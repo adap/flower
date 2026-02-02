@@ -40,7 +40,12 @@ class SimulationIoStub:
         flwr.proto.appio_pb2.ListAppsToLaunchRequest,
         flwr.proto.appio_pb2.ListAppsToLaunchResponse,
     ]
-    """List runs to launch"""
+    """///////////////////////////////////////////////////////////////////////////
+    General *AppIo endpoints for SuperExec processes
+    ///////////////////////////////////////////////////////////////////////////
+
+    List runs to launch
+    """
 
     RequestToken: grpc.UnaryUnaryMultiCallable[
         flwr.proto.appio_pb2.RequestTokenRequest,
@@ -52,19 +57,41 @@ class SimulationIoStub:
         flwr.proto.run_pb2.GetRunRequest,
         flwr.proto.run_pb2.GetRunResponse,
     ]
-    """Get run details"""
+    """///////////////////////////////////////////////////////////////////////////
+    General *AppIo endpoints for App Executor processes
+    ///////////////////////////////////////////////////////////////////////////
+
+    Get run details
+    """
+
+    SendAppHeartbeat: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.heartbeat_pb2.SendAppHeartbeatRequest,
+        flwr.proto.heartbeat_pb2.SendAppHeartbeatResponse,
+    ]
+    """App heartbeat"""
 
     PullAppInputs: grpc.UnaryUnaryMultiCallable[
         flwr.proto.appio_pb2.PullAppInputsRequest,
         flwr.proto.appio_pb2.PullAppInputsResponse,
     ]
-    """Pull Simulation inputs"""
+    """Pull app inputs"""
 
     PushAppOutputs: grpc.UnaryUnaryMultiCallable[
         flwr.proto.appio_pb2.PushAppOutputsRequest,
         flwr.proto.appio_pb2.PushAppOutputsResponse,
     ]
-    """Push Simulation outputs"""
+    """Push app outputs"""
+
+    GetRunStatus: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.run_pb2.GetRunStatusRequest,
+        flwr.proto.run_pb2.GetRunStatusResponse,
+    ]
+    """///////////////////////////////////////////////////////////////////////////
+    Specific endpoints shared by ServerAppIo and SimulationIo
+    ///////////////////////////////////////////////////////////////////////////
+
+    Get Run Status
+    """
 
     UpdateRunStatus: grpc.UnaryUnaryMultiCallable[
         flwr.proto.run_pb2.UpdateRunStatusRequest,
@@ -82,26 +109,24 @@ class SimulationIoStub:
         flwr.proto.run_pb2.GetFederationOptionsRequest,
         flwr.proto.run_pb2.GetFederationOptionsResponse,
     ]
-    """Get Federation Options"""
+    """///////////////////////////////////////////////////////////////////////////
+    Specific endpoints for SimulationIo
+    ///////////////////////////////////////////////////////////////////////////
 
-    GetRunStatus: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.run_pb2.GetRunStatusRequest,
-        flwr.proto.run_pb2.GetRunStatusResponse,
-    ]
-    """Get Run Status"""
-
-    SendAppHeartbeat: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.heartbeat_pb2.SendAppHeartbeatRequest,
-        flwr.proto.heartbeat_pb2.SendAppHeartbeatResponse,
-    ]
-    """App heartbeat"""
+    Get Federation Options
+    """
 
 class SimulationIoAsyncStub:
     ListAppsToLaunch: grpc.aio.UnaryUnaryMultiCallable[
         flwr.proto.appio_pb2.ListAppsToLaunchRequest,
         flwr.proto.appio_pb2.ListAppsToLaunchResponse,
     ]
-    """List runs to launch"""
+    """///////////////////////////////////////////////////////////////////////////
+    General *AppIo endpoints for SuperExec processes
+    ///////////////////////////////////////////////////////////////////////////
+
+    List runs to launch
+    """
 
     RequestToken: grpc.aio.UnaryUnaryMultiCallable[
         flwr.proto.appio_pb2.RequestTokenRequest,
@@ -113,19 +138,41 @@ class SimulationIoAsyncStub:
         flwr.proto.run_pb2.GetRunRequest,
         flwr.proto.run_pb2.GetRunResponse,
     ]
-    """Get run details"""
+    """///////////////////////////////////////////////////////////////////////////
+    General *AppIo endpoints for App Executor processes
+    ///////////////////////////////////////////////////////////////////////////
+
+    Get run details
+    """
+
+    SendAppHeartbeat: grpc.aio.UnaryUnaryMultiCallable[
+        flwr.proto.heartbeat_pb2.SendAppHeartbeatRequest,
+        flwr.proto.heartbeat_pb2.SendAppHeartbeatResponse,
+    ]
+    """App heartbeat"""
 
     PullAppInputs: grpc.aio.UnaryUnaryMultiCallable[
         flwr.proto.appio_pb2.PullAppInputsRequest,
         flwr.proto.appio_pb2.PullAppInputsResponse,
     ]
-    """Pull Simulation inputs"""
+    """Pull app inputs"""
 
     PushAppOutputs: grpc.aio.UnaryUnaryMultiCallable[
         flwr.proto.appio_pb2.PushAppOutputsRequest,
         flwr.proto.appio_pb2.PushAppOutputsResponse,
     ]
-    """Push Simulation outputs"""
+    """Push app outputs"""
+
+    GetRunStatus: grpc.aio.UnaryUnaryMultiCallable[
+        flwr.proto.run_pb2.GetRunStatusRequest,
+        flwr.proto.run_pb2.GetRunStatusResponse,
+    ]
+    """///////////////////////////////////////////////////////////////////////////
+    Specific endpoints shared by ServerAppIo and SimulationIo
+    ///////////////////////////////////////////////////////////////////////////
+
+    Get Run Status
+    """
 
     UpdateRunStatus: grpc.aio.UnaryUnaryMultiCallable[
         flwr.proto.run_pb2.UpdateRunStatusRequest,
@@ -143,19 +190,12 @@ class SimulationIoAsyncStub:
         flwr.proto.run_pb2.GetFederationOptionsRequest,
         flwr.proto.run_pb2.GetFederationOptionsResponse,
     ]
-    """Get Federation Options"""
+    """///////////////////////////////////////////////////////////////////////////
+    Specific endpoints for SimulationIo
+    ///////////////////////////////////////////////////////////////////////////
 
-    GetRunStatus: grpc.aio.UnaryUnaryMultiCallable[
-        flwr.proto.run_pb2.GetRunStatusRequest,
-        flwr.proto.run_pb2.GetRunStatusResponse,
-    ]
-    """Get Run Status"""
-
-    SendAppHeartbeat: grpc.aio.UnaryUnaryMultiCallable[
-        flwr.proto.heartbeat_pb2.SendAppHeartbeatRequest,
-        flwr.proto.heartbeat_pb2.SendAppHeartbeatResponse,
-    ]
-    """App heartbeat"""
+    Get Federation Options
+    """
 
 class SimulationIoServicer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
@@ -164,7 +204,12 @@ class SimulationIoServicer(metaclass=abc.ABCMeta):
         request: flwr.proto.appio_pb2.ListAppsToLaunchRequest,
         context: _ServicerContext,
     ) -> typing.Union[flwr.proto.appio_pb2.ListAppsToLaunchResponse, collections.abc.Awaitable[flwr.proto.appio_pb2.ListAppsToLaunchResponse]]:
-        """List runs to launch"""
+        """///////////////////////////////////////////////////////////////////////////
+        General *AppIo endpoints for SuperExec processes
+        ///////////////////////////////////////////////////////////////////////////
+
+        List runs to launch
+        """
 
     @abc.abstractmethod
     def RequestToken(
@@ -180,7 +225,20 @@ class SimulationIoServicer(metaclass=abc.ABCMeta):
         request: flwr.proto.run_pb2.GetRunRequest,
         context: _ServicerContext,
     ) -> typing.Union[flwr.proto.run_pb2.GetRunResponse, collections.abc.Awaitable[flwr.proto.run_pb2.GetRunResponse]]:
-        """Get run details"""
+        """///////////////////////////////////////////////////////////////////////////
+        General *AppIo endpoints for App Executor processes
+        ///////////////////////////////////////////////////////////////////////////
+
+        Get run details
+        """
+
+    @abc.abstractmethod
+    def SendAppHeartbeat(
+        self,
+        request: flwr.proto.heartbeat_pb2.SendAppHeartbeatRequest,
+        context: _ServicerContext,
+    ) -> typing.Union[flwr.proto.heartbeat_pb2.SendAppHeartbeatResponse, collections.abc.Awaitable[flwr.proto.heartbeat_pb2.SendAppHeartbeatResponse]]:
+        """App heartbeat"""
 
     @abc.abstractmethod
     def PullAppInputs(
@@ -188,7 +246,7 @@ class SimulationIoServicer(metaclass=abc.ABCMeta):
         request: flwr.proto.appio_pb2.PullAppInputsRequest,
         context: _ServicerContext,
     ) -> typing.Union[flwr.proto.appio_pb2.PullAppInputsResponse, collections.abc.Awaitable[flwr.proto.appio_pb2.PullAppInputsResponse]]:
-        """Pull Simulation inputs"""
+        """Pull app inputs"""
 
     @abc.abstractmethod
     def PushAppOutputs(
@@ -196,7 +254,20 @@ class SimulationIoServicer(metaclass=abc.ABCMeta):
         request: flwr.proto.appio_pb2.PushAppOutputsRequest,
         context: _ServicerContext,
     ) -> typing.Union[flwr.proto.appio_pb2.PushAppOutputsResponse, collections.abc.Awaitable[flwr.proto.appio_pb2.PushAppOutputsResponse]]:
-        """Push Simulation outputs"""
+        """Push app outputs"""
+
+    @abc.abstractmethod
+    def GetRunStatus(
+        self,
+        request: flwr.proto.run_pb2.GetRunStatusRequest,
+        context: _ServicerContext,
+    ) -> typing.Union[flwr.proto.run_pb2.GetRunStatusResponse, collections.abc.Awaitable[flwr.proto.run_pb2.GetRunStatusResponse]]:
+        """///////////////////////////////////////////////////////////////////////////
+        Specific endpoints shared by ServerAppIo and SimulationIo
+        ///////////////////////////////////////////////////////////////////////////
+
+        Get Run Status
+        """
 
     @abc.abstractmethod
     def UpdateRunStatus(
@@ -220,22 +291,11 @@ class SimulationIoServicer(metaclass=abc.ABCMeta):
         request: flwr.proto.run_pb2.GetFederationOptionsRequest,
         context: _ServicerContext,
     ) -> typing.Union[flwr.proto.run_pb2.GetFederationOptionsResponse, collections.abc.Awaitable[flwr.proto.run_pb2.GetFederationOptionsResponse]]:
-        """Get Federation Options"""
+        """///////////////////////////////////////////////////////////////////////////
+        Specific endpoints for SimulationIo
+        ///////////////////////////////////////////////////////////////////////////
 
-    @abc.abstractmethod
-    def GetRunStatus(
-        self,
-        request: flwr.proto.run_pb2.GetRunStatusRequest,
-        context: _ServicerContext,
-    ) -> typing.Union[flwr.proto.run_pb2.GetRunStatusResponse, collections.abc.Awaitable[flwr.proto.run_pb2.GetRunStatusResponse]]:
-        """Get Run Status"""
-
-    @abc.abstractmethod
-    def SendAppHeartbeat(
-        self,
-        request: flwr.proto.heartbeat_pb2.SendAppHeartbeatRequest,
-        context: _ServicerContext,
-    ) -> typing.Union[flwr.proto.heartbeat_pb2.SendAppHeartbeatResponse, collections.abc.Awaitable[flwr.proto.heartbeat_pb2.SendAppHeartbeatResponse]]:
-        """App heartbeat"""
+        Get Federation Options
+        """
 
 def add_SimulationIoServicer_to_server(servicer: SimulationIoServicer, server: typing.Union[grpc.Server, grpc.aio.Server]) -> None: ...

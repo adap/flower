@@ -385,7 +385,7 @@ def start_log_uploader(
 ) -> threading.Thread:
     """Start the log uploader thread and return it."""
     thread = threading.Thread(
-        target=_log_uploader, args=(log_queue, node_id, run_id, stub)
+        target=_log_uploader, args=(log_queue, node_id, run_id, stub), daemon=True
     )
     thread.start()
     return thread

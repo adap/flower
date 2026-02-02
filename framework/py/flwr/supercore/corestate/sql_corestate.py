@@ -1,4 +1,4 @@
-# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2026 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,12 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""SQLite-based CoreState implementation."""
+"""SQLAlchemy-based CoreState implementation."""
 
 
 import secrets
-import sqlite3
 from typing import cast
+
+from sqlalchemy import MetaData, text
+from sqlalchemy.exc import IntegrityError
 
 from flwr.common import now
 from flwr.common.constant import (
@@ -25,23 +27,16 @@ from flwr.common.constant import (
     HEARTBEAT_DEFAULT_INTERVAL,
     HEARTBEAT_PATIENCE,
 )
-from flwr.supercore.sqlite_mixin import SqliteMixin
+from flwr.supercore.sql_mixin import SqlMixin
+from flwr.supercore.state.schema.corestate_tables import create_corestate_metadata
 from flwr.supercore.utils import int64_to_uint64, uint64_to_int64
 
 from ..object_store import ObjectStore
 from .corestate import CoreState
 
-SQL_CREATE_TABLE_TOKEN_STORE = """
-CREATE TABLE IF NOT EXISTS token_store (
-    run_id                  INTEGER PRIMARY KEY,
-    token                   TEXT UNIQUE NOT NULL,
-    active_until            REAL
-);
-"""
 
-
-class SqliteCoreState(CoreState, SqliteMixin):
-    """SQLite-based CoreState implementation."""
+class SqlCoreState(CoreState, SqlMixin):
+    """SQLAlchemy-based CoreState implementation."""
 
     def __init__(self, database_path: str, object_store: ObjectStore) -> None:
         super().__init__(database_path)
@@ -52,9 +47,9 @@ class SqliteCoreState(CoreState, SqliteMixin):
         """Return the ObjectStore instance used by this CoreState."""
         return self._object_store
 
-    def get_sql_statements(self) -> tuple[str, ...]:
-        """Return SQL statements needed for CoreState tables."""
-        return (SQL_CREATE_TABLE_TOKEN_STORE,)
+    def get_metadata(self) -> MetaData:
+        """Return SQLAlchemy MetaData needed for CoreState tables."""
+        return create_corestate_metadata()
 
     def create_token(self, run_id: int) -> str | None:
         """Create a token for the given run ID."""
@@ -63,7 +58,8 @@ class SqliteCoreState(CoreState, SqliteMixin):
         active_until = current + HEARTBEAT_DEFAULT_INTERVAL
         query = """
             INSERT INTO token_store (run_id, token, active_until)
-            VALUES (:run_id, :token, :active_until);
+            VALUES (:run_id, :token, :active_until)
+            RETURNING token;
         """
         data = {
             "run_id": uint64_to_int64(run_id),
@@ -71,10 +67,10 @@ class SqliteCoreState(CoreState, SqliteMixin):
             "active_until": active_until,
         }
         try:
-            self.query(query, data)
-        except sqlite3.IntegrityError:
+            rows = self.query(query, data)
+            return cast(str, rows[0]["token"])
+        except IntegrityError:
             return None  # Token already created for this run ID
-        return token
 
     def verify_token(self, run_id: int, token: str) -> bool:
         """Verify a token for the given run ID."""
@@ -128,14 +124,14 @@ class SqliteCoreState(CoreState, SqliteMixin):
         """
         current = now().timestamp()
 
-        with self.conn:
+        with self.session() as session:
             # Delete expired tokens and get their run_ids and active_until timestamps
             query = """
                 DELETE FROM token_store
                 WHERE active_until < :current
                 RETURNING run_id, active_until;
             """
-            rows = self.conn.execute(query, {"current": current}).fetchall()
+            rows = session.execute(text(query), {"current": current}).mappings().all()
             expired_records = [
                 (int64_to_uint64(row["run_id"]), row["active_until"]) for row in rows
             ]

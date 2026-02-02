@@ -23,6 +23,7 @@ from io import BytesIO
 from pathlib import Path
 from typing import IO, Annotated
 
+import click
 import typer
 
 from flwr.common.config import get_flwr_dir, get_metadata_from_config
@@ -62,26 +63,19 @@ def install(
     if source is None:
         source = Path(typer.prompt("Enter the source FAB file"))
 
-    source = source.resolve()
+    source = source.expanduser().resolve()
     if not source.exists() or not source.is_file():
-        typer.secho(
-            f"❌ The source {source} does not exist or is not a file.",
-            fg=typer.colors.RED,
-            bold=True,
-            err=True,
+        raise click.ClickException(
+            f"The source {source} does not exist or is not a file."
         )
-        raise typer.Exit(code=1)
 
     if source.suffix != ".fab":
-        typer.secho(
-            f"❌ The source {source} is not a `.fab` file.",
-            fg=typer.colors.RED,
-            bold=True,
-            err=True,
-        )
-        raise typer.Exit(code=1)
+        raise click.ClickException(f"The source {source} is not a `.fab` file.")
 
-    install_from_fab(source, flwr_dir)
+    try:
+        install_from_fab(source, flwr_dir)
+    except ValueError as e:
+        raise click.ClickException(str(e)) from None
 
 
 def install_from_fab(
@@ -107,7 +101,7 @@ def install_from_fab(
 
     Raises
     ------
-    typer.Exit
+    click.ClickException
         If FAB format is invalid or hash verification fails.
     """
     fab_file_archive: Path | IO[bytes]
@@ -129,26 +123,14 @@ def install_from_fab(
             tmpdir_path = Path(tmpdir)
             info_dir = tmpdir_path / ".info"
             if not info_dir.exists():
-                typer.secho(
-                    "❌ FAB file has incorrect format.",
-                    fg=typer.colors.RED,
-                    bold=True,
-                    err=True,
-                )
-                raise typer.Exit(code=1)
+                raise click.ClickException("FAB file has incorrect format.")
 
             content_file = info_dir / "CONTENT"
 
             if not content_file.exists() or not _verify_hashes(
                 content_file.read_text(), tmpdir_path
             ):
-                typer.secho(
-                    "❌ File hashes couldn't be verified.",
-                    fg=typer.colors.RED,
-                    bold=True,
-                    err=True,
-                )
-                raise typer.Exit(code=1)
+                raise click.ClickException("File hashes couldn't be verified.")
 
             shutil.rmtree(info_dir)
 
@@ -189,19 +171,10 @@ def validate_and_install(
 
     Raises
     ------
-    typer.Exit
+    click.ClickException
         If configuration is invalid or metadata doesn't match.
     """
-    config, _, _ = load_and_validate(project_dir / "pyproject.toml", check_module=False)
-
-    if config is None:
-        typer.secho(
-            "❌ Invalid config inside FAB file.",
-            fg=typer.colors.RED,
-            bold=True,
-            err=True,
-        )
-        raise typer.Exit(code=1)
+    config, _ = load_and_validate(project_dir / "pyproject.toml", check_module=False)
 
     fab_id, version = get_metadata_from_config(config)
     publisher, project_name = fab_id.split("/")
@@ -283,7 +256,7 @@ def _validate_fab_and_config_metadata(
 
     Raises
     ------
-    typer.Exit
+    click.ClickException
         If filename format is incorrect or hash doesn't match.
     """
     publisher, project_name, version, fab_hash = config_metadata
@@ -299,33 +272,21 @@ def _validate_fab_and_config_metadata(
         != f"{publisher}.{project_name}.{version}"
         or len(fab_shorthash) != FAB_HASH_TRUNCATION  # Verify hash length
     ):
-        typer.secho(
-            "❌ FAB file has incorrect name. The file name must follow the format "
-            "`<publisher>.<project_name>.<version>.<8hexchars>.fab`.",
-            fg=typer.colors.RED,
-            bold=True,
-            err=True,
+        raise click.ClickException(
+            "FAB file has incorrect name. The file name must follow the format "
+            "`<publisher>.<project_name>.<version>.<8hexchars>.fab`."
         )
-        raise typer.Exit(code=1)
 
     # Verify hash is a valid hexadecimal
     try:
         _ = int(fab_shorthash, 16)
     except Exception as e:
-        typer.secho(
-            f"❌ FAB file has an invalid hexadecimal string `{fab_shorthash}`.",
-            fg=typer.colors.RED,
-            bold=True,
-            err=True,
-        )
-        raise typer.Exit(code=1) from e
+        raise click.ClickException(
+            f"FAB file has an invalid hexadecimal string `{fab_shorthash}`."
+        ) from e
 
     # Verify shorthash matches
     if fab_shorthash != fab_hash[:FAB_HASH_TRUNCATION]:
-        typer.secho(
-            "❌ The hash in the FAB file name does not match the hash of the FAB.",
-            fg=typer.colors.RED,
-            bold=True,
-            err=True,
+        raise click.ClickException(
+            "The hash in the FAB file name does not match the hash of the FAB."
         )
-        raise typer.Exit(code=1)

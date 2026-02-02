@@ -29,7 +29,7 @@ clientapp = "jaxexample.client_app:app"
 [tool.flwr.app.config]
 num-server-rounds = 5
 learning-rate = 0.1
-fraction-evaluate = 0.4
+fraction-evaluate = 0.2
 batch-size = 64
 
 [tool.flwr.federations]

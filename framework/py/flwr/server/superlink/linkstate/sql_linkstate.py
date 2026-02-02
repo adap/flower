@@ -1,4 +1,4 @@
-# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2026 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,20 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""SQLite based implemenation of the link state."""
+"""SQLAlchemy-based implementation of the link state."""
 
 
 # pylint: disable=too-many-lines
 
 import json
-import sqlite3
 from collections.abc import Sequence
 from datetime import datetime, timezone
 from logging import ERROR, WARNING
-from typing import Any, cast
+from typing import Any
+
+from sqlalchemy import MetaData
+from sqlalchemy.exc import IntegrityError
 
 from flwr.app.user_config import UserConfig
-from flwr.common import Context, Message, Metadata, log, now
+from flwr.common import Context, Message, log, now
 from flwr.common.constant import (
     HEARTBEAT_PATIENCE,
     MESSAGE_TTL_TOLERANCE,
@@ -36,22 +38,15 @@ from flwr.common.constant import (
     Status,
     SubStatus,
 )
-from flwr.common.message import make_message
 from flwr.common.record import ConfigRecord
-from flwr.common.serde import recorddict_from_proto, recorddict_to_proto
-from flwr.common.serde_utils import error_from_proto, error_to_proto
 from flwr.common.typing import Run, RunStatus
-
-# pylint: disable=E0611
-from flwr.proto.error_pb2 import Error as ProtoError
-from flwr.proto.node_pb2 import NodeInfo
-from flwr.proto.recorddict_pb2 import RecordDict as ProtoRecordDict
-
-# pylint: enable=E0611
+from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.server.utils.validator import validate_message
 from flwr.supercore.constant import NodeStatus
-from flwr.supercore.corestate.sqlite_corestate import SqliteCoreState
+from flwr.supercore.corestate.sql_corestate import SqlCoreState
 from flwr.supercore.object_store.object_store import ObjectStore
+from flwr.supercore.state.schema.corestate_tables import create_corestate_metadata
+from flwr.supercore.state.schema.linkstate_tables import create_linkstate_metadata
 from flwr.supercore.utils import int64_to_uint64, uint64_to_int64
 from flwr.superlink.federation import FederationManager
 
@@ -64,122 +59,18 @@ from .utils import (
     context_to_bytes,
     convert_sint64_values_in_dict_to_uint64,
     convert_uint64_values_in_dict_to_sint64,
+    dict_to_message,
     generate_rand_int_from_bytes,
     has_valid_sub_status,
     is_valid_transition,
+    message_to_dict,
     verify_found_message_replies,
     verify_message_ids,
 )
 
-SQL_CREATE_TABLE_NODE = """
-CREATE TABLE IF NOT EXISTS node(
-    node_id                 INTEGER UNIQUE,
-    owner_aid               TEXT,
-    owner_name              TEXT,
-    status                  TEXT,
-    registered_at           TEXT,
-    last_activated_at       TEXT NULL,
-    last_deactivated_at     TEXT NULL,
-    unregistered_at         TEXT NULL,
-    online_until            TIMESTAMP NULL,
-    heartbeat_interval      REAL,
-    public_key              BLOB UNIQUE
-);
-"""
 
-SQL_CREATE_INDEX_ONLINE_UNTIL = """
-CREATE INDEX IF NOT EXISTS idx_online_until ON node (online_until);
-"""
-
-SQL_CREATE_INDEX_OWNER_AID = """
-CREATE INDEX IF NOT EXISTS idx_node_owner_aid ON node(owner_aid);
-"""
-
-SQL_CREATE_INDEX_NODE_STATUS = """
-CREATE INDEX IF NOT EXISTS idx_node_status ON node(status);
-"""
-
-SQL_CREATE_TABLE_RUN = """
-CREATE TABLE IF NOT EXISTS run(
-    run_id                INTEGER UNIQUE,
-    fab_id                TEXT,
-    fab_version           TEXT,
-    fab_hash              TEXT,
-    override_config       TEXT,
-    pending_at            TEXT,
-    starting_at           TEXT,
-    running_at            TEXT,
-    finished_at           TEXT,
-    sub_status            TEXT,
-    details               TEXT,
-    federation            TEXT,
-    federation_options    BLOB,
-    flwr_aid              TEXT,
-    bytes_sent            INTEGER DEFAULT 0,
-    bytes_recv            INTEGER DEFAULT 0,
-    clientapp_runtime     REAL DEFAULT 0.0
-);
-"""
-
-SQL_CREATE_TABLE_LOGS = """
-CREATE TABLE IF NOT EXISTS logs (
-    timestamp             REAL,
-    run_id                INTEGER,
-    node_id               INTEGER,
-    log                   TEXT,
-    PRIMARY KEY (timestamp, run_id, node_id),
-    FOREIGN KEY (run_id) REFERENCES run(run_id)
-);
-"""
-
-SQL_CREATE_TABLE_CONTEXT = """
-CREATE TABLE IF NOT EXISTS context(
-    run_id                INTEGER UNIQUE,
-    context               BLOB,
-    FOREIGN KEY(run_id) REFERENCES run(run_id)
-);
-"""
-
-SQL_CREATE_TABLE_MESSAGE_INS = """
-CREATE TABLE IF NOT EXISTS message_ins(
-    message_id              TEXT UNIQUE,
-    group_id                TEXT,
-    run_id                  INTEGER,
-    src_node_id             INTEGER,
-    dst_node_id             INTEGER,
-    reply_to_message_id     TEXT,
-    created_at              REAL,
-    delivered_at            TEXT,
-    ttl                     REAL,
-    message_type            TEXT,
-    content                 BLOB NULL,
-    error                   BLOB NULL,
-    FOREIGN KEY(run_id) REFERENCES run(run_id)
-);
-"""
-
-
-SQL_CREATE_TABLE_MESSAGE_RES = """
-CREATE TABLE IF NOT EXISTS message_res(
-    message_id              TEXT UNIQUE,
-    group_id                TEXT,
-    run_id                  INTEGER,
-    src_node_id             INTEGER,
-    dst_node_id             INTEGER,
-    reply_to_message_id     TEXT,
-    created_at              REAL,
-    delivered_at            TEXT,
-    ttl                     REAL,
-    message_type            TEXT,
-    content                 BLOB NULL,
-    error                   BLOB NULL,
-    FOREIGN KEY(run_id) REFERENCES run(run_id)
-);
-"""
-
-
-class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
-    """SQLite-based LinkState implementation."""
+class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
+    """SQLAlchemy-based LinkState implementation."""
 
     def __init__(
         self,
@@ -191,23 +82,21 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
         federation_manager.linkstate = self
         self._federation_manager = federation_manager
 
-    def get_sql_statements(self) -> tuple[str, ...]:
-        """Return SQL statements for LinkState tables."""
-        return super().get_sql_statements() + (
-            SQL_CREATE_TABLE_RUN,
-            SQL_CREATE_TABLE_LOGS,
-            SQL_CREATE_TABLE_CONTEXT,
-            SQL_CREATE_TABLE_MESSAGE_INS,
-            SQL_CREATE_TABLE_MESSAGE_RES,
-            SQL_CREATE_TABLE_NODE,
-            SQL_CREATE_INDEX_ONLINE_UNTIL,
-            SQL_CREATE_INDEX_OWNER_AID,
-            SQL_CREATE_INDEX_NODE_STATUS,
-        )
+    def get_metadata(self) -> MetaData:
+        """Return combined SQLAlchemy MetaData for LinkState and CoreState tables."""
+        # Start with linkstate tables
+        metadata = create_linkstate_metadata()
+
+        # Add corestate tables (token_store)
+        corestate_metadata = create_corestate_metadata()
+        for table in corestate_metadata.tables.values():
+            table.to_metadata(metadata)
+
+        return metadata
 
     @property
     def federation_manager(self) -> FederationManager:
-        """Get the FederationManager instance."""
+        """Return the FederationManager instance."""
         return self._federation_manager
 
     def store_message_ins(self, message: Message) -> str | None:
@@ -235,20 +124,26 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
             )
             return None
 
-        with self.conn:
+        with self.session():
             # Validate run_id
-            query = "SELECT federation FROM run WHERE run_id = ?;"
-            rows = self.conn.execute(query, (data[0]["run_id"],)).fetchall()
+            query = "SELECT federation FROM run WHERE run_id = :run_id"
+            rows = self.query(query, {"run_id": data[0]["run_id"]})
             if not rows:
                 log(ERROR, "Invalid run ID for Message: %s", message.metadata.run_id)
                 return None
             federation: str = rows[0]["federation"]
 
             # Validate destination node ID
-            query = "SELECT node_id FROM node WHERE node_id = ? AND status IN (?, ?);"
-            rows = self.conn.execute(
-                query, (data[0]["dst_node_id"], NodeStatus.ONLINE, NodeStatus.OFFLINE)
-            ).fetchall()
+            query = """SELECT node_id FROM node WHERE node_id = :node_id
+                       AND status IN (:online, :offline)"""
+            rows = self.query(
+                query,
+                {
+                    "node_id": data[0]["dst_node_id"],
+                    "online": NodeStatus.ONLINE,
+                    "offline": NodeStatus.OFFLINE,
+                },
+            )
             if not rows or not self.federation_manager.has_node(
                 message.metadata.dst_node_id, federation
             ):
@@ -259,29 +154,62 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
                 )
                 return None
 
+            # Insert message
             columns = ", ".join([f":{key}" for key in data[0]])
-            query = f"INSERT INTO message_ins VALUES({columns});"
+            query = f"INSERT INTO message_ins VALUES({columns})"
 
             # Only invalid run_id can trigger IntegrityError.
             # This may need to be changed in the future version
             # with more integrity checks.
-            self.conn.execute(query, data[0])
+            self.query(query, data[0])
 
         return message.metadata.message_id
 
+    # pylint: disable-next=too-many-locals
     def _check_stored_messages(self, message_ids: set[str]) -> None:
         """Check and delete the message if it's invalid."""
         if not message_ids:
             return
 
-        with self.conn:
+        with self.session():
+            # Batch fetch all messages in one query
+            placeholders = ",".join([f":mid_{i}" for i in range(len(message_ids))])
+            query = f"""
+                SELECT * FROM message_ins
+                WHERE message_id IN ({placeholders})
+            """
+            params = {f"mid_{i}": str(mid) for i, mid in enumerate(message_ids)}
+            message_rows = self.query(query, params)
+
+            if not message_rows:
+                return
+
+            # Build message lookup dict
+            message_dict: dict[str, dict[str, Any]] = {
+                row["message_id"]: row for row in message_rows
+            }
+
+            # Collect unique run_ids for batch federation lookup
+            run_ids = {row["run_id"] for row in message_rows}
+            placeholders = ",".join([f":rid_{i}" for i in range(len(run_ids))])
+            query = f"""
+                SELECT run_id, federation FROM run
+                WHERE run_id IN ({placeholders})
+            """
+            params = {f"rid_{i}": rid for i, rid in enumerate(run_ids)}
+            run_rows = self.query(query, params)
+
+            # Build run_id to federation mapping
+            run_id_to_federation: dict[int, str] = {
+                row["run_id"]: row["federation"] for row in run_rows
+            }
+
             invalid_msg_ids: set[str] = set()
             current_time = now().timestamp()
 
+            # Check each message for validity
             for msg_id in message_ids:
-                # Check if message exists
-                query = "SELECT * FROM message_ins WHERE message_id = ?;"
-                message_row = self.conn.execute(query, (msg_id,)).fetchone()
+                message_row = message_dict.get(msg_id)
                 if not message_row:
                     continue
 
@@ -291,15 +219,12 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
                     invalid_msg_ids.add(msg_id)
                     continue
 
-                # Check if src_node_id and dst_node_id are in the federation
-                # Get federation from run table
+                # Check if run exists and get federation
                 run_id = message_row["run_id"]
-                query = "SELECT federation FROM run WHERE run_id = ?;"
-                run_row = self.conn.execute(query, (run_id,)).fetchone()
-                if not run_row:  # This should not happen
+                federation = run_id_to_federation.get(run_id)
+                if not federation:
                     invalid_msg_ids.add(msg_id)
                     continue
-                federation = run_row["federation"]
 
                 # Convert sint64 to uint64 for node IDs
                 src_node_id = int64_to_uint64(message_row["src_node_id"])
@@ -324,52 +249,48 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
             msg = f"`node_id` must be != {SUPERLINK_NODE_ID}"
             raise AssertionError(msg)
 
-        data: dict[str, str | int] = {}
+        params: dict[str, str | int] = {}
 
         # Convert the uint64 value to sint64 for SQLite
-        data["node_id"] = uint64_to_int64(node_id)
+        params["node_id"] = uint64_to_int64(node_id)
 
-        with self.conn:
+        with self.session():
             # Retrieve all Messages for node_id
             query = """
                 SELECT message_id
                 FROM message_ins
-                WHERE   dst_node_id == :node_id
-                AND   delivered_at = ""
-                AND   (created_at + ttl) > CAST(strftime('%s', 'now') AS REAL)
+                WHERE dst_node_id = :node_id
+                AND delivered_at = ''
+                AND (created_at + ttl) > CAST(strftime('%s', 'now') AS REAL)
             """
 
             if limit is not None:
                 query += " LIMIT :limit"
-                data["limit"] = limit
+                params["limit"] = limit
 
-            query += ";"
-
-            rows = self.conn.execute(query, data).fetchall()
+            rows = self.query(query, params)
             message_ids: set[str] = {row["message_id"] for row in rows}
             self._check_stored_messages(message_ids)
 
             # Mark retrieved Messages as delivered
             if rows:
                 # Prepare query
-                placeholders: str = ",".join(
-                    [f":id_{i}" for i in range(len(message_ids))]
-                )
+                placeholders = ",".join([f":mid_{i}" for i in range(len(message_ids))])
                 query = f"""
                     UPDATE message_ins
                     SET delivered_at = :delivered_at
                     WHERE message_id IN ({placeholders})
-                    RETURNING *;
+                    RETURNING *
                 """
 
                 # Prepare data for query
                 delivered_at = now().isoformat()
-                data = {"delivered_at": delivered_at}
+                params = {"delivered_at": delivered_at}
                 for index, msg_id in enumerate(message_ids):
-                    data[f"id_{index}"] = str(msg_id)
+                    params[f"mid_{index}"] = str(msg_id)
 
                 # Run query
-                rows = self.conn.execute(query, data).fetchall()
+                rows = self.query(query, params)
 
             for row in rows:
                 # Convert values from sint64 to uint64
@@ -377,7 +298,7 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
                     row, ["run_id", "src_node_id", "dst_node_id"]
                 )
 
-        result = [dict_to_message(row) for row in rows]
+        result = [dict_to_message(dict(row)) for row in rows]
 
         return result
 
@@ -403,8 +324,8 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
             )
             return None
 
-        # Ensure that the dst_node_id of the original message matches the src_node_id of
-        # reply being processed.
+        # Ensure that the dst_node_id of the original message matches the src_node_id
+        # of reply being processed.
         if (
             msg_ins
             and message
@@ -434,21 +355,19 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
             return None
 
         # Store Message
-        data = (message_to_dict(message),)
+        msg_dict = message_to_dict(message)
 
         # Convert values from uint64 to sint64 for SQLite
         convert_uint64_values_in_dict_to_sint64(
-            data[0], ["run_id", "src_node_id", "dst_node_id"]
+            msg_dict, ["run_id", "src_node_id", "dst_node_id"]
         )
 
-        columns = ", ".join([f":{key}" for key in data[0]])
-        query = f"INSERT INTO message_res VALUES({columns});"
+        columns = ", ".join([f":{key}" for key in msg_dict])
+        query = f"INSERT INTO message_res VALUES({columns})"
 
-        # Only invalid run_id can trigger IntegrityError.
-        # This may need to be changed in the future version with more integrity checks.
         try:
-            self.query(query, data)
-        except sqlite3.IntegrityError:
+            self.query(query, msg_dict)
+        except IntegrityError:
             log(ERROR, "`run` is invalid")
             return None
 
@@ -456,21 +375,21 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
 
     def get_message_res(self, message_ids: set[str]) -> list[Message]:
         """Get reply Messages for the given Message IDs."""
-        # pylint: disable-msg=too-many-locals
+        # pylint: disable=too-many-locals
         ret: dict[str, Message] = {}
 
-        with self.conn:
+        with self.session():
             # Verify Message IDs
             self._check_stored_messages(message_ids)
             current = now().timestamp()
+            placeholders = ",".join([f":mid_{i}" for i in range(len(message_ids))])
             query = f"""
                 SELECT *
                 FROM message_ins
-                WHERE message_id IN ({','.join(['?'] * len(message_ids))});
+                WHERE message_id IN ({placeholders})
             """
-            rows = self.conn.execute(
-                query, tuple(str(message_id) for message_id in message_ids)
-            ).fetchall()
+            params = {f"mid_{i}": str(mid) for i, mid in enumerate(message_ids)}
+            rows = self.query(query, params)
             found_message_ins_dict: dict[str, Message] = {}
             for row in rows:
                 convert_sint64_values_in_dict_to_uint64(
@@ -490,15 +409,18 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
                 in_message = found_message_ins_dict[message_id]
                 sint_node_id = uint64_to_int64(in_message.metadata.dst_node_id)
                 dst_node_ids.add(sint_node_id)
+            placeholders = ",".join([f":nid_{i}" for i in range(len(dst_node_ids))])
             query = f"""
                 SELECT node_id, online_until
                 FROM node
-                WHERE node_id IN ({','.join(['?'] * len(dst_node_ids))})
-                AND status != ?
+                WHERE node_id IN ({placeholders})
+                AND status != :unregistered
             """
-            rows = self.conn.execute(
-                query, tuple(dst_node_ids) + (NodeStatus.UNREGISTERED,)
-            ).fetchall()
+            node_params: dict[str, int | str] = {
+                f"nid_{i}": nid for i, nid in enumerate(dst_node_ids)
+            }
+            node_params["unregistered"] = NodeStatus.UNREGISTERED
+            rows = self.query(query, node_params)
             tmp_ret_dict = check_node_availability_for_in_message(
                 inquired_in_message_ids=message_ids,
                 found_in_message_dict=found_message_ins_dict,
@@ -510,15 +432,15 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
             ret.update(tmp_ret_dict)
 
             # Find all reply Messages
+            placeholders = ",".join([f":mid_{i}" for i in range(len(message_ids))])
             query = f"""
                 SELECT *
                 FROM message_res
-                WHERE reply_to_message_id IN ({','.join(['?'] * len(message_ids))})
-                AND delivered_at = "";
+                WHERE reply_to_message_id IN ({placeholders})
+                AND delivered_at = ''
             """
-            rows = self.conn.execute(
-                query, tuple(str(message_id) for message_id in message_ids)
-            ).fetchall()
+            params = {f"mid_{i}": str(mid) for i, mid in enumerate(message_ids)}
+            rows = self.query(query, params)
             for row in rows:
                 convert_sint64_values_in_dict_to_uint64(
                     row, ["run_id", "src_node_id", "dst_node_id"]
@@ -538,13 +460,15 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
             message_res_ids = [
                 message_res.metadata.message_id for message_res in ret.values()
             ]
+            placeholders = ",".join([f":mid_{i}" for i in range(len(message_res_ids))])
             query = f"""
                 UPDATE message_res
-                SET delivered_at = ?
-                WHERE message_id IN ({','.join(['?'] * len(message_res_ids))});
+                SET delivered_at = :delivered_at
+                WHERE message_id IN ({placeholders})
             """
-            data: list[Any] = [delivered_at] + message_res_ids
-            self.conn.execute(query, data)
+            params = {"delivered_at": delivered_at}
+            params.update({f"mid_{i}": mid for i, mid in enumerate(message_res_ids)})
+            self.query(query, params)
 
         return list(ret.values())
 
@@ -553,64 +477,55 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
 
         This includes delivered but not yet deleted.
         """
-        query = "SELECT count(*) AS num FROM message_ins;"
-        rows = self.query(query)
-        result = rows[0]
-        num = cast(int, result["num"])
-        return num
+        query = "SELECT count(*) AS num FROM message_ins"
+        rows = self.query(query, {})
+        return int(rows[0]["num"])
 
     def num_message_res(self) -> int:
         """Calculate the number of reply Messages in store.
 
         This includes delivered but not yet deleted.
         """
-        query = "SELECT count(*) AS num FROM message_res;"
+        query = "SELECT count(*) AS num FROM message_res"
         rows = self.query(query)
-        result: dict[str, int] = rows[0]
-        return result["num"]
+        return int(rows[0]["num"])
 
     def delete_messages(self, message_ins_ids: set[str]) -> None:
         """Delete a Message and its reply based on provided Message IDs."""
         if not message_ins_ids:
             return
-        if self.conn is None:
-            raise AttributeError("LinkState not initialized")
 
-        placeholders = ",".join(["?"] * len(message_ins_ids))
-        data = tuple(str(message_id) for message_id in message_ins_ids)
+        placeholders = ",".join([f":mid_{i}" for i in range(len(message_ins_ids))])
+        params = {f"mid_{i}": str(mid) for i, mid in enumerate(message_ins_ids)}
 
         # Delete Message
         query_1 = f"""
             DELETE FROM message_ins
-            WHERE message_id IN ({placeholders});
+            WHERE message_id IN ({placeholders})
         """
 
         # Delete reply Message
         query_2 = f"""
             DELETE FROM message_res
-            WHERE reply_to_message_id IN ({placeholders});
+            WHERE reply_to_message_id IN ({placeholders})
         """
 
-        with self.conn:
-            self.conn.execute(query_1, data)
-            self.conn.execute(query_2, data)
+        with self.session():
+            self.query(query_1, params)
+            self.query(query_2, params)
 
     def get_message_ids_from_run_id(self, run_id: int) -> set[str]:
         """Get all instruction Message IDs for the given run_id."""
-        if self.conn is None:
-            raise AttributeError("LinkState not initialized")
-
         query = """
             SELECT message_id
             FROM message_ins
-            WHERE run_id = :run_id;
+            WHERE run_id = :run_id
         """
-
         sint64_run_id = uint64_to_int64(run_id)
-        data = {"run_id": sint64_run_id}
+        params = {"run_id": sint64_run_id}
 
-        with self.conn:
-            rows = self.conn.execute(query, data).fetchall()
+        with self.session():
+            rows = self.query(query, params)
 
         return {row["message_id"] for row in rows}
 
@@ -635,29 +550,31 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
             (node_id, owner_aid, owner_name, status, registered_at, last_activated_at,
             last_deactivated_at, unregistered_at, online_until, heartbeat_interval,
             public_key)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (:node_id, :owner_aid, :owner_name, :status, :registered_at,
+            :last_activated_at, :last_deactivated_at, :unregistered_at, :online_until,
+            :heartbeat_interval, :public_key)
         """
 
         # Mark the node online until now().timestamp() + heartbeat_interval
         try:
             self.query(
                 query,
-                (
-                    sint64_node_id,  # node_id
-                    owner_aid,  # owner_aid
-                    owner_name,  # owner_name
-                    NodeStatus.REGISTERED,  # status
-                    now().isoformat(),  # registered_at
-                    None,  # last_activated_at
-                    None,  # last_deactivated_at
-                    None,  # unregistered_at
-                    None,  # online_until, initialized with offline status
-                    heartbeat_interval,  # heartbeat_interval
-                    public_key,  # public_key
-                ),
+                {
+                    "node_id": sint64_node_id,
+                    "owner_aid": owner_aid,
+                    "owner_name": owner_name,
+                    "status": NodeStatus.REGISTERED,
+                    "registered_at": now().isoformat(),
+                    "last_activated_at": None,
+                    "last_deactivated_at": None,
+                    "unregistered_at": None,
+                    "online_until": None,  # initialized with offline status
+                    "heartbeat_interval": heartbeat_interval,
+                    "public_key": public_key,
+                },
             )
-        except sqlite3.IntegrityError as e:
-            if "UNIQUE constraint failed: node.public_key" in str(e):
+        except IntegrityError as e:
+            if "node.public_key" in str(e):
                 raise ValueError("Public key already in use.") from None
             # Must be node ID conflict, almost impossible unless system is compromised
             log(ERROR, "Unexpected node registration failure.")
@@ -672,21 +589,20 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
 
         query = """
             UPDATE node
-            SET status = ?, unregistered_at = ?,
-            online_until = IIF(online_until > ?, ?, online_until)
-            WHERE node_id = ? AND status != ? AND owner_aid = ?
+            SET status = :unregistered, unregistered_at = :unregistered_at,
+            online_until = IIF(online_until > :current, :current, online_until)
+            WHERE node_id = :node_id AND status != :unregistered
+            AND owner_aid = :owner_aid
             RETURNING node_id
         """
         current = now()
-        params = (
-            NodeStatus.UNREGISTERED,
-            current.isoformat(),
-            current.timestamp(),
-            current.timestamp(),
-            sint64_node_id,
-            NodeStatus.UNREGISTERED,
-            owner_aid,
-        )
+        params = {
+            "unregistered": NodeStatus.UNREGISTERED,
+            "unregistered_at": current.isoformat(),
+            "current": current.timestamp(),
+            "node_id": sint64_node_id,
+            "owner_aid": owner_aid,
+        }
 
         rows = self.query(query, params)
         if not rows:
@@ -697,58 +613,58 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
 
     def activate_node(self, node_id: int, heartbeat_interval: float) -> bool:
         """Activate the node with the specified `node_id`."""
-        with self.conn:
-            self._check_and_tag_offline_nodes([node_id])
+        self._check_and_tag_offline_nodes([node_id])
 
-            # Only activate if the node is currently registered or offline
-            current_dt = now()
-            query = """
-                UPDATE node
-                SET status = ?,
-                    last_activated_at = ?,
-                    online_until = ?,
-                    heartbeat_interval = ?
-                WHERE node_id = ? AND status in (?, ?)
-                RETURNING node_id
-            """
-            params = (
-                NodeStatus.ONLINE,
-                current_dt.isoformat(),
-                current_dt.timestamp() + HEARTBEAT_PATIENCE * heartbeat_interval,
-                heartbeat_interval,
-                uint64_to_int64(node_id),
-                NodeStatus.REGISTERED,
-                NodeStatus.OFFLINE,
-            )
+        # Only activate if the node is currently registered or offline
+        current_dt = now()
+        sint64_node_id = uint64_to_int64(node_id)
+        query = """
+            UPDATE node
+            SET status = :online,
+                last_activated_at = :current,
+                online_until = :online_until,
+                heartbeat_interval = :heartbeat_interval
+            WHERE node_id = :node_id AND status IN (:registered, :offline)
+            RETURNING node_id
+        """
+        params = {
+            "online": NodeStatus.ONLINE,
+            "current": current_dt.isoformat(),
+            "online_until": current_dt.timestamp()
+            + HEARTBEAT_PATIENCE * heartbeat_interval,
+            "heartbeat_interval": heartbeat_interval,
+            "node_id": sint64_node_id,
+            "registered": NodeStatus.REGISTERED,
+            "offline": NodeStatus.OFFLINE,
+        }
 
-            row = self.conn.execute(query, params).fetchone()
-            return row is not None
+        rows = self.query(query, params)
+        return len(rows) > 0
 
     def deactivate_node(self, node_id: int) -> bool:
         """Deactivate the node with the specified `node_id`."""
-        with self.conn:
-            self._check_and_tag_offline_nodes([node_id])
+        self._check_and_tag_offline_nodes([node_id])
 
-            # Only deactivate if the node is currently online
-            current_dt = now()
-            query = """
-                UPDATE node
-                SET status = ?,
-                    last_deactivated_at = ?,
-                    online_until = ?
-                WHERE node_id = ? AND status = ?
-                RETURNING node_id
-            """
-            params = (
-                NodeStatus.OFFLINE,
-                current_dt.isoformat(),
-                current_dt.timestamp(),
-                uint64_to_int64(node_id),
-                NodeStatus.ONLINE,
-            )
+        # Only deactivate if the node is currently online
+        current_dt = now()
+        query = """
+            UPDATE node
+            SET status = :offline,
+                last_deactivated_at = :current_iso,
+                online_until = :current_ts
+            WHERE node_id = :node_id AND status = :online
+            RETURNING node_id
+        """
+        params = {
+            "offline": NodeStatus.OFFLINE,
+            "current_iso": current_dt.isoformat(),
+            "current_ts": current_dt.timestamp(),
+            "node_id": uint64_to_int64(node_id),
+            "online": NodeStatus.ONLINE,
+        }
 
-            row = self.conn.execute(query, params).fetchone()
-            return row is not None
+        rows = self.query(query, params)
+        return len(rows) > 0
 
     def get_nodes(self, run_id: int) -> set[int]:
         """Retrieve all currently stored node IDs as a set.
@@ -758,16 +674,13 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
         If the provided `run_id` does not exist or has no matching nodes,
         an empty `Set` MUST be returned.
         """
-        if self.conn is None:
-            raise AttributeError("LinkState not initialized")
-
-        with self.conn:
+        with self.session():
             # Convert the uint64 value to sint64 for SQLite
             sint64_run_id = uint64_to_int64(run_id)
 
             # Validate run ID
-            query = "SELECT federation FROM run WHERE run_id = ?"
-            rows = self.conn.execute(query, (sint64_run_id,)).fetchall()
+            query = "SELECT federation FROM run WHERE run_id = :run_id"
+            rows = self.query(query, {"run_id": sint64_run_id})
             if not rows:
                 return set()
             federation: str = rows[0]["federation"]
@@ -784,23 +697,25 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
         """Check and tag offline nodes."""
         # strftime will convert POSIX timestamp to ISO format
         query = """
-            UPDATE node SET status = ?,
+            UPDATE node SET status = :offline,
             last_deactivated_at =
-            strftime("%Y-%m-%dT%H:%M:%f+00:00", online_until, "unixepoch")
-            WHERE online_until <= ? AND status == ?
+            strftime('%Y-%m-%dT%H:%M:%f+00:00', online_until, 'unixepoch')
+            WHERE online_until <= :current_time AND status = :online
         """
-        params = [
-            NodeStatus.OFFLINE,
-            now().timestamp(),
-            NodeStatus.ONLINE,
-        ]
+        params: dict[str, Any] = {
+            "offline": NodeStatus.OFFLINE,
+            "current_time": now().timestamp(),
+            "online": NodeStatus.ONLINE,
+        }
         if node_ids is not None:
-            placeholders = ",".join(["?"] * len(node_ids))
+            placeholders = ",".join([f":nid_{i}" for i in range(len(node_ids))])
             query += f" AND node_id IN ({placeholders})"
-            params.extend(uint64_to_int64(node_id) for node_id in node_ids)
-        self.conn.execute(query, params)
+            params.update(
+                {f"nid_{i}": uint64_to_int64(nid) for i, nid in enumerate(node_ids)}
+            )
+        self.query(query, params)
 
-    def get_node_info(
+    def get_node_info(  # pylint: disable=too-many-locals
         self,
         *,
         node_ids: Sequence[int] | None = None,
@@ -808,32 +723,37 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
         statuses: Sequence[str] | None = None,
     ) -> Sequence[NodeInfo]:
         """Retrieve information about nodes based on the specified filters."""
-        with self.conn:
+        with self.session():
             self._check_and_tag_offline_nodes()
 
             # Build the WHERE clause based on provided filters
             conditions = []
-            params: list[Any] = []
+            params: dict[str, Any] = {}
             if node_ids is not None:
                 sint64_node_ids = [uint64_to_int64(node_id) for node_id in node_ids]
-                placeholders = ",".join(["?"] * len(sint64_node_ids))
+                placeholders = ",".join(
+                    [f":nid_{i}" for i in range(len(sint64_node_ids))]
+                )
                 conditions.append(f"node_id IN ({placeholders})")
-                params.extend(sint64_node_ids)
+                for i, nid in enumerate(sint64_node_ids):
+                    params[f"nid_{i}"] = nid
             if owner_aids is not None:
-                placeholders = ",".join(["?"] * len(owner_aids))
+                placeholders = ",".join([f":aid_{i}" for i in range(len(owner_aids))])
                 conditions.append(f"owner_aid IN ({placeholders})")
-                params.extend(owner_aids)
+                for i, aid in enumerate(owner_aids):
+                    params[f"aid_{i}"] = aid
             if statuses is not None:
-                placeholders = ",".join(["?"] * len(statuses))
+                placeholders = ",".join([f":st_{i}" for i in range(len(statuses))])
                 conditions.append(f"status IN ({placeholders})")
-                params.extend(statuses)
+                for i, status in enumerate(statuses):
+                    params[f"st_{i}"] = status
 
             # Construct the final query
             query = "SELECT * FROM node"
             if conditions:
                 query += " WHERE " + " AND ".join(conditions)
 
-            rows = self.conn.execute(query, params).fetchall()
+            rows = self.query(query, params)
 
             result: list[NodeInfo] = []
             for row in rows:
@@ -846,8 +766,11 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
     def get_node_id_by_public_key(self, public_key: bytes) -> int | None:
         """Get `node_id` for the specified `public_key` if it exists and is not
         deleted."""
-        query = "SELECT node_id FROM node WHERE public_key = ? AND status != ?;"
-        rows = self.query(query, (public_key, NodeStatus.UNREGISTERED))
+        query = """SELECT node_id FROM node
+                   WHERE public_key = :public_key AND status != :unregistered;"""
+        rows = self.query(
+            query, {"public_key": public_key, "unregistered": NodeStatus.UNREGISTERED}
+        )
 
         # If no result is found, return None
         if not rows:
@@ -857,8 +780,7 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
         node_id = int64_to_uint64(rows[0]["node_id"])
         return node_id
 
-    # pylint: disable=too-many-arguments,too-many-positional-arguments
-    def create_run(
+    def create_run(  # pylint: disable=too-many-arguments,too-many-positional-arguments
         self,
         fab_id: str | None,
         fab_version: str | None,
@@ -875,41 +797,43 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
         # Convert the uint64 value to sint64 for SQLite
         sint64_run_id = uint64_to_int64(uint64_run_id)
 
-        with self.conn:
+        with self.session():
             # Check conflicts
-            query = "SELECT COUNT(*) FROM run WHERE run_id = ?;"
-            # If sint64_run_id does not exist
-            row = self.conn.execute(query, (sint64_run_id,)).fetchone()
-            if row["COUNT(*)"] == 0:
+            query = "SELECT COUNT(*) as cnt FROM run WHERE run_id = :run_id"
+            rows = self.query(query, {"run_id": sint64_run_id})
+            if rows[0]["cnt"] == 0:
                 query = """
                     INSERT INTO run
                     (run_id, fab_id, fab_version,
                     fab_hash, override_config, federation, federation_options,
                     pending_at, starting_at, running_at, finished_at, sub_status,
                     details, flwr_aid, bytes_sent, bytes_recv, clientapp_runtime)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                    VALUES (:run_id, :fab_id, :fab_version, :fab_hash, :override_config,
+                    :federation, :federation_options, :pending_at, :starting_at,
+                    :running_at, :finished_at, :sub_status, :details, :flwr_aid,
+                    :bytes_sent, :bytes_recv, :clientapp_runtime)
                 """
                 override_config_json = json.dumps(override_config)
-                data = [
-                    sint64_run_id,  # run_id
-                    fab_id,  # fab_id
-                    fab_version,  # fab_version
-                    fab_hash,  # fab_hash
-                    override_config_json,  # override_config
-                    federation,  # federation
-                    configrecord_to_bytes(federation_options),  # federation_options
-                    now().isoformat(),  # pending_at
-                    "",  # starting_at
-                    "",  # running_at
-                    "",  # finished_at
-                    "",  # sub_status
-                    "",  # details
-                    flwr_aid or "",  # flwr_aid
-                    0,  # bytes_sent
-                    0,  # bytes_recv
-                    0,  # clientapp_runtime
-                ]
-                self.conn.execute(query, tuple(data))
+                params = {
+                    "run_id": sint64_run_id,
+                    "fab_id": fab_id or "",
+                    "fab_version": fab_version or "",
+                    "fab_hash": fab_hash or "",
+                    "override_config": override_config_json,
+                    "federation": federation,
+                    "federation_options": configrecord_to_bytes(federation_options),
+                    "pending_at": now().isoformat(),
+                    "starting_at": "",
+                    "running_at": "",
+                    "finished_at": "",
+                    "sub_status": "",
+                    "details": "",
+                    "flwr_aid": flwr_aid or "",
+                    "bytes_sent": 0,
+                    "bytes_recv": 0,
+                    "clientapp_runtime": 0.0,
+                }
+                self.query(query, params)
                 return uint64_run_id
         log(ERROR, "Unexpected run creation failure.")
         return 0
@@ -921,11 +845,11 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
         """
         if flwr_aid:
             rows = self.query(
-                "SELECT run_id FROM run WHERE flwr_aid = ?;",
-                (flwr_aid,),
+                "SELECT run_id FROM run WHERE flwr_aid = :flwr_aid",
+                {"flwr_aid": flwr_aid},
             )
         else:
-            rows = self.query("SELECT run_id FROM run;", ())
+            rows = self.query("SELECT run_id FROM run", {})
         return {int64_to_uint64(row["run_id"]) for row in rows}
 
     def get_run(self, run_id: int) -> Run | None:
@@ -935,8 +859,8 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
 
         # Convert the uint64 value to sint64 for SQLite
         sint64_run_id = uint64_to_int64(run_id)
-        query = "SELECT * FROM run WHERE run_id = ?;"
-        rows = self.query(query, (sint64_run_id,))
+        query = "SELECT * FROM run WHERE run_id = :run_id"
+        rows = self.query(query, {"run_id": sint64_run_id})
         if rows:
             row = rows[0]
             return Run(
@@ -969,9 +893,10 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
         self._cleanup_expired_tokens()
 
         # Convert the uint64 value to sint64 for SQLite
-        sint64_run_ids = (uint64_to_int64(run_id) for run_id in set(run_ids))
-        query = f"SELECT * FROM run WHERE run_id IN ({','.join(['?'] * len(run_ids))});"
-        rows = self.query(query, tuple(sint64_run_ids))
+        placeholders = ",".join([f":rid_{i}" for i in range(len(run_ids))])
+        query = f"SELECT * FROM run WHERE run_id IN ({placeholders})"
+        params = {f"rid_{i}": uint64_to_int64(rid) for i, rid in enumerate(run_ids)}
+        rows = self.query(query, params)
 
         return {
             # Restore uint64 run IDs
@@ -988,11 +913,11 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
         # Clean up expired tokens; this will flag inactive runs as needed
         self._cleanup_expired_tokens()
 
-        with self.conn:
+        with self.session():
             # Convert the uint64 value to sint64 for SQLite
             sint64_run_id = uint64_to_int64(run_id)
-            query = "SELECT * FROM run WHERE run_id = ?;"
-            rows = self.conn.execute(query, (sint64_run_id,)).fetchall()
+            query = "SELECT * FROM run WHERE run_id = :run_id"
+            rows = self.query(query, {"run_id": sint64_run_id})
 
             # Check if the run_id exists
             if not rows:
@@ -1027,7 +952,9 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
 
             # Update the status
             query = """
-                UPDATE run SET %s= ?, sub_status = ?, details = ? WHERE run_id = ?;
+                UPDATE run SET %s = :timestamp,
+                sub_status = :sub_status, details = :details
+                WHERE run_id = :run_id
             """
 
             # Prepare data for query
@@ -1042,33 +969,30 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
             elif new_status.status == Status.FINISHED:
                 timestamp_fld = "finished_at"
 
-            data = (
-                current.isoformat(),
-                new_status.sub_status,
-                new_status.details,
-                uint64_to_int64(run_id),
-            )
-            self.conn.execute(query % timestamp_fld, data)
+            params = {
+                "timestamp": current.isoformat(),
+                "sub_status": new_status.sub_status,
+                "details": new_status.details,
+                "run_id": sint64_run_id,
+            }
+            self.query(query % timestamp_fld, params)
         return True
 
     def get_pending_run_id(self) -> int | None:
-        """Get the `run_id` of a run with `Status.PENDING` status, if any."""
-        pending_run_id = None
-
+        """Get the `run_id` of a run with `Status.PENDING` status."""
         # Fetch all runs with unset `starting_at` (i.e. they are in PENDING status)
-        query = "SELECT * FROM run WHERE starting_at = '' LIMIT 1;"
-        rows = self.query(query)
+        query = "SELECT * FROM run WHERE starting_at = '' LIMIT 1"
+        rows = self.query(query, {})
         if rows:
-            pending_run_id = int64_to_uint64(rows[0]["run_id"])
-
-        return pending_run_id
+            return int64_to_uint64(rows[0]["run_id"])
+        return None
 
     def get_federation_options(self, run_id: int) -> ConfigRecord | None:
         """Retrieve the federation options for the specified `run_id`."""
         # Convert the uint64 value to sint64 for SQLite
         sint64_run_id = uint64_to_int64(run_id)
-        query = "SELECT federation_options FROM run WHERE run_id = ?;"
-        rows = self.query(query, (sint64_run_id,))
+        query = "SELECT federation_options FROM run WHERE run_id = :run_id"
+        rows = self.query(query, {"run_id": sint64_run_id})
 
         # Check if the run_id exists
         if not rows:
@@ -1088,41 +1012,46 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
         HEARTBEAT_PATIENCE = N allows for N-1 missed heartbeat before
         the node is marked as offline.
         """
-        if self.conn is None:
-            raise AttributeError("LinkState not initialized")
-
         sint64_node_id = uint64_to_int64(node_id)
 
-        with self.conn:
-            # Check if node exists and not deleted
-            query = "SELECT status FROM node WHERE node_id = ? AND status != ?"
-            row = self.conn.execute(
-                query, (sint64_node_id, NodeStatus.UNREGISTERED)
-            ).fetchone()
-            if row is None:
-                return False
+        # Check if the node exists and is not unregistered
+        query = """
+            SELECT status FROM node WHERE node_id = :node_id AND status != :unregistered
+        """
+        rows = self.query(
+            query, {"node_id": sint64_node_id, "unregistered": NodeStatus.UNREGISTERED}
+        )
+        if not rows:
+            return False
 
-            # Construct query and params
-            current_dt = now()
-            query = "UPDATE node SET online_until = ?, heartbeat_interval = ?"
-            params: list[Any] = [
-                current_dt.timestamp() + HEARTBEAT_PATIENCE * heartbeat_interval,
-                heartbeat_interval,
-            ]
+        # Construct query and params
+        current_dt = now()
+        query = (
+            "UPDATE node SET online_until = :online_until, "
+            "heartbeat_interval = :heartbeat_interval"
+        )
+        params: dict[str, Any] = {
+            "online_until": current_dt.timestamp()
+            + HEARTBEAT_PATIENCE * heartbeat_interval,
+            "heartbeat_interval": heartbeat_interval,
+        }
 
-            # Set timestamp if the status changes
-            if row["status"] != NodeStatus.ONLINE:
-                query += ", status = ?, last_activated_at = ?"
-                params += [NodeStatus.ONLINE, current_dt.isoformat()]
+        # Set timestamp if the status changes
+        if rows[0]["status"] != NodeStatus.ONLINE:
+            query += ", status = :online, last_activated_at = :last_activated_at"
+            params["online"] = NodeStatus.ONLINE
+            params["last_activated_at"] = current_dt.isoformat()
 
-            # Execute the query, refreshing `online_until` and `heartbeat_interval`
-            query += " WHERE node_id = ?"
-            params += [sint64_node_id]
-            self.conn.execute(query, params)
-            return True
+        # Execute the query, refreshing `online_until` and `heartbeat_interval`
+        query += " WHERE node_id = :node_id"
+        params["node_id"] = sint64_node_id
+        self.query(query, params)
+        return True
 
     def _on_tokens_expired(self, expired_records: list[tuple[int, float]]) -> None:
-        """Transition runs with expired tokens to failed status.
+        """Handle cleanup of expired tokens.
+
+        Override in subclasses to add custom cleanup logic.
 
         Parameters
         ----------
@@ -1133,28 +1062,30 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
         if not expired_records:
             return
 
-        with self.conn:
+        with self.session():
             query = """
                 UPDATE run
-                SET sub_status = ?, details = ?, finished_at = ?
-                WHERE run_id = ?;
+                SET sub_status = :failed, details = :details, finished_at = :finished_at
+                WHERE run_id = :run_id
             """
             data = [
-                (
-                    SubStatus.FAILED,
-                    RUN_FAILURE_DETAILS_NO_HEARTBEAT,
-                    datetime.fromtimestamp(active_until, tz=timezone.utc).isoformat(),
-                    uint64_to_int64(run_id),
-                )
+                {
+                    "failed": SubStatus.FAILED,
+                    "details": RUN_FAILURE_DETAILS_NO_HEARTBEAT,
+                    "finished_at": datetime.fromtimestamp(
+                        active_until, tz=timezone.utc
+                    ).isoformat(),
+                    "run_id": uint64_to_int64(run_id),
+                }
                 for run_id, active_until in expired_records
             ]
-            self.conn.executemany(query, data)
+            self.query(query, data)
 
     def get_serverapp_context(self, run_id: int) -> Context | None:
         """Get the context for the specified `run_id`."""
         # Retrieve context if any
-        query = "SELECT context FROM context WHERE run_id = ?;"
-        rows = self.query(query, (uint64_to_int64(run_id),))
+        query = "SELECT context FROM context WHERE run_id = :run_id"
+        rows = self.query(query, {"run_id": uint64_to_int64(run_id)})
         context = context_from_bytes(rows[0]["context"]) if rows else None
         return context
 
@@ -1164,20 +1095,30 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
         context_bytes = context_to_bytes(context)
         sint_run_id = uint64_to_int64(run_id)
 
-        with self.conn:
+        with self.session():
             # Check if any existing Context assigned to the run_id
-            query = "SELECT COUNT(*) FROM context WHERE run_id = ?;"
-            row = self.conn.execute(query, (sint_run_id,)).fetchone()
-            if row["COUNT(*)"] > 0:
+            query = "SELECT COUNT(*) as count FROM context WHERE run_id = :run_id"
+            row = self.query(query, {"run_id": sint_run_id})[0]
+            if row["count"] > 0:
                 # Update context
-                query = "UPDATE context SET context = ? WHERE run_id = ?;"
-                self.conn.execute(query, (context_bytes, sint_run_id))
+                query = """
+                    UPDATE context
+                    SET context = :context_bytes WHERE run_id = :run_id
+                """
+                self.query(
+                    query, {"context_bytes": context_bytes, "run_id": sint_run_id}
+                )
             else:
                 try:
                     # Store context
-                    query = "INSERT INTO context (run_id, context) VALUES (?, ?);"
-                    self.conn.execute(query, (sint_run_id, context_bytes))
-                except sqlite3.IntegrityError:
+                    query = (
+                        "INSERT INTO context (run_id, context) "
+                        "VALUES (:run_id, :context_bytes)"
+                    )
+                    self.query(
+                        query, {"run_id": sint_run_id, "context_bytes": context_bytes}
+                    )
+                except IntegrityError:
                     raise ValueError(f"Run {run_id} not found") from None
 
     def add_serverapp_log(self, run_id: int, log_message: str) -> None:
@@ -1188,10 +1129,19 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
         # Store log
         try:
             query = """
-                INSERT INTO logs (timestamp, run_id, node_id, log) VALUES (?, ?, ?, ?);
+                INSERT INTO logs (timestamp, run_id, node_id, log)
+                VALUES (:current_ts, :run_id, :node_id, :log)
             """
-            self.query(query, (now().timestamp(), sint64_run_id, 0, log_message))
-        except sqlite3.IntegrityError:
+            self.query(
+                query,
+                {
+                    "current_ts": now().timestamp(),
+                    "run_id": sint64_run_id,
+                    "node_id": 0,
+                    "log": log_message,
+                },
+            )
+        except IntegrityError:
             raise ValueError(f"Run {run_id} not found") from None
 
     def get_serverapp_log(
@@ -1201,10 +1151,10 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
         # Convert the uint64 value to sint64 for SQLite
         sint64_run_id = uint64_to_int64(run_id)
 
-        with self.conn:
+        with self.session():
             # Check if the run_id exists
-            query = "SELECT run_id FROM run WHERE run_id = ?;"
-            rows = self.conn.execute(query, (sint64_run_id,)).fetchall()
+            query = "SELECT run_id FROM run WHERE run_id = :run_id"
+            rows = self.query(query, {"run_id": sint64_run_id})
             if not rows:
                 raise ValueError(f"Run {run_id} not found")
 
@@ -1213,12 +1163,18 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
                 after_timestamp = 0.0
             query = """
                 SELECT log, timestamp FROM logs
-                WHERE run_id = ? AND node_id = ? AND timestamp > ?;
+                WHERE run_id = :run_id AND node_id = :node_id
+                AND timestamp > :after_timestamp
+                ORDER BY timestamp
             """
-            rows = self.conn.execute(
-                query, (sint64_run_id, 0, after_timestamp)
-            ).fetchall()
-            rows.sort(key=lambda x: x["timestamp"])
+            rows = self.query(
+                query,
+                {
+                    "run_id": sint64_run_id,
+                    "node_id": 0,
+                    "after_timestamp": after_timestamp,
+                },
+            )
             latest_timestamp = rows[-1]["timestamp"] if rows else 0.0
         return "".join(row["log"] for row in rows), latest_timestamp
 
@@ -1227,20 +1183,19 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
 
         Return Message if valid.
         """
-        with self.conn:
+        with self.session():
             self._check_stored_messages({message_id})
             query = """
                 SELECT *
                 FROM message_ins
                 WHERE message_id = :message_id
             """
-            data = {"message_id": message_id}
-            rows: list[dict[str, Any]] = self.conn.execute(query, data).fetchall()
+            rows = self.query(query, {"message_id": message_id})
             if not rows:
                 # Message does not exist
                 return None
 
-        return rows[0]
+        return dict(rows[0])
 
     def store_traffic(self, run_id: int, *, bytes_sent: int, bytes_recv: int) -> None:
         """Store traffic data for the specified `run_id`."""
@@ -1258,18 +1213,23 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
 
         sint64_run_id = uint64_to_int64(run_id)
 
-        with self.conn:
+        with self.session():
             # Check if run exists, performing the update only if it does
             update_query = """
                 UPDATE run
-                SET bytes_sent = bytes_sent + ?,
-                    bytes_recv = bytes_recv + ?
-                WHERE run_id = ?
-                RETURNING run_id;
+                SET bytes_sent = bytes_sent + :bytes_sent,
+                    bytes_recv = bytes_recv + :bytes_recv
+                WHERE run_id = :run_id
+                RETURNING run_id
             """
-            rows = self.conn.execute(
-                update_query, (bytes_sent, bytes_recv, sint64_run_id)
-            ).fetchall()
+            rows = self.query(
+                update_query,
+                {
+                    "bytes_sent": bytes_sent,
+                    "bytes_recv": bytes_recv,
+                    "run_id": sint64_run_id,
+                },
+            )
 
             if not rows:
                 raise ValueError(f"Run {run_id} not found")
@@ -1277,60 +1237,20 @@ class SqliteLinkState(LinkState, SqliteCoreState):  # pylint: disable=R0904
     def add_clientapp_runtime(self, run_id: int, runtime: float) -> None:
         """Add ClientApp runtime to the cumulative total for the specified `run_id`."""
         sint64_run_id = uint64_to_int64(run_id)
-        with self.conn:
+        with self.session():
             # Check if run exists, performing the update only if it does
             update_query = """
                 UPDATE run
-                SET clientapp_runtime = clientapp_runtime + ?
-                WHERE run_id = ?
-                RETURNING run_id;
+                SET clientapp_runtime = clientapp_runtime + :runtime
+                WHERE run_id = :run_id
+                RETURNING run_id
             """
-            rows = self.conn.execute(update_query, (runtime, sint64_run_id)).fetchall()
+            rows = self.query(
+                update_query, {"runtime": runtime, "run_id": sint64_run_id}
+            )
 
             if not rows:
                 raise ValueError(f"Run {run_id} not found")
-
-
-def message_to_dict(message: Message) -> dict[str, Any]:
-    """Transform Message to dict."""
-    result = {
-        "message_id": message.metadata.message_id,
-        "group_id": message.metadata.group_id,
-        "run_id": message.metadata.run_id,
-        "src_node_id": message.metadata.src_node_id,
-        "dst_node_id": message.metadata.dst_node_id,
-        "reply_to_message_id": message.metadata.reply_to_message_id,
-        "created_at": message.metadata.created_at,
-        "delivered_at": message.metadata.delivered_at,
-        "ttl": message.metadata.ttl,
-        "message_type": message.metadata.message_type,
-        "content": None,
-        "error": None,
-    }
-
-    if message.has_content():
-        result["content"] = recorddict_to_proto(message.content).SerializeToString()
-    else:
-        result["error"] = error_to_proto(message.error).SerializeToString()
-
-    return result
-
-
-def dict_to_message(message_dict: dict[str, Any]) -> Message:
-    """Transform dict to Message."""
-    content, error = None, None
-    if (b_content := message_dict.pop("content")) is not None:
-        content = recorddict_from_proto(ProtoRecordDict.FromString(b_content))
-    if (b_error := message_dict.pop("error")) is not None:
-        error = error_from_proto(ProtoError.FromString(b_error))
-
-    # Metadata constructor doesn't allow passing created_at. We set it later
-    metadata = Metadata(
-        **{k: v for k, v in message_dict.items() if k not in ["delivered_at"]}
-    )
-    msg = make_message(metadata=metadata, content=content, error=error)
-    msg.metadata.delivered_at = message_dict["delivered_at"]
-    return msg
 
 
 def determine_run_status(row: dict[str, Any]) -> str:
@@ -1344,4 +1264,4 @@ def determine_run_status(row: dict[str, Any]) -> str:
             return Status.STARTING
         return Status.PENDING
     run_id = int64_to_uint64(row["run_id"])
-    raise sqlite3.IntegrityError(f"The run {run_id} does not have a valid status.")
+    raise ValueError(f"The run {run_id} does not have a valid status.")

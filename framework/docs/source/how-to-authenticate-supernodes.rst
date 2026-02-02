@@ -71,7 +71,8 @@ in the example linked at the top of this guide.
 .. code-block:: bash
 
     # In the example directory, generate the public/private key pairs
-    $ ./generate_auth_keys.sh
+    # along side the TLS certificates.
+    $ python generate_creds.py
 
 This will generate the keys in a new ``keys/`` directory. By default it creates a key
 pair for the SuperLink and one for each SuperNode. Copy this directory into the
@@ -111,21 +112,21 @@ Here's how this looks in code:
 
 .. code-block:: bash
 
-    # flwr supernode register <supernode-pub-key> <app> <federation>
-    $ flwr supernode register keys/client_credentials_1.pub . local-deployment
+    # flwr supernode register <supernode-pub-key> <superlink>
+    $ flwr supernode register keys/supernode_credentials_1.pub local-deployment
 
 Next, let’s register the second SuperNode as well:
 
 .. code-block:: bash
 
-    $ flwr supernode register keys/client_credentials_2.pub . local-deployment
+    $ flwr supernode register keys/supernode_credentials_2.pub local-deployment
 
 You can list the registered SuperNodes using the following command:
 
 .. code-block:: bash
 
-    # flwr supernode list <app> <federation>
-    $ flwr supernode list . local-deployment
+    # flwr supernode list <superlink>
+    $ flwr supernode list local-deployment
 
 This will display the IDs of the SuperNodes you just registered as well as their status.
 You should see a table similar to the following:
@@ -157,9 +158,9 @@ the TLS certificate.
     $ flower-supernode \
         --root-certificates certificates/ca.crt \
         --superlink 127.0.0.1:9092 \
-        --clientappio-api-address 0.0.0.0:9094 \
+        --clientappio-api-address 127.0.0.1:9094 \
         --node-config="partition-id=0 num-partitions=2" \
-        --auth-supernode-private-key keys/client_credentials_1
+        --auth-supernode-private-key keys/supernode_credentials_1
 
 .. dropdown:: Understand the command
 
@@ -174,16 +175,16 @@ private key:
     $ flower-supernode \
         --root-certificates certificates/ca.crt \
         --superlink 127.0.0.1:9092 \
-        --clientappio-api-address 0.0.0.0:9095 \
+        --clientappio-api-address 127.0.0.1:9095 \
         --node-config="partition-id=1 num-partitions=2" \
-        --auth-supernode-private-key keys/client_credentials_2
+        --auth-supernode-private-key keys/supernode_credentials_2
 
 After connecting both SuperNodes, you can check the status of the SuperNodes again. You
 will notice their status is now ``online``:
 
 .. code-block:: bash
 
-    $ flwr supernode list . local-deployment
+    $ flwr supernode list local-deployment
 
     ┏━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┓
     ┃       Node ID        ┃   Owner    ┃ Status  ┃ Elapsed ┃   Status Changed @   ┃
@@ -210,8 +211,8 @@ or future runs. Unregistering a SuperNode can be done via the
 
 .. code-block:: bash
 
-    # flwr supernode unregister <node-id> <app> <federation>
-    $ flwr supernode unregister 16019329408659850374 . local-deployment
+    # flwr supernode unregister <node-id> <superlink>
+    $ flwr supernode unregister 16019329408659850374 local-deployment
 
 The above command unregisters the first SuperNode. You can verify this by listing the
 SuperNodes again:
@@ -233,7 +234,7 @@ right, **if you wish to connect a second SuperNode a new EC key pair is needed.*
 
 .. code-block:: bash
 
-    $ flwr supernode list . local-deployment --verbose
+    $ flwr supernode list local-deployment --verbose
 
     ┏━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┓
     ┃       Node ID        ┃   Owner    ┃    Status   ┃ Elapsed ┃   Status Changed @   ┃

@@ -18,9 +18,11 @@
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
+import click
 import tomli
+import typer
 from parameterized import parameterized
 
 from .config_migration import (
@@ -28,6 +30,7 @@ from .config_migration import (
     _comment_out_legacy_toml_config,
     _is_legacy_usage,
     _migrate_pyproject_toml_to_flower_config,
+    migrate,
 )
 from .flower_config import init_flwr_config, read_superlink_connection
 
@@ -66,7 +69,6 @@ options.num-supernodes = 2
 [tool.flwr.federations.researchgrid]
 address = "researchgrid.flower.blue"
 root-certificates = "certs/researchgrid.crt"
-enable-account-auth = true
 options.num-supernodes = 2
 """
 
@@ -104,10 +106,11 @@ class TestConfigMigration(unittest.TestCase):
             ("./relative/path", [], True),  # relative path with slash
             (".", [], True),  # dot path
             ("named-conn", [], False),  # normal name
+            (None, [], False),  # None superlink; only possible with new usage
         ]
     )
     def test_is_legacy_usage(
-        self, superlink: str, args: list[str], expected: bool
+        self, superlink: str | None, args: list[str], expected: bool
     ) -> None:
         """Test `_is_legacy_usage` function."""
         assert _is_legacy_usage(superlink, args) is expected
@@ -139,7 +142,6 @@ class TestConfigMigration(unittest.TestCase):
         assert researchgrid.root_certificates == str(
             (self.app_path / "certs/researchgrid.crt").resolve()
         )
-        assert researchgrid.enable_account_auth is True
 
     def test_comment_out_legacy_toml_config(self) -> None:
         """Test `_comment_out_legacy_toml_config` function."""
@@ -159,3 +161,87 @@ class TestConfigMigration(unittest.TestCase):
 
         # The app section should remain intact
         assert parsed["tool"]["flwr"]["app"]["publisher"] == "pan"
+
+    @patch("flwr.cli.config_migration.click.get_current_context")
+    def test_migrate_success_with_legacy_usage(
+        self, mock_get_context: MagicMock
+    ) -> None:
+        """Test successful migration with legacy usage pattern."""
+        # Prepare: Mock context for usage output
+        mock_ctx = MagicMock()
+        mock_ctx.get_usage.return_value = "Usage: flwr [OPTIONS]"
+        mock_get_context.return_value = mock_ctx
+
+        # Execute and expect typer.Exit due to legacy usage
+        with self.assertRaises(typer.Exit):
+            migrate(str(self.app_path), ["local-poc"])
+
+        # Assert: Verify connection was migrated
+        conn = read_superlink_connection("local-poc")
+        assert conn is not None
+        assert conn.address == "127.0.0.1:9093"
+
+    def test_migrate_failure_legacy_usage_no_federations(self) -> None:
+        """Test migration failure when legacy usage but no federations."""
+        # Create app without federations section
+        app_path = self.home_path / "no-fed-app"
+        app_path.mkdir(parents=True, exist_ok=True)
+        (app_path / "pyproject.toml").write_text("[project]\nname='test'")
+
+        with self.assertRaises(click.ClickException) as cm:
+            migrate(str(app_path), [])
+        assert "Cannot migrate configuration" in str(cm.exception)
+
+    def test_migrate_no_action_non_legacy_usage(self) -> None:
+        """Test no migration when non-legacy usage detected."""
+        migrate("named-conn", [])
+
+        # Should not create this connection
+        with self.assertRaises(click.ClickException):
+            _ = read_superlink_connection("named-conn")
+
+    @parameterized.expand(  # type: ignore[misc]
+        [
+            (None, False),
+            ("named-conn", False),
+            ("/abs/path", True),  # `flwr run` usage
+        ]
+    )
+    @patch("flwr.cli.config_migration.typer.echo")
+    @patch("flwr.cli.config_migration.typer.secho")
+    def test_migrate_silent_when_not_migratable_and_non_legacy(
+        self,
+        superlink: str | None,
+        ignore_legacy_usage: bool,
+        mock_secho: MagicMock,
+        mock_echo: MagicMock,
+    ) -> None:
+        """Test no output when not migratable and not legacy usage."""
+        # Execute with a non-path superlink that doesn't exist
+        migrate(superlink, [], ignore_legacy_usage)
+
+        # Verify no output was printed
+        mock_echo.assert_not_called()
+        mock_secho.assert_not_called()
+
+    def test_migrate_raises_on_multiple_args(self) -> None:
+        """Test that multiple extra args raise UsageError."""
+        with self.assertRaises(click.UsageError):
+            migrate(str(self.app_path), ["arg1", "arg2"])
+
+    @patch("flwr.cli.config_migration.click.get_current_context")
+    def test_migrate_with_default_federation(self, mock_get_context: MagicMock) -> None:
+        """Test migration properly sets default federation."""
+        # Mock context for usage output
+        mock_ctx = MagicMock()
+        mock_ctx.get_usage.return_value = "Usage: flwr [OPTIONS]"
+        mock_get_context.return_value = mock_ctx
+
+        # Execute migration without specifying federation (legacy path)
+        with self.assertRaises(typer.Exit):
+            migrate(str(self.app_path), [])
+
+        # Verify default connection is set from legacy config
+        default_conn = read_superlink_connection()
+        assert default_conn is not None
+        assert default_conn.name == "local-poc"
