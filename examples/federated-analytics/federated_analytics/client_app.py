@@ -54,7 +54,7 @@ def query(msg: Message, context: Context) -> Message:
                 metrics[f"{feature}_{agg}_count"] = len(df[feature])
                 metrics[f"{feature}_{agg}_sum_sqd"] = sum(df[feature] ** 2)
             else:
-                print(f"Aggregation method '{agg}' not recognized.")
+                raise ValueError(f"Aggregation method '{agg}' not recognized.")
 
     reply_content = RecordDict({"query_results": MetricRecord(metrics)})
 
