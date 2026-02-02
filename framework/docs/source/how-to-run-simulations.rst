@@ -209,8 +209,8 @@ workload. You can do so by adjusting the backend resources for your federation.
     make use of 25% of the available VRAM but it ends up using 50%, it might cause other
     ``ClientApp`` instances to crash throwing an out-of-memory (OOM) error.
 
-Customizing resources can be done directly in the `Flower Configuration
-<ref-flower-configuration.html>`_. Setting the ``options.backend.client-resources``
+Customizing resources can be done directly in the :ref:`Flower Configuration
+<ref-flower-configuration>`. Setting the ``options.backend.client-resources``
 variable allows you to define how many CPU cores and what fraction of GPU memory each
 backend worker (and hence each ``ClientApp``) gets. For example, to run a simulation
 with 10 clients where each ``ClientApp`` assumes to use 1 CPU core and no GPU access,
@@ -280,8 +280,8 @@ resource-aware manner in batches of 8.
 
 By default, the ``Simulation Engine`` has **access to all system resources** (i.e., all
 CPUs, all GPUs). However, in some settings, you might want to limit how many of your
-system resources are used for simulation. You can do this in the `Flower Configuration
-<ref-flower-configuration.html>`_ by setting the ``options.backend.init-args`` variable.
+system resources are used for simulation. You can do this in the :doc:`Flower Configuration
+<ref-flower-configuration>` by setting the ``options.backend.init-args`` variable.
 
 .. code-block:: toml
 
