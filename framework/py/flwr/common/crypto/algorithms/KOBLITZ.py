@@ -190,3 +190,4 @@ def verify(authenticated_data: bytes, curve_name: str, ecc_pubkey: object) -> by
     except InvalidSignature as exc:
         raise ValueError("Firma non valida") from exc
     return data
+

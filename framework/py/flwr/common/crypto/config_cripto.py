@@ -1,16 +1,11 @@
-"""Configurazione di default per i moduli di crittografia."""
-
 ENCRYPTION_ENABLED = False
 ENCRYPTION_METHOD = None
-
-INTEGRITY_ENABLED = True
-INTEGRITY_METHOD = "HMAC"
-
+INTEGRITY_ENABLED = False
+INTEGRITY_METHOD = None
 AUTH_ENABLED = False
 AUTH_METHOD = None
-
-NET = "resnet18"
+NET = 'mobilenet_v3_small'
 TLS = False
 ACCURACY = 0.5
-NUM_CLIENTS = 1
-EVALUATION_SIDE = "server"
+NUM_CLIENTS = 2
+EVALUATION_SIDE = 'server'

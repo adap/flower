@@ -20,7 +20,7 @@ AUTH_METHODS = [
     "ED448",
     "ECCFROG522PP",
 ]
-NET_OPTIONS = ["custom_cnn", "resnet18", "resnet34", "tiny_cnn", "squeezenet"]
+NET_OPTIONS = ["custom_cnn", "resnet18", "resnet34", "tiny_cnn", "squeezenet", "mobilenet_v3_small"]
 EVALUATION_OPTIONS = ["server", "client"]
 
 def ask_accuracy(prompt, default=0.5):

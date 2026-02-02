@@ -9,7 +9,14 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from datasets import load_from_disk
 from torchvision.transforms import Compose, Normalize, ToTensor, Resize
-from torchvision.models import resnet18, resnet34, squeezenet1_1, ResNet18_Weights
+from torchvision.models import (
+    resnet18,
+    resnet34,
+    squeezenet1_1,
+    mobilenet_v3_small,
+    ResNet18_Weights,
+    MobileNet_V3_Small_Weights,
+)
 
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
@@ -122,6 +129,11 @@ def get_model(model_name: str, num_classes=10, pretrained=True):
         model.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
         model.maxpool = nn.Identity()  # rimuove maxpool iniziale
         model.fc = nn.Linear(model.fc.in_features, num_classes)
+        return model
+    elif model_name == "mobilenet_v3_small":
+        weights = MobileNet_V3_Small_Weights.DEFAULT if pretrained else None
+        model = mobilenet_v3_small(weights=weights)
+        model.classifier[3] = nn.Linear(model.classifier[3].in_features, num_classes)
         return model
     else:
         raise ValueError(f"Modello {model_name} non supportato")
