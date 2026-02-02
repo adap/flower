@@ -65,7 +65,6 @@ def main(grid: Grid, context: Context) -> None:
             content=recorddict,
             message_type=MessageType.QUERY,  # target `query` method in ClientApp
             dst_node_id=node_id,
-            group_id="1",
         )
         messages.append(message)
 
