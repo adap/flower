@@ -10,6 +10,10 @@ This example will show you how you can use Flower to run federated analytics wor
 
 ## Set up the project
 
+### Prerequisites
+
+This example will make use of PostgreSQL databases running in containers. Make sure you have Docker and Docker Compose v2 installed.
+
 ### Clone the project
 
 After cloning the project, this will create a new directory called `federated-analytics` containing the following files:
@@ -93,13 +97,13 @@ N=${1:-2}   # number of PostgreSQL databases (default = 2)
 BASE_PORT=5433
 
 {
-  echo "services:"
-  
-  for i in $(seq 1 "$N"); do
-    PORT=$((BASE_PORT + i - 1))
-    # Set a seed for each of the database for producing different random data
-    SEED=$(echo "scale=2; $i / 100" | bc)
-    cat <<EOF
+    echo "services:"
+
+    for i in $(seq 1 "$N"); do
+        PORT=$((BASE_PORT + i - 1))
+        # Set a seed for each of the database for producing different random data
+        SEED=$(echo "scale=2; $i / 100" | bc)
+        cat <<EOF
   postgres_$i:
     image: postgres:18
     container_name: postgres_$i
@@ -114,7 +118,7 @@ BASE_PORT=5433
       - ./db_init.sh:/docker-entrypoint-initdb.d/init.sh:ro
 
 EOF
-  done
+    done
 } | docker compose -f - up -d
 ```
 
