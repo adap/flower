@@ -49,6 +49,12 @@ service ServerAppIo {
   rpc SendAppHeartbeat(SendAppHeartbeatRequest)
       returns (SendAppHeartbeatResponse) {}
 
+  // Pull app inputs
+  rpc PullAppInputs(PullAppInputsRequest) returns (PullAppInputsResponse) {}
+
+  // Push app outputs
+  rpc PushAppOutputs(PushAppOutputsRequest) returns (PushAppOutputsResponse) {}
+
   /////////////////////////////////////////////////////////////////////////////
   // Specific endpoints shared by ServerAppIo and ClientAppIo
   /////////////////////////////////////////////////////////////////////////////
@@ -66,12 +72,6 @@ service ServerAppIo {
   /////////////////////////////////////////////////////////////////////////////
   // Specific endpoints shared by ServerAppIo and SimulationIo
   /////////////////////////////////////////////////////////////////////////////
-
-  // Pull ServerApp inputs
-  rpc PullAppInputs(PullAppInputsRequest) returns (PullAppInputsResponse) {}
-
-  // Push ServerApp outputs
-  rpc PushAppOutputs(PushAppOutputsRequest) returns (PushAppOutputsResponse) {}
 
   // Get the status of a given run
   rpc GetRunStatus(GetRunStatusRequest) returns (GetRunStatusResponse) {}
