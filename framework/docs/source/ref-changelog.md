@@ -36,7 +36,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Refine `flwr federation` CLI** ([#6340](https://github.com/adap/flower/pull/6340), [#6461](https://github.com/adap/flower/pull/6461), [#6463](https://github.com/adap/flower/pull/6463), [#6468](https://github.com/adap/flower/pull/6468), [#6476](https://github.com/adap/flower/pull/6476), [#6479](https://github.com/adap/flower/pull/6479), [#6480](https://github.com/adap/flower/pull/6480))
 
-  **Deprecated `flwr federation show` in favor of `flwr federation list`.** The unified command now supports detailed inspection via `flwr federation list --federation <federation>` and displays account names instead of account IDs.
+  Deprecated `flwr federation show` in favor of `flwr federation list`. The unified command now supports detailed inspection via `flwr federation list --federation <federation>` and displays account names instead of account IDs.
 
 - **Update CI/CD workflows and tests** ([#6301](https://github.com/adap/flower/pull/6301), [#6321](https://github.com/adap/flower/pull/6321), [#6330](https://github.com/adap/flower/pull/6330), [#6346](https://github.com/adap/flower/pull/6346), [#6347](https://github.com/adap/flower/pull/6347), [#6348](https://github.com/adap/flower/pull/6348), [#6352](https://github.com/adap/flower/pull/6352), [#6373](https://github.com/adap/flower/pull/6373), [#6375](https://github.com/adap/flower/pull/6375), [#6394](https://github.com/adap/flower/pull/6394), [#6445](https://github.com/adap/flower/pull/6445), [#6449](https://github.com/adap/flower/pull/6449))
 
