@@ -72,14 +72,6 @@ flower-supernode \
      --node-config="db-port=5434"
 ```
 
-Next, update the [`pyproject.toml`](./pyproject.toml) file to add a new federation configuration:
-
-```toml
-[tool.flwr.federations.local-deployment]
-address = "127.0.0.1:9093"
-insecure = true
-```
-
 Finally, run the Flower App and follow the `ServerApp` logs to track the execution of the run:
 
 ```shell

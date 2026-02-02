@@ -38,12 +38,8 @@ def query_database(  # pylint: disable=too-many-arguments, too-many-positional-a
         f"postgresql+psycopg://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
     )
 
-    # Build query to select only the requested features
-    columns = ", ".join(selected_features)
-    query_str = f"SELECT {columns} FROM {table_name}"
-
-    # Execute query and load into DataFrame
-    df = pd.read_sql(query_str, engine)
+    # Execute query and load selected features into DataFrame
+    df = pd.read_sql_table(table_name, engine, columns=selected_features)
     engine.dispose()
 
     return df
