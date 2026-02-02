@@ -108,22 +108,16 @@ class ServerAppIoStub:
     ]
     """Confirm Message Received"""
 
-    GetRunStatus: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.run_pb2.GetRunStatusRequest,
-        flwr.proto.run_pb2.GetRunStatusResponse,
+    UpdateRunStatus: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.run_pb2.UpdateRunStatusRequest,
+        flwr.proto.run_pb2.UpdateRunStatusResponse,
     ]
     """///////////////////////////////////////////////////////////////////////////
     Specific endpoints shared by ServerAppIo and SimulationIo
     ///////////////////////////////////////////////////////////////////////////
 
-    Get the status of a given run
+    Update the status of a given run
     """
-
-    UpdateRunStatus: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.run_pb2.UpdateRunStatusRequest,
-        flwr.proto.run_pb2.UpdateRunStatusResponse,
-    ]
-    """Update the status of a given run"""
 
     PushLogs: grpc.UnaryUnaryMultiCallable[
         flwr.proto.log_pb2.PushLogsRequest,
@@ -230,22 +224,16 @@ class ServerAppIoAsyncStub:
     ]
     """Confirm Message Received"""
 
-    GetRunStatus: grpc.aio.UnaryUnaryMultiCallable[
-        flwr.proto.run_pb2.GetRunStatusRequest,
-        flwr.proto.run_pb2.GetRunStatusResponse,
+    UpdateRunStatus: grpc.aio.UnaryUnaryMultiCallable[
+        flwr.proto.run_pb2.UpdateRunStatusRequest,
+        flwr.proto.run_pb2.UpdateRunStatusResponse,
     ]
     """///////////////////////////////////////////////////////////////////////////
     Specific endpoints shared by ServerAppIo and SimulationIo
     ///////////////////////////////////////////////////////////////////////////
 
-    Get the status of a given run
+    Update the status of a given run
     """
-
-    UpdateRunStatus: grpc.aio.UnaryUnaryMultiCallable[
-        flwr.proto.run_pb2.UpdateRunStatusRequest,
-        flwr.proto.run_pb2.UpdateRunStatusResponse,
-    ]
-    """Update the status of a given run"""
 
     PushLogs: grpc.aio.UnaryUnaryMultiCallable[
         flwr.proto.log_pb2.PushLogsRequest,
@@ -371,25 +359,17 @@ class ServerAppIoServicer(metaclass=abc.ABCMeta):
         """Confirm Message Received"""
 
     @abc.abstractmethod
-    def GetRunStatus(
-        self,
-        request: flwr.proto.run_pb2.GetRunStatusRequest,
-        context: _ServicerContext,
-    ) -> typing.Union[flwr.proto.run_pb2.GetRunStatusResponse, collections.abc.Awaitable[flwr.proto.run_pb2.GetRunStatusResponse]]:
-        """///////////////////////////////////////////////////////////////////////////
-        Specific endpoints shared by ServerAppIo and SimulationIo
-        ///////////////////////////////////////////////////////////////////////////
-
-        Get the status of a given run
-        """
-
-    @abc.abstractmethod
     def UpdateRunStatus(
         self,
         request: flwr.proto.run_pb2.UpdateRunStatusRequest,
         context: _ServicerContext,
     ) -> typing.Union[flwr.proto.run_pb2.UpdateRunStatusResponse, collections.abc.Awaitable[flwr.proto.run_pb2.UpdateRunStatusResponse]]:
-        """Update the status of a given run"""
+        """///////////////////////////////////////////////////////////////////////////
+        Specific endpoints shared by ServerAppIo and SimulationIo
+        ///////////////////////////////////////////////////////////////////////////
+
+        Update the status of a given run
+        """
 
     @abc.abstractmethod
     def PushLogs(

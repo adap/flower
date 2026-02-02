@@ -62,13 +62,6 @@ message UpdateRunStatusRequest {
 }
 message UpdateRunStatusResponse {}
 
-// GetRunStatus
-message GetRunStatusRequest {
-  Node node = 1;
-  repeated uint64 run_ids = 2;
-}
-message GetRunStatusResponse { map<uint64, RunStatus> run_status_dict = 1; }
-
 // Get Federation Options associated with run
 message GetFederationOptionsRequest { uint64 run_id = 1; }
 message GetFederationOptionsResponse { ConfigRecord federation_options = 1; }
