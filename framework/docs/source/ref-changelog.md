@@ -8,131 +8,33 @@ We would like to give our special thanks to all the contributors who made the ne
 
 `Charles Beauville`, `Chong Shen Ng`, `Daniel J. Beutel`, `Heng Pan`, `Iason Ofeidis`, `Javier`, `Jun S`, `Taner Topal`, `nihonge` <!---TOKEN_v1.26.0-->
 
+- **Introduce Flower configuration for centralized CLI and SuperLink setup** ([#6240](https://github.com/adap/flower/pull/6240), [#6338](https://github.com/adap/flower/pull/6338), [#6343](https://github.com/adap/flower/pull/6343), [#6349](https://github.com/adap/flower/pull/6349), [#6354](https://github.com/adap/flower/pull/6354), [#6356](https://github.com/adap/flower/pull/6356), [#6357](https://github.com/adap/flower/pull/6357), [#6359](https://github.com/adap/flower/pull/6359), [#6362](https://github.com/adap/flower/pull/6362), [#6364](https://github.com/adap/flower/pull/6364), [#6365](https://github.com/adap/flower/pull/6365), [#6366](https://github.com/adap/flower/pull/6366), [#6367](https://github.com/adap/flower/pull/6367), [#6372](https://github.com/adap/flower/pull/6372), [#6374](https://github.com/adap/flower/pull/6374), [#6376](https://github.com/adap/flower/pull/6376), [#6381](https://github.com/adap/flower/pull/6381), [#6382](https://github.com/adap/flower/pull/6382), [#6385](https://github.com/adap/flower/pull/6385), [#6386](https://github.com/adap/flower/pull/6386), [#6390](https://github.com/adap/flower/pull/6390), [#6393](https://github.com/adap/flower/pull/6393), [#6399](https://github.com/adap/flower/pull/6399), [#6400](https://github.com/adap/flower/pull/6400), [#6405](https://github.com/adap/flower/pull/6405), [#6422](https://github.com/adap/flower/pull/6422), [#6423](https://github.com/adap/flower/pull/6423), [#6435](https://github.com/adap/flower/pull/6435), [#6439](https://github.com/adap/flower/pull/6439), [#6440](https://github.com/adap/flower/pull/6440), [#6441](https://github.com/adap/flower/pull/6441), [#6446](https://github.com/adap/flower/pull/6446), [#6481](https://github.com/adap/flower/pull/6481), [#6492](https://github.com/adap/flower/pull/6492))
 
+  Introduces Flower configuration as a centralized way to manage SuperLink connections and simulation settings, enabling `flwr` commands to be executed from any directory and allowing reuse of named connections. Removes the unnecessary `enable-account-auth` option. This replaces the legacy `federation` configuration in `pyproject.toml`, which is automatically migrated to the new Flower configuration format when running `flwr` commands. For usage details, see the [Flower CLI reference](https://flower.ai/docs/framework/main/en/ref-api-cli.html) and the [Flower configuration documentation](https://flower.ai/docs/framework/main/en/ref-flower-configuration.html).
+
+- **Migrate internal state storage to SQLAlchemy with automated schema migrations** ([#6344](https://github.com/adap/flower/pull/6344), [#6345](https://github.com/adap/flower/pull/6345), [#6355](https://github.com/adap/flower/pull/6355), [#6370](https://github.com/adap/flower/pull/6370), [#6371](https://github.com/adap/flower/pull/6371), [#6378](https://github.com/adap/flower/pull/6378), [#6379](https://github.com/adap/flower/pull/6379), [#6380](https://github.com/adap/flower/pull/6380), [#6383](https://github.com/adap/flower/pull/6383), [#6384](https://github.com/adap/flower/pull/6384), [#6387](https://github.com/adap/flower/pull/6387), [#6388](https://github.com/adap/flower/pull/6388), [#6389](https://github.com/adap/flower/pull/6389), [#6396](https://github.com/adap/flower/pull/6396), [#6398](https://github.com/adap/flower/pull/6398), [#6402](https://github.com/adap/flower/pull/6402), [#6403](https://github.com/adap/flower/pull/6403), [#6404](https://github.com/adap/flower/pull/6404), [#6406](https://github.com/adap/flower/pull/6406), [#6407](https://github.com/adap/flower/pull/6407), [#6408](https://github.com/adap/flower/pull/6408), [#6410](https://github.com/adap/flower/pull/6410), [#6411](https://github.com/adap/flower/pull/6411), [#6424](https://github.com/adap/flower/pull/6424), [#6425](https://github.com/adap/flower/pull/6425), [#6426](https://github.com/adap/flower/pull/6426), [#6433](https://github.com/adap/flower/pull/6433), [#6436](https://github.com/adap/flower/pull/6436), [#6448](https://github.com/adap/flower/pull/6448), [#6450](https://github.com/adap/flower/pull/6450), [#6457](https://github.com/adap/flower/pull/6457), [#6459](https://github.com/adap/flower/pull/6459), [#6460](https://github.com/adap/flower/pull/6460), [#6469](https://github.com/adap/flower/pull/6469), [#6477](https://github.com/adap/flower/pull/6477), [#6478](https://github.com/adap/flower/pull/6478))
+
+  Migrates Flower’s internal states (`LinkState` and `ObjectStore`) to SQLAlchemy, replaces SQLite3 implementations, and introduces Alembic-based schema migrations with automatic upgrades. This ensures database compatibility across Flower versions and lays the groundwork for supporting external databases such as PostgreSQL. See the [database migration guide](https://flower.ai/docs/framework/contributor-how-to-migrate-database.html) for details.
+
+- **Improve CLI error handling and usability** ([#6432](https://github.com/adap/flower/pull/6432), [#6437](https://github.com/adap/flower/pull/6437), [#6444](https://github.com/adap/flower/pull/6444), [#6462](https://github.com/adap/flower/pull/6462), [#6467](https://github.com/adap/flower/pull/6467))
+
+  Uses `click.ClickException` for clearer and more consistent error formatting, improves CLI error messages and logging, and shows command aliases.
 
 - **Fix networking, shutdown, and Windows-specific issues** ([#6342](https://github.com/adap/flower/pull/6342), [#6430](https://github.com/adap/flower/pull/6430), [#6447](https://github.com/adap/flower/pull/6447), [#6456](https://github.com/adap/flower/pull/6456), [#6490](https://github.com/adap/flower/pull/6490))
 
-		Fixes message transmission under unstable network conditions, improves Windows process handling and address resolution, and ensures graceful shutdown of `flwr-serverapp`.
+  Fixes message transmission and capacity tracking under unstable network conditions, improves Windows process handling and address resolution, and ensures graceful shutdown of `flwr-serverapp`.
 
-- **Update framework documentation** ([#6312](https://github.com/adap/flower/pull/6312), [#6336](https://github.com/adap/flower/pull/6336), [#6351](https://github.com/adap/flower/pull/6351), [#6397](https://github.com/adap/flower/pull/6397), [#6401](https://github.com/adap/flower/pull/6401), [#6455](https://github.com/adap/flower/pull/6455), [#6470](https://github.com/adap/flower/pull/6470), [#6485](https://github.com/adap/flower/pull/6485))
+- **Update and maintain examples** ([#6331](https://github.com/adap/flower/pull/6331), [#6334](https://github.com/adap/flower/pull/6334), [#6369](https://github.com/adap/flower/pull/6369), [#6395](https://github.com/adap/flower/pull/6395), [#6419](https://github.com/adap/flower/pull/6419), [#6474](https://github.com/adap/flower/pull/6474), [#6488](https://github.com/adap/flower/pull/6488))
+
+  Updates the JAX quickstart, bumps example dependencies, makes the certificate generation script cross-platform, normalizes training loss in the PyTorch quickstart, and marks the legacy `quickstart-pytorch` example as deprecated.
+
+- **Refine `flwr federation` CLI** ([#6340](https://github.com/adap/flower/pull/6340), [#6461](https://github.com/adap/flower/pull/6461), [#6463](https://github.com/adap/flower/pull/6463), [#6468](https://github.com/adap/flower/pull/6468), [#6476](https://github.com/adap/flower/pull/6476), [#6479](https://github.com/adap/flower/pull/6479), [#6480](https://github.com/adap/flower/pull/6480))
+
+  Unifies `flwr federation show` into `flwr federation list`, allowing detailed inspection via `flwr federation list --federation <federation>`, and displays account names instead of account IDs in federation listings.
 
 - **Update CI/CD workflows and tests** ([#6301](https://github.com/adap/flower/pull/6301), [#6321](https://github.com/adap/flower/pull/6321), [#6330](https://github.com/adap/flower/pull/6330), [#6346](https://github.com/adap/flower/pull/6346), [#6347](https://github.com/adap/flower/pull/6347), [#6348](https://github.com/adap/flower/pull/6348), [#6352](https://github.com/adap/flower/pull/6352), [#6373](https://github.com/adap/flower/pull/6373), [#6375](https://github.com/adap/flower/pull/6375), [#6394](https://github.com/adap/flower/pull/6394), [#6445](https://github.com/adap/flower/pull/6445), [#6449](https://github.com/adap/flower/pull/6449))
 
 - **General improvements** ([#6320](https://github.com/adap/flower/pull/6320), [#6323](https://github.com/adap/flower/pull/6323), [#6324](https://github.com/adap/flower/pull/6324), [#6325](https://github.com/adap/flower/pull/6325), [#6326](https://github.com/adap/flower/pull/6326), [#6327](https://github.com/adap/flower/pull/6327), [#6335](https://github.com/adap/flower/pull/6335), [#6337](https://github.com/adap/flower/pull/6337), [#6339](https://github.com/adap/flower/pull/6339), [#6350](https://github.com/adap/flower/pull/6350), [#6353](https://github.com/adap/flower/pull/6353), [#6358](https://github.com/adap/flower/pull/6358), [#6360](https://github.com/adap/flower/pull/6360), [#6361](https://github.com/adap/flower/pull/6361), [#6377](https://github.com/adap/flower/pull/6377), [#6409](https://github.com/adap/flower/pull/6409), [#6412](https://github.com/adap/flower/pull/6412), [#6414](https://github.com/adap/flower/pull/6414), [#6415](https://github.com/adap/flower/pull/6415), [#6416](https://github.com/adap/flower/pull/6416), [#6417](https://github.com/adap/flower/pull/6417), [#6418](https://github.com/adap/flower/pull/6418), [#6421](https://github.com/adap/flower/pull/6421), [#6431](https://github.com/adap/flower/pull/6431), [#6452](https://github.com/adap/flower/pull/6452), [#6458](https://github.com/adap/flower/pull/6458), [#6465](https://github.com/adap/flower/pull/6465), [#6471](https://github.com/adap/flower/pull/6471), [#6472](https://github.com/adap/flower/pull/6472), [#6475](https://github.com/adap/flower/pull/6475), [#6482](https://github.com/adap/flower/pull/6482), [#6484](https://github.com/adap/flower/pull/6484), [#6487](https://github.com/adap/flower/pull/6487), [#6491](https://github.com/adap/flower/pull/6491), [#6495](https://github.com/adap/flower/pull/6495))
-
-
-### Flower Datasets
-- **feat(datasets): Add FedJam to recommended FL multimodal datasets** ([#6483](https://github.com/adap/flower/pull/6483))
-- **refactor(datasets): Adjust** `datasets` **versions** ([#6126](https://github.com/adap/flower/pull/6126))
-
-
-
-### Improve examples
-- **refactor(examples): Update** `quickstart-jax` **example** ([#6369](https://github.com/adap/flower/pull/6369))
-- **refactor(examples): Bump** `torch` **in** `flowertune-llm` **example** ([#6488](https://github.com/adap/flower/pull/6488))
-- **refactor(examples): Bump** `torch` **and** `torchvision` ([#6474](https://github.com/adap/flower/pull/6474))
-- **refactor(examples): Bump** `sentencepiece` ([#6419](https://github.com/adap/flower/pull/6419))
-- **refactor(examples): Make certificates generation script cross-platform** ([#6395](https://github.com/adap/flower/pull/6395))
-- **refactor(examples): Mark the old quickstart-pytorch example as deprecated to avoid confusion** ([#6331](https://github.com/adap/flower/pull/6331))
-- **fix(:skip): Normalize avg_trainloss in PyTorch quickstart** ([#6334](https://github.com/adap/flower/pull/6334))
-
-
-
-### Refactor SQL DB
-
-- **feat(framework): Add Alembic migration utilities** ([#6460](https://github.com/adap/flower/pull/6460))
-- **feat(framework): Add** `SqlLinkState` `Message` **methods** ([#6402](https://github.com/adap/flower/pull/6402))
-- **refactor(framework): Extract** `PRAGMA` **constants from** `SqliteMixin` ([#6380](https://github.com/adap/flower/pull/6380))
-- **refactor(framework): Apply single query to** `_check_stored_messages()` **in** `SqlLinkState` ([#6433](https://github.com/adap/flower/pull/6433))
-- **refactor(framework): Remove** `SqliteMixin` **code and tests** ([#6426](https://github.com/adap/flower/pull/6426))
-- **feat(framework): Add SQLAlchemy as Flower Framework dependency** ([#6345](https://github.com/adap/flower/pull/6345))
-- **feat(framework): Add** `SqlLinkState` **node activation** ([#6389](https://github.com/adap/flower/pull/6389))
-- **feat(framework): Introduce SQLAlchemy-based** `SqlObjectStore` ([#6406](https://github.com/adap/flower/pull/6406))
-- **feat(framework): Introduce** `SqlMixin` ([#6379](https://github.com/adap/flower/pull/6379))
-- **feat(framework): Introduce** `SqlCoreState` ([#6384](https://github.com/adap/flower/pull/6384))
-- **refactor(framework): Remove duplicate** `ObjectStore` **and** `CoreState` **tests** ([#6448](https://github.com/adap/flower/pull/6448))
-- **refactor(framework): Add factory functions for SQLAlchemy** `Table` **definitions** ([#6383](https://github.com/adap/flower/pull/6383))
-- **feat(framework): Set** `SqlLinkState` **as default in** `LinkStateFactory` ([#6404](https://github.com/adap/flower/pull/6404))
-- **feat(framework): Add** `SqlLinkState` `Run` **management** ([#6398](https://github.com/adap/flower/pull/6398))
-- **feat(framework): Add** `CoreState` **SQLAlchemy table** ([#6370](https://github.com/adap/flower/pull/6370))
-- **feat(framework): Set** `SqlObjectStore` **as default in** `ObjectStoreFactory` ([#6411](https://github.com/adap/flower/pull/6411))
-- **refactor(framework): Update** `SqliteMixin` **test to be compatible with** `SqlMixin` ([#6378](https://github.com/adap/flower/pull/6378))
-- **feat(framework): Add** `LinkState` **SQLAlchemy table** ([#6355](https://github.com/adap/flower/pull/6355))
-- **feat(framework): Add** `ObjectStore` **SQLAlchemy table** ([#6371](https://github.com/adap/flower/pull/6371))
-- **feat(framework): Add** `SqlLinkState` **remaining methods for context, logging, and token handling** ([#6403](https://github.com/adap/flower/pull/6403))
-- **feat(framework): Introduce** `SqlLinkState` ([#6387](https://github.com/adap/flower/pull/6387))
-- **feat(framework): Add** `SqlObjectStore` **registration and storage methods** ([#6408](https://github.com/adap/flower/pull/6408))
-- **feat(framework): Add** `SqlObjectStore` `get` **and** `clear` **methods** ([#6407](https://github.com/adap/flower/pull/6407))
-- **feat(framework): Add** `SqlLinkState` **node management** ([#6388](https://github.com/adap/flower/pull/6388))
-- **refactor(framework): Remove** `SqliteLinkState` **code and tests** ([#6424](https://github.com/adap/flower/pull/6424))
-- **feat(framework): Add** `SqlObjectStore` **deletion methods** ([#6410](https://github.com/adap/flower/pull/6410))
-- **refactor(framework): Remove** `SqliteObjectStore` **code and tests** ([#6425](https://github.com/adap/flower/pull/6425))
-- **docs(framework): Add contributor guide on generating database migration scripts** ([#6478](https://github.com/adap/flower/pull/6478))
-- **feat(framework): Open a web page automatically when** `flwr login` ([#6344](https://github.com/adap/flower/pull/6344))
-- **feat(framework): Add** `paracelsus` **to autogenerate SQLAlchemy schema** ([#6436](https://github.com/adap/flower/pull/6436))
-- **feat(framework): Introduce Alembic for SuperLink state migration** ([#6457](https://github.com/adap/flower/pull/6457))
-- **feat(framework): Enable** `SqlMixin` **to automigrate database** ([#6469](https://github.com/adap/flower/pull/6469))
-- **feat(framework): Introduce ExitCode for SQL database schema mismatch** ([#6459](https://github.com/adap/flower/pull/6459))
-- **feat(framework): Add Alembic migration generation dev script** ([#6477](https://github.com/adap/flower/pull/6477))
-- **refactor(framework): Improve** `SqlMixin` **reentrant session handling and test coverage** ([#6396](https://github.com/adap/flower/pull/6396))
-- **refactor(framework): Set SQLite database url constant** ([#6450](https://github.com/adap/flower/pull/6450))
-
-
-### Flower config
-- **refactor(framework): Remove invocation of** `init_flwr_config` **from** `flwr` **main** ([#6446](https://github.com/adap/flower/pull/6446))
-- **refactor(framework): Improve** `flwr config ls` ([#6422](https://github.com/adap/flower/pull/6422))
-- **refactor(framework): Remove old functions using** `toml-federations` ([#6423](https://github.com/adap/flower/pull/6423))
-- **refactor(framework): Tweak** `SuperLinkConnection` **definition** ([#6386](https://github.com/adap/flower/pull/6386))
-- **feat(framework): Add** `verbose` **to simulation options** ([#6481](https://github.com/adap/flower/pull/6481))
-- **feat(framework): Add functions for reading/writing Flower config file** ([#6362](https://github.com/adap/flower/pull/6362))
-- **feat(framework): Add utility functions for reading global connection config** ([#6240](https://github.com/adap/flower/pull/6240))
-- **refactor(framework): Allow only for absolute** `root-certificates` **path in** `SuperLinkConnection` ([#6367](https://github.com/adap/flower/pull/6367))
-- **refactor(framework): Introduce module for** `Flower Config` **and its tests** ([#6354](https://github.com/adap/flower/pull/6354))
-- **refactor(framework): Update exception messages so to mention Flower configuration** ([#6440](https://github.com/adap/flower/pull/6440))
-- **refactor(framework): Update** `flwr ls/log/pull/stop/run` **to use Flower Config** ([#6374](https://github.com/adap/flower/pull/6374))
-- **refactor(framework): Update** `init_channel_from_connection` **to optionally receive auth plugin** ([#6381](https://github.com/adap/flower/pull/6381))
-- **feat(framework): Introduce** `flwr config list` ([#6359](https://github.com/adap/flower/pull/6359))
-- **refactor(framework): Update signatures** `flwr app xyz` ([#6405](https://github.com/adap/flower/pull/6405))
-- **docs(framework): Update** `docker` **docs to use Flower Config** ([#6441](https://github.com/adap/flower/pull/6441))
-- **feat(framework): Resolve relative root-certificates path in migration** ([#6366](https://github.com/adap/flower/pull/6366))
-- **feat(framework): Add the function for migrating pyproject TOML federations to Flower config** ([#6364](https://github.com/adap/flower/pull/6364))
-- **feat(framework): Add** `--federation` **option to** `flwr run` ([#6492](https://github.com/adap/flower/pull/6492))
-- **refactor(framework): Make** `migrate_if_legacy_usage` **return** `True` **when migration is performed** ([#6376](https://github.com/adap/flower/pull/6376))
-- **feat(framework): Update** `flwr login` **and the authn plugins to use Flower config** ([#6393](https://github.com/adap/flower/pull/6393))
-- **docs(framework): Introduce** `Flower Configuration` **documentation page** ([#6435](https://github.com/adap/flower/pull/6435))
-- **refactor(framework): Expand type-checking for** `SuperLinkConnections` **dataclasses** ([#6349](https://github.com/adap/flower/pull/6349))
-- **feat(framework): Add credential store** ([#6372](https://github.com/adap/flower/pull/6372))
-- **feat(framework): Introduce Flower Config Initialization Routine** ([#6338](https://github.com/adap/flower/pull/6338))
-- **feat(framework): Migrate remaining** `flwr` **commands to Flower config** ([#6399](https://github.com/adap/flower/pull/6399))
-- **refactor(framework): Make** `SuperLinkConnection` **use getters** ([#6382](https://github.com/adap/flower/pull/6382))
-- **refactor(framework): Move everything about** `Flower Config` **to** `cli` **module** ([#6356](https://github.com/adap/flower/pull/6356))
-- **feat(framework): Add** `write_superlink_connection` **function** ([#6357](https://github.com/adap/flower/pull/6357))
-- **refactor(framework): Make CLI code look cleaner** ([#6400](https://github.com/adap/flower/pull/6400))
-- **refactor(framework): Introduce** `SuperlinkSimulationOptions` **config profile parsing** ([#6343](https://github.com/adap/flower/pull/6343))
-- **refactor(framework): Improve config migration function** ([#6385](https://github.com/adap/flower/pull/6385))
-- **refactor(framework): Prepare Flower CLI to use** `SuperLinkConnection` **objects** ([#6365](https://github.com/adap/flower/pull/6365))
-- **docs(framework): Update pages to use Flower Configuration instead of** `pyprojec.toml` ([#6439](https://github.com/adap/flower/pull/6439))
-- **refactor(framework): Use defaults in** `SuperLinkConnection` ([#6390](https://github.com/adap/flower/pull/6390))
-
-
-### multi-federation
-
-- **refactor(framework): Update** `NOOP_FEDERATION` **to match new schema** ([#6479](https://github.com/adap/flower/pull/6479))
-- **refactor(framework): Show** `account-name` **instead of** `flwr-aid` **when showing federations info** ([#6476](https://github.com/adap/flower/pull/6476))
-- **refactor(framework): Remove unnecessary fields from** `Federation` ([#6480](https://github.com/adap/flower/pull/6480))
-- **refactor(framework): Enforce** `federation` **name format** ([#6463](https://github.com/adap/flower/pull/6463))
-- **refactor(framework): Update** `federation` **signature and** `get_details` **method behaviour** ([#6468](https://github.com/adap/flower/pull/6468))
-- **feat(framework): Introduce** `Account` **protobuf message** ([#6461](https://github.com/adap/flower/pull/6461))
-- **refactor(framework): Unify** `flwr federation show` **and** `flwr federation list` ([#6340](https://github.com/adap/flower/pull/6340))
-
-
-### Better CLI UX
-
-- **refactor(framework): Fix and improve CLI error logging** ([#6467](https://github.com/adap/flower/pull/6467))
-- **refactor(framework): Show aliases in CLI** ([#6462](https://github.com/adap/flower/pull/6462))
-- **feat(framework): Print better error messages when the federation is not specified** ([#6432](https://github.com/adap/flower/pull/6432))
-- **refactor(framework): Use** `click.ClickException` **in CLI for better formatting** ([#6437](https://github.com/adap/flower/pull/6437))
-- **refactor(framework): Remove unnecessary** `"enable-account-auth"` **option** ([#6444](https://github.com/adap/flower/pull/6444))
 
 ## v1.25.0 (2025-12-16)
 
