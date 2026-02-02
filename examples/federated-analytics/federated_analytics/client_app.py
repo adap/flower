@@ -2,10 +2,9 @@
 
 import warnings
 
+from federated_analytics.task import query_database
 from flwr.app import Context, Message, MetricRecord, RecordDict
 from flwr.clientapp import ClientApp
-
-from federated_analytics.task import query_database
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
@@ -18,11 +17,10 @@ def query(msg: Message, context: Context) -> Message:
     """Query PostgreSQL database and report aggregated results to `ServerApp`."""
 
     # Get database connection details from node config
-    db_host: str = context.node_config.get("db-host", "localhost")
-    db_port: int = context.node_config.get("db-port", 5432)
-    db_name: str = context.node_config.get("db-name", "flwrlabs")
-    db_user: str = context.node_config.get("db-user", "flwrlabs")
-    db_password: str = context.node_config.get("db-password", "flwrlabs")
+    db_url: str = context.node_config.get(
+        "db-url",
+        "postgresql://flwrlabs:flwrlabs@localhost:5432/flwrlabs",
+    )
     table_name: str = context.node_config.get("table-name", "person_measurements")
 
     selected_features: list[str] = msg.content["config"]["selected_features"]
@@ -30,11 +28,7 @@ def query(msg: Message, context: Context) -> Message:
 
     # Query database
     df = query_database(
-        db_host=db_host,
-        db_port=db_port,
-        db_name=db_name,
-        db_user=db_user,
-        db_password=db_password,
+        db_url=db_url,
         table_name=table_name,
         selected_features=selected_features,
     )

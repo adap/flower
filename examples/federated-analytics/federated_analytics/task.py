@@ -10,23 +10,15 @@ from flwr.common.logger import log
 from sqlalchemy import create_engine
 
 
-def query_database(  # pylint: disable=too-many-arguments, too-many-positional-arguments
-    db_host: str,
-    db_port: int,
-    db_name: str,
-    db_user: str,
-    db_password: str,
+def query_database(
+    db_url: str,
     table_name: str,
     selected_features: list[str],
 ) -> pd.DataFrame:
     """Query PostgreSQL database and return selected features as DataFrame.
 
     Args:
-        db_host: Database host address
-        db_port: Database port number
-        db_name: Database name
-        db_user: Database user
-        db_password: Database password
+        db_url: Database connection URL (e.g., postgresql://user:pass@host:port/dbname)
         table_name: Name of the table to query
         selected_features: List of column names to select
 
@@ -34,9 +26,7 @@ def query_database(  # pylint: disable=too-many-arguments, too-many-positional-a
         DataFrame containing the selected features
     """
     # Create database connection
-    engine = create_engine(
-        f"postgresql+psycopg://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
-    )
+    engine = create_engine(db_url)
 
     # Execute query and load selected features into DataFrame
     df = pd.read_sql_table(table_name, engine, columns=selected_features)

@@ -144,12 +144,14 @@ flower-superlink --insecure
 
 Next, start two Supernodes and connect them to the SuperLink. You will need to specify different `--node-config` values so that each SuperNode will connect to different PostgreSQL databases.
 
+The `db-url` parameter accepts a standard PostgreSQL connection string in the format `postgresql://username:password@host:port/database`. Each SuperNode should point to a different database port (5433 and 5434) corresponding to the containers started by `db_start.sh`.
+
 ```shell
 flower-supernode \
      --insecure \
      --superlink 127.0.0.1:9092 \
      --clientappio-api-address 127.0.0.1:9094 \
-     --node-config="db-port=5433"
+     --node-config="db-url='postgresql://flwrlabs:flwrlabs@localhost:5433/flwrlabs'"
 ```
 
 ```shell
@@ -157,7 +159,7 @@ flower-supernode \
      --insecure \
      --superlink 127.0.0.1:9092 \
      --clientappio-api-address 127.0.0.1:9095 \
-     --node-config="db-port=5434"
+     --node-config="db-url='postgresql://flwrlabs:flwrlabs@localhost:5434/flwrlabs'"
 ```
 
 Finally, run the Flower App and follow the `ServerApp` logs to track the execution of the run:
