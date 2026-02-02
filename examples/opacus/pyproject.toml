@@ -29,9 +29,3 @@ clientapp = "opacus_fl.client_app:app"
 num-server-rounds = 3
 target-delta = 1e-5
 max-grad-norm = 1.0
-
-[tool.flwr.federations]
-default = "local-simulation"
-
-[tool.flwr.federations.local-simulation]
-options.num-supernodes = 2

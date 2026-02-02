@@ -48,7 +48,3 @@ params.tree-method = "hist"
 
 [tool.flwr.federations]
 default = "local-simulation"
-
-[tool.flwr.federations.local-simulation]
-options.num-supernodes = 5
-options.backend.client-resources.num-cpus = 2
