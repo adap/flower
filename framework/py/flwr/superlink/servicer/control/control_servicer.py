@@ -571,7 +571,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         # Build Federation proto object
         federation_proto = Federation(
             name=federation,
-            member_aids=details.member_aids,
+            accounts=details.accounts,
             nodes=details.nodes,
             runs=[run_to_proto(run) for run in details.runs],
         )

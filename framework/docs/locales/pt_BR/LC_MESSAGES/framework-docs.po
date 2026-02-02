@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-28 00:09+0000\n"
+"POT-Creation-Date: 2026-01-30 00:10+0000\n"
 "PO-Revision-Date: 2024-05-25 11:09+0000\n"
 "Last-Translator: Gustavo Bertoli <gubertoli@gmail.com>\n"
 "Language: pt_BR\n"
@@ -47,11 +47,11 @@ msgstr ""
 msgid "Contributor tutorials"
 msgstr ""
 
-#: ../../source/contribute.rst:49
+#: ../../source/contribute.rst:50
 msgid "Contributor explanations"
 msgstr ""
 
-#: ../../source/contribute.rst:61
+#: ../../source/contribute.rst:62
 msgid "Contributor references"
 msgstr ""
 
@@ -82,25 +82,25 @@ msgstr ""
 msgid "A learning-oriented series of tutorials, the best place to start."
 msgstr ""
 
-#: ../../source/contribute.rst:44 ../../source/index.rst:87
+#: ../../source/contribute.rst:45 ../../source/index.rst:87
 #: ../../source/index.rst:92
 msgid "Explanations"
 msgstr ""
 
-#: ../../source/contribute.rst:46 ../../source/index.rst:89
+#: ../../source/contribute.rst:47 ../../source/index.rst:89
 msgid ""
 "Understanding-oriented concept guides explain and discuss key topics and "
 "underlying ideas behind Flower and collaborative AI."
 msgstr ""
 
-#: ../../source/contribute.rst:57
+#: ../../source/contribute.rst:58
 #: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:365
 #: ../../source/index.rst:102 ../../source/index.rst:104
 #: ../../source/reference.rst:7
 msgid "References"
 msgstr ""
 
-#: ../../source/contribute.rst:59 ../../source/reference.rst:9
+#: ../../source/contribute.rst:60 ../../source/reference.rst:9
 msgid "Information-oriented API reference and other reference material."
 msgstr ""
 
@@ -379,15 +379,15 @@ msgstr "Argumento de compilação"
 #: ../../source/ref-exit-codes/0.rst:7 ../../source/ref-exit-codes/1.rst:7
 #: ../../source/ref-exit-codes/100.rst:7 ../../source/ref-exit-codes/101.rst:7
 #: ../../source/ref-exit-codes/102.rst:7 ../../source/ref-exit-codes/103.rst:7
-#: ../../source/ref-exit-codes/104.rst:7 ../../source/ref-exit-codes/2.rst:7
-#: ../../source/ref-exit-codes/200.rst:23 ../../source/ref-exit-codes/201.rst:7
-#: ../../source/ref-exit-codes/202.rst:7 ../../source/ref-exit-codes/203.rst:7
-#: ../../source/ref-exit-codes/3.rst:7 ../../source/ref-exit-codes/300.rst:7
-#: ../../source/ref-exit-codes/302.rst:7 ../../source/ref-exit-codes/303.rst:7
-#: ../../source/ref-exit-codes/304.rst:7 ../../source/ref-exit-codes/400.rst:7
-#: ../../source/ref-exit-codes/500.rst:7 ../../source/ref-exit-codes/600.rst:7
-#: ../../source/ref-exit-codes/601.rst:7 ../../source/ref-exit-codes/602.rst:7
-#: ../../source/ref-exit-codes/700.rst:7
+#: ../../source/ref-exit-codes/104.rst:7 ../../source/ref-exit-codes/105.rst:7
+#: ../../source/ref-exit-codes/2.rst:7 ../../source/ref-exit-codes/200.rst:23
+#: ../../source/ref-exit-codes/201.rst:7 ../../source/ref-exit-codes/202.rst:7
+#: ../../source/ref-exit-codes/203.rst:7 ../../source/ref-exit-codes/3.rst:7
+#: ../../source/ref-exit-codes/300.rst:7 ../../source/ref-exit-codes/302.rst:7
+#: ../../source/ref-exit-codes/303.rst:7 ../../source/ref-exit-codes/304.rst:7
+#: ../../source/ref-exit-codes/400.rst:7 ../../source/ref-exit-codes/500.rst:7
+#: ../../source/ref-exit-codes/600.rst:7 ../../source/ref-exit-codes/601.rst:7
+#: ../../source/ref-exit-codes/602.rst:7 ../../source/ref-exit-codes/700.rst:7
 msgid "Description"
 msgstr "Descrição"
 
@@ -1030,6 +1030,116 @@ msgid ""
 "Change ``!pip install -q 'flwr[simulation]' torch torchvision "
 "matplotlib`` to ``!pip install -q 'flwr-1.8.0-py3-none-"
 "any.whl[simulation]' torch torchvision matplotlib``"
+msgstr ""
+
+#: ../../source/contributor-how-to-migrate-database.rst:3
+msgid "Migrate Flower Database Schema"
+msgstr ""
+
+#: ../../source/contributor-how-to-migrate-database.rst:5
+msgid ""
+"When making changes to the database schema used in Flower, it is "
+"essential to create a migration script to ensure that existing on-disk "
+"databases can be updated to the new schema without data loss. From Flower"
+" version ``1.26.0`` onwards, the framework uses `Alembic "
+"<https://alembic.sqlalchemy.org/en/latest/>`_ as our database migration "
+"tool."
+msgstr ""
+
+#: ../../source/contributor-how-to-migrate-database.rst:10
+msgid ""
+"This guide describes the steps required to create a new migration script "
+"after modifying the database schema."
+msgstr ""
+
+#: ../../source/contributor-how-to-migrate-database.rst:15
+#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:41
+msgid "Pre-requisites"
+msgstr ""
+
+#: ../../source/contributor-how-to-migrate-database.rst:17
+msgid ""
+"Install development versions of Flower according to the instructions in "
+":doc:`contributor-how-to-install-development-versions` with the ``dev`` "
+"dependencies."
+msgstr ""
+
+#: ../../source/contributor-how-to-migrate-database.rst:22
+#, fuzzy
+msgid "Generating Migrations"
+msgstr "Descrição"
+
+#: ../../source/contributor-how-to-migrate-database.rst:24
+msgid ""
+"The Flower SQL database schema is defined under "
+"``supercore/state/schema/``. After making changes to the schema (e.g., "
+"adding a new column to a table), generate the migration revision:"
+msgstr ""
+
+#: ../../source/contributor-how-to-migrate-database.rst:32
+msgid "This command:"
+msgstr ""
+
+#: ../../source/contributor-how-to-migrate-database.rst:34
+msgid "Creates a temporary SQLite database"
+msgstr ""
+
+#: ../../source/contributor-how-to-migrate-database.rst:35
+msgid "Upgrades it to the current ``head`` revision"
+msgstr ""
+
+#: ../../source/contributor-how-to-migrate-database.rst:36
+msgid "Runs autogenerate to detect your schema changes"
+msgstr ""
+
+#: ../../source/contributor-how-to-migrate-database.rst:37
+msgid ""
+"Generates a new migration file in "
+"``py/flwr/supercore/state/alembic/versions/``"
+msgstr ""
+
+#: ../../source/contributor-how-to-migrate-database.rst:38
+msgid "Automatically cleans up the temporary database"
+msgstr ""
+
+#: ../../source/contributor-how-to-migrate-database.rst:42
+msgid "Review Generated Migrations"
+msgstr ""
+
+#: ../../source/contributor-how-to-migrate-database.rst:44
+msgid "Always review the generated migration file before committing:"
+msgstr ""
+
+#: ../../source/contributor-how-to-migrate-database.rst:46
+msgid "Check that the detected changes match your intent"
+msgstr ""
+
+#: ../../source/contributor-how-to-migrate-database.rst:47
+msgid "Verify data migration logic if renaming/removing columns"
+msgstr ""
+
+#: ../../source/contributor-how-to-migrate-database.rst:48
+msgid "Test the upgrade and downgrade paths"
+msgstr ""
+
+#: ../../source/contributor-how-to-migrate-database.rst:52
+msgid "Manual Workflow (Alternative)"
+msgstr ""
+
+#: ../../source/contributor-how-to-migrate-database.rst:54
+msgid "If you prefer using the Alembic CLI directly:"
+msgstr ""
+
+#: ../../source/contributor-how-to-migrate-database.rst:63
+#: ../../source/how-to-migrate-from-openfl.rst:566
+#: ../../source/how-to-upgrade-to-flower-1.13.rst:471
+msgid "Important"
+msgstr ""
+
+#: ../../source/contributor-how-to-migrate-database.rst:65
+msgid ""
+"The manual workflow creates a ``state.db`` file that should not be "
+"committed to git."
 msgstr ""
 
 #: ../../source/contributor-how-to-release-flower.rst:3
@@ -2786,6 +2896,9 @@ msgstr ""
 #: ../../source/docker/tutorial-quickstart-docker-compose.rst:110
 #: ../../source/docker/tutorial-quickstart-docker-compose.rst:250
 #: ../../source/docker/tutorial-quickstart-docker.rst:326
+#: ../../source/how-to-authenticate-accounts.rst:96
+#: ../../source/how-to-enable-tls-connections.rst:127
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:200
 msgid "config.toml"
 msgstr ""
 
@@ -3892,6 +4005,7 @@ msgstr ""
 
 #: ../../source/docker/tutorial-quickstart-docker-compose.rst:94
 #: ../../source/docker/tutorial-quickstart-docker.rst:310
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:184
 msgid ""
 "Find the Flower Configuration TOML file in your machine. This file is "
 "automatically create for your when you first use a Flower CLI command. "
@@ -8975,26 +9089,26 @@ msgid ""
 "``$HOME/.flwr/config.toml``):"
 msgstr ""
 
-#: ../../source/how-to-authenticate-accounts.rst:107
+#: ../../source/how-to-authenticate-accounts.rst:108
 msgid ""
 "Account authentication and authorization is only supported with TLS "
 "connections."
 msgstr ""
 
-#: ../../source/how-to-authenticate-accounts.rst:108
+#: ../../source/how-to-authenticate-accounts.rst:109
 msgid ""
 "Setting the default connection is optional. If you don't set your "
 "SuperLink as default, you can specify the connection name explicitly in "
 "each command, for example: ``flwr login my-prod-superlink``."
 msgstr ""
 
-#: ../../source/how-to-authenticate-accounts.rst:112
+#: ../../source/how-to-authenticate-accounts.rst:113
 msgid ""
 "Learn more about the Flower Configuration file in the `Flower "
 "Configuration File <ref-flower-configuration.html>`_ reference."
 msgstr ""
 
-#: ../../source/how-to-authenticate-accounts.rst:115
+#: ../../source/how-to-authenticate-accounts.rst:116
 msgid ""
 "You need to login first before other CLI commands can be executed. Upon "
 "executing ``flwr login``, a URL will be returned by the authentication "
@@ -9002,7 +9116,7 @@ msgid ""
 "the OIDC provider."
 msgstr ""
 
-#: ../../source/how-to-authenticate-accounts.rst:128
+#: ../../source/how-to-authenticate-accounts.rst:129
 msgid ""
 "Once the login is successful, the credentials returned by the OIDC "
 "provider via the SuperLink will be stored locally. The tokens will be "
@@ -9011,11 +9125,11 @@ msgid ""
 "authentication checks."
 msgstr ""
 
-#: ../../source/how-to-authenticate-accounts.rst:135
+#: ../../source/how-to-authenticate-accounts.rst:136
 msgid "Run authorized ``flwr`` CLI commands"
 msgstr ""
 
-#: ../../source/how-to-authenticate-accounts.rst:137
+#: ../../source/how-to-authenticate-accounts.rst:138
 msgid ""
 "With the above steps completed, you can now run ``flwr`` CLI commands "
 "against a SuperLink setup with account authentication and authorization. "
@@ -9023,7 +9137,7 @@ msgid ""
 "command to start a Flower app:"
 msgstr ""
 
-#: ../../source/how-to-authenticate-accounts.rst:147
+#: ../../source/how-to-authenticate-accounts.rst:148
 msgid ""
 "If the account does not have the necessary permissions to run the "
 "command, an error will be returned:"
@@ -10109,15 +10223,9 @@ msgid ""
 "federation. The Flower CLI commands are processed by the SuperLink and "
 "therefore, if it has been configured to only operate on TLS conenction, "
 "the requests sent by the Flower CLI need to make use of a TLS "
-"certificate. To do so, replace the ``insecure = true`` field in the "
-"``pyproject.toml`` with a new field that reads the certificate:"
-msgstr ""
-
-#: ../../source/how-to-enable-tls-connections.rst:127
-#: ../../source/how-to-manage-flower-federations.rst:69
-#: ../../source/how-to-run-flower-with-deployment-engine.rst:178
-#: ../../source/how-to-upgrade-to-message-api.rst:132
-msgid "pyproject.toml"
+"certificate. To do so, replace the ``insecure = true`` field in your "
+"Flower Configuration TOML file with a new field that reads the "
+"certificate:"
 msgstr ""
 
 #: ../../source/how-to-enable-tls-connections.rst:135
@@ -10384,84 +10492,85 @@ msgid ""
 msgstr ""
 
 #: ../../source/how-to-manage-flower-federations.rst:25
+msgid ""
+"Federations can be addressed by their unique identifier, which has the "
+"form ``@<account-name>/<federation-name>`` being ``<account-name>`` the "
+"name of the account that created the federation and ``<federation-name>``"
+" the name given to the federation at creation time."
+msgstr ""
+
+#: ../../source/how-to-manage-flower-federations.rst:30
 #: ../../source/how-to-run-flower-with-deployment-engine.rst:13
 msgid "In this how-to guide, you will:"
 msgstr ""
 
-#: ../../source/how-to-manage-flower-federations.rst:27
+#: ../../source/how-to-manage-flower-federations.rst:32
 msgid "Learn how to see the federations you are part of."
 msgstr ""
 
-#: ../../source/how-to-manage-flower-federations.rst:28
+#: ../../source/how-to-manage-flower-federations.rst:33
 msgid "Learn how to display information about a specific federation."
 msgstr ""
 
-#: ../../source/how-to-manage-flower-federations.rst:32
+#: ../../source/how-to-manage-flower-federations.rst:37
 #, fuzzy
 msgid "List Federations"
 msgstr "``FLWR_VERSION``"
 
-#: ../../source/how-to-manage-flower-federations.rst:34
+#: ../../source/how-to-manage-flower-federations.rst:39
 msgid ""
 "With the |flower_cli_federation_link|_, you can easily inspect the "
 "federations your Flower account is part of:"
 msgstr ""
 
-#: ../../source/how-to-manage-flower-federations.rst:41
+#: ../../source/how-to-manage-flower-federations.rst:46
 msgid ""
 "The above command will display a table with a row for each federation you"
-" are part of. In this case there is only one federation named "
-"``default``:"
+" are part of. In this case there is only one federation named ``default``"
+" under the account ``none``:"
 msgstr ""
 
-#: ../../source/how-to-manage-flower-federations.rst:55
+#: ../../source/how-to-manage-flower-federations.rst:60
 #, fuzzy
 msgid "Inspect a Federation"
 msgstr "``FLWR_VERSION``"
 
-#: ../../source/how-to-manage-flower-federations.rst:57
+#: ../../source/how-to-manage-flower-federations.rst:62
 msgid ""
-"You can inspect a specific federation by providing the name of the "
+"You can inspect a specific federation by providing the identifier of the "
 "federation to the ``flwr federation list`` command. With this command, "
 "you will be able to see the following information about a federation:"
 msgstr ""
 
-#: ../../source/how-to-manage-flower-federations.rst:61
+#: ../../source/how-to-manage-flower-federations.rst:66
 #, fuzzy
 msgid "The members of the federation."
 msgstr "``FLWR_VERSION``"
 
-#: ../../source/how-to-manage-flower-federations.rst:62
+#: ../../source/how-to-manage-flower-federations.rst:67
 #, fuzzy
 msgid "The SuperNodes registered with the federation and their status."
 msgstr "``FLWR_VERSION``"
 
-#: ../../source/how-to-manage-flower-federations.rst:63
+#: ../../source/how-to-manage-flower-federations.rst:68
 #, fuzzy
 msgid "The runs executed via the federation."
 msgstr "``FLWR_VERSION``"
 
-#: ../../source/how-to-manage-flower-federations.rst:65
+#: ../../source/how-to-manage-flower-federations.rst:70
 msgid ""
-"The ``flwr federation list`` command requires the name of the federation "
-"to inspect as an argument. This can be specified as part of your "
-"``pyproject.toml`` configuration. For example:"
+"The ``flwr federation list --federation <federation>`` command requires "
+"the identifier of the federation to inspect as an argument:"
 msgstr ""
 
-#: ../../source/how-to-manage-flower-federations.rst:78
-msgid ""
-"In this example, the federation named ``default`` is specified. You can "
-"now inspect it by running:"
-msgstr ""
-
-#: ../../source/how-to-manage-flower-federations.rst:85
+#: ../../source/how-to-manage-flower-federations.rst:77
 msgid ""
 "Then, assuming that there are two ``SuperNodes`` connected and that three"
 " runs have been submitted through the federation, a representative output"
 " would be similar to:"
 msgstr ""
 
-#: ../../source/how-to-manage-flower-federations.rst:116
+#: ../../source/how-to-manage-flower-federations.rst:108
 msgid ""
 "Note how the ``SuperNodes`` table shows a subset of the information "
 "available via the command ``flwr supernode list`` (Learn more about this "
@@ -10728,11 +10837,6 @@ msgid ""
 "Continuity Program "
 "<https://docs.google.com/forms/d/e/1FAIpQLScprGGX_jFRoEUv4HbJkkhkg6O7e5eCiq7uP95_0xK5Qnt1gA/viewform>`_"
 " to get in touch with our team!"
-msgstr ""
-
-#: ../../source/how-to-migrate-from-openfl.rst:566
-#: ../../source/how-to-upgrade-to-flower-1.13.rst:471
-msgid "Important"
 msgstr ""
 
 #: ../../source/how-to-migrate-from-openfl.rst:568
@@ -11537,10 +11641,6 @@ msgid ""
 "accept links and route incoming traffic and the cluster where SuperNode "
 "is deployed must have a Skupper site to join the application network and "
 "route outgoing requests via the interconnect."
-msgstr ""
-
-#: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:41
-msgid "Pre-requisites"
 msgstr ""
 
 #: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:43
@@ -12782,58 +12882,64 @@ msgstr ""
 msgid "Step 3: Run a Flower App on the Federation"
 msgstr ""
 
-#: ../../source/how-to-run-flower-with-deployment-engine.rst:168
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:170
+msgid ""
+"The Flower Configuration file is automatically created for you when you "
+"first use a Flower CLI command. Use ``flwr config list`` to see available"
+" SuperLink connections as well as the path to the configuration file. "
+"Read more about it in the :doc:`ref-flower-configuration` guide."
+msgstr ""
+
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:175
 msgid ""
 "At this point, you have launched two SuperNodes that are connected to the"
 " same SuperLink. The system is idling waiting for a ``Run`` to be "
 "submitted. Before you can run your Flower App through the federation we "
 "need a way to tell ``flwr run`` that the App is to be executed via the "
 "SuperLink we just started, instead of using the local Simulation Engine "
-"(the default). Doing this is easy: define a new federation section in the"
-" ``pyproject.toml``, indicate the address of the SuperLink and pass a "
-"certificate (if any) or set the insecure flag (only when testing locally,"
-" real deployments require TLS)."
+"(the default). Doing this is easy: define a new SuperLink connection in "
+"the **Flower Configuration** file, indicate the address of the SuperLink "
+"and pass a certificate (if any) or set the insecure flag (only when "
+"testing locally, real deployments require TLS)."
 msgstr ""
 
-#: ../../source/how-to-run-flower-with-deployment-engine.rst:176
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:198
 msgid ""
-"Open the ``pyproject.toml`` file and at the end add a new federation "
-"configuration:"
+"Open the ``config.toml`` file and at the end add a new SuperLink "
+"connection:"
 msgstr ""
 
-#: ../../source/how-to-run-flower-with-deployment-engine.rst:187
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:209
 msgid ""
-"You can customize the string that follows ``tool.flwr.federations.`` to "
-"fit your needs. However, please note that the string cannot contain a dot"
-" (``.``)."
+"You can customize the string that follows ``[superlink.]`` to fit your "
+"needs. However, please note that the string cannot contain a dot (``.``)."
 msgstr ""
 
-#: ../../source/how-to-run-flower-with-deployment-engine.rst:190
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:212
 msgid ""
 "In this example, ``local-deployment`` has been used. Just remember to "
 "replace ``local-deployment`` with your chosen name in both the "
-"``tool.flwr.federations.`` string and the corresponding ``flwr run .`` "
-"command."
+"``[superlink.]`` string and the corresponding ``flwr run .`` command."
 msgstr ""
 
-#: ../../source/how-to-run-flower-with-deployment-engine.rst:194
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:216
 msgid ""
 "In another terminal and with your Python environment activated, run the "
 "Flower App and follow the ``ServerApp`` logs to track the execution of "
 "the run:"
 msgstr ""
 
-#: ../../source/how-to-run-flower-with-deployment-engine.rst:201
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:223
 msgid ""
 "If you want to rerun the project or test an updated version by making "
 "changes to the code, simply re-run the command above."
 msgstr ""
 
-#: ../../source/how-to-run-flower-with-deployment-engine.rst:206
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:228
 msgid "Step 4: Clean Up"
 msgstr ""
 
-#: ../../source/how-to-run-flower-with-deployment-engine.rst:208
+#: ../../source/how-to-run-flower-with-deployment-engine.rst:230
 msgid ""
 "Use the ``Ctrl+C`` command in each terminal to stop the respective "
 "processes."
@@ -14151,6 +14257,10 @@ msgid ""
 "`pyproject.toml` in your app:"
 msgstr ""
 
+#: ../../source/how-to-upgrade-to-message-api.rst:132
+msgid "pyproject.toml"
+msgstr ""
+
 #: ../../source/how-to-upgrade-to-message-api.rst:141
 msgid "Then, run the following command to install the updated dependencies:"
 msgstr ""
@@ -15348,8 +15458,9 @@ msgid "Manage Configuration"
 msgstr "``FLWR_VERSION``"
 
 #: ../../flwr config list:1
-msgid "List all SuperLink connections."
-msgstr ""
+#, fuzzy
+msgid "List all SuperLink connections (alias: ls)."
+msgstr "``FLWR_VERSION``"
 
 #: ../../flwr config federation list:1 register:1 run:1 stop:1 supernode
 #: unregister:1
@@ -15372,9 +15483,10 @@ msgid "Manage Federations"
 msgstr "``FLWR_VERSION``"
 
 #: ../../flwr federation list:1
-#, fuzzy
-msgid "List available federations."
-msgstr "``FLWR_VERSION``"
+msgid ""
+"List available federations or details of a specific federation (alias: "
+"ls)."
+msgstr ""
 
 #: ../../flwr federation list:1
 #, fuzzy
@@ -15434,9 +15546,7 @@ msgid "The source FAB file to install."
 msgstr ""
 
 #: ../../flwr list:1
-msgid ""
-"List the details of one provided run ID or all runs in a Flower "
-"federation."
+msgid "List the details of one provided run ID or all runs (alias: ls)."
 msgstr ""
 
 #: ../../flwr list:1
@@ -15604,7 +15714,7 @@ msgstr "Construindo a imagem do servidor"
 
 #: ../../flwr list:1 supernode
 #, fuzzy
-msgid "List SuperNodes in the federation."
+msgid "List SuperNodes in the federation (alias: ls)."
 msgstr "``FLWR_VERSION``"
 
 #: ../../flwr list:1 supernode
@@ -29499,6 +29609,7 @@ msgstr ""
 #: ../../source/ref-exit-codes/102.rst:13
 #: ../../source/ref-exit-codes/103.rst:13
 #: ../../source/ref-exit-codes/104.rst:13
+#: ../../source/ref-exit-codes/105.rst:17
 #: ../../source/ref-exit-codes/200.rst:32
 #: ../../source/ref-exit-codes/201.rst:13
 #: ../../source/ref-exit-codes/202.rst:13
@@ -29621,6 +29732,28 @@ msgid ""
 "Some of the arguments passed to the SuperLink are incompatible with each "
 "other. Check the SuperLink logs for additional help on how to resolve the"
 " issue."
+msgstr ""
+
+#: ../../source/ref-exit-codes/105.rst:3
+msgid "[105] SUPERLINK_DATABASE_SCHEMA_MISMATCH"
+msgstr ""
+
+#: ../../source/ref-exit-codes/105.rst:9
+msgid ""
+"The SuperLink was started with a database schema that does not match the "
+"expected baseline schema."
+msgstr ""
+
+#: ../../source/ref-exit-codes/105.rst:12
+msgid ""
+"This typically occurs when using a pre-Alembic database that requires "
+"migration that has been modified."
+msgstr ""
+
+#: ../../source/ref-exit-codes/105.rst:19
+msgid ""
+"Back up your database and either migrate it manually to the baseline "
+"schema or start with a fresh database."
 msgstr ""
 
 #: ../../source/ref-exit-codes/2.rst:3
@@ -65109,5 +65242,117 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "Name of the federation to login into."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The `Flower CLI <ref-api-cli.html>`_ "
+#~ "(e.g. ``flwr run`` command) is the "
+#~ "way a user (e.g. a data scientist)"
+#~ " can interact with a deployed "
+#~ "federation. The Flower CLI commands are"
+#~ " processed by the SuperLink and "
+#~ "therefore, if it has been configured "
+#~ "to only operate on TLS conenction, "
+#~ "the requests sent by the Flower "
+#~ "CLI need to make use of a "
+#~ "TLS certificate. To do so, replace "
+#~ "the ``insecure = true`` field in "
+#~ "the ``pyproject.toml`` with a new field"
+#~ " that reads the certificate:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The ``flwr federation list`` command "
+#~ "requires the name of the federation "
+#~ "to inspect as an argument. This "
+#~ "can be specified as part of your"
+#~ " ``pyproject.toml`` configuration. For example:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "At this point, you have launched "
+#~ "two SuperNodes that are connected to "
+#~ "the same SuperLink. The system is "
+#~ "idling waiting for a ``Run`` to be"
+#~ " submitted. Before you can run your"
+#~ " Flower App through the federation we"
+#~ " need a way to tell ``flwr "
+#~ "run`` that the App is to be "
+#~ "executed via the SuperLink we just "
+#~ "started, instead of using the local "
+#~ "Simulation Engine (the default). Doing "
+#~ "this is easy: define a new "
+#~ "federation section in the ``pyproject.toml``,"
+#~ " indicate the address of the "
+#~ "SuperLink and pass a certificate (if "
+#~ "any) or set the insecure flag "
+#~ "(only when testing locally, real "
+#~ "deployments require TLS)."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Open the ``pyproject.toml`` file and at"
+#~ " the end add a new federation "
+#~ "configuration:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "You can customize the string that "
+#~ "follows ``tool.flwr.federations.`` to fit your"
+#~ " needs. However, please note that the"
+#~ " string cannot contain a dot (``.``)."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "In this example, ``local-deployment`` "
+#~ "has been used. Just remember to "
+#~ "replace ``local-deployment`` with your "
+#~ "chosen name in both the "
+#~ "``tool.flwr.federations.`` string and the "
+#~ "corresponding ``flwr run .`` command."
+#~ msgstr ""
+
+#~ msgid "List all SuperLink connections."
+#~ msgstr ""
+
+#~ msgid "List available federations."
+#~ msgstr "``FLWR_VERSION``"
+
+#~ msgid ""
+#~ "List the details of one provided "
+#~ "run ID or all runs in a "
+#~ "Flower federation."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The above command will display a "
+#~ "table with a row for each "
+#~ "federation you are part of. In "
+#~ "this case there is only one "
+#~ "federation named ``default``:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "You can inspect a specific federation"
+#~ " by providing the name of the "
+#~ "federation to the ``flwr federation "
+#~ "list`` command. With this command, you"
+#~ " will be able to see the "
+#~ "following information about a federation:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The ``flwr federation list --federation "
+#~ "<federation>`` command requires the name "
+#~ "of the federation to inspect as an"
+#~ " argument. This can be specified as"
+#~ " part of your Flower Configuration "
+#~ "TOML file. For example:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "In this example, the federation named"
+#~ " ``default`` is specified. You can "
+#~ "now inspect it by running:"
 #~ msgstr ""
 

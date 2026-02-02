@@ -66,6 +66,7 @@ class SuperLinkSimulationOptionsTomlKey:
 
     NUM_SUPERNODES = "num-supernodes"
     BACKEND = "backend"
+    VERBOSE = "verbose"
 
 
 class SimulationClientResourcesTomlKey:

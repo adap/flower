@@ -77,7 +77,7 @@ pathspec = "^0.12.1"
 rich = "^13.5.0"
 pyyaml = "^6.0.2"
 requests = "^2.31.0"
-click = "<8.2.0"
+click = "^8.0.0"
 SQLAlchemy = "^2.0.45"
 alembic = "^1.18.1"
 # Optional dependencies (Simulation Engine)
@@ -86,8 +86,8 @@ ray = [
     { version = "==2.51.1", optional = true, python = "==3.13", markers = "sys_platform != 'win32'" },
 ]
 # Optional dependencies (REST transport layer)
-starlette = { version = "^0.47.2", optional = true }
-uvicorn = { version = "^0.34.0", extras = ["standard"], optional = true }
+starlette = { version = "^0.50.0", optional = true }
+uvicorn = { version = "^0.40.0", extras = ["standard"], optional = true }
 
 [tool.poetry.extras]
 simulation = ["ray"]
@@ -137,7 +137,7 @@ beautysh = "==6.1.0"
 twine = "==5.1.1"
 types-PyYAML = "^6.0.2"
 pyroma = "==4.2"
-check-wheel-contents = "==0.4.0"
+check-wheel-contents = "==0.6.3"
 GitPython = "==3.1.32"
 PyGithub = "==2.1.1"
 licensecheck = "==2025.1.0"
