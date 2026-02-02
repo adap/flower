@@ -75,6 +75,7 @@ versions = sorted(
     key=lambda x: [int(part) for part in x[1:].split(".")],
 )
 versions.append("main")
+versions.reverse()  # Latest version first
 for version in versions:
     html_context["versions"].append({"name": version})
 
