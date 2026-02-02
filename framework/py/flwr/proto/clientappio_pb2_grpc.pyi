@@ -70,6 +70,18 @@ class ClientAppIoStub:
     ]
     """App heartbeat"""
 
+    PullAppInputs: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.appio_pb2.PullAppInputsRequest,
+        flwr.proto.appio_pb2.PullAppInputsResponse,
+    ]
+    """Pull app inputs"""
+
+    PushAppOutputs: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.appio_pb2.PushAppOutputsRequest,
+        flwr.proto.appio_pb2.PushAppOutputsResponse,
+    ]
+    """Push app outputs"""
+
     PushObject: grpc.UnaryUnaryMultiCallable[
         flwr.proto.message_pb2.PushObjectRequest,
         flwr.proto.message_pb2.PushObjectResponse,
@@ -93,28 +105,16 @@ class ClientAppIoStub:
     ]
     """Confirm Message Received"""
 
-    PullClientAppInputs: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.appio_pb2.PullAppInputsRequest,
-        flwr.proto.appio_pb2.PullAppInputsResponse,
+    PushMessage: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.appio_pb2.PushAppMessagesRequest,
+        flwr.proto.appio_pb2.PushAppMessagesResponse,
     ]
     """///////////////////////////////////////////////////////////////////////////
     Specific endpoints for ClientAppIo
     ///////////////////////////////////////////////////////////////////////////
 
-    Pull client app inputs
+    Push Message
     """
-
-    PushClientAppOutputs: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.appio_pb2.PushAppOutputsRequest,
-        flwr.proto.appio_pb2.PushAppOutputsResponse,
-    ]
-    """Push client app outputs"""
-
-    PushMessage: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.appio_pb2.PushAppMessagesRequest,
-        flwr.proto.appio_pb2.PushAppMessagesResponse,
-    ]
-    """Push Message"""
 
     PullMessage: grpc.UnaryUnaryMultiCallable[
         flwr.proto.appio_pb2.PullAppMessagesRequest,
@@ -157,6 +157,18 @@ class ClientAppIoAsyncStub:
     ]
     """App heartbeat"""
 
+    PullAppInputs: grpc.aio.UnaryUnaryMultiCallable[
+        flwr.proto.appio_pb2.PullAppInputsRequest,
+        flwr.proto.appio_pb2.PullAppInputsResponse,
+    ]
+    """Pull app inputs"""
+
+    PushAppOutputs: grpc.aio.UnaryUnaryMultiCallable[
+        flwr.proto.appio_pb2.PushAppOutputsRequest,
+        flwr.proto.appio_pb2.PushAppOutputsResponse,
+    ]
+    """Push app outputs"""
+
     PushObject: grpc.aio.UnaryUnaryMultiCallable[
         flwr.proto.message_pb2.PushObjectRequest,
         flwr.proto.message_pb2.PushObjectResponse,
@@ -180,28 +192,16 @@ class ClientAppIoAsyncStub:
     ]
     """Confirm Message Received"""
 
-    PullClientAppInputs: grpc.aio.UnaryUnaryMultiCallable[
-        flwr.proto.appio_pb2.PullAppInputsRequest,
-        flwr.proto.appio_pb2.PullAppInputsResponse,
+    PushMessage: grpc.aio.UnaryUnaryMultiCallable[
+        flwr.proto.appio_pb2.PushAppMessagesRequest,
+        flwr.proto.appio_pb2.PushAppMessagesResponse,
     ]
     """///////////////////////////////////////////////////////////////////////////
     Specific endpoints for ClientAppIo
     ///////////////////////////////////////////////////////////////////////////
 
-    Pull client app inputs
+    Push Message
     """
-
-    PushClientAppOutputs: grpc.aio.UnaryUnaryMultiCallable[
-        flwr.proto.appio_pb2.PushAppOutputsRequest,
-        flwr.proto.appio_pb2.PushAppOutputsResponse,
-    ]
-    """Push client app outputs"""
-
-    PushMessage: grpc.aio.UnaryUnaryMultiCallable[
-        flwr.proto.appio_pb2.PushAppMessagesRequest,
-        flwr.proto.appio_pb2.PushAppMessagesResponse,
-    ]
-    """Push Message"""
 
     PullMessage: grpc.aio.UnaryUnaryMultiCallable[
         flwr.proto.appio_pb2.PullAppMessagesRequest,
@@ -253,6 +253,22 @@ class ClientAppIoServicer(metaclass=abc.ABCMeta):
         """App heartbeat"""
 
     @abc.abstractmethod
+    def PullAppInputs(
+        self,
+        request: flwr.proto.appio_pb2.PullAppInputsRequest,
+        context: _ServicerContext,
+    ) -> typing.Union[flwr.proto.appio_pb2.PullAppInputsResponse, collections.abc.Awaitable[flwr.proto.appio_pb2.PullAppInputsResponse]]:
+        """Pull app inputs"""
+
+    @abc.abstractmethod
+    def PushAppOutputs(
+        self,
+        request: flwr.proto.appio_pb2.PushAppOutputsRequest,
+        context: _ServicerContext,
+    ) -> typing.Union[flwr.proto.appio_pb2.PushAppOutputsResponse, collections.abc.Awaitable[flwr.proto.appio_pb2.PushAppOutputsResponse]]:
+        """Push app outputs"""
+
+    @abc.abstractmethod
     def PushObject(
         self,
         request: flwr.proto.message_pb2.PushObjectRequest,
@@ -282,33 +298,17 @@ class ClientAppIoServicer(metaclass=abc.ABCMeta):
         """Confirm Message Received"""
 
     @abc.abstractmethod
-    def PullClientAppInputs(
-        self,
-        request: flwr.proto.appio_pb2.PullAppInputsRequest,
-        context: _ServicerContext,
-    ) -> typing.Union[flwr.proto.appio_pb2.PullAppInputsResponse, collections.abc.Awaitable[flwr.proto.appio_pb2.PullAppInputsResponse]]:
-        """///////////////////////////////////////////////////////////////////////////
-        Specific endpoints for ClientAppIo
-        ///////////////////////////////////////////////////////////////////////////
-
-        Pull client app inputs
-        """
-
-    @abc.abstractmethod
-    def PushClientAppOutputs(
-        self,
-        request: flwr.proto.appio_pb2.PushAppOutputsRequest,
-        context: _ServicerContext,
-    ) -> typing.Union[flwr.proto.appio_pb2.PushAppOutputsResponse, collections.abc.Awaitable[flwr.proto.appio_pb2.PushAppOutputsResponse]]:
-        """Push client app outputs"""
-
-    @abc.abstractmethod
     def PushMessage(
         self,
         request: flwr.proto.appio_pb2.PushAppMessagesRequest,
         context: _ServicerContext,
     ) -> typing.Union[flwr.proto.appio_pb2.PushAppMessagesResponse, collections.abc.Awaitable[flwr.proto.appio_pb2.PushAppMessagesResponse]]:
-        """Push Message"""
+        """///////////////////////////////////////////////////////////////////////////
+        Specific endpoints for ClientAppIo
+        ///////////////////////////////////////////////////////////////////////////
+
+        Push Message
+        """
 
     @abc.abstractmethod
     def PullMessage(
