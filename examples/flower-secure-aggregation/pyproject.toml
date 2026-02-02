@@ -38,9 +38,3 @@ max-weight = 9000
 timeout = 15.0
 # Demo flag
 is-demo = true
-
-[tool.flwr.federations]
-default = "local-simulation"
-
-[tool.flwr.federations.local-simulation]
-options.num-supernodes = 5

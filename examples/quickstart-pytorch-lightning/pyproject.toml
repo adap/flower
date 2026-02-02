@@ -28,9 +28,3 @@ clientapp = "pytorchlightning_example.client_app:app"
 [tool.flwr.app.config]
 num-server-rounds = 3
 max-epochs = 1
-
-[tool.flwr.federations]
-default = "local-simulation"
-
-[tool.flwr.federations.local-simulation]
-options.num-supernodes = 4

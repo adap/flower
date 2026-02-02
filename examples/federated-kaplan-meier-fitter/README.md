@@ -65,6 +65,27 @@ You can run your Flower project in both _simulation_ and _deployment_ mode witho
 
 ### Run with the Simulation Engine
 
+This example is designed to run with two virtual clients. Let's first locate the Flower Configuration file and modify one of the existing connections to make use of two nodes.
+
+1. Locate the Flower Configuration file:
+
+```bash
+flwr config list
+# Flower Config file: /path/to/your/.flwr/config.toml
+# SuperLink connections:
+#  supergrid
+#  local (default)
+```
+
+2. Modify the `local` connection so it has two supernodes:
+
+```TOML
+[superlink.local]
+options.num-supernodes = 2
+```
+
+Run the app:
+
 ```bash
 flwr run .
 ```

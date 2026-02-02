@@ -39,12 +39,3 @@ params.num-parallel-tree = 1
 params.subsample = 1
 params.tree-method = "hist"
 
-[tool.flwr.federations]
-default = "local-simulation"
-
-[tool.flwr.federations.local-simulation]
-options.num-supernodes = 20
-
-[tool.flwr.federations.supergrid-deployment]
-address = "supergrid.flower.ai"
-enable-account-auth = true

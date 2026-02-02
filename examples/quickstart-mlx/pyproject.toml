@@ -32,9 +32,3 @@ local-epochs = 1
 hidden-dim = 32
 batch-size = 256
 learning-rate = 0.1
-
-[tool.flwr.federations]
-default = "local-simulation"
-
-[tool.flwr.federations.local-simulation]
-options.num-supernodes = 10

@@ -29,14 +29,3 @@ clientapp = "monaiexample.client_app:app"
 num-server-rounds = 5
 fraction-train = 0.5
 batch-size = 128
-
-[tool.flwr.federations]
-default = "local-simulation"
-
-[tool.flwr.federations.local-simulation]
-options.num-supernodes = 10
-
-[tool.flwr.federations.local-simulation-gpu]
-options.num-supernodes = 10
-options.backend.client-resources.num-cpus = 4
-options.backend.client-resources.num-gpus = 0.25 # at most 4 ClientApps will run in a given GPU

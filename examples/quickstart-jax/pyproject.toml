@@ -31,9 +31,3 @@ num-server-rounds = 5
 learning-rate = 0.1
 fraction-evaluate = 0.2
 batch-size = 64
-
-[tool.flwr.federations]
-default = "local-simulation"
-
-[tool.flwr.federations.local-simulation]
-options.num-supernodes = 50

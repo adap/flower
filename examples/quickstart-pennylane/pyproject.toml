@@ -43,14 +43,3 @@ fraction-evaluate = 0.5
 # Quantum circuit configuration
 n-qubits = 4
 n-layers = 3
-
-[tool.flwr.federations]
-default = "local-simulation"
-
-[tool.flwr.federations.local-simulation]
-options.num-supernodes = 10
-
-[tool.flwr.federations.local-simulation-gpu]
-options.num-supernodes = 10
-options.backend.client-resources.num-cpus = 2
-options.backend.client-resources.num-gpus = 0.2
