@@ -536,9 +536,10 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
 
         # Get federations the account is a member of
         federations = state.federation_manager.get_federations(flwr_aid=flwr_aid)
-
         return ListFederationsResponse(
-            federations=[Federation(name=fed) for fed in federations]
+            federations=[
+                Federation(name=fed[0], description=fed[1]) for fed in federations
+            ]
         )
 
     def ShowFederation(
