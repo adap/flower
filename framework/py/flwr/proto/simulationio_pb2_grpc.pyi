@@ -74,24 +74,24 @@ class SimulationIoStub:
         flwr.proto.appio_pb2.PullAppInputsRequest,
         flwr.proto.appio_pb2.PullAppInputsResponse,
     ]
-    """///////////////////////////////////////////////////////////////////////////
-    Specific endpoints shared by ServerAppIo and SimulationIo
-    ///////////////////////////////////////////////////////////////////////////
-
-    Pull Simulation inputs
-    """
+    """Pull app inputs"""
 
     PushAppOutputs: grpc.UnaryUnaryMultiCallable[
         flwr.proto.appio_pb2.PushAppOutputsRequest,
         flwr.proto.appio_pb2.PushAppOutputsResponse,
     ]
-    """Push Simulation outputs"""
+    """Push app outputs"""
 
     GetRunStatus: grpc.UnaryUnaryMultiCallable[
         flwr.proto.run_pb2.GetRunStatusRequest,
         flwr.proto.run_pb2.GetRunStatusResponse,
     ]
-    """Get Run Status"""
+    """///////////////////////////////////////////////////////////////////////////
+    Specific endpoints shared by ServerAppIo and SimulationIo
+    ///////////////////////////////////////////////////////////////////////////
+
+    Get Run Status
+    """
 
     UpdateRunStatus: grpc.UnaryUnaryMultiCallable[
         flwr.proto.run_pb2.UpdateRunStatusRequest,
@@ -155,24 +155,24 @@ class SimulationIoAsyncStub:
         flwr.proto.appio_pb2.PullAppInputsRequest,
         flwr.proto.appio_pb2.PullAppInputsResponse,
     ]
-    """///////////////////////////////////////////////////////////////////////////
-    Specific endpoints shared by ServerAppIo and SimulationIo
-    ///////////////////////////////////////////////////////////////////////////
-
-    Pull Simulation inputs
-    """
+    """Pull app inputs"""
 
     PushAppOutputs: grpc.aio.UnaryUnaryMultiCallable[
         flwr.proto.appio_pb2.PushAppOutputsRequest,
         flwr.proto.appio_pb2.PushAppOutputsResponse,
     ]
-    """Push Simulation outputs"""
+    """Push app outputs"""
 
     GetRunStatus: grpc.aio.UnaryUnaryMultiCallable[
         flwr.proto.run_pb2.GetRunStatusRequest,
         flwr.proto.run_pb2.GetRunStatusResponse,
     ]
-    """Get Run Status"""
+    """///////////////////////////////////////////////////////////////////////////
+    Specific endpoints shared by ServerAppIo and SimulationIo
+    ///////////////////////////////////////////////////////////////////////////
+
+    Get Run Status
+    """
 
     UpdateRunStatus: grpc.aio.UnaryUnaryMultiCallable[
         flwr.proto.run_pb2.UpdateRunStatusRequest,
@@ -246,12 +246,7 @@ class SimulationIoServicer(metaclass=abc.ABCMeta):
         request: flwr.proto.appio_pb2.PullAppInputsRequest,
         context: _ServicerContext,
     ) -> typing.Union[flwr.proto.appio_pb2.PullAppInputsResponse, collections.abc.Awaitable[flwr.proto.appio_pb2.PullAppInputsResponse]]:
-        """///////////////////////////////////////////////////////////////////////////
-        Specific endpoints shared by ServerAppIo and SimulationIo
-        ///////////////////////////////////////////////////////////////////////////
-
-        Pull Simulation inputs
-        """
+        """Pull app inputs"""
 
     @abc.abstractmethod
     def PushAppOutputs(
@@ -259,7 +254,7 @@ class SimulationIoServicer(metaclass=abc.ABCMeta):
         request: flwr.proto.appio_pb2.PushAppOutputsRequest,
         context: _ServicerContext,
     ) -> typing.Union[flwr.proto.appio_pb2.PushAppOutputsResponse, collections.abc.Awaitable[flwr.proto.appio_pb2.PushAppOutputsResponse]]:
-        """Push Simulation outputs"""
+        """Push app outputs"""
 
     @abc.abstractmethod
     def GetRunStatus(
@@ -267,7 +262,12 @@ class SimulationIoServicer(metaclass=abc.ABCMeta):
         request: flwr.proto.run_pb2.GetRunStatusRequest,
         context: _ServicerContext,
     ) -> typing.Union[flwr.proto.run_pb2.GetRunStatusResponse, collections.abc.Awaitable[flwr.proto.run_pb2.GetRunStatusResponse]]:
-        """Get Run Status"""
+        """///////////////////////////////////////////////////////////////////////////
+        Specific endpoints shared by ServerAppIo and SimulationIo
+        ///////////////////////////////////////////////////////////////////////////
+
+        Get Run Status
+        """
 
     @abc.abstractmethod
     def UpdateRunStatus(

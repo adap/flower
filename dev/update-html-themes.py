@@ -26,20 +26,20 @@ ROOT_DIR = Path(".")
 # Define new fields to be added to the `html_theme_options` dictionary in `conf.py`.
 # If no fields are needed, set to an empty dictionary.
 NEW_FIELDS: dict[str, Optional[Union[dict[str, str], str]]] = {
-    # "announcement": (
-    #     "<a href='https://flower.ai/events/flower-ai-day-2025/'>"
-    #     "<strong style='color: #f2b705;'>👉 Register now</strong></a> "
-    #     "for Flower AI Day 2025!<br />"
-    #     "September 25, 🇺🇸 San Francisco"
-    # ),
-    # "light_css_variables": {
-    #     "color-announcement-background": "#292f36",
-    #     "color-announcement-text": "#ffffff",
-    # },
-    # "dark_css_variables": {
-    #     "color-announcement-background": "#292f36",
-    #     "color-announcement-text": "#ffffff",
-    # },
+    "announcement": (
+        "<a href='https://flower.ai/events/flower-ai-summit-2026/'>"
+        "<strong style='color: #f2b705;'>👉 Register now</strong></a> "
+        "for Flower AI Summit 2026!<br />"
+        "April 15-16, 🇬🇧 London"
+    ),
+    "light_css_variables": {
+        "color-announcement-background": "#292f36",
+        "color-announcement-text": "#ffffff",
+    },
+    "dark_css_variables": {
+        "color-announcement-background": "#292f36",
+        "color-announcement-text": "#ffffff",
+    },
 }
 
 
