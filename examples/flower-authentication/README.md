@@ -215,5 +215,5 @@ above. Don't forget to specify the correct client private key for each client (S
 With both the long-running server (SuperLink) and two SuperNodes up and running, we can now start the run. You can optionally use the `--stream` flag to stream logs from your `ServerApp` running on SuperLink.
 
 ```bash
-flwr run . my-federation --stream
+flwr run . --stream
 ```
