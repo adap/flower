@@ -19,7 +19,7 @@ def query(msg: Message, context: Context) -> Message:
     # Get database connection details from node config
     db_url: str = context.node_config.get(
         "db-url",
-        "postgresql://flwrlabs:flwrlabs@localhost:5432/flwrlabs",
+        "postgresql+psycopg://flwrlabs:flwrlabs@localhost:5432/flwrlabs",
     )
     table_name: str = context.node_config.get("table-name", "person_measurements")
 

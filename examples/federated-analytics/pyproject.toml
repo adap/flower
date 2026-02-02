@@ -11,10 +11,10 @@ authors = [
     { name = "The Flower Authors", email = "hello@flower.ai" },
 ]
 dependencies = [
-    "flwr>=1.25.0",
+    # "flwr>=1.25.0",
     "pandas==2.3.3",
-    "SQLAlchemy==2.0.44",
-    "psycopg[binary]==3.2.13",
+    "SQLAlchemy==2.0.45",
+    "psycopg[binary]==3.3.2",
 ]
 
 [tool.hatch.build.targets.wheel]
@@ -33,9 +33,25 @@ fraction-sample = 1.0
 selected-features = "age,bmi,systolic_bp,diastolic_bp,ldl_cholesterol,hba1c"
 feature-aggregation = "mean,std"
 
-[tool.flwr.federations]
-default = "federated-analytics"
 
-[tool.flwr.federations.federated-analytics]
-address = "127.0.0.1:9093"
-insecure = true
+#######################################################################
+# CONFIGURATION MIGRATION NOTICE:
+#
+# What was previously called "federation config" for SuperLink
+# connections in pyproject.toml has been renamed and moved.
+#
+# These settings are now **SuperLink connection configuration**
+# and are defined in the Flower configuration file.
+#
+# The entries below are commented out intentionally and are kept
+# only as a migration reference.
+#
+# Docs: https://flower.ai/docs/framework/ref-flower-configuration.html
+#######################################################################
+
+# [tool.flwr.federations]
+# default = "federated-analytics"
+
+# [tool.flwr.federations.federated-analytics]
+# address = "127.0.0.1:9093"
+# insecure = true

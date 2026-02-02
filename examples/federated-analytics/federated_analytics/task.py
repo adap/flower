@@ -18,7 +18,7 @@ def query_database(
     """Query PostgreSQL database and return selected features as DataFrame.
 
     Args:
-        db_url: Database connection URL (e.g., postgresql://user:pass@host:port/dbname)
+        db_url: Database connection URL (e.g., postgresql+psycopg://user:pass@host:port/dbname)
         table_name: Name of the table to query
         selected_features: List of column names to select
 

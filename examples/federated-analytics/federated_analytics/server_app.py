@@ -5,11 +5,10 @@ import random
 import time
 from logging import INFO
 
+from federated_analytics.task import aggregate_features
 from flwr.app import ConfigRecord, Context, Message, MessageType, RecordDict
 from flwr.common.logger import log
 from flwr.serverapp import Grid, ServerApp
-
-from federated_analytics.task import aggregate_features
 
 app = ServerApp()
 
@@ -75,6 +74,11 @@ def main(grid: Grid, context: Context) -> None:
     aggregated_stats = aggregate_features(
         replies, selected_features, feature_aggregation
     )
+
+    log(INFO, "Saving aggregated statistics to 'aggregated_stats.json'...")
+    # Save aggregated stats to JSON file
+    with open("aggregated_stats.json", "w", encoding="utf-8") as f:
+        json.dump(aggregated_stats, f, indent=2)
 
     # Display final aggregated stats
     print("\n" + "=" * 40)
