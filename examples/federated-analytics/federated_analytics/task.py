@@ -1,10 +1,12 @@
 """federated_analytics: A Flower / Federated Analytics app."""
 
 from collections.abc import Iterable
+from logging import INFO
 
 import numpy as np
 import pandas as pd
 from flwr.app import Message
+from flwr.common.logger import log
 from sqlalchemy import create_engine
 
 
