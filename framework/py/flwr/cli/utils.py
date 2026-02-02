@@ -95,6 +95,8 @@ def cli_output_handler(
 
     try:
         yield is_json
+    except typer.Exit:  # Allow typer.Exit to pass through
+        raise
     except Exception as err:  # pylint: disable=broad-except
         if is_json:
             restore_output()
