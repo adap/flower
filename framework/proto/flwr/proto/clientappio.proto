@@ -46,6 +46,12 @@ service ClientAppIo {
   rpc SendAppHeartbeat(SendAppHeartbeatRequest)
       returns (SendAppHeartbeatResponse) {}
 
+  // Pull app inputs
+  rpc PullAppInputs(PullAppInputsRequest) returns (PullAppInputsResponse) {}
+
+  // Push app outputs
+  rpc PushAppOutputs(PushAppOutputsRequest) returns (PushAppOutputsResponse) {}
+
   /////////////////////////////////////////////////////////////////////////////
   // Specific endpoints shared by ServerAppIo and ClientAppIo
   /////////////////////////////////////////////////////////////////////////////
@@ -63,14 +69,6 @@ service ClientAppIo {
   /////////////////////////////////////////////////////////////////////////////
   // Specific endpoints for ClientAppIo
   /////////////////////////////////////////////////////////////////////////////
-
-  // Pull client app inputs
-  rpc PullClientAppInputs(PullAppInputsRequest)
-      returns (PullAppInputsResponse) {}
-
-  // Push client app outputs
-  rpc PushClientAppOutputs(PushAppOutputsRequest)
-      returns (PushAppOutputsResponse) {}
 
   // Push Message
   rpc PushMessage(PushAppMessagesRequest) returns (PushAppMessagesResponse) {}
