@@ -6,7 +6,7 @@ framework: [pandas]
 
 # Federated Analytics with OMOP CDM using Flower
 
-This example will show you how you can use Flower to run federated analytics workloads on distributed SQL databases, which are applicable to many biostatistics and healthcare use cases. You will use an artificial dataset generated in adherance to the [OMOP Common Data Model](https://www.ohdsi.org/data-standardization/), which uses the OHDSI standardized vocabularies widely adopted in clinical domains. You will also run this example with Flower's Deployment Engine to demonstrate how each SuperNode can be configured to connect to different PostgreSQL databases, respectively, while the database connection will be handled using SQLAlchemy and the `pyscopg` adapter which is the latest implementation of the PostgreSQL adapter for Python.
+This example will show you how you can use Flower to run federated analytics workloads on distributed SQL databases, which are applicable to many biostatistics and healthcare use cases. You will use an artificial dataset generated in adherance to the [OMOP Common Data Model](https://www.ohdsi.org/data-standardization/), which uses the OHDSI standardized vocabularies widely adopted in clinical domains. You will also run this example with Flower's Deployment Engine to demonstrate how each SuperNode can be configured to connect to different PostgreSQL databases, respectively, while the database connection will be handled using SQLAlchemy and the `psycopg` adapter which is the latest implementation of the PostgreSQL adapter for Python.
 
 ## Set up the project
 
