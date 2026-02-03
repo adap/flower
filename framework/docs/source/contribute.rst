@@ -64,4 +64,3 @@ Information-oriented API reference and other reference material.
     :caption: Contributor references
 
     contributor-ref-good-first-contributions
-    contributor-ref-secure-aggregation-protocols
