@@ -100,6 +100,8 @@ def cli_output_handler(
             restore_output()
             print_json_error(captured_output.getvalue(), err)
         else:
+            if isinstance(err, typer.Exit):
+                raise  # Allow typer.Exit to escape normally
             raise click.ClickException(str(err)) from None
     finally:
         if is_json:
@@ -418,7 +420,8 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-b
             if e.details() == FEDERATION_NOT_SPECIFIED_MESSAGE:  # pylint: disable=E1101
                 raise click.ClickException(
                     "No federation specified. "
-                    "Please specify a federation and try again.",
+                    "Please use the `--federation` flag or set a default federation "
+                    "in your SuperLink connection configuration."
                 ) from None
             patten = re.compile(FEDERATION_NOT_FOUND_MESSAGE.replace("%s", "(.+)"))
             if m := patten.match(e.details()):  # pylint: disable=E1101

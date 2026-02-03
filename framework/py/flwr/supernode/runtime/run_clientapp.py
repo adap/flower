@@ -110,7 +110,7 @@ def run_clientapp(  # pylint: disable=R0913, R0914, R0917
         heartbeat_sender.start()
 
         # Pull Message, Context, Run and (optional) FAB from SuperNode
-        message, context, run, fab = pull_clientappinputs(stub=stub, token=token)
+        message, context, run, fab = pull_appinputs(stub=stub, token=token)
 
         try:
 
@@ -152,7 +152,7 @@ def run_clientapp(  # pylint: disable=R0913, R0914, R0917
             reply_message = Message(Error(code=e_code, reason=reason), reply_to=message)
 
         # Push Message and Context to SuperNode
-        _ = push_clientappoutputs(
+        _ = push_appoutputs(
             stub=stub, token=token, message=reply_message, context=context
         )
 
@@ -165,15 +165,15 @@ def run_clientapp(  # pylint: disable=R0913, R0914, R0917
     )
 
 
-def pull_clientappinputs(
+def pull_appinputs(
     stub: ClientAppIoStub, token: str
 ) -> tuple[Message, Context, Run, Fab | None]:
-    """Pull ClientAppInputs from SuperNode."""
+    """Pull AppInputs from SuperNode."""
     masked_token = mask_string(token)
-    log(INFO, "[flwr-clientapp] Pull `ClientAppInputs` for token %s", masked_token)
+    log(INFO, "[flwr-clientapp] Pull `AppInputs` for token %s", masked_token)
     try:
         # Pull Context, Run and (optional) FAB
-        res: PullAppInputsResponse = stub.PullClientAppInputs(
+        res: PullAppInputsResponse = stub.PullAppInputs(
             PullAppInputsRequest(token=token)
         )
         context = context_from_proto(res.context)
@@ -201,16 +201,16 @@ def pull_clientappinputs(
         message.metadata.__dict__["_message_id"] = object_tree.object_id
         return message, context, run, fab
     except grpc.RpcError as e:
-        log(ERROR, "[PullClientAppInputs] gRPC error occurred: %s", str(e))
+        log(ERROR, "[PullAppInputs] gRPC error occurred: %s", str(e))
         raise e
 
 
-def push_clientappoutputs(
+def push_appoutputs(
     stub: ClientAppIoStub, token: str, message: Message, context: Context
 ) -> PushAppOutputsResponse:
-    """Push ClientAppOutputs to SuperNode."""
+    """Push AppOutputs to SuperNode."""
     masked_token = mask_string(token)
-    log(INFO, "[flwr-clientapp] Push `ClientAppOutputs` for token %s", masked_token)
+    log(INFO, "[flwr-clientapp] Push `AppOutputs` for token %s", masked_token)
     # Set message ID
     message.metadata.__dict__["_message_id"] = message.object_id
     proto_message = message_to_proto(remove_content_from_message(message))
@@ -250,10 +250,10 @@ def push_clientappoutputs(
             )
 
         # Push Context
-        res: PushAppOutputsResponse = stub.PushClientAppOutputs(
+        res: PushAppOutputsResponse = stub.PushAppOutputs(
             PushAppOutputsRequest(token=token, context=proto_context)
         )
         return res
     except grpc.RpcError as e:
-        log(ERROR, "[PushClientAppOutputs] gRPC error occurred: %s", str(e))
+        log(ERROR, "[PushAppOutputs] gRPC error occurred: %s", str(e))
         raise e

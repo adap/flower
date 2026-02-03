@@ -73,8 +73,9 @@ versions = sorted(
         and int(tag.name.split(".")[1]) >= 8
     ],
     key=lambda x: [int(part) for part in x[1:].split(".")],
+    reverse=True,  # Latest version tags first
 )
-versions.append("main")
+versions.insert(0, "main")  # Ensure "main" appears first
 for version in versions:
     html_context["versions"].append({"name": version})
 
@@ -259,7 +260,7 @@ redirects = {
     "release-process": "contributor-how-to-release-flower.html",
     # Restructuring: contributor references
     "good-first-contributions": "contributor-ref-good-first-contributions.html",
-    "secagg": "contributor-ref-secure-aggregation-protocols.html",
+    "secagg": "explanation-ref-secure-aggregation-protocols.html",
     # Deleted pages
     "people": "index.html",
     "organizations": "index.html",
@@ -313,12 +314,12 @@ html_theme_options = {
     #     "color-brand-content": "#292F36",
     #     "color-admonition-background": "#F2B705",
     # },
-    # "announcement": (
-    #     "<a href='https://flower.ai/events/flower-ai-day-2025/'>"
-    #     "<strong style='color: #f2b705;'>👉 Register now</strong></a> "
-    #     "for Flower AI Day 2025!<br />"
-    #     "September 25, 🇺🇸 San Francisco"
-    # ),
+    "announcement": (
+        "<a href='https://flower.ai/events/flower-ai-summit-2026/'>"
+        "<strong style='color: #f2b705;'>👉 Register now</strong></a> "
+        "for Flower AI Summit 2026!<br />"
+        "April 15-16, 🇬🇧 London"
+    ),
     "light_css_variables": {
         "color-announcement-background": "#292f36",
         "color-announcement-text": "#ffffff",

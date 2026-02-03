@@ -59,6 +59,7 @@ MIME_MAP = {
 
 # Constants for federations
 NOOP_FEDERATION = f"@{NOOP_ACCOUNT_NAME}/default"
+NOOP_FEDERATION_DESCRIPTION = "A federation for testing and development purposes."
 
 # Constants for exit handling
 FORCE_EXIT_TIMEOUT_SECONDS = 5  # Used in `flwr_exit` function
