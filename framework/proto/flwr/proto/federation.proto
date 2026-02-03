@@ -26,8 +26,9 @@ message Account {
 
 message Federation {
   string name = 1;
-  string description = 2;
-  repeated Account accounts = 3;
-  repeated NodeInfo nodes = 4;
-  repeated Run runs = 5;
+  // repeated string member_aids = 2; // Deprecated in v1.26.0
+  repeated NodeInfo nodes = 3;
+  repeated Run runs = 4;
+  string description = 5;        // Added in v1.26.0
+  repeated Account accounts = 6; // Added in v1.26.0
 }
