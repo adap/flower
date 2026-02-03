@@ -53,7 +53,7 @@ The `flwr new` command will generate a directory with the following structure:
 This can serve as the starting point for you to build up your own federated LLM fine-tuning methods.
 
 > [!IMPORTANT]
-> Please note that if you intend to submit your project as an entry to the [LLM Leaderboard](https://flower.ai/benchmarks/llm-leaderboard) modifications to the `[tool.flwr.app.config.static]` section and `options.num-supernodes` under the `[tool.flwr.federations.local-simulation]` section in the `pyproject.toml` are not allowed and will invalidate the submission.
+> Please note that if you intend to submit your project as an entry to the [LLM Leaderboard](https://flower.ai/benchmarks/llm-leaderboard) modifications to the `[tool.flwr.app.config.static]` section in the `pyproject.toml` or making use of a different number of `SuperNodes` to the one detailed in each app's readme are not allowed and will invalidate the submission.
 
 
 ## Run FlowerTune LLM challenges
