@@ -73,8 +73,9 @@ versions = sorted(
         and int(tag.name.split(".")[1]) >= 8
     ],
     key=lambda x: [int(part) for part in x[1:].split(".")],
+    reverse=True,  # Latest version tags first
 )
-versions.append("main")
+versions.insert(0, "main")  # Ensure "main" appears first
 for version in versions:
     html_context["versions"].append({"name": version})
 
