@@ -95,13 +95,13 @@ def cli_output_handler(
 
     try:
         yield is_json
-    except typer.Exit:  # Allow typer.Exit to pass through
-        raise
     except Exception as err:  # pylint: disable=broad-except
         if is_json:
             restore_output()
             print_json_error(captured_output.getvalue(), err)
         else:
+            if isinstance(err, typer.Exit):
+                raise  # Allow typer.Exit to escape normally
             raise click.ClickException(str(err)) from None
     finally:
         if is_json:
