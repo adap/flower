@@ -211,7 +211,7 @@ cluster, in our local machine, we first need to install Flower and create a Flow
 
 Next, we need to create a new SuperLink connection in the Flower Configuration file:
 
-1. Find the Flower Configuration TOML file in your machine using ``flwr config list`` to
+1. Find the Flower Configuration file in your machine using ``flwr config list`` to
    see available SuperLink connections as well as the path to the configuration file.
 
    .. code-block:: console
