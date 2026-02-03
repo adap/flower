@@ -260,7 +260,7 @@ redirects = {
     "release-process": "contributor-how-to-release-flower.html",
     # Restructuring: contributor references
     "good-first-contributions": "contributor-ref-good-first-contributions.html",
-    "secagg": "contributor-ref-secure-aggregation-protocols.html",
+    "secagg": "explanation-ref-secure-aggregation-protocols.html",
     # Deleted pages
     "people": "index.html",
     "organizations": "index.html",
