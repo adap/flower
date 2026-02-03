@@ -126,9 +126,12 @@ def _to_table(federations: list[Federation]) -> Table:
     table.add_column(
         Text("Federation", justify="center"), style="bright_black", no_wrap=True
     )
+    table.add_column(
+        Text("Description", justify="center"), style="bright_black", no_wrap=True
+    )
 
     for federation in federations:
-        table.add_row(federation.name)
+        table.add_row(federation.name, federation.description)
 
     return table
 
