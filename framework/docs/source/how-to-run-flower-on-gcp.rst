@@ -602,14 +602,30 @@ the service:
 
     kubectl get service superlink-service
 
-After we get the ``EXTERNAL-IP`` , we go to the directory of the Flower example, we open
-the ``pyproject.toml`` and then add the following section at the end of the file:
+After we get the ``EXTERNAL-IP`` we need to create a new SuperLink connection in the
+Flower Configuration file:
 
-.. code-block:: bash
+1. Find the Flower Configuration TOML file in your machine using ``flwr config list`` to
+   see available SuperLink connections as well as the path to the configuration file.
 
-    [tool.flwr.federations.gcp-deployment]
-    address = "<EXTERNAL_IP>:9093" # replace the EXTERNAL_IP with the correct value
-    insecure = true
+   .. code-block:: bash
+       :emphasize-lines: 3
+
+         $ flwr config list
+
+         Flower Config file: /path/to/.flwr/config.toml
+         SuperLink connections:
+           supergrid
+           local (default)
+
+2. Open the ``config.toml`` file and at the end add a new SuperLink connection:
+
+   .. code-block:: toml
+       :caption: config.toml
+
+       [superlink.gcp-deployment]
+       address = "<EXTERNAL_IP>:9093" # replace the EXTERNAL_IP with the correct value
+       insecure = true
 
 Then we can execute the example on the GCP cluster by running:
 
@@ -702,7 +718,7 @@ the logs from the run. The output should look like the one shared below.
 
     Please note that if you terminate or shut down the cluster, and create a new one,
     the value of the ``EXTERNAL_IP`` changes. In that case, you will have to update the
-    ``pyproject.toml``.
+    Flower Configuration file.
 
 ********************************
  Shutdown Flower Infrastructure
