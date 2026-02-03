@@ -130,12 +130,10 @@ in ``pyproject.toml`` like this:
     # Override some arguments
     $ flwr run . --run-config num-server-rounds=5
 
-
 .. tip::
 
-    Check the :doc:`how-to-run-simulations` documentation to learn
-    more about how to configure and run Flower simulations.
-
+    Check the :doc:`how-to-run-simulations` documentation to learn more about how to
+    configure and run Flower simulations.
 
 .. note::
 

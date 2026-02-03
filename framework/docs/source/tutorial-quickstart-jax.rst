@@ -467,12 +467,10 @@ using ``np.savez()`` as shown above.
 Congratulations! You've successfully built and run your first federated learning system
 for JAX with Flower!
 
-
 .. tip::
 
-    Check the :doc:`how-to-run-simulations` documentation to learn
-    more about how to configure and run Flower simulations.
-
+    Check the :doc:`how-to-run-simulations` documentation to learn more about how to
+    configure and run Flower simulations.
 
 .. note::
 
