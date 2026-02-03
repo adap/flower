@@ -392,6 +392,13 @@ invoking its |strategy_start_link|_ method. To it we pass:
 Congratulations! You've successfully built and run your first federated learning system
 in scikit-learn on the Iris dataset using the new Message API.
 
+
+.. tip::
+
+    Check the :doc:`how-to-run-simulations` documentation to learn
+    more about how to configure and run Flower simulations.
+
+
 .. note::
 
     Check the source code of another Flower App using ``scikit-learn`` in the `Flower

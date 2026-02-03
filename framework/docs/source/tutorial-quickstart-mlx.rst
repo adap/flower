@@ -489,6 +489,13 @@ weights as an ``ArrayRecord``, and federated training and evaluation metrics as
 
 Congratulations! You've successfully built and run your first federated learning system.
 
+
+.. tip::
+
+    Check the :doc:`how-to-run-simulations` documentation to learn
+    more about how to configure and run Flower simulations.
+
+
 .. note::
 
     Check the `source code
