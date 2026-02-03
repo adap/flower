@@ -73,9 +73,6 @@ service ServerAppIo {
   // Specific endpoints shared by ServerAppIo and SimulationIo
   /////////////////////////////////////////////////////////////////////////////
 
-  // Get the status of a given run
-  rpc GetRunStatus(GetRunStatusRequest) returns (GetRunStatusResponse) {}
-
   // Update the status of a given run
   rpc UpdateRunStatus(UpdateRunStatusRequest)
       returns (UpdateRunStatusResponse) {}
