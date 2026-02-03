@@ -26,6 +26,7 @@ message Account {
 
 message Federation {
   string name = 1;
+  string description = 2;
   repeated Account accounts = 3;
   repeated NodeInfo nodes = 4;
   repeated Run runs = 5;
