@@ -49,6 +49,10 @@ classifiers = [
 packages = [{ include = "flwr_datasets", from = "./" }]
 exclude = ["./**/*_test.py"]
 
+[tool.poetry.scripts]
+# `flwr-datasets` CLI
+flwr-datasets-creator = "flwr_datasets.cli:flwr_datasets_creator"
+
 [tool.poetry.dependencies]
 python = "^3.10"
 numpy = ">=1.26.0,<3.0.0"
