@@ -659,10 +659,10 @@ instance in the same namespace (``flower-openshift-demo``) as the SuperLink in t
 OpenShift cluster, the only change you need to make is to define a new SuperLink
 connection in the Flower Configuration file:
 
-1. Find the Flower Configuration TOML file in your machine using ``flwr config list`` to
-   see available SuperLink connections as well as the path to the configuration file.
+1. Run ``flwr config list`` to locate the Flower configuration file on your machine and
+   view available SuperLink connections.
 
-   .. code-block:: bash
+   .. code-block:: console
        :emphasize-lines: 3
 
          $ flwr config list
@@ -672,7 +672,8 @@ connection in the Flower Configuration file:
            supergrid
            local (default)
 
-2. Open the ``config.toml`` file and at the end add a new SuperLink connection:
+2. Open the Flower Configuration file (``config.toml``) and add a new SuperLink
+   connection at the end:
 
    .. code-block:: toml
        :caption: config.toml
