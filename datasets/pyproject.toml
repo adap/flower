@@ -51,7 +51,7 @@ exclude = ["./**/*_test.py"]
 
 [tool.poetry.scripts]
 # `flwr-datasets` CLI
-flwr-datasets-creator = "flwr_datasets.cli:flwr_datasets_creator"
+flwr-datasets = "flwr_datasets.cli.app:app"
 
 [tool.poetry.dependencies]
 python = "^3.10"

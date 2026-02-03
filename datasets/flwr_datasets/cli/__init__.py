@@ -12,11 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower Datasets command line interface."""
-
-
-from .flwr_datasets_creator import flwr_datasets_creator
-
-__all__ = [
-    "flwr_datasets_creator",
-]
+"""Flower Ddatasets command line interface."""
