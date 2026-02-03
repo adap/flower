@@ -36,7 +36,6 @@ from flwr.common.serde import (
     message_from_proto,
     message_to_proto,
     run_status_from_proto,
-    run_status_to_proto,
     run_to_proto,
 )
 from flwr.common.typing import Fab, RunStatus
@@ -76,8 +75,6 @@ from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     GetRunRequest,
     GetRunResponse,
-    GetRunStatusRequest,
-    GetRunStatusResponse,
     UpdateRunStatusRequest,
     UpdateRunStatusResponse,
 )
@@ -433,21 +430,6 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         merged_logs = "".join(request.logs)
         state.add_serverapp_log(request.run_id, merged_logs)
         return PushLogsResponse()
-
-    def GetRunStatus(
-        self, request: GetRunStatusRequest, context: grpc.ServicerContext
-    ) -> GetRunStatusResponse:
-        """Get the status of a run."""
-        log(DEBUG, "ServerAppIoServicer.GetRunStatus")
-        state = self.state_factory.state()
-
-        # Get run status from LinkState
-        run_statuses = state.get_run_status(set(request.run_ids))
-        run_status_dict = {
-            run_id: run_status_to_proto(run_status)
-            for run_id, run_status in run_statuses.items()
-        }
-        return GetRunStatusResponse(run_status_dict=run_status_dict)
 
     def SendAppHeartbeat(
         self, request: SendAppHeartbeatRequest, context: grpc.ServicerContext
