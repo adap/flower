@@ -54,7 +54,6 @@ from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
     RequestTokenRequest,
     RequestTokenResponse,
 )
-from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
     SendAppHeartbeatRequest,
     SendAppHeartbeatResponse,
@@ -85,7 +84,7 @@ from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
 from flwr.server.superlink.utils import abort_if
 from flwr.server.utils.validator import validate_message
-from flwr.supercore.ffs import Ffs, FfsFactory
+from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import NoObjectInStoreError, ObjectStoreFactory
 
 
@@ -311,19 +310,6 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             return GetRunResponse()
 
         return GetRunResponse(run=run_to_proto(run))
-
-    def GetFab(
-        self, request: GetFabRequest, context: grpc.ServicerContext
-    ) -> GetFabResponse:
-        """Get FAB from Ffs."""
-        log(DEBUG, "ServerAppIoServicer.GetFab")
-
-        ffs: Ffs = self.ffs_factory.ffs()
-        if result := ffs.get(request.hash_str):
-            fab = Fab(request.hash_str, result[0], result[1])
-            return GetFabResponse(fab=fab_to_proto(fab))
-
-        raise ValueError(f"Found no FAB with hash: {request.hash_str}")
 
     def PullAppInputs(
         self, request: PullAppInputsRequest, context: grpc.ServicerContext
