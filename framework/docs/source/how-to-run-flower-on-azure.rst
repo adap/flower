@@ -214,7 +214,7 @@ Next, we need to create a new SuperLink connection in the Flower Configuration f
 1. Find the Flower Configuration TOML file in your machine using ``flwr config list`` to
    see available SuperLink connections as well as the path to the configuration file.
 
-   .. code-block:: bash
+   .. code-block:: console
        :emphasize-lines: 3
 
          $ flwr config list
