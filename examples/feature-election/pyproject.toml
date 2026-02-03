@@ -15,6 +15,9 @@ dependencies = [
     "PyImpetus>=0.0.6"
 ]
 
+authors = [
+    { name = "Ioannis Christofilogiannis", email = "jchr2001@gmail.com" }
+]
 
 [tool.hatch.build.targets.wheel]
 packages = ["."]
