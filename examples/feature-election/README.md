@@ -142,21 +142,55 @@ If you are already familiar with how the Deployment Engine works, you may want t
 
 ## Results
 
-After running, results are saved to `outputs/<date>/<time>/feature_election_results.json`:
+After running, results are saved to `outputs/<date>/<time>/`:
+
+### feature_election_results.json
 
 ```json
 {
   "global_feature_mask": [true, false, true, ...],
+  "feature_selection_with_names": {
+    "feature_000": true,
+    "feature_001": false,
+    "feature_002": true
+  },
+  "selected_feature_names": ["feature_000", "feature_002", ...],
   "election_stats": {
     "num_clients": 10,
     "num_features_original": 100,
     "num_features_selected": 35,
     "reduction_ratio": 0.65,
+    "freedom_degree": 0.5,
     "intersection_features": 15,
     "union_features": 50
   },
-  "client_scores": {
-    "0": {"initial_score": 0.82, "fs_score": 0.85, "num_features": 30}
+  "tuning_history": [
+    {"freedom_degree": 0.5, "score": 0.82, "num_features_selected": 30},
+    {"freedom_degree": 0.6, "score": 0.85, "num_features_selected": 35}
+  ],
+  "total_bytes_transmitted": 123456
+}
+```
+
+### client_feature_selections.json
+
+```json
+{
+  "client_1": {
+    "num_samples": 800,
+    "num_features_selected": 25,
+    "selected_feature_names": ["feature_000", "feature_003", ...],
+    "all_features": {
+      "feature_000": {"selected": true, "score": 0.95},
+      "feature_001": {"selected": false, "score": 0.12}
+    }
+  },
+  "_summary": {
+    "total_clients": 2,
+    "features_selected_by_all": ["feature_000", "feature_005"],
+    "features_selected_by_any": ["feature_000", "feature_002", "feature_003"],
+    "num_intersection": 18,
+    "num_union": 35
   }
 }
 ```
