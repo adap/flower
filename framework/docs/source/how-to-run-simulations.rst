@@ -44,7 +44,6 @@ workloads makes sense.
     <https://learn.microsoft.com/en-us/powershell/scripting/overview?view=powershell-7.5>`_,
     we recommend using `WSL2 <https://learn.microsoft.com/en-us/windows/wsl/about>`_.
 
-
 Flower's ``Simulation Engine`` schedules, launches, and manages |clientapp_link|_
 instances. It does so through a ``Backend``, which contains several workers (i.e.,
 Python processes) that can execute a ``ClientApp`` by passing it a |context_link|_ and a
