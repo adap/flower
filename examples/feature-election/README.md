@@ -4,7 +4,7 @@ dataset: [synthetic]
 framework: [sklearn, pandas]
 ---
 
-# Federated Feature Election with Flower
+# Feature Election: Federated feature selection with Flower
 
 A federated feature selection framework for tabular datasets.
 
