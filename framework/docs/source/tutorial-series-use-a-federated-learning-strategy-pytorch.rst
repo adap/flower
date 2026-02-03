@@ -354,12 +354,12 @@ Congratulations! You have created your first custom strategy adding dynamism to 
 ****************************
 
 As a last step in this tutorial, let's see how we can use Flower to experiment with a
-large number of clients. In the ``pyproject.toml``, increase the number of SuperNodes to
-1000:
+large number of clients. Locate your Flower Configuration file (use ``flwr config
+list``) and increase the number of SuperNodes to 1000:
 
 .. code-block:: toml
 
-    [tool.flwr.federations.local-simulation]
+    [superlink.local]
     options.num-supernodes = 1000
 
 Note that we can reuse the ``ClientApp`` for different ``num-supernodes`` since the
