@@ -44,64 +44,6 @@ workloads makes sense.
     <https://learn.microsoft.com/en-us/powershell/scripting/overview?view=powershell-7.5>`_,
     we recommend using `WSL2 <https://learn.microsoft.com/en-us/windows/wsl/about>`_.
 
-.. tip::
-
-    The ``Flower AI Simulation 2025`` tutorial series is available on YouTube. You can
-    find all the videos `here
-    <https://www.youtube.com/playlist?list=PLNG4feLHqCWkdlSrEL2xbCtGa6QBxlUZb>`_ or by
-    clicking on the video previews below. The associated code for the tutorial can be
-    found in the `Flower Github repository
-    <https://github.com/adap/flower/tree/main/examples/flower-simulation-step-by-step-pytorch>`_
-
-.. list-table::
-    :widths: 33 33 33
-    :header-rows: 0
-
-    - - .. raw:: html
-
-            <a href="https://youtu.be/XK_dRVcSZqg">
-                <img src="https://img.youtube.com/vi/XK_dRVcSZqg/0.jpg" alt="Introduction" width="200"/>
-            </a>
-      - .. raw:: html
-
-            <a href="https://youtu.be/VwGq16DMx3Q">
-                <img src="https://img.youtube.com/vi/VwGq16DMx3Q/0.jpg" alt="Launch your first simulation" width="200"/>
-            </a>
-      - .. raw:: html
-
-            <a href="https://youtu.be/8Uwsa0x7VJw">
-                <img src="https://img.youtube.com/vi/8Uwsa0x7VJw/0.jpg" alt="Understanding Flower Apps" width="200"/>
-            </a>
-    - - .. raw:: html
-
-            <a href="https://youtu.be/KsMP9dgcLw4">
-                <img src="https://img.youtube.com/vi/KsMP9dgcLw4/0.jpg" alt="Defining Strategy Callbacks" width="200"/>
-            </a>
-      - .. raw:: html
-
-            <a href="https://youtu.be/dZRDe1ldy5s">
-                <img src="https://img.youtube.com/vi/dZRDe1ldy5s/0.jpg" alt="Sending ClientApp Metrics" width="200"/>
-            </a>
-      - .. raw:: html
-
-            <a href="https://youtu.be/udDSIQyYzNM">
-                <img src="https://img.youtube.com/vi/udDSIQyYzNM/0.jpg" alt="Building Custom Strategies" width="200"/>
-            </a>
-    - - .. raw:: html
-
-            <a href="https://youtu.be/ir2okeinZ2g">
-                <img src="https://img.youtube.com/vi/ir2okeinZ2g/0.jpg" alt="Desginging Stateful ClientApps" width="200"/>
-            </a>
-      - .. raw:: html
-
-            <a href="https://youtu.be/TAUxb9eEZ3w">
-                <img src="https://img.youtube.com/vi/TAUxb9eEZ3w/0.jpg" alt="Scaling Up simulations" width="200"/>
-            </a>
-      - .. raw:: html
-
-            <a href="https://youtu.be/nUUkuqi4Lpo">
-                <img src="https://img.youtube.com/vi/nUUkuqi4Lpo/0.jpg" alt="Wrapping Up" width="200"/>
-            </a>
 
 Flower's ``Simulation Engine`` schedules, launches, and manages |clientapp_link|_
 instances. It does so through a ``Backend``, which contains several workers (i.e.,
