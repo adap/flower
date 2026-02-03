@@ -367,7 +367,9 @@ class FeatureElectionStrategy(Strategy):
             if self.num_features is None:
                 self.num_features = len(mask)
                 if self.feature_names is None:
-                    self.feature_names = [f"feature_{i:03d}" for i in range(self.num_features)]
+                    self.feature_names = [
+                        f"feature_{i:03d}" for i in range(self.num_features)
+                    ]
 
             self.cached_client_selections[str(msg.metadata.src_node_id)] = {
                 "selected_features": mask,
@@ -385,11 +387,13 @@ class FeatureElectionStrategy(Strategy):
         self._calculate_statistics()
 
         if self.tuning_rounds > 0:
-            self.tuning_history.append({
-                "freedom_degree": self.freedom_degree,
-                "score": 0.0,
-                "num_features_selected": int(np.sum(self.global_feature_mask))
-            })
+            self.tuning_history.append(
+                {
+                    "freedom_degree": self.freedom_degree,
+                    "score": 0.0,
+                    "num_features_selected": int(np.sum(self.global_feature_mask)),
+                }
+            )
             self.freedom_degree = self._next_freedom_degree(first_step=True)
 
         return (
@@ -420,11 +424,17 @@ class FeatureElectionStrategy(Strategy):
         avg_score = sum(scores) / len(scores) if scores else 0.0
         logger.info(f"Tuning: FD={self.freedom_degree:.4f} -> score={avg_score:.4f}")
 
-        self.tuning_history.append({
-            "freedom_degree": self.freedom_degree,
-            "score": avg_score,
-            "num_features_selected": int(np.sum(self.global_feature_mask)) if self.global_feature_mask is not None else 0
-        })
+        self.tuning_history.append(
+            {
+                "freedom_degree": self.freedom_degree,
+                "score": avg_score,
+                "num_features_selected": (
+                    int(np.sum(self.global_feature_mask))
+                    if self.global_feature_mask is not None
+                    else 0
+                ),
+            }
+        )
 
         if server_round < 1 + self.tuning_rounds:
             self.freedom_degree = self._next_freedom_degree(first_step=False)
@@ -585,8 +595,13 @@ class FeatureElectionStrategy(Strategy):
             ),
             "feature_selection_with_names": feature_selection_details,
             "selected_feature_names": (
-                [name for name, sel in zip(self.feature_names, self.global_feature_mask) if sel]
-                if self.global_feature_mask is not None and self.feature_names is not None
+                [
+                    name
+                    for name, sel in zip(self.feature_names, self.global_feature_mask)
+                    if sel
+                ]
+                if self.global_feature_mask is not None
+                and self.feature_names is not None
                 else None
             ),
             "election_stats": self.election_stats,
@@ -602,7 +617,9 @@ class FeatureElectionStrategy(Strategy):
         logger.info(f"Results saved to {path}")
         self._save_client_selections()
 
-    def _save_client_selections(self, filename: str = "client_feature_selections.json") -> None:
+    def _save_client_selections(
+        self, filename: str = "client_feature_selections.json"
+    ) -> None:
         """Save per-client feature selections to a separate file."""
         if not self.cached_client_selections or self.feature_names is None:
             return
@@ -616,30 +633,38 @@ class FeatureElectionStrategy(Strategy):
             num_samples = selection_data["num_samples"]
 
             features_info = {}
-            for i, (name, selected, score) in enumerate(zip(self.feature_names, mask, scores)):
+            for i, (name, selected, score) in enumerate(
+                zip(self.feature_names, mask, scores)
+            ):
                 features_info[name] = {
                     "selected": bool(selected),
-                    "score": float(score)
+                    "score": float(score),
                 }
 
-            selected_names = [name for name, sel in zip(self.feature_names, mask) if sel]
+            selected_names = [
+                name for name, sel in zip(self.feature_names, mask) if sel
+            ]
 
             client_details[f"client_{client_id}"] = {
                 "num_samples": int(num_samples),
                 "num_features_selected": int(np.sum(mask)),
                 "selected_feature_names": selected_names,
-                "all_features": features_info
+                "all_features": features_info,
             }
 
         if len(self.cached_client_selections) > 1:
-            masks = np.array([s["selected_features"] for s in self.cached_client_selections.values()])
+            masks = np.array(
+                [s["selected_features"] for s in self.cached_client_selections.values()]
+            )
             intersection_mask = np.all(masks, axis=0)
             union_mask = np.any(masks, axis=0)
 
             client_details["_summary"] = {
                 "total_clients": len(self.cached_client_selections),
                 "features_selected_by_all": [
-                    name for name, sel in zip(self.feature_names, intersection_mask) if sel
+                    name
+                    for name, sel in zip(self.feature_names, intersection_mask)
+                    if sel
                 ],
                 "features_selected_by_any": [
                     name for name, sel in zip(self.feature_names, union_mask) if sel
