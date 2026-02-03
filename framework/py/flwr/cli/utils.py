@@ -100,6 +100,8 @@ def cli_output_handler(
             restore_output()
             print_json_error(captured_output.getvalue(), err)
         else:
+            if isinstance(err, typer.Exit):
+                raise  # Allow typer.Exit to escape normally
             raise click.ClickException(str(err)) from None
     finally:
         if is_json:
