@@ -165,20 +165,6 @@ multiple apps to choose from. The example below uses the ``PyTorch`` quickstart 
 Then, follow the instructions shown after completing the |flwr_new_link|_ command. When
 you execute |flwr_run_link|_, you'll be using the ``Simulation Engine``.
 
-If we take a look at the ``pyproject.toml`` that was generated from the |flwr_new_link|_
-command (and loaded upon |flwr_run_link|_ execution), we see that a *default* federation
-is defined. It sets the number of supernodes to 10.
-
-.. code-block:: toml
-
-    [tool.flwr.federations]
-    default = "local-simulation"
-
-    [tool.flwr.federations.local-simulation]
-    options.num-supernodes = 10
-
-You can modify the size of your simulations by adjusting ``options.num-supernodes``.
-
 Simulation examples
 ===================
 
@@ -223,11 +209,16 @@ workload. You can do so by adjusting the backend resources for your federation.
     make use of 25% of the available VRAM but it ends up using 50%, it might cause other
     ``ClientApp`` instances to crash throwing an out-of-memory (OOM) error.
 
-Customizing resources can be done directly in the ``pyproject.toml`` of your app.
+Customizing resources can be done directly in the :doc:`Flower Configuration
+<ref-flower-configuration>`. Setting the ``options.backend.client-resources`` variable
+allows you to define how many CPU cores and what fraction of GPU memory each backend
+worker (and hence each ``ClientApp``) gets. For example, to run a simulation with 10
+clients where each ``ClientApp`` assumes to use 1 CPU core and no GPU access, you would
+set:
 
 .. code-block:: toml
 
-    [tool.flwr.federations.local-simulation]
+    [superlink.local]
     options.num-supernodes = 10
     options.backend.client-resources.num-cpus = 1 # each ClientApp assumes to use 1 CPU (default is 2)
     options.backend.client-resources.num-gpus = 0.0 # no GPU access to the ClientApp (default is 0.0)
@@ -238,7 +229,7 @@ assigned by specifying the **ratio** of VRAM each should make use of.
 
 .. code-block:: toml
 
-    [tool.flwr.federations.local-simulation]
+    [superlink.local-gpu]
     options.num-supernodes = 10
     options.backend.client-resources.num-cpus = 1 # each ClientApp assumes to use 1 CPU (default is 2)
     options.backend.client-resources.num-gpus = 0.25 # each ClientApp uses 25% of VRAM (default is 0.0)
@@ -289,12 +280,13 @@ resource-aware manner in batches of 8.
 
 By default, the ``Simulation Engine`` has **access to all system resources** (i.e., all
 CPUs, all GPUs). However, in some settings, you might want to limit how many of your
-system resources are used for simulation. You can do this in the ``pyproject.toml`` of
-your app by setting the ``options.backend.init-args`` variable.
+system resources are used for simulation. You can do this in the :doc:`Flower
+Configuration <ref-flower-configuration>` by setting the ``options.backend.init-args``
+variable.
 
 .. code-block:: toml
 
-    [tool.flwr.federations.local-simulation]
+    [superlink.local-gpu-limited]
     options.num-supernodes = 10
     options.backend.client-resources.num-cpus = 1 # Each ClientApp will get assigned 1 CPU core
     options.backend.client-resources.num-gpus = 0.5 # Each ClientApp will get 50% of each available GPU
@@ -333,7 +325,7 @@ or Jupyter environment by means of `run_simulation
     run_simulation(
         server_app=server_app,
         client_app=client_app,
-        num_supernodes=10,  # equivalent to setting `num-supernodes` in the pyproject.toml
+        num_supernodes=10,  # equivalent to setting `num-supernodes` in the Flower Configuration
     )
 
 With ``run_simulation``, you can also control the amount of resources for your
