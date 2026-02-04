@@ -32,7 +32,6 @@ jobs:
       - name: Install docs dependencies
         run: |
           cd framework
-          python -m poetry add ../datasets
           python -m poetry install
       - name: Update HTML theme options
         run: python dev/update-html-themes.py
