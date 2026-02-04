@@ -49,7 +49,7 @@ def create(
         ),
     ] = Path("./federated_dataset"),
 ) -> None:
-    """Create a federated dataset and save it to disk.
+    """Create a federated dataset and save each partition in a sub-directory.
 
     This command is used to generate federated datasets
     for demo purposes and currently supports only IID
