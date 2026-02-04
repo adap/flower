@@ -30,7 +30,7 @@ def create(
         str,
         typer.Option(
             "--name",
-            help="Hugging Face dataset identifier (e.g., 'username/dataset_name').",
+            help="Hugging Face dataset identifier (e.g., 'ylecun/mnist').",
         ),
     ],
     num_partitions: Annotated[
