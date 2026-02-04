@@ -303,14 +303,13 @@ vision = [
 [package.metadata]
 requires-dist = [
     { name = "datasets", specifier = ">=2.14.6,<5.0.0" },
-    { name = "librosa", marker = "extra == 'audio'", specifier = ">=0.10.0.post2" },
     { name = "matplotlib", specifier = ">=3.7.5,<4.0.0" },
     { name = "numpy", specifier = ">=1.26.0,<3.0.0" },
     { name = "pillow", marker = "extra == 'vision'", specifier = ">=6.2.1" },
     { name = "seaborn", specifier = ">=0.13.0,<0.14.0" },
     { name = "soundfile", marker = "extra == 'audio'", specifier = ">=0.12.1" },
-    { name = "torch", marker = "python_full_version < '3.14' and extra == 'audio'", specifier = ">=2.8.0" },
-    { name = "torchcodec", marker = "python_full_version < '3.14' and extra == 'audio'", specifier = ">=0.7.0" },
+    { name = "torch", marker = "extra == 'audio'", specifier = ">=2.8.0" },
+    { name = "torchcodec", marker = "extra == 'audio'", specifier = ">=0.7.0" },
     { name = "tqdm", specifier = ">=4.66.1,<5.0.0" },
 ]
 provides-extras = ["vision", "audio"]

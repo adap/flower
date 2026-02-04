@@ -54,12 +54,7 @@ dependencies = [
 
 [project.optional-dependencies]
 vision = ["pillow>=6.2.1"]
-audio = [
-    "soundfile>=0.12.1; python_version < '3.12'",
-    "librosa>=0.10.0.post2; python_version < '3.12'",
-    "torch>=2.8.0; python_version < '3.12'",
-    "torchcodec>=0.7.0; python_version < '3.12'",
-]
+audio = ["soundfile>=0.12.1", "torch>=2.8.0", "torchcodec>=0.7.0"]
 
 [project.urls]
 Homepage = "https://flower.ai"

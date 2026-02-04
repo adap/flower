@@ -28,11 +28,6 @@ For audio datasets (e.g. Speech Command) ``flwr-datasets`` should be installed w
 
   python -m pip install "flwr-datasets[audio]"
 
-.. note::
-
-  The ``audio`` extra currently supports Python ``<3.12`` due to upstream dependency
-  constraints.
-
 Install directly from GitHub (pip)
 ----------------------------------
 
