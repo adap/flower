@@ -32,8 +32,8 @@ jobs:
       - name: Install Flower Framework and Flower Datasets with dependencies
         run: |
           cd framework
-          python -m poetry add ../datasets
           python -m poetry install
+          python -m pip install -e ../datasets
       - name: Build docs
         run: ./dev/build-docs.sh ${{ github.ref == 'refs/heads/main' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork }}
       - name: Deploy docs
