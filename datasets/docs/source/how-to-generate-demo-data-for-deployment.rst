@@ -34,7 +34,7 @@ The ``flwr-datasets create`` command enables you to download a dataset,
 partition it, and save each partition to disk in a single step. For complete
 details on all available options, see the :doc:`ref-api-cli`.
 
-For example, to generate demo data from the MNIST dataset with five
+For example, to generate demo data from the `MNIST dataset <https://huggingface.co/datasets/ylecun/mnist>`_ with five
 partitions and store the result in the ``./demo_data`` directory (it will be created if it doesn't exist), run the
 following command in your terminal:
 
