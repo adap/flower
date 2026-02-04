@@ -15,6 +15,7 @@
 """Test for Flower Datasets command line interface `create` command."""
 
 
+import re
 from dataclasses import dataclass
 from pathlib import Path
 from types import SimpleNamespace
@@ -57,6 +58,52 @@ def test_create_raises_on_non_positive_num_partitions(tmp_path: Path) -> None:
     """Ensure `create` fails when `num_partitions` is not a positive integer."""
     with pytest.raises(click.ClickException, match="positive integer"):
         create(dataset_name="user/ds", num_partitions=0, out_dir=tmp_path)
+
+
+def test_create_raises_click_exception_when_dataset_load_fails(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Ensure `create` raises a user-friendly error when dataset loading fails.
+
+    This covers cases like:
+    - dataset does not exist on the Hugging Face Hub
+    - network access/authentication issues
+    - other upstream HF/Datasets failures
+    """
+    out_dir = tmp_path / "out"
+    dataset_name = "does-not-exist/dataset"
+
+    # Avoid overwrite prompt path
+    monkeypatch.setattr(Path, "exists", lambda _self: False)
+
+    # Avoid touching the real filesystem in this unit test
+    monkeypatch.setattr(
+        Path, "mkdir", lambda _self, _parents=False, _exist_ok=False: None
+    )
+
+    # Mock partitioner
+    monkeypatch.setattr(
+        create_module,
+        "IidPartitioner",
+        lambda *, num_partitions: SimpleNamespace(num_partitions=num_partitions),
+    )
+
+    # Make FederatedDataset construction fail (simulates "dataset not found"/network issues)
+    def _raise_fds(
+        *, dataset: str, partitioners: dict[str, object]
+    ) -> _FakeFederatedDataset:
+        raise RuntimeError("upstream failure")
+
+    monkeypatch.setattr(create_module, "FederatedDataset", _raise_fds)
+
+    expected_msg = (
+        f"Dataset '{dataset_name}' could not be found on the Hugging Face Hub or "
+        "network access is unavailable. "
+        "Please verify the dataset identifier and your connection."
+    )
+
+    with pytest.raises(click.ClickException, match=re.escape(expected_msg)):
+        create(dataset_name=dataset_name, num_partitions=2, out_dir=out_dir)
 
 
 @dataclass(frozen=True)
