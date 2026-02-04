@@ -211,8 +211,13 @@ class FeatureElectionStrategy(Strategy):
             if not self.cached_client_selections:
                 logger.error("No cached votes for tuning!")
                 return []
-            mask = self._aggregate_selections(self.cached_client_selections)
-            payload["feature_mask"] = Array(mask.astype(np.float32))
+            if self.global_feature_mask is not None:
+                payload["feature_mask"] = Array(
+                    self.global_feature_mask.astype(np.float32)
+                )
+            else:
+                mask = self._aggregate_selections(self.cached_client_selections)
+                payload["feature_mask"] = Array(mask.astype(np.float32))
         else:
             train_config["phase"] = "fl_training"
             for k, v in arrays.items():
@@ -381,20 +386,23 @@ class FeatureElectionStrategy(Strategy):
             logger.warning("No valid feature selections received")
             return None, None
 
+        # Compute the global mask with the INITIAL freedom_degree
+        # This mask will be evaluated in the first tuning round
         self.global_feature_mask = self._aggregate_selections(
             self.cached_client_selections
         )
         self._calculate_statistics()
 
-        if self.tuning_rounds > 0:
-            self.tuning_history.append(
-                {
-                    "freedom_degree": self.freedom_degree,
-                    "score": 0.0,
-                    "num_features_selected": int(np.sum(self.global_feature_mask)),
-                }
-            )
-            self.freedom_degree = self._next_freedom_degree(first_step=True)
+        # The first tuning round (Round 2) will:
+        #   1. Evaluate the current freedom_degree with clients
+        #   2. Record the actual score in tuning_history
+        #   3. Then compute the next freedom_degree
+
+        logger.info(
+            f"Feature election complete. Initial FD={self.freedom_degree:.4f}, "
+            f"selected {int(np.sum(self.global_feature_mask))} features. "
+            f"Will be evaluated in first tuning round."
+        )
 
         return (
             ArrayRecord(
@@ -436,15 +444,34 @@ class FeatureElectionStrategy(Strategy):
             }
         )
 
-        if server_round < 1 + self.tuning_rounds:
-            self.freedom_degree = self._next_freedom_degree(first_step=False)
+        # Determine if we should compute next freedom_degree or finalize
+        is_last_tuning_round = server_round >= 1 + self.tuning_rounds
+
+        if not is_last_tuning_round:
+            # Compute next freedom_degree for the next tuning round
+            # first_step=True only when this is the very first entry in history
+            is_first_step = len(self.tuning_history) == 1
+            self.freedom_degree = self._next_freedom_degree(first_step=is_first_step)
+
+            # Recompute global mask with the NEW freedom_degree
+            self.global_feature_mask = self._aggregate_selections(
+                self.cached_client_selections
+            )
+            self._calculate_statistics()
+
+            logger.info(
+                f"Next tuning round will evaluate FD={self.freedom_degree:.4f} "
+                f"({int(np.sum(self.global_feature_mask))} features)"
+            )
         else:
+            # Last tuning round - select the best freedom_degree
             best_entry = max(self.tuning_history, key=lambda x: x["score"])
             best_fd = best_entry["freedom_degree"]
             best_score = best_entry["score"]
             logger.info(
                 f"Tuning complete. Best: FD={best_fd:.4f} (score={best_score:.4f})"
             )
+            # Set to best and recompute final mask
             self.freedom_degree = best_fd
             self.global_feature_mask = self._aggregate_selections(
                 self.cached_client_selections
