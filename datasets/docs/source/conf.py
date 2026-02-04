@@ -54,6 +54,7 @@ extensions = [
     "sphinx.ext.graphviz",
     "sphinxarg.ext",
     "myst_parser",
+    "sphinx_click",
     "sphinx_copybutton",
     "sphinx_design",
     "sphinxcontrib.mermaid",
