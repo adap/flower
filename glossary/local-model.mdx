@@ -1,0 +1,32 @@
+---
+title: "Local Model"
+description: "A local model is the model state held by a client, often initialized from the global model and optionally personalized."
+date: "2026-02-03"
+author:
+  name: "Flower Team"
+  position: "Maintainers"
+  website: "https://flower.ai/"
+related:
+  - text: "Global Model"
+    link: "/glossary/global-model"
+  - text: "Personalized Federated Learning (pFL)"
+    link: "/glossary/personalized-federated-learning"
+  - text: "Inference"
+    link: "/glossary/inference"
+---
+
+A local model is the model state held by a client. It is often initialized from the current global model and then updated locally for training, evaluation, personalization, or inference.
+
+## Why it matters
+- Enables on-device or on-prem inference without sending user data away.
+- Enables personalization strategies where clients adapt a shared model to local needs.
+
+## In federated settings
+Local models may diverge across clients due to non-IID data, different compute budgets, or explicit personalization.
+
+## Common pitfalls
+- “Local model performance” is not the same as “global model performance”; be explicit about which you report.
+- Local adaptation can overfit if local datasets are small.
+
+## In Flower
+In Flower, local adaptation is typically implemented in a [ClientApp](/glossary/clientapp) using a global model provided by the server-side [Strategy](/glossary/strategy), in both the [simulation runtime](/glossary/simulation-runtime) and the [deployment runtime](/glossary/deployment-runtime).

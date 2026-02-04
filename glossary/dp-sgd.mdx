@@ -1,0 +1,29 @@
+---
+title: "DP-SGD"
+description: "DP-SGD trains with differential privacy by clipping gradients and adding noise before updating model parameters."
+date: "2026-02-03"
+author:
+  name: "Flower Team"
+  position: "Maintainers"
+  website: "https://flower.ai/"
+related:
+  - text: "Differential Privacy (DP)"
+    link: "/glossary/differential-privacy"
+  - text: "Privacy Budget (ε, δ)"
+    link: "/glossary/privacy-budget"
+---
+
+DP-SGD (Differentially Private Stochastic Gradient Descent) is a method for training models with differential privacy by clipping gradients to bound sensitivity and then adding noise before applying updates.
+
+## Why it matters
+- Common building block for DP training in deep learning.
+
+## In federated settings
+DP-SGD ideas often appear in federated learning as “clip then add noise” applied to gradients or updates, with privacy accounting across rounds.
+
+## Common pitfalls
+- Clipping norms and noise levels strongly affect accuracy.
+- Privacy accounting must include composition across rounds and training steps.
+
+## In Flower
+In Flower, DP-SGD-style training is typically implemented in a [ClientApp](/glossary/clientapp) and coordinated by the server-side [Strategy](/glossary/strategy) in a [ServerApp](/glossary/serverapp).

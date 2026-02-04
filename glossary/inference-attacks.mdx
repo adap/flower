@@ -1,0 +1,29 @@
+---
+title: "Inference Attacks"
+description: "Inference attacks attempt to learn sensitive information from model outputs, gradients, or federated updates."
+date: "2026-02-03"
+author:
+  name: "Flower Team"
+  position: "Maintainers"
+  website: "https://flower.ai/"
+related:
+  - text: "Threat Model"
+    link: "/glossary/threat-model"
+  - text: "Differential Privacy (DP)"
+    link: "/glossary/differential-privacy"
+---
+
+Inference attacks aim to extract information about training data or participants from a model or training signals. Examples include membership inference (was a record used?), model inversion/reconstruction (recover features or samples), and property inference (learn dataset attributes).
+
+## Why it matters
+- Federated systems can leak information through updates and metrics even without raw data sharing.
+
+## In federated settings
+Attack surface includes model updates, intermediate statistics, evaluation metrics, and even participation patterns.
+
+## Common pitfalls
+- Assuming that “no raw data leaves the device” implies no leakage.
+- Overlooking that repeated rounds provide repeated opportunities for inference.
+
+## In Flower
+In Flower, defenses against inference attacks are typically applied in client-side code ([ClientApp](/glossary/clientapp)) and/or in server-side aggregation ([Strategy](/glossary/strategy)), depending on the threat model.

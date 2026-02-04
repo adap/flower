@@ -1,27 +1,38 @@
 ---
 title: "Flower Datasets"
-description: "Flower Datasets is a library that enables the creation of datasets for federated learning by partitioning centralized datasets to exhibit heterogeneity or using naturally partitioned datasets."
+description: "Flower Datasets helps create and study federated datasets by partitioning centralized datasets or using naturally partitioned data sources."
 date: "2024-05-24"
 author:
   name: "Adam Narożniak"
   position: "ML Engineer at Flower Labs"
   website: "https://discuss.flower.ai/u/adam.narozniak/summary"
 related:
+    - text: "Heterogeneity in Federated Learning"
+      link: "/glossary/heterogeneity-in-federated-learning"
+    - text: "Non-IID Data"
+      link: "/glossary/non-iid-data"
     - text: "Flower Datasets documentation"
       link: "https://flower.ai/docs/datasets/"
     - text: "Flower Datasets GitHub page"
       link: "https://github.com/adap/flower/tree/main/datasets"
 ---
 
-Flower Datasets is a library that enables the creation of datasets for federated learning/analytics/evaluation by partitioning centralized datasets to exhibit heterogeneity or using naturally partitioned datasets. It was created by the Flower Labs team, which also created Flower - A Friendly Federated AI Framework.
+Flower Datasets is a library for working with datasets in federated settings. It supports creating federated-style partitions from centralized datasets and working with datasets that are naturally partitioned across sources.
 
-The key features include:
-* downloading datasets (HuggingFace `datasets` are used under the hood),
-* partitioning (simulate different levels of heterogeneity by using one of the implemented partitioning schemes or create your own),
-* creating centralized datasets (easily utilize centralized versions of the datasets),
-* reproducibility (repeat the experiments with the same results),
-* visualization (display the created partitions),
-* ML agnostic (easy integration with all popular ML frameworks).
+## Why it matters
+Federated methods are strongly affected by how data is distributed across clients. Being able to create reproducible partitions and study different types of heterogeneity is essential for meaningful experiments and comparisons.
 
+## In federated settings
+Flower Datasets supports:
+- **Simulated federated partitions**: split a centralized dataset into per-client partitions that exhibit different kinds of statistical heterogeneity (for example label skew or quantity skew).
+- **Naturally partitioned datasets**: datasets that already come separated by client/site/user, which can better reflect real deployments.
 
-It is a supplementary library to Flower, with which it integrates easily.
+This makes it useful for federated learning, federated evaluation, and federated analytics experiments.
+
+## Common pitfalls
+- Over-interpreting results from a single partitioning scheme; different heterogeneity patterns can change conclusions.
+- Treating simulated partitions as identical to real-world partitions (availability, preprocessing, and non-stationarity are often missing).
+- Failing to document partitioning parameters, making experiments hard to reproduce.
+
+## In Flower
+In Flower, Flower Datasets is commonly used in the [simulation runtime](/glossary/simulation-runtime) to create reproducible, heterogeneous client partitions for benchmarking [Strategy](/glossary/strategy) behavior.

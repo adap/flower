@@ -1,0 +1,32 @@
+---
+title: "Global Model"
+description: "The global model is the shared model state maintained by the server and distributed to clients during federated rounds."
+date: "2026-02-03"
+author:
+  name: "Flower Team"
+  position: "Maintainers"
+  website: "https://flower.ai/"
+related:
+  - text: "Local Model"
+    link: "/glossary/local-model"
+  - text: "Model Update"
+    link: "/glossary/model-update"
+  - text: "Federated Learning"
+    link: "/glossary/federated-learning"
+---
+
+The global model is the shared model state maintained by the server (or coordinator) and distributed to clients for training or evaluation. After aggregation, the global model is updated and becomes the starting point for the next round.
+
+## Why it matters
+- It is the main vehicle for learning across all clients.
+- It is what is typically deployed when a single model must serve everyone.
+
+## In federated settings
+The global model is often updated from partial participation, so each update reflects only a subset of the population.
+
+## Common pitfalls
+- A single global model can underperform for minority cohorts; personalization may be needed.
+- Treating the global model as “privacy-preserving” by default is incorrect without defenses.
+
+## In Flower
+In Flower, the global model is typically maintained in a [ServerApp](/glossary/serverapp) by the server-side [Strategy](/glossary/strategy) and distributed to clients for execution in both the [simulation runtime](/glossary/simulation-runtime) and the [deployment runtime](/glossary/deployment-runtime).

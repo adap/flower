@@ -1,0 +1,32 @@
+---
+title: "SuperLink"
+description: "SuperLink is Flower’s long-running server-side process that forwards tasks to SuperNodes and receives results back."
+date: "2026-02-03"
+author:
+  name: "Flower Team"
+  position: "Maintainers"
+  website: "https://flower.ai/"
+related:
+  - text: "SuperNode"
+    link: "/glossary/supernode"
+  - text: "SuperExec"
+    link: "/glossary/superexec"
+  - text: "ServerApp"
+    link: "/glossary/serverapp"
+---
+
+SuperLink is a long-running Flower process on the server side responsible for forwarding task instructions to clients (SuperNodes) and receiving task results back.
+
+## Why it matters
+- Handles durable connectivity and routing so application code can focus on federated logic.
+- Enables multi-run scenarios where many app processes share the same federation runtime.
+
+## In federated settings
+The coordination layer must handle partial participation, retries, and observability without requiring application code to manage networking details.
+
+## Common pitfalls
+- Confusing SuperLink (infrastructure) with “server” as a federated learning concept; the server also includes project-specific orchestration logic.
+- Treating the communication layer as the full security story; authentication and authorization still matter.
+
+## In Flower
+In Flower, SuperLink coordinates with [SuperExec](/glossary/superexec) to schedule a [ServerApp](/glossary/serverapp) and communicates with [SuperNode](/glossary/supernode) processes for client-side execution.

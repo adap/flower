@@ -1,0 +1,29 @@
+---
+title: "Vertical Federated Learning"
+description: "Vertical FL combines different feature sets for overlapping entities across parties, typically requiring secure protocols."
+date: "2026-02-03"
+author:
+  name: "Flower Team"
+  position: "Maintainers"
+  website: "https://flower.ai/"
+related:
+  - text: "Horizontal Federated Learning"
+    link: "/glossary/horizontal-federated-learning"
+  - text: "Split Learning"
+    link: "/glossary/split-learning"
+---
+
+Vertical federated learning is the setting where different parties hold different feature sets (different columns) for overlapping entities (shared users/customers). Training requires coordinating across parties while aligning entity identities and protecting sensitive features.
+
+## Why it matters
+- Enables learning when no single party has all the relevant features.
+
+## In federated settings
+Vertical FL typically cannot use simple weight averaging because data is partitioned by features, not by samples. It often relies on secure computation, split learning-style designs, or specialized protocols.
+
+## Common pitfalls
+- Entity alignment and governance are major practical challenges.
+- Privacy and leakage risks can be higher due to cross-party feature correlation.
+
+## In Flower
+In Flower, vertical FL typically requires specialized protocol work in [ServerApp](/glossary/serverapp)/[ClientApp](/glossary/clientapp) beyond standard FedAvg-style [Strategy](/glossary/strategy) workflows.

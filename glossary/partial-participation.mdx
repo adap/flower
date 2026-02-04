@@ -1,0 +1,30 @@
+---
+title: "Partial Participation"
+description: "Partial participation means only a subset of clients contributes in each round, even if many are eligible overall."
+date: "2026-02-03"
+author:
+  name: "Flower Team"
+  position: "Maintainers"
+  website: "https://flower.ai/"
+related:
+  - text: "Client Selection"
+    link: "/glossary/client-selection"
+  - text: "Scalability"
+    link: "/glossary/scalability"
+---
+
+Partial participation means that only a subset of all eligible clients contributes updates in each federated round. This is common when the number of clients is large or availability is limited.
+
+## Why it matters
+- Makes federated learning feasible at scale.
+- Changes convergence behavior and variance of updates.
+
+## In federated settings
+Partial participation is often parameterized as a fraction of clients per round. It interacts with client selection, dropouts, and weighting.
+
+## Common pitfalls
+- Mistaking “partial participation” (by design) for “dropout” (by failure).
+- Overfitting to the frequently participating subset.
+
+## In Flower
+In Flower, partial participation is configured in the server-side [Strategy](/glossary/strategy) and can be explored in both the [simulation runtime](/glossary/simulation-runtime) and the [deployment runtime](/glossary/deployment-runtime).

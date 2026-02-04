@@ -1,0 +1,30 @@
+---
+title: "Cross-silo Federated Learning"
+description: "Cross-silo FL trains across a small number of organizations or sites with relatively stable connectivity and larger datasets."
+date: "2026-02-03"
+author:
+  name: "Flower Team"
+  position: "Maintainers"
+  website: "https://flower.ai/"
+related:
+  - text: "Cross-device Federated Learning"
+    link: "/glossary/cross-device-federated-learning"
+  - text: "Threat Model"
+    link: "/glossary/threat-model"
+---
+
+Cross-silo federated learning trains across a small number of data silos such as hospitals, banks, or data centers. Compared to cross-device FL, participants are typically more reliable, have better connectivity, and hold larger datasets.
+
+## Why it matters
+- Enables collaboration across organizations without pooling sensitive data.
+- Often provides stronger operational control and observability than cross-device FL.
+
+## In federated settings
+Cross-silo deployments often have explicit governance, agreements, and stable participation schedules.
+
+## Common pitfalls
+- Assuming cross-silo FL is “easy” because clients are stable; heterogeneity and privacy/security still apply.
+- Evaluation can be politically sensitive; define aggregation and reporting carefully.
+
+## In Flower
+In Flower, cross-silo deployments typically run in the [deployment runtime](/glossary/deployment-runtime), coordinating long-running [SuperNode](/glossary/supernode) processes at sites through a central [SuperLink](/glossary/superlink).

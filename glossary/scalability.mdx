@@ -1,6 +1,6 @@
 ---
 title: "Scalability"
-description: "Scalability ensures systems grow with demand. In Federated Learning, it involves efficiently managing dynamic clients and diverse devices. Flower supports large-scale FL on various devices/ resources."
+description: "Scalability is the ability to handle more clients, more rounds, and more workload without unacceptable cost or performance degradation."
 date: "2024-05-23"
 author:
   name: "Daniel Nata Nugraha"
@@ -9,14 +9,36 @@ author:
   website: "https://www.linkedin.com/in/daniel-nugraha/"
   github: "github.com/danielnugraha"
 related:
-  - text: "Flower Paper"
-    link: "https://arxiv.org/pdf/2007.14390"
   - text: "Federated Learning"
     link: "/glossary/federated-learning"
-  - text: "Tutorial: What is Federated Learning?"
-    link: "/docs/framework/tutorial-series-what-is-federated-learning.html"
+  - text: "Partial Participation"
+    link: "/glossary/partial-participation"
+  - text: "Communication Efficiency"
+    link: "/glossary/communication-efficiency"
+  - text: "SuperLink"
+    link: "/glossary/superlink"
+  - text: "SuperNode"
+    link: "/glossary/supernode"
+  - text: "Flower Paper"
+    link: "https://arxiv.org/pdf/2007.14390"
 ---
 
-Scalability is the ability of a system, network, or process to accommodate an increasing amount of work. This involves adding resources (like servers) or optimizing existing ones to maintain or enhance performance. There are two main types of scalability: horizontal scalability (adding more nodes, such as servers) and vertical scalability (adding more power to existing nodes, like increasing CPU or RAM). Ideally, a scalable system can do both, seamlessly adapting to increased demands without significant downtime. Scalability is essential for businesses to grow while ensuring services remain reliable and responsive.
-Scalability in Federated Learning involves managing dynamic client participation, as clients may join or leave unpredictably. This requires algorithms that adapt to varying availability and efficiently aggregate updates from numerous models. Additionally, scalable federated learning systems must handle heterogeneous client devices with different processing powers, network conditions, and data distributions, ensuring balanced contributions to the global model.
-Scalability in Flower means efficiently conducting large-scale federated learning (FL) training and evaluation. Flower enables researchers to launch FL experiments with many clients using reasonable computing resources, such as a single machine or a multi-GPU rack. Flower supports scaling workloads to millions of clients, including diverse devices like Raspberry Pis, Android and iOS mobile devices, laptops, etc. It offers complete control over connection management and includes a virtual client engine for large-scale simulations.
+Scalability is the ability of a system to handle increasing workload by adding resources and/or improving efficiency. In federated AI, “workload” can mean more clients, more rounds, larger models, more concurrent runs, or more evaluation/analytics tasks.
+
+## Why it matters
+Federated systems are often motivated by scale: many participants, geographically distributed deployments, and repeated coordination over time. If the system doesn’t scale, cost and latency can dominate and the federation becomes impractical.
+
+## In federated settings
+Scalability has both **algorithmic** and **systems** dimensions:
+- **Algorithmic scalability**: communication cost per round, number of rounds needed, model/update size, and techniques like **partial participation** and update compression.
+- **Systems scalability**: connection management, task scheduling, handling stragglers and dropouts, and observability across a large fleet.
+
+Scaling also changes what “representative” means: who participates (and who does not) can influence both model quality and reported metrics.
+
+## Common pitfalls
+- Assuming that an algorithm that scales in simulation will behave the same in deployment. Real networks and availability patterns can dominate.
+- Optimizing for throughput at the expense of representativeness (selection bias toward “fast” or “always online” clients).
+- Ignoring end-to-end cost (communication, retries, storage, monitoring) when evaluating scalability.
+
+## In Flower
+In Flower, scalability is addressed in both the [simulation runtime](/glossary/simulation-runtime) and the [deployment runtime](/glossary/deployment-runtime), with coordination handled by [SuperLink](/glossary/superlink)/[SuperNode](/glossary/supernode) and orchestration defined by a server-side [Strategy](/glossary/strategy).

@@ -1,0 +1,33 @@
+---
+title: "Federated Evaluation"
+description: "Federated evaluation measures model performance across clients by aggregating locally computed metrics."
+date: "2026-02-03"
+author:
+  name: "Flower Team"
+  position: "Maintainers"
+  website: "https://flower.ai/"
+related:
+  - text: "Evaluation"
+    link: "/glossary/evaluation"
+  - text: "Federated AI"
+    link: "/glossary/federated-ai"
+  - text: "Non-IID Data"
+    link: "/glossary/non-iid-data"
+---
+
+Federated evaluation is the evaluation of a model across multiple clients by having each client compute metrics locally on its own data and then aggregating the results. This allows assessing generalization across different client data distributions without centralizing evaluation data.
+
+## Why it matters
+- Reveals how a model performs across heterogeneous populations and environments.
+- Helps detect regressions that only appear on specific client cohorts.
+
+## In federated settings
+Metric aggregation must be defined carefully. For example, averaging per-client accuracies (macro average) is different from weighting by number of examples (micro average).
+
+## Common pitfalls
+- Selection bias: evaluating only “available” clients may misrepresent the population.
+- Inconsistent preprocessing across clients can make metrics incomparable.
+- Aggregating non-linear metrics (like F1) is subtle; define what is aggregated.
+
+## In Flower
+In Flower, federated evaluation is controlled by the server-side [Strategy](/glossary/strategy) and executed by [ClientApp](/glossary/clientapp) processes, with metrics aggregation defined in a [ServerApp](/glossary/serverapp).

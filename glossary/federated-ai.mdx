@@ -1,0 +1,35 @@
+---
+title: "Federated AI"
+description: "Federated AI is the umbrella for running AI workloads (training, evaluation, analytics) across multiple data holders without centralizing raw data."
+date: "2026-02-03"
+author:
+  name: "Flower Team"
+  position: "Maintainers"
+  website: "https://flower.ai/"
+related:
+  - text: "Federated Learning"
+    link: "/glossary/federated-learning"
+  - text: "Federated Evaluation"
+    link: "/glossary/federated-evaluation"
+  - text: "Federated Analytics"
+    link: "/glossary/federated-analytics"
+  - text: "Threat Model"
+    link: "/glossary/threat-model"
+---
+
+Federated AI is an umbrella term for executing AI workloads across multiple data holders without moving raw data into a single central location. Instead, computation is brought to where the data lives, and only limited results—such as model updates, metrics, or aggregate statistics—are shared.
+
+## Why it matters
+- Enables collaboration when data sharing is restricted (privacy, regulation, ownership).
+- Reduces the need to copy or pool large datasets.
+- Makes it possible to learn from diverse, real-world data sources.
+
+## In federated settings
+Federated AI includes federated learning (training models), federated evaluation (measuring model performance across clients), and federated analytics (computing aggregate statistics across clients).
+
+## Common pitfalls
+- “Federated” does not automatically mean “private”; updates and metrics can still leak information.
+- System design (threat model, aggregation, access control) matters as much as the ML algorithm.
+
+## In Flower
+In Flower, federated workloads are orchestrated via a server-side [Strategy](/glossary/strategy) and run in both the [simulation runtime](/glossary/simulation-runtime) and the [deployment runtime](/glossary/deployment-runtime).

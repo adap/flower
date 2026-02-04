@@ -1,0 +1,32 @@
+---
+title: "Secure Aggregation"
+description: "Secure aggregation is a protocol that lets the server learn only an aggregate of client contributions, not individual updates."
+date: "2026-02-03"
+author:
+  name: "Flower Team"
+  position: "Maintainers"
+  website: "https://flower.ai/"
+related:
+  - text: "Threat Model"
+    link: "/glossary/threat-model"
+  - text: "Model Update"
+    link: "/glossary/model-update"
+  - text: "Differential Privacy (DP)"
+    link: "/glossary/differential-privacy"
+---
+
+Secure aggregation is a cryptographic protocol that allows a server to compute an aggregate (often a sum) of client contributions without learning any individual client’s contribution in the clear. The server only learns the final aggregate.
+
+## Why it matters
+- Reduces the risk of the server inspecting individual model updates.
+- Complements differential privacy and other privacy mechanisms.
+
+## In federated settings
+Secure aggregation is commonly used for aggregating model updates or analytics statistics. Many protocols must handle dropouts and partial participation.
+
+## Common pitfalls
+- Secure aggregation does not automatically prevent all leakage (the aggregate itself can still be sensitive).
+- Protocol complexity and dropout handling can be significant.
+
+## In Flower
+In Flower, secure aggregation is typically integrated into the aggregation path defined by the server-side [Strategy](/glossary/strategy), often paired with client-side changes in a [ClientApp](/glossary/clientapp) depending on the threat model.

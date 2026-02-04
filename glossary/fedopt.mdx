@@ -1,0 +1,30 @@
+---
+title: "FedOpt (Server-Side Optimization)"
+description: "FedOpt uses server-side optimizers to apply aggregated updates, often improving stability under heterogeneity."
+date: "2026-02-03"
+author:
+  name: "Flower Team"
+  position: "Maintainers"
+  website: "https://flower.ai/"
+related:
+  - text: "Federated Averaging (FedAvg)"
+    link: "/glossary/fedavg"
+  - text: "Aggregation"
+    link: "/glossary/aggregation"
+---
+
+FedOpt refers to a family of federated optimization methods where the server applies an optimizer (for example momentum or Adam-like updates) to the aggregated client updates, rather than directly replacing the global model with a simple average.
+
+## Why it matters
+- Can improve convergence and stability, especially with heterogeneity.
+- Provides additional knobs (server learning rate, momentum) for tuning.
+
+## In federated settings
+FedOpt typically treats the aggregated update as a direction (like a gradient estimate) and then updates the global model using an optimizer step.
+
+## Common pitfalls
+- Server optimizer hyperparameters can be sensitive.
+- Still requires careful handling of non-IID and partial participation.
+
+## In Flower
+In Flower, FedOpt-style updates are implemented in the server-side [Strategy](/glossary/strategy) and run in both the [simulation runtime](/glossary/simulation-runtime) and the [deployment runtime](/glossary/deployment-runtime).

@@ -1,40 +1,41 @@
 ---
 title: "Edge Computing"
-description: "Edge computing is a distributed computing concept of bringing compute and data storage as close as possible to the source of data generation and consumption by users."
+description: "Edge computing runs computation near where data is generated (devices, gateways) instead of only in centralized clouds."
 date: "2024-09-10"
 author:
   name: "Chong Shen Ng"
   position: "Research Engineer @ Flower Labs"
   website: "https://discuss.flower.ai/u/chongshenng"
   github: "github.com/chongshenng"
-related: 
+related:
   - text: "IoT"
     link: "/glossary/iot"
-  - text: "Run Flower using Docker"
-    link: "/docs/framework/docker/index.html"
-  - text: "Flower Clients in C++"
-    link: "/docs/examples/quickstart-cpp.html"
+  - text: "Cross-device Federated Learning"
+    link: "/glossary/cross-device-federated-learning"
+  - text: "Model Update"
+    link: "/glossary/model-update"
+  - text: "Heterogeneity in Federated Learning"
+    link: "/glossary/heterogeneity-in-federated-learning"
+  - text: "Deployment Runtime"
+    link: "/glossary/deployment-runtime"
   - text: "Federated Learning on Embedded Devices with Flower"
     link: "/docs/examples/embedded-devices.html"
 ---
 
-### Introduction to Edge Computing
+Edge computing is a distributed systems approach that places computation and often short-term storage close to where data is generated—on devices, gateways, or nearby servers—rather than sending everything to a centralized cloud. The goal is typically to reduce latency and bandwidth, improve resilience to connectivity issues, and keep more processing under local control.
 
-Edge computing is a distributed computing concept of bringing compute and data storage as close as possible to the source of data generation and consumption by users. By performing computation close to the data source, edge computing aims to address limitations typically encountered in centralized computing, such as bandwidth, latency, privacy, and autonomy.
+## Why it matters
+- Many real-world data sources are naturally “at the edge” (phones, sensors, industrial equipment).
+- Network constraints (latency, bandwidth, intermittent connectivity) often dominate system design.
+- Keeping computation local can reduce the need to move sensitive or high-volume data.
 
-Edge computing works alongside cloud and fog computing, but each serves different purposes. Cloud computing delivers on-demand resources like data storage, servers, analytics, and networking via the Internet. Fog computing, however, brings computing closer to devices by distributing communication and computation across clusters of IoT or edge devices. While edge computing is sometimes used interchangeably with fog computing, edge computing specifically handles data processing directly at or near the devices themselves, whereas fog computing distributes tasks across multiple nodes, bridging the gap between edge devices and the cloud.
+## In federated settings
+Federated AI workloads commonly run at the edge: clients perform local training, evaluation, or analytics and only share constrained outputs (for example [model updates](/glossary/model-update) or aggregate statistics). Edge deployments tend to have strong [system heterogeneity](/glossary/heterogeneity-in-federated-learning) (compute, memory, connectivity) and [partial participation](/glossary/partial-participation), which affects convergence, metric representativeness, and operational reliability.
 
-### Advantages and Use Cases of Edge Computing
+## Common pitfalls
+- Treating “edge” as synonymous with “private”: privacy is not guaranteed without explicit mechanisms and a clear threat model.
+- Underestimating operational constraints (background execution limits, power, flaky networks, updates).
+- Assuming edge computing implies federated learning; edge workloads can be centralized or federated depending on the coordination design.
 
-The key benefit of edge computing is that the volume of data moved is significantly reduced because computation runs directly on board the device on the acquired data. This reduces the amount of long-distance communication between machines, which improves latency and reduces transmissions costs. Examples of edge computing that benefit from offloading computation include:
-1. Smart watches and fitness monitors that measure live health metrics.
-2. Facial recognition and wake word detection on smartphones.
-3. Real-time lane departure warning systems in road transport that detect lane lines using on-board videos and sensors.
-
-### Federated Learning in Edge Computing
-
-When deploying federated learning systems, edge computing is an important component to consider. Edge computing typically take the role of "clients" in federated learning. In a healthcare use case, servers in different hospitals can train models on their local data. In mobile computing, smartphones perform local training (and inference) on user data such as for next word prediction.
-
-### Edge Computing with Flower
-
-With the Flower framework, you can easily deploy federated learning workflows and maximise the use of edge computing resources. Flower provides the infrastructure to perform federated learning, federated evaluation, and federated analytics, all in a easy, scalable and secure way. Start with our tutorial on running Federated Learning on Embedded Devices (link [here](https://github.com/adap/flower/tree/main/examples/embedded-devices)), which shows you how to run Flower on NVidia Jetson devices and Raspberry Pis as your edge compute.
+## In Flower
+In Flower, edge devices typically participate as [SuperNode](/glossary/supernode) instances in the [deployment runtime](/glossary/deployment-runtime), executing a [ClientApp](/glossary/clientapp) while a server-side [Strategy](/glossary/strategy) coordinates rounds; the same logic can be stress-tested at scale in the [simulation runtime](/glossary/simulation-runtime).

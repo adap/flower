@@ -1,0 +1,30 @@
+---
+title: "Personalized Federated Learning (pFL)"
+description: "Personalized FL aims to produce models tailored to each client (or cohort) rather than a single global model."
+date: "2026-02-03"
+author:
+  name: "Flower Team"
+  position: "Maintainers"
+  website: "https://flower.ai/"
+related:
+  - text: "Global Model"
+    link: "/glossary/global-model"
+  - text: "Local Model"
+    link: "/glossary/local-model"
+---
+
+Personalized federated learning (pFL) is a set of methods that aim to provide better client-specific performance than a single global model. Instead of optimizing only for an “average” client, pFL explicitly targets per-client or per-cohort adaptation.
+
+## Why it matters
+- A single global model can be suboptimal when clients are highly heterogeneous.
+- Personalization can improve fairness and user experience.
+
+## In federated settings
+Personalization can be achieved via fine-tuning, multi-task learning, clustered FL, shared representations, or partial model sharing.
+
+## Common pitfalls
+- Evaluation is harder: you must define whether you report global performance, average personalized performance, or worst-case performance.
+- Personalization can increase compute and storage requirements on clients.
+
+## In Flower
+In Flower, personalization is typically implemented in a [ClientApp](/glossary/clientapp), optionally coordinated by a server-side [Strategy](/glossary/strategy).

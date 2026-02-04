@@ -1,0 +1,32 @@
+---
+title: "Round"
+description: "A round is one iteration of federated coordination where selected clients receive a task and return results for aggregation."
+date: "2026-02-03"
+author:
+  name: "Flower Team"
+  position: "Maintainers"
+  website: "https://flower.ai/"
+related:
+  - text: "Client Selection"
+    link: "/glossary/client-selection"
+  - text: "Aggregation"
+    link: "/glossary/aggregation"
+  - text: "Model Update"
+    link: "/glossary/model-update"
+---
+
+A round is one iteration of a federated workflow in which a coordinator selects clients, sends them a task (often including a model), clients execute locally, and the results are aggregated to update the global state.
+
+## Why it matters
+- Rounds define the cadence of communication and coordination cost.
+- Many design choices (sampling, local computation, aggregation) happen at the round level.
+
+## In federated settings
+A typical training round includes: client selection → broadcasting the current global model/config → local training → sending model updates → aggregation.
+
+## Common pitfalls
+- Confusing rounds with epochs: epochs are passes over data; rounds are communication iterations.
+- Dropouts and stragglers can cause incomplete or delayed rounds.
+
+## In Flower
+In Flower, round orchestration is implemented in the server-side [Strategy](/glossary/strategy), running in both the [simulation runtime](/glossary/simulation-runtime) and the [deployment runtime](/glossary/deployment-runtime).

@@ -1,6 +1,6 @@
 ---
 title: "Model Training"
-description: "Model training is the process of teaching an algorithm to learn from data to make predictions or decisions."
+description: "Model training fits model parameters to data; in federated settings it is executed locally on clients and coordinated across rounds."
 date: "2024-07-12"
 author:
   name: "Yan Gao"
@@ -10,15 +10,39 @@ author:
 related:
   - text: "Federated Learning"
     link: "/glossary/federated-learning"
-  - text: "Server"
-    link: "/glossary/server"
-  - text: "Client"
-    link: "/glossary/client"
+  - text: "Round"
+    link: "/glossary/round"
+  - text: "Federated Averaging (FedAvg)"
+    link: "/glossary/fedavg"
+  - text: "FedProx"
+    link: "/glossary/fedprox"
+  - text: "SCAFFOLD"
+    link: "/glossary/scaffold"
+  - text: "Non-IID Data"
+    link: "/glossary/non-iid-data"
+  - text: "Heterogeneity in Federated Learning"
+    link: "/glossary/heterogeneity-in-federated-learning"
 ---
 
-Model training is a core component of developing machine learning (ML) systems, where an algorithm learns from data to make predictions or decisions. A typical model training process involves several key steps: dataset preparation, feature selection and engineering, choice of model based on the task (e.g., classification, regression), choice of training algorithm (e.g. optimizer), and model iteration for updating its weights and biases to minimize the loss function, which measures the difference between the predicted and actual outcomes on the training data. The traditional ML model training process typically involves considerable manual effort, whereas deep learning (DL) offers an end-to-end automated process.
+Model training is the process of fitting a model’s parameters to data by optimizing an objective (loss). In deep learning, this typically means iteratively updating parameters using gradient-based optimization.
 
-This approach assumes easy access to data and often requires substantial computational resources, depending on the size of the dataset and complexity of the model. However, large amounts of the data in the real world is distributed and protected due to privacy concerns, making it inaccessible for typical (centralized) model training. Federated learning (FL) migrates the model training from data center to local user ends. After local training, each participant sends only their model's updates (not the data) to a central server for aggregation. The updated global model is sent back to the participants for further rounds of local training and updates. This way, the model training benefits from diverse, real-world data without compromising individual data privacy.
+## Why it matters
+Training choices (data, model architecture, optimizer, hyperparameters) determine whether a model is accurate, robust, and suitable for production constraints.
 
-#### Model training in Flower
-Flower, a friendly FL framework, offers a wealth of model training examples and baselines tailored for federated environments. Please refer to the [examples](https://flower.ai/docs/examples/) and [baselines](https://flower.ai/docs/baselines/) documentation for more detailed information.
+## In federated settings
+In federated learning, training is executed **locally on clients** and coordinated across **rounds**. A typical round: clients receive the current global model, train locally for a bounded amount of work (for example a few epochs), and return a **model update** to the server for aggregation.
+
+Compared to centralized training, federated training must handle:
+- **non-IID data** across clients
+- system heterogeneity (different compute/network/availability)
+- partial participation and client dropouts
+
+These factors can cause “client drift” and instability; methods like **FedProx** or **SCAFFOLD** are examples of approaches that aim to mitigate such issues.
+
+## Common pitfalls
+- Using too many local epochs can reduce communication but worsen convergence under strong non-IID data.
+- Reporting only an average metric can hide poor performance for specific clients/cohorts.
+- Assuming privacy is guaranteed because data stays local; privacy requires explicit mechanisms and a clear threat model.
+
+## In Flower
+In Flower, model training is implemented in [ClientApp](/glossary/clientapp) code and orchestrated by a server-side [Strategy](/glossary/strategy) within a [ServerApp](/glossary/serverapp), in both the [simulation runtime](/glossary/simulation-runtime) and the [deployment runtime](/glossary/deployment-runtime).

@@ -1,0 +1,36 @@
+---
+title: "Simulation Runtime"
+description: "In Flower, the simulation runtime runs federated experiments without a physical fleet by simulating many clients on available compute."
+date: "2026-02-03"
+author:
+  name: "Flower Team"
+  position: "Maintainers"
+  website: "https://flower.ai/"
+related:
+  - text: "Strategy"
+    link: "/glossary/strategy"
+  - text: "Scalability"
+    link: "/glossary/scalability"
+  - text: "Partial Participation"
+    link: "/glossary/partial-participation"
+  - text: "Deployment Runtime"
+    link: "/glossary/deployment-runtime"
+  - text: "Round"
+    link: "/glossary/round"
+---
+
+The simulation runtime is a way to run federated experiments without a physical fleet of devices or sites by simulating many clients on available compute (for example a single machine, a cluster, or a multi-GPU setup). It is primarily used to iterate quickly, compare strategies, and stress-test federated behavior at scale.
+
+## Why it matters
+Simulation enables fast iteration on algorithms and orchestration logic, reproducible experiments, and early detection of scalability bottlenecks. It is often the fastest path to validate ideas before moving to the deployment runtime.
+
+## In federated settings
+Simulations can capture statistical heterogeneity, partial participation, and many scheduling patterns, but they often simplify or omit real-world effects such as network variability, device constraints, and non-stationary availability. Bridging simulation results to deployment requires careful assumptions and validation.
+
+## Common pitfalls
+- Over-trusting simulation metrics as production truth without validating on real deployments.
+- Using unrealistic client behavior (for example perfectly synchronous clients) that hides stragglers and dropouts.
+- Ignoring systems constraints (bandwidth, startup time, observability) that dominate in production.
+
+## In Flower
+In Flower, the same server-side [Strategy](/glossary/strategy) abstraction can be used in both the simulation runtime and the [deployment runtime](/glossary/deployment-runtime), which helps keep experiments close to production orchestration.

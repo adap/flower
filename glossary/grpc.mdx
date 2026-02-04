@@ -1,44 +1,35 @@
 ---
 title: "gRPC"
-description: "gRPC is an inter-process communication technology for building distributed apps. It allows developers to connect, invoke, operate, and debug apps as easily as making a local function call."
+description: "gRPC is an RPC framework often used for efficient, cross-language communication between distributed services."
 date: "2024-09-10"
 author:
   name: "Chong Shen Ng"
   position: "Research Engineer @ Flower Labs"
   website: "https://discuss.flower.ai/u/chongshenng"
   github: "github.com/chongshenng"
-related: 
-  - text: "Federated Learning"
-    link: "/glossary/federated-learning"
-  - text: "Tutorial: What is Federated Learning?"
-    link: "/docs/framework/tutorial-series-what-is-federated-learning.html"
+related:
   - text: "Protocol Buffers"
     link: "/glossary/protocol-buffers"
-  - text: "Google: gRPC - A true internet scale RPC framework"
-    link: "https://cloud.google.com/blog/products/gcp/grpc-a-true-internet-scale-rpc-framework-is-now-1-and-ready-for-production-deployments"
+  - text: "Interoperability"
+    link: "/glossary/interoperability"
+  - text: "Flower"
+    link: "/glossary/flower"
+  - text: "SuperLink"
+    link: "/glossary/superlink"
 ---
 
-### Introduction to gRPC
+gRPC is a framework for Remote Procedure Calls (RPC) that helps distributed services communicate efficiently. It is commonly paired with **Protocol Buffers** for defining interfaces and serializing messages.
 
-gRPC is an inter-process communication technology for building distributed applications. It allows you to connect, invoke, operate, and debug these applications as easily as making a local function call. It can efficiently connect services in and across data centers. It is also applicable in the last mile of distributed computing to connect devices, mobile applications, and browsers to backend services. Supporting various languages like C++, Go, Java, and Python, and platforms like Android and the web, gRPC is a versatile framework for any environment. 
+## Why it matters
+Federated systems are distributed systems: they rely on frequent, structured exchanges of tasks, configurations, model updates, and metrics. An efficient RPC layer can improve performance and simplify multi-language interoperability.
 
-Google first [open-sourced gRPC in 2016](https://cloud.google.com/blog/products/gcp/grpc-a-true-internet-scale-rpc-framework-is-now-1-and-ready-for-production-deployments), basing it on their internal remote procedure call (RPC) framework, Stubby, designed to handle tens of billions of requests per second. Built on HTTP/2 and protocol buffers, gRPC is a popular high-performance framework for developers to built micro-services. Notable early adopters of gRPC include Square, Netflix, CockroachDB, Cisco, and Juniper Networks.
+## In federated settings
+Network constraints (bandwidth, latency, intermittent connectivity) are often central bottlenecks in federated learning. Using an efficient transport and serialization format can reduce overhead, but the dominant cost is usually the size and frequency of exchanged payloads (for example model updates).
 
-By default, gRPC uses protocol buffers - Google's language-neutral and platform-neutral mechanism for efficiently serializing structured data - as its interface definition language and its underlying message interchange format. The recommended protocol buffer version as of writing is `proto3`, though other formats like JSON can also be used. 
+## Common pitfalls
+- Confusing “gRPC client/server” (networking roles) with “federated learning client/server” (participant roles). They are different concepts.
+- Assuming transport efficiency solves scalability; algorithmic communication efficiency (update size, number of rounds) often matters more.
+- Breaking compatibility when evolving message schemas without a migration strategy.
 
-### How does it work?
-
-gRPC operates similarly to many RPC systems. First, you specify the methods that can be called remotely on the server application, along with their parameters and return type. Then, with the appropriate code (more on this below), a gRPC client application can directly call these methods on the gRPC server application on a different machine as if it were a local object. Note that the definitions of client and server in gRPC is different to federated learning. For clarity, we will refer to client (server) applications in gRPC as gRPC client (server) applications.
-
-To use gRPC, follow these steps:
-1. Define structure for the data you want to serialize in a proto file definition. `*.proto`.
-2. Run the protocol buffer compiler `protoc` to generate to data access classes in the preferred language from the `*.proto` service definitions. This step generates the gRPC client and server code, as well as the regular protocol buffer code for handling your message types.
-3. Use the generated class in your application to populate, serialize, and retrieve the class protocol buffer messages.
-
-### Use cases in Federated Learning
-
-There are several reasons why gRPC is particularly useful in federated learning. First, clients and server in a federation rely on stable and efficient communication. Using Protobuf, a highly efficient binary serialization format, gRPC overcomes the bandwidth limitations in federated learning, such as in low-bandwidth mobile connections. Second, gRPC’s language-independent communication allows developers to use a variety of programming languages, enabling broader adoption for on-device executions.
-
-### gRPC in Flower
-
-gRPC's benefits for distributed computing make it a natural choice for the Flower framework. Flower uses gRPC as its primary communication protocol. To make it easier to build your federated learning systems, we have introduced high-level APIs to take care of the serialization and deserialization of the model parameters, configurations, and metrics. For more details on how to use Flower, follow our "Get started with Flower" tutorial here.
+## In Flower
+In Flower, gRPC is part of the communication stack used by the [SuperLink](/glossary/superlink) and [SuperNode](/glossary/supernode) components to exchange structured tasks and results.

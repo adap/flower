@@ -1,17 +1,45 @@
 ---
 title: "Client"
-description: "A client is any machine with local data that connects to a server, trains on received global model weights, and sends back updated weights. Clients may also evaluate global model weights."
+description: "A client is a participant that holds local data and compute, executes federated tasks, and returns results such as model updates or metrics."
 date: "2024-05-23"
 author:
   name: "Charles Beauville"
   position: "Machine Learning Engineer"
   website: "https://www.linkedin.com/in/charles-beauville/"
   github: "github.com/charlesbvll"
-related: 
+related:
+  - text: "Server"
+    link: "/glossary/server"
   - text: "Federated Learning"
     link: "/glossary/federated-learning"
+  - text: "Federated Evaluation"
+    link: "/glossary/federated-evaluation"
+  - text: "Federated Analytics"
+    link: "/glossary/federated-analytics"
+  - text: "Cross-device Federated Learning"
+    link: "/glossary/cross-device-federated-learning"
+  - text: "Cross-silo Federated Learning"
+    link: "/glossary/cross-silo-federated-learning"
   - text: "Tutorial: What is Federated Learning?"
     link: "/docs/framework/tutorial-series-what-is-federated-learning.html"
 ---
 
-Any machine with access to some data that connects to a server to perform Federated Learning. During each round of FL (if it is sampled), it will receive global model weights from the server, train on the data they have access to, and send the resulting trained weights back to the server. Clients can also be sampled to evaluate the global server weights on the data they have access to, this is called federated evaluation.
+A client is a participant in a federated system that holds local data and compute. Clients connect to a coordinating server to execute tasks (for example local training, evaluation, or analytics) and return results such as **model updates**, metrics, or aggregate statistics.
+
+## Why it matters
+The client boundary is the core reason federated approaches exist: data stays under the client’s control, while computation happens locally. Client constraints (compute, network, policy) shape what algorithms and deployments are feasible.
+
+## In federated settings
+Clients are not just “workers” like in centralized distributed training. In real federations, clients can be intermittently available, heterogeneous, and have data distributions that differ significantly from the overall population (non-IID). Common patterns include:
+- **Cross-device** clients (phones/edge devices) with small datasets and limited resources
+- **Cross-silo** clients (organizations/sites) with larger datasets and more stable participation
+
+Clients can participate in training rounds, federated evaluation, and federated analytics depending on the workload.
+
+## Common pitfalls
+- Confusing a federated learning **client** with a “gRPC client” (a networking term). In FL, “client” means a data holder/participant.
+- Assuming clients are trusted. Threat models often include malicious or faulty clients.
+- Comparing client metrics without ensuring consistent preprocessing and metric definitions.
+
+## In Flower
+In Flower, a federated client is typically a long-running [SuperNode](/glossary/supernode) in the [deployment runtime](/glossary/deployment-runtime). It launches [ClientApp](/glossary/clientapp) processes via [SuperExec](/glossary/superexec) to execute project-specific code.

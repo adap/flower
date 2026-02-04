@@ -1,0 +1,32 @@
+---
+title: "Differential Privacy (DP)"
+description: "Differential privacy provides a formal guarantee that limits what can be learned about individuals from released outputs."
+date: "2026-02-03"
+author:
+  name: "Flower Team"
+  position: "Maintainers"
+  website: "https://flower.ai/"
+related:
+  - text: "Privacy Budget (ε, δ)"
+    link: "/glossary/privacy-budget"
+  - text: "DP-SGD"
+    link: "/glossary/dp-sgd"
+  - text: "Threat Model"
+    link: "/glossary/threat-model"
+---
+
+Differential privacy (DP) is a mathematical framework for limiting what can be inferred about an individual from the output of an algorithm. A DP mechanism typically introduces randomized noise calibrated to the sensitivity of the computation.
+
+## Why it matters
+- Provides a principled, composable privacy guarantee.
+- Helps reason about privacy beyond “best effort” anonymization.
+
+## In federated settings
+DP can be applied to model training (for example by clipping and noising gradients/updates) and to analytics/evaluation metrics. Different threat models lead to different DP variants (client-level vs example-level, local vs central).
+
+## Common pitfalls
+- DP always introduces a utility–privacy trade-off; it is not “free privacy.”
+- Reporting “DP” without the privacy parameters and accounting is incomplete.
+
+## In Flower
+In Flower, DP is typically applied in a [ClientApp](/glossary/clientapp) (for example via clipping and noising) and/or in the server-side [Strategy](/glossary/strategy), depending on the threat model.

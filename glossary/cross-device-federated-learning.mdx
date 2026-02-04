@@ -1,0 +1,32 @@
+---
+title: "Cross-device Federated Learning"
+description: "Cross-device FL trains across many personal devices with intermittent connectivity and tight resource constraints."
+date: "2026-02-03"
+author:
+  name: "Flower Team"
+  position: "Maintainers"
+  website: "https://flower.ai/"
+related:
+  - text: "Cross-silo Federated Learning"
+    link: "/glossary/cross-silo-federated-learning"
+  - text: "Client Selection"
+    link: "/glossary/client-selection"
+  - text: "Non-IID Data"
+    link: "/glossary/non-iid-data"
+---
+
+Cross-device federated learning trains across a very large number of devices such as smartphones, laptops, or edge devices. Devices are often intermittently available, have limited compute/battery/network, and typically hold small, highly non-IID datasets.
+
+## Why it matters
+- Enables learning from real-world user behavior without collecting raw user data centrally.
+- Requires robust system design for unreliable participation.
+
+## In federated settings
+Cross-device FL commonly uses partial participation, strict client eligibility constraints (charging, Wi‑Fi), and careful privacy defenses.
+
+## Common pitfalls
+- Selection bias due to availability constraints.
+- High variance due to small local datasets.
+
+## In Flower
+In Flower, cross-device deployments typically run in the [deployment runtime](/glossary/deployment-runtime) with many [SuperNode](/glossary/supernode) participants coordinated by a central [SuperLink](/glossary/superlink).

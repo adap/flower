@@ -1,14 +1,44 @@
 ---
 title: "Federated Learning"
-description: "Federated Learning is a machine learning approach where model training occurs on decentralized devices, preserving data privacy and leveraging local computations."
+description: "Federated learning trains a shared model across multiple data holders by keeping data local and aggregating model updates."
 date: "2024-05-23"
 author:
   name: "Julian Rußmeyer"
   position: "UX/UI Designer"
   website: "https://www.linkedin.com/in/julian-russmeyer/"
-related: 
+related:
+  - text: "Federated AI"
+    link: "/glossary/federated-ai"
+  - text: "Round"
+    link: "/glossary/round"
+  - text: "Client Selection"
+    link: "/glossary/client-selection"
+  - text: "Model Update"
+    link: "/glossary/model-update"
+  - text: "Secure Aggregation"
+    link: "/glossary/secure-aggregation"
+  - text: "Differential Privacy (DP)"
+    link: "/glossary/differential-privacy"
   - text: "Tutorial: What is Federated Learning?"
     link: "/docs/framework/tutorial-series-what-is-federated-learning.html"
 ---
 
-Federated learning is an approach to machine learning in which the model is trained on multiple decentralized devices or servers with local data samples without exchanging them. Instead of sending raw data to a central server, updates to the model are calculated locally and only the model parameters are aggregated centrally. In this way, user privacy is maintained and communication costs are reduced, while collaborative model training is enabled.
+Federated learning is a way to train machine learning models collaboratively across multiple data holders (clients) without directly sharing raw data. A server coordinates training in **rounds**: selected clients train locally and send back a **model update**, which the server aggregates into a new **global model**.
+
+## Why it matters
+Federated learning enables training on data that is difficult or impossible to centralize (privacy, regulation, ownership, or sheer size). It can also reduce data transfer by sending model updates instead of raw examples.
+
+## In federated settings
+Federated learning is often “hub-and-spoke”: one server orchestrates many clients. Compared to standard distributed training, clients may be intermittently available, resource constrained, and have very different data distributions (non-IID). Typical design choices include client selection, local training duration (local steps/epochs), aggregation rule, and communication format (weights vs deltas vs gradients).
+
+Federated learning is commonly split into:
+- **Cross-device FL** (many unreliable devices, small local datasets)
+- **Cross-silo FL** (fewer organizations/sites, more stable participation)
+
+## Common pitfalls
+- **Privacy is not automatic**: updates and even metrics can leak information. Privacy requires explicit mechanisms (secure aggregation, differential privacy) and a clear threat model.
+- **Selection bias**: only training/evaluating on “available” clients can misrepresent the target population.
+- **Heterogeneity**: strong non-IID data and system variability can destabilize training and hide regressions for minority cohorts.
+
+## In Flower
+In Flower, federated learning is orchestrated by a server-side [Strategy](/glossary/strategy) within a [ServerApp](/glossary/serverapp) and executed by [ClientApp](/glossary/clientapp) processes in both the [simulation runtime](/glossary/simulation-runtime) and the [deployment runtime](/glossary/deployment-runtime).

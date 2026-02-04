@@ -1,38 +1,46 @@
 ---
-title: "Heterogenity in Federated Learning"
-description: "Heterogeneity is a core challenge in FL, and countering the problems that result from it is an active field of study. We distinguish statistical and structural heterogeneity."
+title: "Heterogeneity in Federated Learning"
+description: "Heterogeneity describes how clients differ in data, resources, and behavior—one of the core challenges in federated systems."
 date: "2024-05-24"
 author:
   name: "Adam Narożniak"
   position: "ML Engineer at Flower Labs"
   website: "https://discuss.flower.ai/u/adam.narozniak/summary"
+related:
+  - text: "Non-IID Data"
+    link: "/glossary/non-iid-data"
+  - text: "Cross-device Federated Learning"
+    link: "/glossary/cross-device-federated-learning"
+  - text: "Cross-silo Federated Learning"
+    link: "/glossary/cross-silo-federated-learning"
+  - text: "FedProx"
+    link: "/glossary/fedprox"
+  - text: "SCAFFOLD"
+    link: "/glossary/scaffold"
+  - text: "Personalized Federated Learning (pFL)"
+    link: "/glossary/personalized-federated-learning"
+  - text: "Flower Datasets"
+    link: "/glossary/flower-datasets"
 ---
 
-Heterogeneity is a core challenge in federated learning (FL), and countering the problems that result from it is an active field of study in FL. We can distinguish the following categories:
-* statistical heterogeneity (related to data),
-* structural heterogeneity (related to resources and infrastructure).
+Heterogeneity describes the many ways clients in a federation can differ—from their data distributions to their hardware and availability. It is one of the defining challenges of federated learning because these differences can destabilize optimization and hide uneven performance across clients.
 
-Real-world FL training can exhibit any combination of the problems described below.
+## Why it matters
+Federated systems rarely have “identical” clients. Heterogeneity can slow convergence, increase variance between rounds, and lead to global models that perform well on average but poorly for specific cohorts.
 
-### Statistical Heterogeneity
-Statistical heterogeneity is the situation in which the clients' distributions are not equal, which can be a result of the following:
-* feature distribution skew (covariate shift),
-* label distribution skew (prior probability shift),
-* same label, different features (concept drift),
-* same features, different label (concept shift),
-* quantity skew.
+## In federated settings
+It is useful to distinguish three broad sources of heterogeneity:
 
-### Structural Heterogeneity 
-Structural Heterogeneity results from different types of devices that can be in the same federation of FL devices, which can exhibit differences in the following:
-* computation resource (different chips), which leads to different training times,
-* storage resources (available disk space), which can imply, e.g., not enough resources to store the results (which can also indicate a different number of samples),
-* energy levels/charging status, current resource consumption, which can change over time and can imply the lack of willingness/capabilities to join the training,
-* network connection, e.g., unstable network connection, can lead to more frequent dropouts and lack of availability.
+- **Statistical heterogeneity (non-IID data)**: client datasets differ. Common patterns include label skew, feature/covariate shift, quantity skew (different dataset sizes), and distribution shift over time.
+- **System heterogeneity**: clients differ in compute, memory, network bandwidth, and availability. This can create stragglers, dropouts, and uneven training progress.
+- **Non-stationarity**: client data-generating processes change over time (for example concept drift), which can invalidate assumptions made during training or evaluation.
 
-### Simulating Heterogeneity - Flower Datasets
-Flower Datasets is a library that enables you to simulate statistical heterogeneity according to the various partitioning schemes (see all [here](https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.html)).
-It provides ways of simulating quantity skew, label distribution skew, and mix of them, depending on the object used. It also enables working with datasets that naturally exhibit different types of heterogeneity.
+Real deployments often exhibit combinations of all three.
 
-### Countering Heterogeneity - Strategies in Flower
-Flower is a library that enables you to perform federated learning in deployment (real-life scenario) and simulation. It provides out-of-the-box weight aggregation 
-strategies (see them [here](https://flower.ai/docs/framework/ref-api/flwr.server.strategy.html)), which are used as the core measures to mitigate problems in heterogeneous environments.
+## Common pitfalls
+- Treating heterogeneity as purely a data problem. System and availability differences can dominate real-world behavior.
+- Using only aggregate metrics; heterogeneity often shows up as tail failures (worst-client or cohort regressions).
+- Applying “robust” aggregation without considering that legitimate non-IID updates may look like outliers.
+
+## In Flower
+In Flower, heterogeneity can be studied in both the [simulation runtime](/glossary/simulation-runtime) and the [deployment runtime](/glossary/deployment-runtime), with statistical heterogeneity often modeled via [Flower Datasets](/glossary/flower-datasets). Server-side mitigations are typically encoded in the [Strategy](/glossary/strategy).

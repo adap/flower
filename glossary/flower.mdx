@@ -1,0 +1,34 @@
+---
+title: "Flower"
+description: "Flower is an open-source federated AI framework for training, evaluation, and analytics in simulation and deployment."
+date: "2026-02-03"
+author:
+  name: "Flower Team"
+  position: "Maintainers"
+  website: "https://flower.ai/"
+related:
+  - text: "Federated AI"
+    link: "/glossary/federated-ai"
+  - text: "SuperLink"
+    link: "/glossary/superlink"
+  - text: "SuperNode"
+    link: "/glossary/supernode"
+  - text: "Strategy"
+    link: "/glossary/strategy"
+---
+
+Flower is an open-source framework for building federated AI systems, including federated learning, federated evaluation, and federated analytics. It supports both simulation (for experimentation at scale) and deployment (for real federations).
+
+## Why it matters
+- Provides reusable building blocks for orchestration, communication, and aggregation.
+- Separates project-specific ML code from long-running infrastructure components.
+
+## In federated settings
+Flower aims to make it practical to move from research experiments to production-like deployments while keeping federated concepts explicit (rounds, selection, aggregation, and metrics).
+
+## Common pitfalls
+- Treating “using a framework” as a substitute for threat modeling; privacy/security still require explicit design.
+- Assuming simulation results directly transfer to real deployments without accounting for system constraints.
+
+## In Flower
+In Flower, the core extension points are the server-side [Strategy](/glossary/strategy) and app processes ([ServerApp](/glossary/serverapp)/[ClientApp](/glossary/clientapp)) that run in both the [simulation runtime](/glossary/simulation-runtime) and the [deployment runtime](/glossary/deployment-runtime).

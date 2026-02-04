@@ -1,0 +1,30 @@
+---
+title: "Interoperability"
+description: "Interoperability is the ability for federated systems to work across different platforms, languages, and ML frameworks."
+date: "2026-02-03"
+author:
+  name: "Flower Team"
+  position: "Maintainers"
+  website: "https://flower.ai/"
+related:
+  - text: "gRPC"
+    link: "/glossary/grpc"
+  - text: "Protocol Buffers"
+    link: "/glossary/protocol-buffers"
+---
+
+Interoperability is the ability to run federated workloads across heterogeneous environments—different operating systems, hardware, programming languages, and machine learning frameworks—while keeping the protocol and semantics consistent.
+
+## Why it matters
+- Real federations are heterogeneous (mobile, edge, servers, different stacks).
+- Interoperability reduces integration cost and increases adoption.
+
+## In federated settings
+Interoperability typically requires well-defined protocols, serialization formats, and clear contracts for what is exchanged (model updates, metrics, configs).
+
+## Common pitfalls
+- Silent differences in preprocessing, model parameter ordering, or numeric precision can break training/evaluation.
+- Treating interoperability as purely a transport problem; semantics matter.
+
+## In Flower
+In Flower, interoperability is supported by the communication stack used by [SuperLink](/glossary/superlink) and [SuperNode](/glossary/supernode), allowing heterogeneous clients to participate under a shared protocol.

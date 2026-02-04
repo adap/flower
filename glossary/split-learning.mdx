@@ -1,0 +1,30 @@
+---
+title: "Split Learning"
+description: "Split learning trains a model by splitting it across parties and exchanging activations/gradients instead of model weights."
+date: "2026-02-03"
+author:
+  name: "Flower Team"
+  position: "Maintainers"
+  website: "https://flower.ai/"
+related:
+  - text: "Federated Learning"
+    link: "/glossary/federated-learning"
+  - text: "Vertical Federated Learning"
+    link: "/glossary/vertical-federated-learning"
+---
+
+Split learning is a collaborative training approach where a model is split between parties. Clients run the early layers locally and send intermediate activations to a server (or another party), which completes the forward/backward pass and returns gradients.
+
+## Why it matters
+- Can reduce what needs to be shared compared to sending full model updates.
+- Useful when clients cannot store or compute the full model.
+
+## In federated settings
+Split learning is distinct from federated learning (which aggregates client updates) but can be combined with FL in hybrid schemes.
+
+## Common pitfalls
+- Activations can still leak information; privacy is not automatic.
+- Latency and synchronization requirements can be challenging.
+
+## In Flower
+In Flower, split learning requires custom application logic in [ServerApp](/glossary/serverapp)/[ClientApp](/glossary/clientapp) and careful protocol design for the [deployment runtime](/glossary/deployment-runtime).

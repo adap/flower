@@ -1,0 +1,30 @@
+---
+title: "Hierarchical Federated Learning"
+description: "Hierarchical FL aggregates updates in multiple levels (e.g., device → edge → cloud) to match real network topologies."
+date: "2026-02-03"
+author:
+  name: "Flower Team"
+  position: "Maintainers"
+  website: "https://flower.ai/"
+related:
+  - text: "Communication Efficiency"
+    link: "/glossary/communication-efficiency"
+  - text: "Aggregation"
+    link: "/glossary/aggregation"
+---
+
+Hierarchical federated learning performs aggregation in multiple levels. For example, devices send updates to an edge aggregator, which aggregates locally and forwards a combined update upstream to a central server.
+
+## Why it matters
+- Reduces bandwidth and latency across wide-area links.
+- Better matches real deployments with gateways and regional infrastructure.
+
+## In federated settings
+Hierarchical FL can be viewed as “federated learning with intermediate aggregation points,” which changes system and statistical behavior compared to a single central server.
+
+## Common pitfalls
+- Intermediate aggregators become security and trust focal points.
+- Heterogeneity and bias can appear at each hierarchy level.
+
+## In Flower
+In Flower, hierarchical FL is typically implemented by composing aggregation layers in the server-side [Strategy](/glossary/strategy) and aligning coordinators with the [deployment runtime](/glossary/deployment-runtime) topology.

@@ -1,0 +1,30 @@
+---
+title: "ClientApp"
+description: "In Flower, a ClientApp is a short-lived process containing project-specific client code for local training, evaluation, and preprocessing."
+date: "2026-02-03"
+author:
+  name: "Flower Team"
+  position: "Maintainers"
+  website: "https://flower.ai/"
+related:
+  - text: "SuperNode"
+    link: "/glossary/supernode"
+  - text: "SuperExec"
+    link: "/glossary/superexec"
+---
+
+In Flower, a ClientApp is a short-lived application process that runs project-specific code on the client side. It is responsible for tasks like local training, evaluation, and preprocessing.
+
+## Why it matters
+- Separates client ML logic from long-running networking components.
+- Enables running different projects on the same federation over time.
+
+## In federated settings
+Client-side application code is where local data handling, preprocessing, training loops, and privacy-related transformations are implemented.
+
+## Common pitfalls
+- Assuming client code is identical across devices; client environments can vary significantly.
+- Mixing long-running networking responsibilities with short-lived training logic, making upgrades harder.
+
+## In Flower
+In Flower, ClientApp processes are launched and managed by [SuperExec](/glossary/superexec) and typically invoked by [SuperNode](/glossary/supernode) in the [deployment runtime](/glossary/deployment-runtime).

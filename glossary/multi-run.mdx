@@ -1,0 +1,32 @@
+---
+title: "Multi-run (Multi-tenancy)"
+description: "Multi-run allows multiple Flower projects/runs to share the same federation infrastructure (SuperLink + SuperNodes)."
+date: "2026-02-03"
+author:
+  name: "Flower Team"
+  position: "Maintainers"
+  website: "https://flower.ai/"
+related:
+  - text: "SuperExec"
+    link: "/glossary/superexec"
+  - text: "ServerApp"
+    link: "/glossary/serverapp"
+  - text: "ClientApp"
+    link: "/glossary/clientapp"
+---
+
+Multi-run (also called multi-tenancy or multi-job) is the ability to run multiple federated workloads on the same underlying federation infrastructure. A single SuperLink and set of SuperNodes can support different ServerApp/ClientApp pairs across separate runs.
+
+## Why it matters
+- Improves infrastructure reuse and operational efficiency.
+- Enables running multiple experiments or products without redeploying the federation.
+
+## In federated settings
+Multi-run requires isolation of configuration, artifacts, and observability across runs, while sharing durable connectivity and fleet management.
+
+## Common pitfalls
+- Mixing metrics and logs across runs, making evaluation misleading.
+- Weak isolation between runs (configuration, access control, or resource limits).
+
+## In Flower
+In Flower, multi-run is enabled by separating long-running infrastructure ([SuperLink](/glossary/superlink)/[SuperNode](/glossary/supernode)) from short-lived apps ([ServerApp](/glossary/serverapp)/[ClientApp](/glossary/clientapp)) managed by [SuperExec](/glossary/superexec) in the [deployment runtime](/glossary/deployment-runtime).

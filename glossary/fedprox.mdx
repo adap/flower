@@ -1,0 +1,29 @@
+---
+title: "FedProx"
+description: "FedProx modifies local training with a proximal term to reduce divergence from the global model under heterogeneity."
+date: "2026-02-03"
+author:
+  name: "Flower Team"
+  position: "Maintainers"
+  website: "https://flower.ai/"
+related:
+  - text: "Non-IID Data"
+    link: "/glossary/non-iid-data"
+  - text: "Federated Learning"
+    link: "/glossary/federated-learning"
+---
+
+FedProx is a federated optimization approach designed to handle heterogeneity by adding a proximal term to the client’s local objective. Intuitively, it discourages local models from drifting too far from the current global model during local training.
+
+## Why it matters
+- Often improves stability when client data and resources vary widely.
+
+## In federated settings
+FedProx is especially relevant when local training is imperfect due to non-IID data or when clients perform varying amounts of local computation.
+
+## Common pitfalls
+- The proximal strength hyperparameter must be tuned.
+- It mitigates, but does not eliminate, challenges from strong non-IID data.
+
+## In Flower
+In Flower, FedProx-style behavior is typically implemented via a server-side [Strategy](/glossary/strategy) and client training logic in a [ClientApp](/glossary/clientapp), in both the [simulation runtime](/glossary/simulation-runtime) and the [deployment runtime](/glossary/deployment-runtime).

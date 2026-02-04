@@ -1,0 +1,32 @@
+---
+title: "Model Update"
+description: "A model update is what a client sends back—weights, deltas, gradients, or statistics—to inform server-side aggregation."
+date: "2026-02-03"
+author:
+  name: "Flower Team"
+  position: "Maintainers"
+  website: "https://flower.ai/"
+related:
+  - text: "Aggregation"
+    link: "/glossary/aggregation"
+  - text: "Secure Aggregation"
+    link: "/glossary/secure-aggregation"
+  - text: "Communication Efficiency"
+    link: "/glossary/communication-efficiency"
+---
+
+A model update is the information a client returns to the server after executing a task. Depending on the system and algorithm, it can be full model parameters (weights), parameter deltas, gradients, optimizer state, or other sufficient statistics.
+
+## Why it matters
+- The update format determines bandwidth cost and aggregation design.
+- The update format affects privacy and attack surface.
+
+## In federated settings
+Many systems aggregate deltas or weights (as in FedAvg), but some approaches aggregate gradients or other statistics. Updates are often weighted by the number of local examples.
+
+## Common pitfalls
+- Treating “weights” and “updates” as interchangeable can hide important algorithmic differences.
+- Updates can leak information about local data; privacy defenses must be explicit.
+
+## In Flower
+In Flower, what is sent and how it is aggregated is defined by the server-side [Strategy](/glossary/strategy) inside a [ServerApp](/glossary/serverapp), with updates exchanged between [SuperLink](/glossary/superlink) and [SuperNode](/glossary/supernode) in the [deployment runtime](/glossary/deployment-runtime).

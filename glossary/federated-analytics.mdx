@@ -1,0 +1,33 @@
+---
+title: "Federated Analytics"
+description: "Federated analytics computes aggregate statistics across decentralized data sources without collecting raw data centrally."
+date: "2026-02-03"
+author:
+  name: "Flower Team"
+  position: "Maintainers"
+  website: "https://flower.ai/"
+related:
+  - text: "Federated AI"
+    link: "/glossary/federated-ai"
+  - text: "Secure Aggregation"
+    link: "/glossary/secure-aggregation"
+  - text: "Differential Privacy (DP)"
+    link: "/glossary/differential-privacy"
+---
+
+Federated analytics is the computation of aggregate statistics (for example counts, sums, histograms, or other population-level measurements) across many data holders without centralizing their raw data. Clients compute local contributions and a coordinator aggregates them.
+
+## Why it matters
+- Supports product and model insights when raw data cannot be collected.
+- Often cheaper than training a model when you only need aggregates.
+- Can be combined with privacy mechanisms (secure aggregation, differential privacy).
+
+## In federated settings
+Unlike federated learning, federated analytics typically does not update model parameters. The “payload” is usually statistics, sketches, or intermediate aggregates rather than weights.
+
+## Common pitfalls
+- Aggregation choices can bias results (who participates, how they’re weighted).
+- Privacy requires explicit design; even aggregates can be sensitive.
+
+## In Flower
+In Flower, federated analytics is typically orchestrated by a server-side [Strategy](/glossary/strategy) and executed by [ClientApp](/glossary/clientapp) processes in both the [simulation runtime](/glossary/simulation-runtime) and the [deployment runtime](/glossary/deployment-runtime).

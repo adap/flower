@@ -1,0 +1,32 @@
+---
+title: "ServerApp"
+description: "In Flower, a ServerApp is a short-lived process containing project-specific server logic such as client selection, configuration, and aggregation."
+date: "2026-02-03"
+author:
+  name: "Flower Team"
+  position: "Maintainers"
+  website: "https://flower.ai/"
+related:
+  - text: "SuperLink"
+    link: "/glossary/superlink"
+  - text: "SuperExec"
+    link: "/glossary/superexec"
+  - text: "Strategy"
+    link: "/glossary/strategy"
+---
+
+In Flower, a ServerApp is a short-lived application process that runs project-specific server-side code. It defines how clients are selected, how tasks are configured, and how results are aggregated.
+
+## Why it matters
+- Separates experiment/application logic from long-running infrastructure.
+- Enables multiple projects to share the same deployment infrastructure.
+
+## In federated settings
+Server-side application code is where you define the orchestration policy and aggregation behavior, which strongly influences training stability and evaluation correctness.
+
+## Common pitfalls
+- Treating server code as purely orchestration; aggregation and evaluation choices can embed bias.
+- Hard-coding assumptions about client availability or data distributions.
+
+## In Flower
+In Flower, ServerApp processes are launched and managed by [SuperExec](/glossary/superexec) and typically host the server-side [Strategy](/glossary/strategy) logic.

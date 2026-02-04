@@ -1,0 +1,34 @@
+---
+title: "Threat Model"
+description: "A threat model specifies what adversaries can observe or control in a federated system, shaping privacy and security guarantees."
+date: "2026-02-03"
+author:
+  name: "Flower Team"
+  position: "Maintainers"
+  website: "https://flower.ai/"
+related:
+  - text: "Inference Attacks"
+    link: "/glossary/inference-attacks"
+  - text: "Poisoning Attacks"
+    link: "/glossary/poisoning-attacks"
+  - text: "Secure Aggregation"
+    link: "/glossary/secure-aggregation"
+  - text: "Differential Privacy (DP)"
+    link: "/glossary/differential-privacy"
+---
+
+A threat model defines who the adversary is and what capabilities they have—what they can observe (updates, metrics, messages), what they can control (clients, server, network), and what their goal is (inference, disruption, backdoor). Privacy and security claims are only meaningful relative to a threat model.
+
+## Why it matters
+- Determines which mitigations are necessary (DP, secure aggregation, robust aggregation).
+- Prevents “security by assumption” and unclear guarantees.
+
+## In federated settings
+Common threat models include honest-but-curious servers, malicious clients, colluding clients, and adversaries with auxiliary information.
+
+## Common pitfalls
+- Assuming “the server is trusted” while still claiming privacy guarantees.
+- Ignoring client-side adversaries (poisoning, sybil, backdoors).
+
+## In Flower
+In Flower, the threat model should be stated explicitly for the [deployment runtime](/glossary/deployment-runtime), including what the [SuperLink](/glossary/superlink) operator can observe and what guarantees are provided by the chosen [Strategy](/glossary/strategy).

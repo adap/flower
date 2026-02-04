@@ -1,34 +1,42 @@
 ---
 title: "XGBoost"
-description: "XGBoost - or eXtreme Gradient Boosting - is an open-source library providing a regularizing gradient boosting decisiong tree framework for many programming languages including Python, C++, and Java."
+description: "XGBoost is an open-source library for training gradient-boosted decision trees (GBDTs), widely used for tabular machine learning."
 date: "2024-09-10"
 author:
   name: "Chong Shen Ng"
   position: "Research Engineer @ Flower Labs"
   website: "https://discuss.flower.ai/u/chongshenng"
   github: "github.com/chongshenng"
-related: 
+related:
+  - text: "Federated Gradient Boosting"
+    link: "/glossary/federated-gradient-boosting"
+  - text: "Cross-silo Federated Learning"
+    link: "/glossary/cross-silo-federated-learning"
+  - text: "Strategy"
+    link: "/glossary/strategy"
   - text: "Quickstart Federated Learning with XGBoost and Flower"
     link: "/docs/framework/tutorial-quickstart-xgboost.html"
   - text: "Flower Example using XGBoost (Comprehensive)"
     link: "/docs/examples/xgboost-comprehensive.html"
 ---
 
-### Introduction to XGBoost
+XGBoost is an open-source library for training gradient-boosted decision tree models (GBDTs). It is widely used on structured/tabular data because it is efficient, often strong out of the box, and provides interpretable tree ensembles.
 
-XGBoost - or eXtreme Gradient Boosting - is an open-source library which provides a regularizing gradient boosting framework for Python, C++, Java, R, Julia, Perl, and Scala. It implements machine learning algorithms based on the gradient boosting concept, where a single model is created from an ensemble of weak learners (decision trees). This is commonly referred as a Gradient Boosting Decision Trees (GBDT), a decision tree ensemble learning algorithm. 
+## Why it matters
+- GBDTs are a strong baseline for many tabular problems, common in cross-silo settings (healthcare, finance, industry).
+- Training and inference are often practical on modest compute, making them attractive for production workflows.
+- Tree ensembles can provide useful interpretability compared to some deep learning approaches.
 
-GBDTs are commonly compared with the random forest algorithm. They are similar in the sense that they build multiple decision trees. But the key differences are in how they are built and combined. Random forest first builds full decision trees in parallel from bootstrap samples of the dataset, and then generates the final prediction based on an average of all of the predictions. In contrast, GBDT iteratively trains decision trees with the objective that each subsequent tree reduces the error residuals of the previous model - this is the concept of boosting. The final prediction in a GBDT is a weighted sum of all of the tree predictions. While the bootstrap aggregation method of random forest minimizes variance and overfitting, the boosting method of GBDT minimizes bias and underfitting.
+## In federated settings
+Federated training for tree ensembles typically does not look like parameter averaging used for neural networks. Depending on the method, participants may share trees, split decisions, or aggregated statistics (for example histograms) needed to construct trees without revealing raw records. See [Federated Gradient Boosting](/glossary/federated-gradient-boosting) for the concept-level view.
 
-XGBoost includes many features that optimizes the implementation of GBDT, including parallelized trees training (instead of sequential) and integration with distributed processing frameworks like Apache Spark and Dask. These various performance improvements have historically made XGBoost the preferred framework of choice when training models for supervised learning tasks, and have seen widespread success in Kaggle competitions on structured data. 
+Because tabular features and preprocessing must match across participants, federated gradient boosting is often used in [cross-silo federated learning](/glossary/cross-silo-federated-learning) where parties can coordinate schema and governance more explicitly.
 
-### Use cases in Federated Learning
+## Common pitfalls
+- Assuming you can “just FedAvg” a tree model; the aggregation protocol is algorithm-specific.
+- Mismatched feature engineering or categorical encoding across participants that breaks training or evaluation.
+- Overlooking leakage risk: shared statistics can still be sensitive without explicit privacy design.
+- Reporting a single average metric and missing cohort or site-level performance issues.
 
-While there is no way to know before hand what model would perform the best in federated learning, XGBoost is appealing for several reasons:
-1. To train the first model, XGBoost hyperparameters require significantly less tuning compared to neural network-based models.
-2. XGBoost is known to produce models that perform far better than neural networks on tabular datasets, which can be encountered in real-world federated learning systems such as in healthcare or IoT applications.
-3. Feature scaling is unnecessary when training XGBoost models. This not only facilitates fine-tuning on new data distributions, but also supports cross-device and cross-silo federated learning, where the data distributions from participating clients are not know a priori.
-
-### XGBoost in Flower
-
-In Flower, we have provided two strategies for performing federated learning with XGBoost: [`FedXgbBagging`](https://github.com/adap/flower/blob/main/src/py/flwr/server/strategy/fedxgb_bagging.py)  and [`FedXgbCyclic`](https://github.com/adap/flower/blob/main/src/py/flwr/server/strategy/fedxgb_cyclic.py), which are inspired from the work at Nvidia NVFlare. These implementations allow Flower users to use different aggregation strategies for the XGBoost model. `FedXgbBagging` aggregates trees from all participating clients every round, whereas `FedXgbCyclic` aggregates clients' trees sequentially in a round-robin manner. With these strategies, Flower users can very quickly and easily run and compare the performance of federated learning systems on distributed tabular datasets using state-of-the-art XGBoost aggregation strategies, without needing to implement them from scratch.
+## In Flower
+In Flower, XGBoost-based federated training is implemented as a [Strategy](/glossary/strategy) inside a [ServerApp](/glossary/serverapp) and can be exercised in the [simulation runtime](/glossary/simulation-runtime) or the [deployment runtime](/glossary/deployment-runtime), alongside the general pattern described in [Federated Gradient Boosting](/glossary/federated-gradient-boosting).

@@ -1,17 +1,41 @@
 ---
 title: "Server"
-description: "The central entity coordinating the aggregation of local model updates from multiple clients to build a comprehensive, privacy-preserving global model."
+description: "The coordinating entity that orchestrates rounds, selects clients, aggregates results, and maintains the global state."
 date: "2024-07-08"
 author:
   name: "Heng Pan"
   position: "Research Scientist"
   website: "https://discuss.flower.ai/u/pan-h/summary"
   github: "github.com/panh99"
-related: 
+related:
   - text: "Client"
     link: "/glossary/client"
   - text: "Federated Learning"
     link: "/glossary/federated-learning"
+  - text: "Round"
+    link: "/glossary/round"
+  - text: "Client Selection"
+    link: "/glossary/client-selection"
+  - text: "Aggregation"
+    link: "/glossary/aggregation"
+  - text: "Strategy"
+    link: "/glossary/strategy"
+  - text: "SuperLink"
+    link: "/glossary/superlink"
 ---
 
-A server in federated learning plays a pivotal role by managing the distributed training process across various clients. Each client independently trains its local model using the local data and then sends the model updates to the server. The server aggregates the received updates to create a new global model, which is subsequently sent back to the clients. This iterative process allows the global model to improve over time without the need for the clients to share their raw data, ensuring data privacy and minimizing data transfer.
+A server is the coordinating entity in a federated system. It orchestrates **rounds** by selecting clients, sending them tasks (often including a model/config), receiving results back, and aggregating those results to update the global state.
+
+## Why it matters
+The server defines how the federation behaves: which clients participate, how results are combined, and what is measured and reported. Server choices drive scalability, robustness, and representativeness.
+
+## In federated settings
+In federated learning, the server maintains a global model and updates it via aggregation. In federated evaluation or analytics, the server aggregates locally computed metrics or statistics. Compared to centralized distributed training, federated servers must deal with partial participation, client dropouts, and heterogeneous client capabilities and data distributions.
+
+## Common pitfalls
+- Treating the server as “trusted” by default. Privacy and security guarantees depend on the threat model and defenses (for example secure aggregation and differential privacy).
+- Aggregating metrics without specifying weighting (by clients vs by examples).
+- Overfitting to clients that are easiest to reach (selection bias).
+
+## In Flower
+In Flower, the server side is split between long-running infrastructure ([SuperLink](/glossary/superlink) and [SuperExec](/glossary/superexec)) and short-lived project code ([ServerApp](/glossary/serverapp)) in the [deployment runtime](/glossary/deployment-runtime). The server-side [Strategy](/glossary/strategy) defines client selection, task configuration, and aggregation.

@@ -1,0 +1,38 @@
+---
+title: "Deployment Runtime"
+description: "In Flower, the deployment runtime is the set of long-running components that coordinate real federations (SuperLink/SuperNode/SuperExec) and run app code (ServerApp/ClientApp)."
+date: "2026-02-03"
+author:
+  name: "Flower Team"
+  position: "Maintainers"
+  website: "https://flower.ai/"
+related:
+  - text: "SuperLink"
+    link: "/glossary/superlink"
+  - text: "SuperNode"
+    link: "/glossary/supernode"
+  - text: "SuperExec"
+    link: "/glossary/superexec"
+  - text: "ServerApp"
+    link: "/glossary/serverapp"
+  - text: "ClientApp"
+    link: "/glossary/clientapp"
+  - text: "Multi-run (Multi-tenancy)"
+    link: "/glossary/multi-run"
+---
+
+The deployment runtime is the part of a federated system that runs against a real federation of clients (devices or sites) and coordinates training, evaluation, and analytics in production-like conditions. It typically separates long-running infrastructure (connectivity, scheduling, routing) from short-lived, project-specific application code.
+
+## Why it matters
+A durable runtime is what turns a federated algorithm into an operational system. It enables safe upgrades, isolation between runs, better observability, and reliable coordination despite partial participation, dropouts, and heterogeneous client environments.
+
+## In federated settings
+Real deployments must handle unreliable networks, client availability constraints, authentication and authorization, and governance around who can participate and what can be computed. Operational concerns (retries, timeouts, fleet health, and run isolation) often matter as much as the learning algorithm.
+
+## Common pitfalls
+- Confusing deployment with simulation and assuming results will transfer without accounting for real availability and networking constraints.
+- Assuming “federated” implies privacy; privacy depends on a threat model and explicit mechanisms.
+- Mixing networking roles (“RPC client/server”) with federated roles (“client/server”), which can cause design and documentation confusion.
+
+## In Flower
+In Flower, the deployment runtime is built around long-running infrastructure—[SuperLink](/glossary/superlink), [SuperNode](/glossary/supernode), and [SuperExec](/glossary/superexec)—that runs short-lived application code ([ServerApp](/glossary/serverapp) and [ClientApp](/glossary/clientapp)) to support [Multi-run](/glossary/multi-run) federated workloads.

@@ -1,22 +1,37 @@
 ---
 title: "Docker"
-description: "Docker is a containerization tool that allows for consistent and reliable deployment of applications across different environments."
+description: "Docker packages software into containers so it runs consistently across environments, which is useful for deploying federated infrastructure and apps."
 date: "2024-07-08"
 author:
   name: "Robert Steiner"
   position: "DevOps Engineer at Flower Labs"
   website: "https://github.com/Robert-Steiner"
+related:
+  - text: "Flower"
+    link: "/glossary/flower"
+  - text: "SuperLink"
+    link: "/glossary/superlink"
+  - text: "SuperNode"
+    link: "/glossary/supernode"
+  - text: "SuperExec"
+    link: "/glossary/superexec"
 ---
 
-Docker is an open-source containerization tool for deploying and running applications. Docker
-containers encapsulate an application's code, dependencies, and configuration files, allowing
-for consistent and reliable deployment across different environments.
+Docker is a containerization platform that packages an application and its dependencies into a container image. Containers help run the same software reliably across different machines and operating systems.
 
-In the context of federated learning, Docker containers can be used to package the entire client
-and server application, including all the necessary dependencies, and then deployed on various
-devices such as edge devices, cloud servers, or even on-premises servers.
+## Why it matters
+Federated systems often include multiple moving parts (server infrastructure, client-side runtimes, and project-specific apps). Containers simplify deployment, versioning, and reproducibility across heterogeneous environments.
 
-In Flower, Docker containers are used to containerize various applications like `SuperLink`,
-`SuperNode`, and `SuperExec`. Flower's Docker images allow users to quickly get Flower up and
-running, reducing the time and effort required to set up and configure the necessary software
-and dependencies.
+## In federated settings
+Docker can be used to package federated infrastructure components and application code so they can be deployed consistently in cloud, on-prem, or edge environments. Containerization can also help with:
+- reproducible experiments (pinning dependencies)
+- operational rollouts (known-good images)
+- isolation of runtime dependencies
+
+## Common pitfalls
+- Treating containers as a security boundary by default. Container security depends on configuration and operational controls.
+- Forgetting that client devices may not support Docker (many cross-device scenarios require native/mobile runtimes).
+- Shipping oversized images, increasing bandwidth and startup time.
+
+## In Flower
+In Flower, Docker images are commonly used to deploy the [SuperLink](/glossary/superlink), [SuperNode](/glossary/supernode), and [SuperExec](/glossary/superexec) components of the [deployment runtime](/glossary/deployment-runtime).

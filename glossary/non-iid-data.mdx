@@ -1,0 +1,32 @@
+---
+title: "Non-IID Data"
+description: "Non-IID data means client datasets are not identically distributed, a core challenge that affects convergence and fairness."
+date: "2026-02-03"
+author:
+  name: "Flower Team"
+  position: "Maintainers"
+  website: "https://flower.ai/"
+related:
+  - text: "Heterogeneity in Federated Learning"
+    link: "/glossary/heterogeneity-in-federated-learning"
+  - text: "FedProx"
+    link: "/glossary/fedprox"
+  - text: "SCAFFOLD"
+    link: "/glossary/scaffold"
+---
+
+Non-IID (non–independently and identically distributed) data describes the common federated setting where each client’s data distribution differs from the overall population and from other clients.
+
+## Why it matters
+- Can slow convergence and destabilize training.
+- Can lead to uneven performance across clients and cohorts.
+
+## In federated settings
+Non-IID can arise from label skew, feature skew, different behaviors, or different data collection processes across clients.
+
+## Common pitfalls
+- Reporting only a single average metric can hide poor performance for specific clients.
+- Some optimization settings that work centrally can fail under strong non-IID heterogeneity.
+
+## In Flower
+In Flower, non-IID behavior is often studied using [Flower Datasets](/glossary/flower-datasets) in the [simulation runtime](/glossary/simulation-runtime) to benchmark how different [Strategy](/glossary/strategy) choices behave under heterogeneity.

@@ -1,0 +1,28 @@
+---
+title: "Federated Gradient Boosting"
+description: "Federated gradient boosting trains tree ensembles across data holders using protocols that aggregate statistics without sharing raw data."
+date: "2026-02-03"
+author:
+  name: "Flower Team"
+  position: "Maintainers"
+  website: "https://flower.ai/"
+related:
+  - text: "Federated AI"
+    link: "/glossary/federated-ai"
+---
+
+Federated gradient boosting is the application of gradient-boosted decision tree (GBDT) training in a federated setting. Instead of sharing raw data, participants share aggregated statistics or model components needed to build trees.
+
+## Why it matters
+- Tree ensembles are strong baselines for tabular data, common in many cross-silo settings.
+- Enables collaboration on structured data without pooling datasets.
+
+## In federated settings
+Federated GBDT methods often differ from FedAvg-style neural training. Implementations may aggregate histograms, splits, or trees depending on the approach.
+
+## Common pitfalls
+- Protocol and aggregation details are algorithm-specific; “federated boosting” is not one standard method.
+- Leakage can still occur through shared statistics unless mitigations are applied.
+
+## In Flower
+In Flower, federated gradient boosting workflows are typically implemented as a server-side [Strategy](/glossary/strategy) paired with project-specific [ClientApp](/glossary/clientapp) logic, running in the [simulation runtime](/glossary/simulation-runtime) or the [deployment runtime](/glossary/deployment-runtime).

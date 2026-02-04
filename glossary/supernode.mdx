@@ -1,0 +1,32 @@
+---
+title: "SuperNode"
+description: "SuperNode is Flower’s long-running client-side process that connects to SuperLink, requests tasks, executes them, and returns results."
+date: "2026-02-03"
+author:
+  name: "Flower Team"
+  position: "Maintainers"
+  website: "https://flower.ai/"
+related:
+  - text: "SuperLink"
+    link: "/glossary/superlink"
+  - text: "ClientApp"
+    link: "/glossary/clientapp"
+  - text: "SuperExec"
+    link: "/glossary/superexec"
+---
+
+SuperNode is a long-running Flower process on the client side. It connects to the SuperLink, requests tasks, executes them locally, and returns results.
+
+## Why it matters
+- Provides a durable client-side component for intermittent or long-running federations.
+- Separates networking concerns from short-lived client-side training/evaluation code.
+
+## In federated settings
+Client-side runtimes must handle heterogeneous environments, limited resources, and unreliable connectivity while preserving correctness and observability.
+
+## Common pitfalls
+- Assuming all clients can run the same runtime environment; cross-device deployments may require multiple client implementations.
+- Confusing SuperNode with the “client” concept; it is one possible implementation of a federated client.
+
+## In Flower
+In Flower, SuperNode coordinates with [SuperExec](/glossary/superexec) to run a [ClientApp](/glossary/clientapp) and communicates with [SuperLink](/glossary/superlink) for task orchestration in the [deployment runtime](/glossary/deployment-runtime).

@@ -1,0 +1,32 @@
+---
+title: "Client Selection"
+description: "Client selection (sampling) chooses which clients participate in a given round based on availability and policy."
+date: "2026-02-03"
+author:
+  name: "Flower Team"
+  position: "Maintainers"
+  website: "https://flower.ai/"
+related:
+  - text: "Round"
+    link: "/glossary/round"
+  - text: "Partial Participation"
+    link: "/glossary/partial-participation"
+  - text: "Cross-device Federated Learning"
+    link: "/glossary/cross-device-federated-learning"
+---
+
+Client selection (or client sampling) is the process of choosing which clients participate in a federated round. Selection may be random, availability-based, stratified, or constrained by device, fairness, or policy requirements.
+
+## Why it matters
+- Determines representativeness of training/evaluation.
+- Controls compute and communication cost per round.
+
+## In federated settings
+In cross-device settings, selection must account for intermittent availability and resource constraints. In cross-silo settings, selection is often more stable but may be governed by organizational rules.
+
+## Common pitfalls
+- Always selecting “fast” clients can bias the model.
+- Evaluating only selected clients can create misleading metrics.
+
+## In Flower
+In Flower, client selection is implemented in the server-side [Strategy](/glossary/strategy) inside a [ServerApp](/glossary/serverapp), with tasks routed via [SuperLink](/glossary/superlink) to [SuperNode](/glossary/supernode).

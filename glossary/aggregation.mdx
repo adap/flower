@@ -1,18 +1,46 @@
 ---
 title: "Aggregation"
-description: "Combine model weights from sampled clients to update the global model. This process enables the global model to learn from each client's data."
+description: "Aggregation combines client results (often model updates) into a single server-side update of the global state."
 date: "2024-05-23"
 author:
   name: "Charles Beauville"
   position: "Machine Learning Engineer"
   website: "https://www.linkedin.com/in/charles-beauville/"
   github: "github.com/charlesbvll"
-related: 
+related:
   - text: "Federated Learning"
     link: "/glossary/federated-learning"
+  - text: "Model Update"
+    link: "/glossary/model-update"
+  - text: "Federated Averaging (FedAvg)"
+    link: "/glossary/fedavg"
+  - text: "FedOpt (Server-Side Optimization)"
+    link: "/glossary/fedopt"
+  - text: "Robust Aggregation"
+    link: "/glossary/robust-aggregation"
+  - text: "Secure Aggregation"
+    link: "/glossary/secure-aggregation"
   - text: "Tutorial: What is Federated Learning?"
     link: "/docs/framework/tutorial-series-what-is-federated-learning.html"
 ---
 
-During each Federated Learning round, the server will receive model weights from sampled clients and needs a function to improve its global model using those weights. This is what is called `aggregation`. It can be a simple weighted average function (like `FedAvg`), or can be more complex (e.g. incorporating optimization techniques). The aggregation is where FL's magic happens, it allows the global model to learn and improve from each client's particular data distribution with only their trained weights.
+Aggregation is the server-side step that combines results from multiple clients into a single update of the global state. In federated learning, this usually means combining client **model updates** to produce the next **global model**; in federated evaluation or analytics, it can mean combining metrics or statistics.
 
+## Why it matters
+Aggregation largely determines the behavior of a federated system: stability under heterogeneity, resistance to faulty or malicious updates, and how representative the global model is of the target population.
+
+## In federated settings
+The simplest aggregation rule is a weighted average of client parameters or deltas (as in **FedAvg**), often weighted by the number of local examples. More advanced approaches apply server-side optimization (**FedOpt**) or use robust rules (for example trimmed mean or median) when some client updates might be unreliable or adversarial.
+
+Aggregation is also where systems decide:
+- how to weight clients (micro vs macro-style weighting)
+- what is aggregated (weights, deltas, gradients, metrics, histograms)
+- what information is revealed (plain aggregation vs **secure aggregation**)
+
+## Common pitfalls
+- Averaging per-client metrics can be misleading unless you specify whether you weight by examples or by clients.
+- “Robust” aggregation can mistakenly downweight legitimate updates when data is strongly non-IID.
+- Secure aggregation hides individual updates, which can limit debugging and some defenses; plan for observability separately.
+
+## In Flower
+In Flower, aggregation is defined by the server-side [Strategy](/glossary/strategy) inside a [ServerApp](/glossary/serverapp) and runs in both the [simulation runtime](/glossary/simulation-runtime) and the [deployment runtime](/glossary/deployment-runtime).

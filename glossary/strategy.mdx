@@ -1,0 +1,32 @@
+---
+title: "Strategy"
+description: "A strategy defines the server-side policy for selecting clients, configuring tasks, and aggregating results in federated rounds."
+date: "2026-02-03"
+author:
+  name: "Flower Team"
+  position: "Maintainers"
+  website: "https://flower.ai/"
+related:
+  - text: "Client Selection"
+    link: "/glossary/client-selection"
+  - text: "Aggregation"
+    link: "/glossary/aggregation"
+  - text: "ServerApp"
+    link: "/glossary/serverapp"
+---
+
+A strategy is the server-side policy that controls how a federated workload runs: which clients participate, what configuration they receive, and how results (updates, metrics) are aggregated.
+
+## Why it matters
+- Encodes the “algorithm” at the orchestration level.
+- Determines behavior under partial participation, dropouts, and heterogeneity.
+
+## In federated settings
+Strategies can implement FedAvg-like averaging, adaptive server optimization, robust aggregation, custom evaluation aggregation, and more.
+
+## Common pitfalls
+- Over-customizing without clear evaluation; strategy changes can introduce subtle bias or instability.
+- Aggregating metrics without defining weighting and cohort reporting.
+
+## In Flower
+In Flower, a Strategy typically runs inside a [ServerApp](/glossary/serverapp) and can be reused across both the [simulation runtime](/glossary/simulation-runtime) and the [deployment runtime](/glossary/deployment-runtime).

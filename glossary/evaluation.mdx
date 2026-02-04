@@ -1,19 +1,37 @@
 ---
 title: "Evaluation"
-description: "Evaluation measures how well the trained model performs by testing it on each client's local data, providing insights into its generalizability across varied data sources."
+description: "Evaluation measures how well a model performs; in federated settings it is often computed locally on clients and aggregated server-side."
 date: "2024-07-08"
 author:
   name: "Heng Pan"
   position: "Research Scientist"
   website: "https://discuss.flower.ai/u/pan-h/summary"
   github: "github.com/panh99"
-related: 
+related:
+  - text: "Federated Evaluation"
+    link: "/glossary/federated-evaluation"
   - text: "Server"
     link: "/glossary/server"
   - text: "Client"
     link: "/glossary/client"
+  - text: "Non-IID Data"
+    link: "/glossary/non-iid-data"
 ---
 
-Evaluation in machine learning is the process of assessing a model's performance on unseen data to determine its ability to generalize beyond the training set. This typically involves using a separate test set and various metrics like accuracy or F1-score to measure how well the model performs on new data, ensuring it isn't overfitting or underfitting.
+Evaluation is the process of measuring a model’s performance on data that was not used to fit the model. It typically reports metrics such as accuracy, loss, AUC, or F1 to help determine whether a model generalizes and meets product or research requirements.
 
-In federated learning, evaluation (or distributed evaluation) refers to the process of assessing a model's performance across multiple clients, such as devices or data centers. Each client evaluates the model locally using its own data and then sends the results to the server, which aggregates all the evaluation outcomes. This process allows for understanding how well the model generalizes to different data distributions without centralizing sensitive data.
+## Why it matters
+Without evaluation, it’s easy to ship models that look good in training but fail in real-world conditions. In federated settings, evaluation is also the primary way to detect regressions that impact specific client cohorts.
+
+## In federated settings
+In federated learning, evaluation is often performed **locally** on clients and then aggregated on the server (**federated evaluation**). This enables assessing performance across heterogeneous client distributions without centralizing evaluation data.
+
+How you aggregate matters. For example, averaging per-client accuracies (macro-style) is different from weighting by the number of local examples (micro-style). Under non-IID data, these choices can change conclusions.
+
+## Common pitfalls
+- **Selection bias**: evaluating only on available or sampled clients can misrepresent the population.
+- **Incomparable metrics**: differences in preprocessing, label definitions, or metric implementations can invalidate aggregated results.
+- **Non-linear metrics**: aggregating F1-score or AUC requires a clear definition of what is aggregated (per-client metrics vs pooled counts).
+
+## In Flower
+In Flower, evaluation is typically orchestrated by a server-side [Strategy](/glossary/strategy) in a [ServerApp](/glossary/serverapp) and executed by [ClientApp](/glossary/clientapp) processes in both the [simulation runtime](/glossary/simulation-runtime) and the [deployment runtime](/glossary/deployment-runtime).

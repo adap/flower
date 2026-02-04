@@ -1,0 +1,29 @@
+---
+title: "SCAFFOLD"
+description: "SCAFFOLD reduces client drift using control variates, improving convergence under non-IID data."
+date: "2026-02-03"
+author:
+  name: "Flower Team"
+  position: "Maintainers"
+  website: "https://flower.ai/"
+related:
+  - text: "Non-IID Data"
+    link: "/glossary/non-iid-data"
+  - text: "Federated Learning"
+    link: "/glossary/federated-learning"
+---
+
+SCAFFOLD is an optimization technique for federated learning that reduces client drift by using control variates—additional correction terms that help align local updates with the global optimization direction.
+
+## Why it matters
+- Can improve convergence when client updates are biased due to non-IID data.
+
+## In federated settings
+By correcting local updates, SCAFFOLD helps ensure that local training steps do not systematically move the model in conflicting directions across clients.
+
+## Common pitfalls
+- Requires maintaining and communicating extra state (control variates).
+- Implementation complexity is higher than FedAvg.
+
+## In Flower
+In Flower, SCAFFOLD-style behavior is typically implemented as a server-side [Strategy](/glossary/strategy) that coordinates additional state across rounds in both the [simulation runtime](/glossary/simulation-runtime) and the [deployment runtime](/glossary/deployment-runtime).

@@ -1,0 +1,30 @@
+---
+title: "Robust Aggregation (Byzantine Robustness)"
+description: "Robust aggregation aims to tolerate malicious or faulty client updates during federated training."
+date: "2026-02-03"
+author:
+  name: "Flower Team"
+  position: "Maintainers"
+  website: "https://flower.ai/"
+related:
+  - text: "Aggregation"
+    link: "/glossary/aggregation"
+  - text: "Poisoning Attacks"
+    link: "/glossary/poisoning-attacks"
+---
+
+Robust aggregation refers to aggregation rules designed to reduce the influence of faulty or adversarial (Byzantine) client updates. Examples include coordinate-wise median, trimmed mean, and other techniques that downweight or filter outliers.
+
+## Why it matters
+- Helps defend against poisoning and some failure modes.
+- Can improve stability when some client updates are corrupted.
+
+## In federated settings
+Robust aggregation is a key tool when clients are not fully trusted, but it must be balanced against natural heterogeneity and non-IID behavior.
+
+## Common pitfalls
+- Robust aggregation can hurt performance when data is strongly non-IID (legitimate updates may look like outliers).
+- It does not replace authentication, secure aggregation, or DP; it addresses a different risk.
+
+## In Flower
+In Flower, robust aggregation is typically implemented by customizing the server-side [Strategy](/glossary/strategy) inside a [ServerApp](/glossary/serverapp).

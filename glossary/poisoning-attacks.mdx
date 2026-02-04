@@ -1,0 +1,29 @@
+---
+title: "Poisoning Attacks (Data/Model/Backdoor)"
+description: "Poisoning attacks manipulate client data or updates to degrade the global model or implant targeted behavior."
+date: "2026-02-03"
+author:
+  name: "Flower Team"
+  position: "Maintainers"
+  website: "https://flower.ai/"
+related:
+  - text: "Threat Model"
+    link: "/glossary/threat-model"
+  - text: "Robust Aggregation"
+    link: "/glossary/robust-aggregation"
+---
+
+Poisoning attacks occur when an adversary manipulates training to harm the global model or introduce targeted behavior. This can be done by poisoning local data, directly crafting malicious model updates, or implanting backdoors that trigger on specific patterns.
+
+## Why it matters
+- Federated learning increases exposure to untrusted or partially trusted clients.
+
+## In federated settings
+Because training is distributed, the server typically cannot inspect client data. Defenses often rely on robust aggregation, anomaly detection, client authentication, and careful threat modeling.
+
+## Common pitfalls
+- Treating outliers as always malicious; heterogeneity can also produce atypical updates.
+- Relying on a single defense; robust systems layer mitigations.
+
+## In Flower
+In Flower, defenses against poisoning are typically implemented in the server-side [Strategy](/glossary/strategy) and should be paired with deployment controls in the [deployment runtime](/glossary/deployment-runtime).

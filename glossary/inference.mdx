@@ -8,14 +8,26 @@ author:
   website: "https://discuss.flower.ai/u/yan-gao/"
   github: "github.com/yan-gao-GY"
 related:
+  - text: "Local Model"
+    link: "/glossary/local-model"
+  - text: "Personalized Federated Learning (pFL)"
+    link: "/glossary/personalized-federated-learning"
   - text: "Federated Learning"
     link: "/glossary/federated-learning"
-  - text: "Server"
-    link: "/glossary/server"
-  - text: "Client"
-    link: "/glossary/client"
 ---
 
-Inference, also known as model prediction, is the stage in the machine learning workflow where a trained model is used to make predictions based on new, unseen data. In a typical machine learning setting, model inference involves the following steps: model loading, where the trained model is loaded into the application or service where it will be used; data preparation, which preprocess the new data in the same way as the training data; and model prediction, where the prepared data is fed into the model to compute outputs based on the learned patterns during training.
+Inference is the stage where a trained model is used to make predictions or decisions on new inputs. It typically involves loading the model, applying the same preprocessing as in training, and running a forward pass to produce outputs.
 
-In the context of federated learning (FL), inference can be performed locally on the user's device. A global model updated from FL process is deployed and loaded on individual nodes (e.g., smartphones, hospital servers) for local inference. This allows for keeping all data on-device, enhancing privacy and reducing latency.
+## Why it matters
+Inference is where model value is realized in production. Latency, reliability, and resource usage at inference time often matter as much as training accuracy.
+
+## In federated settings
+Federated learning affects how models are trained, but inference can happen centrally, on-device, or in a hybrid way. A common pattern is to deploy a **global model** (or a client-specific **local model**) to client environments for on-device inference, reducing data movement and potentially improving latency.
+
+## Common pitfalls
+- **Training/inference mismatch**: inconsistent preprocessing or feature availability between training and inference leads to degraded performance.
+- **Distribution shift**: client environments can change over time; monitoring and re-training strategies matter.
+- Assuming on-device inference implies privacy guarantees; it depends on the full system design and what data leaves the device.
+
+## In Flower
+In Flower, inference typically lives in application code (often alongside a [ClientApp](/glossary/clientapp)) using model artifacts produced by a federated run; Flower primarily orchestrates training, evaluation, and analytics.

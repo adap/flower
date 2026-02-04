@@ -1,0 +1,32 @@
+---
+title: "Federated Averaging (FedAvg)"
+description: "FedAvg is a baseline FL algorithm that averages client-trained models (often weighted by local data size) to update the global model."
+date: "2026-02-03"
+author:
+  name: "Flower Team"
+  position: "Maintainers"
+  website: "https://flower.ai/"
+related:
+  - text: "Federated Learning"
+    link: "/glossary/federated-learning"
+  - text: "Aggregation"
+    link: "/glossary/aggregation"
+  - text: "Model Update"
+    link: "/glossary/model-update"
+---
+
+Federated Averaging (FedAvg) is a foundational federated learning algorithm. In each round, selected clients start from the global model, train locally for a small number of steps/epochs, and send their updated parameters (or deltas) back. The server aggregates these updates—often as a data-size-weighted average—to form the next global model.
+
+## Why it matters
+- Strong baseline and the reference point for many FL methods.
+- Simple and widely supported across frameworks.
+
+## In federated settings
+FedAvg’s behavior is strongly affected by non-IID data, client compute heterogeneity, and the choice of local training steps.
+
+## Common pitfalls
+- Too many local steps can cause client drift under non-IID data.
+- Averaging weights can be bandwidth-heavy for large models.
+
+## In Flower
+In Flower, FedAvg is implemented as a server-side [Strategy](/glossary/strategy) and runs in both the [simulation runtime](/glossary/simulation-runtime) and the [deployment runtime](/glossary/deployment-runtime).

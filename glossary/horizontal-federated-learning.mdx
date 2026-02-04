@@ -1,0 +1,29 @@
+---
+title: "Horizontal Federated Learning"
+description: "Horizontal FL is the common case where clients share the same feature space but have different samples."
+date: "2026-02-03"
+author:
+  name: "Flower Team"
+  position: "Maintainers"
+  website: "https://flower.ai/"
+related:
+  - text: "Vertical Federated Learning"
+    link: "/glossary/vertical-federated-learning"
+  - text: "Federated Learning"
+    link: "/glossary/federated-learning"
+---
+
+Horizontal federated learning is the standard setting where clients have the same feature space (same input schema) but different samples (different rows). This matches many real-world scenarios like user devices or multiple sites collecting the same type of data.
+
+## Why it matters
+- Most classic FL algorithms (like FedAvg) assume this setting.
+
+## In federated settings
+Clients train the same model architecture locally and share updates that can be aggregated directly.
+
+## Common pitfalls
+- Even with the same schema, preprocessing differences can break assumptions.
+- Non-IID label/feature distributions can still be severe.
+
+## In Flower
+In Flower, most built-in examples and many default [Strategy](/glossary/strategy) patterns assume horizontal federated learning and run in both the [simulation runtime](/glossary/simulation-runtime) and the [deployment runtime](/glossary/deployment-runtime).

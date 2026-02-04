@@ -1,0 +1,32 @@
+---
+title: "SuperExec"
+description: "SuperExec is Flower’s long-running process that schedules, launches, and manages app processes (ClientApp/ServerApp) on demand."
+date: "2026-02-03"
+author:
+  name: "Flower Team"
+  position: "Maintainers"
+  website: "https://flower.ai/"
+related:
+  - text: "SuperLink"
+    link: "/glossary/superlink"
+  - text: "SuperNode"
+    link: "/glossary/supernode"
+  - text: "Multi-run (Multi-tenancy)"
+    link: "/glossary/multi-run"
+---
+
+SuperExec is a long-running Flower process that schedules, launches, and manages application processes (such as ClientApp and ServerApp) on demand.
+
+## Why it matters
+- Enables multi-run/multi-tenancy by running different app processes over time.
+- Keeps long-running infrastructure stable while swapping short-lived project code.
+
+## In federated settings
+Separating durable connectivity from project code helps federated systems run multiple workloads and update application logic without restarting the federation runtime.
+
+## Common pitfalls
+- Treating process management as an implementation detail; it affects isolation, observability, and operational safety.
+- Overlooking resource limits when running multiple app processes concurrently.
+
+## In Flower
+In Flower, SuperExec is started by [SuperLink](/glossary/superlink) or [SuperNode](/glossary/supernode) and manages short-lived [ServerApp](/glossary/serverapp) and [ClientApp](/glossary/clientapp) processes to enable [Multi-run](/glossary/multi-run).

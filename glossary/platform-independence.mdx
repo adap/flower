@@ -1,19 +1,40 @@
 ---
 title: "Platform Independence"
-description: "The capability to run program across different hardware and operating systems."
+description: "The ability to run software across different hardware and operating systems with minimal platform-specific changes."
 date: "2024-07-08"
 author:
   name: "Heng Pan"
   position: "Research Scientist"
   website: "https://discuss.flower.ai/u/pan-h/summary"
   github: "github.com/panh99"
-related: 
+related:
   - text: "Federated Learning"
     link: "/glossary/federated-learning"
+  - text: "Interoperability"
+    link: "/glossary/interoperability"
+  - text: "gRPC"
+    link: "/glossary/grpc"
+  - text: "Protocol Buffers"
+    link: "/glossary/protocol-buffers"
 ---
 
-Platform independence in federated learning refers to the capability of machine learning systems to operate seamlessly across various hardware and operating system environments. This ensures that the federated learning process can function effectively on various devices with different operating systems such as Windows, Linux, Mac OS, iOS, and Android without requiring platform-specific modifications. By achieving platform independence, federated learning frameworks enable efficient data analysis and model training across heterogeneous edge devices, enhancing scalability and flexibility in distributed machine learning scenarios.
+Platform independence is the ability for software to run across different operating systems and hardware architectures with minimal or no platform-specific changes. In federated AI, this often means clients and servers can participate from heterogeneous environments while following the same protocol and semantics.
 
-### Platform Independence in Flower
+## Why it matters
+- Real federations are heterogeneous (mobile, edge, servers, different hardware).
+- Platform independence reduces integration and maintenance costs.
+- It enables incremental rollouts as fleets evolve over time.
 
-Flower is interoperable with different operating systems and hardware platforms to work well in heterogeneous edge device environments.
+## In federated settings
+Federated systems must coordinate across environments that differ not only by operating system, but also by programming language, ML framework, and numeric behavior. Achieving platform independence typically requires:
+- a stable communication protocol and serialization format for messages and payloads
+- clear contracts for what is exchanged (for example [model updates](/glossary/model-update) and metrics)
+- careful control of preprocessing and model parameter conventions to avoid silent incompatibilities
+
+## Common pitfalls
+- Treating platform independence as only a packaging problem; protocol semantics and preprocessing consistency matter.
+- Assuming numeric results will match across hardware (for example due to floating point differences).
+- Overlooking security boundaries: interoperability can increase the attack surface if authentication and authorization are not designed explicitly.
+
+## In Flower
+In Flower, platform independence is achieved by keeping coordination at the protocol level: [SuperLink](/glossary/superlink) and [SuperNode](/glossary/supernode) communicate via shared interfaces (see [gRPC](/glossary/grpc) and [Protocol Buffers](/glossary/protocol-buffers)), enabling heterogeneous clients to participate under one [Strategy](/glossary/strategy).

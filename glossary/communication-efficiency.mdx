@@ -1,0 +1,30 @@
+---
+title: "Communication Efficiency"
+description: "Communication efficiency reduces bandwidth and rounds needed by compressing updates, changing training cadence, or reducing payload size."
+date: "2026-02-03"
+author:
+  name: "Flower Team"
+  position: "Maintainers"
+  website: "https://flower.ai/"
+related:
+  - text: "Model Update"
+    link: "/glossary/model-update"
+  - text: "Partial Participation"
+    link: "/glossary/partial-participation"
+---
+
+Communication efficiency is the set of techniques used to reduce the communication cost of federated workloads. This includes reducing the number of rounds, compressing model updates, quantizing values, sparsifying updates, or using more local computation per round.
+
+## Why it matters
+- Communication is often the main bottleneck in federated systems.
+- Lower bandwidth and fewer round trips enable larger scale and weaker networks.
+
+## In federated settings
+Efficiency techniques trade off accuracy, convergence stability, and client compute. What works in cross-silo may not work in cross-device settings.
+
+## Common pitfalls
+- Increasing local epochs can reduce communication but worsen client drift under non-IID data.
+- Compression can interact poorly with secure aggregation or robust aggregation if not designed carefully.
+
+## In Flower
+In Flower, communication/compute trade-offs are typically controlled in the [Strategy](/glossary/strategy) and apply in both the [simulation runtime](/glossary/simulation-runtime) and the [deployment runtime](/glossary/deployment-runtime).

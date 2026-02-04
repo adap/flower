@@ -1,0 +1,28 @@
+---
+title: "Privacy Budget (ε, δ)"
+description: "The privacy budget quantifies the strength of a differential privacy guarantee; smaller ε generally means stronger privacy."
+date: "2026-02-03"
+author:
+  name: "Flower Team"
+  position: "Maintainers"
+  website: "https://flower.ai/"
+related:
+  - text: "Differential Privacy (DP)"
+    link: "/glossary/differential-privacy"
+---
+
+A privacy budget quantifies the strength of a differential privacy guarantee, commonly expressed as parameters ε (epsilon) and δ (delta). Informally, smaller ε indicates stronger privacy (but typically lower utility), while δ bounds a small probability of larger privacy loss.
+
+## Why it matters
+- Enables comparing DP configurations and communicating privacy guarantees.
+- Helps teams reason about cumulative privacy loss across repeated computations.
+
+## In federated settings
+Privacy budgets compose across rounds, meaning repeated training/evaluation/analytics consumes more privacy budget.
+
+## Common pitfalls
+- Treating ε as a label without specifying δ, accounting method, and threat model.
+- Comparing ε values across different settings without considering differences in mechanism and sensitivity.
+
+## In Flower
+In Flower, DP accounting is typically reported alongside experiments implemented in a [ServerApp](/glossary/serverapp)/[ClientApp](/glossary/clientapp) pair and coordinated by a [Strategy](/glossary/strategy).

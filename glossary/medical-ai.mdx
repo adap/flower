@@ -1,6 +1,6 @@
 ---
 title: "Medical AI"
-description: "Medical AI involves the application of artificial intelligence technologies to healthcare, enhancing diagnosis, treatment planning, and patient monitoring by analyzing complex medical data."
+description: "Medical AI applies machine learning and AI methods to clinical and healthcare tasks such as diagnosis support, imaging, and patient monitoring."
 date: "2024-07-12"
 author:
   name: "Yan Gao"
@@ -10,15 +10,35 @@ author:
 related:
   - text: "Federated Learning"
     link: "/glossary/federated-learning"
-  - text: "Server"
-    link: "/glossary/server"
-  - text: "Client"
-    link: "/glossary/client"
+  - text: "Cross-silo Federated Learning"
+    link: "/glossary/cross-silo-federated-learning"
+  - text: "Federated Evaluation"
+    link: "/glossary/federated-evaluation"
+  - text: "Secure Aggregation"
+    link: "/glossary/secure-aggregation"
+  - text: "Differential Privacy (DP)"
+    link: "/glossary/differential-privacy"
+  - text: "Threat Model"
+    link: "/glossary/threat-model"
 ---
 
-Medical AI refers to the application of artificial intelligence technologies, particularly machine learning algorithms, to medical and healthcare-related fields. This includes, but is not limited to, tasks such as disease diagnosis, personalized treatment plans, drug development, medical imaging analysis, and healthcare management. The goal of Medical AI is to enhance healthcare services, improve treatment outcomes, reduce costs, and increase efficiency within healthcare systems.
+Medical AI is the use of machine learning and other AI methods in clinical and healthcare contexts, such as imaging, risk prediction, triage, and operational analytics. Compared to many consumer ML settings, medical AI is high stakes, highly regulated, and sensitive to distribution shift and measurement differences across sites.
 
-Federated learning (FL) introduces a novel approach to the training of machine learning models across multiple decentralized devices or servers holding local data samples, without exchanging them. This is particularly appropriate in the medical field due to the sensitive nature of medical data and strict privacy requirements. It leverages the strength of diverse datasets without compromising patient confidentiality, making it an increasingly popular choice in Medical AI applications.
+## Why it matters
+- Medical data is often siloed across institutions, devices, and jurisdictions.
+- Errors can have real clinical consequences, so evaluation, monitoring, and governance matter.
+- Site-to-site differences (population, equipment, coding practices) can be large and must be accounted for.
 
-#### Medical AI in Flower
-Flower, a friendly FL framework, is developing a more versatile and privacy-enhancing solution for Medical AI through the use of FL. Please check out [Flower industry healthcare](flower.ai/industry/healthcare) website for more detailed information.
+## In federated settings
+Federated AI is often a natural fit for medical collaborations because institutions may be unable to pool raw data centrally. In cross-silo federated learning, each site trains or evaluates locally and contributes constrained outputs (for example [model updates](/glossary/model-update) or locally computed metrics) for aggregation.
+
+Because “privacy” is not automatic, medical federations typically need an explicit [threat model](/glossary/threat-model) and may combine techniques such as [secure aggregation](/glossary/secure-aggregation) and [differential privacy](/glossary/differential-privacy), depending on requirements and who is trusted.
+
+## Common pitfalls
+- Treating federated learning as a drop-in privacy solution without specifying the threat model and defenses.
+- Inconsistent preprocessing, labeling, or measurement across sites that makes training and evaluation incomparable.
+- Reporting only average metrics and missing poor performance on smaller sites or patient cohorts.
+- Ignoring non-stationarity (changes in clinical practice or population) that can invalidate historical results.
+
+## In Flower
+In Flower, medical collaborations are commonly modeled as [cross-silo federated learning](/glossary/cross-silo-federated-learning) in the [deployment runtime](/glossary/deployment-runtime), where a [ServerApp](/glossary/serverapp) defines a [Strategy](/glossary/strategy) and each site runs a [ClientApp](/glossary/clientapp) under local governance.
