@@ -26,10 +26,9 @@ from flwr_datasets.partitioner import IidPartitioner
 
 
 def create(
-    name: Annotated[
+    dataset_name: Annotated[
         str,
-        typer.Option(
-            "--name",
+        typer.Argument(
             help="Hugging Face dataset identifier (e.g., 'ylecun/mnist').",
         ),
     ],
@@ -78,10 +77,16 @@ def create(
     partitioner = IidPartitioner(num_partitions=num_partitions)
 
     # Create the federated dataset
-    fds = FederatedDataset(dataset=name, partitioners={"train": partitioner})
+    fds = FederatedDataset(dataset=dataset_name, partitioners={"train": partitioner})
 
     # Load partitions and save them to disk
     for partition_id in range(num_partitions):
         partition = fds.load_partition(partition_id=partition_id)
         partition_out_dir = out_dir / f"partition_{partition_id}"
         partition.save_to_disk(partition_out_dir)
+
+    typer.secho(
+        f"🎊 Created {num_partitions} partitions for {dataset_name} in {out_dir}",
+        fg=typer.colors.GREEN,
+        bold=True,
+    )

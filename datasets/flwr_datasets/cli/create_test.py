@@ -56,7 +56,7 @@ class _FakeFederatedDataset:
 def test_create_raises_on_non_positive_num_partitions(tmp_path: Path) -> None:
     """Ensure `create` fails when `num_partitions` is not a positive integer."""
     with pytest.raises(click.ClickException, match="positive integer"):
-        create(name="user/ds", num_partitions=0, out_dir=tmp_path)
+        create(dataset_name="user/ds", num_partitions=0, out_dir=tmp_path)
 
 
 @dataclass(frozen=True)
@@ -157,7 +157,7 @@ def test_create_partitions_save_behavior(
             ),
         )
 
-    create(name="user/ds", num_partitions=case.num_partitions, out_dir=out_dir)
+    create(dataset_name="user/ds", num_partitions=case.num_partitions, out_dir=out_dir)
 
     assert len(confirm_calls) == case.expect_confirm_calls
 
