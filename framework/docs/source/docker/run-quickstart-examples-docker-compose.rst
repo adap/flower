@@ -86,7 +86,7 @@ Before you start, make sure that:
 
        In this example, ``local-deployment`` has been used. Just remember to replace
        ``local-deployment`` with your chosen name in both the ``superlink.`` string and
-       the corresponding ``flwr run .`` command. Refer to the `Flower configuration file
+       the corresponding ``flwr run .`` command. Refer to the `Flower Configuration
        <ref-flower-configuration.html>`_ for more information.
 
 5. Run the example and follow the logs of the ``ServerApp`` :

@@ -110,7 +110,7 @@ located at ``$HOME/.flwr/config.toml``):
       default, you can specify the connection name explicitly in each command, for
       example: ``flwr login my-prod-superlink``.
 
-Learn more about the Flower Configuration file in the `Flower Configuration File
+Learn more about the Flower Configuration file in the `Flower Configuration
 <ref-flower-configuration.html>`_ reference.
 
 You need to login first before other CLI commands can be executed. Upon executing ``flwr

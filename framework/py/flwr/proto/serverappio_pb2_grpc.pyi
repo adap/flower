@@ -20,7 +20,6 @@ limitations under the License.
 import abc
 import collections.abc
 import flwr.proto.appio_pb2
-import flwr.proto.fab_pb2
 import flwr.proto.heartbeat_pb2
 import flwr.proto.log_pb2
 import flwr.proto.message_pb2
@@ -148,12 +147,6 @@ class ServerAppIoStub:
     ]
     """Return a set of nodes"""
 
-    GetFab: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.fab_pb2.GetFabRequest,
-        flwr.proto.fab_pb2.GetFabResponse,
-    ]
-    """Get FAB"""
-
 class ServerAppIoAsyncStub:
     ListAppsToLaunch: grpc.aio.UnaryUnaryMultiCallable[
         flwr.proto.appio_pb2.ListAppsToLaunchRequest,
@@ -263,12 +256,6 @@ class ServerAppIoAsyncStub:
         flwr.proto.serverappio_pb2.GetNodesResponse,
     ]
     """Return a set of nodes"""
-
-    GetFab: grpc.aio.UnaryUnaryMultiCallable[
-        flwr.proto.fab_pb2.GetFabRequest,
-        flwr.proto.fab_pb2.GetFabResponse,
-    ]
-    """Get FAB"""
 
 class ServerAppIoServicer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
@@ -407,13 +394,5 @@ class ServerAppIoServicer(metaclass=abc.ABCMeta):
         context: _ServicerContext,
     ) -> typing.Union[flwr.proto.serverappio_pb2.GetNodesResponse, collections.abc.Awaitable[flwr.proto.serverappio_pb2.GetNodesResponse]]:
         """Return a set of nodes"""
-
-    @abc.abstractmethod
-    def GetFab(
-        self,
-        request: flwr.proto.fab_pb2.GetFabRequest,
-        context: _ServicerContext,
-    ) -> typing.Union[flwr.proto.fab_pb2.GetFabResponse, collections.abc.Awaitable[flwr.proto.fab_pb2.GetFabResponse]]:
-        """Get FAB"""
 
 def add_ServerAppIoServicer_to_server(servicer: ServerAppIoServicer, server: typing.Union[grpc.Server, grpc.aio.Server]) -> None: ...
