@@ -117,8 +117,9 @@ def test_create_partitions_save_behavior(
         ), "confirm should not be called in this scenario"
         return case.user_overwrite
 
-    def _mkdir(self: Path, _parents: bool = False, _exist_ok: bool = False) -> None:
+    def _mkdir(self: Path, parents: bool = False, exist_ok: bool = False) -> None:
         """Record directory creation attempts."""
+        del parents, exist_ok  # unused
         mkdir_calls.append(self)
 
     monkeypatch.setattr(Path, "exists", _exists)
