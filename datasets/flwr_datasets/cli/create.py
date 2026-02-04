@@ -76,14 +76,25 @@ def create(
     # Create data partitioner
     partitioner = IidPartitioner(num_partitions=num_partitions)
 
-    # Create the federated dataset
-    fds = FederatedDataset(dataset=dataset_name, partitioners={"train": partitioner})
+    try:
+        # Create the federated dataset
+        fds = FederatedDataset(
+            dataset=dataset_name,
+            partitioners={"train": partitioner},
+        )
 
-    # Load partitions and save them to disk
-    for partition_id in range(num_partitions):
-        partition = fds.load_partition(partition_id=partition_id)
-        partition_out_dir = out_dir / f"partition_{partition_id}"
-        partition.save_to_disk(partition_out_dir)
+        # Load partitions and save them to disk
+        for partition_id in range(num_partitions):
+            partition = fds.load_partition(partition_id=partition_id)
+            partition_out_dir = out_dir / f"partition_{partition_id}"
+            partition.save_to_disk(partition_out_dir)
+
+    except Exception as err:  # pylint: disable=broad-exception-caught
+        raise click.ClickException(
+            f"Dataset '{dataset_name}' could not be found on the Hugging Face Hub or "
+            "network access is unavailable. "
+            "Please verify the dataset identifier and your connection."
+        ) from err
 
     typer.secho(
         f"🎊 Created {num_partitions} partitions for {dataset_name} in {out_dir}",
