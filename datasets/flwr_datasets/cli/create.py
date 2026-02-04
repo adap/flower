@@ -38,7 +38,7 @@ def create(
         typer.Option(
             "--num-partitions",
             min=1,
-            help="Number of partitions to create for the federated dataset.",
+            help="Number of partitions to create.",
         ),
     ] = 10,
     out_dir: Annotated[
