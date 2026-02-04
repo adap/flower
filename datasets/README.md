@@ -20,10 +20,6 @@ For a complete installation guide visit the [Flower Datasets Documentation](http
 pip install flwr-datasets[vision]
 ```
 
-> [!NOTE]
-> The `audio` extra currently supports Python `<3.12` due to upstream dependency
-> constraints.
-
 ## Development (uv)
 
 Flower Datasets uses `uv` for development and CI.
