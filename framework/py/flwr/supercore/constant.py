@@ -73,6 +73,7 @@ SYSTEM_MESSAGE_TYPE = "system"
 
 # SQLite PRAGMA settings for optimal performance and correctness
 SQLITE_PRAGMAS = (
+    ("busy_timeout", "5000"),  # Retry lock acquisition for up to 5s before SQLITE_BUSY
     ("journal_mode", "WAL"),  # Enable Write-Ahead Logging for better concurrency
     ("synchronous", "NORMAL"),
     ("foreign_keys", "ON"),
