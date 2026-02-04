@@ -77,9 +77,7 @@ def test_create_raises_click_exception_when_dataset_load_fails(
     monkeypatch.setattr(Path, "exists", lambda _self: False)
 
     # Avoid touching the real filesystem in this unit test
-    monkeypatch.setattr(
-        Path, "mkdir", lambda _self, _parents=False, _exist_ok=False: None
-    )
+    monkeypatch.setattr(Path, "mkdir", lambda _self, **_kwargs: None)
 
     # Mock partitioner
     monkeypatch.setattr(
