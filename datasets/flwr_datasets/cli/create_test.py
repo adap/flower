@@ -108,8 +108,9 @@ def test_create_partitions_save_behavior(
         """Simulate existence of the output directory."""
         return case.out_dir_exists and self == out_dir
 
-    def _confirm(message: str, _default: bool = False) -> bool:
+    def _confirm(message: str, default: bool = False) -> bool:
         """Simulate user response to overwrite confirmation."""
+        del default  # unused
         confirm_calls.append(message)
         assert (
             case.user_overwrite is not None
