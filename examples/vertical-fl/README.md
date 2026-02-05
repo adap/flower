@@ -117,7 +117,7 @@ flwr config list
 options.num-supernodes = 3
 ```
 
-Remember, if you wish to change `options.num-supernodes` you'll need to adjust `feature-splits` in the `pyproject.toml` accordingtly.
+Remember, if you wish to change `options.num-supernodes` you'll need to adjust `feature-splits` in the `pyproject.toml` accordingly.
 
 ### Run with the Simulation Engine
 
