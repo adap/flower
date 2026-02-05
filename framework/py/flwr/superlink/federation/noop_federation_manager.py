@@ -15,9 +15,10 @@
 """NoOp implementation of FederationManager."""
 
 
-from flwr.common.constant import NOOP_FLWR_AID
+from flwr.common.constant import NOOP_ACCOUNT_NAME, NOOP_FLWR_AID
 from flwr.common.typing import Federation
-from flwr.supercore.constant import NOOP_FEDERATION
+from flwr.proto.federation_pb2 import Account  # pylint: disable=E0611
+from flwr.supercore.constant import NOOP_FEDERATION, NOOP_FEDERATION_DESCRIPTION
 
 from .federation_manager import FederationManager
 
@@ -47,11 +48,11 @@ class NoOpFederationManager(FederationManager):
             raise ValueError(f"Federation '{federation}' does not exist.")
         return True
 
-    def get_federations(self, flwr_aid: str) -> list[str]:
-        """Get federations of which the account is a member."""
+    def get_federations(self, flwr_aid: str) -> list[tuple[str, str]]:
+        """Get federations (name, description) of which the account is a member."""
         if flwr_aid != NOOP_FLWR_AID:
             return []
-        return [NOOP_FEDERATION]
+        return [(NOOP_FEDERATION, NOOP_FEDERATION_DESCRIPTION)]
 
     def get_details(self, federation: str) -> Federation:
         """Get details of the federation."""
@@ -65,7 +66,8 @@ class NoOpFederationManager(FederationManager):
         ]
         return Federation(
             name=NOOP_FEDERATION,
-            member_aids=[NOOP_FLWR_AID],
+            description=NOOP_FEDERATION_DESCRIPTION,
+            accounts=[Account(id=NOOP_FLWR_AID, name=NOOP_ACCOUNT_NAME)],
             nodes=nodes,
             runs=runs,
         )

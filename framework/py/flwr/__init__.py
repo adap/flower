@@ -17,7 +17,7 @@
 
 import importlib
 
-from flwr.common.version import package_version as _package_version
+from flwr.supercore.version import package_version as _package_version
 
 from . import app, clientapp, serverapp
 

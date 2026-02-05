@@ -21,6 +21,7 @@ from io import BytesIO
 from pathlib import Path
 from typing import Annotated, Any
 
+import click
 import pathspec
 import tomli
 import tomli_w
@@ -70,7 +71,7 @@ def get_fab_filename(config: dict[str, Any], fab_hash: str) -> str:
     Parameters
     ----------
     config : dict[str, Any]
-        The project configuration dictionary.
+        The Flower App configuration dictionary.
     fab_hash : str
         The SHA-256 hash of the FAB file.
 
@@ -105,40 +106,29 @@ def build(
     if app is None:
         app = Path.cwd()
 
-    app = app.resolve()
+    app = app.expanduser().resolve()
     if not app.is_dir():
-        typer.secho(
-            f"❌ The path {app} is not a valid path to a Flower app.",
-            fg=typer.colors.RED,
-            bold=True,
+        raise click.ClickException(
+            f"The path {app} is not a valid path to a Flower app."
         )
-        raise typer.Exit(code=1)
 
     if not is_valid_project_name(app.name):
-        typer.secho(
-            f"❌ The project name {app.name} is invalid, "
-            "a valid project name must start with a letter, "
-            "and can only contain letters, digits, and hyphens.",
-            fg=typer.colors.RED,
-            bold=True,
+        raise click.ClickException(
+            f"The Flower App name {app.name} is invalid, "
+            "a valid app name must start with a letter, "
+            "and can only contain letters, digits, and hyphens."
         )
-        raise typer.Exit(code=1)
 
-    config, errors, warnings = load_and_validate(app / "pyproject.toml")
-    if config is None:
-        typer.secho(
-            "Project configuration could not be loaded.\npyproject.toml is invalid:\n"
-            + "\n".join([f"- {line}" for line in errors]),
-            fg=typer.colors.RED,
-            bold=True,
-        )
-        raise typer.Exit(code=1)
+    try:
+        config, warnings = load_and_validate(app / "pyproject.toml")
+    except ValueError as e:
+        raise click.ClickException(str(e)) from None
 
     if warnings:
         typer.secho(
-            "Project configuration is missing the following "
+            "Flower App configuration (pyproject.toml) is missing the following "
             "recommended properties:\n" + "\n".join([f"- {line}" for line in warnings]),
-            fg=typer.colors.RED,
+            fg=typer.colors.YELLOW,
             bold=True,
         )
 

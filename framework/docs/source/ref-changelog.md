@@ -2,6 +2,154 @@
 
 ## Unreleased
 
+## v1.26.0 (2026-02-05)
+
+### Thanks to our contributors
+
+We would like to give our special thanks to all the contributors who made the new version of Flower possible (in `git shortlog` order):
+
+`Charles Beauville`, `Chong Shen Ng`, `Daniel J. Beutel`, `Flippchen`, `Heng Pan`, `Iason Ofeidis`, `Javier`, `Jun S`, `Soumik Sarker`, `Taner Topal`, `Yan Gao`, `nihonge` <!---TOKEN_v1.26.0-->
+
+### What's new?
+
+- **Introduce centralized `flwr` CLI configuration** ([#6240](https://github.com/adap/flower/pull/6240), [#6338](https://github.com/adap/flower/pull/6338), [#6343](https://github.com/adap/flower/pull/6343), [#6349](https://github.com/adap/flower/pull/6349), [#6354](https://github.com/adap/flower/pull/6354), [#6356](https://github.com/adap/flower/pull/6356), [#6357](https://github.com/adap/flower/pull/6357), [#6359](https://github.com/adap/flower/pull/6359), [#6362](https://github.com/adap/flower/pull/6362), [#6364](https://github.com/adap/flower/pull/6364), [#6365](https://github.com/adap/flower/pull/6365), [#6366](https://github.com/adap/flower/pull/6366), [#6367](https://github.com/adap/flower/pull/6367), [#6372](https://github.com/adap/flower/pull/6372), [#6376](https://github.com/adap/flower/pull/6376), [#6381](https://github.com/adap/flower/pull/6381), [#6382](https://github.com/adap/flower/pull/6382), [#6385](https://github.com/adap/flower/pull/6385), [#6386](https://github.com/adap/flower/pull/6386), [#6390](https://github.com/adap/flower/pull/6390), [#6400](https://github.com/adap/flower/pull/6400), [#6422](https://github.com/adap/flower/pull/6422), [#6423](https://github.com/adap/flower/pull/6423), [#6435](https://github.com/adap/flower/pull/6435), [#6439](https://github.com/adap/flower/pull/6439), [#6440](https://github.com/adap/flower/pull/6440), [#6441](https://github.com/adap/flower/pull/6441), [#6446](https://github.com/adap/flower/pull/6446), [#6481](https://github.com/adap/flower/pull/6481), [#6492](https://github.com/adap/flower/pull/6492), [#6502](https://github.com/adap/flower/pull/6502), [#6509](https://github.com/adap/flower/pull/6509), [#6513](https://github.com/adap/flower/pull/6513), [#6519](https://github.com/adap/flower/pull/6519))
+
+  Changes Flower CLI (`flwr`) configuration to introduce a new way to manage SuperLink connections and simulation settings in a central place (instead of Flower app's `pyproject.toml`). This enables `flwr` commands to be executed from any directory and allow reuse of named connections across different Flower apps. This change also removes the now obsolete `enable-account-auth` option. The central Flower CLI config fully replaces the legacy `federation` configuration in `pyproject.toml`, which is automatically migrated to the new Flower configuration format when running `flwr` commands. For usage details, see the [Flower CLI reference](https://flower.ai/docs/framework/main/en/ref-api-cli.html) and the [Flower configuration documentation](https://flower.ai/docs/framework/main/en/ref-flower-configuration.html).
+
+- **Enable automated database migrations on Flower version upgrades** ([#6345](https://github.com/adap/flower/pull/6345), [#6355](https://github.com/adap/flower/pull/6355), [#6370](https://github.com/adap/flower/pull/6370), [#6371](https://github.com/adap/flower/pull/6371), [#6378](https://github.com/adap/flower/pull/6378), [#6379](https://github.com/adap/flower/pull/6379), [#6380](https://github.com/adap/flower/pull/6380), [#6383](https://github.com/adap/flower/pull/6383), [#6384](https://github.com/adap/flower/pull/6384), [#6387](https://github.com/adap/flower/pull/6387), [#6388](https://github.com/adap/flower/pull/6388), [#6389](https://github.com/adap/flower/pull/6389), [#6396](https://github.com/adap/flower/pull/6396), [#6398](https://github.com/adap/flower/pull/6398), [#6402](https://github.com/adap/flower/pull/6402), [#6403](https://github.com/adap/flower/pull/6403), [#6404](https://github.com/adap/flower/pull/6404), [#6406](https://github.com/adap/flower/pull/6406), [#6407](https://github.com/adap/flower/pull/6407), [#6408](https://github.com/adap/flower/pull/6408), [#6410](https://github.com/adap/flower/pull/6410), [#6411](https://github.com/adap/flower/pull/6411), [#6424](https://github.com/adap/flower/pull/6424), [#6425](https://github.com/adap/flower/pull/6425), [#6426](https://github.com/adap/flower/pull/6426), [#6433](https://github.com/adap/flower/pull/6433), [#6436](https://github.com/adap/flower/pull/6436), [#6448](https://github.com/adap/flower/pull/6448), [#6450](https://github.com/adap/flower/pull/6450), [#6457](https://github.com/adap/flower/pull/6457), [#6459](https://github.com/adap/flower/pull/6459), [#6460](https://github.com/adap/flower/pull/6460), [#6469](https://github.com/adap/flower/pull/6469), [#6477](https://github.com/adap/flower/pull/6477), [#6478](https://github.com/adap/flower/pull/6478), [#6521](https://github.com/adap/flower/pull/6521))
+
+  Refactors Flower's internal states implementations to introduce Alembic-based schema migrations with automatic upgrades. This ensures database compatibility across Flower versions and lays the groundwork for supporting more types of databases. See the [database migration guide](https://flower.ai/docs/framework/contributor-how-to-migrate-database.html) for details.
+
+- **Improve CLI error handling and usability** ([#6432](https://github.com/adap/flower/pull/6432), [#6437](https://github.com/adap/flower/pull/6437), [#6444](https://github.com/adap/flower/pull/6444), [#6462](https://github.com/adap/flower/pull/6462), [#6467](https://github.com/adap/flower/pull/6467), [#6505](https://github.com/adap/flower/pull/6505))
+
+  Updates `flwr` CLI to provide clearer and more consistent error formatting, improves CLI error messages and logging, and shows command aliases.
+
+- **Improve reliability of network stack, `ServerApp` shutdown and Windows support** ([#6342](https://github.com/adap/flower/pull/6342), [#6430](https://github.com/adap/flower/pull/6430), [#6447](https://github.com/adap/flower/pull/6447), [#6456](https://github.com/adap/flower/pull/6456), [#6490](https://github.com/adap/flower/pull/6490), [#6504](https://github.com/adap/flower/pull/6504))
+
+  Improves the reliability of message transmission and capacity tracking under unstable network conditions and high concurrency, improves Windows process handling and address resolution, and ensures graceful shutdown of `flwr-serverapp`.
+
+- **Fix and improve framework documentation** ([#6312](https://github.com/adap/flower/pull/6312), [#6336](https://github.com/adap/flower/pull/6336), [#6351](https://github.com/adap/flower/pull/6351), [#6397](https://github.com/adap/flower/pull/6397), [#6401](https://github.com/adap/flower/pull/6401), [#6434](https://github.com/adap/flower/pull/6434), [#6455](https://github.com/adap/flower/pull/6455), [#6470](https://github.com/adap/flower/pull/6470), [#6485](https://github.com/adap/flower/pull/6485), [#6506](https://github.com/adap/flower/pull/6506), [#6508](https://github.com/adap/flower/pull/6508), [#6511](https://github.com/adap/flower/pull/6511), [#6512](https://github.com/adap/flower/pull/6512), [#6516](https://github.com/adap/flower/pull/6516))
+
+  Fixes an incorrect learning rate key in the tutorial series, updates the `clientappio` address in the auth example, and improves the documentation UI by making the versioning sidebar scrollable to show all versions.
+
+- **Update and maintain examples** ([#6331](https://github.com/adap/flower/pull/6331), [#6334](https://github.com/adap/flower/pull/6334), [#6369](https://github.com/adap/flower/pull/6369), [#6395](https://github.com/adap/flower/pull/6395), [#6419](https://github.com/adap/flower/pull/6419), [#6474](https://github.com/adap/flower/pull/6474), [#6488](https://github.com/adap/flower/pull/6488))
+
+  Updates the JAX quickstart, bumps example dependencies, makes the certificate generation script cross-platform, normalizes training loss in the PyTorch quickstart, and marks the legacy `quickstart-pytorch` example as deprecated.
+
+- **Refine `flwr federation` CLI** ([#6340](https://github.com/adap/flower/pull/6340), [#6461](https://github.com/adap/flower/pull/6461), [#6463](https://github.com/adap/flower/pull/6463), [#6468](https://github.com/adap/flower/pull/6468), [#6476](https://github.com/adap/flower/pull/6476), [#6479](https://github.com/adap/flower/pull/6479), [#6480](https://github.com/adap/flower/pull/6480))
+
+  Removes `flwr federation show` in favor of `flwr federation list`. This makes the command more consistent with how `flwr list` works. The aligned command now supports detailed inspection via `flwr federation list --federation <federation>` and displays account names instead of account IDs.
+
+- **Update CI/CD workflows and tests** ([#6301](https://github.com/adap/flower/pull/6301), [#6321](https://github.com/adap/flower/pull/6321), [#6330](https://github.com/adap/flower/pull/6330), [#6346](https://github.com/adap/flower/pull/6346), [#6347](https://github.com/adap/flower/pull/6347), [#6348](https://github.com/adap/flower/pull/6348), [#6352](https://github.com/adap/flower/pull/6352), [#6373](https://github.com/adap/flower/pull/6373), [#6375](https://github.com/adap/flower/pull/6375), [#6394](https://github.com/adap/flower/pull/6394), [#6445](https://github.com/adap/flower/pull/6445), [#6449](https://github.com/adap/flower/pull/6449))
+
+- **General improvements** ([#6320](https://github.com/adap/flower/pull/6320), [#6323](https://github.com/adap/flower/pull/6323), [#6324](https://github.com/adap/flower/pull/6324), [#6325](https://github.com/adap/flower/pull/6325), [#6326](https://github.com/adap/flower/pull/6326), [#6327](https://github.com/adap/flower/pull/6327), [#6335](https://github.com/adap/flower/pull/6335), [#6337](https://github.com/adap/flower/pull/6337), [#6339](https://github.com/adap/flower/pull/6339), [#6344](https://github.com/adap/flower/pull/6344), [#6350](https://github.com/adap/flower/pull/6350), [#6353](https://github.com/adap/flower/pull/6353), [#6358](https://github.com/adap/flower/pull/6358), [#6360](https://github.com/adap/flower/pull/6360), [#6361](https://github.com/adap/flower/pull/6361), [#6377](https://github.com/adap/flower/pull/6377), [#6409](https://github.com/adap/flower/pull/6409), [#6412](https://github.com/adap/flower/pull/6412), [#6414](https://github.com/adap/flower/pull/6414), [#6415](https://github.com/adap/flower/pull/6415), [#6416](https://github.com/adap/flower/pull/6416), [#6417](https://github.com/adap/flower/pull/6417), [#6418](https://github.com/adap/flower/pull/6418), [#6421](https://github.com/adap/flower/pull/6421), [#6431](https://github.com/adap/flower/pull/6431), [#6452](https://github.com/adap/flower/pull/6452), [#6458](https://github.com/adap/flower/pull/6458), [#6465](https://github.com/adap/flower/pull/6465), [#6471](https://github.com/adap/flower/pull/6471), [#6472](https://github.com/adap/flower/pull/6472), [#6475](https://github.com/adap/flower/pull/6475), [#6482](https://github.com/adap/flower/pull/6482), [#6484](https://github.com/adap/flower/pull/6484), [#6487](https://github.com/adap/flower/pull/6487), [#6491](https://github.com/adap/flower/pull/6491), [#6495](https://github.com/adap/flower/pull/6495), [#6496](https://github.com/adap/flower/pull/6496), [#6497](https://github.com/adap/flower/pull/6497), [#6498](https://github.com/adap/flower/pull/6498), [#6500](https://github.com/adap/flower/pull/6500), [#6503](https://github.com/adap/flower/pull/6503), [#6507](https://github.com/adap/flower/pull/6507), [#6510](https://github.com/adap/flower/pull/6510), [#6515](https://github.com/adap/flower/pull/6515), [#6518](https://github.com/adap/flower/pull/6518), [#6522](https://github.com/adap/flower/pull/6522), [#6524](https://github.com/adap/flower/pull/6524))
+
+  As always, many parts of the Flower framework and quality infrastructure were improved and updated.
+
+### Incompatible changes
+
+- **Deprecate legacy `flwr` CLI configuration via `pyproject.toml`** ([#6374](https://github.com/adap/flower/pull/6374), [#6393](https://github.com/adap/flower/pull/6393), [#6399](https://github.com/adap/flower/pull/6399), [#6405](https://github.com/adap/flower/pull/6405))
+
+  Deprecates the now-legacy `flwr` CLI configuration usage (where configuration lives in `pyproject.toml`) following the introduction of the (central, project-independent) Flower configuration. Refer to the [Flower CLI reference](https://flower.ai/docs/framework/main/en/ref-api-cli.html) or run `flwr <command> --help` for updated usage.
+
+## v1.25.0 (2025-12-16)
+
+### Thanks to our contributors
+
+We would like to give our special thanks to all the contributors who made the new version of Flower possible (in `git shortlog` order):
+
+`Chong Shen Ng`, `Daniel J. Beutel`, `Heng Pan`, `Javier`, `Mohammad Naseri`, `Soumik Sarker`, `William Lindskog`, `Yan Gao`, `sarahhfalco` <!---TOKEN_v1.25.0-->
+
+### What's new?
+
+- **Track compute time and network traffic for runs** ([#6241](https://github.com/adap/flower/pull/6241), [#6242](https://github.com/adap/flower/pull/6242), [#6243](https://github.com/adap/flower/pull/6243), [#6244](https://github.com/adap/flower/pull/6244), [#6245](https://github.com/adap/flower/pull/6245), [#6249](https://github.com/adap/flower/pull/6249), [#6266](https://github.com/adap/flower/pull/6266), [#6267](https://github.com/adap/flower/pull/6267), [#6268](https://github.com/adap/flower/pull/6268), [#6269](https://github.com/adap/flower/pull/6269), [#6270](https://github.com/adap/flower/pull/6270), [#6271](https://github.com/adap/flower/pull/6271), [#6272](https://github.com/adap/flower/pull/6272), [#6273](https://github.com/adap/flower/pull/6273), [#6274](https://github.com/adap/flower/pull/6274), [#6275](https://github.com/adap/flower/pull/6275), [#6276](https://github.com/adap/flower/pull/6276), [#6279](https://github.com/adap/flower/pull/6279))
+
+  Flower now records compute time and network traffic for a run. The run detail view shown by `flwr list --run-id <run-id>` displays traffic exchanged between SuperLink and SuperNode, as well as compute time used by `ServerApp` and `ClientApp`.
+
+- **Refactor `flwr new` to pull apps from the Flower platform** ([#6251](https://github.com/adap/flower/pull/6251), [#6252](https://github.com/adap/flower/pull/6252), [#6258](https://github.com/adap/flower/pull/6258), [#6259](https://github.com/adap/flower/pull/6259), [#6260](https://github.com/adap/flower/pull/6260), [#6263](https://github.com/adap/flower/pull/6263), [#6265](https://github.com/adap/flower/pull/6265), [#6283](https://github.com/adap/flower/pull/6283), [#6284](https://github.com/adap/flower/pull/6284), [#6285](https://github.com/adap/flower/pull/6285), [#6292](https://github.com/adap/flower/pull/6292), [#6294](https://github.com/adap/flower/pull/6294), [#6302](https://github.com/adap/flower/pull/6302))
+
+  Refactors `flwr new` to fetch Flower apps directly from the Flower platform (see the [usage reference](https://flower.ai/docs/framework/ref-api-cli.html#flwr-new)). This introduces new and updated quickstart examples (including NumPy and FlowerTune LLM), renames and updates existing examples, aligns CI to run against platform-backed examples, and updates related documentation and benchmark instructions.
+
+- **Migrate examples to the Message API and remove outdated Docker Compose as well as Tensorflow Privacy examples** ([#6232](https://github.com/adap/flower/pull/6232), [#6233](https://github.com/adap/flower/pull/6233), [#6238](https://github.com/adap/flower/pull/6238), [#6297](https://github.com/adap/flower/pull/6297), [#6304](https://github.com/adap/flower/pull/6304))
+
+  Migrates the scikit-learn, Vertical FL, and Opacus examples to the Message API, with the Vertical FL example also updated to use `flwr-datasets`. The outdated Docker Compose and Tensorflow Privacy examples are removed.
+
+- **Improve CLI output with human-readable durations** ([#6277](https://github.com/adap/flower/pull/6277), [#6296](https://github.com/adap/flower/pull/6296))
+
+  Updates the Flower CLI to display durations in a more human-friendly format (`xd xh xm xs`), automatically selecting appropriate units instead of the previous `HH:MM:SS` format.
+
+- **Update examples and baselines** ([#6234](https://github.com/adap/flower/pull/6234), [#6256](https://github.com/adap/flower/pull/6256), [#6257](https://github.com/adap/flower/pull/6257), [#6264](https://github.com/adap/flower/pull/6264), [#6280](https://github.com/adap/flower/pull/6280), [#6281](https://github.com/adap/flower/pull/6281), [#6286](https://github.com/adap/flower/pull/6286), [#6287](https://github.com/adap/flower/pull/6287), [#6288](https://github.com/adap/flower/pull/6288), [#6290](https://github.com/adap/flower/pull/6290), [#6291](https://github.com/adap/flower/pull/6291), [#6293](https://github.com/adap/flower/pull/6293))
+
+- **Improve documentation** ([#6229](https://github.com/adap/flower/pull/6229), [#6230](https://github.com/adap/flower/pull/6230), [#6255](https://github.com/adap/flower/pull/6255), [#6262](https://github.com/adap/flower/pull/6262))
+
+- **Update CI/CD configuration** ([#6168](https://github.com/adap/flower/pull/6168), [#6246](https://github.com/adap/flower/pull/6246), [#6295](https://github.com/adap/flower/pull/6295), [#6305](https://github.com/adap/flower/pull/6305))
+
+- **General improvements** ([#6056](https://github.com/adap/flower/pull/6056), [#6085](https://github.com/adap/flower/pull/6085), [#6176](https://github.com/adap/flower/pull/6176), [#6235](https://github.com/adap/flower/pull/6235), [#6236](https://github.com/adap/flower/pull/6236), [#6254](https://github.com/adap/flower/pull/6254), [#6278](https://github.com/adap/flower/pull/6278), [#6299](https://github.com/adap/flower/pull/6299))
+
+  As always, many parts of the Flower framework and quality infrastructure were improved and updated.
+
+### Incompatible changes
+
+- **Remove bundled templates from `flwr new`** ([#6261](https://github.com/adap/flower/pull/6261))
+
+  Removes the templates previously bundled with the Flower wheel now that `flwr new` pulls apps from the Flower platform. The `--framework` and `--username` options are deprecated as part of this change.
+
+## v1.24.0 (2025-11-30)
+
+### Thanks to our contributors
+
+We would like to give our special thanks to all the contributors who made the new version of Flower possible (in `git shortlog` order):
+
+`Charles Beauville`, `Chong Shen Ng`, `Daniel J. Beutel`, `Daniel Nata Nugraha`, `Heng Pan`, `Javier`, `Patrick Foley`, `Robert Steiner`, `Yan Gao` <!---TOKEN_v1.24.0-->
+
+### What's new?
+
+- **Add Python 3.13 support** ([#6116](https://github.com/adap/flower/pull/6116), [#6119](https://github.com/adap/flower/pull/6119), [#6132](https://github.com/adap/flower/pull/6132))
+
+  `flwr` now supports Python 3.13, with CI and dataset tests updated accordingly and `ray` bumped to ensure compatibility.
+
+- **Improve the `flwr list` view** ([#6117](https://github.com/adap/flower/pull/6117))
+
+  `flwr list` now shows fewer details by default, while providing expanded information when using the `--run-id` flag.
+
+- **Extend federation commands and internal APIs** ([#6067](https://github.com/adap/flower/pull/6067), [#6068](https://github.com/adap/flower/pull/6068), [#6078](https://github.com/adap/flower/pull/6078), [#6082](https://github.com/adap/flower/pull/6082), [#6086](https://github.com/adap/flower/pull/6086), [#6087](https://github.com/adap/flower/pull/6087), [#6088](https://github.com/adap/flower/pull/6088), [#6090](https://github.com/adap/flower/pull/6090), [#6091](https://github.com/adap/flower/pull/6091), [#6092](https://github.com/adap/flower/pull/6092), [#6093](https://github.com/adap/flower/pull/6093), [#6094](https://github.com/adap/flower/pull/6094), [#6098](https://github.com/adap/flower/pull/6098), [#6103](https://github.com/adap/flower/pull/6103), [#6105](https://github.com/adap/flower/pull/6105), [#6121](https://github.com/adap/flower/pull/6121), [#6122](https://github.com/adap/flower/pull/6122), [#6143](https://github.com/adap/flower/pull/6143), [#6152](https://github.com/adap/flower/pull/6152), [#6153](https://github.com/adap/flower/pull/6153), [#6154](https://github.com/adap/flower/pull/6154), [#6158](https://github.com/adap/flower/pull/6158), [#6165](https://github.com/adap/flower/pull/6165), [#6167](https://github.com/adap/flower/pull/6167))
+
+  These updates refine and extend the existing federation concept. `flwr federation show` and `flwr federation list` now provide clearer visibility into SuperNodes and runs in the default federation.
+
+- **Introduce unified app heartbeat mechanism** ([#6204](https://github.com/adap/flower/pull/6204), [#6206](https://github.com/adap/flower/pull/6206), [#6209](https://github.com/adap/flower/pull/6209), [#6210](https://github.com/adap/flower/pull/6210), [#6212](https://github.com/adap/flower/pull/6212), [#6213](https://github.com/adap/flower/pull/6213), [#6214](https://github.com/adap/flower/pull/6214), [#6215](https://github.com/adap/flower/pull/6215), [#6218](https://github.com/adap/flower/pull/6218), [#6219](https://github.com/adap/flower/pull/6219), [#6221](https://github.com/adap/flower/pull/6221), [#6224](https://github.com/adap/flower/pull/6224), [#6225](https://github.com/adap/flower/pull/6225), [#6226](https://github.com/adap/flower/pull/6226), [#6227](https://github.com/adap/flower/pull/6227))
+
+  Introduces a unified heartbeat mechanism for app processes, preventing hangs when an app process crashes without responding. The new system enables `flwr-serverapp` and `flwr-simulation` processes to exit more quickly when a run is stopped by the `flwr stop` command.
+
+- **Fix bugs** ([#6188](https://github.com/adap/flower/pull/6188), [#6171](https://github.com/adap/flower/pull/6171), [#6175](https://github.com/adap/flower/pull/6175), [#6207](https://github.com/adap/flower/pull/6207))
+
+  Resolves issues causing occasional missing or unregistered object IDs on lower-powered machines, prevent the `flwr-serverapp` process from hanging after being stopped via the CLI, and correct the `finished_at` timestamp and initial heartbeat interval for runs.
+
+- **Improve import performance** ([#6102](https://github.com/adap/flower/pull/6102))
+
+- **Improve internal SQLite database performance** ([#6178](https://github.com/adap/flower/pull/6178), [#6195](https://github.com/adap/flower/pull/6195))
+
+- **Update CI workflows and development tooling** ([#5242](https://github.com/adap/flower/pull/5242), [#6053](https://github.com/adap/flower/pull/6053), [#6080](https://github.com/adap/flower/pull/6080), [#6089](https://github.com/adap/flower/pull/6089), [#6108](https://github.com/adap/flower/pull/6108), [#6129](https://github.com/adap/flower/pull/6129), [#6130](https://github.com/adap/flower/pull/6130), [#6131](https://github.com/adap/flower/pull/6131), [#6135](https://github.com/adap/flower/pull/6135), [#6138](https://github.com/adap/flower/pull/6138), [#6142](https://github.com/adap/flower/pull/6142), [#6144](https://github.com/adap/flower/pull/6144), [#6156](https://github.com/adap/flower/pull/6156), [#6181](https://github.com/adap/flower/pull/6181), [#6187](https://github.com/adap/flower/pull/6187), [#6189](https://github.com/adap/flower/pull/6189))
+
+- **Update documentation** ([#6115](https://github.com/adap/flower/pull/6115), [#6081](https://github.com/adap/flower/pull/6081), [#6110](https://github.com/adap/flower/pull/6110), [#6137](https://github.com/adap/flower/pull/6137), [#6146](https://github.com/adap/flower/pull/6146), [#6169](https://github.com/adap/flower/pull/6169), [#6179](https://github.com/adap/flower/pull/6179), [#6228](https://github.com/adap/flower/pull/6228))
+
+- **General improvements** ([#6077](https://github.com/adap/flower/pull/6077), [#6083](https://github.com/adap/flower/pull/6083), [#6084](https://github.com/adap/flower/pull/6084), [#6095](https://github.com/adap/flower/pull/6095), [#6097](https://github.com/adap/flower/pull/6097), [#6100](https://github.com/adap/flower/pull/6100), [#6101](https://github.com/adap/flower/pull/6101), [#6109](https://github.com/adap/flower/pull/6109), [#6114](https://github.com/adap/flower/pull/6114), [#6123](https://github.com/adap/flower/pull/6123), [#6127](https://github.com/adap/flower/pull/6127), [#6139](https://github.com/adap/flower/pull/6139), [#6140](https://github.com/adap/flower/pull/6140), [#6150](https://github.com/adap/flower/pull/6150), [#6151](https://github.com/adap/flower/pull/6151), [#6157](https://github.com/adap/flower/pull/6157), [#6159](https://github.com/adap/flower/pull/6159), [#6160](https://github.com/adap/flower/pull/6160), [#6162](https://github.com/adap/flower/pull/6162), [#6164](https://github.com/adap/flower/pull/6164), [#6172](https://github.com/adap/flower/pull/6172), [#6173](https://github.com/adap/flower/pull/6173), [#6174](https://github.com/adap/flower/pull/6174), [#6180](https://github.com/adap/flower/pull/6180), [#6190](https://github.com/adap/flower/pull/6190), [#6191](https://github.com/adap/flower/pull/6191), [#6192](https://github.com/adap/flower/pull/6192), [#6193](https://github.com/adap/flower/pull/6193), [#6196](https://github.com/adap/flower/pull/6196), [#6197](https://github.com/adap/flower/pull/6197), [#6198](https://github.com/adap/flower/pull/6198), [#6199](https://github.com/adap/flower/pull/6199), [#6200](https://github.com/adap/flower/pull/6200), [#6202](https://github.com/adap/flower/pull/6202), [#6203](https://github.com/adap/flower/pull/6203), [#6205](https://github.com/adap/flower/pull/6205), [#6208](https://github.com/adap/flower/pull/6208), [#6211](https://github.com/adap/flower/pull/6211), [#6222](https://github.com/adap/flower/pull/6222), [#6223](https://github.com/adap/flower/pull/6223))
+
+  As always, many parts of the Flower framework and quality infrastructure were improved and updated.
+
+### Incompatible changes
+
+- **Drop Python 3.9 support** ([#6118](https://github.com/adap/flower/pull/6118), [#6136](https://github.com/adap/flower/pull/6136), [#6147](https://github.com/adap/flower/pull/6147))
+
+  `flwr` now requires Python 3.10 as the minimum supported version, with baselines and development scripts updated accordingly.
+
+- **Bump protobuf to 5.x** ([#6104](https://github.com/adap/flower/pull/6104))
+
+  Upgrades `protobuf` to `>=5.29.0`, ensuring `flwr` uses the latest gRPC stack and remains compatible with TensorFlow 2.20+. Note that this version is incompatible with TensorFlow versions earlier than 2.18.
+
+- **Deprecate `flwr.server.utils.tensorboard`** ([#6113](https://github.com/adap/flower/pull/6113))
+
+  The `flwr.server.utils.tensorboard` function is now deprecated, and a slow import issue occurring when `tensorflow` is installed has been resolved.
+
 ## v1.23.0 (2025-11-03)
 
 ### Thanks to our contributors
@@ -815,7 +963,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Update documentation** ([#4511](https://github.com/adap/flower/pull/4511), [#4010](https://github.com/adap/flower/pull/4010), [#4396](https://github.com/adap/flower/pull/4396), [#4499](https://github.com/adap/flower/pull/4499), [#4269](https://github.com/adap/flower/pull/4269), [#3340](https://github.com/adap/flower/pull/3340), [#4482](https://github.com/adap/flower/pull/4482), [#4387](https://github.com/adap/flower/pull/4387), [#4342](https://github.com/adap/flower/pull/4342), [#4492](https://github.com/adap/flower/pull/4492), [#4474](https://github.com/adap/flower/pull/4474), [#4500](https://github.com/adap/flower/pull/4500), [#4514](https://github.com/adap/flower/pull/4514), [#4236](https://github.com/adap/flower/pull/4236), [#4112](https://github.com/adap/flower/pull/4112), [#3367](https://github.com/adap/flower/pull/3367), [#4501](https://github.com/adap/flower/pull/4501), [#4373](https://github.com/adap/flower/pull/4373), [#4409](https://github.com/adap/flower/pull/4409), [#4356](https://github.com/adap/flower/pull/4356), [#4520](https://github.com/adap/flower/pull/4520), [#4524](https://github.com/adap/flower/pull/4524), [#4525](https://github.com/adap/flower/pull/4525), [#4526](https://github.com/adap/flower/pull/4526), [#4527](https://github.com/adap/flower/pull/4527), [#4528](https://github.com/adap/flower/pull/4528), [#4545](https://github.com/adap/flower/pull/4545), [#4522](https://github.com/adap/flower/pull/4522), [#4534](https://github.com/adap/flower/pull/4534), [#4513](https://github.com/adap/flower/pull/4513), [#4529](https://github.com/adap/flower/pull/4529), [#4441](https://github.com/adap/flower/pull/4441), [#4530](https://github.com/adap/flower/pull/4530), [#4470](https://github.com/adap/flower/pull/4470), [#4553](https://github.com/adap/flower/pull/4553), [#4531](https://github.com/adap/flower/pull/4531), [#4554](https://github.com/adap/flower/pull/4554), [#4555](https://github.com/adap/flower/pull/4555), [#4552](https://github.com/adap/flower/pull/4552), [#4533](https://github.com/adap/flower/pull/4533))
 
-  Many documentation pages and tutorials have been updated to improve clarity, fix typos, incorporate user feedback, and stay aligned with the latest features in the framework. Key updates include adding a guide for designing stateful `ClientApp` objects, updating the comprehensive guide for setting up and running Flower's `Simulation Engine`, updating the XGBoost, scikit-learn, and JAX quickstart tutorials to use `flwr run`, updating DP guide, removing outdated pages, updating Docker docs, and marking legacy functions as deprecated. The [Secure Aggregation Protocols](https://flower.ai/docs/framework/contributor-ref-secure-aggregation-protocols.html) page has also been updated.
+  Many documentation pages and tutorials have been updated to improve clarity, fix typos, incorporate user feedback, and stay aligned with the latest features in the framework. Key updates include adding a guide for designing stateful `ClientApp` objects, updating the comprehensive guide for setting up and running Flower's `Simulation Engine`, updating the XGBoost, scikit-learn, and JAX quickstart tutorials to use `flwr run`, updating DP guide, removing outdated pages, updating Docker docs, and marking legacy functions as deprecated. The [Secure Aggregation Protocols](https://flower.ai/docs/framework/explanation-ref-secure-aggregation-protocols.html) page has also been updated.
 
 - **Update examples and templates** ([#4510](https://github.com/adap/flower/pull/4510), [#4368](https://github.com/adap/flower/pull/4368), [#4121](https://github.com/adap/flower/pull/4121), [#4329](https://github.com/adap/flower/pull/4329), [#4382](https://github.com/adap/flower/pull/4382), [#4248](https://github.com/adap/flower/pull/4248), [#4395](https://github.com/adap/flower/pull/4395), [#4386](https://github.com/adap/flower/pull/4386), [#4408](https://github.com/adap/flower/pull/4408))
 

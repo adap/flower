@@ -17,6 +17,7 @@
 
 import tempfile
 import unittest
+from unittest.mock import Mock
 
 import grpc
 from parameterized import parameterized
@@ -30,6 +31,10 @@ from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
     PushAppOutputsRequest,
     PushAppOutputsResponse,
 )
+from flwr.proto.heartbeat_pb2 import (  # pylint:disable=E0611
+    SendAppHeartbeatRequest,
+    SendAppHeartbeatResponse,
+)
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     UpdateRunStatusRequest,
     UpdateRunStatusResponse,
@@ -39,6 +44,7 @@ from flwr.server.superlink.simulation.simulationio_grpc import run_simulationio_
 from flwr.server.superlink.utils import _STATUS_TO_MSG
 from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME, NOOP_FEDERATION
 from flwr.supercore.ffs import FfsFactory
+from flwr.supercore.object_store import ObjectStoreFactory
 from flwr.superlink.federation import NoOpFederationManager
 
 
@@ -52,7 +58,7 @@ class TestSimulationIoServicer(unittest.TestCase):  # pylint: disable=R0902
         self.addCleanup(self.temp_dir.cleanup)  # Ensures cleanup after test
 
         state_factory = LinkStateFactory(
-            FLWR_IN_MEMORY_DB_NAME, NoOpFederationManager()
+            FLWR_IN_MEMORY_DB_NAME, NoOpFederationManager(), ObjectStoreFactory()
         )
         self.state = state_factory.state()
         ffs_factory = FfsFactory(self.temp_dir.name)
@@ -77,6 +83,11 @@ class TestSimulationIoServicer(unittest.TestCase):  # pylint: disable=R0902
             "/flwr.proto.SimulationIo/UpdateRunStatus",
             request_serializer=UpdateRunStatusRequest.SerializeToString,
             response_deserializer=UpdateRunStatusResponse.FromString,
+        )
+        self._send_app_heartbeat = self._channel.unary_unary(
+            "/flwr.proto.SimulationIo/SendAppHeartbeat",
+            request_serializer=SendAppHeartbeatRequest.SerializeToString,
+            response_deserializer=SendAppHeartbeatResponse.FromString,
         )
 
     def tearDown(self) -> None:
@@ -224,3 +235,20 @@ class TestSimulationIoServicer(unittest.TestCase):  # pylint: disable=R0902
             self._update_run_status.with_call(request=request)
         assert e.exception.code() == grpc.StatusCode.PERMISSION_DENIED
         assert e.exception.details() == self.status_to_msg[run_status.status]
+
+    @parameterized.expand([(True,), (False,)])  # type: ignore
+    def test_send_app_heartbeat(self, success: bool) -> None:
+        """Test sending an app heartbeat."""
+        # Prepare
+        token = "test-token"
+        request = SendAppHeartbeatRequest(token=token)
+        mock_ack_method = Mock(return_value=success)
+        self.state.acknowledge_app_heartbeat = mock_ack_method  # type: ignore
+
+        # Execute
+        response, _ = self._send_app_heartbeat.with_call(request=request)
+
+        # Assert
+        self.assertIsInstance(response, SendAppHeartbeatResponse)
+        self.assertEqual(response.success, success)
+        mock_ack_method.assert_called_once_with(token)

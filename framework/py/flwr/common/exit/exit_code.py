@@ -33,6 +33,7 @@ class ExitCode:
     SUPERLINK_LICENSE_MISSING = 102
     SUPERLINK_LICENSE_URL_INVALID = 103
     SUPERLINK_INVALID_ARGS = 104
+    SUPERLINK_DATABASE_SCHEMA_MISMATCH = 105
 
     # ServerApp-specific exit codes (200-299)
     SERVERAPP_STRATEGY_PRECONDITION_UNMET = 200
@@ -57,6 +58,9 @@ class ExitCode:
     COMMON_ADDRESS_INVALID = 600
     COMMON_MISSING_EXTRA_REST = 601
     COMMON_TLS_NOT_SUPPORTED = 602
+
+    # Simulation exit codes (700-799)
+    SIMULATION_EXCEPTION = 700
 
     def __new__(cls) -> ExitCode:
         """Prevent instantiation."""
@@ -87,6 +91,11 @@ EXIT_CODE_HELP = {
     ExitCode.SUPERLINK_INVALID_ARGS: (
         "Invalid arguments provided to SuperLink. Use `--help` check for the correct "
         "usage. Alternatively, check the documentation."
+    ),
+    ExitCode.SUPERLINK_DATABASE_SCHEMA_MISMATCH: (
+        "The database schema does not match the expected schema for this version of "
+        "SuperLink. Please refer to the documentation for guidance on how to resolve "
+        "this issue."
     ),
     # ServerApp-specific exit codes (200-299)
     ExitCode.SERVERAPP_STRATEGY_PRECONDITION_UNMET: (
@@ -150,4 +159,8 @@ To use the REST API, install `flwr` with the `rest` extra:
     `pip install "flwr[rest]"`.
 """,
     ExitCode.COMMON_TLS_NOT_SUPPORTED: "Please use the '--insecure' flag.",
+    # Simulation exit codes (700-799)
+    ExitCode.SIMULATION_EXCEPTION: (
+        "An unhandled exception occurred when running the simulation."
+    ),
 }

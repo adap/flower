@@ -29,7 +29,6 @@ from flwr.common.serde import (
     context_to_proto,
     fab_to_proto,
     run_status_from_proto,
-    run_status_to_proto,
     run_to_proto,
 )
 from flwr.common.typing import Fab, RunStatus
@@ -57,8 +56,6 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     GetFederationOptionsResponse,
     GetRunRequest,
     GetRunResponse,
-    GetRunStatusRequest,
-    GetRunStatusResponse,
     UpdateRunStatusRequest,
     UpdateRunStatusResponse,
 )
@@ -219,22 +216,6 @@ class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
         )
         return UpdateRunStatusResponse()
 
-    def GetRunStatus(
-        self, request: GetRunStatusRequest, context: ServicerContext
-    ) -> GetRunStatusResponse:
-        """Get status of requested runs."""
-        log(DEBUG, "SimultionIoServicer.GetRunStatus")
-        state = self.state_factory.state()
-
-        statuses = state.get_run_status(set(request.run_ids))
-
-        return GetRunStatusResponse(
-            run_status_dict={
-                run_id: run_status_to_proto(status)
-                for run_id, status in statuses.items()
-            }
-        )
-
     def PushLogs(
         self, request: PushLogsRequest, context: grpc.ServicerContext
     ) -> PushLogsResponse:
@@ -268,20 +249,14 @@ class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
     def SendAppHeartbeat(
         self, request: SendAppHeartbeatRequest, context: grpc.ServicerContext
     ) -> SendAppHeartbeatResponse:
-        """Handle a heartbeat from the ServerApp in simulation."""
-        log(DEBUG, "SimultionIoServicer.SendAppHeartbeat")
+        """Handle a heartbeat from an app process."""
+        log(DEBUG, "SimulationIoServicer.SendAppHeartbeat")
 
         # Init state
         state = self.state_factory.state()
 
         # Acknowledge the heartbeat
-        # The app heartbeat can only be acknowledged if the run is in
-        # starting or running status.
-        success = state.acknowledge_app_heartbeat(
-            run_id=request.run_id,
-            heartbeat_interval=request.heartbeat_interval,
-        )
-
+        success = state.acknowledge_app_heartbeat(request.token)
         return SendAppHeartbeatResponse(success=success)
 
     def _verify_token(self, token: str, context: grpc.ServicerContext) -> int:

@@ -44,65 +44,6 @@ workloads makes sense.
     <https://learn.microsoft.com/en-us/powershell/scripting/overview?view=powershell-7.5>`_,
     we recommend using `WSL2 <https://learn.microsoft.com/en-us/windows/wsl/about>`_.
 
-.. tip::
-
-    The ``Flower AI Simulation 2025`` tutorial series is available on YouTube. You can
-    find all the videos `here
-    <https://www.youtube.com/playlist?list=PLNG4feLHqCWkdlSrEL2xbCtGa6QBxlUZb>`_ or by
-    clicking on the video previews below. The associated code for the tutorial can be
-    found in the `Flower Github repository
-    <https://github.com/adap/flower/tree/main/examples/flower-simulation-step-by-step-pytorch>`_
-
-.. list-table::
-    :widths: 33 33 33
-    :header-rows: 0
-
-    - - .. raw:: html
-
-            <a href="https://youtu.be/XK_dRVcSZqg">
-                <img src="https://img.youtube.com/vi/XK_dRVcSZqg/0.jpg" alt="Introduction" width="200"/>
-            </a>
-      - .. raw:: html
-
-            <a href="https://youtu.be/VwGq16DMx3Q">
-                <img src="https://img.youtube.com/vi/VwGq16DMx3Q/0.jpg" alt="Launch your first simulation" width="200"/>
-            </a>
-      - .. raw:: html
-
-            <a href="https://youtu.be/8Uwsa0x7VJw">
-                <img src="https://img.youtube.com/vi/8Uwsa0x7VJw/0.jpg" alt="Understanding Flower Apps" width="200"/>
-            </a>
-    - - .. raw:: html
-
-            <a href="https://youtu.be/KsMP9dgcLw4">
-                <img src="https://img.youtube.com/vi/KsMP9dgcLw4/0.jpg" alt="Defining Strategy Callbacks" width="200"/>
-            </a>
-      - .. raw:: html
-
-            <a href="https://youtu.be/dZRDe1ldy5s">
-                <img src="https://img.youtube.com/vi/dZRDe1ldy5s/0.jpg" alt="Sending ClientApp Metrics" width="200"/>
-            </a>
-      - .. raw:: html
-
-            <a href="https://youtu.be/udDSIQyYzNM">
-                <img src="https://img.youtube.com/vi/udDSIQyYzNM/0.jpg" alt="Building Custom Strategies" width="200"/>
-            </a>
-    - - .. raw:: html
-
-            <a href="https://youtu.be/ir2okeinZ2g">
-                <img src="https://img.youtube.com/vi/ir2okeinZ2g/0.jpg" alt="Desginging Stateful ClientApps" width="200"/>
-            </a>
-      - .. raw:: html
-
-            <a href="https://youtu.be/TAUxb9eEZ3w">
-                <img src="https://img.youtube.com/vi/TAUxb9eEZ3w/0.jpg" alt="Scaling Up simulations" width="200"/>
-            </a>
-      - .. raw:: html
-
-            <a href="https://youtu.be/nUUkuqi4Lpo">
-                <img src="https://img.youtube.com/vi/nUUkuqi4Lpo/0.jpg" alt="Wrapping Up" width="200"/>
-            </a>
-
 Flower's ``Simulation Engine`` schedules, launches, and manages |clientapp_link|_
 instances. It does so through a ``Backend``, which contains several workers (i.e.,
 Python processes) that can execute a ``ClientApp`` by passing it a |context_link|_ and a
@@ -150,7 +91,7 @@ Running a simulation is straightforward; in fact, it is the default mode of oper
 for |flwr_run_link|_. Therefore, running Flower simulations primarily requires you to
 first define a ``ClientApp`` and a ``ServerApp``. A convenient way to generate a minimal
 but fully functional Flower app is by means of the |flwr_new_link|_ command. There are
-multiple templates to choose from. The example below uses the ``PyTorch`` template.
+multiple apps to choose from. The example below uses the ``PyTorch`` quickstart app.
 
 .. tip::
 
@@ -159,25 +100,11 @@ multiple templates to choose from. The example below uses the ``PyTorch`` templa
 
 .. code-block:: shell
 
-    # or simply execute `flwr run` for a fully interactive process
-    flwr new my-app --framework="PyTorch" --username="alice"
+    # or simply execute `flwr new` for a list of recommended apps to choose from
+    flwr new @flwrlabs/quickstart-pytorch
 
 Then, follow the instructions shown after completing the |flwr_new_link|_ command. When
 you execute |flwr_run_link|_, you'll be using the ``Simulation Engine``.
-
-If we take a look at the ``pyproject.toml`` that was generated from the |flwr_new_link|_
-command (and loaded upon |flwr_run_link|_ execution), we see that a *default* federation
-is defined. It sets the number of supernodes to 10.
-
-.. code-block:: toml
-
-    [tool.flwr.federations]
-    default = "local-simulation"
-
-    [tool.flwr.federations.local-simulation]
-    options.num-supernodes = 10
-
-You can modify the size of your simulations by adjusting ``options.num-supernodes``.
 
 Simulation examples
 ===================
@@ -223,11 +150,16 @@ workload. You can do so by adjusting the backend resources for your federation.
     make use of 25% of the available VRAM but it ends up using 50%, it might cause other
     ``ClientApp`` instances to crash throwing an out-of-memory (OOM) error.
 
-Customizing resources can be done directly in the ``pyproject.toml`` of your app.
+Customizing resources can be done directly in the :doc:`Flower Configuration
+<ref-flower-configuration>`. Setting the ``options.backend.client-resources`` variable
+allows you to define how many CPU cores and what fraction of GPU memory each backend
+worker (and hence each ``ClientApp``) gets. For example, to run a simulation with 10
+clients where each ``ClientApp`` assumes to use 1 CPU core and no GPU access, you would
+set:
 
 .. code-block:: toml
 
-    [tool.flwr.federations.local-simulation]
+    [superlink.local]
     options.num-supernodes = 10
     options.backend.client-resources.num-cpus = 1 # each ClientApp assumes to use 1 CPU (default is 2)
     options.backend.client-resources.num-gpus = 0.0 # no GPU access to the ClientApp (default is 0.0)
@@ -238,7 +170,7 @@ assigned by specifying the **ratio** of VRAM each should make use of.
 
 .. code-block:: toml
 
-    [tool.flwr.federations.local-simulation]
+    [superlink.local-gpu]
     options.num-supernodes = 10
     options.backend.client-resources.num-cpus = 1 # each ClientApp assumes to use 1 CPU (default is 2)
     options.backend.client-resources.num-gpus = 0.25 # each ClientApp uses 25% of VRAM (default is 0.0)
@@ -289,17 +221,18 @@ resource-aware manner in batches of 8.
 
 By default, the ``Simulation Engine`` has **access to all system resources** (i.e., all
 CPUs, all GPUs). However, in some settings, you might want to limit how many of your
-system resources are used for simulation. You can do this in the ``pyproject.toml`` of
-your app by setting the ``options.backend.init_args`` variable.
+system resources are used for simulation. You can do this in the :doc:`Flower
+Configuration <ref-flower-configuration>` by setting the ``options.backend.init-args``
+variable.
 
 .. code-block:: toml
 
-    [tool.flwr.federations.local-simulation]
+    [superlink.local-gpu-limited]
     options.num-supernodes = 10
     options.backend.client-resources.num-cpus = 1 # Each ClientApp will get assigned 1 CPU core
     options.backend.client-resources.num-gpus = 0.5 # Each ClientApp will get 50% of each available GPU
-    options.backend.init_args.num_cpus = 1 # Only expose 1 CPU to the simulation
-    options.backend.init_args.num_gpus = 1 # Expose a single GPU to the simulation
+    options.backend.init-args.num-cpus = 1 # Only expose 1 CPU to the simulation
+    options.backend.init-args.num-gpus = 1 # Expose a single GPU to the simulation
 
 With the above setup, the Backend will be initialized with a single CPU and GPU.
 Therefore, even if more CPUs and GPUs are available in your system, they will not be
@@ -309,7 +242,7 @@ any given point.
 For a complete list of settings you can configure, check the `ray.init
 <https://docs.ray.io/en/latest/ray-core/api/doc/ray.init.html#ray-init>`_ documentation.
 
-For the highest performance, do not set ``options.backend.init_args``.
+For the highest performance, do not set ``options.backend.init-args``.
 
 *****************************
  Simulation in Colab/Jupyter
@@ -333,7 +266,7 @@ or Jupyter environment by means of `run_simulation
     run_simulation(
         server_app=server_app,
         client_app=client_app,
-        num_supernodes=10,  # equivalent to setting `num-supernodes` in the pyproject.toml
+        num_supernodes=10,  # equivalent to setting `num-supernodes` in the Flower Configuration
     )
 
 With ``run_simulation``, you can also control the amount of resources for your

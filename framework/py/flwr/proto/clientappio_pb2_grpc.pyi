@@ -20,6 +20,7 @@ limitations under the License.
 import abc
 import collections.abc
 import flwr.proto.appio_pb2
+import flwr.proto.heartbeat_pb2
 import flwr.proto.message_pb2
 import flwr.proto.run_pb2
 import grpc
@@ -39,7 +40,12 @@ class ClientAppIoStub:
         flwr.proto.appio_pb2.ListAppsToLaunchRequest,
         flwr.proto.appio_pb2.ListAppsToLaunchResponse,
     ]
-    """Get run IDs with pending messages"""
+    """///////////////////////////////////////////////////////////////////////////
+    General *AppIo endpoints for SuperExec processes
+    ///////////////////////////////////////////////////////////////////////////
+
+    Get run IDs with pending messages
+    """
 
     RequestToken: grpc.UnaryUnaryMultiCallable[
         flwr.proto.appio_pb2.RequestTokenRequest,
@@ -51,37 +57,41 @@ class ClientAppIoStub:
         flwr.proto.run_pb2.GetRunRequest,
         flwr.proto.run_pb2.GetRunResponse,
     ]
-    """Get run details"""
+    """///////////////////////////////////////////////////////////////////////////
+    General *AppIo endpoints for App Executor processes
+    ///////////////////////////////////////////////////////////////////////////
 
-    PullClientAppInputs: grpc.UnaryUnaryMultiCallable[
+    Get run details
+    """
+
+    SendAppHeartbeat: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.heartbeat_pb2.SendAppHeartbeatRequest,
+        flwr.proto.heartbeat_pb2.SendAppHeartbeatResponse,
+    ]
+    """App heartbeat"""
+
+    PullAppInputs: grpc.UnaryUnaryMultiCallable[
         flwr.proto.appio_pb2.PullAppInputsRequest,
         flwr.proto.appio_pb2.PullAppInputsResponse,
     ]
-    """Pull client app inputs"""
+    """Pull app inputs"""
 
-    PushClientAppOutputs: grpc.UnaryUnaryMultiCallable[
+    PushAppOutputs: grpc.UnaryUnaryMultiCallable[
         flwr.proto.appio_pb2.PushAppOutputsRequest,
         flwr.proto.appio_pb2.PushAppOutputsResponse,
     ]
-    """Push client app outputs"""
-
-    PushMessage: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.appio_pb2.PushAppMessagesRequest,
-        flwr.proto.appio_pb2.PushAppMessagesResponse,
-    ]
-    """Push Message"""
-
-    PullMessage: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.appio_pb2.PullAppMessagesRequest,
-        flwr.proto.appio_pb2.PullAppMessagesResponse,
-    ]
-    """Pull Message"""
+    """Push app outputs"""
 
     PushObject: grpc.UnaryUnaryMultiCallable[
         flwr.proto.message_pb2.PushObjectRequest,
         flwr.proto.message_pb2.PushObjectResponse,
     ]
-    """Push Object"""
+    """///////////////////////////////////////////////////////////////////////////
+    Specific endpoints shared by ServerAppIo and ClientAppIo
+    ///////////////////////////////////////////////////////////////////////////
+
+    Push Object
+    """
 
     PullObject: grpc.UnaryUnaryMultiCallable[
         flwr.proto.message_pb2.PullObjectRequest,
@@ -95,12 +105,34 @@ class ClientAppIoStub:
     ]
     """Confirm Message Received"""
 
+    PushMessage: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.appio_pb2.PushAppMessagesRequest,
+        flwr.proto.appio_pb2.PushAppMessagesResponse,
+    ]
+    """///////////////////////////////////////////////////////////////////////////
+    Specific endpoints for ClientAppIo
+    ///////////////////////////////////////////////////////////////////////////
+
+    Push Message
+    """
+
+    PullMessage: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.appio_pb2.PullAppMessagesRequest,
+        flwr.proto.appio_pb2.PullAppMessagesResponse,
+    ]
+    """Pull Message"""
+
 class ClientAppIoAsyncStub:
     ListAppsToLaunch: grpc.aio.UnaryUnaryMultiCallable[
         flwr.proto.appio_pb2.ListAppsToLaunchRequest,
         flwr.proto.appio_pb2.ListAppsToLaunchResponse,
     ]
-    """Get run IDs with pending messages"""
+    """///////////////////////////////////////////////////////////////////////////
+    General *AppIo endpoints for SuperExec processes
+    ///////////////////////////////////////////////////////////////////////////
+
+    Get run IDs with pending messages
+    """
 
     RequestToken: grpc.aio.UnaryUnaryMultiCallable[
         flwr.proto.appio_pb2.RequestTokenRequest,
@@ -112,37 +144,41 @@ class ClientAppIoAsyncStub:
         flwr.proto.run_pb2.GetRunRequest,
         flwr.proto.run_pb2.GetRunResponse,
     ]
-    """Get run details"""
+    """///////////////////////////////////////////////////////////////////////////
+    General *AppIo endpoints for App Executor processes
+    ///////////////////////////////////////////////////////////////////////////
 
-    PullClientAppInputs: grpc.aio.UnaryUnaryMultiCallable[
+    Get run details
+    """
+
+    SendAppHeartbeat: grpc.aio.UnaryUnaryMultiCallable[
+        flwr.proto.heartbeat_pb2.SendAppHeartbeatRequest,
+        flwr.proto.heartbeat_pb2.SendAppHeartbeatResponse,
+    ]
+    """App heartbeat"""
+
+    PullAppInputs: grpc.aio.UnaryUnaryMultiCallable[
         flwr.proto.appio_pb2.PullAppInputsRequest,
         flwr.proto.appio_pb2.PullAppInputsResponse,
     ]
-    """Pull client app inputs"""
+    """Pull app inputs"""
 
-    PushClientAppOutputs: grpc.aio.UnaryUnaryMultiCallable[
+    PushAppOutputs: grpc.aio.UnaryUnaryMultiCallable[
         flwr.proto.appio_pb2.PushAppOutputsRequest,
         flwr.proto.appio_pb2.PushAppOutputsResponse,
     ]
-    """Push client app outputs"""
-
-    PushMessage: grpc.aio.UnaryUnaryMultiCallable[
-        flwr.proto.appio_pb2.PushAppMessagesRequest,
-        flwr.proto.appio_pb2.PushAppMessagesResponse,
-    ]
-    """Push Message"""
-
-    PullMessage: grpc.aio.UnaryUnaryMultiCallable[
-        flwr.proto.appio_pb2.PullAppMessagesRequest,
-        flwr.proto.appio_pb2.PullAppMessagesResponse,
-    ]
-    """Pull Message"""
+    """Push app outputs"""
 
     PushObject: grpc.aio.UnaryUnaryMultiCallable[
         flwr.proto.message_pb2.PushObjectRequest,
         flwr.proto.message_pb2.PushObjectResponse,
     ]
-    """Push Object"""
+    """///////////////////////////////////////////////////////////////////////////
+    Specific endpoints shared by ServerAppIo and ClientAppIo
+    ///////////////////////////////////////////////////////////////////////////
+
+    Push Object
+    """
 
     PullObject: grpc.aio.UnaryUnaryMultiCallable[
         flwr.proto.message_pb2.PullObjectRequest,
@@ -156,6 +192,23 @@ class ClientAppIoAsyncStub:
     ]
     """Confirm Message Received"""
 
+    PushMessage: grpc.aio.UnaryUnaryMultiCallable[
+        flwr.proto.appio_pb2.PushAppMessagesRequest,
+        flwr.proto.appio_pb2.PushAppMessagesResponse,
+    ]
+    """///////////////////////////////////////////////////////////////////////////
+    Specific endpoints for ClientAppIo
+    ///////////////////////////////////////////////////////////////////////////
+
+    Push Message
+    """
+
+    PullMessage: grpc.aio.UnaryUnaryMultiCallable[
+        flwr.proto.appio_pb2.PullAppMessagesRequest,
+        flwr.proto.appio_pb2.PullAppMessagesResponse,
+    ]
+    """Pull Message"""
+
 class ClientAppIoServicer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def ListAppsToLaunch(
@@ -163,7 +216,12 @@ class ClientAppIoServicer(metaclass=abc.ABCMeta):
         request: flwr.proto.appio_pb2.ListAppsToLaunchRequest,
         context: _ServicerContext,
     ) -> typing.Union[flwr.proto.appio_pb2.ListAppsToLaunchResponse, collections.abc.Awaitable[flwr.proto.appio_pb2.ListAppsToLaunchResponse]]:
-        """Get run IDs with pending messages"""
+        """///////////////////////////////////////////////////////////////////////////
+        General *AppIo endpoints for SuperExec processes
+        ///////////////////////////////////////////////////////////////////////////
+
+        Get run IDs with pending messages
+        """
 
     @abc.abstractmethod
     def RequestToken(
@@ -179,39 +237,36 @@ class ClientAppIoServicer(metaclass=abc.ABCMeta):
         request: flwr.proto.run_pb2.GetRunRequest,
         context: _ServicerContext,
     ) -> typing.Union[flwr.proto.run_pb2.GetRunResponse, collections.abc.Awaitable[flwr.proto.run_pb2.GetRunResponse]]:
-        """Get run details"""
+        """///////////////////////////////////////////////////////////////////////////
+        General *AppIo endpoints for App Executor processes
+        ///////////////////////////////////////////////////////////////////////////
+
+        Get run details
+        """
 
     @abc.abstractmethod
-    def PullClientAppInputs(
+    def SendAppHeartbeat(
+        self,
+        request: flwr.proto.heartbeat_pb2.SendAppHeartbeatRequest,
+        context: _ServicerContext,
+    ) -> typing.Union[flwr.proto.heartbeat_pb2.SendAppHeartbeatResponse, collections.abc.Awaitable[flwr.proto.heartbeat_pb2.SendAppHeartbeatResponse]]:
+        """App heartbeat"""
+
+    @abc.abstractmethod
+    def PullAppInputs(
         self,
         request: flwr.proto.appio_pb2.PullAppInputsRequest,
         context: _ServicerContext,
     ) -> typing.Union[flwr.proto.appio_pb2.PullAppInputsResponse, collections.abc.Awaitable[flwr.proto.appio_pb2.PullAppInputsResponse]]:
-        """Pull client app inputs"""
+        """Pull app inputs"""
 
     @abc.abstractmethod
-    def PushClientAppOutputs(
+    def PushAppOutputs(
         self,
         request: flwr.proto.appio_pb2.PushAppOutputsRequest,
         context: _ServicerContext,
     ) -> typing.Union[flwr.proto.appio_pb2.PushAppOutputsResponse, collections.abc.Awaitable[flwr.proto.appio_pb2.PushAppOutputsResponse]]:
-        """Push client app outputs"""
-
-    @abc.abstractmethod
-    def PushMessage(
-        self,
-        request: flwr.proto.appio_pb2.PushAppMessagesRequest,
-        context: _ServicerContext,
-    ) -> typing.Union[flwr.proto.appio_pb2.PushAppMessagesResponse, collections.abc.Awaitable[flwr.proto.appio_pb2.PushAppMessagesResponse]]:
-        """Push Message"""
-
-    @abc.abstractmethod
-    def PullMessage(
-        self,
-        request: flwr.proto.appio_pb2.PullAppMessagesRequest,
-        context: _ServicerContext,
-    ) -> typing.Union[flwr.proto.appio_pb2.PullAppMessagesResponse, collections.abc.Awaitable[flwr.proto.appio_pb2.PullAppMessagesResponse]]:
-        """Pull Message"""
+        """Push app outputs"""
 
     @abc.abstractmethod
     def PushObject(
@@ -219,7 +274,12 @@ class ClientAppIoServicer(metaclass=abc.ABCMeta):
         request: flwr.proto.message_pb2.PushObjectRequest,
         context: _ServicerContext,
     ) -> typing.Union[flwr.proto.message_pb2.PushObjectResponse, collections.abc.Awaitable[flwr.proto.message_pb2.PushObjectResponse]]:
-        """Push Object"""
+        """///////////////////////////////////////////////////////////////////////////
+        Specific endpoints shared by ServerAppIo and ClientAppIo
+        ///////////////////////////////////////////////////////////////////////////
+
+        Push Object
+        """
 
     @abc.abstractmethod
     def PullObject(
@@ -236,5 +296,26 @@ class ClientAppIoServicer(metaclass=abc.ABCMeta):
         context: _ServicerContext,
     ) -> typing.Union[flwr.proto.message_pb2.ConfirmMessageReceivedResponse, collections.abc.Awaitable[flwr.proto.message_pb2.ConfirmMessageReceivedResponse]]:
         """Confirm Message Received"""
+
+    @abc.abstractmethod
+    def PushMessage(
+        self,
+        request: flwr.proto.appio_pb2.PushAppMessagesRequest,
+        context: _ServicerContext,
+    ) -> typing.Union[flwr.proto.appio_pb2.PushAppMessagesResponse, collections.abc.Awaitable[flwr.proto.appio_pb2.PushAppMessagesResponse]]:
+        """///////////////////////////////////////////////////////////////////////////
+        Specific endpoints for ClientAppIo
+        ///////////////////////////////////////////////////////////////////////////
+
+        Push Message
+        """
+
+    @abc.abstractmethod
+    def PullMessage(
+        self,
+        request: flwr.proto.appio_pb2.PullAppMessagesRequest,
+        context: _ServicerContext,
+    ) -> typing.Union[flwr.proto.appio_pb2.PullAppMessagesResponse, collections.abc.Awaitable[flwr.proto.appio_pb2.PullAppMessagesResponse]]:
+        """Pull Message"""
 
 def add_ClientAppIoServicer_to_server(servicer: ClientAppIoServicer, server: typing.Union[grpc.Server, grpc.aio.Server]) -> None: ...

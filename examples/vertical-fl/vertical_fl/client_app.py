@@ -1,42 +1,91 @@
+import io
+
 import torch
-from flwr.client import NumPyClient
+from flwr.app import Array, ArrayRecord, ConfigRecord, Context, Message, RecordDict
 from flwr.clientapp import ClientApp
-from flwr.common import Context
-from sklearn.preprocessing import StandardScaler
 
 from vertical_fl.task import ClientModel, load_data
 
-
-class FlowerClient(NumPyClient):
-    def __init__(self, v_split_id, data, lr):
-        self.v_split_id = v_split_id
-        self.data = torch.tensor(StandardScaler().fit_transform(data)).float()
-        self.model = ClientModel(input_size=self.data.shape[1])
-        self.optimizer = torch.optim.SGD(self.model.parameters(), lr=lr)
-
-    def get_parameters(self, config):
-        pass
-
-    def fit(self, parameters, config):
-        embedding = self.model(self.data)
-        return [embedding.detach().numpy()], 1, {}
-
-    def evaluate(self, parameters, config):
-        self.model.zero_grad()
-        embedding = self.model(self.data)
-        embedding.backward(torch.from_numpy(parameters[int(self.v_split_id)]))
-        self.optimizer.step()
-        return 0.0, 1, {}
+# Flower ClientApp
+app = ClientApp()
 
 
-def client_fn(context: Context):
+@app.query("generate_embeddings")
+def get_emb(msg: Message, context: Context):
+    """Generate embeddings."""
+
+    # Read from config
     partition_id = context.node_config["partition-id"]
-    num_partitions = context.node_config["num-partitions"]
-    partition, v_split_id = load_data(partition_id, num_partitions=num_partitions)
+    feature_splits: str = context.run_config["feature-splits"]
+    out_feature_dim_clientapp: int = context.run_config["out-feature-dim-clientapp"]
+    in_feature_dim_clientapp = [int(dim) for dim in feature_splits.split(",")]
+    data = load_data(partition_id, in_feature_dim_clientapp)
+
+    data = torch.from_numpy(data).float()
+    model = ClientModel(
+        input_size=data.shape[1], out_feat_dim=out_feature_dim_clientapp
+    )
+
+    # Load model from state if available
+    if model_record := context.state.get("model", None):
+        model.load_state_dict(model_record.to_torch_state_dict())
+
+    # Do forward pass
+    embedding = model(data)
+
+    # Construct and return reply Message
+    model_record = ArrayRecord({"embedding": Array(embedding.detach().numpy())})
+    content = RecordDict(
+        {
+            "arrays": model_record,
+            "config": ConfigRecord({"pos": partition_id}),
+        }
+    )
+    return Message(content=content, reply_to=msg)
+
+
+@app.train("apply_gradients")
+def apply_grad(msg: Message, context: Context):
+    """Apply gradients to local model."""
+
+    # Read from config
     lr = context.run_config["learning-rate"]
-    return FlowerClient(v_split_id, partition, lr).to_client()
+    partition_id = context.node_config["partition-id"]
+    out_feature_dim_clientapp: int = context.run_config["out-feature-dim-clientapp"]
+    feature_splits: str = context.run_config["feature-splits"]
+    in_feature_dim_clientapp = [int(dim) for dim in feature_splits.split(",")]
+    data = load_data(partition_id, in_feature_dim_clientapp)
 
+    data = torch.from_numpy(data).float()
+    model = ClientModel(
+        input_size=data.shape[1], out_feat_dim=out_feature_dim_clientapp
+    )
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    optimizer.zero_grad()
 
-app = ClientApp(
-    client_fn=client_fn,
-)
+    # Load model from state if available
+    if model_record := context.state.get("model", None):
+        model.load_state_dict(model_record.to_torch_state_dict())
+
+    # Load optimizer state from state if available
+    if optimizer_state_record := context.state.get("optimizer_state", None):
+        buffer = io.BytesIO(optimizer_state_record["serialized"])
+        optimizer.load_state_dict(torch.load(buffer))
+
+    # Do forward pass
+    embedding = model(data)
+
+    # Get gradients from message and apply them
+    embedding.backward(
+        torch.from_numpy(msg.content["gradients"]["local-gradients"].numpy())
+    )
+    optimizer.step()
+
+    # Save updated model in state for next round
+    context.state["model"] = ArrayRecord(model.state_dict())
+    # (Optional) Save the optimizer state. Not all optimizers have state, but Adam does.
+    torch.save(optimizer.state_dict(), buffer := io.BytesIO())
+    context.state["optimizer_state"] = ConfigRecord({"serialized": buffer.getvalue()})
+
+    # Construct and return reply Message
+    return Message(content=RecordDict(), reply_to=msg)

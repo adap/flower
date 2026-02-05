@@ -39,8 +39,7 @@ from flwr.common.constant import (
     Status,
     SubStatus,
 )
-from flwr.common.exit import ExitCode, add_exit_handler, flwr_exit
-from flwr.common.heartbeat import HeartbeatSender, get_grpc_app_heartbeat_fn
+from flwr.common.exit import ExitCode, flwr_exit, register_signal_handlers
 from flwr.common.logger import (
     log,
     mirror_output_to_queue,
@@ -67,6 +66,7 @@ from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub
 from flwr.server.grid.grpc_grid import GrpcGrid
 from flwr.server.run_serverapp import run as run_
 from flwr.supercore.app_utils import start_parent_process_monitor
+from flwr.supercore.heartbeat import HeartbeatSender, make_app_heartbeat_fn_grpc
 from flwr.supercore.superexec.plugin import ServerAppExecPlugin
 from flwr.supercore.superexec.run_superexec import run_with_deprecation_warning
 
@@ -144,6 +144,10 @@ def run_serverapp(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
     exit_code = ExitCode.SUCCESS
 
     def on_exit() -> None:
+        # Set Grpc max retries to 1 to avoid blocking on exit
+        if grid:
+            grid._retry_invoker.max_tries = 1
+
         # Stop heartbeat sender
         if heartbeat_sender and heartbeat_sender.is_running:
             heartbeat_sender.stop()
@@ -154,16 +158,24 @@ def run_serverapp(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
 
         # Update run status
         if run and run_status and grid:
-            run_status_proto = run_status_to_proto(run_status)
-            grid._stub.UpdateRunStatus(
-                UpdateRunStatusRequest(run_id=run.run_id, run_status=run_status_proto)
-            )
+            try:
+                req = UpdateRunStatusRequest(
+                    run_id=run.run_id, run_status=run_status_to_proto(run_status)
+                )
+                grid._stub.UpdateRunStatus(req)
+            except grpc.RpcError:
+                pass
 
         # Close the Grpc connection
         if grid:
             grid.close()
 
-    add_exit_handler(on_exit)
+    # Register signal handlers for graceful shutdown
+    register_signal_handlers(
+        event_type=EventType.FLWR_SERVERAPP_RUN_LEAVE,
+        exit_message="Run stopped by user.",
+        exit_handlers=[on_exit],
+    )
 
     try:
         # Initialize the GrpcGrid
@@ -227,13 +239,9 @@ def run_serverapp(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
         )
 
         # Set up heartbeat sender
-        heartbeat_fn = get_grpc_app_heartbeat_fn(
-            grid._stub,
-            run.run_id,
-            failure_message="Heartbeat failed unexpectedly. The SuperLink could "
-            "not find the provided run ID, or the run status is invalid.",
+        heartbeat_sender = HeartbeatSender(
+            make_app_heartbeat_fn_grpc(grid._stub, token)
         )
-        heartbeat_sender = HeartbeatSender(heartbeat_fn)
         heartbeat_sender.start()
 
         # Load and run the ServerApp with the Grid

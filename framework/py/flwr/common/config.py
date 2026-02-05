@@ -22,9 +22,10 @@ from io import BytesIO
 from pathlib import Path
 from typing import IO, Any, TypeVar, cast, get_args
 
+import click
 import tomli
-import typer
 
+from flwr.app.user_config import UserConfig, UserConfigValue
 from flwr.common.constant import (
     APP_DIR,
     FAB_CONFIG_FILE,
@@ -32,7 +33,7 @@ from flwr.common.constant import (
     FLWR_DIR,
     FLWR_HOME,
 )
-from flwr.common.typing import Run, UserConfig, UserConfigValue
+from flwr.common.typing import Run
 
 from . import ConfigRecord, object_ref
 
@@ -41,7 +42,7 @@ T_dict = TypeVar("T_dict", bound=dict[str, Any])  # pylint: disable=invalid-name
 
 def get_flwr_dir(provided_path: str | None = None) -> Path:
     """Return the Flower home directory based on env variables."""
-    if provided_path is None or not Path(provided_path).is_dir():
+    if provided_path is None or not Path(provided_path).expanduser().is_dir():
         return Path(
             os.getenv(
                 FLWR_HOME,
@@ -212,7 +213,7 @@ def parse_config_args(config: list[str] | None, flatten: bool = True) -> dict[st
 
     # Handle if .toml file is passed
     if len(config) == 1 and config[0].endswith(".toml"):
-        with Path(config[0]).open("rb") as config_file:
+        with Path(config[0]).expanduser().open("rb") as config_file:
             overrides = flatten_dict(tomli.load(config_file))
         return overrides
 
@@ -234,16 +235,13 @@ def parse_config_args(config: list[str] | None, flatten: bool = True) -> dict[st
                 overrides.update(tomli.loads(toml_str))
                 flat_overrides = flatten_dict(overrides) if flatten else overrides
             except tomli.TOMLDecodeError as err:
-                typer.secho(
-                    "❌ The provided configuration string is in an invalid format. "
+                raise click.ClickException(
+                    "The provided configuration string is in an invalid format. "
                     "The correct format should be, e.g., 'key1=123 key2=false "
                     'key3="string"\', where values must be of type bool, int, '
                     "string, or float. Ensure proper formatting with "
-                    "space-separated key-value pairs.",
-                    fg=typer.colors.RED,
-                    bold=True,
-                )
-                raise typer.Exit(code=1) from err
+                    "space-separated key-value pairs."
+                ) from err
 
     return flat_overrides
 
@@ -332,8 +330,6 @@ def validate_fields_in_config(
             warnings.append('Recommended property "description" missing in [project]')
         if "license" not in config["project"]:
             warnings.append('Recommended property "license" missing in [project]')
-        if "authors" not in config["project"]:
-            warnings.append('Recommended property "authors" missing in [project]')
 
     if (
         "tool" not in config
@@ -377,13 +373,13 @@ def validate_config(
     is_valid, reason = object_ref.validate(serverapp_ref, check_module, project_dir)
 
     if not is_valid and isinstance(reason, str):
-        return False, [reason], []
+        return False, [reason], warnings
 
     # Validate clientapp
     clientapp_ref = config["tool"]["flwr"]["app"]["components"]["clientapp"]
     is_valid, reason = object_ref.validate(clientapp_ref, check_module, project_dir)
 
     if not is_valid and isinstance(reason, str):
-        return False, [reason], []
+        return False, [reason], warnings
 
-    return True, [], []
+    return True, [], warnings

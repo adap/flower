@@ -19,13 +19,11 @@ from __future__ import annotations
 
 import os
 
-TRANSPORT_TYPE_GRPC_BIDI = "grpc-bidi"
 TRANSPORT_TYPE_GRPC_RERE = "grpc-rere"
 TRANSPORT_TYPE_GRPC_ADAPTER = "grpc-adapter"
 TRANSPORT_TYPE_REST = "rest"
 TRANSPORT_TYPE_VCE = "vce"
 TRANSPORT_TYPES = [
-    TRANSPORT_TYPE_GRPC_BIDI,
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
     TRANSPORT_TYPE_VCE,
@@ -182,19 +180,8 @@ SUPERNODE_NOT_CREATED_FROM_CLI_MESSAGE = "Invalid SuperNode credentials"
 PUBLIC_KEY_ALREADY_IN_USE_MESSAGE = "Public key already in use"
 PUBLIC_KEY_NOT_VALID = "The provided public key is not valid"
 NODE_NOT_FOUND_MESSAGE = "Node ID not found for account"
-
-
-class MessageType:
-    """Message type."""
-
-    TRAIN = "train"
-    EVALUATE = "evaluate"
-    QUERY = "query"
-    SYSTEM = "system"
-
-    def __new__(cls) -> MessageType:
-        """Prevent instantiation."""
-        raise TypeError(f"{cls.__name__} cannot be instantiated.")
+FEDERATION_NOT_SPECIFIED_MESSAGE = "No federation specified in the request"
+FEDERATION_NOT_FOUND_MESSAGE = "Federation '%s' does not exist"
 
 
 class MessageTypeLegacy:
@@ -229,6 +216,7 @@ class ErrorCode:
     NODE_UNAVAILABLE = 5
     MOD_FAILED_PRECONDITION = 6
     INVALID_FAB = 7
+    CLIENT_APP_CRASHED = 8
 
     def __new__(cls) -> ErrorCode:
         """Prevent instantiation."""
@@ -322,4 +310,4 @@ class ExecPluginType:
 
 # Constants for No-op auth plugins
 NOOP_FLWR_AID = "<id:none>"
-NOOP_ACCOUNT_NAME = "<name:none>"
+NOOP_ACCOUNT_NAME = "none"
