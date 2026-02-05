@@ -63,13 +63,9 @@ def test_create_raises_on_non_positive_num_partitions(tmp_path: Path) -> None:
 def test_create_raises_click_exception_when_dataset_load_fails(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """Ensure `create` raises a user-friendly error when dataset loading fails.
-
-    This covers cases like:
-    - dataset does not exist on the Hugging Face Hub
-    - network access/authentication issues
-    - other upstream HF/Datasets failures
-    """
+    """Ensure `create` raises a user-friendly error when the dataset is
+    missing/unreachable."""
+    # Create a unique dataset name
     out_dir = tmp_path / "out"
     dataset_name = "does-not-exist/dataset"
 
@@ -86,18 +82,18 @@ def test_create_raises_click_exception_when_dataset_load_fails(
         lambda *, num_partitions: SimpleNamespace(num_partitions=num_partitions),
     )
 
-    # Make FederatedDataset construction fail (simulates "dataset not found"/network issues)
+    # Ensure the command handles DatasetNotFoundError specifically
     def _raise_fds(
         *, dataset: str, partitioners: dict[str, object]
     ) -> _FakeFederatedDataset:
-        raise RuntimeError("upstream failure")
+        raise create_module.DatasetNotFoundError("not found")
 
     monkeypatch.setattr(create_module, "FederatedDataset", _raise_fds)
 
     expected_msg = (
-        f"Dataset '{dataset_name}' could not be found on the Hugging Face Hub or "
-        "network access is unavailable. "
-        "Please verify the dataset identifier and your connection."
+        f"Dataset '{dataset_name}' could not be found on the Hugging Face Hub, "
+        "or network access is unavailable. "
+        "Please verify the dataset identifier and your internet connection."
     )
 
     with pytest.raises(click.ClickException, match=re.escape(expected_msg)):

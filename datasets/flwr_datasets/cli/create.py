@@ -21,6 +21,7 @@ from typing import Annotated
 import click
 import typer
 
+from datasets.load import DatasetNotFoundError
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import IidPartitioner
 
@@ -89,12 +90,18 @@ def create(
             partition_out_dir = out_dir / f"partition_{partition_id}"
             partition.save_to_disk(partition_out_dir)
 
-    except Exception as err:  # pylint: disable=broad-exception-caught
+    except DatasetNotFoundError as err:
         raise click.ClickException(
-            f"Dataset '{dataset_name}' could not be found on the Hugging Face Hub or "
-            "network access is unavailable. "
-            "Please verify the dataset identifier and your connection."
+            f"Dataset '{dataset_name}' could not be found on the Hugging Face Hub, "
+            "or network access is unavailable. "
+            "Please verify the dataset identifier and your internet connection."
         ) from err
+
+    except Exception as ex:  # pylint: disable=broad-exception-caught
+        raise click.ClickException(
+            "An unexpected error occurred while creating the federated dataset. "
+            "Please try again or check the logs for more details."
+        ) from ex
 
     typer.secho(
         f"🎊 Created {num_partitions} partitions for {dataset_name} in {out_dir}",
