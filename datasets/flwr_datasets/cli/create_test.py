@@ -64,7 +64,9 @@ def test_create_raises_click_exception_when_dataset_load_fails(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """Ensure `create` raises a user-friendly error when the dataset is
-    missing/unreachable."""
+    missing/unreachable.
+    """
+    
     # Create a unique dataset name
     out_dir = tmp_path / "out"
     dataset_name = "does-not-exist/dataset"
