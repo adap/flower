@@ -32,7 +32,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Update and maintain examples** ([#6331](https://github.com/adap/flower/pull/6331), [#6334](https://github.com/adap/flower/pull/6334), [#6369](https://github.com/adap/flower/pull/6369), [#6395](https://github.com/adap/flower/pull/6395), [#6419](https://github.com/adap/flower/pull/6419), [#6474](https://github.com/adap/flower/pull/6474), [#6488](https://github.com/adap/flower/pull/6488))
 
-  Update the JAX quickstart, bump example dependencies, make the certificate generation script cross-platform, normalize training loss in the PyTorch quickstart, and mark the legacy `quickstart-pytorch` example as deprecated.
+  Updates the JAX quickstart, bumps example dependencies, makes the certificate generation script cross-platform, normalizes training loss in the PyTorch quickstart, and marks the legacy `quickstart-pytorch` example as deprecated.
 
 - **Refine `flwr federation` CLI** ([#6340](https://github.com/adap/flower/pull/6340), [#6461](https://github.com/adap/flower/pull/6461), [#6463](https://github.com/adap/flower/pull/6463), [#6468](https://github.com/adap/flower/pull/6468), [#6476](https://github.com/adap/flower/pull/6476), [#6479](https://github.com/adap/flower/pull/6479), [#6480](https://github.com/adap/flower/pull/6480))
 
