@@ -9,7 +9,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "flowertune-llm-general-nlp"
-version = "1.0.0"
+version = "1.0.1"
 description = "Base App for the General NLP challenge in the FlowerTune LLM Leaderboard"
 license = "Apache-2.0"
 # Dependencies for your Flower App

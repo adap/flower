@@ -9,7 +9,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "quickstart-numpy"
-version = "1.0.0"
+version = "1.0.1"
 description = "Federated Learning with Numpy and Flower (Quickstart Example)"
 license = "Apache-2.0"
 # Dependencies for your Flower App

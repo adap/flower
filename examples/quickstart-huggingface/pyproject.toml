@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "quickstart-huggingface"
-version = "1.0.0"
+version = "1.0.1"
 description = "Federated Learning with Hugginface Transformers and Flower (Quickstart Example)"
 license = "Apache-2.0"
 authors = [
