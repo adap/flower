@@ -25,6 +25,8 @@ import click
 import pytest
 import typer
 
+from datasets.load import DatasetNotFoundError
+
 from . import create as create_module
 from .create import create
 
@@ -88,7 +90,7 @@ def test_create_raises_click_exception_when_dataset_load_fails(
     def _raise_fds(
         *, dataset: str, partitioners: dict[str, object]
     ) -> _FakeFederatedDataset:
-        raise create_module.DatasetNotFoundError("not found")
+        raise DatasetNotFoundError("not found")
 
     monkeypatch.setattr(create_module, "FederatedDataset", _raise_fds)
 
@@ -187,20 +189,15 @@ def test_create_partitions_save_behavior(
         monkeypatch.setattr(create_module, "IidPartitioner", _fake_partitioner)
         monkeypatch.setattr(create_module, "FederatedDataset", _fake_fds)
     else:
-        monkeypatch.setattr(
-            create_module,
-            "IidPartitioner",
-            lambda **_: (_ for _ in ()).throw(
-                AssertionError("IidPartitioner should not be called")
-            ),
-        )
-        monkeypatch.setattr(
-            create_module,
-            "FederatedDataset",
-            lambda **_: (_ for _ in ()).throw(
-                AssertionError("FederatedDataset should not be called")
-            ),
-        )
+
+        def _fail_partitioner(**_: object) -> None:
+            raise AssertionError("IidPartitioner should not be called")
+
+        def _fail_fds(**_: object) -> None:
+            raise AssertionError("FederatedDataset should not be called")
+
+        monkeypatch.setattr(create_module, "IidPartitioner", _fail_partitioner)
+        monkeypatch.setattr(create_module, "FederatedDataset", _fail_fds)
 
     create(dataset_name="user/ds", num_partitions=case.num_partitions, out_dir=out_dir)
 
