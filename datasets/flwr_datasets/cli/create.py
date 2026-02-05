@@ -100,7 +100,7 @@ def create(
     except Exception as ex:  # pylint: disable=broad-exception-caught
         raise click.ClickException(
             "An unexpected error occurred while creating the federated dataset. "
-            "Please try again or check the logs for more details."
+            f"Please try again or check the logs for more details: {str(ex)}"
         ) from ex
 
     typer.secho(
