@@ -12,7 +12,6 @@ from flwr.common.message import Message
 from torch.utils.tensorboard.writer import SummaryWriter
 
 
-
 def get_wandb_mod(name: str) -> Mod:
     """Return a mod that logs metrics to W&B."""
 
