@@ -122,5 +122,5 @@ In your |clientapp_link|_, you can access the configured data path through the
 .. tip::
 
    For a complete guide on how to run Flower SuperNodes, refer to the
-   `Deployment Runtime Documentation <https://flower.ai/docs/framework/how-to-run-flower-with-deployment-engine.html>`_ documentation.
+   `Deployment Runtime Documentation <https://flower.ai/docs/framework/how-to-run-flower-with-deployment-engine.html>`_.
 
