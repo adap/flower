@@ -26,33 +26,10 @@ from flwr.common import (
     ndarrays_to_parameters,
     parameters_to_ndarrays,
 )
+from flwr.server.client_manager_test import TestClientProxy
 from flwr.server.client_proxy import ClientProxy
 
 from .krum import Krum
-
-
-class TestClientProxy(ClientProxy):
-    """Minimal ClientProxy test double."""
-
-    def get_properties(self, ins, timeout, group_id):
-        """Not used in this test module."""
-        raise NotImplementedError
-
-    def get_parameters(self, ins, timeout, group_id):
-        """Not used in this test module."""
-        raise NotImplementedError
-
-    def fit(self, ins, timeout, group_id):
-        """Not used in this test module."""
-        raise NotImplementedError
-
-    def evaluate(self, ins, timeout, group_id):
-        """Not used in this test module."""
-        raise NotImplementedError
-
-    def reconnect(self, ins, timeout, group_id):
-        """Not used in this test module."""
-        raise NotImplementedError
 
 
 def test_krum_num_fit_clients_20_available() -> None:

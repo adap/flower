@@ -16,32 +16,9 @@
 
 
 from flwr.server.client_manager import SimpleClientManager
+from flwr.server.client_manager_test import TestClientProxy
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.criterion import Criterion
-
-
-class TestClientProxy(ClientProxy):
-    """Minimal ClientProxy test double."""
-
-    def get_properties(self, ins, timeout, group_id):
-        """Not used in this test module."""
-        raise NotImplementedError
-
-    def get_parameters(self, ins, timeout, group_id):
-        """Not used in this test module."""
-        raise NotImplementedError
-
-    def fit(self, ins, timeout, group_id):
-        """Not used in this test module."""
-        raise NotImplementedError
-
-    def evaluate(self, ins, timeout, group_id):
-        """Not used in this test module."""
-        raise NotImplementedError
-
-    def reconnect(self, ins, timeout, group_id):
-        """Not used in this test module."""
-        raise NotImplementedError
 
 
 def test_criterion_applied() -> None:
