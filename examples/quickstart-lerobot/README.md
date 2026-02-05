@@ -82,7 +82,7 @@ And then run the app
 
 ```bash
 # Run with the `local-gpu` settings
-flwr run . local--gpu
+flwr run . local-gpu
 ```
 
 You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example
