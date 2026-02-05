@@ -37,8 +37,7 @@ def create(
         int,
         typer.Option(
             "--num-partitions",
-            min=1,
-            help="Number of partitions to create.",
+            help="Number of partitions to create. Must be a positive integer",
         ),
     ] = 10,
     out_dir: Annotated[
