@@ -104,7 +104,7 @@ def create(
         ) from ex
 
     typer.secho(
-        f"🎊 Created {num_partitions} partitions for {dataset_name} in {out_dir}",
+        f"🎊 Created {num_partitions} partitions for '{dataset_name}' in '{out_dir.absolute()}'",
         fg=typer.colors.GREEN,
         bold=True,
     )

@@ -90,7 +90,7 @@ def test_create_raises_click_exception_when_dataset_load_fails(
     def _raise_fds(
         *, dataset: str, partitioners: dict[str, object]
     ) -> _FakeFederatedDataset:
-        raise DatasetNotFoundError("not found")
+        raise DatasetNotFoundError()
 
     monkeypatch.setattr(create_module, "FederatedDataset", _raise_fds)
 
