@@ -1,10 +1,10 @@
 .. |context_link| replace:: ``Context``
 
-.. _context_link: ref-api/flwr.app.Context.html
+.. _context_link: https://flower.ai/docs/framework/ref-api/flwr.app.Context.html
 
 .. |clientapp_link| replace:: ``ClientApp``
 
-.. _clientapp_link: ref-api/flwr.clientapp.ClientApp.html
+.. _clientapp_link: https://flower.ai/docs/framework/ref-api/flwr.clientapp.ClientApp.html
 
 Generate Demo Data for SuperNodes
 =================================
@@ -49,7 +49,7 @@ following command in your terminal:
    Saving the dataset (1/1 shards): 100%|████████████| 12000/12000 [00:00<00:00, 4001.21 examples/s]
    Saving the dataset (1/1 shards): 100%|████████████| 12000/12000 [00:00<00:00, 4010.60 examples/s]
    Saving the dataset (1/1 shards): 100%|████████████| 12000/12000 [00:00<00:00, 3990.48 examples/s]
-   🎊 Created 5 partitions for ylecun/mnist in demo_data
+   🎊 Created 5 partitions for ylecun/mnist in /path/to/demo_data
 
 The above command generates the following directory structure:
 
@@ -77,10 +77,10 @@ partition path as a node configuration parameter when starting the SuperNode.
 Passing the Data Path to a SuperNode
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Use the ``--node-config`` flag to specify the path to the partition when
-launching a SuperNode. Note in the example below the choice of key
-``data-path`` is arbitrary; you can use any key that makes sense for your
-application. 
+Use the ``--node-config`` flag to specify the path to the partition when 
+launching a SuperNode. In the example below, the selected key ``data-path`` 
+is arbitrary and provided for illustration only; any application-appropriate 
+key may be used.
 
 .. code-block:: bash
 
