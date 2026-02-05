@@ -28,7 +28,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Fix and improve framework documentation** ([#6312](https://github.com/adap/flower/pull/6312), [#6336](https://github.com/adap/flower/pull/6336), [#6351](https://github.com/adap/flower/pull/6351), [#6397](https://github.com/adap/flower/pull/6397), [#6401](https://github.com/adap/flower/pull/6401), [#6434](https://github.com/adap/flower/pull/6434), [#6455](https://github.com/adap/flower/pull/6455), [#6470](https://github.com/adap/flower/pull/6470), [#6485](https://github.com/adap/flower/pull/6485), [#6506](https://github.com/adap/flower/pull/6506), [#6508](https://github.com/adap/flower/pull/6508), [#6511](https://github.com/adap/flower/pull/6511), [#6512](https://github.com/adap/flower/pull/6512), [#6516](https://github.com/adap/flower/pull/6516))
 
-  Fix an incorrect learning rate key in the tutorial series, update the `clientappio` address in the auth example, and improve the documentation UI by making the versioning sidebar scrollable to show all versions.
+  Fixes an incorrect learning rate key in the tutorial series, updates the `clientappio` address in the auth example, and improves the documentation UI by making the versioning sidebar scrollable to show all versions.
 
 - **Update and maintain examples** ([#6331](https://github.com/adap/flower/pull/6331), [#6334](https://github.com/adap/flower/pull/6334), [#6369](https://github.com/adap/flower/pull/6369), [#6395](https://github.com/adap/flower/pull/6395), [#6419](https://github.com/adap/flower/pull/6419), [#6474](https://github.com/adap/flower/pull/6474), [#6488](https://github.com/adap/flower/pull/6488))
 
