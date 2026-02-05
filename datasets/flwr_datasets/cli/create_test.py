@@ -63,9 +63,10 @@ def test_create_raises_on_non_positive_num_partitions(tmp_path: Path) -> None:
 def test_create_raises_click_exception_when_dataset_load_fails(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """Ensure `create` raises a user-friendly error when the dataset is
-    missing/unreachable."""
+    """Ensure `create` raises a user-friendly error when the dataset is.
 
+    missing/unreachable.
+    """
     # Create a unique dataset name
     out_dir = tmp_path / "out"
     dataset_name = "does-not-exist/dataset"
