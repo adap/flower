@@ -15,18 +15,39 @@
 """Tests for ClientManager."""
 
 
-from unittest.mock import MagicMock
-
 from flwr.server.client_manager import SimpleClientManager
-from flwr.server.superlink.fleet.grpc_bidi.grpc_client_proxy import GrpcClientProxy
+from flwr.server.client_proxy import ClientProxy
+
+
+class TestClientProxy(ClientProxy):
+    """Minimal ClientProxy test double."""
+
+    def get_properties(self, ins, timeout, group_id):
+        """Not used in this test module."""
+        raise NotImplementedError
+
+    def get_parameters(self, ins, timeout, group_id):
+        """Not used in this test module."""
+        raise NotImplementedError
+
+    def fit(self, ins, timeout, group_id):
+        """Not used in this test module."""
+        raise NotImplementedError
+
+    def evaluate(self, ins, timeout, group_id):
+        """Not used in this test module."""
+        raise NotImplementedError
+
+    def reconnect(self, ins, timeout, group_id):
+        """Not used in this test module."""
+        raise NotImplementedError
 
 
 def test_simple_client_manager_register() -> None:
     """Tests if the register method works correctly."""
     # Prepare
     cid = "1"
-    bridge = MagicMock()
-    client = GrpcClientProxy(cid=cid, bridge=bridge)
+    client = TestClientProxy(cid=cid)
     client_manager = SimpleClientManager()
 
     # Execute
@@ -43,8 +64,7 @@ def test_simple_client_manager_unregister() -> None:
     """Tests if the unregister method works correctly."""
     # Prepare
     cid = "1"
-    bridge = MagicMock()
-    client = GrpcClientProxy(cid=cid, bridge=bridge)
+    client = TestClientProxy(cid=cid)
     client_manager = SimpleClientManager()
     client_manager.register(client)
 

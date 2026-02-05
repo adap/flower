@@ -15,8 +15,6 @@
 """FedAdagrad tests."""
 
 
-from unittest.mock import MagicMock
-
 from numpy import array, float32
 
 from flwr.common import (
@@ -29,9 +27,32 @@ from flwr.common import (
     parameters_to_ndarrays,
 )
 from flwr.server.client_proxy import ClientProxy
-from flwr.server.superlink.fleet.grpc_bidi.grpc_client_proxy import GrpcClientProxy
 
 from .fedadagrad import FedAdagrad
+
+
+class TestClientProxy(ClientProxy):
+    """Minimal ClientProxy test double."""
+
+    def get_properties(self, ins, timeout, group_id):
+        """Not used in this test module."""
+        raise NotImplementedError
+
+    def get_parameters(self, ins, timeout, group_id):
+        """Not used in this test module."""
+        raise NotImplementedError
+
+    def fit(self, ins, timeout, group_id):
+        """Not used in this test module."""
+        raise NotImplementedError
+
+    def evaluate(self, ins, timeout, group_id):
+        """Not used in this test module."""
+        raise NotImplementedError
+
+    def reconnect(self, ins, timeout, group_id):
+        """Not used in this test module."""
+        raise NotImplementedError
 
 
 def test_aggregate_fit() -> None:
@@ -50,9 +71,8 @@ def test_aggregate_fit() -> None:
     param_1: Parameters = ndarrays_to_parameters(
         [array([1.0, 1.0, 1.0, 1.0], dtype=float32)]
     )
-    bridge = MagicMock()
-    client_0 = GrpcClientProxy(cid="0", bridge=bridge)
-    client_1 = GrpcClientProxy(cid="1", bridge=bridge)
+    client_0 = TestClientProxy(cid="0")
+    client_1 = TestClientProxy(cid="1")
     results: list[tuple[ClientProxy, FitRes]] = [
         (
             client_0,

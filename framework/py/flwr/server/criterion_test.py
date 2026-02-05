@@ -15,22 +15,42 @@
 """Tests for criterion sampling."""
 
 
-from unittest.mock import MagicMock
-
 from flwr.server.client_manager import SimpleClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.criterion import Criterion
-from flwr.server.superlink.fleet.grpc_bidi.grpc_client_proxy import GrpcClientProxy
+
+
+class TestClientProxy(ClientProxy):
+    """Minimal ClientProxy test double."""
+
+    def get_properties(self, ins, timeout, group_id):
+        """Not used in this test module."""
+        raise NotImplementedError
+
+    def get_parameters(self, ins, timeout, group_id):
+        """Not used in this test module."""
+        raise NotImplementedError
+
+    def fit(self, ins, timeout, group_id):
+        """Not used in this test module."""
+        raise NotImplementedError
+
+    def evaluate(self, ins, timeout, group_id):
+        """Not used in this test module."""
+        raise NotImplementedError
+
+    def reconnect(self, ins, timeout, group_id):
+        """Not used in this test module."""
+        raise NotImplementedError
 
 
 def test_criterion_applied() -> None:
     """Test sampling w/ criterion."""
     # Prepare
-    bridge = MagicMock()
-    client1 = GrpcClientProxy(cid="train_client_1", bridge=bridge)
-    client2 = GrpcClientProxy(cid="train_client_2", bridge=bridge)
-    client3 = GrpcClientProxy(cid="test_client_1", bridge=bridge)
-    client4 = GrpcClientProxy(cid="test_client_2", bridge=bridge)
+    client1 = TestClientProxy(cid="train_client_1")
+    client2 = TestClientProxy(cid="train_client_2")
+    client3 = TestClientProxy(cid="test_client_1")
+    client4 = TestClientProxy(cid="test_client_2")
 
     client_manager = SimpleClientManager()
     client_manager.register(client1)
@@ -55,11 +75,10 @@ def test_criterion_applied() -> None:
 def test_criterion_not_applied() -> None:
     """Test sampling w/o criterion."""
     # Prepare
-    bridge = MagicMock()
-    client1 = GrpcClientProxy(cid="train_client_1", bridge=bridge)
-    client2 = GrpcClientProxy(cid="train_client_2", bridge=bridge)
-    client3 = GrpcClientProxy(cid="test_client_1", bridge=bridge)
-    client4 = GrpcClientProxy(cid="test_client_2", bridge=bridge)
+    client1 = TestClientProxy(cid="train_client_1")
+    client2 = TestClientProxy(cid="train_client_2")
+    client3 = TestClientProxy(cid="test_client_1")
+    client4 = TestClientProxy(cid="test_client_2")
 
     client_manager = SimpleClientManager()
     client_manager.register(client1)
