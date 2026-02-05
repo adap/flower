@@ -8,7 +8,7 @@ version = "1.0.0"
 description = "Opacus E2E testing"
 license = "Apache-2.0"
 dependencies = [
-    "flwr[simulation] @ {root:parent:parent:uri}",
+    "flwr[simulation]",
     "opacus>=1.4.0,<2.0.0",
     "torch>=1.13.1,<3.0.0",
     "torchvision>=0.14.0,<2.0.0",
@@ -17,8 +17,9 @@ dependencies = [
 [tool.hatch.build.targets.wheel]
 packages = ["."]
 
-[tool.hatch.metadata]
-allow-direct-references = true
+[tool.uv.sources]
+flwr = { path = "../..", editable = true }
+
 
 [tool.flwr.app]
 publisher = "flwrlabs"

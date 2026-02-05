@@ -8,7 +8,7 @@ version = "1.0.0"
 description = "PyTorch Federated Learning E2E test with Flower"
 license = "Apache-2.0"
 dependencies = [
-    "flwr[simulation] @ {root:parent:parent:uri}",
+    "flwr[simulation]",
     "torch>=2.5.0,<3.0.0",
     "torchvision>=0.20.1,<0.21.0",
     "tqdm>=4.63.0,<5.0.0",
@@ -17,8 +17,9 @@ dependencies = [
 [tool.hatch.build.targets.wheel]
 packages = ["."]
 
-[tool.hatch.metadata]
-allow-direct-references = true
+[tool.uv.sources]
+flwr = { path = "../..", editable = true }
+
 
 [tool.flwr.app]
 publisher = "flwrlabs"

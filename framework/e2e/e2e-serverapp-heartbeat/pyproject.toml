@@ -7,13 +7,14 @@ name = "e2e-serverapp-heartbeat"
 version = "1.0.0"
 description = "Test heartbeat for runs."
 license = "Apache-2.0"
-dependencies = ["flwr @ {root:parent:parent:uri}"]
+dependencies = ["flwr"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["."]
 
-[tool.hatch.metadata]
-allow-direct-references = true
+[tool.uv.sources]
+flwr = { path = "../..", editable = true }
+
 
 [tool.flwr.app]
 publisher = "flwrlabs"

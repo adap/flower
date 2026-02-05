@@ -8,7 +8,7 @@ version = "1.0.0"
 description = "Fastai Federated Learning E2E test with Flower"
 license = "Apache-2.0"
 dependencies = [
-    "flwr[simulation] @ {root:parent:parent:uri}",
+    "flwr[simulation]",
     "fastai>=2.7.12,<3.0.0",
     "fastprogress==1.0.5",
     "fastcore<1.12.2", # Remove this constraint once this issue is resolved. https://github.com/AnswerDotAI/fastcore/issues/751 
@@ -20,8 +20,9 @@ dependencies = [
 [tool.hatch.build.targets.wheel]
 packages = ["."]
 
-[tool.hatch.metadata]
-allow-direct-references = true
+[tool.uv.sources]
+flwr = { path = "../..", editable = true }
+
 
 [tool.flwr.app]
 publisher = "flwrlabs"
