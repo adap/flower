@@ -15,6 +15,18 @@
 """Tests for ClientManager."""
 
 
+from flwr.common import (
+    DisconnectRes,
+    EvaluateIns,
+    EvaluateRes,
+    FitIns,
+    FitRes,
+    GetParametersIns,
+    GetParametersRes,
+    GetPropertiesIns,
+    GetPropertiesRes,
+    ReconnectIns,
+)
 from flwr.server.client_manager import SimpleClientManager
 from flwr.server.client_proxy import ClientProxy
 
@@ -22,23 +34,48 @@ from flwr.server.client_proxy import ClientProxy
 class TestClientProxy(ClientProxy):
     """Minimal ClientProxy test double."""
 
-    def get_properties(self, ins, timeout, group_id):
+    def get_properties(
+        self,
+        ins: GetPropertiesIns,
+        timeout: float | None,
+        group_id: int | None,
+    ) -> GetPropertiesRes:
         """Not used in this test module."""
         raise NotImplementedError
 
-    def get_parameters(self, ins, timeout, group_id):
+    def get_parameters(
+        self,
+        ins: GetParametersIns,
+        timeout: float | None,
+        group_id: int | None,
+    ) -> GetParametersRes:
         """Not used in this test module."""
         raise NotImplementedError
 
-    def fit(self, ins, timeout, group_id):
+    def fit(
+        self,
+        ins: FitIns,
+        timeout: float | None,
+        group_id: int | None,
+    ) -> FitRes:
         """Not used in this test module."""
         raise NotImplementedError
 
-    def evaluate(self, ins, timeout, group_id):
+    def evaluate(
+        self,
+        ins: EvaluateIns,
+        timeout: float | None,
+        group_id: int | None,
+    ) -> EvaluateRes:
         """Not used in this test module."""
         raise NotImplementedError
 
-    def reconnect(self, ins, timeout, group_id):
+    def reconnect(
+        self,
+        ins: ReconnectIns,
+        timeout: float | None,
+        group_id: int | None,
+    ) -> DisconnectRes:
         """Not used in this test module."""
         raise NotImplementedError
 
