@@ -24,7 +24,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Improve reliability of network stack, `ServerApp` shutdown and Windows support** ([#6342](https://github.com/adap/flower/pull/6342), [#6430](https://github.com/adap/flower/pull/6430), [#6447](https://github.com/adap/flower/pull/6447), [#6456](https://github.com/adap/flower/pull/6456), [#6490](https://github.com/adap/flower/pull/6490), [#6504](https://github.com/adap/flower/pull/6504))
 
-  Improves the reliability of message transmission and capacity tracking under unstable network conditions and high concurrency, improves Windows process handling and address resolution, and ensure sgraceful shutdown of `flwr-serverapp`.
+  Improves the reliability of message transmission and capacity tracking under unstable network conditions and high concurrency, improves Windows process handling and address resolution, and ensures graceful shutdown of `flwr-serverapp`.
 
 - **Fix and improve framework documentation** ([#6312](https://github.com/adap/flower/pull/6312), [#6336](https://github.com/adap/flower/pull/6336), [#6351](https://github.com/adap/flower/pull/6351), [#6397](https://github.com/adap/flower/pull/6397), [#6401](https://github.com/adap/flower/pull/6401), [#6434](https://github.com/adap/flower/pull/6434), [#6455](https://github.com/adap/flower/pull/6455), [#6470](https://github.com/adap/flower/pull/6470), [#6485](https://github.com/adap/flower/pull/6485), [#6506](https://github.com/adap/flower/pull/6506), [#6508](https://github.com/adap/flower/pull/6508), [#6511](https://github.com/adap/flower/pull/6511), [#6512](https://github.com/adap/flower/pull/6512), [#6516](https://github.com/adap/flower/pull/6516))
 
