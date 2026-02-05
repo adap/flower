@@ -1,4 +1,4 @@
-# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2026 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ from typing import Annotated
 import click
 import typer
 
+from datasets.load import DatasetNotFoundError
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import IidPartitioner
 
@@ -36,8 +37,7 @@ def create(
         int,
         typer.Option(
             "--num-partitions",
-            min=1,
-            help="Number of partitions to create.",
+            help="Number of partitions to create. Must be a positive integer",
         ),
     ] = 10,
     out_dir: Annotated[
@@ -89,15 +89,21 @@ def create(
             partition_out_dir = out_dir / f"partition_{partition_id}"
             partition.save_to_disk(partition_out_dir)
 
-    except Exception as err:  # pylint: disable=broad-exception-caught
+    except DatasetNotFoundError as err:
         raise click.ClickException(
-            f"Dataset '{dataset_name}' could not be found on the Hugging Face Hub or "
-            "network access is unavailable. "
-            "Please verify the dataset identifier and your connection."
+            f"Dataset '{dataset_name}' could not be found on the Hugging Face Hub, "
+            "or network access is unavailable. "
+            "Please verify the dataset identifier and your internet connection."
         ) from err
 
+    except Exception as ex:  # pylint: disable=broad-exception-caught
+        raise click.ClickException(
+            "An unexpected error occurred while creating the federated dataset. "
+            f"Please try again or check the logs for more details: {str(ex)}"
+        ) from ex
+
     typer.secho(
-        f"🎊 Created {num_partitions} partitions for {dataset_name} in {out_dir}",
+        f"🎊 Created {num_partitions} partitions for '{dataset_name}' in '{out_dir.absolute()}'",
         fg=typer.colors.GREEN,
         bold=True,
     )

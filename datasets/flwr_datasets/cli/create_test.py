@@ -1,4 +1,4 @@
-# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2026 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@ from typing import Any
 import click
 import pytest
 import typer
+
+from datasets.load import DatasetNotFoundError
 
 from . import create as create_module
 from .create import create
@@ -63,13 +65,11 @@ def test_create_raises_on_non_positive_num_partitions(tmp_path: Path) -> None:
 def test_create_raises_click_exception_when_dataset_load_fails(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """Ensure `create` raises a user-friendly error when dataset loading fails.
+    """Ensure `create` raises a user-friendly error when the dataset is.
 
-    This covers cases like:
-    - dataset does not exist on the Hugging Face Hub
-    - network access/authentication issues
-    - other upstream HF/Datasets failures
+    missing/unreachable.
     """
+    # Create a unique dataset name
     out_dir = tmp_path / "out"
     dataset_name = "does-not-exist/dataset"
 
@@ -86,18 +86,18 @@ def test_create_raises_click_exception_when_dataset_load_fails(
         lambda *, num_partitions: SimpleNamespace(num_partitions=num_partitions),
     )
 
-    # Make FederatedDataset construction fail (simulates "dataset not found"/network issues)
+    # Ensure the command handles DatasetNotFoundError specifically
     def _raise_fds(
         *, dataset: str, partitioners: dict[str, object]
     ) -> _FakeFederatedDataset:
-        raise RuntimeError("upstream failure")
+        raise DatasetNotFoundError()
 
     monkeypatch.setattr(create_module, "FederatedDataset", _raise_fds)
 
     expected_msg = (
-        f"Dataset '{dataset_name}' could not be found on the Hugging Face Hub or "
-        "network access is unavailable. "
-        "Please verify the dataset identifier and your connection."
+        f"Dataset '{dataset_name}' could not be found on the Hugging Face Hub, "
+        "or network access is unavailable. "
+        "Please verify the dataset identifier and your internet connection."
     )
 
     with pytest.raises(click.ClickException, match=re.escape(expected_msg)):
@@ -189,20 +189,15 @@ def test_create_partitions_save_behavior(
         monkeypatch.setattr(create_module, "IidPartitioner", _fake_partitioner)
         monkeypatch.setattr(create_module, "FederatedDataset", _fake_fds)
     else:
-        monkeypatch.setattr(
-            create_module,
-            "IidPartitioner",
-            lambda **_: (_ for _ in ()).throw(
-                AssertionError("IidPartitioner should not be called")
-            ),
-        )
-        monkeypatch.setattr(
-            create_module,
-            "FederatedDataset",
-            lambda **_: (_ for _ in ()).throw(
-                AssertionError("FederatedDataset should not be called")
-            ),
-        )
+
+        def _fail_partitioner(**_: object) -> None:
+            raise AssertionError("IidPartitioner should not be called")
+
+        def _fail_fds(**_: object) -> None:
+            raise AssertionError("FederatedDataset should not be called")
+
+        monkeypatch.setattr(create_module, "IidPartitioner", _fail_partitioner)
+        monkeypatch.setattr(create_module, "FederatedDataset", _fail_fds)
 
     create(dataset_name="user/ds", num_partitions=case.num_partitions, out_dir=out_dir)
 
