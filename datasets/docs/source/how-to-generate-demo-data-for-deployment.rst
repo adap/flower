@@ -49,7 +49,7 @@ following command in your terminal:
    Saving the dataset (1/1 shards): 100%|████████████| 12000/12000 [00:00<00:00, 4001.21 examples/s]
    Saving the dataset (1/1 shards): 100%|████████████| 12000/12000 [00:00<00:00, 4010.60 examples/s]
    Saving the dataset (1/1 shards): 100%|████████████| 12000/12000 [00:00<00:00, 3990.48 examples/s]
-   🎊 Created 5 partitions for ylecun/mnist in /path/to/demo_data
+   🎊 Created 5 partitions for 'ylecun/mnist' in '/path/to/demo_data'
 
 The above command generates the following directory structure:
 
