@@ -20,7 +20,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Improve CLI error handling and usability** ([#6432](https://github.com/adap/flower/pull/6432), [#6437](https://github.com/adap/flower/pull/6437), [#6444](https://github.com/adap/flower/pull/6444), [#6462](https://github.com/adap/flower/pull/6462), [#6467](https://github.com/adap/flower/pull/6467), [#6505](https://github.com/adap/flower/pull/6505))
 
-  Update `flwr` CLI to provide clearer and more consistent error formatting, improve CLI error messages and logging, and show command aliases.
+  Updates `flwr` CLI to provide clearer and more consistent error formatting, improves CLI error messages and logging, and shows command aliases.
 
 - **Improve reliability of network stack, `ServerApp` shutdown and Windows support** ([#6342](https://github.com/adap/flower/pull/6342), [#6430](https://github.com/adap/flower/pull/6430), [#6447](https://github.com/adap/flower/pull/6447), [#6456](https://github.com/adap/flower/pull/6456), [#6490](https://github.com/adap/flower/pull/6490), [#6504](https://github.com/adap/flower/pull/6504))
 
