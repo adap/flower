@@ -73,8 +73,8 @@ options.backend.client-resources.num-gpus = 0.2 # at most 5 ClientApp will run i
 And then run the app
 
 ```bash
-# Run with the `local-gpu` settings
-flwr run . local--gpu
+# Run with the `local-gpu` connection
+flwr run . local-gpu
 ```
 
 ![](_static/central_evaluation.png)
