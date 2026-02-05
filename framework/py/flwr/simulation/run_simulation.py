@@ -28,6 +28,7 @@ from pathlib import Path
 from queue import Empty, Queue
 from typing import Any, cast
 
+from flwr.app.user_config import UserConfig
 from flwr.cli.config_utils import load_and_validate
 from flwr.cli.utils import get_sha256_hash
 from flwr.clientapp import ClientApp
@@ -39,7 +40,7 @@ from flwr.common.logger import (
     update_console_handler,
     warn_deprecated_feature_with_example,
 )
-from flwr.common.typing import Run, RunStatus, UserConfig
+from flwr.common.typing import Run, RunStatus
 from flwr.server.grid import Grid, InMemoryGrid
 from flwr.server.run_serverapp import run as _run
 from flwr.server.server_app import ServerApp
@@ -115,17 +116,7 @@ def run_simulation_from_cli() -> None:
         sys.exit("Simulation Engine cannot start.")
 
     # Load pyproject.toml
-    config, errors, warnings = load_and_validate(
-        app_path / "pyproject.toml", check_module=False
-    )
-    if errors:
-        raise ValueError(errors)
-
-    if warnings:
-        log(WARNING, warnings)
-
-    if config is None:
-        raise ValueError("Config extracted from FAB's pyproject.toml is not valid")
+    config, _ = load_and_validate(app_path / "pyproject.toml", check_module=False)
 
     # Get ClientApp and SeverApp components
     app_components = config["tool"]["flwr"]["app"]["components"]

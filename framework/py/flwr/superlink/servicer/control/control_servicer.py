@@ -29,6 +29,8 @@ from flwr.cli.config_utils import get_fab_metadata
 from flwr.common import Context, RecordDict, now
 from flwr.common.constant import (
     FAB_MAX_SIZE,
+    FEDERATION_NOT_FOUND_MESSAGE,
+    FEDERATION_NOT_SPECIFIED_MESSAGE,
     HEARTBEAT_DEFAULT_INTERVAL,
     LOG_STREAM_INTERVAL,
     NO_ACCOUNT_AUTH_MESSAGE,
@@ -38,6 +40,7 @@ from flwr.common.constant import (
     PUBLIC_KEY_NOT_VALID,
     PULL_UNFINISHED_RUN_MESSAGE,
     RUN_ID_NOT_FOUND_MESSAGE,
+    SUPERLINK_NODE_ID,
     TRANSPORT_TYPE_GRPC_ADAPTER,
     Status,
     SubStatus,
@@ -79,7 +82,7 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
 from flwr.proto.federation_pb2 import Federation  # pylint: disable=E0611
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
-from flwr.supercore.constant import PLATFORM_API_URL
+from flwr.supercore.constant import NOOP_FEDERATION, PLATFORM_API_URL
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
 from flwr.supercore.primitives.asymmetric import bytes_to_public_key, uses_nist_ec_curve
@@ -148,10 +151,11 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 )
 
             # Check (1) federation exists and (2) the flwr_aid is a member
-            federation = request.federation
-
+            federation = request.federation or NOOP_FEDERATION
             if not state.federation_manager.exists(federation):
-                raise ValueError(f"Federation '{federation}' does not exist.")
+                if request.federation:
+                    raise ValueError(FEDERATION_NOT_FOUND_MESSAGE % federation)
+                raise ValueError(FEDERATION_NOT_SPECIFIED_MESSAGE)
 
             if not state.federation_manager.has_member(flwr_aid, federation):
                 raise ValueError(
@@ -169,7 +173,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             fab_hash = ffs.put(fab.content, fab.verifications)
 
             if fab_hash != fab.hash_str:
-                raise RuntimeError(
+                raise ValueError(
                     f"FAB ({fab.hash_str}) hash from request doesn't match contents"
                 )
             fab_id, fab_version = get_fab_metadata(fab.content)
@@ -179,7 +183,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 fab_version,
                 fab_hash,
                 override_config,
-                request.federation,
+                federation,
                 federation_options,
                 flwr_aid,
             )
@@ -195,7 +199,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             # Create an empty context for the Run
             context = Context(
                 run_id=run_id,
-                node_id=0,
+                node_id=SUPERLINK_NODE_ID,
                 # Dict is invariant in mypy
                 node_config=node_config,  # type: ignore[arg-type]
                 state=RecordDict(),
@@ -205,13 +209,9 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             # Register the context at the LinkState
             state.set_serverapp_context(run_id=run_id, context=context)
 
-        # pylint: disable-next=broad-except
-        except Exception as e:
+        except ValueError as e:
             log(ERROR, "Could not start run: %s", str(e))
-            context.abort(
-                grpc.StatusCode.FAILED_PRECONDITION,
-                str(e),
-            )
+            context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(e))
 
         log(INFO, "Created run %s", str(run_id))
         return StartRunResponse(run_id=run_id)
@@ -536,9 +536,10 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
 
         # Get federations the account is a member of
         federations = state.federation_manager.get_federations(flwr_aid=flwr_aid)
-
         return ListFederationsResponse(
-            federations=[Federation(name=fed) for fed in federations]
+            federations=[
+                Federation(name=fed[0], description=fed[1]) for fed in federations
+            ]
         )
 
     def ShowFederation(
@@ -558,7 +559,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
 
         # Ensure flwr_aid is a member of the requested federation
         federation = request.federation_name
-        if federation not in federations:
+        if federation not in [fed[0] for fed in federations]:
             context.abort(
                 grpc.StatusCode.FAILED_PRECONDITION,
                 f"Federation '{federation}' does not exist or you are "
@@ -571,7 +572,8 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         # Build Federation proto object
         federation_proto = Federation(
             name=federation,
-            member_aids=details.member_aids,
+            member_aids=[acc.id for acc in details.accounts],  # Deprecated in v1.26.0
+            accounts=details.accounts,
             nodes=details.nodes,
             runs=[run_to_proto(run) for run in details.runs],
         )

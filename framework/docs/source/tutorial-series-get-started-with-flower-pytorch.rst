@@ -243,7 +243,7 @@ The PyTorch quickstart also provides the usual training and test functions:
                 loss.backward()
                 optimizer.step()
                 running_loss += loss.item()
-        avg_trainloss = running_loss / len(trainloader)
+        avg_trainloss = running_loss / (epochs * len(trainloader))
         return avg_trainloss
 
 
@@ -557,8 +557,8 @@ with Flower! The last step is to run our simulation in the command line, as foll
     $ flwr run .
 
 This will execute the federated learning simulation with 10 clients, or SuperNodes,
-defined in the ``[tool.flwr.federations.local-simulation]`` section in the
-``pyproject.toml``. You should expect an output log similar to this:
+defined in the ``[superlink.local]`` section in your Flower Configuration file. You
+should expect an output log similar to this:
 
 .. code-block:: shell
 

@@ -36,7 +36,6 @@ from flwr.common.serde import (
     message_from_proto,
     message_to_proto,
     run_status_from_proto,
-    run_status_to_proto,
     run_to_proto,
 )
 from flwr.common.typing import Fab, RunStatus
@@ -55,7 +54,6 @@ from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
     RequestTokenRequest,
     RequestTokenResponse,
 )
-from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
     SendAppHeartbeatRequest,
     SendAppHeartbeatResponse,
@@ -76,8 +74,6 @@ from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     GetRunRequest,
     GetRunResponse,
-    GetRunStatusRequest,
-    GetRunStatusResponse,
     UpdateRunStatusRequest,
     UpdateRunStatusResponse,
 )
@@ -88,7 +84,7 @@ from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
 from flwr.server.superlink.utils import abort_if
 from flwr.server.utils.validator import validate_message
-from flwr.supercore.ffs import Ffs, FfsFactory
+from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import NoObjectInStoreError, ObjectStoreFactory
 
 
@@ -315,19 +311,6 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
 
         return GetRunResponse(run=run_to_proto(run))
 
-    def GetFab(
-        self, request: GetFabRequest, context: grpc.ServicerContext
-    ) -> GetFabResponse:
-        """Get FAB from Ffs."""
-        log(DEBUG, "ServerAppIoServicer.GetFab")
-
-        ffs: Ffs = self.ffs_factory.ffs()
-        if result := ffs.get(request.hash_str):
-            fab = Fab(request.hash_str, result[0], result[1])
-            return GetFabResponse(fab=fab_to_proto(fab))
-
-        raise ValueError(f"Found no FAB with hash: {request.hash_str}")
-
     def PullAppInputs(
         self, request: PullAppInputsRequest, context: grpc.ServicerContext
     ) -> PullAppInputsResponse:
@@ -433,21 +416,6 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         merged_logs = "".join(request.logs)
         state.add_serverapp_log(request.run_id, merged_logs)
         return PushLogsResponse()
-
-    def GetRunStatus(
-        self, request: GetRunStatusRequest, context: grpc.ServicerContext
-    ) -> GetRunStatusResponse:
-        """Get the status of a run."""
-        log(DEBUG, "ServerAppIoServicer.GetRunStatus")
-        state = self.state_factory.state()
-
-        # Get run status from LinkState
-        run_statuses = state.get_run_status(set(request.run_ids))
-        run_status_dict = {
-            run_id: run_status_to_proto(run_status)
-            for run_id, run_status in run_statuses.items()
-        }
-        return GetRunStatusResponse(run_status_dict=run_status_dict)
 
     def SendAppHeartbeat(
         self, request: SendAppHeartbeatRequest, context: grpc.ServicerContext

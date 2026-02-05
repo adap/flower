@@ -26,6 +26,9 @@ README.md @jafermarq @tanertopal @danieljanes
 # Flower Framework Docs
 /framework/docs @panh99 @tanertopal @danieljanes
 
+# Flower Framework E2E Tests
+/framework/e2e @panh99 @tanertopal @danieljanes
+
 # Flower Templates
 /framework/py/flwr/cli/new/templates @jafermarq @tanertopal @danieljanes
 
@@ -45,12 +48,15 @@ README.md @jafermarq @tanertopal @danieljanes
 /.devcontainer @Robert-Steiner @Moep90 @tanertopal @danieljanes
 /framework/docker @Robert-Steiner @Moep90 @tanertopal @danieljanes
 
+# Flower `flwr` CLI
+/framework/py/flwr/cli/ @jafermarq @panh99 @tanertopal @danieljanes
+
 # Flower Framework Infrastructure
 /framework/py/flwr/supercore/ @panh99 @tanertopal @danieljanes
 /framework/py/flwr/superlink/ @panh99 @tanertopal @danieljanes
 /framework/py/flwr/supernode/ @panh99 @tanertopal @danieljanes
 
-# Override for CLI
+# Override for `flower-` CLI
 /framework/py/flwr/supercore/cli/ @tanertopal @danieljanes
 /framework/py/flwr/superlink/cli/ @tanertopal @danieljanes
 /framework/py/flwr/supernode/cli/ @tanertopal @danieljanes

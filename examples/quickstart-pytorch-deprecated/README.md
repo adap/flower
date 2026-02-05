@@ -1,10 +1,10 @@
 ---
-tags: [quickstart, vision, fds]
+tags: [quickstart, vision, fds, deprecated]
 dataset: [CIFAR-10]
 framework: [torch, torchvision]
 ---
 
-# Federated Learning with PyTorch and Flower (Quickstart Example)
+# [Deprecated] Federated Learning with PyTorch and Flower (Quickstart Example)
 
 > [!CAUTION]
 > This example uses a deprecated API for Flower. Use instead the [quickstart-pytorch](../quickstart-pytorch/) which makes use of the Message API.

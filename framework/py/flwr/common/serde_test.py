@@ -22,6 +22,7 @@ from typing import Any, TypeVar, cast
 
 import pytest
 
+from flwr.app.user_config import UserConfig
 from flwr.common.constant import SUPERLINK_NODE_ID
 from flwr.common.message import make_message
 
@@ -293,7 +294,7 @@ class RecordMaker:
             message_type=self.get_message_type(),
         )
 
-    def user_config(self) -> typing.UserConfig:
+    def user_config(self) -> UserConfig:
         """Create a UserConfig."""
         return {
             "key1": self.rng.randint(0, 1 << 30),

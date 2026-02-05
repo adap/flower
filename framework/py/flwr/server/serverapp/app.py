@@ -144,6 +144,10 @@ def run_serverapp(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
     exit_code = ExitCode.SUCCESS
 
     def on_exit() -> None:
+        # Set Grpc max retries to 1 to avoid blocking on exit
+        if grid:
+            grid._retry_invoker.max_tries = 1
+
         # Stop heartbeat sender
         if heartbeat_sender and heartbeat_sender.is_running:
             heartbeat_sender.stop()
@@ -154,10 +158,13 @@ def run_serverapp(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
 
         # Update run status
         if run and run_status and grid:
-            run_status_proto = run_status_to_proto(run_status)
-            grid._stub.UpdateRunStatus(
-                UpdateRunStatusRequest(run_id=run.run_id, run_status=run_status_proto)
-            )
+            try:
+                req = UpdateRunStatusRequest(
+                    run_id=run.run_id, run_status=run_status_to_proto(run_status)
+                )
+                grid._stub.UpdateRunStatus(req)
+            except grpc.RpcError:
+                pass
 
         # Close the Grpc connection
         if grid:

@@ -304,8 +304,8 @@ see how this looks like in code. Create a new file called ``custom_strategy.py``
             """Configure the next round of federated training and maybe do LR decay."""
             # Decrease learning rate by a factor of 0.5 every 5 rounds
             if server_round % 5 == 0 and server_round > 0:
-                config["learning-rate"] *= 0.5
-                print("LR decreased to:", config["learning-rate"])
+                config["lr"] *= 0.5
+                print("LR decreased to:", config["lr"])
             # Pass the updated config and the rest of arguments to the parent class
             return super().configure_train(server_round, arrays, config, grid)
 
@@ -354,12 +354,12 @@ Congratulations! You have created your first custom strategy adding dynamism to 
 ****************************
 
 As a last step in this tutorial, let's see how we can use Flower to experiment with a
-large number of clients. In the ``pyproject.toml``, increase the number of SuperNodes to
-1000:
+large number of clients. Locate your Flower Configuration file (use ``flwr config
+list``) and increase the number of SuperNodes to 1000:
 
 .. code-block:: toml
 
-    [tool.flwr.federations.local-simulation]
+    [superlink.local]
     options.num-supernodes = 1000
 
 Note that we can reuse the ``ClientApp`` for different ``num-supernodes`` since the

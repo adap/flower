@@ -14,6 +14,7 @@
 # ==============================================================================
 """Tests for the CLI."""
 
+
 from typer.testing import CliRunner
 
 from flwr.supercore.version import package_version

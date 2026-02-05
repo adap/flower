@@ -18,9 +18,10 @@
 import abc
 from collections.abc import Sequence
 
+from flwr.app.user_config import UserConfig
 from flwr.common import Context, Message
 from flwr.common.record import ConfigRecord
-from flwr.common.typing import Run, RunStatus, UserConfig
+from flwr.common.typing import Run, RunStatus
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.supercore.corestate import CoreState
 from flwr.superlink.federation import FederationManager
@@ -243,26 +244,6 @@ class LinkState(CoreState):  # pylint: disable=R0904
         Sequence[NodeInfo]
             A sequence of NodeInfo objects representing the nodes matching
             the specified filters.
-        """
-
-    @abc.abstractmethod
-    def get_node_public_key(self, node_id: int) -> bytes:
-        """Get `public_key` for the specified `node_id`.
-
-        Parameters
-        ----------
-        node_id : int
-            The identifier of the node whose public key is to be retrieved.
-
-        Returns
-        -------
-        bytes
-            The public key associated with the specified `node_id`.
-
-        Raises
-        ------
-        ValueError
-            If the specified `node_id` does not exist in the link state.
         """
 
     @abc.abstractmethod

@@ -27,6 +27,7 @@ from uuid import uuid4
 
 from parameterized import parameterized
 
+from flwr.app.user_config import UserConfig
 from flwr.common import (
     DEFAULT_TTL,
     ConfigRecord,
@@ -45,7 +46,7 @@ from flwr.common.constant import (
     SubStatus,
 )
 from flwr.common.serde import message_from_proto, message_to_proto
-from flwr.common.typing import RunStatus, UserConfig
+from flwr.common.typing import RunStatus
 
 # pylint: disable=E0611
 from flwr.proto.message_pb2 import Message as ProtoMessage
@@ -53,11 +54,7 @@ from flwr.proto.message_pb2 import Metadata as ProtoMetadata
 from flwr.proto.recorddict_pb2 import RecordDict as ProtoRecordDict
 
 # pylint: enable=E0611
-from flwr.server.superlink.linkstate import (
-    InMemoryLinkState,
-    LinkState,
-    SqliteLinkState,
-)
+from flwr.server.superlink.linkstate import InMemoryLinkState, LinkState, SqlLinkState
 from flwr.supercore.constant import NOOP_FEDERATION, NodeStatus
 from flwr.supercore.corestate.corestate_test import StateTest as CoreStateTest
 from flwr.supercore.object_store.object_store_factory import ObjectStoreFactory
@@ -698,12 +695,11 @@ class StateTest(CoreStateTest):
         with self.assertRaises(ValueError):
             state.create_node("fake_aid2", "fake_name", public_key, 10)
         retrieved_nodes = state.get_node_info()
-        retrieved_public_key = state.get_node_public_key(node_id)
 
         # Assert
         assert len(retrieved_nodes) == 1
         assert retrieved_nodes[0].node_id == node_id
-        assert retrieved_public_key == public_key
+        assert retrieved_nodes[0].public_key == public_key
 
         # Assert node_ids and public_key_to_node_id are synced
         if isinstance(state, InMemoryLinkState):
@@ -864,25 +860,6 @@ class StateTest(CoreStateTest):
         # Test failed deactivation when UNREGISTERED
         state.delete_node("mock_flwr_aid", node_id)
         assert not state.deactivate_node(node_id)
-
-    def test_delete_node_public_key(self) -> None:
-        """Test deleting a client node with public key."""
-        # Prepare
-        state: LinkState = self.state_factory()
-        public_key = b"mock"
-        run_id = create_dummy_run(state)
-        node_id = state.create_node(
-            "fake_aid", "fake_name", public_key, heartbeat_interval=10
-        )
-
-        # Execute
-        state.delete_node("fake_aid", node_id)
-        retrieved_node_ids = state.get_nodes(run_id)
-        with self.assertRaises(ValueError):
-            _ = state.get_node_public_key(node_id)
-
-        # Assert
-        assert len(retrieved_node_ids) == 0
 
     def test_get_nodes_invalid_run_id(self) -> None:
         """Test retrieving all node_ids with invalid run_id."""
@@ -1580,7 +1557,7 @@ class StateTest(CoreStateTest):
         run_id = create_dummy_run(state)
         log_entry = "Log entry"
         state.add_serverapp_log(run_id, log_entry)
-        timestamp = now().timestamp()
+        timestamp = now().timestamp() + 0.001  # Ensure timestamp is after the log entry
 
         # Execute
         retrieved_logs, latest = state.get_serverapp_log(
@@ -1831,60 +1808,38 @@ class InMemoryStateTest(StateTest):
         self.assertSetEqual(state.owner_to_node_ids["aid2"], {node_id3})
 
 
-class SqliteInMemoryStateTest(StateTest, unittest.TestCase):
-    """Test SqliteState implemenation with in-memory database."""
+class SqlInMemoryStateTest(StateTest, unittest.TestCase):
+    """Test SqlLinkState implementation with in-memory database."""
 
     __test__ = True
 
-    def state_factory(self) -> SqliteLinkState:
-        """Return SqliteState with in-memory database."""
-        state = SqliteLinkState(
-            ":memory:",
+    def state_factory(self) -> SqlLinkState:
+        """Return SqlLinkState with in-memory database."""
+        state = SqlLinkState(
+            database_path=":memory:",
             federation_manager=NoOpFederationManager(),
             object_store=ObjectStoreFactory().store(),
         )
         state.initialize()
         return state
 
-    def test_initialize(self) -> None:
-        """Test initialization."""
-        # Prepare
-        state = self.state_factory()
 
-        # Execute
-        result = state.query("SELECT name FROM sqlite_schema;")
-
-        # Assert
-        assert len(result) == 20
-
-
-class SqliteFileBasedTest(StateTest, unittest.TestCase):
-    """Test SqliteState implemenation with file-based database."""
+class SqlFileBasedTest(StateTest, unittest.TestCase):
+    """Test SqlLinkState implementation with file-based database."""
 
     __test__ = True
 
-    def state_factory(self) -> SqliteLinkState:
-        """Return SqliteState with file-based database."""
+    def state_factory(self) -> SqlLinkState:
+        """Return SqlLinkState with file-based database."""
         # pylint: disable-next=consider-using-with,attribute-defined-outside-init
         self.tmp_file = tempfile.NamedTemporaryFile()
-        state = SqliteLinkState(
+        state = SqlLinkState(
             database_path=self.tmp_file.name,
             federation_manager=NoOpFederationManager(),
             object_store=ObjectStoreFactory().store(),
         )
         state.initialize()
         return state
-
-    def test_initialize(self) -> None:
-        """Test initialization."""
-        # Prepare
-        state = self.state_factory()
-
-        # Execute
-        result = state.query("SELECT name FROM sqlite_schema;")
-
-        # Assert
-        assert len(result) == 20
 
 
 if __name__ == "__main__":

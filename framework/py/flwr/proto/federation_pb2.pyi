@@ -29,6 +29,24 @@ import typing
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
 @typing.final
+class Account(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    ID_FIELD_NUMBER: builtins.int
+    NAME_FIELD_NUMBER: builtins.int
+    id: builtins.str
+    name: builtins.str
+    def __init__(
+        self,
+        *,
+        id: builtins.str = ...,
+        name: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing.Literal["id", b"id", "name", b"name"]) -> None: ...
+
+global___Account = Account
+
+@typing.final
 class Federation(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
 
@@ -36,13 +54,23 @@ class Federation(google.protobuf.message.Message):
     MEMBER_AIDS_FIELD_NUMBER: builtins.int
     NODES_FIELD_NUMBER: builtins.int
     RUNS_FIELD_NUMBER: builtins.int
+    DESCRIPTION_FIELD_NUMBER: builtins.int
+    ACCOUNTS_FIELD_NUMBER: builtins.int
     name: builtins.str
+    description: builtins.str
+    """Added in v1.26.0"""
     @property
-    def member_aids(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.str]: ...
+    def member_aids(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.str]:
+        """Deprecated in v1.26.0"""
+
     @property
     def nodes(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[flwr.proto.node_pb2.NodeInfo]: ...
     @property
     def runs(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[flwr.proto.run_pb2.Run]: ...
+    @property
+    def accounts(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___Account]:
+        """Added in v1.26.0"""
+
     def __init__(
         self,
         *,
@@ -50,7 +78,9 @@ class Federation(google.protobuf.message.Message):
         member_aids: collections.abc.Iterable[builtins.str] | None = ...,
         nodes: collections.abc.Iterable[flwr.proto.node_pb2.NodeInfo] | None = ...,
         runs: collections.abc.Iterable[flwr.proto.run_pb2.Run] | None = ...,
+        description: builtins.str = ...,
+        accounts: collections.abc.Iterable[global___Account] | None = ...,
     ) -> None: ...
-    def ClearField(self, field_name: typing.Literal["member_aids", b"member_aids", "name", b"name", "nodes", b"nodes", "runs", b"runs"]) -> None: ...
+    def ClearField(self, field_name: typing.Literal["accounts", b"accounts", "description", b"description", "member_aids", b"member_aids", "name", b"name", "nodes", b"nodes", "runs", b"runs"]) -> None: ...
 
 global___Federation = Federation

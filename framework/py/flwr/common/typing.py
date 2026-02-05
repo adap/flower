@@ -23,6 +23,8 @@ from typing import Any
 import numpy as np
 import numpy.typing as npt
 
+from flwr.app.user_config import UserConfig
+from flwr.proto.federation_pb2 import Account  # pylint: disable=E0611
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 
 NDArray = npt.NDArray[Any]
@@ -64,8 +66,6 @@ Config = dict[str, Scalar]
 Properties = dict[str, Scalar]
 
 # Value type for user configs
-UserConfigValue = bool | float | int | str
-UserConfig = dict[str, UserConfigValue]
 
 
 class Code(Enum):
@@ -343,6 +343,7 @@ class Federation:
     """Federation details."""
 
     name: str
-    member_aids: list[str]
+    description: str
+    accounts: list[Account]
     nodes: list[NodeInfo]
     runs: list[Run]
