@@ -4,13 +4,13 @@ import os
 import time
 from typing import cast
 
+import wandb
 from flwr.client.typing import ClientAppCallable, Mod
 from flwr.common.constant import MessageType
 from flwr.common.context import Context
 from flwr.common.message import Message
 from torch.utils.tensorboard.writer import SummaryWriter
 
-import wandb
 
 
 def get_wandb_mod(name: str) -> Mod:
