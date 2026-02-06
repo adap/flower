@@ -69,17 +69,21 @@ python generate_creds.py --supernodes {your_number_of_supernodes}
 
 Let's first locate the Flower Configuration file and create a SuperLink connection with that will allow us to interface with the SuperLink using the TLS certificate we just created.
 
-1. Locate the Flower Configuration file:
+Locate the Flower Configuration file:
 
-```bash
+```shell
 flwr config list
-# Flower Config file: /path/to/your/.flwr/config.toml
-# SuperLink connections:
-#  supergrid
-#  local (default)
 ```
 
-2. Create a new Superlink connection named `my-connection`:
+```console
+# Example output:
+Flower Config file: /path/to/your/.flwr/config.toml
+SuperLink connections:
+ supergrid
+ local (default)
+```
+
+Create a new Superlink connection named `my-connection`:
 
 ```TOML
 [superlink.my-connection]
@@ -87,14 +91,14 @@ address = "127.0.0.1:9093" # Control API of SuperLink
 root-certificates = "/abs/path/to/certificates/ca.crt"
 ```
 
-3. Make this new connection the default one by editing the top part of the `config.toml`. In this way, if you now execute `flwr config list` again you should see the following output:
+Make this new connection the default one by editing the top part of the `config.toml`. In this way, if you now execute `flwr config list` again you should see the following output:
 
-```shell
-# Flower Config file: /path/to/your/.flwr/config.toml
-# SuperLink connections:
-#  supergrid
-#  local
-#  my-connection (default)
+```console
+Flower Config file: /path/to/your/.flwr/config.toml
+SuperLink connections:
+ supergrid
+ local
+ my-connection (default)
 ```
 
 ## Start the long-running Flower server (SuperLink)

@@ -52,17 +52,21 @@ You can run your Flower project in both _simulation_ and _deployment_ mode witho
 
 This example is designed to run with 100 virtual clients. Let's first locate the Flower Configuration file and create a SuperLink connection with 100 clients.
 
-1. Locate the Flower Configuration file:
+Locate the Flower Configuration file:
 
-```bash
+```shell
 flwr config list
-# Flower Config file: /path/to/your/.flwr/config.toml
-# SuperLink connections:
-#  supergrid
-#  local (default)
 ```
 
-2. Create a new Superlink connection:
+```console
+# Example output:
+Flower Config file: /path/to/your/.flwr/config.toml
+SuperLink connections:
+ supergrid
+ local (default)
+```
+
+Create a new `Superlink` connection:
 
 ```TOML
 [superlink.local-xl]

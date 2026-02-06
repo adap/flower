@@ -32,7 +32,7 @@ the group it comes from therefore to simulate the division that might occur.
 Start by cloning the example project:
 
 ```shell
-$ git clone --depth=1 https://github.com/adap/flower.git _tmp \
+git clone --depth=1 https://github.com/adap/flower.git _tmp \
         && mv _tmp/examples/federated-kaplan-meier-fitter . \
         && rm -rf _tmp \
         && cd federated-kaplan-meier-fitter
@@ -67,17 +67,21 @@ You can run your Flower project in both _simulation_ and _deployment_ mode witho
 
 This example is designed to run with two virtual clients. Let's first locate the Flower Configuration file and modify one of the existing connections to make use of two nodes.
 
-1. Locate the Flower Configuration file:
+Locate your Flower configuration file by running:
 
-```bash
+```shell
 flwr config list
-# Flower Config file: /path/to/your/.flwr/config.toml
-# SuperLink connections:
-#  supergrid
-#  local (default)
 ```
 
-2. Modify the `local` connection so it has two supernodes:
+```console
+# Example output:
+Flower Config file: /path/to/your/.flwr/config.toml
+SuperLink connections:
+ supergrid
+ local (default)
+```
+
+Modify the `local` connection so it has two supernodes:
 
 ```TOML
 [superlink.local]
@@ -86,20 +90,20 @@ options.num-supernodes = 2
 
 Run the app:
 
-```bash
+```shell
 flwr run .
 ```
 
 You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example:
 
-```bash
+```shell
 flwr run . --run-config "num-server-rounds=5"
 ```
 
 You can also check that the results match the centralized version.
 
 ```shell
-$ python3 centralized.py
+python centralized.py
 ```
 
 ### Run with the Deployment Engine

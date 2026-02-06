@@ -100,17 +100,21 @@ You can run your Flower project in both _simulation_ and _deployment_ mode witho
 
 This example is designed to run with three virtual clients since that's the number of `feature-splits` in the app's `pyproject.toml`. Let's first locate the Flower Configuration file and edit one of the existing connections to make it use three nodes.
 
-1. Locate the Flower Configuration file:
+Locate the Flower Configuration file:
 
-```bash
+```shell
 flwr config list
-# Flower Config file: /path/to/your/.flwr/config.toml
-# SuperLink connections:
-#  supergrid
-#  local (default)
 ```
 
-2. Modify the `local` connection so it has three supernodes:
+```console
+# Example output:
+Flower Config file: /path/to/your/.flwr/config.toml
+SuperLink connections:
+ supergrid
+ local (default)
+```
+
+Modify the `local` connection so it has three supernodes:
 
 ```TOML
 [superlink.local]

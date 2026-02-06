@@ -139,17 +139,21 @@ You can run your Flower project in both _simulation_ and _deployment_ mode witho
 
 The run is defined in the `pyproject.toml` which: specifies the paths to `ClientApp` and `ServerApp` as well as their parameterization with configs in the `[tool.flwr.app.config]` block. Before launching our simulation, we need to define a `SuperLink Connection` in the `Flower Configuration`. To do this, let's first locate the Flower Configuration file and then edit it.
 
-1. Locate the Flower Configuration file:
+Locate the Flower Configuration file:
 
-```bash
+```shell
 flwr config list
-# Flower Config file: /path/to/your/.flwr/config.toml
-# SuperLink connections:
-#  supergrid
-#  local (default)
 ```
 
-2. Edit the `local` configuration so it looks like the following.
+```console
+# Example output:
+Flower Config file: /path/to/your/.flwr/config.toml
+SuperLink connections:
+ supergrid
+ local (default)
+```
+
+Edit the `local` configuration so it looks like the following.
 
 ```TOML
 [superlink.flowertune]
