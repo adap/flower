@@ -254,7 +254,7 @@ flower-supernode --superlink="<SUPERLINK-IP>:9092" \
 
 **4. Run your whipser app**
 
-First, ensure you have a `SuperLink` connection defined in your Flower Configuration file. You can locate this file via `flwr config list`. Open it and create a new connection if you don't have it already. For example:
+First, ensure you have a SuperLink connection defined in your Flower Configuration file. You can locate this file via `flwr config list`. Open it and create a new connection if you don't have it already. For example:
 
 ```toml
 [superlink.remote]
