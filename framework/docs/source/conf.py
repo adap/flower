@@ -73,8 +73,9 @@ versions = sorted(
         and int(tag.name.split(".")[1]) >= 8
     ],
     key=lambda x: [int(part) for part in x[1:].split(".")],
+    reverse=True,  # Latest version tags first
 )
-versions.append("main")
+versions.insert(0, "main")  # Ensure "main" appears first
 for version in versions:
     html_context["versions"].append({"name": version})
 
@@ -92,10 +93,10 @@ copyright = f"{datetime.date.today().year} Flower Labs GmbH"
 author = "The Flower Authors"
 
 # The full version of the next release, including alpha/beta/rc tags
-release = "1.26.0"
+release = "1.27.0"
 # The current released version
 rst_prolog = """
-.. |stable_flwr_version| replace:: 1.26.0
+.. |stable_flwr_version| replace:: 1.27.0
 .. |stable_flwr_superlink_docker_digest| replace:: 4b317d5b6030710b476f4dbfab2c3a33021ad40a0fcfa54d7edd45e0c51d889c
 .. |ubuntu_version| replace:: 24.04
 .. |setuptools_version| replace:: 80.9.0
@@ -259,7 +260,7 @@ redirects = {
     "release-process": "contributor-how-to-release-flower.html",
     # Restructuring: contributor references
     "good-first-contributions": "contributor-ref-good-first-contributions.html",
-    "secagg": "contributor-ref-secure-aggregation-protocols.html",
+    "secagg": "explanation-ref-secure-aggregation-protocols.html",
     # Deleted pages
     "people": "index.html",
     "organizations": "index.html",
@@ -312,12 +313,12 @@ html_theme_options = {
     #     "color-brand-content": "#292F36",
     #     "color-admonition-background": "#F2B705",
     # },
-    # "announcement": (
-    #     "<a href='https://flower.ai/events/flower-ai-day-2025/'>"
-    #     "<strong style='color: #f2b705;'>👉 Register now</strong></a> "
-    #     "for Flower AI Day 2025!<br />"
-    #     "September 25, 🇺🇸 San Francisco"
-    # ),
+    "announcement": (
+        "<a href='https://flower.ai/events/flower-ai-summit-2026/'>"
+        "<strong style='color: #f2b705;'>👉 Register now</strong></a> "
+        "for Flower AI Summit 2026!<br />"
+        "April 15-16, 🇺🇬🇧 London"
+    ),
    "light_logo": "flower-logo-light.png",
    "dark_logo": "flower-logo-dark.png",
 

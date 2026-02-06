@@ -20,7 +20,6 @@ limitations under the License.
 import abc
 import collections.abc
 import flwr.proto.appio_pb2
-import flwr.proto.fab_pb2
 import flwr.proto.heartbeat_pb2
 import flwr.proto.log_pb2
 import flwr.proto.message_pb2
@@ -108,22 +107,16 @@ class ServerAppIoStub:
     ]
     """Confirm Message Received"""
 
-    GetRunStatus: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.run_pb2.GetRunStatusRequest,
-        flwr.proto.run_pb2.GetRunStatusResponse,
+    UpdateRunStatus: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.run_pb2.UpdateRunStatusRequest,
+        flwr.proto.run_pb2.UpdateRunStatusResponse,
     ]
     """///////////////////////////////////////////////////////////////////////////
     Specific endpoints shared by ServerAppIo and SimulationIo
     ///////////////////////////////////////////////////////////////////////////
 
-    Get the status of a given run
+    Update the status of a given run
     """
-
-    UpdateRunStatus: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.run_pb2.UpdateRunStatusRequest,
-        flwr.proto.run_pb2.UpdateRunStatusResponse,
-    ]
-    """Update the status of a given run"""
 
     PushLogs: grpc.UnaryUnaryMultiCallable[
         flwr.proto.log_pb2.PushLogsRequest,
@@ -153,12 +146,6 @@ class ServerAppIoStub:
         flwr.proto.serverappio_pb2.GetNodesResponse,
     ]
     """Return a set of nodes"""
-
-    GetFab: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.fab_pb2.GetFabRequest,
-        flwr.proto.fab_pb2.GetFabResponse,
-    ]
-    """Get FAB"""
 
 class ServerAppIoAsyncStub:
     ListAppsToLaunch: grpc.aio.UnaryUnaryMultiCallable[
@@ -230,22 +217,16 @@ class ServerAppIoAsyncStub:
     ]
     """Confirm Message Received"""
 
-    GetRunStatus: grpc.aio.UnaryUnaryMultiCallable[
-        flwr.proto.run_pb2.GetRunStatusRequest,
-        flwr.proto.run_pb2.GetRunStatusResponse,
+    UpdateRunStatus: grpc.aio.UnaryUnaryMultiCallable[
+        flwr.proto.run_pb2.UpdateRunStatusRequest,
+        flwr.proto.run_pb2.UpdateRunStatusResponse,
     ]
     """///////////////////////////////////////////////////////////////////////////
     Specific endpoints shared by ServerAppIo and SimulationIo
     ///////////////////////////////////////////////////////////////////////////
 
-    Get the status of a given run
+    Update the status of a given run
     """
-
-    UpdateRunStatus: grpc.aio.UnaryUnaryMultiCallable[
-        flwr.proto.run_pb2.UpdateRunStatusRequest,
-        flwr.proto.run_pb2.UpdateRunStatusResponse,
-    ]
-    """Update the status of a given run"""
 
     PushLogs: grpc.aio.UnaryUnaryMultiCallable[
         flwr.proto.log_pb2.PushLogsRequest,
@@ -275,12 +256,6 @@ class ServerAppIoAsyncStub:
         flwr.proto.serverappio_pb2.GetNodesResponse,
     ]
     """Return a set of nodes"""
-
-    GetFab: grpc.aio.UnaryUnaryMultiCallable[
-        flwr.proto.fab_pb2.GetFabRequest,
-        flwr.proto.fab_pb2.GetFabResponse,
-    ]
-    """Get FAB"""
 
 class ServerAppIoServicer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
@@ -371,25 +346,17 @@ class ServerAppIoServicer(metaclass=abc.ABCMeta):
         """Confirm Message Received"""
 
     @abc.abstractmethod
-    def GetRunStatus(
-        self,
-        request: flwr.proto.run_pb2.GetRunStatusRequest,
-        context: _ServicerContext,
-    ) -> typing.Union[flwr.proto.run_pb2.GetRunStatusResponse, collections.abc.Awaitable[flwr.proto.run_pb2.GetRunStatusResponse]]:
-        """///////////////////////////////////////////////////////////////////////////
-        Specific endpoints shared by ServerAppIo and SimulationIo
-        ///////////////////////////////////////////////////////////////////////////
-
-        Get the status of a given run
-        """
-
-    @abc.abstractmethod
     def UpdateRunStatus(
         self,
         request: flwr.proto.run_pb2.UpdateRunStatusRequest,
         context: _ServicerContext,
     ) -> typing.Union[flwr.proto.run_pb2.UpdateRunStatusResponse, collections.abc.Awaitable[flwr.proto.run_pb2.UpdateRunStatusResponse]]:
-        """Update the status of a given run"""
+        """///////////////////////////////////////////////////////////////////////////
+        Specific endpoints shared by ServerAppIo and SimulationIo
+        ///////////////////////////////////////////////////////////////////////////
+
+        Update the status of a given run
+        """
 
     @abc.abstractmethod
     def PushLogs(
@@ -427,13 +394,5 @@ class ServerAppIoServicer(metaclass=abc.ABCMeta):
         context: _ServicerContext,
     ) -> typing.Union[flwr.proto.serverappio_pb2.GetNodesResponse, collections.abc.Awaitable[flwr.proto.serverappio_pb2.GetNodesResponse]]:
         """Return a set of nodes"""
-
-    @abc.abstractmethod
-    def GetFab(
-        self,
-        request: flwr.proto.fab_pb2.GetFabRequest,
-        context: _ServicerContext,
-    ) -> typing.Union[flwr.proto.fab_pb2.GetFabResponse, collections.abc.Awaitable[flwr.proto.fab_pb2.GetFabResponse]]:
-        """Get FAB"""
 
 def add_ServerAppIoServicer_to_server(servicer: ServerAppIoServicer, server: typing.Union[grpc.Server, grpc.aio.Server]) -> None: ...

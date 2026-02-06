@@ -52,24 +52,24 @@ class SqlObjectStore(ObjectStore, SqlMixin):
 
             child_ids = [child.object_id for child in tree_node.children]
             with self.session():
+                # Insert new object if it doesn't exist (race-condition safe)
+                # RETURNING returns a row only if the insert succeeded
                 rows = self.query(
-                    "SELECT object_id, is_available FROM objects "
-                    "WHERE object_id = :object_id",
-                    {"object_id": obj_id},
+                    "INSERT INTO objects "
+                    "(object_id, content, is_available, ref_count) "
+                    "VALUES (:object_id, :content, :is_available, :ref_count) "
+                    "ON CONFLICT (object_id) DO NOTHING "
+                    "RETURNING object_id",
+                    {
+                        "object_id": obj_id,
+                        "content": b"",
+                        "is_available": 0,
+                        "ref_count": 0,
+                    },
                 )
-                if not rows:
-                    # Insert new object
-                    self.query(
-                        "INSERT INTO objects "
-                        "(object_id, content, is_available, ref_count) "
-                        "VALUES (:object_id, :content, :is_available, :ref_count)",
-                        {
-                            "object_id": obj_id,
-                            "content": b"",
-                            "is_available": 0,
-                            "ref_count": 0,
-                        },
-                    )
+
+                if rows:
+                    # New object inserted: set up child relationships
                     for cid in child_ids:
                         self.query(
                             "INSERT INTO object_children (parent_id, child_id) "
@@ -83,8 +83,12 @@ class SqlObjectStore(ObjectStore, SqlMixin):
                         )
                     new_objects.append(obj_id)
                 else:
-                    # Add to the list of new objects if not available
-                    if not rows[0]["is_available"]:
+                    # Object exists: check if unavailable
+                    rows = self.query(
+                        "SELECT is_available FROM objects WHERE object_id = :object_id",
+                        {"object_id": obj_id},
+                    )
+                    if rows and not rows[0]["is_available"]:
                         new_objects.append(obj_id)
 
                 # Ensure run mapping

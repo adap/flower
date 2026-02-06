@@ -4,7 +4,6 @@ import grpc
 import warnings
 
 from flwr.proto import appio_pb2 as flwr_dot_proto_dot_appio__pb2
-from flwr.proto import fab_pb2 as flwr_dot_proto_dot_fab__pb2
 from flwr.proto import heartbeat_pb2 as flwr_dot_proto_dot_heartbeat__pb2
 from flwr.proto import log_pb2 as flwr_dot_proto_dot_log__pb2
 from flwr.proto import message_pb2 as flwr_dot_proto_dot_message__pb2
@@ -85,11 +84,6 @@ class ServerAppIoStub(object):
                 request_serializer=flwr_dot_proto_dot_message__pb2.ConfirmMessageReceivedRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_message__pb2.ConfirmMessageReceivedResponse.FromString,
                 _registered_method=True)
-        self.GetRunStatus = channel.unary_unary(
-                '/flwr.proto.ServerAppIo/GetRunStatus',
-                request_serializer=flwr_dot_proto_dot_run__pb2.GetRunStatusRequest.SerializeToString,
-                response_deserializer=flwr_dot_proto_dot_run__pb2.GetRunStatusResponse.FromString,
-                _registered_method=True)
         self.UpdateRunStatus = channel.unary_unary(
                 '/flwr.proto.ServerAppIo/UpdateRunStatus',
                 request_serializer=flwr_dot_proto_dot_run__pb2.UpdateRunStatusRequest.SerializeToString,
@@ -114,11 +108,6 @@ class ServerAppIoStub(object):
                 '/flwr.proto.ServerAppIo/GetNodes',
                 request_serializer=flwr_dot_proto_dot_serverappio__pb2.GetNodesRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_serverappio__pb2.GetNodesResponse.FromString,
-                _registered_method=True)
-        self.GetFab = channel.unary_unary(
-                '/flwr.proto.ServerAppIo/GetFab',
-                request_serializer=flwr_dot_proto_dot_fab__pb2.GetFabRequest.SerializeToString,
-                response_deserializer=flwr_dot_proto_dot_fab__pb2.GetFabResponse.FromString,
                 _registered_method=True)
 
 
@@ -200,19 +189,12 @@ class ServerAppIoServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def GetRunStatus(self, request, context):
+    def UpdateRunStatus(self, request, context):
         """///////////////////////////////////////////////////////////////////////////
         Specific endpoints shared by ServerAppIo and SimulationIo
         ///////////////////////////////////////////////////////////////////////////
 
-        Get the status of a given run
-        """
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def UpdateRunStatus(self, request, context):
-        """Update the status of a given run
+        Update the status of a given run
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -245,13 +227,6 @@ class ServerAppIoServicer(object):
 
     def GetNodes(self, request, context):
         """Return a set of nodes
-        """
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def GetFab(self, request, context):
-        """Get FAB
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -305,11 +280,6 @@ def add_ServerAppIoServicer_to_server(servicer, server):
                     request_deserializer=flwr_dot_proto_dot_message__pb2.ConfirmMessageReceivedRequest.FromString,
                     response_serializer=flwr_dot_proto_dot_message__pb2.ConfirmMessageReceivedResponse.SerializeToString,
             ),
-            'GetRunStatus': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetRunStatus,
-                    request_deserializer=flwr_dot_proto_dot_run__pb2.GetRunStatusRequest.FromString,
-                    response_serializer=flwr_dot_proto_dot_run__pb2.GetRunStatusResponse.SerializeToString,
-            ),
             'UpdateRunStatus': grpc.unary_unary_rpc_method_handler(
                     servicer.UpdateRunStatus,
                     request_deserializer=flwr_dot_proto_dot_run__pb2.UpdateRunStatusRequest.FromString,
@@ -334,11 +304,6 @@ def add_ServerAppIoServicer_to_server(servicer, server):
                     servicer.GetNodes,
                     request_deserializer=flwr_dot_proto_dot_serverappio__pb2.GetNodesRequest.FromString,
                     response_serializer=flwr_dot_proto_dot_serverappio__pb2.GetNodesResponse.SerializeToString,
-            ),
-            'GetFab': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetFab,
-                    request_deserializer=flwr_dot_proto_dot_fab__pb2.GetFabRequest.FromString,
-                    response_serializer=flwr_dot_proto_dot_fab__pb2.GetFabResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -595,33 +560,6 @@ class ServerAppIo(object):
             _registered_method=True)
 
     @staticmethod
-    def GetRunStatus(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            '/flwr.proto.ServerAppIo/GetRunStatus',
-            flwr_dot_proto_dot_run__pb2.GetRunStatusRequest.SerializeToString,
-            flwr_dot_proto_dot_run__pb2.GetRunStatusResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
-
-    @staticmethod
     def UpdateRunStatus(request,
             target,
             options=(),
@@ -746,33 +684,6 @@ class ServerAppIo(object):
             '/flwr.proto.ServerAppIo/GetNodes',
             flwr_dot_proto_dot_serverappio__pb2.GetNodesRequest.SerializeToString,
             flwr_dot_proto_dot_serverappio__pb2.GetNodesResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
-
-    @staticmethod
-    def GetFab(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            '/flwr.proto.ServerAppIo/GetFab',
-            flwr_dot_proto_dot_fab__pb2.GetFabRequest.SerializeToString,
-            flwr_dot_proto_dot_fab__pb2.GetFabResponse.FromString,
             options,
             channel_credentials,
             insecure,

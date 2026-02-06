@@ -1,46 +1,48 @@
-:og:description: Learn how to setup the Flower Configuration file and how to use it to run your Flower App and interact with SuperLinks.
+:og:description: Learn how to setup the Flower Configuration and how to use it to run your Flower App and interact with SuperLinks.
 .. meta::
-    :description: Learn how to setup the Flower Configuration file and how to use it to run your Flower App and interact with SuperLinks.
+    :description: Learn how to setup the Flower Configuration and how to use it to run your Flower App and interact with SuperLinks.
 
-###########################
- Flower Configuration File
-###########################
+######################
+ Flower Configuration
+######################
 
 .. note::
 
-    The Flower Configuration file is a new feature introduced in Flower 1.26.0. While
-    its functionality will evolve over time, as a start it serves as a direct
-    replacement of the `federations` section in the `pyproject.toml` file of Flower Apps
-    in older versions.
+    The Flower Configuration is a new feature introduced in Flower 1.26.0. While its
+    functionality will evolve over time, as a start it serves as a direct replacement of
+    the `federations` section in the `pyproject.toml` file of Flower Apps in older
+    versions.
 
 **What is it?**
 
-The Flower Configuration is a TOML file that lives in the directory specified by the
-``FLWR_HOME`` environment variable (which defaults to ``$HOME/.flwr`` when unset) and is
-designed to simplify the usage of `Flower CLI <ref-api-cli.html>`_ commands.
+The Flower Configuration is a system for managing SuperLink connections, stored in a
+TOML file (which we refer to as the Flower Configuration file) that lives in the
+directory specified by the ``FLWR_HOME`` environment variable (which defaults to
+``$HOME/.flwr`` when unset). It is designed to facilitate the usage of `Flower CLI
+<ref-api-cli.html>`_ commands.
 
 **Why use it?**
 
-This configuration file allows you to define reusable connection configurations that you
-can reference by name when running ``flwr`` commands. For example, you can set up
+The Flower Configuration allows you to define reusable connection configurations that
+you can reference by name when running ``flwr`` commands. For example, you can set up
 configurations for local testing, staging servers, and production deployments, then
 easily switch between them.
 
-Most ``flwr`` commands (like ``flwr log``, ``flwr ls``, and ``flwr stop``) can use this
-configuration file from anywhere on your system. The exception is ``flwr run``, which
+Most ``flwr`` commands (like ``flwr log``, ``flwr ls``, and ``flwr stop``) can use the
+Flower Configuration from anywhere on your system. The exception is ``flwr run``, which
 must be executed from within a Flower App directory to access the app code.
 
 .. tip::
 
-    **First-time setup:** If a Flower Configuration file doesn't exist in your system,
+    **First-time setup:** If the Flower Configuration file doesn't exist in your system,
     it will be automatically created for you the first time you run a Flower CLI
     command.
 
     **Upgrading from older versions:** If you are upgrading from a previous version of
     Flower, the ``federations`` section in your ``pyproject.toml`` file will be
-    automatically migrated to the Flower Configuration file. The syntax remains the same
-    with the exception of the name of the section and the ``superlink`` keyword instead
-    of ``tool.flwr.federations``.
+    automatically migrated to the Flower Configuration. The syntax remains the same with
+    the exception of the name of the section and the ``superlink`` keyword instead of
+    ``tool.flwr.federations``.
 
 *************************************
  Flower Configuration File Structure
@@ -194,12 +196,13 @@ for TLS setup and advanced configurations.
 **If you're new to Flower 1.26.0+, you can skip this section.**
 
 For users upgrading from versions before 1.26.0: The ``federations`` section in your
-``pyproject.toml`` file will be automatically migrated to the new Flower Configuration
-file the first time you run a ``flwr`` command.
+``pyproject.toml`` file will be automatically migrated to the Flower Configuration the
+first time you run a ``flwr`` command.
 
 **What happens during migration**
 
-1. A new config file is created at ``$HOME/.flwr/config.toml``
+1. The Flower Configuration file will be created at ``$HOME/.flwr/config.toml`` if not
+   already existing
 2. Your federation definitions are copied and renamed (``federations`` → ``superlink``)
 3. The old ``[tool.flwr.federations]`` section in ``pyproject.toml`` is commented out
    for your reference
@@ -207,5 +210,5 @@ file the first time you run a ``flwr`` command.
 **After migration**
 
 You can safely delete the commented-out ``federations`` section from your
-``pyproject.toml`` file. All connection configurations now live in the central
-configuration file and work across all your Flower projects.
+``pyproject.toml`` file. All connection configurations now live in the Flower
+Configuration and work across all your Flower projects.

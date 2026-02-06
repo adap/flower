@@ -140,5 +140,4 @@ Access these values in your code using ``context.run_config``. For example:
     What was previously called "federation config" for SuperLink connections in
     ``pyproject.toml`` has been renamed and moved. These settings are now **SuperLink
     connection configuration** and are defined in the Flower configuration file. Refer
-    to the `Flower configuration file <ref-flower-configuration.html>`_ for more
-    information.
+    to the `Flower Configuration <ref-flower-configuration.html>`_ for more information.

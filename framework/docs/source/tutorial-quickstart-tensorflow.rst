@@ -391,6 +391,11 @@ Tensorflow's ``save()`` function.
 
 Congratulations! You've successfully built and run your first federated learning system.
 
+.. tip::
+
+    Check the :doc:`how-to-run-simulations` documentation to learn more about how to
+    configure and run Flower simulations.
+
 .. note::
 
     Check the source code of the extended version of this tutorial in

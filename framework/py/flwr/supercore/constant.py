@@ -59,6 +59,7 @@ MIME_MAP = {
 
 # Constants for federations
 NOOP_FEDERATION = f"@{NOOP_ACCOUNT_NAME}/default"
+NOOP_FEDERATION_DESCRIPTION = "A federation for testing and development purposes."
 
 # Constants for exit handling
 FORCE_EXIT_TIMEOUT_SECONDS = 5  # Used in `flwr_exit` function
@@ -72,6 +73,7 @@ SYSTEM_MESSAGE_TYPE = "system"
 
 # SQLite PRAGMA settings for optimal performance and correctness
 SQLITE_PRAGMAS = (
+    ("busy_timeout", "5000"),  # Retry lock acquisition for up to 5s before SQLITE_BUSY
     ("journal_mode", "WAL"),  # Enable Write-Ahead Logging for better concurrency
     ("synchronous", "NORMAL"),
     ("foreign_keys", "ON"),
