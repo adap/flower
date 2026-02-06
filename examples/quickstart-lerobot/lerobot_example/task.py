@@ -39,7 +39,7 @@ def get_dataset_metadata(repo_id: str, revision: str) -> LeRobotDatasetMetadata:
 def get_policy_config(meta: LeRobotDatasetMetadata, device: torch.device) -> DiffusionConfig:
     """Build a Diffusion policy config from dataset metadata."""
     features = dataset_to_policy_features(meta.features)
-    output_features = {k: ft for k, ft in features.items() if ft.type is FeatureType.ACTION}
+    output_features = {k: ft for k, ft in features.items() if ft.type == FeatureType.ACTION}
     input_features = {k: ft for k, ft in features.items() if k not in output_features}
     return DiffusionConfig(
         input_features=input_features,
