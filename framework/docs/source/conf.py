@@ -319,9 +319,10 @@ html_theme_options = {
     #     "September 25, 🇺🇸 San Francisco"
     # ),
    "light_logo": "flower-logo-light.png",
-"dark_logo": "flower-logo-dark.png",
+   "dark_logo": "flower-logo-dark.png",
 
 "light_css_variables": {
+    "color-announcement-background": "#292f36",
     "color-announcement-text": "#ffffff",
     "color-sidebar-background": "#f2f2f2",
     "color-sidebar-search-background": "#f2f2f2",
