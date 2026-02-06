@@ -146,9 +146,11 @@ With both the long-running server (`SuperLink`) and two `SuperNodes` up and runn
 
 First, locate your Flower configuration file by running:
 
-```console
-$ flwr config list
+```bash
+flwr config list
+```
 
+```text
 Flower Config file: /path/to/your/.flwr/config.toml
 SuperLink connections:
  supergrid

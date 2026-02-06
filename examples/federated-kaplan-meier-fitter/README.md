@@ -71,10 +71,13 @@ This example is designed to run with two virtual clients. Let's first locate the
 
 ```bash
 flwr config list
-# Flower Config file: /path/to/your/.flwr/config.toml
-# SuperLink connections:
-#  supergrid
-#  local (default)
+```
+
+```text
+Flower Config file: /path/to/your/.flwr/config.toml
+SuperLink connections:
+ supergrid
+ local (default)
 ```
 
 2. Modify the `local` connection so it has two supernodes:
