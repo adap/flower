@@ -15,6 +15,19 @@
 """Utility functions for the infrastructure."""
 
 
+import json
+import os
+import re
+from pathlib import Path
+
+import requests
+
+from flwr.common.constant import FLWR_DIR, FLWR_HOME
+from flwr.supercore.version import package_version as flwr_version
+
+from .constant import APP_ID_PATTERN, APP_VERSION_PATTERN
+
+
 def mask_string(value: str, head: int = 4, tail: int = 4) -> str:
     """Mask a string by preserving only the head and tail characters.
 
@@ -50,3 +63,215 @@ def int64_to_uint64(signed: int) -> int:
     if signed < 0:
         return signed + (1 << 64)
     return signed
+
+
+def get_flwr_home() -> Path:
+    """Get the Flower home directory path.
+
+    Returns FLWR_HOME environment variable if set, otherwise returns a default
+    subdirectory in the user's home directory.
+    """
+    if flwr_home := os.getenv(FLWR_HOME):
+        return Path(flwr_home)
+    return Path.home() / FLWR_DIR
+
+
+def parse_app_spec(app_spec: str) -> tuple[str, str | None]:
+    """Parse app specification string into app ID and version.
+
+    Parameters
+    ----------
+    app_spec : str
+        The app specification string in the format '@account/app' or
+        '@account/app==x.y.z' (digits only).
+
+    Returns
+    -------
+    tuple[str, str | None]
+        A tuple containing the app ID and optional version.
+
+    Raises
+    ------
+    ValueError
+        If the app specification format is invalid.
+    """
+    if "==" in app_spec:
+        app_id, app_version = app_spec.split("==", 1)
+
+        if not re.match(APP_VERSION_PATTERN, app_version):
+            raise ValueError(
+                "Invalid app version. Expected format: x.y.z (digits only)."
+            )
+    else:
+        app_id = app_spec
+        app_version = None
+
+    if not re.match(APP_ID_PATTERN, app_id):
+        raise ValueError(
+            "Invalid remote app ID. Expected format: '@account_name/app_name'."
+        )
+
+    return app_id, app_version
+
+
+def request_download_link(
+    app_id: str, app_version: str | None, in_url: str, out_url: str
+) -> tuple[str, list[dict[str, str]] | None]:
+    """Request a download link for the given app from the Flower Platform API.
+
+    Parameters
+    ----------
+    app_id : str
+        The application identifier in the format '@account/app'.
+    app_version : str | None
+        The application version (e.g., '1.2.3'), or None to request the latest version.
+    in_url : str
+        The Platform API endpoint URL to query.
+    out_url : str
+        The key name in the response that contains the download URL.
+
+    Returns
+    -------
+    tuple[str, list[dict[str, str]] | None]
+        A tuple containing:
+        - The download URL for the application.
+        - A list of verification dictionaries if provided by the API, otherwise None.
+
+    Raises
+    ------
+    ValueError
+        If the API connection fails, the application or version is not found,
+        the API returns a non-200 response, or the response format is invalid.
+    """
+    headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+    }
+    body = {
+        "app_id": app_id,  # send raw string of app_id
+        "app_version": app_version,
+        "flwr_version": flwr_version,
+    }
+
+    try:
+        resp = requests.post(in_url, headers=headers, data=json.dumps(body), timeout=20)
+    except requests.RequestException as e:
+        raise ValueError(f"Unable to connect to Platform API: {e}") from e
+
+    if resp.status_code == 404:
+        # Expecting a JSON body with a "detail" field
+        try:
+            error_message = resp.json().get("detail")
+        except ValueError:
+            # JSON parsing failed
+            raise ValueError(f"{app_id} not found in Platform API.") from None
+
+        if isinstance(error_message, dict):
+            available_app_versions = error_message.get("available_app_versions", [])
+            available_versions_str = (
+                ", ".join(map(str, available_app_versions))
+                if available_app_versions
+                else "None"
+            )
+            raise ValueError(
+                f"{app_id}=={app_version} not found in Platform API. "
+                f"Available app versions for {app_id}: {available_versions_str}"
+            )
+
+        raise ValueError(f"{app_id} not found in Platform API.")
+
+    if not resp.ok:
+        raise ValueError(
+            f"Platform API request failed with status {resp.status_code}. "
+            f"Details: {resp.text}"
+        )
+
+    data = resp.json()
+    if out_url not in data:
+        raise ValueError("Invalid response from Platform API")
+
+    verifications = data["verifications"] if "verifications" in data else None
+
+    return str(data[out_url]), verifications
+
+
+def humanize_duration(seconds: float) -> str:
+    """Convert a duration in seconds to a human-friendly string.
+
+    Rules:
+      - < 90 seconds: show seconds
+      - < 1 hour: show minutes + seconds
+      - < 1 day: show hours + minutes
+      - >= 1 day: show days + hours
+    """
+    seconds = int(seconds)
+
+    # Under 90 seconds → Seconds only
+    if seconds < 90:
+        return f"{seconds}s"
+
+    # Under 1 hour → Minutes and seconds
+    minutes, sec = divmod(seconds, 60)
+    if minutes < 60:
+        return f"{minutes}m {sec}s"
+
+    # Under 1 day → Hours and minutes
+    hours, minutes = divmod(minutes, 60)
+    if hours < 24:
+        return f"{hours}h {minutes}m"
+
+    # 1+ days → Days and hours
+    days, hours = divmod(hours, 24)
+    return f"{days}d {hours}h"
+
+
+def humanize_bytes(num_bytes: int) -> str:
+    """Convert a number of bytes to a human-friendly string.
+
+    Uses 1024-based units and 0-1 decimal precision.
+    Rules:
+      - < 1 KB: bytes
+      - < 1 MB: KB
+      - < 1 GB: MB
+      - < 1 TB: GB
+    """
+    value = float(num_bytes)
+
+    for suffix in ["B", "KB", "MB", "GB", "TB"]:
+        if value < 1024 or suffix == "TB":
+            # Bytes → no decimals
+            if suffix == "B":
+                return f"{int(value)} B"
+
+            # Decide precision: 1 decimal for <10, otherwise no decimal
+            if value < 10:
+                formatted = f"{value:.1f}"
+            else:
+                formatted = f"{int(value)}"
+
+            return f"{formatted} {suffix}"
+
+        value /= 1024
+
+    raise RuntimeError("Unreachable code")  # Make mypy happy
+
+
+def check_federation_format(federation: str) -> None:
+    """Check if the federation string is valid.
+
+    Parameters
+    ----------
+    federation : str
+        The federation string to check.
+
+    Raises
+    ------
+    ValueError
+        If the federation string is not valid. The expected
+        format is '@<account-name>/<federation-name>'.
+    """
+    if not re.match(r"^@[a-zA-Z0-9\-_]+/[a-zA-Z0-9\-_]+$", federation):
+        raise ValueError(
+            f"Invalid federation format: {federation}. "
+            f"Expected format: '@<account-name>/<federation-name>'."
+        )

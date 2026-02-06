@@ -32,10 +32,10 @@ from cryptography.hazmat.primitives.asymmetric import ec, ed25519
 from cryptography.hazmat.primitives.serialization.ssh import load_ssh_public_key
 from grpc import RpcError
 
+from flwr.app.user_config import UserConfig
 from flwr.client.grpc_adapter_client.connection import grpc_adapter
 from flwr.client.grpc_rere_client.connection import grpc_request_response
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, Context, Error, Message, RecordDict
-from flwr.common.address import parse_address
 from flwr.common.config import get_flwr_dir, get_fused_config_from_fab
 from flwr.common.constant import (
     CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
@@ -60,12 +60,12 @@ from flwr.common.inflatable_utils import (
     push_object_contents_from_iterable,
 )
 from flwr.common.logger import log
-from flwr.common.retry_invoker import RetryInvoker, _make_simple_grpc_retry_invoker
+from flwr.common.retry_invoker import RetryInvoker, make_simple_grpc_retry_invoker
 from flwr.common.telemetry import EventType
-from flwr.common.typing import Fab, Run, RunNotRunningException, UserConfig
-from flwr.common.version import package_version
+from flwr.common.typing import Fab, Run, RunNotRunningException
 from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server
 from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
+from flwr.supercore.address import parse_address, resolve_bind_address
 from flwr.supercore.ffs import Ffs, FfsFactory
 from flwr.supercore.grpc_health import run_health_server_grpc_no_tls
 from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
@@ -74,6 +74,7 @@ from flwr.supercore.primitives.asymmetric_ed25519 import (
     decode_base64url,
     verify_signature,
 )
+from flwr.supercore.version import package_version
 from flwr.supernode.nodestate import NodeState, NodeStateFactory
 from flwr.supernode.servicer.clientappio import ClientAppIoServicer
 
@@ -212,7 +213,10 @@ def start_client_internal(
     # Launch the SuperExec if the isolation mode is `subprocess`
     if isolation == ISOLATION_MODE_SUBPROCESS:
         command = ["flower-superexec", "--insecure"]
-        command += ["--appio-api-address", clientappio_api_address]
+        command += [
+            "--appio-api-address",
+            resolve_bind_address(clientappio_api_address),
+        ]
         command += ["--plugin-type", ExecPluginType.CLIENT_APP]
         command += ["--parent-pid", str(os.getpid())]
         # pylint: disable-next=consider-using-with
@@ -432,7 +436,7 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
 def _push_messages(
     state: NodeState,
     object_store: ObjectStore,
-    send: Callable[[Message, ObjectTree], set[str]],
+    send: Callable[[Message, ObjectTree, float], set[str]],
     push_object: Callable[[int, str, bytes], None],
 ) -> None:
     """Push reply messages to the SuperLink."""
@@ -480,9 +484,12 @@ def _push_messages(
 
         # Send the message
         try:
-            # Send the reply message with its ObjectTree
+            clientapp_runtime = state.get_message_processing_duration(
+                message_id=message.metadata.reply_to_message_id,
+            )
+            # Send the reply message with its ObjectTree and ClientApp runtime
             # Get the IDs of objects to send
-            ids_obj_to_send = send(message, object_tree)
+            ids_obj_to_send = send(message, object_tree, clientapp_runtime)
 
             # Push object contents from the ObjectStore
             run_id = message.metadata.run_id
@@ -539,7 +546,7 @@ def _init_connection(  # pylint: disable=too-many-positional-arguments
     tuple[
         int,
         Callable[[], tuple[Message, ObjectTree] | None],
-        Callable[[Message, ObjectTree], set[str]],
+        Callable[[Message, ObjectTree, float], set[str]],
         Callable[[int], Run],
         Callable[[str, int], Fab],
         Callable[[int, str], bytes],
@@ -603,7 +610,7 @@ def _make_fleet_connection_retry_invoker(
     connection_error_type: type[Exception] = RpcError,
 ) -> RetryInvoker:
     """Create a retry invoker for fleet connection."""
-    retry_invoker = _make_simple_grpc_retry_invoker()
+    retry_invoker = make_simple_grpc_retry_invoker()
     retry_invoker.recoverable_exceptions = connection_error_type
     if max_retries is not None:
         retry_invoker.max_tries = max_retries + 1

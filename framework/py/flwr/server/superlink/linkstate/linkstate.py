@@ -18,9 +18,10 @@
 import abc
 from collections.abc import Sequence
 
+from flwr.app.user_config import UserConfig
 from flwr.common import Context, Message
 from flwr.common.record import ConfigRecord
-from flwr.common.typing import Run, RunStatus, UserConfig
+from flwr.common.typing import Run, RunStatus
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.supercore.corestate import CoreState
 from flwr.superlink.federation import FederationManager
@@ -246,26 +247,6 @@ class LinkState(CoreState):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
-    def get_node_public_key(self, node_id: int) -> bytes:
-        """Get `public_key` for the specified `node_id`.
-
-        Parameters
-        ----------
-        node_id : int
-            The identifier of the node whose public key is to be retrieved.
-
-        Returns
-        -------
-        bytes
-            The public key associated with the specified `node_id`.
-
-        Raises
-        ------
-        ValueError
-            If the specified `node_id` does not exist in the link state.
-        """
-
-    @abc.abstractmethod
     def create_run(  # pylint: disable=too-many-arguments,too-many-positional-arguments
         self,
         fab_id: str | None,
@@ -479,4 +460,36 @@ class LinkState(CoreState):  # pylint: disable=R0904
             - The ServerApp logs associated with the specified `run_id`.
             - The timestamp of the latest log entry in the returned logs.
               Returns `0` if no logs are returned.
+        """
+
+    @abc.abstractmethod
+    def store_traffic(self, run_id: int, *, bytes_sent: int, bytes_recv: int) -> None:
+        """Store traffic data for the specified `run_id`.
+
+        Parameters
+        ----------
+        run_id : int
+            The identifier of the run for which to store traffic data.
+        bytes_sent : int
+            The number of bytes pulled by SuperNodes from the SuperLink to add to the
+            run's total.
+        bytes_recv : int
+            The number of bytes received by SuperLink from SuperNodes to add to the
+            run's total.
+        """
+
+    @abc.abstractmethod
+    def add_clientapp_runtime(self, run_id: int, runtime: float) -> None:
+        """Add ClientApp runtime to the cumulative total for the specified `run_id`.
+
+        This method accumulates the runtime by adding the provided value to the
+        existing total runtime for the run. Multiple ClientApps can contribute
+        to the same run's total runtime.
+
+        Parameters
+        ----------
+        run_id : int
+            The identifier of the run for which to store each ClientApp's runtime.
+        runtime : float
+            The runtime in seconds to add to the `run_id`'s cumulative total.
         """

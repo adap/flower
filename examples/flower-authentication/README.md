@@ -31,8 +31,7 @@ flower-authentication
 │   ├── server_app.py   # Defines your ServerApp
 │   └── task.py         # Defines your model, training and data loading
 ├── pyproject.toml      # Project metadata like dependencies and configs
-├── certificate.conf    # Configuration for OpenSSL
-├── generate.sh         # Generate certificates and keys
+├── generate_creds.py   # Generate certificates and keys
 ├── prepare_dataset.py  # Generate datasets for each SuperNode to use
 └── README.md
 ```
@@ -45,30 +44,25 @@ Install the dependencies defined in `pyproject.toml` as well as the `authexample
 pip install -e .
 ```
 
-## Generate TLS certificates
+## Generate TLS certificates and authentication keys
 
-The `generate_cert.sh` script generates certificates for creating a secure TLS connection between the SuperLink and SuperNodes, as well as between the flwr CLI (user) and the SuperLink.
+The `generate_creds.py` script generates:
 
-> [!NOTE]
-> Note that this script should only be used for development purposes and not for creating production key pairs.
-
-```bash
-./generate_cert.sh
-```
-
-## Generate public and private keys for SuperNode authentication
-
-The `generate_auth_keys.sh` script generates two private–public key pairs for two SuperNodes by default. If you have more SuperNodes, you can specify the number of key pairs to generate.
+1. TLS certificates for establishing a secure connection.
+2. Private and public keys for SuperNode authentication.
 
 > [!NOTE]
-> Note that this script should only be used for development purposes and not for creating production key pairs.
+> This script is for development purposes only.
+
+> [!TIP]
+> You can configure the certificate details (e.g. Validity, Organization, or adding a public IP to `SERVER_SAN_IPS`) by editing the global variables at the top of `generate_creds.py`.
 
 ```bash
-# Generate two key pairs by default
-./generate_auth_keys.sh
+# Generate certificates and keys (creates 2 SuperNodes key pairs by default)
+python generate_creds.py
 
-# Or pass the desired the number of key pairs
-./generate_auth_keys.sh {your_number_of_clients}
+# Or specify the number of SuperNodes key pairs
+python generate_creds.py --supernodes {your_number_of_supernodes}
 ```
 
 ## Start the long-running Flower server (SuperLink)
@@ -103,7 +97,7 @@ Before connecting the `SuperNodes` we need to register them with the `SuperLink`
 Let's register the first `SuperNode`. The command below will send the public key to the `SuperLink` defined in the `my-federation` federation in the `pyproject.toml`.
 
 ```shell
-flwr supernode register keys/client_credentials_1.pub . my-federation
+flwr supernode register keys/supernode_credentials_1.pub . my-federation
 # It will print something like:
 # Loading project configuration...
 # Success
@@ -113,7 +107,7 @@ flwr supernode register keys/client_credentials_1.pub . my-federation
 Then, we register the second `SuperNode` using the other public key:
 
 ```shell
-flwr supernode register keys/client_credentials_2.pub . my-federation
+flwr supernode register keys/supernode_credentials_2.pub . my-federation
 # It will print something like:
 # Loading project configuration...
 # Success
@@ -143,9 +137,10 @@ In a new terminal window, start the first long-running Flower client (SuperNode)
 ```bash
 flower-supernode \
     --root-certificates certificates/ca.crt \
-    --auth-supernode-private-key keys/client_credentials_1 \
+    --auth-supernode-private-key keys/supernode_credentials_1 \
+    --superlink "127.0.0.1:9092" \
     --node-config 'dataset-path="datasets/cifar10_part_1"' \
-    --clientappio-api-address="0.0.0.0:9094"
+    --clientappio-api-address="127.0.0.1:9094"
 ```
 
 In yet another new terminal window, start the second long-running Flower client:
@@ -153,9 +148,10 @@ In yet another new terminal window, start the second long-running Flower client:
 ```bash
 flower-supernode \
     --root-certificates certificates/ca.crt \
-    --auth-supernode-private-key keys/client_credentials_2 \
+    --auth-supernode-private-key keys/supernode_credentials_2 \
+    --superlink "127.0.0.1:9092" \
     --node-config 'dataset-path="datasets/cifar10_part_2"' \
-    --clientappio-api-address="0.0.0.0:9095"
+    --clientappio-api-address="127.0.0.1:9095"
 ```
 
 Now that you have connected the `SuperNodes`, you should see them with status `online`:

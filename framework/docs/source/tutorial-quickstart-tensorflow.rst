@@ -41,7 +41,7 @@ using the Flower framework and TensorFlow. First of all, it is recommended to cr
 virtual environment and run everything within a :doc:`virtualenv
 <contributor-how-to-set-up-a-virtual-env>`.
 
-Let's use `flwr new` to create a complete Flower+TensorFlow project. It will generate
+Let's use ``flwr new`` to create a complete Flower+TensorFlow project. It will generate
 all the files needed to run, by default with the Flower Simulation Engine, a federation
 of 10 nodes using |fedavg_link|_. The dataset will be partitioned using Flower Dataset's
 `IidPartitioner
@@ -55,21 +55,19 @@ install Flower in your new environment:
     # In a new Python environment
     $ pip install flwr
 
-Then, run the command below. You will be prompted to select one of the available
-templates (choose ``TensorFlow``), give a name to your project, and type in your
-developer name:
+Then, run the command below:
 
 .. code-block:: shell
 
-    $ flwr new
+    $ flwr new @flwrlabs/quickstart-tensorflow
 
-After running it you'll notice a new directory with your project name has been created.
-It should have the following structure:
+After running it you'll notice a new directory named ``quickstart-tensorflow`` has been
+created. It should have the following structure:
 
 .. code-block:: shell
 
-    <your-project-name>
-    ├── <your-project-name>
+    quickstart-tensorflow
+    ├── tfexample
     │   ├── __init__.py
     │   ├── client_app.py   # Defines your ClientApp
     │   ├── server_app.py   # Defines your ServerApp
@@ -217,8 +215,9 @@ free to replace it with a more sophisticated model if you'd like:
                 layers.Dense(10, activation="softmax"),
             ]
         )
+        optimizer = keras.optimizers.Adam(learning_rate)
         model.compile(
-            "adam",
+            optimizer=optimizer,
             loss="sparse_categorical_crossentropy",
             metrics=["accuracy"],
         )
@@ -391,6 +390,11 @@ You can easily log the metrics using Python's `pprint
 Tensorflow's ``save()`` function.
 
 Congratulations! You've successfully built and run your first federated learning system.
+
+.. tip::
+
+    Check the :doc:`how-to-run-simulations` documentation to learn more about how to
+    configure and run Flower simulations.
 
 .. note::
 

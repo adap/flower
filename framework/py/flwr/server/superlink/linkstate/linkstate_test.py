@@ -27,6 +27,7 @@ from uuid import uuid4
 
 from parameterized import parameterized
 
+from flwr.app.user_config import UserConfig
 from flwr.common import (
     DEFAULT_TTL,
     ConfigRecord,
@@ -45,7 +46,7 @@ from flwr.common.constant import (
     SubStatus,
 )
 from flwr.common.serde import message_from_proto, message_to_proto
-from flwr.common.typing import RunStatus, UserConfig
+from flwr.common.typing import RunStatus
 
 # pylint: disable=E0611
 from flwr.proto.message_pb2 import Message as ProtoMessage
@@ -53,11 +54,7 @@ from flwr.proto.message_pb2 import Metadata as ProtoMetadata
 from flwr.proto.recorddict_pb2 import RecordDict as ProtoRecordDict
 
 # pylint: enable=E0611
-from flwr.server.superlink.linkstate import (
-    InMemoryLinkState,
-    LinkState,
-    SqliteLinkState,
-)
+from flwr.server.superlink.linkstate import InMemoryLinkState, LinkState, SqlLinkState
 from flwr.supercore.constant import NOOP_FEDERATION, NodeStatus
 from flwr.supercore.corestate.corestate_test import StateTest as CoreStateTest
 from flwr.supercore.object_store.object_store_factory import ObjectStoreFactory
@@ -698,12 +695,11 @@ class StateTest(CoreStateTest):
         with self.assertRaises(ValueError):
             state.create_node("fake_aid2", "fake_name", public_key, 10)
         retrieved_nodes = state.get_node_info()
-        retrieved_public_key = state.get_node_public_key(node_id)
 
         # Assert
         assert len(retrieved_nodes) == 1
         assert retrieved_nodes[0].node_id == node_id
-        assert retrieved_public_key == public_key
+        assert retrieved_nodes[0].public_key == public_key
 
         # Assert node_ids and public_key_to_node_id are synced
         if isinstance(state, InMemoryLinkState):
@@ -864,25 +860,6 @@ class StateTest(CoreStateTest):
         # Test failed deactivation when UNREGISTERED
         state.delete_node("mock_flwr_aid", node_id)
         assert not state.deactivate_node(node_id)
-
-    def test_delete_node_public_key(self) -> None:
-        """Test deleting a client node with public key."""
-        # Prepare
-        state: LinkState = self.state_factory()
-        public_key = b"mock"
-        run_id = create_dummy_run(state)
-        node_id = state.create_node(
-            "fake_aid", "fake_name", public_key, heartbeat_interval=10
-        )
-
-        # Execute
-        state.delete_node("fake_aid", node_id)
-        retrieved_node_ids = state.get_nodes(run_id)
-        with self.assertRaises(ValueError):
-            _ = state.get_node_public_key(node_id)
-
-        # Assert
-        assert len(retrieved_node_ids) == 0
 
     def test_get_nodes_invalid_run_id(self) -> None:
         """Test retrieving all node_ids with invalid run_id."""
@@ -1580,7 +1557,7 @@ class StateTest(CoreStateTest):
         run_id = create_dummy_run(state)
         log_entry = "Log entry"
         state.add_serverapp_log(run_id, log_entry)
-        timestamp = now().timestamp()
+        timestamp = now().timestamp() + 0.001  # Ensure timestamp is after the log entry
 
         # Execute
         retrieved_logs, latest = state.get_serverapp_log(
@@ -1614,6 +1591,106 @@ class StateTest(CoreStateTest):
         """Test that setting the LinkState of the FederationManager works."""
         state: LinkState = self.state_factory()
         assert state.federation_manager.linkstate is state
+
+    def test_store_traffic_basic(self) -> None:
+        """Test basic traffic storage functionality."""
+        # Prepare
+        state = self.state_factory()
+        run_id = create_dummy_run(state)
+        transition_run_status(state, run_id, 2)  # Transition to RUNNING
+
+        # Execute
+        state.store_traffic(run_id, bytes_sent=1000, bytes_recv=2000)
+        run = state.get_run(run_id)
+
+        # Assert
+        assert run is not None
+        assert run.bytes_sent == 1000
+        assert run.bytes_recv == 2000
+
+    def test_store_traffic_accumulation(self) -> None:
+        """Test that traffic accumulates correctly over multiple calls."""
+        # Prepare
+        state = self.state_factory()
+        run_id = create_dummy_run(state)
+        transition_run_status(state, run_id, 2)  # Transition to RUNNING
+
+        # Execute
+        state.store_traffic(run_id, bytes_sent=1000, bytes_recv=500)
+        state.store_traffic(run_id, bytes_sent=2000, bytes_recv=1500)
+        state.store_traffic(run_id, bytes_sent=500, bytes_recv=1000)
+        run = state.get_run(run_id)
+
+        # Assert
+        assert run is not None
+        assert run.bytes_sent == 3500
+        assert run.bytes_recv == 3000
+
+    @parameterized.expand(
+        [
+            (-1000, 2000),  # negative bytes_sent
+            (1000, -2000),  # negative bytes_recv
+            (-500, -1000),  # both negative
+        ]
+    )  # type: ignore
+    def test_store_traffic_negative_values(
+        self, bytes_sent: int, bytes_recv: int
+    ) -> None:
+        """Test that negative traffic values raise ValueError."""
+        # Prepare
+        state = self.state_factory()
+        run_id = create_dummy_run(state)
+
+        # Set initial traffic
+        state.store_traffic(run_id, bytes_sent=1000, bytes_recv=2000)
+
+        # Execute & Assert
+        with self.assertRaises(ValueError):
+            state.store_traffic(run_id, bytes_sent=bytes_sent, bytes_recv=bytes_recv)
+
+        # Verify traffic was not updated
+        run = state.get_run(run_id)
+        assert run is not None
+        assert run.bytes_sent == 1000
+        assert run.bytes_recv == 2000
+
+    def test_store_traffic_invalid_run_id(self) -> None:
+        """Test that invalid run_id raises ValueError."""
+        # Prepare
+        state = self.state_factory()
+        invalid_run_id = 98889  # Run ID that doesn't exist
+
+        # Execute & Assert
+        with self.assertRaises(ValueError):
+            state.store_traffic(invalid_run_id, bytes_sent=1000, bytes_recv=2000)
+
+    def test_store_traffic_both_zero(self) -> None:
+        """Test that both bytes_sent and bytes_recv being zero raises ValueError."""
+        # Prepare
+        state = self.state_factory()
+        run_id = create_dummy_run(state)
+
+        # Execute & Assert
+        with self.assertRaises(ValueError) as context:
+            state.store_traffic(run_id, bytes_sent=0, bytes_recv=0)
+
+        assert "cannot be zero" in str(context.exception)
+        run = state.get_run(run_id)
+        assert run is not None
+        assert run.bytes_sent == 0
+        assert run.bytes_recv == 0
+
+    def test_add_clientapp_runtime_invalid_run_id(self) -> None:
+        """Test that invalid run_id raises ValueError for add_clientapp_runtime."""
+        # Prepare
+        state = self.state_factory()
+        invalid_run_id = 57775  # Run ID that doesn't exist
+
+        # Execute & Assert
+        with self.assertRaises(ValueError) as context:
+            state.add_clientapp_runtime(invalid_run_id, runtime=10.5)
+
+        assert f"Run {invalid_run_id} not found" in str(context.exception)
 
 
 def create_ins_message(
@@ -1731,60 +1808,38 @@ class InMemoryStateTest(StateTest):
         self.assertSetEqual(state.owner_to_node_ids["aid2"], {node_id3})
 
 
-class SqliteInMemoryStateTest(StateTest, unittest.TestCase):
-    """Test SqliteState implemenation with in-memory database."""
+class SqlInMemoryStateTest(StateTest, unittest.TestCase):
+    """Test SqlLinkState implementation with in-memory database."""
 
     __test__ = True
 
-    def state_factory(self) -> SqliteLinkState:
-        """Return SqliteState with in-memory database."""
-        state = SqliteLinkState(
-            ":memory:",
+    def state_factory(self) -> SqlLinkState:
+        """Return SqlLinkState with in-memory database."""
+        state = SqlLinkState(
+            database_path=":memory:",
             federation_manager=NoOpFederationManager(),
             object_store=ObjectStoreFactory().store(),
         )
         state.initialize()
         return state
 
-    def test_initialize(self) -> None:
-        """Test initialization."""
-        # Prepare
-        state = self.state_factory()
 
-        # Execute
-        result = state.query("SELECT name FROM sqlite_schema;")
-
-        # Assert
-        assert len(result) == 20
-
-
-class SqliteFileBasedTest(StateTest, unittest.TestCase):
-    """Test SqliteState implemenation with file-based database."""
+class SqlFileBasedTest(StateTest, unittest.TestCase):
+    """Test SqlLinkState implementation with file-based database."""
 
     __test__ = True
 
-    def state_factory(self) -> SqliteLinkState:
-        """Return SqliteState with file-based database."""
+    def state_factory(self) -> SqlLinkState:
+        """Return SqlLinkState with file-based database."""
         # pylint: disable-next=consider-using-with,attribute-defined-outside-init
         self.tmp_file = tempfile.NamedTemporaryFile()
-        state = SqliteLinkState(
+        state = SqlLinkState(
             database_path=self.tmp_file.name,
             federation_manager=NoOpFederationManager(),
             object_store=ObjectStoreFactory().store(),
         )
         state.initialize()
         return state
-
-    def test_initialize(self) -> None:
-        """Test initialization."""
-        # Prepare
-        state = self.state_factory()
-
-        # Execute
-        result = state.query("SELECT name FROM sqlite_schema;")
-
-        # Assert
-        assert len(result) == 20
 
 
 if __name__ == "__main__":

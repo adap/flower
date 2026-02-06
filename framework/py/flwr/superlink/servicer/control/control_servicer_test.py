@@ -16,6 +16,7 @@
 
 
 import hashlib
+import json
 import os
 import tempfile
 import unittest
@@ -41,6 +42,8 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     ListNodesResponse,
     ListRunsRequest,
     RegisterNodeRequest,
+    ShowFederationRequest,
+    ShowFederationResponse,
     StartRunRequest,
     StopRunRequest,
     StreamLogsRequest,
@@ -57,7 +60,7 @@ from flwr.superlink.servicer.control.control_account_auth_interceptor import (
     shared_account_info,
 )
 
-from .control_servicer import ControlServicer
+from .control_servicer import ControlServicer, _format_verification
 
 FLWR_AID_MISMATCH_CASES = (
     # (context_flwr_aid, run_flwr_aid)
@@ -304,6 +307,19 @@ class TestControlServicer(unittest.TestCase):
         else:
             self.assertEqual(len(res.nodes_info), 0)
 
+    def test_show_federation(self) -> None:
+        """Test ShowFederation method of ControlServicer."""
+        # Prepare
+        request = ShowFederationRequest(federation_name=NOOP_FEDERATION)
+
+        # Execute
+        response: ShowFederationResponse = self.servicer.ShowFederation(request, Mock())
+        retrieved_timestamp = datetime.fromisoformat(response.now).timestamp()
+
+        # Assert
+        self.assertLess(abs(retrieved_timestamp - now().timestamp()), 1e-3)
+        self.assertEqual(response.federation.name, NOOP_FEDERATION)
+
 
 class TestControlServicerAuth(unittest.TestCase):
     """Test ControlServicer methods with authentication plugin and flwr_aid checking."""
@@ -473,3 +489,21 @@ class TestControlServicerAuth(unittest.TestCase):
         ):
             response = self.servicer.ListRuns(request, ctx)
             self.assertEqual(set(response.run_dict.keys()), {run_id})
+
+
+def test_format_verification_compact() -> None:
+    """One test covering both 'with entries' and 'None' input."""
+    # Case 1: verifications list present
+    verifications: list[dict[str, str]] = [
+        {"public_key_id": "key1", "sig": "abc", "algo": "ed25519"},
+        {"public_key_id": "key2", "sig": "def", "algo": "ed25519"},
+    ]
+    out: dict[str, str] = _format_verification(verifications)
+
+    # Should mark valid
+    assert out["valid_license"] == "Valid"
+    # public_key_id -> JSON of remaining fields
+    v1: dict[str, str] = json.loads(out["key1"])
+    v2: dict[str, str] = json.loads(out["key2"])
+    assert v1 == {"sig": "abc", "algo": "ed25519"}
+    assert v2 == {"sig": "def", "algo": "ed25519"}

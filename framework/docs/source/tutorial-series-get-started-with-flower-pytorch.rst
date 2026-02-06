@@ -83,21 +83,19 @@ First, we install the Flower package ``flwr``:
     # In a new Python environment
     $ pip install -U "flwr[simulation]"
 
-Then, we create a new Flower app called ``flower-tutorial`` using the PyTorch template.
-We also specify a username (``flwrlabs``) for the project:
+Then, run the command below:
 
 .. code-block:: shell
 
-    $ flwr new flower-tutorial --framework pytorch --username flwrlabs
+    $ flwr new @flwrlabs/quickstart-pytorch
 
-After running the command, a new directory called ``flower-tutorial`` will be created.
-It should have the following structure:
+After running it you'll notice a new directory named ``quickstart-pytorch`` has been
+created. It should have the following structure:
 
 .. code-block:: shell
 
-    flower-tutorial
-    ├── README.md
-    ├── flower_tutorial
+    quickstart-pytorch
+    ├── pytorchexample
     │   ├── __init__.py
     │   ├── client_app.py   # Defines your ClientApp
     │   ├── server_app.py   # Defines your ServerApp
@@ -110,7 +108,7 @@ Next, we install the project and its dependencies, which are specified in the
 
 .. code-block:: shell
 
-    $ cd flower-tutorial
+    $ cd quickstart-pytorch
     $ pip install -e .
 
 Before we dive into federated learning, we'll take a look at the dataset that we'll be
@@ -147,7 +145,7 @@ these into a PyTorch ``DataLoader``:
 
 .. code-block:: python
 
-    def load_data(partition_id: int, num_partitions: int):
+    def load_data(partition_id: int, num_partitions: int, batch_size: int):
         """Load partition CIFAR10 data."""
         # Only initialize `FederatedDataset` once
         global fds
@@ -170,8 +168,10 @@ these into a PyTorch ``DataLoader``:
             return batch
 
         partition_train_test = partition_train_test.with_transform(apply_transforms)
-        trainloader = DataLoader(partition_train_test["train"], batch_size=32, shuffle=True)
-        testloader = DataLoader(partition_train_test["test"], batch_size=32)
+        trainloader = DataLoader(
+            partition_train_test["train"], batch_size=batch_size, shuffle=True
+        )
+        testloader = DataLoader(partition_train_test["test"], batch_size=batch_size)
         return trainloader, testloader
 
 We now have a function that can return a training set and validation set
@@ -223,7 +223,7 @@ following code is already defined in ``task.py``):
 Training and test functions
 ===========================
 
-The PyTorch template also provides the usual training and test functions:
+The PyTorch quickstart also provides the usual training and test functions:
 
 .. code-block:: python
 
@@ -231,7 +231,7 @@ The PyTorch template also provides the usual training and test functions:
         """Train the model on the training set."""
         net.to(device)  # move model to GPU if available
         criterion = torch.nn.CrossEntropyLoss().to(device)
-        optimizer = torch.optim.Adam(net.parameters(), lr=lr)
+        optimizer = torch.optim.SGD(net.parameters(), lr=lr, momentum=0.9)
         net.train()
         running_loss = 0.0
         for _ in range(epochs):
@@ -243,7 +243,7 @@ The PyTorch template also provides the usual training and test functions:
                 loss.backward()
                 optimizer.step()
                 running_loss += loss.item()
-        avg_trainloss = running_loss / len(trainloader)
+        avg_trainloss = running_loss / (epochs * len(trainloader))
         return avg_trainloss
 
 
@@ -369,7 +369,8 @@ metrics of interest.
         # Load the data
         partition_id = context.node_config["partition-id"]
         num_partitions = context.node_config["num-partitions"]
-        trainloader, _ = load_data(partition_id, num_partitions)
+        batch_size = context.run_config["batch-size"]
+        trainloader, _ = load_data(partition_id, num_partitions, batch_size)
 
         # Call the training function
         train_loss = train_fn(
@@ -449,7 +450,8 @@ evaluation). Here's how the ``evaluate`` function looks like:
         # Load the data
         partition_id = context.node_config["partition-id"]
         num_partitions = context.node_config["num-partitions"]
-        _, valloader = load_data(partition_id, num_partitions)
+        batch_size = context.run_config["batch-size"]
+        _, valloader = load_data(partition_id, num_partitions, batch_size)
 
         # Call the evaluation function
         eval_loss, eval_acc = test_fn(
@@ -513,16 +515,16 @@ the ``Message`` that also carries the model parameters.
         """Main entry point for the ServerApp."""
 
         # Read run config
-        fraction_train: float = context.run_config["fraction-train"]
+        fraction_evaluate: float = context.run_config["fraction-evaluate"]
         num_rounds: int = context.run_config["num-server-rounds"]
-        lr: float = context.run_config["lr"]
+        lr: float = context.run_config["learning-rate"]
 
         # Load global model
         global_model = Net()
         arrays = ArrayRecord(global_model.state_dict())
 
         # Initialize FedAvg strategy
-        strategy = FedAvg(fraction_train=fraction_train)
+        strategy = FedAvg(fraction_evaluate=fraction_evaluate)
 
         # Start strategy, run FedAvg for `num_rounds`
         result = strategy.start(
@@ -530,6 +532,7 @@ the ``Message`` that also carries the model parameters.
             initial_arrays=arrays,
             train_config=ConfigRecord({"lr": lr}),
             num_rounds=num_rounds,
+            evaluate_fn=global_evaluate,
         )
 
         # Save final model to disk
@@ -554,8 +557,8 @@ with Flower! The last step is to run our simulation in the command line, as foll
     $ flwr run .
 
 This will execute the federated learning simulation with 10 clients, or SuperNodes,
-defined in the ``[tool.flwr.federations.local-simulation]`` section in the
-``pyproject.toml``. You should expect an output log similar to this:
+defined in the ``[superlink.local]`` section in your Flower Configuration file. You
+should expect an output log similar to this:
 
 .. code-block:: shell
 

@@ -28,7 +28,6 @@ from flwr.common.constant import (
     SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
     SUPERLINK_NODE_ID,
     ErrorCode,
-    MessageType,
 )
 from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.inflatable import (
@@ -50,7 +49,7 @@ from flwr.common.inflatable_utils import (
 )
 from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.message import make_message, remove_content_from_message
-from flwr.common.retry_invoker import _make_simple_grpc_retry_invoker, _wrap_stub
+from flwr.common.retry_invoker import make_simple_grpc_retry_invoker, wrap_stub
 from flwr.common.serde import message_to_proto, run_from_proto
 from flwr.common.typing import Run
 from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
@@ -69,6 +68,7 @@ from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     GetNodesResponse,
 )
 from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub  # pylint: disable=E0611
+from flwr.supercore.constant import SYSTEM_MESSAGE_TYPE
 
 from .grid import Grid
 
@@ -127,7 +127,7 @@ class GrpcGrid(Grid):
         self._grpc_stub: ServerAppIoStub | None = None
         self._channel: grpc.Channel | None = None
         self.node = Node(node_id=SUPERLINK_NODE_ID)
-        self._retry_invoker = _make_simple_grpc_retry_invoker()
+        self._retry_invoker = make_simple_grpc_retry_invoker()
         super().__init__()
 
     @property
@@ -150,7 +150,7 @@ class GrpcGrid(Grid):
         )
         self._channel.subscribe(on_channel_state_change)
         self._grpc_stub = ServerAppIoStub(self._channel)
-        _wrap_stub(self._grpc_stub, self._retry_invoker)
+        wrap_stub(self._grpc_stub, self._retry_invoker)
         log(DEBUG, "[flwr-serverapp] Connected to %s", self._addr)
 
     def _disconnect(self) -> None:
@@ -341,7 +341,7 @@ class GrpcGrid(Grid):
                                 message_id="",
                                 src_node_id=self.node.node_id,
                                 dst_node_id=self.node.node_id,
-                                message_type=MessageType.SYSTEM,
+                                message_type=SYSTEM_MESSAGE_TYPE,
                                 group_id="",
                                 ttl=0,
                                 reply_to_message_id=msg_proto.metadata.reply_to_message_id,
