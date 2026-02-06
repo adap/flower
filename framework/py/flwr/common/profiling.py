@@ -1,0 +1,216 @@
+# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ==============================================================================
+"""Minimal profiling utilities for Flower runs."""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from datetime import datetime, timezone
+import threading
+from typing import Any, Iterable
+
+from .message import Message
+
+
+@dataclass(frozen=True)
+class ProfileEvent:
+    """A single profiling event."""
+
+    scope: str
+    task: str
+    round: int | None
+    node_id: int | None
+    duration_ms: float
+    metadata: dict[str, Any]
+
+
+class ProfileRecorder:
+    """Record and summarize profiling events."""
+
+    def __init__(self, run_id: int) -> None:
+        self.run_id = run_id
+        self._events: list[ProfileEvent] = []
+        self._lock = threading.Lock()
+
+    def record(
+        self,
+        scope: str,
+        task: str,
+        round: int | None,
+        node_id: int | None,
+        duration_ms: float,
+        metadata: dict[str, Any] | None = None,
+    ) -> None:
+        """Record a profiling event."""
+        if duration_ms is None:
+            return
+        event = ProfileEvent(
+            scope=scope,
+            task=task,
+            round=round,
+            node_id=node_id,
+            duration_ms=float(duration_ms),
+            metadata=metadata or {},
+        )
+        with self._lock:
+            self._events.append(event)
+
+    def summarize(self) -> dict[str, Any]:
+        """Return a JSON-serializable summary of all events."""
+        with self._lock:
+            events = list(self._events)
+
+        stats: dict[tuple[str, str, int | None], dict[str, Any]] = {}
+        for event in events:
+            key = (event.scope, event.task, event.round)
+            stat = stats.get(key)
+            if stat is None:
+                stat = {
+                    "scope": event.scope,
+                    "task": event.task,
+                    "round": event.round,
+                    "count": 0,
+                    "sum_ms": 0.0,
+                    "min_ms": None,
+                    "max_ms": None,
+                }
+                stats[key] = stat
+            stat["count"] += 1
+            stat["sum_ms"] += event.duration_ms
+            stat["min_ms"] = (
+                event.duration_ms
+                if stat["min_ms"] is None
+                else min(stat["min_ms"], event.duration_ms)
+            )
+            stat["max_ms"] = (
+                event.duration_ms
+                if stat["max_ms"] is None
+                else max(stat["max_ms"], event.duration_ms)
+            )
+
+        entries: list[dict[str, Any]] = []
+        for stat in stats.values():
+            avg_ms = stat["sum_ms"] / stat["count"] if stat["count"] else 0.0
+            entries.append(
+                {
+                    "scope": stat["scope"],
+                    "task": stat["task"],
+                    "round": stat["round"],
+                    "count": stat["count"],
+                    "avg_ms": avg_ms,
+                    "min_ms": stat["min_ms"] or 0.0,
+                    "max_ms": stat["max_ms"] or 0.0,
+                }
+            )
+
+        # Derive approximate network time per round
+        by_round: dict[int | None, dict[str, float]] = {}
+        for entry in entries:
+            if entry["round"] is None:
+                continue
+            round_id = entry["round"]
+            if round_id not in by_round:
+                by_round[round_id] = {}
+            if entry["scope"] == "server" and entry["task"] == "send_and_receive":
+                by_round[round_id]["send_and_receive_avg"] = entry["avg_ms"]
+            if entry["scope"] == "client" and entry["task"] == "total":
+                by_round[round_id]["client_total_avg"] = entry["avg_ms"]
+
+        for round_id, values in by_round.items():
+            if "send_and_receive_avg" in values and "client_total_avg" in values:
+                network_ms = max(
+                    values["send_and_receive_avg"] - values["client_total_avg"], 0.0
+                )
+                entries.append(
+                    {
+                        "scope": "server",
+                        "task": "network",
+                        "round": round_id,
+                        "count": 1,
+                        "avg_ms": network_ms,
+                        "min_ms": network_ms,
+                        "max_ms": network_ms,
+                    }
+                )
+
+        entries.sort(key=lambda e: (str(e["scope"]), str(e["task"]), e["round"] or -1))
+
+        return {
+            "run_id": self.run_id,
+            "generated_at": datetime.now(tz=timezone.utc).isoformat(),
+            "entries": entries,
+        }
+
+
+_profile_state = threading.local()
+
+
+def set_active_profiler(profiler: ProfileRecorder | None) -> None:
+    """Set the active profiler for the current thread."""
+    _profile_state.profiler = profiler
+
+
+def clear_active_profiler() -> None:
+    """Clear the active profiler for the current thread."""
+    if hasattr(_profile_state, "profiler"):
+        delattr(_profile_state, "profiler")
+
+
+def get_active_profiler() -> ProfileRecorder | None:
+    """Return the active profiler for the current thread."""
+    return getattr(_profile_state, "profiler", None)
+
+
+def set_current_round(round_id: int | None) -> None:
+    """Set the current round for the active thread."""
+    _profile_state.current_round = round_id
+
+
+def get_current_round() -> int | None:
+    """Return the current round for the active thread."""
+    return getattr(_profile_state, "current_round", None)
+
+
+def record_profile_metrics_from_messages(messages: Iterable[Message]) -> None:
+    """Extract profile metrics from message MetricRecords and record them."""
+    profiler = get_active_profiler()
+    if profiler is None:
+        return
+
+    round_id = get_current_round()
+    for msg in messages:
+        if msg.has_error() or msg.content is None:
+            continue
+        try:
+            for metric_record in msg.content.metric_records.values():
+                for key, value in metric_record.items():
+                    if not key.startswith("profile.client."):
+                        continue
+                    if not key.endswith(".ms"):
+                        continue
+                    if not isinstance(value, (int, float)):
+                        continue
+                    task = key[len("profile.client.") : -3]
+                    profiler.record(
+                        scope="client",
+                        task=task,
+                        round=round_id,
+                        node_id=msg.metadata.src_node_id,
+                        duration_ms=float(value),
+                        metadata={},
+                    )
+        except Exception:
+            # Profiling should never break normal control flow
+            continue
