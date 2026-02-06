@@ -59,6 +59,11 @@ class ControlStub(object):
                 request_serializer=flwr_dot_proto_dot_control__pb2.GetRunProfileRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_control__pb2.GetRunProfileResponse.FromString,
                 _registered_method=True)
+        self.StreamRunProfile = channel.unary_stream(
+                '/flwr.proto.Control/StreamRunProfile',
+                request_serializer=flwr_dot_proto_dot_control__pb2.StreamRunProfileRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_control__pb2.GetRunProfileResponse.FromString,
+                _registered_method=True)
         self.GetLoginDetails = channel.unary_unary(
                 '/flwr.proto.Control/GetLoginDetails',
                 request_serializer=flwr_dot_proto_dot_control__pb2.GetLoginDetailsRequest.SerializeToString,
@@ -134,6 +139,13 @@ class ControlServicer(object):
 
     def GetRunProfile(self, request, context):
         """Get run profile summary
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def StreamRunProfile(self, request, context):
+        """Stream run profile summary updates
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -221,6 +233,11 @@ def add_ControlServicer_to_server(servicer, server):
             'GetRunProfile': grpc.unary_unary_rpc_method_handler(
                     servicer.GetRunProfile,
                     request_deserializer=flwr_dot_proto_dot_control__pb2.GetRunProfileRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_control__pb2.GetRunProfileResponse.SerializeToString,
+            ),
+            'StreamRunProfile': grpc.unary_stream_rpc_method_handler(
+                    servicer.StreamRunProfile,
+                    request_deserializer=flwr_dot_proto_dot_control__pb2.StreamRunProfileRequest.FromString,
                     response_serializer=flwr_dot_proto_dot_control__pb2.GetRunProfileResponse.SerializeToString,
             ),
             'GetLoginDetails': grpc.unary_unary_rpc_method_handler(
@@ -398,6 +415,33 @@ class Control(object):
             target,
             '/flwr.proto.Control/GetRunProfile',
             flwr_dot_proto_dot_control__pb2.GetRunProfileRequest.SerializeToString,
+            flwr_dot_proto_dot_control__pb2.GetRunProfileResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def StreamRunProfile(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_stream(
+            request,
+            target,
+            '/flwr.proto.Control/StreamRunProfile',
+            flwr_dot_proto_dot_control__pb2.StreamRunProfileRequest.SerializeToString,
             flwr_dot_proto_dot_control__pb2.GetRunProfileResponse.FromString,
             options,
             channel_credentials,

@@ -32,7 +32,7 @@ from flwr.cli.config_utils import (
 from flwr.cli.constant import FEDERATION_CONFIG_HELP_MESSAGE
 from flwr.common.constant import CliOutputFormat
 from flwr.common.logger import print_json_error, redirect_output, restore_output
-from flwr.proto.control_pb2 import GetRunProfileRequest  # pylint: disable=E0611
+from flwr.proto.control_pb2 import GetRunProfileRequest, StreamRunProfileRequest  # pylint: disable=E0611
 from flwr.proto.control_pb2_grpc import ControlStub  # pylint: disable=E0611
 
 from .utils import flwr_cli_grpc_exc_handler, init_channel, load_cli_auth_plugin
@@ -66,6 +66,10 @@ def profile(
             help="Format output using 'default' view or 'json'",
         ),
     ] = CliOutputFormat.DEFAULT,
+    live: Annotated[
+        bool,
+        typer.Option("--live", help="Stream profile updates while the run is active"),
+    ] = False,
 ) -> None:
     """Get profiling summary for a run."""
     suppress_output = output_format == CliOutputFormat.JSON
@@ -74,7 +78,8 @@ def profile(
         if suppress_output:
             redirect_output(captured_output)
 
-        typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
+        if not suppress_output:
+            typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
         pyproject_path = app / "pyproject.toml" if app else None
         config, errors, warnings = load_and_validate(pyproject_path, check_module=False)
         config = process_loaded_project_config(config, errors, warnings)
@@ -87,6 +92,21 @@ def profile(
         channel = init_channel(app, federation_config, auth_plugin)
         try:
             stub = ControlStub(channel)
+            if live:
+                req = StreamRunProfileRequest(run_id=run_id)
+                with flwr_cli_grpc_exc_handler():
+                    for res in stub.StreamRunProfile(req):
+                        if not res.summary_json:
+                            continue
+                        summary = json.loads(res.summary_json)
+                        restore_output()
+                        if output_format == CliOutputFormat.JSON:
+                            Console().print_json(json.dumps(summary))
+                        else:
+                            Console().print(_to_table(summary))
+                        if suppress_output:
+                            redirect_output(captured_output)
+                return
             req = GetRunProfileRequest(run_id=run_id)
             with flwr_cli_grpc_exc_handler():
                 res = stub.GetRunProfile(req)

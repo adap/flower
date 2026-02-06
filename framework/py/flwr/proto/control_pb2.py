@@ -56,6 +56,16 @@ _res_field.name = "summary_json"
 _res_field.number = 1
 _res_field.label = _descriptor_pb2.FieldDescriptorProto.LABEL_OPTIONAL
 _res_field.type = _descriptor_pb2.FieldDescriptorProto.TYPE_BYTES
+
+# Add StreamRunProfileRequest for live profile streaming
+_stream_req_msg = _profile_fd.message_type.add()
+_stream_req_msg.name = "StreamRunProfileRequest"
+_stream_req_field = _stream_req_msg.field.add()
+_stream_req_field.name = "run_id"
+_stream_req_field.number = 1
+_stream_req_field.label = _descriptor_pb2.FieldDescriptorProto.LABEL_OPTIONAL
+_stream_req_field.type = _descriptor_pb2.FieldDescriptorProto.TYPE_UINT64
+
 PROFILE_DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(
     _profile_fd.SerializeToString()
 )

@@ -63,6 +63,12 @@ class ControlStub:
     ]
     """Get run profile summary"""
 
+    StreamRunProfile: grpc.UnaryStreamMultiCallable[
+        flwr.proto.control_pb2.StreamRunProfileRequest,
+        flwr.proto.control_pb2.GetRunProfileResponse,
+    ]
+    """Stream run profile summary updates"""
+
     GetLoginDetails: grpc.UnaryUnaryMultiCallable[
         flwr.proto.control_pb2.GetLoginDetailsRequest,
         flwr.proto.control_pb2.GetLoginDetailsResponse,
@@ -141,6 +147,12 @@ class ControlAsyncStub:
         flwr.proto.control_pb2.GetRunProfileResponse,
     ]
     """Get run profile summary"""
+
+    StreamRunProfile: grpc.aio.UnaryStreamMultiCallable[
+        flwr.proto.control_pb2.StreamRunProfileRequest,
+        flwr.proto.control_pb2.GetRunProfileResponse,
+    ]
+    """Stream run profile summary updates"""
 
     GetLoginDetails: grpc.aio.UnaryUnaryMultiCallable[
         flwr.proto.control_pb2.GetLoginDetailsRequest,
@@ -230,6 +242,14 @@ class ControlServicer(metaclass=abc.ABCMeta):
         context: _ServicerContext,
     ) -> typing.Union[flwr.proto.control_pb2.GetRunProfileResponse, collections.abc.Awaitable[flwr.proto.control_pb2.GetRunProfileResponse]]:
         """Get run profile summary"""
+
+    @abc.abstractmethod
+    def StreamRunProfile(
+        self,
+        request: flwr.proto.control_pb2.StreamRunProfileRequest,
+        context: _ServicerContext,
+    ) -> typing.Union[collections.abc.Iterator[flwr.proto.control_pb2.GetRunProfileResponse], collections.abc.AsyncIterator[flwr.proto.control_pb2.GetRunProfileResponse]]:
+        """Stream run profile summary updates"""
 
     @abc.abstractmethod
     def GetLoginDetails(
