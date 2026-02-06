@@ -37,6 +37,7 @@ dataset.name = "vicgalle/alpaca-gpt4"
 model.name = "openlm-research/open_llama_3b_v2"
 model.quantization = 4
 model.gradient-checkpointing = true
+model.dtype = "bfloat16"
 model.device-map = ""
 model.lora.peft-lora-r = 32
 model.lora.peft-lora-alpha = 64

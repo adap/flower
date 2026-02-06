@@ -88,11 +88,11 @@ If you are already familiar with how the Deployment Engine works, you may want t
 This mode is intended to validate that a 70B model can be aggregated layer-by-layer
 without client-side training. Use the Deployment Engine to run multiple nodes/GPUs.
 
-Example run config (bfloat16, no training steps):
+Example run config (float16, no training steps):
 
 ```bash
 flwr run . \
-  --run-config "model.name='meta-llama/Llama-3.1-70B-Instruct' model.device-map='auto' model.quantization=0 train.training-arguments.max-steps=0 profile.enabled=true"
+  --run-config "model.name='meta-llama/Llama-3.1-70B-Instruct' model.device-map='auto' model.quantization=0 train.training-arguments.max-steps=0 profile.enabled=true model.dtype='float16'"
 ```
 
 You can also target the base model ID if available in your environment:

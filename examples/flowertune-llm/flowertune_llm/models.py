@@ -40,8 +40,16 @@ def get_model(model_cfg: DictConfig):
     #        f"Use 4-bit or 8-bit quantization. You passed: {model_cfg.quantization}/"
     #    )
 
+    dtype = getattr(model_cfg, "dtype", "bfloat16")
+    if dtype == "float16":
+        torch_dtype = torch.float16
+    elif dtype == "float32":
+        torch_dtype = torch.float32
+    else:
+        torch_dtype = torch.bfloat16
+
     load_kwargs = {
-        "torch_dtype": torch.bfloat16,
+        "torch_dtype": torch_dtype,
         "low_cpu_mem_usage": True,
     }
     if hasattr(model_cfg, "device_map") and model_cfg.device_map:
