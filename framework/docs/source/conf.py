@@ -317,7 +317,7 @@ html_theme_options = {
         "<a href='https://flower.ai/events/flower-ai-summit-2026/'>"
         "<strong style='color: #f2b705;'>👉 Register now</strong></a> "
         "for Flower AI Summit 2026!<br />"
-        "April 15-16, 🇺🇬🇧 London"
+        "April 15-16, 🇬🇧 London"
     ),
    "light_logo": "flower-logo-light.png",
    "dark_logo": "flower-logo-dark.png",
