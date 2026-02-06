@@ -11,3 +11,10 @@ img.only-light, img.only-dark {
     margin-left: auto;
     margin-right: auto;
 }
+
+/* Paragraph spacing + leading */
+article p {
+  margin-top: 0.9rem;
+  margin-bottom: 1.1rem;
+  line-height: 1.85;
+}

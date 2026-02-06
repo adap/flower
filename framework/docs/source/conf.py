@@ -288,7 +288,6 @@ redirects = {
 #
 html_theme = "furo"
 html_title = "Flower Framework"
-html_logo = "_static/flower-logo.png"
 html_favicon = "_static/favicon.ico"
 html_baseurl = "https://flower.ai/docs/framework/"
 
@@ -319,14 +318,39 @@ html_theme_options = {
     #     "for Flower AI Day 2025!<br />"
     #     "September 25, 🇺🇸 San Francisco"
     # ),
-    "light_css_variables": {
-        "color-announcement-background": "#292f36",
-        "color-announcement-text": "#ffffff",
-    },
-    "dark_css_variables": {
-        "color-announcement-background": "#292f36",
-        "color-announcement-text": "#ffffff",
-    },
+   "light_logo": "flower-logo-light.png",
+"dark_logo": "flower-logo-dark.png",
+
+"light_css_variables": {
+    "color-announcement-text": "#ffffff",
+    "color-sidebar-background": "#f2f2f2",
+    "color-sidebar-search-background": "#f2f2f2",
+    "color-sidebar-search-background--focus": "#e2e2e2",
+
+    # Left sidebar
+    "color-sidebar-link-text": "#5e5e5e",
+    "color-sidebar-link-text--top-level": "#404040",
+    "color-sidebar-item-background--hover": "#e5e5e5",
+},
+
+"dark_css_variables": {
+    "color-announcement-text": "#ffffff",
+    "color-sidebar-background": "#080808",
+    "color-sidebar-search-background": "#080808",
+    "color-sidebar-search-background--focus": "#1c1c1c",
+
+    # Left sidebar
+    "color-sidebar-link-text": "#7c7c7c",
+    "color-sidebar-link-text--top-level": "#7c7c7c",
+    "color-sidebar-item-background--hover": "#262119",
+
+    # Right sidebar (On this page)
+    "color-toc-title-text": "#aab6c3",
+    "color-toc-item-text": "#8fa1b5",
+    "color-toc-item-text--hover": "#d2deea",
+    "color-toc-item-text--active": "#5ca5ff",
+},
+
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
