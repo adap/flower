@@ -67,7 +67,7 @@ You can run your Flower project in both _simulation_ and _deployment_ mode witho
 
 This example is designed to run with two virtual clients. Let's first locate the Flower Configuration file and modify one of the existing connections to make use of two nodes.
 
-First, locate your Flower configuration file by running:
+Locate your Flower configuration file by running:
 
 ```shell
 flwr config list

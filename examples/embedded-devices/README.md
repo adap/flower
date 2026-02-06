@@ -142,9 +142,9 @@ Repeat for each embedded device that you want to connect to the `SuperLink`.
 
 ### Run the Flower App
 
-With both the long-running server (`SuperLink`) and two `SuperNodes` up and running, we can now start run.
+With both the long-running server (`SuperLink`) and two `SuperNodes` up and running, we can now start run. Let's first update the Flower Configuration file to add a new SuperLink connection.
 
-First, locate your Flower configuration file by running:
+Locate your Flower configuration file by running:
 
 ```shell
 flwr config list
@@ -158,7 +158,7 @@ SuperLink connections:
  local (default)
 ```
 
-Open this configuration file and add a new `SuperLink` connection at the end:
+Open this configuration file and add a new SuperLink connection at the end:
 
 ```TOML
 [superlink.embedded-federation]

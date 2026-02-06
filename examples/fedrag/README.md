@@ -129,17 +129,21 @@ All corpora used in this work were derived from the MedRAG toolkit [[4]](#ref4).
 
 This example is designed to run with two virtual clients. Let's first locate the Flower Configuration file and modify one of the existing connections to make use of two nodes.
 
-1. Locate the Flower Configuration file:
+Locate your Flower configuration file by running:
 
-```bash
+```shell
 flwr config list
-# Flower Config file: /path/to/your/.flwr/config.toml
-# SuperLink connections:
-#  supergrid
-#  local (default)
 ```
 
-2. Modify the `local` connection so it has two supernodes:
+```console
+# Example output:
+Flower Config file: /path/to/your/.flwr/config.toml
+SuperLink connections:
+ supergrid
+ local (default)
+```
+
+Modify the `local` connection so it has two supernodes:
 
 ```TOML
 [superlink.local]

@@ -55,17 +55,21 @@ fewer components to be launched manually. By default, `flwr run` will make use o
 
 This example is designed to run with five virtual clients. Let's first locate the Flower Configuration file and edit one of the existing connections to make it use five nodes.
 
-1. Locate the Flower Configuration file:
+Locate the Flower Configuration file:
 
-```bash
+```shell
 flwr config list
-# Flower Config file: /path/to/your/.flwr/config.toml
-# SuperLink connections:
-#  supergrid
-#  local (default)
 ```
 
-2. Modify the `local` connection so it has five supernodes:
+```console
+# Example output:
+Flower Config file: /path/to/your/.flwr/config.toml
+SuperLink connections:
+ supergrid
+ local (default)
+```
+
+Modify the `local` connection so it has five supernodes:
 
 ```TOML
 [superlink.local]

@@ -49,17 +49,21 @@ All the Flower App settings are defined in `pyproject.toml`.
 
 Before proceeding you need to create a new SuperLink connection and define 20 virtual SuperNodes. To do this, let's first locate the Flower Configuration file and then edit it.
 
-1. Locate the Flower Configuration file:
+Locate the Flower Configuration file:
 
-```bash
+```shell
 flwr config list
-# Flower Config file: /path/to/your/.flwr/config.toml
-# SuperLink connections:
-#  supergrid
-#  local (default)
 ```
 
-2. Add a new connection named `flowertune` and make it the default.
+```console
+# Example output:
+Flower Config file: /path/to/your/.flwr/config.toml
+SuperLink connections:
+ supergrid
+ local (default)
+```
+
+Add a new connection named `flowertune` and make it the default.
 
 ```TOML
 [superlink.flowertune]
