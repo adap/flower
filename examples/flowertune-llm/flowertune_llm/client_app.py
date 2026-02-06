@@ -71,7 +71,14 @@ def train(msg: Message, context: Context):
 def train_comms(msg: Message, context: Context):
     """Send the model layer by layer."""
     if context.node_id not in _MODEL_STATE or context.node_id not in _LAYER_NAMES:
-        raise ValueError("Model state not initialized; did you run the train step?")
+        cfg = DictConfig(replace_keys(unflatten_dict(context.run_config)))
+        model = get_model(cfg.model)
+        state_dict = model.state_dict()
+        layer_names = list(state_dict.keys())
+        if msg.content and "config" in msg.content and "layer_names" in msg.content["config"]:
+            layer_names = list(msg.content["config"]["layer_names"])
+        _MODEL_STATE[context.node_id] = state_dict
+        _LAYER_NAMES[context.node_id] = layer_names
 
     model_state = _MODEL_STATE[context.node_id]
     layer_names = _LAYER_NAMES[context.node_id]
