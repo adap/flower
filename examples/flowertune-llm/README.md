@@ -92,7 +92,7 @@ Example run config (float16, no training steps):
 
 ```bash
 flwr run . \
-  --run-config "model.name='meta-llama/Llama-3.1-70B-Instruct' model.device-map='auto' model.quantization=0 train.training-arguments.max-steps=0 profile.enabled=true model.dtype='float16'"
+  --run-config "model.name='meta-llama/Llama-3.1-70B-Instruct' model.device-map='cpu' model.quantization=0 train.training-arguments.max-steps=0 profile.enabled=true model.dtype='float16'"
 ```
 
 You can also target the base model ID if available in your environment:

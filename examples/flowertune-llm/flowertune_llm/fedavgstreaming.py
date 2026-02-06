@@ -233,11 +233,9 @@ class FedAvgStreaming(FedAvg):
             # -----------------------------------------------------------------
             for layer_idx, layer_name in enumerate(self._layer_names):
                 tensor = state_dict[layer_name]
-                chunk_slices = _chunk_slices(tensor, self._max_chunk_bytes)
-                if tensor.ndim == 0:
-                    agg_tensor = torch.empty_like(tensor)
-                else:
-                    agg_tensor = torch.empty_like(tensor)
+                cpu_tensor = tensor.detach().cpu() if hasattr(tensor, "cpu") else tensor
+                chunk_slices = _chunk_slices(cpu_tensor, self._max_chunk_bytes)
+                agg_tensor = torch.empty_like(cpu_tensor)
 
                 for chunk_idx, (start, end) in enumerate(chunk_slices):
                     config = ConfigRecord(
@@ -284,8 +282,6 @@ class FedAvgStreaming(FedAvg):
 
                     chunk_np = agg_record[layer_name].numpy()
                     chunk_tensor = torch.from_numpy(chunk_np)
-                    if tensor.device.type != "cpu":
-                        chunk_tensor = chunk_tensor.to(tensor.device)
 
                     if tensor.ndim == 0:
                         agg_tensor = chunk_tensor

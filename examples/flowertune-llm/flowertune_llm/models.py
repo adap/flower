@@ -60,6 +60,9 @@ def get_model(model_cfg: DictConfig):
         **load_kwargs,
     )
 
+    if getattr(model_cfg, "device_map", "") == "cpu":
+        model = model.to("cpu")
+
     #model = prepare_model_for_kbit_training(
     #    model, use_gradient_checkpointing=model_cfg.gradient_checkpointing
     #)
