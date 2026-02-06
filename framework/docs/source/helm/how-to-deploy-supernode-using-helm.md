@@ -259,7 +259,7 @@ supernode:
 | `global.affinity.podAntiAffinity`                    | Default pod anti-affinity rules. Either: `none`, `soft` or `hard` | `soft`           |
 | `global.affinity.nodeAffinity.type`                  | Default node affinity rules. Either: `none`, `soft` or `hard`     | `hard`           |
 | `global.affinity.nodeAffinity.matchExpressions`      | Default match expressions for node affinity                       | `[]`             |
-| `global.nodeAuth.enabled`                            | Enables or Disables Node-Authentication SuperLink <-> SuperNode   | `false`          |
+| `global.nodeAuth.enabled`                            | Enables or Disables Node-Authentication SuperLink \<-> SuperNode  | `false`          |
 | `global.nodeAuth.authSupernodePrivateKey`            | Specifies the ecdsa-sha2-nistp384 private key                     | `""`             |
 | `global.securityContext.runAsUser`                   | Set Security Context runAsUser                                    | `49999`          |
 | `global.securityContext.runAsGroup`                  | Set Security Context runAsGroup                                   | `49999`          |

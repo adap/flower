@@ -109,7 +109,7 @@ You can configure the license key in the `global.license` section of your `value
 of two ways:
 
 1. Directly — by setting `global.license.key` to your license key.
-2. From an existing Kubernetes Secret — by setting `global.license.existingSecret` to the name of
+1. From an existing Kubernetes Secret — by setting `global.license.existingSecret` to the name of
    a secret that contains your key.
 
 ```{note}
@@ -706,7 +706,7 @@ global:
 | `global.affinity.podAntiAffinity`                    | Default pod anti-affinity rules. Either: `none`, `soft` or `hard` | `soft`             |
 | `global.affinity.nodeAffinity.type`                  | Default node affinity rules. Either: `none`, `soft` or `hard`     | `hard`             |
 | `global.affinity.nodeAffinity.matchExpressions`      | Default match expressions for node affinity                       | `[]`               |
-| `global.nodeAuth.enabled`                            | Enables or Disables Node-Authentication SuperLink <-> SuperNode   | `false`            |
+| `global.nodeAuth.enabled`                            | Enables or Disables Node-Authentication SuperLink \<-> SuperNode  | `false`            |
 | `global.accountAuth.enabled`                         | Enables or disables the user authentication plugin.               | `false`            |
 | `global.accountAuth.config`                          | Set the user authentication configuration.                        | `{}`               |
 | `global.accountAuth.existingSecret`                  | Existing secret with user authentication configuration.           | `""`               |
