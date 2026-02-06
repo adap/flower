@@ -65,6 +65,13 @@ def _chunk_slices(tensor: torch.Tensor, max_bytes: int) -> list[tuple[int, int]]
     return slices
 
 
+def _has_meta_tensors(state_dict: dict[str, Any]) -> bool:
+    for value in state_dict.values():
+        if hasattr(value, "is_meta") and value.is_meta:
+            return True
+    return False
+
+
 # pylint: disable=too-many-instance-attributes
 class FedAvgStreaming(FedAvg):
     """Federated Averaging strategy with layer-wise aggregation."""
@@ -179,10 +186,16 @@ class FedAvgStreaming(FedAvg):
 
         t_start = time.time()
         if evaluate_fn:
-            res = evaluate_fn(0, ArrayRecord(state_dict))
-            log(INFO, "Initial global evaluation results: %s", res)
-            if res is not None:
-                result.evaluate_metrics_serverapp[0] = res
+            if _has_meta_tensors(state_dict):
+                log(
+                    WARNING,
+                    "Skipping initial evaluation: model contains meta tensors.",
+                )
+            else:
+                res = evaluate_fn(0, ArrayRecord(state_dict))
+                log(INFO, "Initial global evaluation results: %s", res)
+                if res is not None:
+                    result.evaluate_metrics_serverapp[0] = res
 
         for current_round in range(1, num_rounds + 1):
             set_current_round(current_round)
@@ -313,20 +326,32 @@ class FedAvgStreaming(FedAvg):
             # --- EVALUATION (SERVERAPP-SIDE) ---------------------------------
             # -----------------------------------------------------------------
             if evaluate_fn:
-                arrays = ArrayRecord(state_dict)
-                log(INFO, "Global evaluation")
-                res = evaluate_fn(current_round, arrays)
-                log(INFO, "\t└──> MetricRecord: %s", res)
-                if res is not None:
-                    result.evaluate_metrics_serverapp[current_round] = res
+                if _has_meta_tensors(state_dict):
+                    log(
+                        WARNING,
+                        "Skipping global evaluation: model contains meta tensors.",
+                    )
+                else:
+                    arrays = ArrayRecord(state_dict)
+                    log(INFO, "Global evaluation")
+                    res = evaluate_fn(current_round, arrays)
+                    log(INFO, "\t└──> MetricRecord: %s", res)
+                    if res is not None:
+                        result.evaluate_metrics_serverapp[current_round] = res
 
         log(INFO, "")
         log(INFO, "Strategy execution finished in %.2fs", time.time() - t_start)
         log(INFO, "")
         log(INFO, "Final results:")
         log(INFO, "")
-        final_arrays = ArrayRecord(state_dict)
-        result.arrays = final_arrays
+        if _has_meta_tensors(state_dict):
+            log(
+                WARNING,
+                "Skipping final ArrayRecord: model contains meta tensors.",
+            )
+        else:
+            final_arrays = ArrayRecord(state_dict)
+            result.arrays = final_arrays
         for line in io.StringIO(str(result)):
             log(INFO, "\t%s", line.strip("\n"))
         log(INFO, "")
