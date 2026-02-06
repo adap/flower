@@ -31,9 +31,3 @@ clientapp = "pandas_example.client_app:app"
 [tool.flwr.app.config]
 num-server-rounds = 3
 fraction-sample = 1.0
-
-[tool.flwr.federations]
-default = "local-simulation"
-
-[tool.flwr.federations.local-simulation]
-options.num-supernodes = 4

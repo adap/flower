@@ -29,9 +29,3 @@ fraction-sample = 1.0
 local-epochs = 1
 learning-rate = 0.1
 depth = 6
-
-[tool.flwr.federations]
-default = "local-simulation"
-
-[tool.flwr.federations.local-simulation]
-options.num-supernodes = 5

@@ -27,9 +27,3 @@ clientapp = "examplefkm.client_app:app"
 [tool.flwr.app.config]
 min-num-clients = 2
 num-server-rounds = 1
-
-[tool.flwr.federations]
-default = "local-simulation"
-
-[tool.flwr.federations.local-simulation]
-options.num-supernodes = 2
