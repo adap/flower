@@ -5,6 +5,7 @@
 # Protobuf Python Version: 5.29.0
 """Generated protocol buffer code."""
 from google.protobuf import descriptor as _descriptor
+from google.protobuf import descriptor_pb2 as _descriptor_pb2
 from google.protobuf import descriptor_pool as _descriptor_pool
 from google.protobuf import runtime_version as _runtime_version
 from google.protobuf import symbol_database as _symbol_database
@@ -35,6 +36,33 @@ DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x18\x66lwr/proto/
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'flwr.proto.control_pb2', _globals)
+
+# Additional messages for run profiling (manually added)
+_profile_fd = _descriptor_pb2.FileDescriptorProto()
+_profile_fd.name = "flwr/proto/control_profile.proto"
+_profile_fd.package = "flwr.proto"
+_profile_fd.syntax = "proto3"
+_req_msg = _profile_fd.message_type.add()
+_req_msg.name = "GetRunProfileRequest"
+_req_field = _req_msg.field.add()
+_req_field.name = "run_id"
+_req_field.number = 1
+_req_field.label = _descriptor_pb2.FieldDescriptorProto.LABEL_OPTIONAL
+_req_field.type = _descriptor_pb2.FieldDescriptorProto.TYPE_UINT64
+_res_msg = _profile_fd.message_type.add()
+_res_msg.name = "GetRunProfileResponse"
+_res_field = _res_msg.field.add()
+_res_field.name = "summary_json"
+_res_field.number = 1
+_res_field.label = _descriptor_pb2.FieldDescriptorProto.LABEL_OPTIONAL
+_res_field.type = _descriptor_pb2.FieldDescriptorProto.TYPE_BYTES
+PROFILE_DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(
+    _profile_fd.SerializeToString()
+)
+_builder.BuildMessageAndEnumDescriptors(PROFILE_DESCRIPTOR, _globals)
+_builder.BuildTopDescriptorsAndMessages(
+    PROFILE_DESCRIPTOR, 'flwr.proto.control_pb2', _globals
+)
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
   _globals['_STARTRUNREQUEST_OVERRIDECONFIGENTRY']._loaded_options = None

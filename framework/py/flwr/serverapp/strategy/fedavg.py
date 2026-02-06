@@ -16,6 +16,7 @@
 
 
 from collections.abc import Callable, Iterable
+import time
 from logging import INFO, WARNING
 
 from flwr.common import (
@@ -27,6 +28,7 @@ from flwr.common import (
     RecordDict,
     log,
 )
+from flwr.common.profiling import get_active_profiler
 from flwr.server import Grid
 
 from .strategy import Strategy
@@ -259,10 +261,22 @@ class FedAvg(Strategy):
             reply_contents = [msg.content for msg in valid_replies]
 
             # Aggregate ArrayRecords
+            profiler = get_active_profiler()
+            start = time.perf_counter() if profiler is not None else None
             arrays = aggregate_arrayrecords(
                 reply_contents,
                 self.weighted_by_key,
             )
+            if profiler is not None and start is not None:
+                duration_ms = (time.perf_counter() - start) * 1000.0
+                profiler.record(
+                    scope="server",
+                    task="aggregate",
+                    round=server_round,
+                    node_id=None,
+                    duration_ms=duration_ms,
+                    metadata={"num_replies": len(valid_replies)},
+                )
 
             # Aggregate MetricRecords
             metrics = self.train_metrics_aggr_fn(

@@ -53,6 +53,11 @@ pip install -e .
 
 You can run your Flower project in both _simulation_ and _deployment_ mode without making changes to the code. If you are starting with Flower, we recommend you using the _simulation_ mode as it requires fewer components to be launched manually. By default, `flwr run` will make use of the Simulation Engine.
 
+> [!NOTE]
+> In this version of the example, **client-side training is disabled** to allow
+> aggregation-only runs. Dataset/tokenizer work is skipped, and the example focuses
+> on layer-wise model aggregation.
+
 ### Run with the Simulation Engine
 
 > [!NOTE]
@@ -77,6 +82,35 @@ flwr run . --run-config "num-server-rounds=50 strategy.fraction-train=0.25"
 Follow this [how-to guide](https://flower.ai/docs/framework/how-to-run-flower-with-deployment-engine.html) to run the same app in this example but with Flower's Deployment Engine. After that, you might be intersted in setting up [secure TLS-enabled communications](https://flower.ai/docs/framework/how-to-enable-tls-connections.html) and [SuperNode authentication](https://flower.ai/docs/framework/how-to-authenticate-supernodes.html) in your federation.
 
 If you are already familiar with how the Deployment Engine works, you may want to learn how to run it using Docker. Check out the [Flower with Docker](https://flower.ai/docs/framework/docker/index.html) documentation.
+
+### 70B Aggregation-Only (Deployment Engine)
+
+This mode is intended to validate that a 70B model can be aggregated layer-by-layer
+without client-side training. Use the Deployment Engine to run multiple nodes/GPUs.
+
+Example run config (bfloat16, no training steps):
+
+```bash
+flwr run . \
+  --run-config "model.name='meta-llama/Llama-3.1-70B-Instruct' model.device-map='auto' model.quantization=0 train.training-arguments.max-steps=0 profile.enabled=true"
+```
+
+You can also target the base model ID if available in your environment:
+`meta-llama/Meta-Llama-3.1-70B`.
+
+### Profiling
+
+To enable profiling for a run:
+
+```bash
+flwr run . --run-config "profile.enabled=true"
+```
+
+Then use the new CLI command to display a summary:
+
+```bash
+flwr profile <run_id>
+```
 
 ## Expected results
 

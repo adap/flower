@@ -16,11 +16,17 @@
 
 
 import time
+from time import perf_counter
 from collections.abc import Iterable
 from typing import cast
 from uuid import uuid4
 
 from flwr.common import Message, RecordDict
+from flwr.common.profiling import (
+    get_active_profiler,
+    get_current_round,
+    record_profile_metrics_from_messages,
+)
 from flwr.common.constant import SUPERLINK_NODE_ID
 from flwr.common.logger import warn_deprecated_feature
 from flwr.common.typing import Run
@@ -151,9 +157,13 @@ class InMemoryGrid(Grid):
         waits for the replies. It continues to pull replies until either all replies are
         received or the specified timeout duration is exceeded.
         """
+        profiler = get_active_profiler()
+        start = perf_counter() if profiler is not None else None
+
         # Push messages
         msg_ids = set(self.push_messages(messages))
         del messages
+        expected_replies = len(msg_ids)
 
         # Pull messages
         end_time = time.time() + (timeout if timeout is not None else 0.0)
@@ -168,4 +178,16 @@ class InMemoryGrid(Grid):
                 break
             # Sleep
             time.sleep(self.pull_interval)
+        if profiler is not None and start is not None:
+            duration_ms = (perf_counter() - start) * 1000.0
+            profiler.record(
+                scope="server",
+                task="send_and_receive",
+                round=get_current_round(),
+                node_id=None,
+                duration_ms=duration_ms,
+                metadata={"expected_replies": expected_replies},
+            )
+            record_profile_metrics_from_messages(ret)
+
         return ret

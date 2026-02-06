@@ -1,27 +1,28 @@
 """flowertune-llm: A Flower / FlowerTune app."""
 
+from __future__ import annotations
+
 import os
+from time import perf_counter
 import warnings
 
 from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
 from flwr.clientapp import ClientApp
 from flwr.common.config import unflatten_dict
 from omegaconf import DictConfig
-from peft import get_peft_model_state_dict, set_peft_model_state_dict
-from transformers import TrainingArguments
-from trl import SFTTrainer
 
-from flowertune_llm.dataset import (
-    get_tokenizer_and_data_collator_and_propt_formatting,
-    load_data,
-    replace_keys,
-)
-from flowertune_llm.models import cosine_annealing, get_model
+from flowertune_llm.dataset import replace_keys
+from flowertune_llm.models import get_model
 
 # Avoid warnings
 os.environ["TOKENIZERS_PARALLELISM"] = "true"
 os.environ["RAY_DISABLE_DOCKER_CPU_WARNING"] = "1"
 warnings.filterwarnings("ignore", category=UserWarning)
+
+
+# Cache model state per node (outside Context.state to avoid RecordDict restrictions)
+_MODEL_STATE: dict[int, dict[str, object]] = {}
+_LAYER_NAMES: dict[int, list[str]] = {}
 
 
 # Flower ClientApp
@@ -30,79 +31,78 @@ app = ClientApp()
 
 @app.train()
 def train(msg: Message, context: Context):
-    """Train the model on local data."""
-    # Parse config
-    partition_id = context.node_config["partition-id"]
-    num_partitions = context.node_config["num-partitions"]
-    num_rounds = context.run_config["num-server-rounds"]
+    """Prepare model state for layer-wise sending (training disabled)."""
     cfg = DictConfig(replace_keys(unflatten_dict(context.run_config)))
-    training_arguments = TrainingArguments(**cfg.train.training_arguments)
 
-    # Let's get the client partition
-    trainset = load_data(partition_id, num_partitions, cfg.dataset.name)
-    (
-        tokenizer,
-        data_collator,
-        formatting_prompts_func,
-    ) = get_tokenizer_and_data_collator_and_propt_formatting(cfg.model.name)
-
-    # Load the model and initialize it with the received weights
+    t0 = perf_counter()
     model = get_model(cfg.model)
-    #set_peft_model_state_dict(model, msg.content["arrays"].to_torch_state_dict())
-    model.load_state_dict(msg.content["arrays"].to_torch_state_dict(), strict=True)
+    t1 = perf_counter()
 
-    # Set learning rate for current round
-    new_lr = cosine_annealing(
-        msg.content["config"]["server-round"],
-        num_rounds,
-        cfg.train.learning_rate_max,
-        cfg.train.learning_rate_min,
-    )
+    if msg.content and "arrays" in msg.content:
+        model.load_state_dict(msg.content["arrays"].to_torch_state_dict(), strict=False)
+    t2 = perf_counter()
 
-    training_arguments.learning_rate = new_lr
-    training_arguments.output_dir = msg.content["config"]["save_path"]
+    state_dict = model.state_dict()
+    layer_names = list(state_dict.keys())
+    if msg.content and "config" in msg.content:
+        config = msg.content["config"]
+        if "layer_names" in config:
+            layer_names = list(config["layer_names"])
 
-    # Construct trainer
-    #trainer = SFTTrainer(
-    #    model=model,
-    #    tokenizer=tokenizer,
-    #    args=training_arguments,
-    #    max_seq_length=cfg.train.seq_length,
-    #    train_dataset=trainset,
-    #    formatting_func=formatting_prompts_func,
-    #    data_collator=data_collator,
-    #)
+    _MODEL_STATE[context.node_id] = state_dict
+    _LAYER_NAMES[context.node_id] = layer_names
+    t3 = perf_counter()
 
-    # Do local training
-    #results = trainer.train()
-
-    # Construct and return reply Message
-    #model_record = ArrayRecord(get_peft_model_state_dict(model))
-    print(f'model layers = {model.state_dict().keys()}')
-    model_record = ArrayRecord(model.state_dict())
-    #metrics = {
-    #    "train_loss": results.training_loss,
-    #    "num-examples": len(trainset),
-    #}
     metrics = {
         "train_loss": 0.0,
-        "num-examples": len(trainset),
+        "num-examples": 1,
+        "profile.client.prepare.ms": (t3 - t0) * 1000.0,
+        "profile.client.load_model.ms": (t1 - t0) * 1000.0,
+        "profile.client.load_arrays.ms": (t2 - t1) * 1000.0,
+        "profile.client.state_dict.ms": (t3 - t2) * 1000.0,
     }
 
     metric_record = MetricRecord(metrics)
     content = RecordDict({"metrics": metric_record})
-    #Save trained model as context for layer-wise sending
-    context.state["net_parameters"] = model_record
-    context.state["current_layer"] = MetricRecord({"idx":0})
-
     return Message(content=content, reply_to=msg)
+
 
 @app.train("layer_wise_communication")
 def train_comms(msg: Message, context: Context):
-    """Send the model layer by layer"""
-    model_dict = context.state["net_parameters"].to_torch_state_dict()
-    idx = context.state["current_layer"]["idx"]
-    send_complete = False
-    if idx == (len(model_dict.keys()) - 1):
-        send_complete = True
-    
+    """Send the model layer by layer."""
+    if context.node_id not in _MODEL_STATE or context.node_id not in _LAYER_NAMES:
+        raise ValueError("Model state not initialized; did you run the train step?")
+
+    model_state = _MODEL_STATE[context.node_id]
+    layer_names = _LAYER_NAMES[context.node_id]
+
+    config = msg.content["config"] if msg.content and "config" in msg.content else {}
+    layer_idx = int(config.get("layer_idx", 0))
+    chunk_start = int(config.get("chunk_start", 0))
+    chunk_end = int(config.get("chunk_end", 0))
+
+    layer_name = layer_names[layer_idx]
+    tensor = model_state[layer_name]
+    t0 = perf_counter()
+    if hasattr(tensor, "detach"):
+        tensor = tensor.detach()
+    if hasattr(tensor, "cpu"):
+        tensor = tensor.cpu()
+    if hasattr(tensor, "__getitem__") and chunk_end > chunk_start and getattr(
+        tensor, "ndim", 0
+    ):
+        tensor = tensor[chunk_start:chunk_end]
+    t1 = perf_counter()
+
+    model_record = ArrayRecord({layer_name: tensor})
+    t2 = perf_counter()
+
+    metrics = {
+        "num-examples": 1,
+        "profile.client.slice.ms": (t1 - t0) * 1000.0,
+        "profile.client.serialize.ms": (t2 - t1) * 1000.0,
+    }
+
+    metric_record = MetricRecord(metrics)
+    content = RecordDict({"arrays": model_record, "metrics": metric_record})
+    return Message(content=content, reply_to=msg)

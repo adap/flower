@@ -57,6 +57,12 @@ class ControlStub:
     ]
     """flwr ls command"""
 
+    GetRunProfile: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.control_pb2.GetRunProfileRequest,
+        flwr.proto.control_pb2.GetRunProfileResponse,
+    ]
+    """Get run profile summary"""
+
     GetLoginDetails: grpc.UnaryUnaryMultiCallable[
         flwr.proto.control_pb2.GetLoginDetailsRequest,
         flwr.proto.control_pb2.GetLoginDetailsResponse,
@@ -129,6 +135,12 @@ class ControlAsyncStub:
         flwr.proto.control_pb2.ListRunsResponse,
     ]
     """flwr ls command"""
+
+    GetRunProfile: grpc.aio.UnaryUnaryMultiCallable[
+        flwr.proto.control_pb2.GetRunProfileRequest,
+        flwr.proto.control_pb2.GetRunProfileResponse,
+    ]
+    """Get run profile summary"""
 
     GetLoginDetails: grpc.aio.UnaryUnaryMultiCallable[
         flwr.proto.control_pb2.GetLoginDetailsRequest,
@@ -210,6 +222,14 @@ class ControlServicer(metaclass=abc.ABCMeta):
         context: _ServicerContext,
     ) -> typing.Union[flwr.proto.control_pb2.ListRunsResponse, collections.abc.Awaitable[flwr.proto.control_pb2.ListRunsResponse]]:
         """flwr ls command"""
+
+    @abc.abstractmethod
+    def GetRunProfile(
+        self,
+        request: flwr.proto.control_pb2.GetRunProfileRequest,
+        context: _ServicerContext,
+    ) -> typing.Union[flwr.proto.control_pb2.GetRunProfileResponse, collections.abc.Awaitable[flwr.proto.control_pb2.GetRunProfileResponse]]:
+        """Get run profile summary"""
 
     @abc.abstractmethod
     def GetLoginDetails(

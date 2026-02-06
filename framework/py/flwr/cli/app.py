@@ -30,6 +30,7 @@ from .login import login
 from .ls import ls
 from .new import new
 from .pull import pull
+from .profile import profile
 from .run import run
 from .stop import stop
 from .supernode import ls as supernode_list
@@ -56,6 +57,7 @@ app.command(hidden=True)(ls)
 app.command()(stop)
 app.command()(login)
 app.command()(pull)
+app.command()(profile)
 
 # Create supernode command group
 supernode_app = typer.Typer(help="Manage SuperNodes")

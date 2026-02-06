@@ -16,6 +16,7 @@
 
 
 import inspect
+from time import perf_counter
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 
@@ -26,8 +27,9 @@ from flwr.client.message_handler.message_handler import (
 )
 from flwr.client.mod.utils import make_ffn
 from flwr.client.typing import ClientFnExt, Mod
-from flwr.common import Context, Message, MessageType
+from flwr.common import Context, Message, MessageType, MetricRecord
 from flwr.common.logger import warn_deprecated_feature
+from flwr.common.profiling import get_active_profiler
 
 from .typing import ClientAppCallable
 
@@ -138,28 +140,59 @@ class ClientApp:
     def __call__(self, message: Message, context: Context) -> Message:
         """Execute `ClientApp`."""
         with self._lifespan(context):
+            start = perf_counter()
             # Execute message using `client_fn`
             if self._call:
-                return self._call(message, context)
+                out_message = self._call(message, context)
+            else:
+                # Get the category and the action
+                # A valid message type is of the form "<category>" or "<category>.<action>",
+                # where <category> must be "train"/"evaluate"/"query", and <action> is a
+                # valid Python identifier
+                if not validate_message_type(message.metadata.message_type):
+                    raise ValueError(
+                        f"Invalid message type: {message.metadata.message_type}"
+                    )
 
-            # Get the category and the action
-            # A valid message type is of the form "<category>" or "<category>.<action>",
-            # where <category> must be "train"/"evaluate"/"query", and <action> is a
-            # valid Python identifier
-            if not validate_message_type(message.metadata.message_type):
-                raise ValueError(
-                    f"Invalid message type: {message.metadata.message_type}"
-                )
+                category, action = message.metadata.message_type, DEFAULT_ACTION
+                if "." in category:
+                    category, action = category.split(".")
 
-            category, action = message.metadata.message_type, DEFAULT_ACTION
-            if "." in category:
-                category, action = category.split(".")
+                # Check if the function is registered
+                if (full_name := f"{category}.{action}") in self._registered_funcs:
+                    out_message = self._registered_funcs[full_name](message, context)
+                else:
+                    raise ValueError(
+                        f"No {category} function registered with name '{action}'"
+                    )
 
-            # Check if the function is registered
-            if (full_name := f"{category}.{action}") in self._registered_funcs:
-                return self._registered_funcs[full_name](message, context)
+            # Inject profiling metric if enabled
+            if context.run_config.get("profile.enabled"):
+                duration_ms = (perf_counter() - start) * 1000.0
+                if out_message is not None and not out_message.has_error():
+                    record = None
+                    if out_message.content is not None:
+                        if out_message.content.metric_records:
+                            record = next(
+                                iter(out_message.content.metric_records.values())
+                            )
+                        else:
+                            record = MetricRecord()
+                            out_message.content["metrics"] = record
+                    if record is not None:
+                        record["profile.client.total.ms"] = duration_ms
+                profiler = get_active_profiler()
+                if profiler is not None:
+                    profiler.record(
+                        scope="client",
+                        task="total",
+                        round=None,
+                        node_id=context.node_id,
+                        duration_ms=duration_ms,
+                        metadata={},
+                    )
 
-            raise ValueError(f"No {category} function registered with name '{action}'")
+            return out_message
 
     def train(
         self, action: str = DEFAULT_ACTION, *, mods: list[Mod] | None = None

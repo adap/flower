@@ -6,7 +6,6 @@ from datetime import datetime
 from flwr.app import ArrayRecord, ConfigRecord, Context, MetricRecord
 from flwr.common.config import unflatten_dict
 from flwr.serverapp import Grid, ServerApp
-from flwr.serverapp.strategy import FedAvg
 from omegaconf import DictConfig
 from peft import get_peft_model_state_dict, set_peft_model_state_dict
 
@@ -33,13 +32,14 @@ def main(grid: Grid, context: Context) -> None:
 
     # Get initial model weights
     init_model = get_model(cfg.model)
-    #arrays = ArrayRecord(get_peft_model_state_dict(init_model))
-    arrays = ArrayRecord(init_model.state_dict())
+    init_state_dict = init_model.state_dict()
+    arrays = ArrayRecord()
 
     # Define strategy
     strategy = FedAvgStreaming(
         fraction_train=cfg.strategy.fraction_train,
         fraction_evaluate=cfg.strategy.fraction_evaluate,
+        initial_state_dict=init_state_dict,
     )
 
     # Start strategy, run FedAvg for `num_rounds`

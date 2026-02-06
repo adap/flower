@@ -55,6 +55,8 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     GetAuthTokensResponse,
     GetLoginDetailsRequest,
     GetLoginDetailsResponse,
+    GetRunProfileRequest,
+    GetRunProfileResponse,
     ListFederationsRequest,
     ListFederationsResponse,
     ListNodesRequest,
@@ -294,6 +296,35 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         # Init the object store
         store = self.objectstore_factory.store()
         return _create_list_runs_response(run_ids, state, store)
+
+    def GetRunProfile(
+        self, request: GetRunProfileRequest, context: grpc.ServicerContext
+    ) -> GetRunProfileResponse:
+        """Get run profile summary."""
+        log(INFO, "ControlServicer.GetRunProfile")
+        state = self.linkstate_factory.state()
+
+        run_id = request.run_id
+        run = state.get_run(run_id)
+        if not run:
+            context.abort(grpc.StatusCode.NOT_FOUND, RUN_ID_NOT_FOUND_MESSAGE)
+
+        flwr_aid = get_current_account_info().flwr_aid
+        _check_flwr_aid_in_run(flwr_aid=flwr_aid, run=cast(Run, run), context=context)
+
+        serverapp_context = state.get_serverapp_context(run_id)
+        if serverapp_context is None:
+            context.abort(grpc.StatusCode.NOT_FOUND, "Profile summary not found.")
+
+        if "profile_summary" not in serverapp_context.state:
+            context.abort(grpc.StatusCode.NOT_FOUND, "Profile summary not found.")
+
+        record = serverapp_context.state["profile_summary"]
+        if "json" not in record:
+            context.abort(grpc.StatusCode.NOT_FOUND, "Profile summary not found.")
+
+        summary_json = cast(bytes, record["json"])
+        return GetRunProfileResponse(summary_json=summary_json)
 
     def StopRun(
         self, request: StopRunRequest, context: grpc.ServicerContext

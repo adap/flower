@@ -189,6 +189,36 @@ class ListRunsResponse(google.protobuf.message.Message):
 global___ListRunsResponse = ListRunsResponse
 
 @typing.final
+class GetRunProfileRequest(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    RUN_ID_FIELD_NUMBER: builtins.int
+    run_id: builtins.int
+    def __init__(
+        self,
+        *,
+        run_id: builtins.int = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing.Literal["run_id", b"run_id"]) -> None: ...
+
+global___GetRunProfileRequest = GetRunProfileRequest
+
+@typing.final
+class GetRunProfileResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    SUMMARY_JSON_FIELD_NUMBER: builtins.int
+    summary_json: builtins.bytes
+    def __init__(
+        self,
+        *,
+        summary_json: builtins.bytes = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing.Literal["summary_json", b"summary_json"]) -> None: ...
+
+global___GetRunProfileResponse = GetRunProfileResponse
+
+@typing.final
 class GetLoginDetailsRequest(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
 

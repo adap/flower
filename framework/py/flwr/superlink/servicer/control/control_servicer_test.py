@@ -28,7 +28,7 @@ from unittest.mock import MagicMock, Mock, patch
 import grpc
 from parameterized import parameterized
 
-from flwr.common import ConfigRecord, now
+from flwr.common import ConfigRecord, Context, RecordDict, now
 from flwr.common.constant import (
     NODE_NOT_FOUND_MESSAGE,
     PUBLIC_KEY_ALREADY_IN_USE_MESSAGE,
@@ -38,6 +38,7 @@ from flwr.common.constant import (
 )
 from flwr.common.typing import Run, RunStatus
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
+    GetRunProfileRequest,
     ListNodesRequest,
     ListNodesResponse,
     ListRunsRequest,
@@ -184,6 +185,22 @@ class TestControlServicer(unittest.TestCase):
         if run_state is not None:
             self.assertEqual(run_state.status, expected_run_status)
         self.store.delete_objects_in_run.assert_called_once_with(run_id)
+
+    def test_get_run_profile(self) -> None:
+        """Test GetRunProfile method of ControlServicer."""
+        run_id = self._create_dummy_run(self.aid)
+        summary_bytes = b'{"entries": []}'
+        context = Context(
+            run_id=run_id,
+            node_id=0,
+            node_config={},
+            state=RecordDict({"profile_summary": ConfigRecord({"json": summary_bytes})}),
+            run_config={},
+        )
+        self.state.set_serverapp_context(run_id=run_id, context=context)
+
+        response = self.servicer.GetRunProfile(GetRunProfileRequest(run_id=run_id), Mock())
+        self.assertEqual(response.summary_json, summary_bytes)
 
     @parameterized.expand(
         [

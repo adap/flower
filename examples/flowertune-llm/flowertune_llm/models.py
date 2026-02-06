@@ -40,10 +40,16 @@ def get_model(model_cfg: DictConfig):
     #        f"Use 4-bit or 8-bit quantization. You passed: {model_cfg.quantization}/"
     #    )
 
+    load_kwargs = {
+        "torch_dtype": torch.bfloat16,
+        "low_cpu_mem_usage": True,
+    }
+    if hasattr(model_cfg, "device_map") and model_cfg.device_map:
+        load_kwargs["device_map"] = model_cfg.device_map
+
     model = AutoModelForCausalLM.from_pretrained(
         model_cfg.name,
-        #quantization_config=quantization_config,
-        #torch_dtype=torch.bfloat16,
+        **load_kwargs,
     )
 
     #model = prepare_model_for_kbit_training(
