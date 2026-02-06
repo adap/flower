@@ -73,7 +73,7 @@ First, locate your Flower configuration file by running:
 flwr config list
 ```
 
-```shell
+```console
 # Example output:
 Flower Config file: /path/to/your/.flwr/config.toml
 SuperLink connections:
