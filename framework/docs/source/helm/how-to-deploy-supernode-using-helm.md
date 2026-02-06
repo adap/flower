@@ -365,7 +365,7 @@ supernode:
 | `superexec.serviceAccount.labels`                       | Labels applied to enabled service account                                                                         | `{}`                      |
 | `superexec.serviceAccount.automountServiceAccountToken` | Automount SA-Token                                                                                                | `true`                    |
 | `superexec.containerPorts.health`                       | Container port for SuperExec Health API                                                                           | `8081`                    |
-| `superexec.podSecurityContext`                          | Security settings that for the SuperExec Pod                                                                      | `{}`                      |
+| `superexec.podSecurityContext`                          | Security settings for the SuperExec Pod                                                                           | `{}`                      |
 | `superexec.livenessProbe.enabled`                       | Enable livenessProbe on SuperExec containers                                                                      | `true`                    |
 | `superexec.livenessProbe.initialDelaySeconds`           | Initial delay seconds for livenessProbe                                                                           | `0`                       |
 | `superexec.livenessProbe.periodSeconds`                 | Period seconds for livenessProbe                                                                                  | `10`                      |
