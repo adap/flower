@@ -65,6 +65,42 @@ python generate_creds.py
 python generate_creds.py --supernodes {your_number_of_supernodes}
 ```
 
+## Define a SuperLink connection in the Flower Configuration file
+
+Let's first locate the Flower Configuration file and create a SuperLink connection with that will allow us to interface with the SuperLink using the TLS certificate we just created.
+
+Locate the Flower Configuration file:
+
+```shell
+flwr config list
+```
+
+```console
+# Example output:
+Flower Config file: /path/to/your/.flwr/config.toml
+SuperLink connections:
+ supergrid
+ local (default)
+```
+
+Create a new Superlink connection named `my-connection`:
+
+```TOML
+[superlink.my-connection]
+address = "127.0.0.1:9093" # Control API of SuperLink
+root-certificates = "/abs/path/to/certificates/ca.crt"
+```
+
+Make this new connection the default one by editing the top part of the `config.toml`. In this way, if you now execute `flwr config list` again you should see the following output:
+
+```console
+Flower Config file: /path/to/your/.flwr/config.toml
+SuperLink connections:
+ supergrid
+ local
+ my-connection (default)
+```
+
 ## Start the long-running Flower server (SuperLink)
 
 Starting long-running Flower server component (SuperLink) and enable authentication is very easy; all you need to do is to pass the `--enable-supernode-auth` flag. In this example we also enable secure TLS communications between `SuperLink`, the `SuperNodes` and the Flower CLI.
@@ -94,37 +130,33 @@ python prepare_dataset.py
 
 Before connecting the `SuperNodes` we need to register them with the `SuperLink`. This means we'll tell the `SuperLink` about the identities of the `SuperNodes` that will be connected. We do this by sending to it the public keys of the `SuperNodes` that we want the `SuperLink` to authorize.
 
-Let's register the first `SuperNode`. The command below will send the public key to the `SuperLink` defined in the `my-federation` federation in the `pyproject.toml`.
+Let's register the first `SuperNode`. The command below will send the public key to the `SuperLink`.
 
 ```shell
-flwr supernode register keys/supernode_credentials_1.pub . my-federation
+flwr supernode register keys/supernode_credentials_1.pub
 # It will print something like:
-# Loading project configuration...
-# Success
 # ✅ SuperNode 16019329408659850374 registered successfully.
 ```
 
 Then, we register the second `SuperNode` using the other public key:
 
 ```shell
-flwr supernode register keys/supernode_credentials_2.pub . my-federation
+flwr supernode register keys/supernode_credentials_2.pub
 # It will print something like:
-# Loading project configuration...
-# Success
 # ✅ SuperNode 8392976743692794070 registered successfully.
 ```
 
 You could also use the Flower ClI to view the status of the `SuperNodes`.
 
 ```shell
-flwr supernode list . my-federation
+flwr supernode list
 📄 Listing all nodes...
 ┏━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┓
 ┃       Node ID        ┃   Owner    ┃ Status  ┃ Elapsed  ┃   Status Changed @   ┃
 ┡━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━┩
-│ 16019329408659850374 │<name:none> │ created │          │ N/A                  │
+│ 16019329408659850374 │   none     │ created │          │ N/A                  │
 ├──────────────────────┼────────────┼─────────┼──────────┼──────────────────────┤
-│ 8392976743692794070  │<name:none> │ created │          │ N/A                  │
+│ 8392976743692794070  │   none     │ created │          │ N/A                  │
 └──────────────────────┴────────────┴─────────┴──────────┴──────────────────────┘
 ```
 
@@ -157,14 +189,14 @@ flower-supernode \
 Now that you have connected the `SuperNodes`, you should see them with status `online`:
 
 ```shell
-flwr supernode list . my-federation
+flwr supernode list
 📄 Listing all nodes...
 ┏━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┓
 ┃       Node ID        ┃   Owner    ┃ Status  ┃ Elapsed  ┃   Status Changed @   ┃
 ┡━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━┩
-│ 16019329408659850374 │<name:none> │ online  │ 00:00:30 │ 2025-10-13 13:40:47Z │
+│ 16019329408659850374 │   none     │ online  │ 00:00:30 │ 2025-10-13 13:40:47Z │
 ├──────────────────────┼────────────┼─────────┼──────────┼──────────────────────┤
-│ 8392976743692794070  │<name:none> │ online  │ 00:00:22 │ 2025-10-13 13:52:21Z │
+│ 8392976743692794070  │   none     │ online  │ 00:00:22 │ 2025-10-13 13:52:21Z │
 └──────────────────────┴────────────┴─────────┴──────────┴──────────────────────┘
 ```
 
@@ -184,8 +216,8 @@ above. Don't forget to specify the correct client private key for each client (S
 
 ## Run the Flower App
 
-With both the long-running server (SuperLink) and two SuperNodes up and running, we can now start the run. Note that the command below points to a federation named `my-federation`. Its entry point is defined in the `pyproject.toml`. You can optionally use the `--stream` flag to stream logs from your `ServerApp` running on SuperLink.
+With both the long-running server (SuperLink) and two SuperNodes up and running, we can now start the run. You can optionally use the `--stream` flag to stream logs from your `ServerApp` running on SuperLink.
 
 ```bash
-flwr run . my-federation --stream
+flwr run . --stream
 ```

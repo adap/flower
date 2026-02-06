@@ -29,9 +29,3 @@ clientapp = "fedvaeexample.client_app:app"
 num-server-rounds = 3
 local-epochs = 1
 learning-rate = 0.001
-
-[tool.flwr.federations]
-default = "local-simulation"
-
-[tool.flwr.federations.local-simulation]
-options.num-supernodes = 2

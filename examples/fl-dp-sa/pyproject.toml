@@ -32,9 +32,3 @@ num-sampled-clients = 20
 # Parameters for the SecAgg+ protocol
 num-shares = 7
 reconstruction-threshold = 4
-
-[tool.flwr.federations]
-default = "local-simulation"
-
-[tool.flwr.federations.local-simulation]
-options.num-supernodes = 100

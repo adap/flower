@@ -45,10 +45,3 @@ params.nthread = 16
 params.num-parallel-tree = 1
 params.subsample = 1
 params.tree-method = "hist"
-
-[tool.flwr.federations]
-default = "local-simulation"
-
-[tool.flwr.federations.local-simulation]
-options.num-supernodes = 5
-options.backend.client-resources.num-cpus = 2

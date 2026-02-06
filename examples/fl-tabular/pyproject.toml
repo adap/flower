@@ -27,8 +27,3 @@ clientapp = "fltabular.client_app:app"
 [tool.flwr.app.config]
 num-server-rounds = 5
 
-[tool.flwr.federations]
-default = "local-simulation"
-
-[tool.flwr.federations.local-simulation]
-options.num-supernodes = 5
