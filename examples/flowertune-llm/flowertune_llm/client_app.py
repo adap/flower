@@ -33,6 +33,7 @@ app = ClientApp()
 def train(msg: Message, context: Context):
     """Prepare model state for layer-wise sending (training disabled)."""
     cfg = DictConfig(replace_keys(unflatten_dict(context.run_config)))
+    aggregation_mode = getattr(cfg, "aggregation", {}).get("mode", "layerwise")
 
     t0 = perf_counter()
     model = get_model(cfg.model)
@@ -64,6 +65,10 @@ def train(msg: Message, context: Context):
 
     metric_record = MetricRecord(metrics)
     content = RecordDict({"metrics": metric_record})
+
+    if aggregation_mode == "all_at_once":
+        model_record = ArrayRecord(state_dict)
+        content["arrays"] = model_record
     return Message(content=content, reply_to=msg)
 
 

@@ -95,6 +95,16 @@ flwr run . \
   --run-config "model.name='meta-llama/Llama-3.1-70B-Instruct' model.device-map='cpu' model.quantization=0 train.training-arguments.max-steps=0 profile.enabled=true model.dtype='float16'"
 ```
 
+### Aggregation Memory Experiment
+
+To compare memory usage between layer-wise aggregation and all-at-once aggregation,
+run the same setup twice with different `aggregation.mode` values:
+
+```bash
+flwr run . --run-config "aggregation.mode='layerwise'"
+flwr run . --run-config "aggregation.mode='all_at_once'"
+```
+
 You can also target the base model ID if available in your environment:
 `meta-llama/Meta-Llama-3.1-70B`.
 

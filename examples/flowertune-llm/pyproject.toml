@@ -20,6 +20,7 @@ dependencies = [
     "sentencepiece==0.2.0",
     "omegaconf==2.3.0",
     "hf_transfer==0.1.8",
+    "psutil==6.0.0",
 ]
 
 [tool.hatch.build.targets.wheel]
@@ -42,6 +43,7 @@ model.device-map = ""
 model.lora.peft-lora-r = 32
 model.lora.peft-lora-alpha = 64
 profile.enabled = false
+aggregation.mode = "layerwise"
 train.save-every-round = 5
 train.learning-rate-max = 5e-5
 train.learning-rate-min = 1e-6

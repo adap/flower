@@ -24,6 +24,7 @@ import time
 from typing import Any
 
 import torch
+import psutil
 
 from flwr.common import (
     ArrayRecord,
@@ -118,6 +119,7 @@ class FedAvgStreaming(FedAvg):
         """Configure the next round of federated training (no arrays sent)."""
         if self.fraction_train == 0.0:
             return []
+        aggregation_mode = config.get("aggregation.mode", "layerwise")
         num_nodes = int(len(list(grid.get_node_ids())) * self.fraction_train)
         sample_size = max(num_nodes, self.min_train_nodes)
         node_ids, num_total = sample_nodes(grid, self.min_available_nodes, sample_size)
@@ -132,7 +134,12 @@ class FedAvgStreaming(FedAvg):
             config["layer_names"] = self._layer_names
             config["num_layers"] = len(self._layer_names)
 
-        record = RecordDict({self.configrecord_key: config})
+        if aggregation_mode == "all_at_once":
+            record = RecordDict(
+                {self.arrayrecord_key: arrays, self.configrecord_key: config}
+            )
+        else:
+            record = RecordDict({self.configrecord_key: config})
         return self._construct_messages(record, node_ids, MessageType.TRAIN)
 
     def aggregate_train(
@@ -176,6 +183,8 @@ class FedAvgStreaming(FedAvg):
         train_config = ConfigRecord() if train_config is None else train_config
         evaluate_config = ConfigRecord() if evaluate_config is None else evaluate_config
         result = Result()
+
+        process = psutil.Process()
 
         if self._state_dict is None:
             if len(initial_arrays) == 0:
@@ -231,64 +240,137 @@ class FedAvgStreaming(FedAvg):
             # -----------------------------------------------------------------
             # --- LAYER-WISE COMMUNICATION -----------------------------------
             # -----------------------------------------------------------------
-            for layer_idx, layer_name in enumerate(self._layer_names):
-                tensor = state_dict[layer_name]
-                cpu_tensor = tensor.detach().cpu() if hasattr(tensor, "cpu") else tensor
-                chunk_slices = _chunk_slices(cpu_tensor, self._max_chunk_bytes)
-                agg_tensor = torch.empty_like(cpu_tensor)
+            aggregation_mode = train_config.get("aggregation.mode", "layerwise")
+            if aggregation_mode == "all_at_once":
+                before_mb = process.memory_info().rss / (1024**2)
+                log(
+                    INFO,
+                    "Aggregation memory before (all_at_once): %.2f MB",
+                    before_mb,
+                )
+                valid_replies, _ = self._check_and_log_replies(
+                    train_replies, is_train=True
+                )
+                reply_contents = [msg.content for msg in valid_replies]
+                profiler = get_active_profiler()
+                start_time = perf_counter() if profiler is not None else None
+                agg_record = aggregate_arrayrecords(
+                    reply_contents,
+                    self.weighted_by_key,
+                )
+                if profiler is not None and start_time is not None:
+                    duration_ms = (perf_counter() - start_time) * 1000.0
+                    profiler.record(
+                        scope="server",
+                        task="aggregate",
+                        round=current_round,
+                        node_id=None,
+                        duration_ms=duration_ms,
+                        metadata={"mode": "all_at_once"},
+                    )
+                after_mb = process.memory_info().rss / (1024**2)
+                log(
+                    INFO,
+                    "Aggregation memory after (all_at_once): %.2f MB",
+                    after_mb,
+                )
+                state_dict = agg_record.to_torch_state_dict()
+            else:
+                num_layers = len(self._layer_names)
+                for layer_idx, layer_name in enumerate(self._layer_names):
+                    tensor = state_dict[layer_name]
+                    cpu_tensor = (
+                        tensor.detach().cpu() if hasattr(tensor, "cpu") else tensor
+                    )
+                    chunk_slices = _chunk_slices(cpu_tensor, self._max_chunk_bytes)
+                    agg_tensor = torch.empty_like(cpu_tensor)
 
-                for chunk_idx, (start, end) in enumerate(chunk_slices):
-                    config = ConfigRecord(
-                        {
-                            "layer_idx": layer_idx,
-                            "chunk_idx": chunk_idx,
-                            "chunk_start": start,
-                            "chunk_end": end,
-                            "chunk_count": len(chunk_slices),
-                        }
-                    )
-                    record = RecordDict({self.configrecord_key: config})
-                    replies = grid.send_and_receive(
-                        messages=self._construct_messages(
-                            record,
-                            node_ids,
-                            message_type="train.layer_wise_communication",
-                        ),
-                        timeout=timeout,
-                    )
-                    valid_replies, _ = self._check_and_log_replies(
-                        replies, is_train=True
-                    )
-                    if not valid_replies:
-                        continue
+                    num_chunks = len(chunk_slices)
+                    for chunk_idx, (start, end) in enumerate(chunk_slices):
+                        log(
+                            INFO,
+                            "[Layer %s/%s][Chunk %s/%s] aggregating...",
+                            layer_idx + 1,
+                            num_layers,
+                            chunk_idx + 1,
+                            num_chunks,
+                        )
+                        config = ConfigRecord(
+                            {
+                                "layer_idx": layer_idx,
+                                "chunk_idx": chunk_idx,
+                                "chunk_start": start,
+                                "chunk_end": end,
+                                "chunk_count": len(chunk_slices),
+                            }
+                        )
+                        record = RecordDict({self.configrecord_key: config})
+                        replies = grid.send_and_receive(
+                            messages=self._construct_messages(
+                                record,
+                                node_ids,
+                                message_type="train.layer_wise_communication",
+                            ),
+                            timeout=timeout,
+                        )
+                        valid_replies, _ = self._check_and_log_replies(
+                            replies, is_train=True
+                        )
+                        if not valid_replies:
+                            continue
 
-                    reply_contents = [msg.content for msg in valid_replies]
-                    profiler = get_active_profiler()
-                    start_time = perf_counter() if profiler is not None else None
-                    agg_record = aggregate_arrayrecords(
-                        reply_contents,
-                        self.weighted_by_key,
-                    )
-                    if profiler is not None and start_time is not None:
-                        duration_ms = (perf_counter() - start_time) * 1000.0
-                        profiler.record(
-                            scope="server",
-                            task="aggregate",
-                            round=current_round,
-                            node_id=None,
-                            duration_ms=duration_ms,
-                            metadata={"layer_idx": layer_idx, "chunk_idx": chunk_idx},
+                        before_mb = process.memory_info().rss / (1024**2)
+                        log(
+                            INFO,
+                            "Aggregation memory before (layerwise): %.2f MB",
+                            before_mb,
                         )
 
-                    chunk_np = agg_record[layer_name].numpy()
-                    chunk_tensor = torch.from_numpy(chunk_np)
+                        reply_contents = [msg.content for msg in valid_replies]
+                        profiler = get_active_profiler()
+                        start_time = perf_counter() if profiler is not None else None
+                        agg_record = aggregate_arrayrecords(
+                            reply_contents,
+                            self.weighted_by_key,
+                        )
+                        if profiler is not None and start_time is not None:
+                            duration_ms = (perf_counter() - start_time) * 1000.0
+                            profiler.record(
+                                scope="server",
+                                task="aggregate",
+                                round=current_round,
+                                node_id=None,
+                                duration_ms=duration_ms,
+                                metadata={
+                                    "mode": "layerwise",
+                                    "layer_idx": layer_idx,
+                                    "chunk_idx": chunk_idx,
+                                },
+                            )
 
-                    if tensor.ndim == 0:
-                        agg_tensor = chunk_tensor
-                    else:
-                        agg_tensor[start:end] = chunk_tensor
+                        after_mb = process.memory_info().rss / (1024**2)
+                        log(
+                            INFO,
+                            "Aggregation memory after (layerwise): %.2f MB",
+                            after_mb,
+                        )
 
-                state_dict[layer_name] = agg_tensor
+                        chunk_np = agg_record[layer_name].numpy()
+                        chunk_tensor = torch.from_numpy(chunk_np)
+
+                        if tensor.ndim == 0:
+                            agg_tensor = chunk_tensor
+                        else:
+                            agg_tensor[start:end] = chunk_tensor
+
+                    state_dict[layer_name] = agg_tensor
+                    log(
+                        INFO,
+                        "[Layer %s/%s] done (%s chunks)",
+                        layer_idx + 1,
+                        num_layers,
+                        num_chunks,
+                    )
 
             # -----------------------------------------------------------------
             # --- EVALUATION (CLIENTAPP-SIDE) ---------------------------------
