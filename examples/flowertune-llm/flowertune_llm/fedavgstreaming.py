@@ -17,6 +17,9 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Iterable
+import os
+import re
+import gc
 import io
 from logging import INFO, WARNING
 from time import perf_counter
@@ -64,6 +67,25 @@ def _chunk_slices(tensor: torch.Tensor, max_bytes: int) -> list[tuple[int, int]]
         slices.append((start, end))
         start = end
     return slices
+
+
+
+
+def _sanitize_layer_name(name: str) -> str:
+    return re.sub(r"[^a-zA-Z0-9_.-]", "_", name)
+
+
+
+
+def _rehydrate_state_dict(layer_names: list[str], offload_dir: str) -> dict[str, torch.Tensor]:
+    state: dict[str, torch.Tensor] = {}
+    for idx, name in enumerate(layer_names):
+        file_name = f"{idx:04d}_{_sanitize_layer_name(name)}.pt"
+        file_path = os.path.join(offload_dir, file_name)
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(f"Missing offloaded layer: {file_path}")
+        state[name] = torch.load(file_path, map_location="cpu")
+    return state
 
 
 def _has_meta_tensors(state_dict: dict[str, Any]) -> bool:
@@ -186,6 +208,14 @@ class FedAvgStreaming(FedAvg):
 
         process = psutil.Process()
 
+        offload_enabled = bool(train_config.get("aggregation.offload", False))
+        offload_dir = str(train_config.get("aggregation.offload-dir", ""))
+        if offload_enabled:
+            if not offload_dir:
+                offload_dir = os.path.join(os.getcwd(), "results", "aggregated_layers")
+            os.makedirs(offload_dir, exist_ok=True)
+            log(INFO, "Layer offload enabled. Writing layers to %s", offload_dir)
+
         if self._state_dict is None:
             if len(initial_arrays) == 0:
                 raise ValueError("initial_state_dict required when initial_arrays empty")
@@ -195,6 +225,8 @@ class FedAvgStreaming(FedAvg):
 
         t_start = time.time()
         if evaluate_fn:
+            if offload_enabled:
+                state_dict = _rehydrate_state_dict(self._layer_names, offload_dir)
             if _has_meta_tensors(state_dict):
                 log(
                     WARNING,
@@ -363,7 +395,23 @@ class FedAvgStreaming(FedAvg):
                         else:
                             agg_tensor[start:end] = chunk_tensor
 
-                    state_dict[layer_name] = agg_tensor
+                        # Release per-chunk memory aggressively
+                        del agg_record
+                        del reply_contents
+                        del valid_replies
+                        del chunk_np
+                        del chunk_tensor
+                        gc.collect()
+
+                    if offload_enabled:
+                        file_name = f"{layer_idx:04d}_{_sanitize_layer_name(layer_name)}.pt"
+                        file_path = os.path.join(offload_dir, file_name)
+                        torch.save(agg_tensor, file_path)
+                        del state_dict[layer_name]
+                    else:
+                        state_dict[layer_name] = agg_tensor
+                    del agg_tensor
+                    gc.collect()
                     log(
                         INFO,
                         "[Layer %s/%s] done (%s chunks)",
@@ -376,6 +424,8 @@ class FedAvgStreaming(FedAvg):
             # --- EVALUATION (CLIENTAPP-SIDE) ---------------------------------
             # -----------------------------------------------------------------
             if self.fraction_evaluate > 0.0:
+                if offload_enabled:
+                    state_dict = _rehydrate_state_dict(self._layer_names, offload_dir)
                 arrays = ArrayRecord(state_dict)
                 evaluate_replies = grid.send_and_receive(
                     messages=self.configure_evaluate(
@@ -404,6 +454,8 @@ class FedAvgStreaming(FedAvg):
             # --- EVALUATION (SERVERAPP-SIDE) ---------------------------------
             # -----------------------------------------------------------------
             if evaluate_fn:
+                if offload_enabled:
+                    state_dict = _rehydrate_state_dict(self._layer_names, offload_dir)
                 if _has_meta_tensors(state_dict):
                     log(
                         WARNING,
@@ -422,7 +474,10 @@ class FedAvgStreaming(FedAvg):
         log(INFO, "")
         log(INFO, "Final results:")
         log(INFO, "")
-        if _has_meta_tensors(state_dict):
+        if offload_enabled:
+            state_dict = _rehydrate_state_dict(self._layer_names, offload_dir)
+            log(INFO, "Final model layers offloaded to %s", offload_dir)
+        elif _has_meta_tensors(state_dict):
             log(
                 WARNING,
                 "Skipping final ArrayRecord: model contains meta tensors.",
