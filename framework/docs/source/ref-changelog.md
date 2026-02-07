@@ -12,7 +12,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Fix client resource handling in local simulations** ([#6536](https://github.com/adap/flower/pull/6536))
 
-  Fix an issue in local simulations where backend configuration is not correctly propagated, causing client resource settings such as CPU and GPU allocations to be ignored.
+  Fix an issue in local simulations where backend configuration is not correctly propagated, causing virtual client resource settings such as CPU and GPU allocations in the Flower Configuration to be ignored.
 
 - **Update framework documentation** ([#6528](https://github.com/adap/flower/pull/6528), [#6530](https://github.com/adap/flower/pull/6530))
 
