@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-06 00:09+0000\n"
+"POT-Creation-Date: 2026-02-07 00:11+0000\n"
 "PO-Revision-Date: 2024-06-12 10:09+0000\n"
 "Last-Translator: Yan Gao <y.gaogy@gmail.com>\n"
 "Language: zh_Hans\n"
@@ -6856,16 +6856,9 @@ msgid "`false`"
 msgstr "``FLWR_VERSION``"
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:279
-msgid "`global.nodeAuth.authListPublicKeys`"
-msgstr ""
-
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:279
-msgid "A list of ecdsa-sha2-nistp384 SuperNode keys"
-msgstr ""
-
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:279
-msgid "`global.userAuth.enabled`"
-msgstr ""
+#, fuzzy
+msgid "`global.accountAuth.enabled`"
+msgstr ":code:`evaluate`"
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:279
 #, fuzzy
@@ -6874,7 +6867,7 @@ msgstr "验证安装"
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:279
 #, fuzzy
-msgid "`global.userAuth.config`"
+msgid "`global.accountAuth.config`"
 msgstr ":code:`evaluate`"
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:279
@@ -6884,12 +6877,42 @@ msgstr "配置值"
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:279
 #, fuzzy
-msgid "`global.userAuth.existingSecret`"
+msgid "`global.accountAuth.existingSecret`"
 msgstr "使用现有策略"
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:279
 msgid "Existing secret with user authentication configuration."
 msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:279
+#, fuzzy
+msgid "`global.federationsConfig.enabled`"
+msgstr ":code:`evaluate`"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:279
+#, fuzzy
+msgid "Enables or disables the federations configuration plugin."
+msgstr "验证安装"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:279
+#, fuzzy
+msgid "`global.federationsConfig.config`"
+msgstr ":code:`evaluate`"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:279
+#, fuzzy
+msgid "Set the federations configuration."
+msgstr "配置值"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:279
+#, fuzzy
+msgid "`global.federationsConfig.existingSecret`"
+msgstr "使用现有策略"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:279
+#, fuzzy
+msgid "Existing secret with federations configuration."
+msgstr "配置值"
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:279
 msgid "`global.license.enabled`"
@@ -7056,8 +7079,8 @@ msgstr ""
 msgid "`IfNotPresent`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:729
-#: ../../source/helm/how-to-deploy-supernode-using-helm.md:276
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:731
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:275
 #, fuzzy
 msgid "TLS Configuration"
 msgstr "配置值"
@@ -7221,7 +7244,7 @@ msgstr ""
 msgid "`tls.existingSecret`"
 msgstr "使用现有策略"
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:750
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:752
 #, fuzzy
 msgid "Component SuperLink"
 msgstr "flower-superlink"
@@ -8118,7 +8141,7 @@ msgstr "flower-superlink"
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:279
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 #, fuzzy
-msgid "`1.21.0-ubuntu`"
+msgid "`1.26.0-ubuntu`"
 msgstr "``UBUNTU_VERSION``"
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:279
@@ -8250,8 +8273,8 @@ msgstr ""
 msgid "`superlink.networkPolicy.simulationIo.ingressNSPodMatchLabels`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:860
-#: ../../source/helm/how-to-deploy-supernode-using-helm.md:352
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:862
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:351
 #, fuzzy
 msgid "Component SuperExec"
 msgstr "flower-superlink"
@@ -8283,6 +8306,22 @@ msgstr "创建超级节点 Dockerfile"
 #, fuzzy
 msgid "Enable or disable SuperExec"
 msgstr "在 :code:`SuperNode` 中启用节点验证"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:279
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "`superexec.pluginType`"
+msgstr "flower-superlink"
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:279
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+msgid "The type of plugin to use."
+msgstr ""
+
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:279
+#, fuzzy
+msgid "`serverapp`"
+msgstr "服务器"
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:279
 #, fuzzy
@@ -8367,7 +8406,6 @@ msgid "`superexec.podSecurityContext`"
 msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:279
-#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 #, fuzzy
 msgid "Security settings that for the SuperExec Pods"
 msgstr "然后，我们启动服务器："
@@ -8451,7 +8489,6 @@ msgid "`superexec.replicas`"
 msgstr "flower-superlink"
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:279
-#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 #, fuzzy
 msgid "The number of SuperExec pods to run"
 msgstr "需要等待的客户数量。"
@@ -8643,7 +8680,7 @@ msgstr "建立资源库"
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:279
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 #, fuzzy
-msgid "`flwr/superexec`"
+msgid "`flwr/superexec-ee`"
 msgstr "Flower 服务器"
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:279
@@ -8657,12 +8694,6 @@ msgstr "flower-superlink"
 #, fuzzy
 msgid "Image tag of SuperExec"
 msgstr "flower-superlink"
-
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:279
-#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
-#, fuzzy
-msgid "`1.21.0-py3.11-ubuntu24.04`"
-msgstr "``UBUNTU_VERSION``"
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:279
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
@@ -8707,7 +8738,7 @@ msgstr ""
 msgid "`superexec.networkPolicy.extraEgress`"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-superlink-using-helm.md:913
+#: ../../source/helm/how-to-deploy-superlink-using-helm.md:916
 #, fuzzy
 msgid "Component OpenFGA"
 msgstr "常见"
@@ -8911,15 +8942,7 @@ msgstr ""
 msgid "Specifies the ecdsa-sha2-nistp384 private key"
 msgstr ""
 
-#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
-msgid "`global.nodeAuth.authSupernodePublicKey`"
-msgstr ""
-
-#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
-msgid "Specifies the ecdsa-sha2-nistp384 public key"
-msgstr ""
-
-#: ../../source/helm/how-to-deploy-supernode-using-helm.md:282
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:281
 #, fuzzy
 msgid "Component SuperNode"
 msgstr "flower-superlink"
@@ -9411,6 +9434,11 @@ msgstr "服务器"
 
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 #, fuzzy
+msgid "`clientapp`"
+msgstr "客户端"
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
 msgid "`superexec.supernode`"
 msgstr "flower-superlink"
 
@@ -9421,6 +9449,16 @@ msgstr ""
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
 msgid "Specify a list of volumes for the SuperExec pod(s)"
 msgstr ""
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "Security settings for the SuperExec Pod"
+msgstr "然后，我们启动服务器："
+
+#: ../../source/helm/how-to-deploy-supernode-using-helm.md:14
+#, fuzzy
+msgid "The number of SuperExec containers to run"
+msgstr "需要等待的客户数量。"
 
 #: ../../source/helm/index.rst:41
 #, fuzzy
@@ -22133,9 +22171,9 @@ msgid ""
 "replaces the legacy `federation` configuration in `pyproject.toml`, which"
 " is automatically migrated to the new Flower configuration format when "
 "running `flwr` commands. For usage details, see the [Flower CLI "
-"reference](https://flower.ai/docs/framework/main/en/ref-api-cli.html) and"
-" the [Flower configuration "
-"documentation](https://flower.ai/docs/framework/main/en/ref-flower-"
+"reference](https://flower.ai/docs/framework/v1.26.0/en/ref-api-cli.html) "
+"and the [Flower configuration "
+"documentation](https://flower.ai/docs/framework/v1.26.0/en/ref-flower-"
 "configuration.html)."
 msgstr ""
 
@@ -22186,8 +22224,8 @@ msgid ""
 "based schema migrations with automatic upgrades. This ensures database "
 "compatibility across Flower versions and lays the groundwork for "
 "supporting more types of databases. See the [database migration "
-"guide](https://flower.ai/docs/framework/contributor-how-to-migrate-"
-"database.html) for details."
+"guide](https://flower.ai/docs/framework/v1.26.0/en/contributor-how-to-"
+"migrate-database.html) for details."
 msgstr ""
 
 #: ../../source/ref-changelog.md:23
@@ -22462,8 +22500,8 @@ msgid ""
 "Deprecates the now-legacy `flwr` CLI configuration usage (where "
 "configuration lives in `pyproject.toml`) following the introduction of "
 "the (central, project-independent) Flower configuration. Refer to the "
-"[Flower CLI reference](https://flower.ai/docs/framework/main/en/ref-api-"
-"cli.html) or run `flwr <command> --help` for updated usage."
+"[Flower CLI reference](https://flower.ai/docs/framework/v1.26.0/en/ref-"
+"api-cli.html) or run `flwr <command> --help` for updated usage."
 msgstr ""
 
 #: ../../source/ref-changelog.md:55
@@ -22550,11 +22588,12 @@ msgstr ""
 #: ../../source/ref-changelog.md:71
 msgid ""
 "Refactors `flwr new` to fetch Flower apps directly from the Flower "
-"platform (see the [usage reference](https://flower.ai/docs/framework/ref-"
-"api-cli.html#flwr-new)). This introduces new and updated quickstart "
-"examples (including NumPy and FlowerTune LLM), renames and updates "
-"existing examples, aligns CI to run against platform-backed examples, and"
-" updates related documentation and benchmark instructions."
+"platform (see the [usage "
+"reference](https://flower.ai/docs/framework/v1.25.0/en/ref-api-cli.html"
+"#flwr-new)). This introduces new and updated quickstart examples "
+"(including NumPy and FlowerTune LLM), renames and updates existing "
+"examples, aligns CI to run against platform-backed examples, and updates "
+"related documentation and benchmark instructions."
 msgstr ""
 
 #: ../../source/ref-changelog.md:73
@@ -23434,8 +23473,8 @@ msgid ""
 "The primary tutorial series has been updated to showcase the Message API."
 " The revamped content improves alignment with recent architectural "
 "changes and enhances learning clarity. See the updated tutorial: [Get "
-"started with Flower](https://flower.ai/docs/framework/tutorial-series-"
-"get-started-with-flower-pytorch.html)."
+"started with Flower](https://flower.ai/docs/framework/v1.22.0/en"
+"/tutorial-series-get-started-with-flower-pytorch.html)."
 msgstr ""
 
 #: ../../source/ref-changelog.md:237
@@ -23652,10 +23691,10 @@ msgid ""
 "`Message`-based strategies are: `FedAvg`, `FedOpt`, `FedAdam`, "
 "`FedAdagrad`, `FedYogi`, and fixed-clipping Differential Privacy "
 "strategies. More will follow in subsequent releases. A [migration "
-"guide](https://flower.ai/docs/framework/how-to-upgrade-to-message-"
-"api.html) has been added to help users transition their existing Flower "
-"Apps operating on the original `Strategy` and `NumPyClient` abstractions "
-"to the Message API."
+"guide](https://flower.ai/docs/framework/v1.21.0/en/how-to-upgrade-to-"
+"message-api.html) has been added to help users transition their existing "
+"Flower Apps operating on the original `Strategy` and `NumPyClient` "
+"abstractions to the Message API."
 msgstr ""
 
 #: ../../source/ref-changelog.md:269
@@ -23704,8 +23743,8 @@ msgid ""
 "each app execution. Supporting changes include new RPCs, protocol "
 "updates, plugin abstractions, and Docker image support for SuperExec. For"
 " more details, refer to the updated [Flower architecture "
-"explainer](https://flower.ai/docs/framework/explanation-flower-"
-"architecture.html). Documentation has been revised to reflect the "
+"explainer](https://flower.ai/docs/framework/v1.21.0/en/explanation-"
+"flower-architecture.html). Documentation has been revised to reflect the "
 "introduction of Flower SuperExec, including guides and tutorials such as "
 "quickstart with Docker, GCP deployment, and network communication to "
 "consistently use SuperExec."
@@ -23725,9 +23764,10 @@ msgstr ""
 
 #: ../../source/ref-changelog.md:275
 msgid ""
-"The `quickstart-pytorch` [tutorial](https://flower.ai/docs/framework"
-"/tutorial-quickstart-pytorch.html) has been migrated to the Message API, "
-"using the new `FedAvg` strategy and the new `flwr new` template."
+"The `quickstart-pytorch` "
+"[tutorial](https://flower.ai/docs/framework/v1.21.0/en/tutorial-"
+"quickstart-pytorch.html) has been migrated to the Message API, using the "
+"new `FedAvg` strategy and the new `flwr new` template."
 msgstr ""
 
 #: ../../source/ref-changelog.md:277
@@ -23754,9 +23794,9 @@ msgstr "**新的 iOS CoreML 代码示例**（[#1289](https://github.com/adap/flo
 
 #: ../../source/ref-changelog.md:283
 msgid ""
-"Introduces a [guide](https://flower.ai/docs/framework/how-to-run-flower-"
-"on-red-hat-openshift.html) for deploying Flower on Red Hat OpenShift, "
-"including setup steps and configuration examples."
+"Introduces a [guide](https://flower.ai/docs/framework/v1.21.0/en/how-to-"
+"run-flower-on-red-hat-openshift.html) for deploying Flower on Red Hat "
+"OpenShift, including setup steps and configuration examples."
 msgstr ""
 
 #: ../../source/ref-changelog.md:285
@@ -24175,8 +24215,8 @@ msgstr "** 支持 Python 3.10** ([#1320](https://github.com/adap/flower/pull/132
 msgid ""
 "Adds a guide explaining how to configure a Flower app using its "
 "`pyproject.toml` file. The documentation is available "
-"[here](https://flower.ai/docs/framework/how-to-configure-pyproject-"
-"toml.html)."
+"[here](https://flower.ai/docs/framework/v1.20.0/en/how-to-configure-"
+"pyproject-toml.html)."
 msgstr ""
 
 #: ../../source/ref-changelog.md:363
@@ -24217,7 +24257,8 @@ msgstr "**新的 iOS CoreML 代码示例**（[#1289](https://github.com/adap/flo
 msgid ""
 "The documentation now includes a comprehensive guide for deploying Flower"
 " SuperLink and SuperNode using Helm charts. For full instructions, refer "
-"to the [Helm Guide](https://flower.ai/docs/framework/helm/index.html)."
+"to the [Helm "
+"Guide](https://flower.ai/docs/framework/v1.20.0/en/helm/index.html)."
 msgstr ""
 
 #: ../../source/ref-changelog.md:375
@@ -24235,10 +24276,10 @@ msgstr ""
 #: ../../source/ref-changelog.md:377
 msgid ""
 "Introduces documentation for configuring user authentication ([User "
-"Authentication Guide](https://flower.ai/docs/framework/how-to-"
+"Authentication Guide](https://flower.ai/docs/framework/v1.20.0/en/how-to-"
 "authenticate-users.html)) and audit logging ([Audit Logging "
-"Guide](https://flower.ai/docs/framework/how-to-configure-audit-"
-"logging.html)) in Flower."
+"Guide](https://flower.ai/docs/framework/v1.20.0/en/how-to-configure-"
+"audit-logging.html)) in Flower."
 msgstr ""
 
 #: ../../source/ref-changelog.md:379
@@ -24537,7 +24578,8 @@ msgid ""
 "Flower on Google Cloud Platform (GCP). It provides step-by-step "
 "instructions for managing Flower workloads in a GCP environment. For more"
 " information, refer to the [official "
-"guide](https://flower.ai/docs/framework/how-to-run-flower-on-gcp.html)."
+"guide](https://flower.ai/docs/framework/v1.19.0/en/how-to-run-flower-on-"
+"gcp.html)."
 msgstr ""
 
 #: ../../source/ref-changelog.md:431
@@ -25420,8 +25462,8 @@ msgid ""
 "`ClientApp` rather than affecting the entire application. This allows for"
 " more granular control. The documentation has been updated to reflect "
 "these changes — please refer to [How to Use Built-in "
-"Mods](https://flower.ai/docs/framework/how-to-use-built-in-mods.html"
-"#registering-function-specific-mods) for details."
+"Mods](https://flower.ai/docs/framework/v1.16.0/en/how-to-use-built-in-"
+"mods.html#registering-function-specific-mods) for details."
 msgstr ""
 
 #: ../../source/ref-changelog.md:628
@@ -25910,8 +25952,8 @@ msgid ""
 "running the SuperLink. Additionally, Flower now enables automatic node "
 "authentication by default, preventing impersonation even when node "
 "authentication is not explicitly used. For more details, see the "
-"[documentation](https://flower.ai/docs/framework/how-to-authenticate-"
-"supernodes.html)."
+"[documentation](https://flower.ai/docs/framework/v1.15.0/en/how-to-"
+"authenticate-supernodes.html)."
 msgstr ""
 
 #: ../../source/ref-changelog.md:748
@@ -25928,8 +25970,8 @@ msgstr ""
 #: ../../source/ref-changelog.md:750
 msgid ""
 "Introduces the [How to run Flower with Deployment "
-"Engine](https://flower.ai/docs/framework/how-to-run-flower-with-"
-"deployment-engine.html) guide, providing detailed instructions on "
+"Engine](https://flower.ai/docs/framework/v1.15.0/en/how-to-run-flower-"
+"with-deployment-engine.html) guide, providing detailed instructions on "
 "deploying Federated Learning in production environments using the Flower "
 "Deployment Engine."
 msgstr ""
@@ -25944,9 +25986,9 @@ msgstr "在文档中添加了新的常见问题部分 ([#948](https://github.com
 #: ../../source/ref-changelog.md:754
 msgid ""
 "Introduces the [*Flower Network "
-"Communication*](https://flower.ai/docs/framework/ref-flower-network-"
-"communication.html) documentation, which details the network connections "
-"used in a deployed Flower federated AI system."
+"Communication*](https://flower.ai/docs/framework/v1.15.0/en/ref-flower-"
+"network-communication.html) documentation, which details the network "
+"connections used in a deployed Flower federated AI system."
 msgstr ""
 
 #: ../../source/ref-changelog.md:756
@@ -25982,7 +26024,7 @@ msgid ""
 "YouTube. You can watch all the videos "
 "[here](https://www.youtube.com/playlist?list=PLNG4feLHqCWkdlSrEL2xbCtGa6QBxlUZb)"
 " or via the embedded previews in the "
-"[documentation](https://flower.ai/docs/framework/how-to-run-"
+"[documentation](https://flower.ai/docs/framework/v1.15.0/en/how-to-run-"
 "simulations.html). The accompanying code for the tutorial can be found in"
 " the [Flower GitHub "
 "repository](https://github.com/adap/flower/tree/main/examples/flower-"
@@ -26021,7 +26063,8 @@ msgid ""
 "Log level can now be configured using the `FLWR_LOG_LEVEL` environment "
 "variable. For example, running `FLWR_LOG_LEVEL=DEBUG flower-superlink "
 "--insecure` will set the log level to DEBUG. For more details, see the "
-"[guide](https://flower.ai/docs/framework/how-to-configure-logging.html)."
+"[guide](https://flower.ai/docs/framework/v1.15.0/en/how-to-configure-"
+"logging.html)."
 msgstr ""
 
 #: ../../source/ref-changelog.md:772
@@ -26449,8 +26492,9 @@ msgid ""
 "The `flwr run`, `flwr ls`, and `flwr stop` commands now support JSON-"
 "formatted output using the `--format json` flag. This makes it easier to "
 "parse and integrate CLI output with other tools. Feel free to check the "
-"[\"How to Use CLI JSON output\"](https://flower.ai/docs/framework/how-to-"
-"use-cli-json-output.html) guide for details!"
+"[\"How to Use CLI JSON "
+"output\"](https://flower.ai/docs/framework/v1.14.0/en/how-to-use-cli-"
+"json-output.html) guide for details!"
 msgstr ""
 
 #: ../../source/ref-changelog.md:847
@@ -26464,8 +26508,8 @@ msgstr "**新的 iOS CoreML 代码示例**（[#1289](https://github.com/adap/flo
 #, fuzzy
 msgid ""
 "A new how-to guide shows a simple Flower deployment for [federated "
-"learning on Microsoft Azure](https://flower.ai/docs/framework/how-to-run-"
-"flower-on-azure.html) VM instances."
+"learning on Microsoft Azure](https://flower.ai/docs/framework/v1.14.0/en"
+"/how-to-run-flower-on-azure.html) VM instances."
 msgstr ""
 "`TensorFlow快速入门 (教程) <https://flower.ai/docs/framework/tutorial-"
 "quickstart-tensorflow.html>`_"
@@ -27086,8 +27130,8 @@ msgid ""
 "XGBoost, scikit-learn, and JAX quickstart tutorials to use `flwr run`, "
 "updating DP guide, removing outdated pages, updating Docker docs, and "
 "marking legacy functions as deprecated. The [Secure Aggregation "
-"Protocols](https://flower.ai/docs/framework/explanation-ref-secure-"
-"aggregation-protocols.html) page has also been updated."
+"Protocols](https://flower.ai/docs/framework/v1.13.0/en/contributor-ref-"
+"secure-aggregation-protocols.html) page has also been updated."
 msgstr ""
 
 #: ../../source/ref-changelog.md:968
@@ -27504,10 +27548,11 @@ msgstr "**重构文档**（[#1387](https://github.com/adap/flower/pull/1387)）"
 
 #: ../../source/ref-changelog.md:1050
 msgid ""
-"A new [Flower architecture explainer](https://flower.ai/docs/framework"
-"/explanation-flower-architecture.html) page introduces Flower components "
-"step-by-step. Check out the `EXPLANATIONS` section of the Flower "
-"documentation if you're interested."
+"A new [Flower architecture "
+"explainer](https://flower.ai/docs/framework/v1.12.0/en/explanation-"
+"flower-architecture.html) page introduces Flower components step-by-step."
+" Check out the `EXPLANATIONS` section of the Flower documentation if "
+"you're interested."
 msgstr ""
 
 #: ../../source/ref-changelog.md:1052
@@ -27598,8 +27643,8 @@ msgstr ""
 msgid ""
 "Upgraded Ubuntu base image to 24.04, added SBOM and gcc to Docker images,"
 " and comprehensively updated [Docker "
-"documentation](https://flower.ai/docs/framework/docker/index.html) "
-"including quickstart guides and distributed Docker Compose instructions."
+"documentation](https://flower.ai/docs/framework/v1.12.0/en/docker/index.html)"
+" including quickstart guides and distributed Docker Compose instructions."
 msgstr ""
 
 #: ../../source/ref-changelog.md:1064
@@ -28096,7 +28141,7 @@ msgstr ""
 #: ../../source/ref-changelog.md:1163
 msgid ""
 "Completely new Docker documentation: "
-"https://flower.ai/docs/framework/docker/index.html"
+"https://flower.ai/docs/framework/v1.11.0/en/docker/index.html"
 msgstr ""
 
 #: ../../source/ref-changelog.md:1165
@@ -28922,8 +28967,8 @@ msgid ""
 "authentication. In previous releases, users often wrote glue code to "
 "connect Flower to external authentication systems. With this release, the"
 " SuperLink can authenticate SuperNodes using a built-in authentication "
-"system. A new [how-to guide](https://flower.ai/docs/framework/how-to-"
-"authenticate-supernodes.html) and a new [code "
+"system. A new [how-to guide](https://flower.ai/docs/framework/v1.9.0/en"
+"/how-to-authenticate-supernodes.html) and a new [code "
 "example](https://github.com/adap/flower/tree/main/examples/flower-"
 "authentication) help you to get started."
 msgstr ""
@@ -28966,8 +29011,8 @@ msgid ""
 "Flower provides stable Docker images for the Flower SuperLink, the Flower"
 " SuperNode, and the Flower `ServerApp`. This set of images enables you to"
 " run all Flower components in Docker. Check out the new [how-to "
-"guide](https://flower.ai/docs/framework/how-to-run-flower-using-"
-"docker.html) to get stated."
+"guide](https://flower.ai/docs/framework/v1.9.0/en/how-to-run-flower-"
+"using-docker.html) to get stated."
 msgstr ""
 
 #: ../../source/ref-changelog.md:1350
@@ -29233,24 +29278,28 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-changelog.md:1390
+#, fuzzy
 msgid ""
 "[How-to upgrate to Flower Next (Flower Next migration "
-"guide)](https://flower.ai/docs/framework/how-to-upgrade-to-flower-"
-"next.html)"
+"guide)](https://flower.ai/docs/framework/v1.9.0/en/how-to-upgrade-to-"
+"flower-next.html)"
 msgstr ""
+"`TensorFlow快速入门 (教程) <https://flower.ai/docs/framework/tutorial-"
+"quickstart-tensorflow.html>`_"
 
 #: ../../source/ref-changelog.md:1392
 #, fuzzy
 msgid ""
-"[How-to run Flower using Docker](https://flower.ai/docs/framework/how-to-"
-"run-flower-using-docker.html)"
+"[How-to run Flower using "
+"Docker](https://flower.ai/docs/framework/v1.9.0/en/how-to-run-flower-"
+"using-docker.html)"
 msgstr ""
 "`TensorFlow快速入门 (教程) <https://flower.ai/docs/framework/tutorial-"
 "quickstart-tensorflow.html>`_"
 
 #: ../../source/ref-changelog.md:1394
 msgid ""
-"[Flower Mods reference](https://flower.ai/docs/framework/ref-"
+"[Flower Mods reference](https://flower.ai/docs/framework/v1.9.0/en/ref-"
 "api/flwr.client.mod.html#module-flwr.client.mod)"
 msgstr ""
 
@@ -29392,8 +29441,8 @@ msgid ""
 "incompatible way. Instead of passing a single `--certificates` flag with "
 "three values, you now need to pass three flags (`--ssl-ca-certfile`, "
 "`--ssl-certfile` and `--ssl-keyfile`) with one value each. Check out the "
-"[SSL connections](https://flower.ai/docs/framework/how-to-enable-ssl-"
-"connections.html) documentation page for details."
+"[SSL connections](https://flower.ai/docs/framework/v1.9.0/en/how-to-"
+"enable-ssl-connections.html) documentation page for details."
 msgstr ""
 
 #: ../../source/ref-changelog.md:1422
@@ -29424,8 +29473,8 @@ msgid ""
 "To simplify the usage of `flower-superlink`, previously separate sets of "
 "CLI options for gRPC and REST were merged into one unified set of "
 "options. Consult the [Flower CLI reference "
-"documentation](https://flower.ai/docs/framework/ref-api-cli.html) for "
-"details."
+"documentation](https://flower.ai/docs/framework/v1.9.0/en/ref-api-"
+"cli.html) for details."
 msgstr ""
 
 #: ../../source/ref-changelog.md:1430
@@ -29654,10 +29703,11 @@ msgid ""
 " fixed or adaptive clipping. The clipping can happen either on the "
 "server-side or the client-side. Local DP does both clipping and noising "
 "on the client-side. A new documentation page [explains Differential "
-"Privacy approaches](https://flower.ai/docs/framework/explanation-"
-"differential-privacy.html) and a new how-to guide describes [how to use "
-"the new Differential Privacy components](https://flower.ai/docs/framework"
-"/how-to-use-differential-privacy.html) in Flower."
+"Privacy approaches](https://flower.ai/docs/framework/v1.8.0/en"
+"/explanation-differential-privacy.html) and a new how-to guide describes "
+"[how to use the new Differential Privacy "
+"components](https://flower.ai/docs/framework/v1.8.0/en/how-to-use-"
+"differential-privacy.html) in Flower."
 msgstr ""
 "内置差分保密功能！Flower 支持中央和本地差分保密 (DP)。中央差分隐私可配置为固定或自适应剪切。剪切可以发生在服务器端或客户端。本地 DP"
 " 在客户端进行剪切和噪声处理。新的文档页面[解释差分隐私方法](https://flower.ai/docs/framework"
@@ -66142,5 +66192,396 @@ msgstr ""
 #~ "file. Refer to the `Flower configuration"
 #~ " file <ref-flower-configuration.html>`_ for"
 #~ " more information."
+#~ msgstr ""
+
+#~ msgid "`global.nodeAuth.authListPublicKeys`"
+#~ msgstr ""
+
+#~ msgid "A list of ecdsa-sha2-nistp384 SuperNode keys"
+#~ msgstr ""
+
+#~ msgid "`global.userAuth.enabled`"
+#~ msgstr ""
+
+#~ msgid "`1.21.0-py3.11-ubuntu24.04`"
+#~ msgstr "``UBUNTU_VERSION``"
+
+#~ msgid "`global.nodeAuth.authSupernodePublicKey`"
+#~ msgstr ""
+
+#~ msgid "Specifies the ecdsa-sha2-nistp384 public key"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Changes Flower CLI (`flwr`) configuration "
+#~ "to introduce a new way to manage"
+#~ " SuperLink connections and simulation "
+#~ "settings in a central place (instead "
+#~ "of Flower app's `pyproject.toml`). This "
+#~ "enables `flwr` commands to be executed"
+#~ " from any directory and allow reuse"
+#~ " of named connections across different "
+#~ "Flower apps. This change also removes"
+#~ " the now obsolete `enable-account-"
+#~ "auth` option. The central Flower CLI "
+#~ "config fully replaces the legacy "
+#~ "`federation` configuration in `pyproject.toml`, "
+#~ "which is automatically migrated to the"
+#~ " new Flower configuration format when "
+#~ "running `flwr` commands. For usage "
+#~ "details, see the [Flower CLI "
+#~ "reference](https://flower.ai/docs/framework/main/en/ref-api-"
+#~ "cli.html) and the [Flower configuration "
+#~ "documentation](https://flower.ai/docs/framework/main/en/ref-"
+#~ "flower-configuration.html)."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Refactors Flower's internal states "
+#~ "implementations to introduce Alembic-based "
+#~ "schema migrations with automatic upgrades. "
+#~ "This ensures database compatibility across "
+#~ "Flower versions and lays the groundwork"
+#~ " for supporting more types of "
+#~ "databases. See the [database migration "
+#~ "guide](https://flower.ai/docs/framework/contributor-how-"
+#~ "to-migrate-database.html) for details."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Deprecates the now-legacy `flwr` CLI "
+#~ "configuration usage (where configuration lives"
+#~ " in `pyproject.toml`) following the "
+#~ "introduction of the (central, project-"
+#~ "independent) Flower configuration. Refer to"
+#~ " the [Flower CLI "
+#~ "reference](https://flower.ai/docs/framework/main/en/ref-api-"
+#~ "cli.html) or run `flwr <command> --help`"
+#~ " for updated usage."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Refactors `flwr new` to fetch Flower "
+#~ "apps directly from the Flower platform"
+#~ " (see the [usage "
+#~ "reference](https://flower.ai/docs/framework/ref-api-"
+#~ "cli.html#flwr-new)). This introduces new "
+#~ "and updated quickstart examples (including "
+#~ "NumPy and FlowerTune LLM), renames and"
+#~ " updates existing examples, aligns CI "
+#~ "to run against platform-backed examples,"
+#~ " and updates related documentation and "
+#~ "benchmark instructions."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The primary tutorial series has been "
+#~ "updated to showcase the Message API. "
+#~ "The revamped content improves alignment "
+#~ "with recent architectural changes and "
+#~ "enhances learning clarity. See the "
+#~ "updated tutorial: [Get started with "
+#~ "Flower](https://flower.ai/docs/framework/tutorial-series-"
+#~ "get-started-with-flower-pytorch.html)."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Introduces a new abstract base class "
+#~ "`Strategy` that operate on `Message` "
+#~ "replies, mirroring the design of those"
+#~ " operating on `FitIns/FitRes` or "
+#~ "`EvaluateIns/EvaluteRes` while providing more "
+#~ "versatility on the type of payloads "
+#~ "that can be federated with Flower. "
+#~ "The first batch of `Message`-based "
+#~ "strategies are: `FedAvg`, `FedOpt`, `FedAdam`,"
+#~ " `FedAdagrad`, `FedYogi`, and fixed-"
+#~ "clipping Differential Privacy strategies. More"
+#~ " will follow in subsequent releases. "
+#~ "A [migration guide](https://flower.ai/docs/framework"
+#~ "/how-to-upgrade-to-message-api.html) "
+#~ "has been added to help users "
+#~ "transition their existing Flower Apps "
+#~ "operating on the original `Strategy` and"
+#~ " `NumPyClient` abstractions to the Message"
+#~ " API."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "SuperExec is a new component responsible"
+#~ " for scheduling, launching, and managing"
+#~ " app processes (e.g., `ServerApp`, "
+#~ "`ClientApp`) within the Flower deployment "
+#~ "runtime. It is automatically spawned "
+#~ "when running a SuperLink or SuperNode"
+#~ " in subprocess mode (default). This "
+#~ "also introduces a token-based mechanism"
+#~ " that improves security by assigning "
+#~ "a unique token to each app "
+#~ "execution. Supporting changes include new "
+#~ "RPCs, protocol updates, plugin abstractions,"
+#~ " and Docker image support for "
+#~ "SuperExec. For more details, refer to"
+#~ " the updated [Flower architecture "
+#~ "explainer](https://flower.ai/docs/framework/explanation-"
+#~ "flower-architecture.html). Documentation has been"
+#~ " revised to reflect the introduction "
+#~ "of Flower SuperExec, including guides "
+#~ "and tutorials such as quickstart with"
+#~ " Docker, GCP deployment, and network "
+#~ "communication to consistently use SuperExec."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The `quickstart-pytorch` "
+#~ "[tutorial](https://flower.ai/docs/framework/tutorial-"
+#~ "quickstart-pytorch.html) has been migrated "
+#~ "to the Message API, using the new"
+#~ " `FedAvg` strategy and the new `flwr"
+#~ " new` template."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Introduces a [guide](https://flower.ai/docs/framework"
+#~ "/how-to-run-flower-on-red-hat-"
+#~ "openshift.html) for deploying Flower on "
+#~ "Red Hat OpenShift, including setup steps"
+#~ " and configuration examples."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Adds a guide explaining how to "
+#~ "configure a Flower app using its "
+#~ "`pyproject.toml` file. The documentation is"
+#~ " available [here](https://flower.ai/docs/framework/how-"
+#~ "to-configure-pyproject-toml.html)."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The documentation now includes a "
+#~ "comprehensive guide for deploying Flower "
+#~ "SuperLink and SuperNode using Helm "
+#~ "charts. For full instructions, refer to"
+#~ " the [Helm "
+#~ "Guide](https://flower.ai/docs/framework/helm/index.html)."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Introduces documentation for configuring user"
+#~ " authentication ([User Authentication "
+#~ "Guide](https://flower.ai/docs/framework/how-to-"
+#~ "authenticate-users.html)) and audit logging "
+#~ "([Audit Logging Guide](https://flower.ai/docs/framework"
+#~ "/how-to-configure-audit-logging.html)) in"
+#~ " Flower."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The documentation now includes a "
+#~ "detailed guide on deploying and running"
+#~ " Flower on Google Cloud Platform "
+#~ "(GCP). It provides step-by-step "
+#~ "instructions for managing Flower workloads "
+#~ "in a GCP environment. For more "
+#~ "information, refer to the [official "
+#~ "guide](https://flower.ai/docs/framework/how-to-run-"
+#~ "flower-on-gcp.html)."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Flower Mods can now be applied to"
+#~ " individual functions within the "
+#~ "`ClientApp` rather than affecting the "
+#~ "entire application. This allows for more"
+#~ " granular control. The documentation has"
+#~ " been updated to reflect these "
+#~ "changes — please refer to [How to"
+#~ " Use Built-in "
+#~ "Mods](https://flower.ai/docs/framework/how-to-use-"
+#~ "built-in-mods.html#registering-function-"
+#~ "specific-mods) for details."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Enhances the SuperNode authentication system,"
+#~ " making it more efficient and "
+#~ "resilient against replay attacks. There's "
+#~ "no longer a need to pass "
+#~ "`--auth-superlink-private-key` and "
+#~ "`--auth-superlink-public-key` when running"
+#~ " the SuperLink. Additionally, Flower now"
+#~ " enables automatic node authentication by"
+#~ " default, preventing impersonation even "
+#~ "when node authentication is not "
+#~ "explicitly used. For more details, see"
+#~ " the [documentation](https://flower.ai/docs/framework/how-"
+#~ "to-authenticate-supernodes.html)."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Introduces the [How to run Flower "
+#~ "with Deployment Engine](https://flower.ai/docs/framework"
+#~ "/how-to-run-flower-with-deployment-"
+#~ "engine.html) guide, providing detailed "
+#~ "instructions on deploying Federated Learning"
+#~ " in production environments using the "
+#~ "Flower Deployment Engine."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Introduces the [*Flower Network "
+#~ "Communication*](https://flower.ai/docs/framework/ref-flower-"
+#~ "network-communication.html) documentation, which "
+#~ "details the network connections used in"
+#~ " a deployed Flower federated AI "
+#~ "system."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The *Flower AI Simulation 2025* tutorial"
+#~ " series is now available on YouTube."
+#~ " You can watch all the videos "
+#~ "[here](https://www.youtube.com/playlist?list=PLNG4feLHqCWkdlSrEL2xbCtGa6QBxlUZb)"
+#~ " or via the embedded previews in "
+#~ "the [documentation](https://flower.ai/docs/framework/how-"
+#~ "to-run-simulations.html). The accompanying "
+#~ "code for the tutorial can be found"
+#~ " in the [Flower GitHub "
+#~ "repository](https://github.com/adap/flower/tree/main/examples"
+#~ "/flower-simulation-step-by-step-pytorch)."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Log level can now be configured "
+#~ "using the `FLWR_LOG_LEVEL` environment "
+#~ "variable. For example, running "
+#~ "`FLWR_LOG_LEVEL=DEBUG flower-superlink --insecure`"
+#~ " will set the log level to "
+#~ "DEBUG. For more details, see the "
+#~ "[guide](https://flower.ai/docs/framework/how-to-"
+#~ "configure-logging.html)."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The `flwr run`, `flwr ls`, and "
+#~ "`flwr stop` commands now support "
+#~ "JSON-formatted output using the `--format"
+#~ " json` flag. This makes it easier "
+#~ "to parse and integrate CLI output "
+#~ "with other tools. Feel free to "
+#~ "check the [\"How to Use CLI JSON"
+#~ " output\"](https://flower.ai/docs/framework/how-to-"
+#~ "use-cli-json-output.html) guide for "
+#~ "details!"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Many documentation pages and tutorials "
+#~ "have been updated to improve clarity,"
+#~ " fix typos, incorporate user feedback, "
+#~ "and stay aligned with the latest "
+#~ "features in the framework. Key updates"
+#~ " include adding a guide for designing"
+#~ " stateful `ClientApp` objects, updating the"
+#~ " comprehensive guide for setting up "
+#~ "and running Flower's `Simulation Engine`, "
+#~ "updating the XGBoost, scikit-learn, and"
+#~ " JAX quickstart tutorials to use "
+#~ "`flwr run`, updating DP guide, removing"
+#~ " outdated pages, updating Docker docs, "
+#~ "and marking legacy functions as "
+#~ "deprecated. The [Secure Aggregation "
+#~ "Protocols](https://flower.ai/docs/framework/explanation-ref-"
+#~ "secure-aggregation-protocols.html) page has"
+#~ " also been updated."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "A new [Flower architecture "
+#~ "explainer](https://flower.ai/docs/framework/explanation-"
+#~ "flower-architecture.html) page introduces Flower"
+#~ " components step-by-step. Check out"
+#~ " the `EXPLANATIONS` section of the "
+#~ "Flower documentation if you're interested."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Upgraded Ubuntu base image to 24.04, "
+#~ "added SBOM and gcc to Docker "
+#~ "images, and comprehensively updated [Docker"
+#~ " documentation](https://flower.ai/docs/framework/docker/index.html)"
+#~ " including quickstart guides and "
+#~ "distributed Docker Compose instructions."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Completely new Docker documentation: "
+#~ "https://flower.ai/docs/framework/docker/index.html"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Flower 1.9 introduces the first "
+#~ "build-in version of client node "
+#~ "authentication. In previous releases, users"
+#~ " often wrote glue code to connect "
+#~ "Flower to external authentication systems. "
+#~ "With this release, the SuperLink can "
+#~ "authenticate SuperNodes using a built-in"
+#~ " authentication system. A new [how-to"
+#~ " guide](https://flower.ai/docs/framework/how-to-"
+#~ "authenticate-supernodes.html) and a new "
+#~ "[code example](https://github.com/adap/flower/tree/main/examples"
+#~ "/flower-authentication) help you to get "
+#~ "started."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Full Flower Next Docker support is "
+#~ "here! With the release of Flower "
+#~ "1.9, Flower provides stable Docker "
+#~ "images for the Flower SuperLink, the "
+#~ "Flower SuperNode, and the Flower "
+#~ "`ServerApp`. This set of images enables"
+#~ " you to run all Flower components "
+#~ "in Docker. Check out the new "
+#~ "[how-to guide](https://flower.ai/docs/framework/how-"
+#~ "to-run-flower-using-docker.html) to "
+#~ "get stated."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "[How-to upgrate to Flower Next "
+#~ "(Flower Next migration "
+#~ "guide)](https://flower.ai/docs/framework/how-to-"
+#~ "upgrade-to-flower-next.html)"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "[Flower Mods reference](https://flower.ai/docs/framework"
+#~ "/ref-api/flwr.client.mod.html#module-flwr.client.mod)"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "SSL-related `flower-superlink` CLI "
+#~ "arguments were restructured in an "
+#~ "incompatible way. Instead of passing a"
+#~ " single `--certificates` flag with three"
+#~ " values, you now need to pass "
+#~ "three flags (`--ssl-ca-certfile`, "
+#~ "`--ssl-certfile` and `--ssl-keyfile`) with"
+#~ " one value each. Check out the "
+#~ "[SSL connections](https://flower.ai/docs/framework/how-"
+#~ "to-enable-ssl-connections.html) documentation "
+#~ "page for details."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "To simplify the usage of `flower-"
+#~ "superlink`, previously separate sets of "
+#~ "CLI options for gRPC and REST were"
+#~ " merged into one unified set of "
+#~ "options. Consult the [Flower CLI "
+#~ "reference documentation](https://flower.ai/docs/framework"
+#~ "/ref-api-cli.html) for details."
 #~ msgstr ""
 
