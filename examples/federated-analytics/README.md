@@ -124,6 +124,16 @@ chmod +x db_start.sh
 > [!NOTE]
 > To start more than two databases, pass the desired number as the first argument to the script, e.g. `./db_start.sh 3`.
 
+### Update Flower Config
+
+SuperLink connections are defined in the [Flower Configuration](https://flower.ai/docs/framework/main/en/ref-flower-configuration.html) file. If it doesn't exist, this file is created automatically for you when you use the Flower CLI command. Open the `config.toml` file (usually located at `$HOME/.flwr`) and add a new SuperLink connection at the end:
+
+```toml
+[superlink.local-deployment]
+address = "127.0.0.1:9093"
+insecure = true
+```
+
 ### Run with the Deployment Engine
 
 For a basic execution of this federated analytics app, activate your environment and start the SuperLink process in insecure mode:
@@ -155,13 +165,13 @@ flower-supernode \
 Finally, run the Flower App and follow the `ServerApp` logs to track the execution of the run:
 
 ```shell
-flwr run . --stream
+flwr run . local-deployment --stream
 ```
 
 You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example:
 
 ```shell
-flwr run . --run-config "selected-features='age,bmi'" --stream
+flwr run . local-deployment --run-config "selected-features='age,bmi'" --stream
 ```
 
 The steps above are adapted from this [how-to guide](https://flower.ai/docs/framework/how-to-run-flower-with-deployment-engine.html). After that, you might be intersted in setting up [secure TLS-enabled communications](https://flower.ai/docs/framework/how-to-enable-tls-connections.html) and [SuperNode authentication](https://flower.ai/docs/framework/how-to-authenticate-supernodes.html) in your federation.
