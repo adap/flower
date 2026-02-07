@@ -1,5 +1,5 @@
 ---
-tags: [basic, tabular, federated analytics]
+tags: [tabular, federated analytics, omop]
 dataset: [artificial]
 framework: [pandas]
 ---
