@@ -97,6 +97,7 @@ release = "1.26.1"
 # The current released version
 rst_prolog = """
 .. |stable_flwr_version| replace:: 1.26.1
+.. The SuperLink Docker image digest is version-independent and does not necessarily track |stable_flwr_version|.
 .. |stable_flwr_superlink_docker_digest| replace:: 4b317d5b6030710b476f4dbfab2c3a33021ad40a0fcfa54d7edd45e0c51d889c
 .. |ubuntu_version| replace:: 24.04
 .. |setuptools_version| replace:: 80.9.0
