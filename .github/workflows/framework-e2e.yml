@@ -18,7 +18,7 @@ env:
 
 jobs:
   changes:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     outputs:
       framework: ${{ steps.filter.outputs.framework }}
     steps:
@@ -36,7 +36,7 @@ jobs:
               - '.github/workflows/framework-e2e.yml'
 
   wheel:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     name: Build, test and upload wheel
     steps:
       - uses: actions/checkout@v5
@@ -73,7 +73,7 @@ jobs:
       dir: ${{ steps.upload.outputs.DIR }}
 
   superexec:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     needs: [changes, wheel]
     strategy:
@@ -133,7 +133,7 @@ jobs:
         run: ./../test_control_api.sh "${{ matrix.connection }}" "${{ matrix.authentication}}" "${{ matrix.engine }}"
 
   frameworks:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     needs: [changes, wheel]
     # Using approach described here:
@@ -262,7 +262,7 @@ jobs:
           key: pythonloc-${{ runner.os }}-${{ matrix.directory }}-${{ env.pythonLocation }}-${{ hashFiles(format('./framework/e2e/{0}/pyproject.toml', matrix.directory)) }}
 
   strategies:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     needs: [changes, wheel]
     strategy:
@@ -304,7 +304,7 @@ jobs:
           python test.py "${{ matrix.strat }}"
 
   apps:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     needs: [changes, wheel]
     env:
@@ -355,7 +355,7 @@ jobs:
 
 
   pull-app:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     needs: [changes, wheel]
     env:
@@ -394,7 +394,7 @@ jobs:
           fi
 
   build_and_install:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     needs: [changes, wheel]
     strategy:
@@ -433,7 +433,7 @@ jobs:
           flwr install *.fab
 
   numpy:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     needs: [changes, wheel]
     strategy:
@@ -521,7 +521,7 @@ jobs:
         shell: bash
 
   serverapp-heartbeat-test:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     needs: [changes, wheel]
     strategy:
