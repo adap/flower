@@ -19,6 +19,25 @@ This work originates from **FLASH**: A framework for Federated Learning with Att
 - **Multiple FS methods**: Lasso, Random Forest, Mutual Information, RFE, and more
 - **Configurable aggregation**: Control the balance between intersection and union of features
 
+## Citation
+
+If you use Feature Election in your research, please cite the FLASH framework paper:
+
+**IEEE Style:**
+> I. Christofilogiannis, G. Valavanis, A. Shevtsov, I. Lamprou and S. Ioannidis, "FLASH: A Framework for Federated Learning with Attribute Selection and Hyperparameter Optimization," 2025 3rd International Conference on Federated Learning Technologies and Applications (FLTA), Dubrovnik, Croatia, 2025, pp. 93-100, doi: 10.1109/FLTA67013.2025.11336571.
+
+**BibTeX:**
+```bibtex
+@INPROCEEDINGS{11336571,
+  author={Christofilogiannis, Ioannis and Valavanis, Georgios and Shevtsov, Alexander and Lamprou, Ioannis and Ioannidis, Sotiris},
+  booktitle={2025 3rd International Conference on Federated Learning Technologies and Applications (FLTA)}, 
+  title={FLASH: A Framework for Federated Learning with Attribute Selection and Hyperparameter Optimization}, 
+  year={2025},
+  pages={93-100},
+  doi={10.1109/FLTA67013.2025.11336571}
+}
+```
+
 ## Feature Selection Methods
 
 | Method | Description | Speed |
@@ -202,16 +221,6 @@ After running, results are saved to `outputs/<date>/<time>/`:
 3. **Submission**: Clients send binary masks and scores (not raw data)
 4. **Aggregation**: Server aggregates using weighted voting based on `freedom_degree`
 5. **Distribution**: Server broadcasts global mask to clients
-
-## Citation
-
-If you use Feature Election in your research, please cite:
-
-FLASH: A framework for Federated Learning with Attribute Selection and Hyperparameter optimization
-
-Authors: Ioannis Christofilogiannis, George Valavanis, Alexander Shevtsov, Ioannis Lamprou and Sotiris Ioannidis
-
-FLTA IEEE 2025 Proceedings citation not yet available, please contact: jchr2001@gmail.com
 
 ## License
 
