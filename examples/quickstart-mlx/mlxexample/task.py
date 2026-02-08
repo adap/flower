@@ -69,7 +69,6 @@ def load_data(partition_id: int, num_partitions: int):
         fds = FederatedDataset(
             dataset="ylecun/mnist",
             partitioners={"train": partitioner},
-            trust_remote_code=True,
         )
     partition = fds.load_partition(partition_id)
     partition_splits = partition.train_test_split(test_size=0.2, seed=42)
@@ -91,10 +90,10 @@ def load_data(partition_id: int, num_partitions: int):
     )
 
     data = (
-        train_partition["img"],
-        train_partition["label"].astype(np.uint32),
-        test_partition["img"],
-        test_partition["label"].astype(np.uint32),
+        np.array(train_partition["img"]),
+        np.array(train_partition["label"], dtype=np.uint32),
+        np.array(test_partition["img"]),
+        np.array(test_partition["label"], dtype=np.uint32),
     )
 
     train_images, train_labels, test_images, test_labels = map(mx.array, data)
