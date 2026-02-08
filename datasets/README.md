@@ -78,4 +78,4 @@ partition = fds.load_partition(0)
 centralized_data = fds.load_split("test")
 ```
 
-For more details, please refer to the specific how-to guides or tutorial. They showcase customization and more advanced features.
+For more details, please refer to the specific how-to guides or tutorials. They showcase customization and more advanced features.
