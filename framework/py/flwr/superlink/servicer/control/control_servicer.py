@@ -74,11 +74,14 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     StartRunResponse,
     StopRunRequest,
     StopRunResponse,
+    StreamEventsRequest,
+    StreamEventsResponse,
     StreamLogsRequest,
     StreamLogsResponse,
     UnregisterNodeRequest,
     UnregisterNodeResponse,
 )
+from flwr.common.events import get_event_dispatcher
 from flwr.proto.federation_pb2 import Federation  # pylint: disable=E0611
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
@@ -257,6 +260,31 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 # Delete objects of the run from the object store
                 self.objectstore_factory.store().delete_objects_in_run(run_id)
                 break
+
+            time.sleep(LOG_STREAM_INTERVAL)  # Sleep briefly to avoid busy waiting
+
+    def StreamEvents(  # pylint: disable=C0103
+        self, request: StreamEventsRequest, context: grpc.ServicerContext
+    ) -> Generator[StreamEventsResponse, Any, None]:
+        """Stream events from all runs."""
+        log(INFO, "ControlServicer.StreamEvents")
+
+        # Get the global event dispatcher
+        dispatcher = get_event_dispatcher()
+
+        after_timestamp = request.after_timestamp
+        while context.is_active():
+            # Get events after the specified timestamp
+            events = dispatcher.get_events_since(after_timestamp)
+
+            if events:
+                latest_timestamp = max(event.timestamp for event in events)
+                yield StreamEventsResponse(
+                    events=events,
+                    latest_timestamp=latest_timestamp,
+                )
+                # Update after_timestamp to avoid getting the same events
+                after_timestamp = latest_timestamp + 1e-6
 
             time.sleep(LOG_STREAM_INTERVAL)  # Sleep briefly to avoid busy waiting
 
