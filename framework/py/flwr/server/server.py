@@ -33,6 +33,8 @@ from flwr.common import (
 )
 from flwr.common.logger import log
 from flwr.common.typing import GetParametersIns
+from flwr.common.events import get_event_dispatcher
+from flwr.proto.event_pb2 import EventType
 from flwr.server.client_manager import ClientManager, SimpleClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.history import History
@@ -69,6 +71,7 @@ class Server:
         )
         self.strategy: Strategy = strategy if strategy is not None else FedAvg()
         self.max_workers: int | None = None
+        self._event_dispatcher = get_event_dispatcher()
 
     def set_max_workers(self, max_workers: int | None) -> None:
         """Set the max_workers used by ThreadPoolExecutor."""
@@ -85,6 +88,13 @@ class Server:
     # pylint: disable=too-many-locals
     def fit(self, num_rounds: int, timeout: float | None) -> tuple[History, float]:
         """Run federated averaging for a number of rounds."""
+        self._event_dispatcher.emit_event(
+            event_type=EventType.RUN_STARTED,
+            metadata={
+                "num_rounds": str(num_rounds),
+            },
+        )
+
         history = History()
 
         # Initialize parameters
@@ -110,18 +120,38 @@ class Server:
         for current_round in range(1, num_rounds + 1):
             log(INFO, "")
             log(INFO, "[ROUND %s]", current_round)
-            # Train model and replace previous global model
-            res_fit = self.fit_round(
-                server_round=current_round,
-                timeout=timeout,
+
+            self._event_dispatcher.emit_event(
+                event_type=EventType.ROUND_STARTED,
+                metadata={
+                    "round": str(current_round),
+                },
             )
-            if res_fit is not None:
-                parameters_prime, fit_metrics, _ = res_fit  # fit_metrics_aggregated
-                if parameters_prime:
-                    self.parameters = parameters_prime
-                history.add_metrics_distributed_fit(
-                    server_round=current_round, metrics=fit_metrics
+
+            # Train model and replace previous global model
+            try:
+                res_fit = self.fit_round(
+                    server_round=current_round,
+                    timeout=timeout,
                 )
+                if res_fit is not None:
+                    parameters_prime, fit_metrics, _ = res_fit
+                    if parameters_prime:
+                        self.parameters = parameters_prime
+                    history.add_metrics_distributed_fit(
+                        server_round=current_round, metrics=fit_metrics
+                    )
+            except Exception as e:
+                # Emit ROUND_FAILED event
+                self._event_dispatcher.emit_event(
+                    event_type=EventType.ROUND_FAILED,
+                    metadata={
+                        "round": str(current_round),
+                        "error_type": type(e).__name__,
+                        "error_message": str(e),
+                    },
+                )
+                raise
 
             # Evaluate model using strategy implementation
             res_cen = self.strategy.evaluate(current_round, parameters=self.parameters)
@@ -152,9 +182,25 @@ class Server:
                         server_round=current_round, metrics=evaluate_metrics_fed
                     )
 
+            self._event_dispatcher.emit_event(
+                event_type=EventType.ROUND_COMPLETED,
+                metadata={
+                    "round": str(current_round),
+                },
+            )
+
         # Bookkeeping
         end_time = timeit.default_timer()
         elapsed = end_time - start_time
+
+        self._event_dispatcher.emit_event(
+            event_type=EventType.RUN_COMPLETED,
+            metadata={
+                "num_rounds": str(num_rounds),
+                "elapsed_time": str(elapsed),
+            },
+        )
+
         return history, elapsed
 
     def evaluate_round(
@@ -163,6 +209,13 @@ class Server:
         timeout: float | None,
     ) -> tuple[float | None, dict[str, Scalar], EvaluateResultsAndFailures] | None:
         """Validate current global model on a number of clients."""
+        self._event_dispatcher.emit_event(
+            event_type=EventType.ROUND_EVALUATE_STARTED,
+            metadata={
+                "round": str(server_round),
+            },
+        )
+
         # Get clients and their respective instructions from strategy
         client_instructions = self.strategy.configure_evaluate(
             server_round=server_round,
@@ -179,28 +232,55 @@ class Server:
             self._client_manager.num_available(),
         )
 
-        # Collect `evaluate` results from all clients participating in this round
-        results, failures = evaluate_clients(
-            client_instructions,
-            max_workers=self.max_workers,
-            timeout=timeout,
-            group_id=server_round,
-        )
-        log(
-            INFO,
-            "aggregate_evaluate: received %s results and %s failures",
-            len(results),
-            len(failures),
-        )
+        try:
+            # Collect `evaluate` results from all clients participating in this round
+            results, failures = evaluate_clients(
+                client_instructions,
+                max_workers=self.max_workers,
+                timeout=timeout,
+                group_id=server_round,
+            )
+            log(
+                INFO,
+                "aggregate_evaluate: received %s results and %s failures",
+                len(results),
+                len(failures),
+            )
 
-        # Aggregate the evaluation results
-        aggregated_result: tuple[
-            float | None,
-            dict[str, Scalar],
-        ] = self.strategy.aggregate_evaluate(server_round, results, failures)
+            # Aggregate the evaluation results
+            aggregated_result: tuple[
+                float | None,
+                dict[str, Scalar],
+            ] = self.strategy.aggregate_evaluate(server_round, results, failures)
 
-        loss_aggregated, metrics_aggregated = aggregated_result
-        return loss_aggregated, metrics_aggregated, (results, failures)
+            loss_aggregated, metrics_aggregated = aggregated_result
+
+            metadata = {
+                "round": str(server_round),
+                "num_results": str(len(results)),
+                "num_failures": str(len(failures)),
+            }
+
+            if loss_aggregated is not None:
+                metadata["loss"] = str(loss_aggregated)
+
+            metadata |= {k: str(v) for k, v in metrics_aggregated.items()}
+            self._event_dispatcher.emit_event(
+                event_type=EventType.ROUND_EVALUATE_AGGREGATED,
+                metadata=metadata,
+            )
+
+            return loss_aggregated, metrics_aggregated, (results, failures)
+        except Exception as e:
+            self._event_dispatcher.emit_event(
+                event_type=EventType.ROUND_EVALUATE_FAILED,
+                metadata={
+                    "round": str(server_round),
+                    "error_type": type(e).__name__,
+                    "error_message": str(e),
+                },
+            )
+            raise
 
     def fit_round(
         self,
@@ -208,6 +288,13 @@ class Server:
         timeout: float | None,
     ) -> tuple[Parameters | None, dict[str, Scalar], FitResultsAndFailures] | None:
         """Perform a single round of federated averaging."""
+        self._event_dispatcher.emit_event(
+            event_type=EventType.ROUND_FIT_STARTED,
+            metadata={
+                "round": str(server_round),
+            },
+        )
+
         # Get clients and their respective instructions from strategy
         client_instructions = self.strategy.configure_fit(
             server_round=server_round,
@@ -225,28 +312,50 @@ class Server:
             self._client_manager.num_available(),
         )
 
-        # Collect `fit` results from all clients participating in this round
-        results, failures = fit_clients(
-            client_instructions=client_instructions,
-            max_workers=self.max_workers,
-            timeout=timeout,
-            group_id=server_round,
-        )
-        log(
-            INFO,
-            "aggregate_fit: received %s results and %s failures",
-            len(results),
-            len(failures),
-        )
+        try:
+            # Collect `fit` results from all clients participating in this round
+            results, failures = fit_clients(
+                client_instructions=client_instructions,
+                max_workers=self.max_workers,
+                timeout=timeout,
+                group_id=server_round,
+            )
+            log(
+                INFO,
+                "aggregate_fit: received %s results and %s failures",
+                len(results),
+                len(failures),
+            )
 
-        # Aggregate training results
-        aggregated_result: tuple[
-            Parameters | None,
-            dict[str, Scalar],
-        ] = self.strategy.aggregate_fit(server_round, results, failures)
+            # Aggregate training results
+            aggregated_result: tuple[
+                Parameters | None,
+                dict[str, Scalar],
+            ] = self.strategy.aggregate_fit(server_round, results, failures)
 
-        parameters_aggregated, metrics_aggregated = aggregated_result
-        return parameters_aggregated, metrics_aggregated, (results, failures)
+            parameters_aggregated, metrics_aggregated = aggregated_result
+
+            self._event_dispatcher.emit_event(
+                event_type=EventType.ROUND_FIT_AGGREGATED,
+                metadata={
+                    "round": str(server_round),
+                    "num_results": str(len(results)),
+                    "num_failures": str(len(failures)),
+                    **{k: str(v) for k, v in metrics_aggregated.items()}
+                },
+            )
+
+            return parameters_aggregated, metrics_aggregated, (results, failures)
+        except Exception as e:
+            self._event_dispatcher.emit_event(
+                event_type=EventType.ROUND_FIT_FAILED,
+                metadata={
+                    "round": str(server_round),
+                    "error_type": type(e).__name__,
+                    "error_message": str(e),
+                },
+            )
+            raise
 
     def disconnect_all_clients(self, timeout: float | None) -> None:
         """Send shutdown signal to all clients."""
