@@ -16,7 +16,7 @@ authors = [
 ]
 
 dependencies = [
-    "flwr[simulation]>=1.26.0",
+    "flwr[simulation]>=1.26.1",
     "transformers>=4.30.0,<5.0",
     "lerobot[pusht]==0.4.3",
     "flwr-datasets @ git+https://github.com/adap/flower.git#subdirectory=datasets",
