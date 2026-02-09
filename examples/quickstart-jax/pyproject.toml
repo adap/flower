@@ -4,11 +4,11 @@ build-backend = "hatchling.build"
 
 [project]
 name = "quickstart-jax"
-version = "1.0.0"
+version = "1.0.1"
 description = "Federated Learning with JAX and Flower (Quickstart Example)"
 license = "Apache-2.0"
 dependencies = [
-    "flwr[simulation]>=1.26.0",
+    "flwr[simulation]>=1.26.1",
     "flwr-datasets[vision]>=0.5.0",
     "datasets>=2.21.0,<=3.1.0",
     "jax==0.4.31",
@@ -31,9 +31,3 @@ num-server-rounds = 5
 learning-rate = 0.1
 fraction-evaluate = 0.2
 batch-size = 64
-
-[tool.flwr.federations]
-default = "local-simulation"
-
-[tool.flwr.federations.local-simulation]
-options.num-supernodes = 50

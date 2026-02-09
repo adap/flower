@@ -8,7 +8,7 @@ version = "1.0.0"
 description = "FlowerTune LLM: Federated LLM Fine-tuning with Flower"
 license = "Apache-2.0"
 dependencies = [
-    "flwr[simulation]>=1.26.0",
+    "flwr[simulation]>=1.26.1",
     "flwr-datasets>=0.5.0",
     "torch==2.8.0",
     "trl==0.8.1",
@@ -57,11 +57,3 @@ train.training-arguments.lr-scheduler-type = "constant"
 strategy.fraction-train = 0.1
 strategy.fraction-evaluate = 0.0
 num-server-rounds = 100
-
-[tool.flwr.federations]
-default = "local-simulation"
-
-[tool.flwr.federations.local-simulation]
-options.num-supernodes = 20
-options.backend.client-resources.num-cpus = 8
-options.backend.client-resources.num-gpus = 1.0
