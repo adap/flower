@@ -109,9 +109,6 @@ scp -r datasets/fashionmnist_part_1 <user>@<device-ip>:/path/to/home
 
 On your development machine, launch the `SuperLink`. You will connnect Flower `SuperNodes` to it in the next step.
 
-> [!NOTE]
-> If you decide to run the `SuperLink` in a different machine, you'll need to adjust the `address` under the `[tool.flwr.federations.embedded-federation]` tag in the `pyproject.toml`.
-
 ```shell
 flower-superlink --insecure
 ```
@@ -145,8 +142,35 @@ Repeat for each embedded device that you want to connect to the `SuperLink`.
 
 ### Run the Flower App
 
-With both the long-running server (`SuperLink`) and two `SuperNodes` up and running, we can now start run. Note that the command below points to a federation named `embedded-federation`. Its entry point is defined in the `pyproject.toml`. Run the following from your development machine where you have cloned this example to, e.g. your laptop.
+With both the long-running server (`SuperLink`) and two `SuperNodes` up and running, we can now start run. Let's first update the Flower Configuration file to add a new SuperLink connection.
+
+Locate your Flower configuration file by running:
+
+```shell
+flwr config list
+```
+
+```console
+# Example output:
+Flower Config file: /path/to/your/.flwr/config.toml
+SuperLink connections:
+ supergrid
+ local (default)
+```
+
+Open this configuration file and add a new SuperLink connection at the end:
+
+```TOML
+[superlink.embedded-federation]
+address = "127.0.0.1:9093" # ControlAPI of your SUPERLINK
+insecure = true
+```
+
+Finally, run your Flower App in your federation:
 
 ```shell
 flwr run . embedded-federation
 ```
+
+> [!TIP]
+> For more details about how to create a SuperLink connection please refer to the [How-To use Flower's Deployment Engine guide](https://flower.ai/docs/framework/how-to-run-flower-with-deployment-engine.html). Read more about the Flower Configuration file in [this guide](https://flower.ai/docs/framework/ref-flower-configuration.html).

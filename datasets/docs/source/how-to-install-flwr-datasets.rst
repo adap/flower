@@ -67,6 +67,6 @@ The following command can be used to verify if Flower Datasets was successfully 
 
 If everything works, it should print the version of Flower Datasets to the command line:
 
-.. code-block:: none
+.. parsed-literal::
 
-  0.5.0
+  |release|

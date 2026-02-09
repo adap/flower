@@ -8,7 +8,7 @@ version = "1.0.0"
 description = "Sample-level Differential Privacy with Opacus in Flower"
 
 dependencies = [
-    "flwr[simulation]>=1.25.0",
+    "flwr[simulation]>=1.26.1",
     "flwr-datasets[vision]>=0.5.0",
     "torch==2.8.0",
     "torchvision==0.23.0",
@@ -29,9 +29,3 @@ clientapp = "opacus_fl.client_app:app"
 num-server-rounds = 3
 target-delta = 1e-5
 max-grad-norm = 1.0
-
-[tool.flwr.federations]
-default = "local-simulation"
-
-[tool.flwr.federations.local-simulation]
-options.num-supernodes = 2
