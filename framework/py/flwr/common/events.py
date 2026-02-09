@@ -17,13 +17,23 @@
 import time
 from queue import Empty, Queue
 from threading import Lock, Thread
+from typing import Protocol
 
 import grpc
 
 from flwr.common.constant import EVENT_UPLOAD_INTERVAL
-from flwr.proto.event_pb2 import Event, EventType, PushEventsRequest
+from flwr.proto.event_pb2 import Event, EventType, PushEventsRequest, PushEventsResponse
 from flwr.proto.node_pb2 import Node
-from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub
+
+
+class EventStub(Protocol):
+    """Protocol for stubs that support PushEvents."""
+
+    def PushEvents(
+        self, request: PushEventsRequest, timeout: float | None = None
+    ) -> PushEventsResponse:
+        """Push events to the server."""
+        ...
 
 
 class EventDispatcher:
@@ -167,7 +177,7 @@ def _event_uploader(
     event_queue: Queue[Event | None],
     node_id: int,
     run_id: int,
-    stub: ServerAppIoStub,
+    stub: EventStub,
 ) -> None:
     """Background worker that batches and uploads events to the server.
 
@@ -233,7 +243,7 @@ def _event_uploader(
 def start_event_uploader(
     node_id: int,
     run_id: int,
-    stub: ServerAppIoStub,
+    stub: EventStub,
 ) -> tuple[Thread, Queue[Event | None]]:
     """Start a background thread that uploads events to the server.
 

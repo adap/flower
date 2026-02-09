@@ -25,7 +25,7 @@ import pytest
 
 from flwr.proto.event_pb2 import Event, EventType
 from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub
-from flwr.server.events import (
+from flwr.common.events import (
     EventDispatcher,
     _event_uploader,
     get_event_dispatcher,
