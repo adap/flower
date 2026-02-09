@@ -35,8 +35,10 @@ from flwr.common.constant import (
     Status,
     SubStatus,
 )
+from flwr.common.events import get_event_dispatcher
 from flwr.common.record import ConfigRecord
 from flwr.common.typing import Run, RunStatus
+from flwr.proto.event_pb2 import EventType
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.server.superlink.linkstate.linkstate import LinkState
 from flwr.server.utils import validate_message
@@ -506,6 +508,7 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
             return result
 
     def _check_and_tag_offline_nodes(self, node_ids: list[int] | None = None) -> None:
+        dispatcher = get_event_dispatcher()
         with self.lock:
             # Set all nodes of "online" status to "offline" if they've offline
             current_ts = now().timestamp()
@@ -518,6 +521,15 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
                         node.last_deactivated_at = datetime.fromtimestamp(
                             node.online_until, tz=timezone.utc
                         ).isoformat()
+
+                        dispatcher.emit_event(
+                            node_id=node_id,
+                            event_type=EventType.NODE_DISCONNECTED,
+                            metadata={
+                                "node_id": str(node_id),
+                                "reason": "heartbeat_timeout",
+                            },
+                        )
 
     def get_node_id_by_public_key(self, public_key: bytes) -> int | None:
         """Get `node_id` for the specified `public_key` if it exists and is not
