@@ -46,6 +46,7 @@ class EventDispatcher:
 
     def __init__(self) -> None:
         self._subs: list[Queue[Event | None]] = []
+        self._events: list[Event] = []
         self._lock = Lock()
 
     def subscribe(self) -> Queue[Event | None]:
@@ -106,6 +107,9 @@ class EventDispatcher:
         consume events promptly to prevent queue overflow.
         """
         with self._lock:
+            # Store event in history
+            self._events.append(event)
+            # Broadcast to subscribers
             for queue in self._subs:
                 queue.put_nowait(event)
 
@@ -140,6 +144,29 @@ class EventDispatcher:
             event.metadata.update(metadata)
 
         self.emit(event)
+
+    def get_events_since(self, after_timestamp: float) -> list[Event]:
+        """Retrieve all events that occurred after the specified timestamp.
+
+        Parameters
+        ----------
+        after_timestamp : float
+            The timestamp (in seconds since epoch) after which to retrieve events.
+
+        Returns
+        -------
+        list[Event]
+            A list of events that occurred after the specified timestamp, ordered
+            by timestamp.
+
+        Notes
+        -----
+        This method is thread-safe and returns a copy of the matching events.
+        The internal event history grows unbounded, so in production systems
+        you may want to implement cleanup of old events.
+        """
+        with self._lock:
+            return [evt for evt in self._events if evt.timestamp > after_timestamp]
 
 
 _event_dispatcher: EventDispatcher | None = None
