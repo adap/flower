@@ -7,7 +7,6 @@ import torch
 from flwr.app import ArrayRecord, ConfigRecord, Context, MetricRecord
 from flwr.serverapp import Grid, ServerApp
 from flwr.serverapp.strategy import FedAvg
-
 from lerobot.datasets.lerobot_dataset import CODEBASE_VERSION
 from lerobot.datasets.utils import get_safe_version
 from lerobot_example.task import get_dataset_metadata, get_policy_components
@@ -49,7 +48,9 @@ def main(grid: Grid, context: Context) -> None:
 
     revision = get_safe_version(repo_id, CODEBASE_VERSION)
     meta = get_dataset_metadata(repo_id, revision)
-    policy, preprocessor, postprocessor, _cfg = get_policy_components(meta, server_device)
+    policy, preprocessor, postprocessor, _cfg = get_policy_components(
+        meta, server_device
+    )
     arrays = ArrayRecord(policy.state_dict())
 
     def evaluate_fn(server_round: int, arrays: ArrayRecord) -> MetricRecord | None:

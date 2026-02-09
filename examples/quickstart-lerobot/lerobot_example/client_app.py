@@ -6,8 +6,6 @@ from pathlib import Path
 import torch
 from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
 from flwr.clientapp import ClientApp
-from transformers import logging as hf_logging
-
 from lerobot.datasets.lerobot_dataset import CODEBASE_VERSION
 from lerobot.datasets.utils import get_safe_version
 from lerobot_example.task import (
@@ -17,6 +15,7 @@ from lerobot_example.task import (
     test,
     train,
 )
+from transformers import logging as hf_logging
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 hf_logging.set_verbosity_error()

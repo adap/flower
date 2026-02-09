@@ -10,7 +10,6 @@ import gymnasium as gym
 import imageio
 import numpy as np
 import torch
-from datasets.utils.logging import disable_progress_bar
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import GroupedNaturalIdPartitioner
 from lerobot.configs.types import FeatureType
@@ -26,6 +25,8 @@ from lerobot.policies.factory import make_pre_post_processors
 from lerobot.utils.constants import ACTION, OBS_IMAGE, OBS_STATE
 from torch.utils.data import DataLoader
 
+from datasets.utils.logging import disable_progress_bar
+
 disable_progress_bar()
 fds = None  # Cache FederatedDataset
 
@@ -36,10 +37,14 @@ def get_dataset_metadata(repo_id: str, revision: str) -> LeRobotDatasetMetadata:
     return LeRobotDatasetMetadata(repo_id, revision=revision)
 
 
-def get_policy_config(meta: LeRobotDatasetMetadata, device: torch.device) -> DiffusionConfig:
+def get_policy_config(
+    meta: LeRobotDatasetMetadata, device: torch.device
+) -> DiffusionConfig:
     """Build a Diffusion policy config from dataset metadata."""
     features = dataset_to_policy_features(meta.features)
-    output_features = {k: ft for k, ft in features.items() if ft.type == FeatureType.ACTION}
+    output_features = {
+        k: ft for k, ft in features.items() if ft.type == FeatureType.ACTION
+    }
     input_features = {k: ft for k, ft in features.items() if k not in output_features}
     return DiffusionConfig(
         input_features=input_features,
@@ -53,11 +58,15 @@ def get_policy_components(meta: LeRobotDatasetMetadata, device: torch.device):
     cfg = get_policy_config(meta, device)
     policy = DiffusionPolicy(cfg)
     policy.to(device)
-    preprocessor, postprocessor = make_pre_post_processors(cfg, dataset_stats=meta.stats)
+    preprocessor, postprocessor = make_pre_post_processors(
+        cfg, dataset_stats=meta.stats
+    )
     return policy, preprocessor, postprocessor, cfg
 
 
-def get_delta_timestamps(cfg: DiffusionConfig, meta: LeRobotDatasetMetadata) -> dict[str, list[float]]:
+def get_delta_timestamps(
+    cfg: DiffusionConfig, meta: LeRobotDatasetMetadata
+) -> dict[str, list[float]]:
     """Compute delta timestamps in seconds for observations/actions."""
     obs_delta = [i / meta.fps for i in cfg.observation_delta_indices]
     action_delta = [i / meta.fps for i in cfg.action_delta_indices]
