@@ -1,12 +1,8 @@
 ---
 myst:
   html_meta:
-    description: Deploy Flower's SuperNode Helm chart to install client 
-      federated learning components. Default config mirrors official releases 
-      for seamless integration.
-    property:og:description: Deploy Flower's SuperNode Helm chart to install 
-      client federated learning components. Default config mirrors official 
-      releases for seamless integration.
+    description: Deploy Flower's SuperNode Helm chart to install client federated learning components. Default config mirrors official releases for seamless integration.
+    property:og:description: Deploy Flower's SuperNode Helm chart to install client federated learning components. Default config mirrors official releases for seamless integration.
 ---
 
 # Deploy SuperNode using Helm
@@ -336,7 +332,7 @@ supernode:
 | `supernode.imagePullSecrets`                                        | SuperNode image pull secrets which overrides global.imagePullSecrets                                                    | `[]`                       |
 | `supernode.image.registry`                                          | SuperNode image registry                                                                                                | `registry.hub.docker.com`  |
 | `supernode.image.repository`                                        | SuperNode image repository                                                                                              | `flwr/supernode-ee`        |
-| `supernode.image.tag`                                               | Image tag of SuperNode                                                                                                  | `1.26.0-ubuntu`            |
+| `supernode.image.tag`                                               | Image tag of SuperNode                                                                                                  | `1.26.1-ubuntu`            |
 | `supernode.image.digest`                                            | Image digest of SuperNode                                                                                               | `""`                       |
 | `supernode.image.pullPolicy`                                        | Components image pullPolicy                                                                                             | `IfNotPresent`             |
 | `supernode.networkPolicy.enabled`                                   | Specifies whether a NetworkPolicy should be created                                                                     | `true`                     |
@@ -395,7 +391,7 @@ supernode:
 | `superexec.imagePullSecrets`                            | SuperExec image pull secrets which overrides global.imagePullSecrets                                              | `[]`                      |
 | `superexec.image.registry`                              | SuperExec image registry                                                                                          | `registry.hub.docker.com` |
 | `superexec.image.repository`                            | SuperExec image repository                                                                                        | `flwr/superexec-ee`       |
-| `superexec.image.tag`                                   | Image tag of SuperExec                                                                                            | `1.26.0-ubuntu`           |
+| `superexec.image.tag`                                   | Image tag of SuperExec                                                                                            | `1.26.1-ubuntu`           |
 | `superexec.image.digest`                                | Image digest of SuperExec                                                                                         | `""`                      |
 | `superexec.image.pullPolicy`                            | Components image pullPolicy                                                                                       | `IfNotPresent`            |
 | `superexec.networkPolicy.enabled`                       | Specifies whether a NetworkPolicy should be created                                                               | `true`                    |

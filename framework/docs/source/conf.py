@@ -290,7 +290,6 @@ redirects = {
 #
 html_theme = "furo"
 html_title = "Flower Framework"
-html_logo = "_static/flower-logo.png"
 html_favicon = "_static/favicon.ico"
 html_baseurl = "https://flower.ai/docs/framework/"
 
@@ -321,13 +320,36 @@ html_theme_options = {
         "for Flower AI Summit 2026!<br />"
         "April 15-16, 🇬🇧 London"
     ),
+    "light_logo": "flower-logo-light.png",
+    "dark_logo": "flower-logo-dark.png",
     "light_css_variables": {
-        "color-announcement-background": "#292f36",
+        "color-announcement-background": "#17222d",
         "color-announcement-text": "#ffffff",
+        # Left sidebar
+        "color-sidebar-link-text": "#5e5e5e",
+        "color-sidebar-link-text--top-level": "#404040",
+        "color-sidebar-item-background--hover": "#e5e5e5",
+        "color-sidebar-search-background": "#f2f2f2",
+        "color-sidebar-search-background--focus": "#e2e2e2",
+        "color-sidebar-background": "#f2f2f2",
+        # Right sidebar (On this page)
+        "color-toc-item-text--active": "#404040",
     },
     "dark_css_variables": {
-        "color-announcement-background": "#292f36",
         "color-announcement-text": "#ffffff",
+        "color-announcement-background": "#17222d",
+        # Left sidebar
+        "color-sidebar-link-text": "#7c7c7c",
+        "color-sidebar-link-text--top-level": "#ababab",
+        "color-sidebar-item-background--hover": "#222222",
+        "color-sidebar-background": "#161616",
+        "color-sidebar-search-background": "#161616",
+        "color-sidebar-search-background--focus": "#1c1c1c",
+        # Right sidebar (On this page)
+        "color-toc-title-text": "#7c7c7c",
+        "color-toc-item-text": "#ababab",
+        "color-toc-item-text--hover": "#d2d2d2",
+        "color-toc-item-text--active": "#fff5bf",
     },
 }
 
