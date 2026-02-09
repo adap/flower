@@ -53,6 +53,12 @@ from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
     RequestTokenRequest,
     RequestTokenResponse,
 )
+from flwr.proto.event_pb2 import (
+    Event,
+    EventType,
+    PushEventsRequest,
+    PushEventsResponse,
+)
 from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
     SendAppHeartbeatRequest,
     SendAppHeartbeatResponse,
@@ -229,6 +235,11 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
             "/flwr.proto.ServerAppIo/PullAppInputs",
             request_serializer=PullAppInputsRequest.SerializeToString,
             response_deserializer=PullAppInputsResponse.FromString,
+        )
+        self._push_events = self._channel.unary_unary(
+            "/flwr.proto.ServerAppIo/PushEvents",
+            request_serializer=PushEventsRequest.SerializeToString,
+            response_deserializer=PushEventsResponse.FromString,
         )
 
     def tearDown(self) -> None:
@@ -919,3 +930,133 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         assert grpc.StatusCode.OK == call.code()
         run_status = self.state.get_run_status({run_id})[run_id]
         assert run_status.status == Status.RUNNING
+
+    def test_push_events_successful(self) -> None:
+        """Test `PushEvents` successfully emits events to dispatcher."""
+        # Prepare
+        run_id = self._create_dummy_run()
+
+        # Create mock event dispatcher to capture emitted events
+        from flwr.server.events import get_event_dispatcher
+
+        dispatcher = get_event_dispatcher()
+        event_queue = dispatcher.subscribe()
+
+        try:
+            # Create events
+            event1 = Event(
+                timestamp=1234567890.0,
+                node_id=self.node_id,
+                run_id=run_id,
+                event_type=EventType.ROUND_STARTED,
+            )
+            event1.metadata["number"] = "1"
+
+            event2 = Event(
+                timestamp=1234567891.0,
+                node_id=self.node_id,
+                run_id=run_id,
+                event_type=EventType.NODE_FIT_COMPLETED,
+            )
+            event2.metadata["accuracy"] = "0.95"
+
+            # Execute
+            request = PushEventsRequest(
+                node=Node(node_id=self.node_id),
+                run_id=run_id,
+                events=[event1, event2],
+            )
+            response, call = self._push_events.with_call(request=request)
+
+            # Assert response
+            assert isinstance(response, PushEventsResponse)
+            assert grpc.StatusCode.OK == call.code()
+
+            # Assert events were emitted to dispatcher
+            received_event1 = event_queue.get_nowait()
+            received_event2 = event_queue.get_nowait()
+
+            assert received_event1 is not None
+            assert received_event2 is not None
+            assert received_event1.node_id == self.node_id
+            assert received_event1.event_type == EventType.ROUND_STARTED
+            assert received_event1.metadata["number"] == "1"
+            assert received_event2.node_id == self.node_id
+            assert received_event2.event_type == EventType.NODE_FIT_COMPLETED
+            assert received_event2.metadata["accuracy"] == "0.95"
+        finally:
+            # Cleanup
+            dispatcher.unsubscribe(event_queue)
+
+    def test_push_events_empty_list(self) -> None:
+        """Test `PushEvents` handles empty event list."""
+        # Prepare
+        run_id = self._create_dummy_run()
+
+        # Execute
+        request = PushEventsRequest(
+            node=Node(node_id=self.node_id),
+            run_id=run_id,
+            events=[],
+        )
+        response, call = self._push_events.with_call(request=request)
+
+        # Assert
+        assert isinstance(response, PushEventsResponse)
+        assert grpc.StatusCode.OK == call.code()
+
+    def test_push_events_multiple_types(self) -> None:
+        """Test `PushEvents` with various event types."""
+        # Prepare
+        run_id = self._create_dummy_run()
+
+        from flwr.server.events import get_event_dispatcher
+
+        dispatcher = get_event_dispatcher()
+        event_queue = dispatcher.subscribe()
+
+        try:
+            # Create events of different types
+            event_types = [
+                EventType.ROUND_STARTED,
+                EventType.ROUND_FIT_RECEIVED,
+                EventType.ROUND_FIT_AGGREGATED,
+                EventType.ROUND_EVALUATE_RECEIVED,
+                EventType.ROUND_EVALUATE_AGGREGATED,
+                EventType.ROUND_COMPLETED,
+                EventType.NODE_FIT_COMPLETED,
+                EventType.NODE_EVALUATE_COMPLETED,
+                EventType.NODE_CONNECTED,
+                EventType.NODE_DISCONNECTED,
+            ]
+
+            events = [
+                Event(
+                    timestamp=float(i),
+                    node_id=self.node_id,
+                    run_id=run_id,
+                    event_type=event_type,
+                )
+                for i, event_type in enumerate(event_types)
+            ]
+
+            # Execute
+            request = PushEventsRequest(
+                node=Node(node_id=self.node_id),
+                run_id=run_id,
+                events=events,
+            )
+            response, call = self._push_events.with_call(request=request)
+
+            # Assert
+            assert isinstance(response, PushEventsResponse)
+            assert grpc.StatusCode.OK == call.code()
+
+            # Verify all events were emitted
+            for expected_type in event_types:
+                received_event = event_queue.get_nowait()
+                assert received_event is not None
+                assert received_event.event_type == expected_type
+        finally:
+            # Cleanup
+            dispatcher.unsubscribe(event_queue)

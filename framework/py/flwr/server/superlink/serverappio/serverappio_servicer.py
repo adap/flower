@@ -18,6 +18,8 @@
 import threading
 from logging import DEBUG, ERROR, INFO
 
+from flwr.proto.event_pb2 import PushEventsRequest, PushEventsResponse
+from flwr.server.events import get_event_dispatcher
 import grpc
 
 from flwr.common import Message
@@ -101,6 +103,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         self.ffs_factory = ffs_factory
         self.objectstore_factory = objectstore_factory
         self.lock = threading.RLock()
+        self.event_dispatcher = get_event_dispatcher()
 
     def ListAppsToLaunch(
         self,
@@ -416,6 +419,20 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         merged_logs = "".join(request.logs)
         state.add_serverapp_log(request.run_id, merged_logs)
         return PushLogsResponse()
+
+    def PushEvents(
+        self, request: PushEventsRequest, context: grpc.ServicerContext
+    ) -> PushEventsResponse:
+        """Push events from ServerApp process to SuperLink's EventDispatcher."""
+        log(DEBUG, "ServerAppIoServicer.PushEvents")
+
+        for event in request.events:
+            if request.run_id:
+                event.run_id = request.run_id
+
+            self.event_dispatcher.emit(event)
+
+        return PushEventsResponse()
 
     def SendAppHeartbeat(
         self, request: SendAppHeartbeatRequest, context: grpc.ServicerContext

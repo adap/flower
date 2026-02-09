@@ -118,6 +118,7 @@ CONN_REFRESH_PERIOD = 60  # Stream connection refresh period
 CONN_RECONNECT_INTERVAL = 0.5  # Reconnect interval between two stream connections
 LOG_STREAM_INTERVAL = 0.5  # Log stream interval for `ControlServicer.StreamLogs`
 LOG_UPLOAD_INTERVAL = 0.2  # Minimum interval between two log uploads
+EVENT_UPLOAD_INTERVAL = 0.5
 
 # Retry configurations
 MAX_RETRY_DELAY = 20  # Maximum delay duration between two consecutive retries.

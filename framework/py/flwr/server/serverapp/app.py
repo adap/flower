@@ -63,6 +63,7 @@ from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.run_pb2 import UpdateRunStatusRequest  # pylint: disable=E0611
 from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub
+from flwr.server.events import start_event_uploader, stop_event_uploader
 from flwr.server.grid.grpc_grid import GrpcGrid
 from flwr.server.run_serverapp import run as run_
 from flwr.supercore.app_utils import start_parent_process_monitor
@@ -135,6 +136,8 @@ def run_serverapp(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
     # Initialize variables for exit handler
     flwr_dir_ = get_flwr_dir(flwr_dir)
     log_uploader = None
+    event_uploader = None
+    event_queue = None
     hash_run_id = None
     run = None
     run_status = None
@@ -155,6 +158,9 @@ def run_serverapp(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
         # Stop log uploader for this run and upload final logs
         if log_uploader:
             stop_log_uploader(log_queue, log_uploader)
+
+        if event_uploader and event_queue:
+            stop_event_uploader(event_queue, event_uploader)
 
         # Update run status
         if run and run_status and grid:
@@ -204,6 +210,13 @@ def run_serverapp(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
         # Start log uploader for this run
         log_uploader = start_log_uploader(
             log_queue=log_queue,
+            node_id=0,
+            run_id=run.run_id,
+            stub=grid._stub,
+        )
+
+        # Start event uploader for this run
+        event_uploader, event_queue = start_event_uploader(
             node_id=0,
             run_id=run.run_id,
             stub=grid._stub,
