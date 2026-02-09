@@ -3,8 +3,7 @@ set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 
 echo "=== test.sh ==="
-which python3
-python -c "import sys; print(sys.executable); import setuptools, pkg_resources; print(setuptools.__version__)"
+
 
 # Default value (true)
 RUN_FULL_TEST=${1:-true}

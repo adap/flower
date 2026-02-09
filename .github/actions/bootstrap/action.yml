@@ -44,9 +44,6 @@ runs:
           python -m pip install -U setuptools==${{ inputs.setuptools-version }}
           python -m pip install -U poetry==${{ inputs.poetry-version }}
           python -m poetry config virtualenvs.create false
-          python -c "import sys; print(sys.executable)"
-          python -c "import setuptools; print(setuptools.__version__)"
-          python -c "import setuptools, pkg_resources; print(setuptools.__version__)"
         fi
       shell: bash
     - id: versions
