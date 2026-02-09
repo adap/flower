@@ -49,6 +49,7 @@ from flwr.proto.appio_pb2 import (
     RequestTokenRequest,
     RequestTokenResponse,
 )
+from flwr.proto.event_pb2 import PushEventsRequest, PushEventsResponse
 from flwr.proto.heartbeat_pb2 import SendAppHeartbeatRequest, SendAppHeartbeatResponse
 from flwr.proto.message_pb2 import (
     ConfirmMessageReceivedRequest,
@@ -61,6 +62,7 @@ from flwr.proto.message_pb2 import (
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse
 
 # pylint: disable=E0601
+from flwr.server.events import get_event_dispatcher
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import NoObjectInStoreError, ObjectStoreFactory
 from flwr.supernode.nodestate import NodeStateFactory
@@ -79,6 +81,7 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         self.state_factory = state_factory
         self.ffs_factory = ffs_factory
         self.objectstore_factory = objectstore_factory
+        self.event_dispatcher = get_event_dispatcher()
 
     def ListAppsToLaunch(
         self,
@@ -332,3 +335,17 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         store.delete(request.message_object_id)
 
         return ConfirmMessageReceivedResponse()
+
+    def PushEvents(
+        self, request: PushEventsRequest, context: grpc.ServicerContext
+    ) -> PushEventsResponse:
+        """Push events from ClientApp process to SuperNode's EventDispatcher."""
+        log(DEBUG, "ClientAppIoServicer.PushEvents")
+
+        for event in request.events:
+            if request.run_id:
+                event.run_id = request.run_id
+
+            self.event_dispatcher.emit(event)
+
+        return PushEventsResponse()

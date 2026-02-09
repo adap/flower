@@ -4,6 +4,7 @@ import grpc
 import warnings
 
 from flwr.proto import appio_pb2 as flwr_dot_proto_dot_appio__pb2
+from flwr.proto import event_pb2 as flwr_dot_proto_dot_event__pb2
 from flwr.proto import heartbeat_pb2 as flwr_dot_proto_dot_heartbeat__pb2
 from flwr.proto import message_pb2 as flwr_dot_proto_dot_message__pb2
 from flwr.proto import run_pb2 as flwr_dot_proto_dot_run__pb2
@@ -91,6 +92,11 @@ class ClientAppIoStub(object):
                 '/flwr.proto.ClientAppIo/PullMessage',
                 request_serializer=flwr_dot_proto_dot_appio__pb2.PullAppMessagesRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_appio__pb2.PullAppMessagesResponse.FromString,
+                _registered_method=True)
+        self.PushEvents = channel.unary_unary(
+                '/flwr.proto.ClientAppIo/PushEvents',
+                request_serializer=flwr_dot_proto_dot_event__pb2.PushEventsRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_event__pb2.PushEventsResponse.FromString,
                 _registered_method=True)
 
 
@@ -190,6 +196,13 @@ class ClientAppIoServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def PushEvents(self, request, context):
+        """Push training events from ClientApp
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_ClientAppIoServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -247,6 +260,11 @@ def add_ClientAppIoServicer_to_server(servicer, server):
                     servicer.PullMessage,
                     request_deserializer=flwr_dot_proto_dot_appio__pb2.PullAppMessagesRequest.FromString,
                     response_serializer=flwr_dot_proto_dot_appio__pb2.PullAppMessagesResponse.SerializeToString,
+            ),
+            'PushEvents': grpc.unary_unary_rpc_method_handler(
+                    servicer.PushEvents,
+                    request_deserializer=flwr_dot_proto_dot_event__pb2.PushEventsRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_event__pb2.PushEventsResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -546,6 +564,33 @@ class ClientAppIo(object):
             '/flwr.proto.ClientAppIo/PullMessage',
             flwr_dot_proto_dot_appio__pb2.PullAppMessagesRequest.SerializeToString,
             flwr_dot_proto_dot_appio__pb2.PullAppMessagesResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def PushEvents(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/flwr.proto.ClientAppIo/PushEvents',
+            flwr_dot_proto_dot_event__pb2.PushEventsRequest.SerializeToString,
+            flwr_dot_proto_dot_event__pb2.PushEventsResponse.FromString,
             options,
             channel_credentials,
             insecure,
