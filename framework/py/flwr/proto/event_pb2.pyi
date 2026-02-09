@@ -42,47 +42,55 @@ class _EventTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._Enum
     DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
     ROUND_STARTED: _EventType.ValueType  # 0
     """Round lifecycle events"""
-    ROUND_FIT_RECEIVED: _EventType.ValueType  # 1
+    ROUND_FIT_STARTED: _EventType.ValueType  # 1
     ROUND_FIT_AGGREGATED: _EventType.ValueType  # 2
-    ROUND_EVALUATE_RECEIVED: _EventType.ValueType  # 3
-    ROUND_EVALUATE_AGGREGATED: _EventType.ValueType  # 4
-    ROUND_COMPLETED: _EventType.ValueType  # 5
-    ROUND_FAILED: _EventType.ValueType  # 6
-    RUN_STARTED: _EventType.ValueType  # 7
+    ROUND_FIT_FAILED: _EventType.ValueType  # 3
+    ROUND_EVALUATE_STARTED: _EventType.ValueType  # 4
+    ROUND_EVALUATE_AGGREGATED: _EventType.ValueType  # 5
+    ROUND_EVALUATE_FAILED: _EventType.ValueType  # 6
+    ROUND_COMPLETED: _EventType.ValueType  # 7
+    ROUND_FAILED: _EventType.ValueType  # 8
+    RUN_STARTED: _EventType.ValueType  # 9
     """Run lifecycle events"""
-    RUN_COMPLETED: _EventType.ValueType  # 8
-    RUN_FAILED: _EventType.ValueType  # 9
-    NODE_FIT_COMPLETED: _EventType.ValueType  # 10
+    RUN_COMPLETED: _EventType.ValueType  # 10
+    RUN_FAILED: _EventType.ValueType  # 11
+    NODE_FIT_STARTED: _EventType.ValueType  # 12
     """Node task events"""
-    NODE_EVALUATE_COMPLETED: _EventType.ValueType  # 11
-    NODE_FIT_FAILED: _EventType.ValueType  # 12
-    NODE_EVALUATE_FAILED: _EventType.ValueType  # 13
-    NODE_CONNECTED: _EventType.ValueType  # 14
+    NODE_FIT_COMPLETED: _EventType.ValueType  # 13
+    NODE_FIT_FAILED: _EventType.ValueType  # 14
+    NODE_EVALUATE_STARTED: _EventType.ValueType  # 15
+    NODE_EVALUATE_COMPLETED: _EventType.ValueType  # 16
+    NODE_EVALUATE_FAILED: _EventType.ValueType  # 17
+    NODE_CONNECTED: _EventType.ValueType  # 18
     """Node lifecycle events"""
-    NODE_DISCONNECTED: _EventType.ValueType  # 15
+    NODE_DISCONNECTED: _EventType.ValueType  # 19
 
 class EventType(_EventType, metaclass=_EventTypeEnumTypeWrapper): ...
 
 ROUND_STARTED: EventType.ValueType  # 0
 """Round lifecycle events"""
-ROUND_FIT_RECEIVED: EventType.ValueType  # 1
+ROUND_FIT_STARTED: EventType.ValueType  # 1
 ROUND_FIT_AGGREGATED: EventType.ValueType  # 2
-ROUND_EVALUATE_RECEIVED: EventType.ValueType  # 3
-ROUND_EVALUATE_AGGREGATED: EventType.ValueType  # 4
-ROUND_COMPLETED: EventType.ValueType  # 5
-ROUND_FAILED: EventType.ValueType  # 6
-RUN_STARTED: EventType.ValueType  # 7
+ROUND_FIT_FAILED: EventType.ValueType  # 3
+ROUND_EVALUATE_STARTED: EventType.ValueType  # 4
+ROUND_EVALUATE_AGGREGATED: EventType.ValueType  # 5
+ROUND_EVALUATE_FAILED: EventType.ValueType  # 6
+ROUND_COMPLETED: EventType.ValueType  # 7
+ROUND_FAILED: EventType.ValueType  # 8
+RUN_STARTED: EventType.ValueType  # 9
 """Run lifecycle events"""
-RUN_COMPLETED: EventType.ValueType  # 8
-RUN_FAILED: EventType.ValueType  # 9
-NODE_FIT_COMPLETED: EventType.ValueType  # 10
+RUN_COMPLETED: EventType.ValueType  # 10
+RUN_FAILED: EventType.ValueType  # 11
+NODE_FIT_STARTED: EventType.ValueType  # 12
 """Node task events"""
-NODE_EVALUATE_COMPLETED: EventType.ValueType  # 11
-NODE_FIT_FAILED: EventType.ValueType  # 12
-NODE_EVALUATE_FAILED: EventType.ValueType  # 13
-NODE_CONNECTED: EventType.ValueType  # 14
+NODE_FIT_COMPLETED: EventType.ValueType  # 13
+NODE_FIT_FAILED: EventType.ValueType  # 14
+NODE_EVALUATE_STARTED: EventType.ValueType  # 15
+NODE_EVALUATE_COMPLETED: EventType.ValueType  # 16
+NODE_EVALUATE_FAILED: EventType.ValueType  # 17
+NODE_CONNECTED: EventType.ValueType  # 18
 """Node lifecycle events"""
-NODE_DISCONNECTED: EventType.ValueType  # 15
+NODE_DISCONNECTED: EventType.ValueType  # 19
 global___EventType = EventType
 
 @typing.final
