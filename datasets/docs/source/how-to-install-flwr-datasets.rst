@@ -69,5 +69,5 @@ If everything works, it should print the version of Flower Datasets to the comma
 
 .. code-block:: none
 
-  0.6.0
+  |release|
 

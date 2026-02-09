@@ -17,6 +17,8 @@
 import datetime
 import os
 import sys
+import tomllib
+from pathlib import Path
 
 # Configuration file for the Sphinx documentation builder.
 #
@@ -36,8 +38,16 @@ project = "Flower Datasets"
 copyright = f"{datetime.date.today().year} Flower Labs GmbH"
 author = "The Flower Authors"
 
-# The full version, including alpha/beta/rc tags
-release = "0.6.0"
+# Read version from pyproject.toml (single source of truth)
+_pyproject_path = Path(__file__).parent.parent.parent / "pyproject.toml"
+with open(_pyproject_path, "rb") as f:
+    _pyproject = tomllib.load(f)
+release = _pyproject["tool"]["poetry"]["version"]
+
+# Make version available as a substitution in rst files (e.g., |release|)
+rst_prolog = f"""
+.. |release| replace:: {release}
+"""
 
 
 # -- General configuration ---------------------------------------------------
