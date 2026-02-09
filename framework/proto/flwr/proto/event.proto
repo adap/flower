@@ -1,0 +1,62 @@
+// Copyright 2026 Flower Labs GmbH. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ==============================================================================
+
+syntax = "proto3";
+
+package flwr.proto;
+
+import "flwr/proto/node.proto";
+
+enum EventType {
+  // Round lifecycle events
+  ROUND_STARTED = 0;
+  ROUND_FIT_RECEIVED = 1;
+  ROUND_FIT_AGGREGATED = 2;
+  ROUND_EVALUATE_RECEIVED = 3;
+  ROUND_EVALUATE_AGGREGATED = 4;
+  ROUND_COMPLETED = 5;
+  ROUND_FAILED = 6;
+
+  // Run lifecycle events
+  RUN_STARTED = 7;
+  RUN_COMPLETED = 8;
+  RUN_FAILED = 9;
+
+  // Node task events
+  NODE_FIT_COMPLETED = 10;
+  NODE_EVALUATE_COMPLETED = 11;
+  NODE_FIT_FAILED = 12;
+  NODE_EVALUATE_FAILED = 13;
+
+  // Node lifecycle events
+  NODE_CONNECTED = 14;
+  NODE_DISCONNECTED = 15;
+}
+
+message Event {
+  double timestamp = 1;
+  optional uint64 run_id = 2;
+  uint64 node_id = 3;
+  EventType event_type = 4;
+  map<string, string> metadata = 5;
+}
+
+message PushEventsRequest {
+  Node node = 1;
+  uint64 run_id = 2;
+  repeated Event events = 3;
+}
+
+message PushEventsResponse {}

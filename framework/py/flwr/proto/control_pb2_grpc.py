@@ -49,6 +49,11 @@ class ControlStub(object):
                 request_serializer=flwr_dot_proto_dot_control__pb2.StreamLogsRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_control__pb2.StreamLogsResponse.FromString,
                 _registered_method=True)
+        self.StreamEvents = channel.unary_stream(
+                '/flwr.proto.Control/StreamEvents',
+                request_serializer=flwr_dot_proto_dot_control__pb2.StreamEventsRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_control__pb2.StreamEventsResponse.FromString,
+                _registered_method=True)
         self.ListRuns = channel.unary_unary(
                 '/flwr.proto.Control/ListRuns',
                 request_serializer=flwr_dot_proto_dot_control__pb2.ListRunsRequest.SerializeToString,
@@ -115,6 +120,13 @@ class ControlServicer(object):
 
     def StreamLogs(self, request, context):
         """Start log stream upon request
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def StreamEvents(self, request, context):
+        """Start event stream upon request
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -200,6 +212,11 @@ def add_ControlServicer_to_server(servicer, server):
                     servicer.StreamLogs,
                     request_deserializer=flwr_dot_proto_dot_control__pb2.StreamLogsRequest.FromString,
                     response_serializer=flwr_dot_proto_dot_control__pb2.StreamLogsResponse.SerializeToString,
+            ),
+            'StreamEvents': grpc.unary_stream_rpc_method_handler(
+                    servicer.StreamEvents,
+                    request_deserializer=flwr_dot_proto_dot_control__pb2.StreamEventsRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_control__pb2.StreamEventsResponse.SerializeToString,
             ),
             'ListRuns': grpc.unary_unary_rpc_method_handler(
                     servicer.ListRuns,
@@ -328,6 +345,33 @@ class Control(object):
             '/flwr.proto.Control/StreamLogs',
             flwr_dot_proto_dot_control__pb2.StreamLogsRequest.SerializeToString,
             flwr_dot_proto_dot_control__pb2.StreamLogsResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def StreamEvents(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_stream(
+            request,
+            target,
+            '/flwr.proto.Control/StreamEvents',
+            flwr_dot_proto_dot_control__pb2.StreamEventsRequest.SerializeToString,
+            flwr_dot_proto_dot_control__pb2.StreamEventsResponse.FromString,
             options,
             channel_credentials,
             insecure,

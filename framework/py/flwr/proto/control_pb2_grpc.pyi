@@ -51,6 +51,12 @@ class ControlStub:
     ]
     """Start log stream upon request"""
 
+    StreamEvents: grpc.UnaryStreamMultiCallable[
+        flwr.proto.control_pb2.StreamEventsRequest,
+        flwr.proto.control_pb2.StreamEventsResponse,
+    ]
+    """Start event stream upon request"""
+
     ListRuns: grpc.UnaryUnaryMultiCallable[
         flwr.proto.control_pb2.ListRunsRequest,
         flwr.proto.control_pb2.ListRunsResponse,
@@ -123,6 +129,12 @@ class ControlAsyncStub:
         flwr.proto.control_pb2.StreamLogsResponse,
     ]
     """Start log stream upon request"""
+
+    StreamEvents: grpc.aio.UnaryStreamMultiCallable[
+        flwr.proto.control_pb2.StreamEventsRequest,
+        flwr.proto.control_pb2.StreamEventsResponse,
+    ]
+    """Start event stream upon request"""
 
     ListRuns: grpc.aio.UnaryUnaryMultiCallable[
         flwr.proto.control_pb2.ListRunsRequest,
@@ -202,6 +214,14 @@ class ControlServicer(metaclass=abc.ABCMeta):
         context: _ServicerContext,
     ) -> typing.Union[collections.abc.Iterator[flwr.proto.control_pb2.StreamLogsResponse], collections.abc.AsyncIterator[flwr.proto.control_pb2.StreamLogsResponse]]:
         """Start log stream upon request"""
+
+    @abc.abstractmethod
+    def StreamEvents(
+        self,
+        request: flwr.proto.control_pb2.StreamEventsRequest,
+        context: _ServicerContext,
+    ) -> typing.Union[collections.abc.Iterator[flwr.proto.control_pb2.StreamEventsResponse], collections.abc.AsyncIterator[flwr.proto.control_pb2.StreamEventsResponse]]:
+        """Start event stream upon request"""
 
     @abc.abstractmethod
     def ListRuns(

@@ -24,6 +24,7 @@ import "flwr/proto/message.proto";
 import "flwr/proto/run.proto";
 import "flwr/proto/fab.proto";
 import "flwr/proto/appio.proto";
+import "flwr/proto/event.proto";
 
 service ServerAppIo {
 
@@ -79,6 +80,9 @@ service ServerAppIo {
 
   // Push ServerApp logs
   rpc PushLogs(PushLogsRequest) returns (PushLogsResponse) {}
+
+  // Push training events from ServerApp
+  rpc PushEvents(PushEventsRequest) returns (PushEventsResponse) {}
 
   /////////////////////////////////////////////////////////////////////////////
   // Specific endpoints for ServerAppIo
