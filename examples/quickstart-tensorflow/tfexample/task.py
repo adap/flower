@@ -3,7 +3,6 @@
 import os
 
 import keras
-import numpy as np
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import IidPartitioner
 from keras import layers
@@ -52,9 +51,13 @@ def load_data(partition_id, num_partitions):
 
     # Divide data on each node: 80% train, 20% test
     partition = partition.train_test_split(test_size=0.2)
-    x_train = np.array(partition["train"]["img"]) / 255.0
-    y_train = np.array(partition["train"]["label"])
-    x_test = np.array(partition["test"]["img"]) / 255.0
-    y_test = np.array(partition["test"]["label"])
+
+    partition["train"].set_format(type="numpy", columns=["img", "label"])
+    partition["test"].set_format(type="numpy", columns=["img", "label"])
+
+    x_train = partition["train"][:]["img"].astype("float32") / 255.0
+    y_train = partition["train"][:]["label"]
+    x_test = partition["test"][:]["img"].astype("float32") / 255.0
+    y_test = partition["test"][:]["label"]
 
     return x_train, y_train, x_test, y_test
