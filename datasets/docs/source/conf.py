@@ -17,8 +17,12 @@
 import datetime
 import os
 import sys
-import tomllib
 from pathlib import Path
+
+try:
+    import tomllib
+except ImportError:
+    import tomli as tomllib
 
 # Configuration file for the Sphinx documentation builder.
 #
