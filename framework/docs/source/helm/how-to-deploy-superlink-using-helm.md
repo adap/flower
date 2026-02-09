@@ -1,12 +1,8 @@
 ---
 myst:
   html_meta:
-    description: Deploy Flower's SuperLink Helm chart to set up federated 
-      learning servers. Default config mirrors official releases, enabling 
-      seamless deployment, evaluation.
-    property:og:description: Deploy Flower's SuperLink Helm chart to set up 
-      federated learning servers. Default config mirrors official releases, 
-      enabling seamless deployment, evaluation.
+    description: Deploy Flower's SuperLink Helm chart to set up federated learning servers. Default config mirrors official releases, enabling seamless deployment, evaluation.
+    property:og:description: Deploy Flower's SuperLink Helm chart to set up federated learning servers. Default config mirrors official releases, enabling seamless deployment, evaluation.
 ---
 
 # Deploy SuperLink using Helm
@@ -838,7 +834,7 @@ global:
 | `superlink.imagePullSecrets`                                   | SuperLink image pull secrets which overrides global.imagePullSecrets                                                    | `[]`                      |
 | `superlink.image.registry`                                     | SuperLink image registry                                                                                                | `registry.hub.docker.com` |
 | `superlink.image.repository`                                   | SuperLink image repository                                                                                              | `flwr/superlink-ee`       |
-| `superlink.image.tag`                                          | SuperLink image tag                                                                                                     | `1.26.0-ubuntu`           |
+| `superlink.image.tag`                                          | SuperLink image tag                                                                                                     | `1.26.1-ubuntu`           |
 | `superlink.image.digest`                                       | SuperLink image digest                                                                                                  | `""`                      |
 | `superlink.image.pullPolicy`                                   | SuperLink image pullPolicy which Components image pullPolicy                                                            | `IfNotPresent`            |
 | `superlink.networkPolicy.enabled`                              | Specifies whether a NetworkPolicy should be created                                                                     | `true`                    |
@@ -876,7 +872,7 @@ global:
 | `superexec.serviceAccount.labels`                       | Labels applied to enabled service account                                                                         | `{}`                      |
 | `superexec.serviceAccount.automountServiceAccountToken` | Automount SA-Token                                                                                                | `true`                    |
 | `superexec.containerPorts.health`                       | Container port for SuperExec Health API                                                                           | `8081`                    |
-| `superexec.podSecurityContext`                          | Security settings that for the SuperExec Pods                                                                     | `{}`                      |
+| `superexec.podSecurityContext`                          | Security settings for the SuperExec Pods                                                                          | `{}`                      |
 | `superexec.livenessProbe.enabled`                       | Enable livenessProbe on SuperExec containers                                                                      | `true`                    |
 | `superexec.livenessProbe.initialDelaySeconds`           | Initial delay seconds for livenessProbe                                                                           | `0`                       |
 | `superexec.livenessProbe.periodSeconds`                 | Period seconds for livenessProbe                                                                                  | `10`                      |
@@ -906,7 +902,7 @@ global:
 | `superexec.imagePullSecrets`                            | SuperExec image pull secrets which overrides global.imagePullSecrets                                              | `[]`                      |
 | `superexec.image.registry`                              | SuperExec image registry                                                                                          | `registry.hub.docker.com` |
 | `superexec.image.repository`                            | SuperExec image repository                                                                                        | `flwr/superexec-ee`       |
-| `superexec.image.tag`                                   | Image tag of SuperExec                                                                                            | `1.26.0-ubuntu`           |
+| `superexec.image.tag`                                   | Image tag of SuperExec                                                                                            | `1.26.1-ubuntu`           |
 | `superexec.image.digest`                                | Image digest of SuperExec                                                                                         | `""`                      |
 | `superexec.image.pullPolicy`                            | Components image pullPolicy                                                                                       | `Always`                  |
 | `superexec.networkPolicy.enabled`                       | Specifies whether a NetworkPolicy should be created                                                               | `true`                    |
