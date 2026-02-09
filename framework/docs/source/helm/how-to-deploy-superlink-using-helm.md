@@ -1,12 +1,8 @@
 ---
 myst:
   html_meta:
-    description: Deploy Flower's SuperLink Helm chart to set up federated 
-      learning servers. Default config mirrors official releases, enabling 
-      seamless deployment, evaluation.
-    property:og:description: Deploy Flower's SuperLink Helm chart to set up 
-      federated learning servers. Default config mirrors official releases, 
-      enabling seamless deployment, evaluation.
+    description: Deploy Flower's SuperLink Helm chart to set up federated learning servers. Default config mirrors official releases, enabling seamless deployment, evaluation.
+    property:og:description: Deploy Flower's SuperLink Helm chart to set up federated learning servers. Default config mirrors official releases, enabling seamless deployment, evaluation.
 ---
 
 # Deploy SuperLink using Helm
