@@ -18,9 +18,10 @@
 import threading
 from logging import DEBUG, ERROR, INFO
 
-from flwr.proto.event_pb2 import PushEventsRequest, PushEventsResponse
-from flwr.server.events import get_event_dispatcher
 import grpc
+
+from flwr.common.events import get_event_dispatcher
+from flwr.proto.event_pb2 import PushEventsRequest, PushEventsResponse
 
 from flwr.common import Message
 from flwr.common.constant import SUPERLINK_NODE_ID, Status

@@ -60,9 +60,9 @@ from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
     PushAppOutputsRequest,
     PushAppOutputsResponse,
 )
+from flwr.common.events import start_event_uploader, stop_event_uploader
 from flwr.proto.clientappio_pb2_grpc import ClientAppIoStub
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
-from flwr.server.events import start_event_uploader, stop_event_uploader
 from flwr.supercore.app_utils import start_parent_process_monitor
 from flwr.supercore.heartbeat import HeartbeatSender, make_app_heartbeat_fn_grpc
 from flwr.supercore.utils import mask_string

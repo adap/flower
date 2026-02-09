@@ -937,7 +937,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         run_id = self._create_dummy_run()
 
         # Create mock event dispatcher to capture emitted events
-        from flwr.server.events import get_event_dispatcher
+        from flwr.common.events import get_event_dispatcher
 
         dispatcher = get_event_dispatcher()
         event_queue = dispatcher.subscribe()
@@ -1010,7 +1010,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         # Prepare
         run_id = self._create_dummy_run()
 
-        from flwr.server.events import get_event_dispatcher
+        from flwr.common.events import get_event_dispatcher
 
         dispatcher = get_event_dispatcher()
         event_queue = dispatcher.subscribe()

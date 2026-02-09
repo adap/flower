@@ -62,7 +62,7 @@ from flwr.proto.message_pb2 import (
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse
 
 # pylint: disable=E0601
-from flwr.server.events import get_event_dispatcher
+from flwr.common.events import get_event_dispatcher
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import NoObjectInStoreError, ObjectStoreFactory
 from flwr.supernode.nodestate import NodeStateFactory
