@@ -10,6 +10,7 @@ import gymnasium as gym
 import imageio
 import numpy as np
 import torch
+from datasets.utils.logging import disable_progress_bar
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import GroupedNaturalIdPartitioner
 from lerobot.configs.types import FeatureType
@@ -24,8 +25,6 @@ from lerobot.policies.diffusion.modeling_diffusion import DiffusionPolicy
 from lerobot.policies.factory import make_pre_post_processors
 from lerobot.utils.constants import ACTION, OBS_IMAGE, OBS_STATE
 from torch.utils.data import DataLoader
-
-from datasets.utils.logging import disable_progress_bar
 
 disable_progress_bar()
 fds = None  # Cache FederatedDataset

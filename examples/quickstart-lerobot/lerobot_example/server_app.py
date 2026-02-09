@@ -9,6 +9,7 @@ from flwr.serverapp import Grid, ServerApp
 from flwr.serverapp.strategy import FedAvg
 from lerobot.datasets.lerobot_dataset import CODEBASE_VERSION
 from lerobot.datasets.utils import get_safe_version
+
 from lerobot_example.task import get_dataset_metadata, get_policy_components
 
 
