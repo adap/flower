@@ -64,6 +64,8 @@ jobs:
         run: |
           cd framework 
           python -m poetry install --all-extras
+          python -c "import sys; print(sys.executable)"
+          python -c "import setuptools; print(setuptools.__version__)"
           python -c "import setuptools, pkg_resources; print(setuptools.__version__)"
       - name: Check if protos need recompilation
         if: ${{ needs.changes.outputs.framework == 'true' }}
