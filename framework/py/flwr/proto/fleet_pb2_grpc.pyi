@@ -19,6 +19,7 @@ limitations under the License.
 
 import abc
 import collections.abc
+import flwr.proto.event_pb2
 import flwr.proto.fab_pb2
 import flwr.proto.fleet_pb2
 import flwr.proto.heartbeat_pb2
@@ -113,6 +114,12 @@ class FleetStub:
     ]
     """Confirm Message Received"""
 
+    PushEvents: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.event_pb2.PushEventsRequest,
+        flwr.proto.event_pb2.PushEventsResponse,
+    ]
+    """Push training events from SuperNode"""
+
 class FleetAsyncStub:
     RegisterNode: grpc.aio.UnaryUnaryMultiCallable[
         flwr.proto.fleet_pb2.RegisterNodeFleetRequest,
@@ -189,6 +196,12 @@ class FleetAsyncStub:
         flwr.proto.message_pb2.ConfirmMessageReceivedResponse,
     ]
     """Confirm Message Received"""
+
+    PushEvents: grpc.aio.UnaryUnaryMultiCallable[
+        flwr.proto.event_pb2.PushEventsRequest,
+        flwr.proto.event_pb2.PushEventsResponse,
+    ]
+    """Push training events from SuperNode"""
 
 class FleetServicer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
@@ -290,5 +303,13 @@ class FleetServicer(metaclass=abc.ABCMeta):
         context: _ServicerContext,
     ) -> typing.Union[flwr.proto.message_pb2.ConfirmMessageReceivedResponse, collections.abc.Awaitable[flwr.proto.message_pb2.ConfirmMessageReceivedResponse]]:
         """Confirm Message Received"""
+
+    @abc.abstractmethod
+    def PushEvents(
+        self,
+        request: flwr.proto.event_pb2.PushEventsRequest,
+        context: _ServicerContext,
+    ) -> typing.Union[flwr.proto.event_pb2.PushEventsResponse, collections.abc.Awaitable[flwr.proto.event_pb2.PushEventsResponse]]:
+        """Push training events from SuperNode"""
 
 def add_FleetServicer_to_server(servicer: FleetServicer, server: typing.Union[grpc.Server, grpc.aio.Server]) -> None: ...
