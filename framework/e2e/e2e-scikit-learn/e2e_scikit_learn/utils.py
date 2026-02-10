@@ -66,7 +66,6 @@ def load_data(partition_id: int, num_partitions: int):
         )
 
     dataset = fds.load_partition(partition_id, "train").with_format("numpy")
-    dataset.set_format("numpy")
 
     batch = dataset[:]
     X = batch["image"].reshape((len(dataset), -1))
