@@ -19,6 +19,8 @@ import json
 from pathlib import Path
 from typing import Annotated
 
+import grpc
+
 import typer
 from rich.console import Console
 from rich.table import Table
@@ -108,13 +110,30 @@ def profile(
                             redirect_output(captured_output)
                 return
             req = GetRunProfileRequest(run_id=run_id)
-            with flwr_cli_grpc_exc_handler():
-                res = stub.GetRunProfile(req)
+            try:
+                with flwr_cli_grpc_exc_handler():
+                    res = stub.GetRunProfile(req)
+            except grpc.RpcError as exc:
+                if exc.code() == grpc.StatusCode.NOT_FOUND:
+                    restore_output()
+                    summary = {"run_id": run_id, "entries": []}
+                    if output_format == CliOutputFormat.JSON:
+                        Console().print_json(json.dumps(summary))
+                    else:
+                        Console().print(_to_table(summary))
+                    return
+                raise
         finally:
             channel.close()
 
         if not res.summary_json:
-            raise ValueError(f"No profile summary found for run ID {run_id}.")
+            summary = {"run_id": run_id, "entries": []}
+            restore_output()
+            if output_format == CliOutputFormat.JSON:
+                Console().print_json(json.dumps(summary))
+            else:
+                Console().print(_to_table(summary))
+            return
 
         summary = json.loads(res.summary_json)
         restore_output()
