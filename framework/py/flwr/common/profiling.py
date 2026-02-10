@@ -19,7 +19,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime, timezone
 import threading
-from typing import Any, Iterable
+from typing import Any, Callable, Iterable
 
 from .message import Message
 
@@ -72,15 +72,16 @@ class ProfileRecorder:
         with self._lock:
             events = list(self._events)
 
-        stats: dict[tuple[str, str, int | None], dict[str, Any]] = {}
+        stats: dict[tuple[str, str, int | None, int | None], dict[str, Any]] = {}
         for event in events:
-            key = (event.scope, event.task, event.round)
+            key = (event.scope, event.task, event.round, event.node_id)
             stat = stats.get(key)
             if stat is None:
                 stat = {
                     "scope": event.scope,
                     "task": event.task,
                     "round": event.round,
+                    "node_id": event.node_id,
                     "count": 0,
                     "sum_ms": 0.0,
                     "min_ms": None,
@@ -145,7 +146,14 @@ class ProfileRecorder:
                     }
                 )
 
-        entries.sort(key=lambda e: (str(e["scope"]), str(e["task"]), e["round"] or -1))
+        entries.sort(
+            key=lambda e: (
+                str(e["scope"]),
+                str(e["task"]),
+                e["round"] or -1,
+                e.get("node_id") or -1,
+            )
+        )
 
         return {
             "run_id": self.run_id,
@@ -162,6 +170,17 @@ def set_active_profiler(profiler: ProfileRecorder | None) -> None:
     _profile_state.profiler = profiler
 
 
+def set_profile_publisher(publisher: Callable[[dict[str, Any]], None] | None) -> None:
+    """Set the profile publisher for the current thread."""
+    _profile_state.publisher = publisher
+
+
+def clear_profile_publisher() -> None:
+    """Clear the profile publisher for the current thread."""
+    if hasattr(_profile_state, "publisher"):
+        delattr(_profile_state, "publisher")
+
+
 def clear_active_profiler() -> None:
     """Clear the active profiler for the current thread."""
     if hasattr(_profile_state, "profiler"):
@@ -171,6 +190,19 @@ def clear_active_profiler() -> None:
 def get_active_profiler() -> ProfileRecorder | None:
     """Return the active profiler for the current thread."""
     return getattr(_profile_state, "profiler", None)
+
+
+def publish_profile_summary() -> None:
+    """Publish the latest profile summary if a publisher is registered."""
+    profiler = get_active_profiler()
+    publisher = getattr(_profile_state, "publisher", None)
+    if profiler is None or publisher is None:
+        return
+    try:
+        publisher(profiler.summarize())
+    except Exception:
+        # Publishing must not impact normal control flow
+        return
 
 
 def set_current_round(round_id: int | None) -> None:

@@ -146,6 +146,7 @@ def _to_table(summary: dict) -> Table:
     table.add_column("Task", style="white")
     table.add_column("Scope", style="bright_black")
     table.add_column("Round", style="cyan")
+    table.add_column("Node", style="magenta")
     table.add_column("Avg (ms)", justify="right")
     table.add_column("Max (ms)", justify="right")
     table.add_column("Count", justify="right")
@@ -156,6 +157,7 @@ def _to_table(summary: dict) -> Table:
             str(entry.get("task", "")),
             str(entry.get("scope", "")),
             str(entry.get("round", "N/A")),
+            str(entry.get("node_id", "N/A")),
             f"{entry.get('avg_ms', 0.0):.2f}",
             f"{entry.get('max_ms', 0.0):.2f}",
             str(entry.get("count", 0)),

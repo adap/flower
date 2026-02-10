@@ -28,7 +28,7 @@ from flwr.common import (
     RecordDict,
     log,
 )
-from flwr.common.profiling import get_active_profiler
+from flwr.common.profiling import get_active_profiler, publish_profile_summary
 from flwr.server import Grid
 
 from .strategy import Strategy
@@ -277,6 +277,7 @@ class FedAvg(Strategy):
                     duration_ms=duration_ms,
                     metadata={"num_replies": len(valid_replies)},
                 )
+                publish_profile_summary()
 
             # Aggregate MetricRecords
             metrics = self.train_metrics_aggr_fn(

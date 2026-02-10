@@ -58,7 +58,9 @@ from flwr.common.serde import (
 from flwr.common.profiling import (
     ProfileRecorder,
     clear_active_profiler,
+    clear_profile_publisher,
     set_active_profiler,
+    set_profile_publisher,
 )
 from flwr.common.telemetry import EventType, event
 from flwr.common.typing import RunNotRunningException, RunStatus
@@ -220,6 +222,26 @@ def run_serverapp(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
         if context.run_config.get("profile.enabled"):
             profile_recorder = ProfileRecorder(run_id=run.run_id)
             set_active_profiler(profile_recorder)
+            last_summary: bytes | None = None
+
+            def _publish(summary: dict[str, object]) -> None:
+                nonlocal last_summary
+                summary_json = json.dumps(summary).encode()
+                if summary_json == last_summary:
+                    return
+                last_summary = summary_json
+                context.state["profile_summary"] = ConfigRecord(
+                    {"json": summary_json}
+                )
+                context.state["profile_live"] = ConfigRecord(
+                    {"enabled": True, "final": False}
+                )
+                out_req = PushAppOutputsRequest(
+                    token=token, run_id=run.run_id, context=context_to_proto(context)
+                )
+                _ = grid._stub.PushAppOutputs(out_req)
+
+            set_profile_publisher(_publish)
 
         log(
             DEBUG,
@@ -262,6 +284,10 @@ def run_serverapp(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
             updated_context.state["profile_summary"] = ConfigRecord(
                 {"json": summary_json}
             )
+            updated_context.state["profile_live"] = ConfigRecord(
+                {"enabled": True, "final": True}
+            )
+            clear_profile_publisher()
             clear_active_profiler()
 
         # Send resulting context

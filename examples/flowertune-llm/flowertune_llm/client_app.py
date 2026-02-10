@@ -6,6 +6,7 @@ import os
 import pickle
 import re
 import warnings
+from time import perf_counter
 
 from flwr.app import ArrayRecord, ConfigRecord, Context, Message, MetricRecord, RecordDict
 from flwr.clientapp import ClientApp
@@ -37,6 +38,7 @@ def _sanitize_layer_name(name: str) -> str:
 @app.train()
 def train(msg: Message, context: Context):
     """Prepare model state for layer-wise sending (training disabled)."""
+    t0 = perf_counter()
     cfg = DictConfig(replace_keys(unflatten_dict(context.run_config)))
     aggregation_mode = getattr(cfg, "aggregation", {}).get("mode", "layerwise")
 
@@ -73,9 +75,11 @@ def train(msg: Message, context: Context):
     context.state[STATE_LAYER_IDX] = ConfigRecord({"idx": 0})
     context.state[STATE_NUM_EXAMPLES] = ConfigRecord({"num_examples": 1})
 
+    t1 = perf_counter()
     metrics = {
         "train_loss": 0.0,
         "num-examples": 1,
+        "profile.client.train.ms": (t1 - t0) * 1000.0,
     }
 
     metric_record = MetricRecord(metrics)
@@ -90,6 +94,7 @@ def train(msg: Message, context: Context):
 @app.train("layer_wise_communication")
 def train_comms(msg: Message, context: Context):
     """Send the model layer by layer from disk."""
+    t0 = perf_counter()
     layer_idx = int(context.state[STATE_LAYER_IDX]["idx"])
     layer_paths = list(context.state[STATE_LAYER_PATHS]["paths"])
 
@@ -109,12 +114,14 @@ def train_comms(msg: Message, context: Context):
     num_examples = int(context.state[STATE_NUM_EXAMPLES]["num_examples"])
     metric_record = MetricRecord({"num-examples": num_examples})
 
+    t1 = perf_counter()
     config_record = ConfigRecord({"send_complete": send_complete})
     content = RecordDict({
         "arrays": array_record,
         "metrics": metric_record,
         "config": config_record,
     })
+    metric_record["profile.client.train_comms.ms"] = (t1 - t0) * 1000.0
 
     context.state[STATE_LAYER_IDX] = ConfigRecord({"idx": layer_idx + 1})
     return Message(content=content, reply_to=msg)

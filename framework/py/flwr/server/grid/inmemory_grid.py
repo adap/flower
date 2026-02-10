@@ -25,6 +25,7 @@ from flwr.common import Message, RecordDict
 from flwr.common.profiling import (
     get_active_profiler,
     get_current_round,
+    publish_profile_summary,
     record_profile_metrics_from_messages,
 )
 from flwr.common.constant import SUPERLINK_NODE_ID
@@ -161,11 +162,22 @@ class InMemoryGrid(Grid):
         start = perf_counter() if profiler is not None else None
 
         # Push messages
+        push_start = perf_counter() if profiler is not None else None
         msg_ids = set(self.push_messages(messages))
+        if profiler is not None and push_start is not None:
+            profiler.record(
+                scope="server",
+                task="network_upstream",
+                round=get_current_round(),
+                node_id=None,
+                duration_ms=(perf_counter() - push_start) * 1000.0,
+                metadata={"expected_replies": len(msg_ids)},
+            )
         del messages
         expected_replies = len(msg_ids)
 
         # Pull messages
+        pull_start = perf_counter() if profiler is not None else None
         end_time = time.time() + (timeout if timeout is not None else 0.0)
         ret: list[Message] = []
         while timeout is None or time.time() < end_time:
@@ -178,6 +190,15 @@ class InMemoryGrid(Grid):
                 break
             # Sleep
             time.sleep(self.pull_interval)
+        if profiler is not None and pull_start is not None:
+            profiler.record(
+                scope="server",
+                task="network_downstream",
+                round=get_current_round(),
+                node_id=None,
+                duration_ms=(perf_counter() - pull_start) * 1000.0,
+                metadata={"received": len(ret)},
+            )
         if profiler is not None and start is not None:
             duration_ms = (perf_counter() - start) * 1000.0
             profiler.record(
@@ -189,5 +210,6 @@ class InMemoryGrid(Grid):
                 metadata={"expected_replies": expected_replies},
             )
             record_profile_metrics_from_messages(ret)
+            publish_profile_summary()
 
         return ret

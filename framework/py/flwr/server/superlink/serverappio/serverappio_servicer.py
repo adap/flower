@@ -391,10 +391,21 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             context,
         )
 
-        state.set_serverapp_context(request.run_id, context_from_proto(request.context))
+        ctx = context_from_proto(request.context)
+        state.set_serverapp_context(request.run_id, ctx)
 
-        # Remove the token
-        state.delete_token(run_id)
+        # Remove the token unless this is a live profiling update
+        keep_token = False
+        if "profile_live" in ctx.state:
+            try:
+                live_cfg = ctx.state["profile_live"]
+                keep_token = bool(live_cfg.get("enabled")) and not bool(
+                    live_cfg.get("final")
+                )
+            except Exception:
+                keep_token = False
+        if not keep_token:
+            state.delete_token(run_id)
         return PushAppOutputsResponse()
 
     def UpdateRunStatus(
