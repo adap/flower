@@ -57,7 +57,8 @@ def global_evaluate(server_round: int, arrays: ArrayRecord) -> MetricRecord:
     global_test_set = load_dataset("zalando-datasets/fashion_mnist")["test"]
     global_test_set.set_format("numpy")
 
-    x_test, y_test = global_test_set["image"] / 255.0, global_test_set["label"]
+    x_test = global_test_set[:]["image"].astype("float32") / 255.0
+    y_test = global_test_set["label"][:]
 
     net = load_model()
     net.set_weights(arrays.to_numpy_ndarrays())
