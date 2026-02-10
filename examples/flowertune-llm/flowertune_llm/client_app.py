@@ -6,10 +6,11 @@ import os
 from time import perf_counter
 import warnings
 
-from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
+from flwr.app import ArrayRecord, ConfigRecord, Context, Message, MetricRecord, RecordDict
 from flwr.clientapp import ClientApp
 from flwr.common.config import unflatten_dict
 from omegaconf import DictConfig
+import torch
 
 from flowertune_llm.dataset import replace_keys
 from flowertune_llm.models import get_model
@@ -20,9 +21,8 @@ os.environ["RAY_DISABLE_DOCKER_CPU_WARNING"] = "1"
 warnings.filterwarnings("ignore", category=UserWarning)
 
 
-# Cache model state per node (outside Context.state to avoid RecordDict restrictions)
-_MODEL_STATE: dict[int, dict[str, object]] = {}
-_LAYER_NAMES: dict[int, list[str]] = {}
+STATE_LAYER_NAMES = "layer_names"
+STATE_MODEL_ARRAYS = "model_arrays"
 
 
 # Flower ClientApp
@@ -50,8 +50,8 @@ def train(msg: Message, context: Context):
         if "layer_names" in config:
             layer_names = list(config["layer_names"])
 
-    _MODEL_STATE[context.node_id] = state_dict
-    _LAYER_NAMES[context.node_id] = layer_names
+    context.state[STATE_LAYER_NAMES] = ConfigRecord({"names": layer_names})
+    context.state[STATE_MODEL_ARRAYS] = ArrayRecord(state_dict)
     t3 = perf_counter()
 
     metrics = {
@@ -75,18 +75,22 @@ def train(msg: Message, context: Context):
 @app.train("layer_wise_communication")
 def train_comms(msg: Message, context: Context):
     """Send the model layer by layer."""
-    if context.node_id not in _MODEL_STATE or context.node_id not in _LAYER_NAMES:
+    if STATE_MODEL_ARRAYS not in context.state or STATE_LAYER_NAMES not in context.state:
         cfg = DictConfig(replace_keys(unflatten_dict(context.run_config)))
         model = get_model(cfg.model)
         state_dict = model.state_dict()
         layer_names = list(state_dict.keys())
-        if msg.content and "config" in msg.content and "layer_names" in msg.content["config"]:
+        if (
+            msg.content
+            and "config" in msg.content
+            and "layer_names" in msg.content["config"]
+        ):
             layer_names = list(msg.content["config"]["layer_names"])
-        _MODEL_STATE[context.node_id] = state_dict
-        _LAYER_NAMES[context.node_id] = layer_names
+        context.state[STATE_LAYER_NAMES] = ConfigRecord({"names": layer_names})
+        context.state[STATE_MODEL_ARRAYS] = ArrayRecord(state_dict)
 
-    model_state = _MODEL_STATE[context.node_id]
-    layer_names = _LAYER_NAMES[context.node_id]
+    layer_names = list(context.state[STATE_LAYER_NAMES]["names"])
+    model_arrays = context.state[STATE_MODEL_ARRAYS]
 
     config = msg.content["config"] if msg.content and "config" in msg.content else {}
     layer_idx = int(config.get("layer_idx", 0))
@@ -94,7 +98,7 @@ def train_comms(msg: Message, context: Context):
     chunk_end = int(config.get("chunk_end", 0))
 
     layer_name = layer_names[layer_idx]
-    tensor = model_state[layer_name]
+    tensor = torch.from_numpy(model_arrays[layer_name].numpy())
     t0 = perf_counter()
     if hasattr(tensor, "detach"):
         tensor = tensor.detach()
