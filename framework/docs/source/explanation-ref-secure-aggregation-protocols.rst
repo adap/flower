@@ -23,14 +23,15 @@ another that is in development. The first is the cryptographic (software) approa
 invented by Google [1]: clients add random masks to their updates and coordinate those
 masks so they cancel out only when the server sums across clients. This provides strong
 protection against an honest-but-curious server, but adds protocol complexity, extra
-communication, and usually works best for sum/average-style aggregation. Furthermore,
-the honest-but-curious security model may not be strong enough, and extending this
-method to a "dishonest server" threat model requires additional algorithm extensions,
-including a trusted third-party. Finally, the algorithm only works with sum-based
-aggregation methods such as FedAvg. See the paper at `Practical Secure Aggregation for
-Federated Learning on User-Held Data <https://arxiv.org/abs/1611.04482>`_.
+communication, and only works for sum-based aggregation methods such as FedAvg.
+Furthermore, the honest-but-curious security model may not be strong enough, and
+extending this method to a "dishonest server" threat model requires additional algorithm
+extensions, including a trusted third-party. See the paper at `Practical Secure
+Aggregation for Federated Learning on User-Held Data
+<https://arxiv.org/abs/1611.04482>`_.
 
-The second is to run aggregation inside a confidential VM (CVM), a HW-based security
+The second is to run aggregation inside a `confidential VM
+<https://en.wikipedia.org/wiki/Confidential_computing>`_ (CVM), a HW-based security
 solution. Here, clients can send updates as normal because the aggregation code runs in
 an isolated environment designed to stay confidential even from a malicious hypervisor.
 This can support more flexible aggregation logic and simpler clients, but shifts trust
@@ -46,10 +47,11 @@ SecureAggPlusWorkflow documentation
  How the Software-based Method Works: A Three-Client Example
 *************************************************************
 
-To illustrate how the cryptographic method works, let's consider a simple example with
-three clients (A, B, and C) and a server. Each client has a two-dimensional update
-vector that they want to send to the server for aggregation. The goal is for the server
-to compute the sum of these updates without learning any individual client's update.
+To illustrate how the software-based cryptographic method works, let's consider a simple
+example with three clients (A, B, and C) and a server. Each client has a two-dimensional
+update vector that they want to send to the server for aggregation. The goal is for the
+server to compute the sum of these updates without learning any individual client's
+update.
 
 - Clients A, B and C have the following updates:
 
@@ -73,9 +75,10 @@ updates.
 Clients coordinate pairwise random noise
 ========================================
 
-First, each pair of clients agrees on a shared random noise vector. Each vector is
-associated with an ordered pair of the two clients that share it (client order
-determined beforehand):
+First, each pair of clients agrees on a shared random noise vector (see `Diffie–Hellman
+key exchange <https://en.wikipedia.org/wiki/Diffie%E2%80%93Hellman_key_exchange>`_).
+Each noise vector is associated with an ordered pair of the two clients that share it
+(client order determined beforehand):
 
     .. math::
 
@@ -89,8 +92,8 @@ Each client builds a mask from the shared noise
 ===============================================
 
 Then, each client constructs a mask by adding or subtracting each of its shared noise
-vectors. The clients know whether to add or subtract a given vector based on if they are
-the first or second client in the ordered pair:
+vectors. The clients know whether to add or subtract a given noise vector based on if
+they are the first or second client in the ordered pair:
 
     .. math::
 
@@ -186,8 +189,8 @@ And do the clients have to communicate directly?
 Not in practice. Instead, the clients communicate via encrypted messages routed through
 the server. Each client posts a public key, which allows others to encrypt messages only
 it can decrypt. These encrypted messages are sent to the server and pulled by the
-appropriate client (remember: only the intended receiving client will have the private
-key needed to decrypt).
+appropriate client (only the intended receiving client will have the private key needed
+to decrypt).
 
 Don't the pairwise vectors scale poorly with many clients?
 ==========================================================
@@ -205,7 +208,8 @@ CVMs keep running code confidential during execution, even from a malicious hype
 including encrypting code and data in DRAM. They also work with "attestation" services
 to allow clients to verify that the correct code is running in the CVM before sending
 their updates. This allows clients to send unmasked updates, since the aggregation code
-is protected by the CVM. Stay tuned for CVM-based secure aggregation in Flower!
+is protected by the CVM running the expected code. Stay tuned for CVM-based secure
+aggregation in Flower!
 
 **References:**
 
