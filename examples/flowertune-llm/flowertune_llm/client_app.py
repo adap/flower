@@ -98,9 +98,9 @@ def train_comms(msg: Message, context: Context):
     config = msg.content["config"] if msg.content and "config" in msg.content else {}
     chunk_start = int(config.get("chunk_start", 0))
     chunk_end = int(config.get("chunk_end", 0))
-    layer_idx = int(context.state[STATE_LAYER_IDX]["idx"])
     layer_paths = list(context.state[STATE_LAYER_PATHS]["paths"])
 
+    layer_idx = int(config.get("layer_idx", 0))
     if layer_idx >= len(layer_paths):
         layer_idx = len(layer_paths) - 1
 
@@ -134,5 +134,4 @@ def train_comms(msg: Message, context: Context):
     })
     metric_record["profile.client.train_comms.ms"] = (t1 - t0) * 1000.0
 
-    context.state[STATE_LAYER_IDX] = ConfigRecord({"idx": layer_idx + 1})
     return Message(content=content, reply_to=msg)
