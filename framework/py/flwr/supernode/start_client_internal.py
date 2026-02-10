@@ -47,6 +47,7 @@ from flwr.common.constant import (
     ErrorCode,
     ExecPluginType,
 )
+from flwr.common.events import start_event_uploader, stop_event_uploader
 from flwr.common.exit import ExitCode, flwr_exit, register_signal_handlers
 from flwr.common.grpc import generic_create_grpc_server
 from flwr.common.inflatable import (
@@ -81,6 +82,17 @@ from flwr.supernode.servicer.clientappio import ClientAppIoServicer
 DEFAULT_FFS_DIR = get_flwr_dir() / "supernode" / "ffs"
 
 FAB_VERIFICATION_ERROR = Error(ErrorCode.INVALID_FAB, "The FAB could not be verified.")
+
+
+class _FleetEventStub:
+    """Lightweight adapter to make Fleet push_events compatible with EventStub protocol."""
+
+    def __init__(self, push_events_fn: Callable) -> None:
+        self._push_events_fn = push_events_fn
+
+    def PushEvents(self, request, timeout=None):  # type: ignore
+        """Push events to Fleet."""
+        return self._push_events_fn(request)
 
 
 # pylint: disable=import-outside-toplevel
@@ -240,40 +252,54 @@ def start_client_internal(
             pull_object,
             push_object,
             confirm_message_received,
+            push_events,
         ) = conn
         # Store node_id in state
         state.set_node_id(node_id)
         log(INFO, "SuperNode ID: %s", node_id)
 
-        # pylint: disable=too-many-nested-blocks
-        while True:
-            # The signature of the function will change after
-            # completing the transition to the `NodeState`-based SuperNode
-            run_id = _pull_and_store_message(
-                state=state,
-                ffs=ffs,
-                object_store=store,
-                node_config=node_config,
-                receive=receive,
-                get_run=get_run,
-                get_fab=get_fab,
-                pull_object=pull_object,
-                confirm_message_received=confirm_message_received,
-                trusted_entities=trusted_entities,
-            )
+        # Create a stub wrapper for event uploading
+        event_stub = _FleetEventStub(push_events)
 
-            # No message has been pulled therefore we can skip the push stage.
-            if run_id is None:
-                # If no message was received, wait for a while
-                time.sleep(3)
-                continue
+        # Start event uploader to forward events from SuperNode to SuperLink
+        event_uploader, event_queue = start_event_uploader(
+            node_id=node_id,
+            run_id=0,  # Use 0 for SuperNode-level events (not tied to a specific run)
+            stub=event_stub,
+        )
 
-            _push_messages(
-                state=state,
-                object_store=store,
-                send=send,
-                push_object=push_object,
-            )
+        try:
+            while True:
+                # The signature of the function will change after
+                # completing the transition to the `NodeState`-based SuperNode
+                run_id = _pull_and_store_message(
+                    state=state,
+                    ffs=ffs,
+                    object_store=store,
+                    node_config=node_config,
+                    receive=receive,
+                    get_run=get_run,
+                    get_fab=get_fab,
+                    pull_object=pull_object,
+                    confirm_message_received=confirm_message_received,
+                    trusted_entities=trusted_entities,
+                )
+
+                # No message has been pulled therefore we can skip the push stage.
+                if run_id is None:
+                    # If no message was received, wait for a while
+                    time.sleep(3)
+                    continue
+
+                _push_messages(
+                    state=state,
+                    object_store=store,
+                    send=send,
+                    push_object=push_object,
+                )
+        finally:
+            # Stop event uploader on shutdown
+            stop_event_uploader(event_queue, event_uploader)
 
 
 def _insert_message(msg: Message, state: NodeState, store: ObjectStore) -> None:
@@ -552,6 +578,7 @@ def _init_connection(  # pylint: disable=too-many-positional-arguments
         Callable[[int, str], bytes],
         Callable[[int, str, bytes], None],
         Callable[[int, str], None],
+        Callable,
     ]
 ]:
     """Establish a connection to the Fleet API server at SuperLink."""
