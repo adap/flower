@@ -21,7 +21,7 @@ from typing import Protocol
 
 import grpc
 
-from flwr.common.constant import EVENT_UPLOAD_INTERVAL
+from flwr.common.constant import EVENT_HISTORY_MAX_SIZE, EVENT_UPLOAD_INTERVAL
 from flwr.proto.event_pb2 import Event, EventType, PushEventsRequest, PushEventsResponse
 from flwr.proto.node_pb2 import Node
 
@@ -105,11 +105,16 @@ class EventDispatcher:
         -----
         This method uses `put_nowait` to avoid blocking. Subscribers should
         consume events promptly to prevent queue overflow.
+
+        The event history is automatically pruned when it exceeds
+        EVENT_HISTORY_MAX_SIZE to prevent unbounded memory growth.
         """
         with self._lock:
-            # Store event in history
             self._events.append(event)
-            # Broadcast to subscribers
+
+            if len(self._events) > EVENT_HISTORY_MAX_SIZE:
+                self._events = self._events[-EVENT_HISTORY_MAX_SIZE:]
+
             for queue in self._subs:
                 queue.put_nowait(event)
 
