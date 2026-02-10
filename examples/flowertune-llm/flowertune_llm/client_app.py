@@ -3,14 +3,14 @@
 from __future__ import annotations
 
 import os
-from time import perf_counter
+import pickle
+import re
 import warnings
 
 from flwr.app import ArrayRecord, ConfigRecord, Context, Message, MetricRecord, RecordDict
 from flwr.clientapp import ClientApp
 from flwr.common.config import unflatten_dict
 from omegaconf import DictConfig
-import torch
 
 from flowertune_llm.dataset import replace_keys
 from flowertune_llm.models import get_model
@@ -20,13 +20,18 @@ os.environ["TOKENIZERS_PARALLELISM"] = "true"
 os.environ["RAY_DISABLE_DOCKER_CPU_WARNING"] = "1"
 warnings.filterwarnings("ignore", category=UserWarning)
 
-
 STATE_LAYER_NAMES = "layer_names"
-STATE_MODEL_ARRAYS = "model_arrays"
+STATE_LAYER_PATHS = "layer_paths"
+STATE_LAYER_IDX = "layer_idx"
+STATE_NUM_EXAMPLES = "num_examples"
 
 
 # Flower ClientApp
 app = ClientApp()
+
+
+def _sanitize_layer_name(name: str) -> str:
+    return re.sub(r"[^a-zA-Z0-9_.-]", "_", name)
 
 
 @app.train()
@@ -35,13 +40,11 @@ def train(msg: Message, context: Context):
     cfg = DictConfig(replace_keys(unflatten_dict(context.run_config)))
     aggregation_mode = getattr(cfg, "aggregation", {}).get("mode", "layerwise")
 
-    t0 = perf_counter()
+    # Load model (no training)
     model = get_model(cfg.model)
-    t1 = perf_counter()
 
     if msg.content and "arrays" in msg.content:
-        model.load_state_dict(msg.content["arrays"].to_torch_state_dict(), strict=False)
-    t2 = perf_counter()
+        model.load_state_dict(msg.content["arrays"].to_torch_state_dict(), strict=True)
 
     state_dict = model.state_dict()
     layer_names = list(state_dict.keys())
@@ -50,75 +53,68 @@ def train(msg: Message, context: Context):
         if "layer_names" in config:
             layer_names = list(config["layer_names"])
 
+    # Persist layer names in context (lightweight)
     context.state[STATE_LAYER_NAMES] = ConfigRecord({"names": layer_names})
-    context.state[STATE_MODEL_ARRAYS] = ArrayRecord(state_dict)
-    t3 = perf_counter()
+
+    # Persist layers to disk for per-layer sending
+    layer_dir = os.path.join(os.getcwd(), "layers", str(context.run_id), str(context.node_id))
+    os.makedirs(layer_dir, exist_ok=True)
+
+    serialized_layer_paths: list[str] = []
+    for layer_name in layer_names:
+        file_name = f"{_sanitize_layer_name(layer_name)}.pt"
+        file_path = os.path.join(layer_dir, file_name)
+        serialized_layer_paths.append(file_path)
+        with open(file_path, "wb") as file:
+            pickle.dump({layer_name: state_dict[layer_name]}, file)
+
+    # Tracking state for layer-wise communication
+    context.state[STATE_LAYER_PATHS] = ConfigRecord({"paths": serialized_layer_paths})
+    context.state[STATE_LAYER_IDX] = ConfigRecord({"idx": 0})
+    context.state[STATE_NUM_EXAMPLES] = ConfigRecord({"num_examples": 1})
 
     metrics = {
         "train_loss": 0.0,
         "num-examples": 1,
-        "profile.client.prepare.ms": (t3 - t0) * 1000.0,
-        "profile.client.load_model.ms": (t1 - t0) * 1000.0,
-        "profile.client.load_arrays.ms": (t2 - t1) * 1000.0,
-        "profile.client.state_dict.ms": (t3 - t2) * 1000.0,
     }
 
     metric_record = MetricRecord(metrics)
-    content = RecordDict({"metrics": metric_record})
+    content = RecordDict({"arrays": ArrayRecord(), "metrics": metric_record})
 
     if aggregation_mode == "all_at_once":
-        model_record = ArrayRecord(state_dict)
-        content["arrays"] = model_record
+        content["arrays"] = ArrayRecord(state_dict)
+
     return Message(content=content, reply_to=msg)
 
 
 @app.train("layer_wise_communication")
 def train_comms(msg: Message, context: Context):
-    """Send the model layer by layer."""
-    if STATE_MODEL_ARRAYS not in context.state or STATE_LAYER_NAMES not in context.state:
-        cfg = DictConfig(replace_keys(unflatten_dict(context.run_config)))
-        model = get_model(cfg.model)
-        state_dict = model.state_dict()
-        layer_names = list(state_dict.keys())
-        if (
-            msg.content
-            and "config" in msg.content
-            and "layer_names" in msg.content["config"]
-        ):
-            layer_names = list(msg.content["config"]["layer_names"])
-        context.state[STATE_LAYER_NAMES] = ConfigRecord({"names": layer_names})
-        context.state[STATE_MODEL_ARRAYS] = ArrayRecord(state_dict)
+    """Send the model layer by layer from disk."""
+    layer_idx = int(context.state[STATE_LAYER_IDX]["idx"])
+    layer_paths = list(context.state[STATE_LAYER_PATHS]["paths"])
 
-    layer_names = list(context.state[STATE_LAYER_NAMES]["names"])
-    model_arrays = context.state[STATE_MODEL_ARRAYS]
+    if layer_idx >= len(layer_paths):
+        layer_idx = len(layer_paths) - 1
 
-    config = msg.content["config"] if msg.content and "config" in msg.content else {}
-    layer_idx = int(config.get("layer_idx", 0))
-    chunk_start = int(config.get("chunk_start", 0))
-    chunk_end = int(config.get("chunk_end", 0))
+    send_complete = layer_idx >= (len(layer_paths) - 1)
 
-    layer_name = layer_names[layer_idx]
-    tensor = torch.from_numpy(model_arrays[layer_name].numpy())
-    t0 = perf_counter()
-    if hasattr(tensor, "detach"):
-        tensor = tensor.detach()
-    if hasattr(tensor, "cpu"):
-        tensor = tensor.cpu()
-    if hasattr(tensor, "__getitem__") and chunk_end > chunk_start and getattr(
-        tensor, "ndim", 0
-    ):
-        tensor = tensor[chunk_start:chunk_end]
-    t1 = perf_counter()
+    # Read model layer from disk
+    layer_path = layer_paths[layer_idx]
+    with open(layer_path, "rb") as file:
+        layer_dict = pickle.load(file)
 
-    model_record = ArrayRecord({layer_name: tensor})
-    t2 = perf_counter()
+    layer_name = next(iter(layer_dict.keys()))
+    array_record = ArrayRecord(layer_dict)
 
-    metrics = {
-        "num-examples": 1,
-        "profile.client.slice.ms": (t1 - t0) * 1000.0,
-        "profile.client.serialize.ms": (t2 - t1) * 1000.0,
-    }
+    num_examples = int(context.state[STATE_NUM_EXAMPLES]["num_examples"])
+    metric_record = MetricRecord({"num-examples": num_examples})
 
-    metric_record = MetricRecord(metrics)
-    content = RecordDict({"arrays": model_record, "metrics": metric_record})
+    config_record = ConfigRecord({"send_complete": send_complete})
+    content = RecordDict({
+        "arrays": array_record,
+        "metrics": metric_record,
+        "config": config_record,
+    })
+
+    context.state[STATE_LAYER_IDX] = ConfigRecord({"idx": layer_idx + 1})
     return Message(content=content, reply_to=msg)
