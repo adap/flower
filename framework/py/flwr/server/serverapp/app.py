@@ -172,9 +172,11 @@ def run_serverapp(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
 
     try:
         # Initialize the GrpcGrid
+        pull_interval = float(server_app_run_config.get("grid.pull-interval", 3.0))
         grid = GrpcGrid(
             serverappio_service_address=serverappio_api_address,
             root_certificates=certificates,
+            pull_interval=pull_interval,
         )
 
         # Pull ServerAppInputs from LinkState
