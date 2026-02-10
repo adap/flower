@@ -29,6 +29,7 @@ from flwr.common.constant import (
     SUPERLINK_NODE_ID,
     Status,
 )
+from flwr.common.events import get_event_dispatcher
 from flwr.common.inflatable import (
     get_all_nested_objects,
     get_object_id,
@@ -1019,9 +1020,9 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
             # Create events of different types
             event_types = [
                 EventType.ROUND_STARTED,
-                EventType.ROUND_FIT_RECEIVED,
+                EventType.ROUND_FIT_STARTED,
                 EventType.ROUND_FIT_AGGREGATED,
-                EventType.ROUND_EVALUATE_RECEIVED,
+                EventType.ROUND_EVALUATE_STARTED,
                 EventType.ROUND_EVALUATE_AGGREGATED,
                 EventType.ROUND_COMPLETED,
                 EventType.NODE_FIT_COMPLETED,
@@ -1059,4 +1060,140 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
                 assert received_event.event_type == expected_type
         finally:
             # Cleanup
+            dispatcher.unsubscribe(event_queue)
+
+    def test_push_events_overrides_run_id_when_not_set(self) -> None:
+        """Test that PushEvents overrides run_id when event.run_id is not set."""
+        # Prepare
+        dispatcher = get_event_dispatcher()
+        event_queue = dispatcher.subscribe()
+
+        try:
+            # Create event without run_id
+            event = Event(
+                timestamp=1234567890.0,
+                node_id=42,
+                event_type=EventType.ROUND_STARTED,
+            )
+            event.ClearField("run_id")  # Ensure run_id is not set
+
+            # Execute
+            request = PushEventsRequest(
+                node=Node(node_id=self.node_id),
+                run_id=999,  # Request-level run_id
+                events=[event],
+            )
+            response, call = self._push_events.with_call(request=request)
+
+            # Assert
+            assert isinstance(response, PushEventsResponse)
+            assert grpc.StatusCode.OK == call.code()
+
+            # Verify run_id was set from request
+            received_event = event_queue.get_nowait()
+            assert received_event is not None
+            assert received_event.run_id == 999
+        finally:
+            dispatcher.unsubscribe(event_queue)
+
+    def test_push_events_preserves_existing_run_id(self) -> None:
+        """Test that PushEvents preserves event.run_id when already set."""
+        # Prepare
+        dispatcher = get_event_dispatcher()
+        event_queue = dispatcher.subscribe()
+
+        try:
+            # Create event with run_id already set
+            event = Event(
+                timestamp=1234567890.0,
+                node_id=42,
+                run_id=555,  # Event already has run_id
+                event_type=EventType.ROUND_STARTED,
+            )
+
+            # Execute
+            request = PushEventsRequest(
+                node=Node(node_id=self.node_id),
+                run_id=999,  # Different run_id in request
+                events=[event],
+            )
+            response, call = self._push_events.with_call(request=request)
+
+            # Assert
+            assert isinstance(response, PushEventsResponse)
+            assert grpc.StatusCode.OK == call.code()
+
+            # Verify original run_id was preserved
+            received_event = event_queue.get_nowait()
+            assert received_event is not None
+            assert received_event.run_id == 555
+        finally:
+            dispatcher.unsubscribe(event_queue)
+
+    def test_push_events_overrides_node_id_when_not_set(self) -> None:
+        """Test that PushEvents overrides node_id when event.node_id is not set."""
+        # Prepare
+        dispatcher = get_event_dispatcher()
+        event_queue = dispatcher.subscribe()
+
+        try:
+            # Create event without node_id (defaults to 0)
+            event = Event(
+                timestamp=1234567890.0,
+                run_id=1,
+                node_id=0,  # Not set
+                event_type=EventType.ROUND_STARTED,
+            )
+
+            # Execute
+            request = PushEventsRequest(
+                node=Node(node_id=777),  # Request-level node_id
+                run_id=1,
+                events=[event],
+            )
+            response, call = self._push_events.with_call(request=request)
+
+            # Assert
+            assert isinstance(response, PushEventsResponse)
+            assert grpc.StatusCode.OK == call.code()
+
+            # Verify node_id was set from request
+            received_event = event_queue.get_nowait()
+            assert received_event is not None
+            assert received_event.node_id == 777
+        finally:
+            dispatcher.unsubscribe(event_queue)
+
+    def test_push_events_preserves_existing_node_id(self) -> None:
+        """Test that PushEvents preserves event.node_id when already set."""
+        # Prepare
+        dispatcher = get_event_dispatcher()
+        event_queue = dispatcher.subscribe()
+
+        try:
+            # Create event with node_id already set
+            event = Event(
+                timestamp=1234567890.0,
+                run_id=1,
+                node_id=333,  # Event already has node_id
+                event_type=EventType.ROUND_STARTED,
+            )
+
+            # Execute
+            request = PushEventsRequest(
+                node=Node(node_id=777),  # Different node_id in request
+                run_id=1,
+                events=[event],
+            )
+            response, call = self._push_events.with_call(request=request)
+
+            # Assert
+            assert isinstance(response, PushEventsResponse)
+            assert grpc.StatusCode.OK == call.code()
+
+            # Verify original node_id was preserved
+            received_event = event_queue.get_nowait()
+            assert received_event is not None
+            assert received_event.node_id == 333
+        finally:
             dispatcher.unsubscribe(event_queue)

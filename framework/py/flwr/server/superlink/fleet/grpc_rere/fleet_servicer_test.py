@@ -162,6 +162,12 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902, R0904
             request_serializer=PullObjectRequest.SerializeToString,
             response_deserializer=PullObjectResponse.FromString,
         )
+        from flwr.proto.event_pb2 import PushEventsRequest, PushEventsResponse
+        self._push_events = self._channel.unary_unary(
+            "/flwr.proto.Fleet/PushEvents",
+            request_serializer=PushEventsRequest.SerializeToString,
+            response_deserializer=PushEventsResponse.FromString,
+        )
         self._confirm_message_received = self._channel.unary_unary(
             "/flwr.proto.Fleet/ConfirmMessageReceived",
             request_serializer=ConfirmMessageReceivedRequest.SerializeToString,
@@ -800,6 +806,146 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902, R0904
         # Verify traffic was recorded
         assert run_after.bytes_sent == bytes_sent_before + len(obj_b)
         assert run_after.bytes_recv == 0  # No bytes received during pull
+
+    def test_push_events_overrides_run_id_when_not_set(self) -> None:
+        """Test that PushEvents overrides run_id when event.run_id is not set."""
+        from flwr.common.events import get_event_dispatcher
+        from flwr.proto.event_pb2 import Event, EventType, PushEventsRequest
+
+        # Prepare
+        node_id = self._create_dummy_node()
+        dispatcher = get_event_dispatcher()
+        event_queue = dispatcher.subscribe()
+
+        try:
+            # Create event without run_id
+            event = Event(
+                timestamp=1234567890.0,
+                node_id=42,
+                event_type=EventType.ROUND_STARTED,
+            )
+            event.ClearField("run_id")  # Ensure run_id is not set
+
+            # Execute
+            request = PushEventsRequest(
+                node=Node(node_id=node_id),
+                run_id=999,  # Request-level run_id
+                events=[event],
+            )
+            response = self._push_events(request)
+
+            # Assert
+            assert response is not None
+            received_event = event_queue.get_nowait()
+            assert received_event is not None
+            assert received_event.run_id == 999
+        finally:
+            dispatcher.unsubscribe(event_queue)
+
+    def test_push_events_preserves_existing_run_id(self) -> None:
+        """Test that PushEvents preserves event.run_id when already set."""
+        from flwr.common.events import get_event_dispatcher
+        from flwr.proto.event_pb2 import Event, EventType, PushEventsRequest
+
+        # Prepare
+        node_id = self._create_dummy_node()
+        dispatcher = get_event_dispatcher()
+        event_queue = dispatcher.subscribe()
+
+        try:
+            # Create event with run_id already set
+            event = Event(
+                timestamp=1234567890.0,
+                node_id=42,
+                run_id=555,  # Event already has run_id
+                event_type=EventType.ROUND_STARTED,
+            )
+
+            # Execute
+            request = PushEventsRequest(
+                node=Node(node_id=node_id),
+                run_id=999,  # Different run_id in request
+                events=[event],
+            )
+            response = self._push_events(request)
+
+            # Assert
+            assert response is not None
+            received_event = event_queue.get_nowait()
+            assert received_event is not None
+            assert received_event.run_id == 555  # Should preserve original
+        finally:
+            dispatcher.unsubscribe(event_queue)
+
+    def test_push_events_overrides_node_id_when_not_set(self) -> None:
+        """Test that PushEvents overrides node_id when event.node_id is not set."""
+        from flwr.common.events import get_event_dispatcher
+        from flwr.proto.event_pb2 import Event, EventType, PushEventsRequest
+
+        # Prepare
+        node_id = self._create_dummy_node()
+        dispatcher = get_event_dispatcher()
+        event_queue = dispatcher.subscribe()
+
+        try:
+            # Create event without node_id (defaults to 0)
+            event = Event(
+                timestamp=1234567890.0,
+                run_id=1,
+                node_id=0,  # Not set
+                event_type=EventType.ROUND_STARTED,
+            )
+
+            # Execute
+            request = PushEventsRequest(
+                node=Node(node_id=node_id),  # Request-level node_id
+                run_id=1,
+                events=[event],
+            )
+            response = self._push_events(request)
+
+            # Assert
+            assert response is not None
+            received_event = event_queue.get_nowait()
+            assert received_event is not None
+            assert received_event.node_id == node_id
+        finally:
+            dispatcher.unsubscribe(event_queue)
+
+    def test_push_events_preserves_existing_node_id(self) -> None:
+        """Test that PushEvents preserves event.node_id when already set."""
+        from flwr.common.events import get_event_dispatcher
+        from flwr.proto.event_pb2 import Event, EventType, PushEventsRequest
+
+        # Prepare
+        node_id = self._create_dummy_node()
+        dispatcher = get_event_dispatcher()
+        event_queue = dispatcher.subscribe()
+
+        try:
+            # Create event with node_id already set
+            event = Event(
+                timestamp=1234567890.0,
+                run_id=1,
+                node_id=333,  # Event already has node_id
+                event_type=EventType.ROUND_STARTED,
+            )
+
+            # Execute
+            request = PushEventsRequest(
+                node=Node(node_id=node_id),  # Different node_id in request
+                run_id=1,
+                events=[event],
+            )
+            response = self._push_events(request)
+
+            # Assert
+            assert response is not None
+            received_event = event_queue.get_nowait()
+            assert received_event is not None
+            assert received_event.node_id == 333  # Should preserve original
+        finally:
+            dispatcher.unsubscribe(event_queue)
 
 
 class TestFleetServicerWithNodeAuthEnabled(TestFleetServicer):
