@@ -39,7 +39,11 @@ from flwr.common import (
     RecordDict,
     log,
 )
-from flwr.common.profiling import get_active_profiler, set_current_round
+from flwr.common.profiling import (
+    get_active_profiler,
+    publish_profile_summary,
+    set_current_round,
+)
 from flwr.server import Grid
 from flwr.serverapp.strategy import FedAvg, Result
 from flwr.serverapp.strategy.strategy_utils import (
@@ -379,6 +383,7 @@ class FedAvgStreaming(FedAvg):
                                     "chunk_idx": chunk_idx,
                                 },
                             )
+                            publish_profile_summary()
 
                         after_mb = process.memory_info().rss / (1024**2)
                         log(
