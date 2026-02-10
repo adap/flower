@@ -28,6 +28,7 @@ import requests
 from flwr.cli.config_utils import get_fab_metadata
 from flwr.common import Context, RecordDict, now
 from flwr.common.constant import (
+    EVENT_STREAM_INTERVAL,
     FAB_MAX_SIZE,
     FEDERATION_NOT_FOUND_MESSAGE,
     FEDERATION_NOT_SPECIFIED_MESSAGE,
@@ -263,16 +264,15 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
 
             time.sleep(LOG_STREAM_INTERVAL)  # Sleep briefly to avoid busy waiting
 
-    def StreamEvents(  # pylint: disable=C0103
+    def StreamEvents(
         self, request: StreamEventsRequest, context: grpc.ServicerContext
     ) -> Generator[StreamEventsResponse, Any, None]:
         """Stream events from all runs."""
         log(INFO, "ControlServicer.StreamEvents")
 
-        # Get the global event dispatcher
         dispatcher = get_event_dispatcher()
-
         after_timestamp = request.after_timestamp
+
         while context.is_active():
             # Get events after the specified timestamp
             events = dispatcher.get_events_since(after_timestamp)
@@ -286,7 +286,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 # Update after_timestamp to avoid getting the same events
                 after_timestamp = latest_timestamp + 1e-6
 
-            time.sleep(LOG_STREAM_INTERVAL)  # Sleep briefly to avoid busy waiting
+            time.sleep(EVENT_STREAM_INTERVAL)  # Sleep briefly to avoid busy waiting
 
     def ListRuns(
         self, request: ListRunsRequest, context: grpc.ServicerContext
