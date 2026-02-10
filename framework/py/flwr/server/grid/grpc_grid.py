@@ -421,6 +421,9 @@ class GrpcGrid(Grid):
             msg_ids.difference_update(
                 {msg.metadata.reply_to_message_id for msg in res_msgs}
             )
+            if profiler is not None and res_msgs:
+                record_profile_metrics_from_messages(res_msgs)
+                publish_profile_summary()
             if len(msg_ids) == 0:
                 break
             # Sleep
@@ -444,7 +447,6 @@ class GrpcGrid(Grid):
                 duration_ms=duration_ms,
                 metadata={"expected_replies": expected_replies},
             )
-            record_profile_metrics_from_messages(ret)
             publish_profile_summary()
 
         return ret

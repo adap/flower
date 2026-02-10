@@ -95,6 +95,9 @@ def train(msg: Message, context: Context):
 def train_comms(msg: Message, context: Context):
     """Send the model layer by layer from disk."""
     t0 = perf_counter()
+    config = msg.content["config"] if msg.content and "config" in msg.content else {}
+    chunk_start = int(config.get("chunk_start", 0))
+    chunk_end = int(config.get("chunk_end", 0))
     layer_idx = int(context.state[STATE_LAYER_IDX]["idx"])
     layer_paths = list(context.state[STATE_LAYER_PATHS]["paths"])
 
@@ -109,6 +112,14 @@ def train_comms(msg: Message, context: Context):
         layer_dict = pickle.load(file)
 
     layer_name = next(iter(layer_dict.keys()))
+    tensor = layer_dict[layer_name]
+    if (
+        chunk_end > chunk_start
+        and hasattr(tensor, "__getitem__")
+        and getattr(tensor, "ndim", 0) > 0
+    ):
+        tensor = tensor[chunk_start:chunk_end]
+    layer_dict = {layer_name: tensor}
     array_record = ArrayRecord(layer_dict)
 
     num_examples = int(context.state[STATE_NUM_EXAMPLES]["num_examples"])
