@@ -221,7 +221,7 @@ def test_event_uploader_batch_and_upload() -> None:
         timestamp=time.time(),
         node_id=1,
         run_id=1,
-        event_type=EventType.ROUND_FIT_RECEIVED
+        event_type=EventType.ROUND_COMPLETED
     )
 
     event_queue.put(event1)
@@ -292,7 +292,7 @@ def test_event_uploader_empty_queue() -> None:
     stub.PushEvents.assert_not_called()
 
 
-@patch("flwr.server.events.time.sleep")
+@patch("flwr.common.events.time.sleep")
 def test_event_uploader_waits_between_uploads(mock_sleep: MagicMock) -> None:
     """Test that uploader waits between upload cycles."""
     # Prepare
@@ -467,3 +467,94 @@ def test_event_uploader_clears_events_after_upload() -> None:
     call_args = stub.PushEvents.call_args[0][0]
     assert call_args.HasField("node")
     assert len(call_args.events) == 5
+
+
+def test_event_dispatcher_history_cleanup() -> None:
+    """Test that event history is pruned when it exceeds max size."""
+    # Prepare
+    from flwr.common.constant import EVENT_HISTORY_MAX_SIZE
+
+    dispatcher = EventDispatcher()
+
+    # Emit more events than the maximum size
+    num_events = EVENT_HISTORY_MAX_SIZE + 500
+    for i in range(num_events):
+        dispatcher.emit_event(
+            event_type=EventType.ROUND_STARTED,
+            node_id=i,
+            run_id=1,
+        )
+
+    # Assert - history should be capped at max size
+    assert len(dispatcher._events) == EVENT_HISTORY_MAX_SIZE
+
+    # Verify that the oldest events were removed (should have events with higher IDs)
+    first_event_node_id = dispatcher._events[0].node_id
+    assert first_event_node_id >= 500  # First 500 should be pruned
+
+
+def test_get_events_since_after_cleanup() -> None:
+    """Test that get_events_since works correctly after history cleanup."""
+    # Prepare
+    from flwr.common.constant import EVENT_HISTORY_MAX_SIZE
+
+    dispatcher = EventDispatcher()
+    initial_timestamp = time.time()
+
+    # Emit events that will trigger cleanup
+    num_events = EVENT_HISTORY_MAX_SIZE + 100
+    for i in range(num_events):
+        dispatcher.emit_event(
+            event_type=EventType.ROUND_STARTED,
+            node_id=i,
+            run_id=1,
+        )
+
+    # Get events after initial timestamp - should only return recent events
+    events = dispatcher.get_events_since(initial_timestamp)
+
+    # Assert - should get max size events (oldest ones were pruned)
+    assert len(events) == EVENT_HISTORY_MAX_SIZE
+
+
+def test_event_dispatcher_preserves_run_id() -> None:
+    """Test that events preserve their run_id when emitted."""
+    # Prepare
+    dispatcher = EventDispatcher()
+    queue = dispatcher.subscribe()
+
+    # Execute - emit event with specific run_id
+    dispatcher.emit_event(
+        event_type=EventType.NODE_FIT_STARTED,
+        node_id=42,
+        run_id=123,
+        metadata={"test": "value"},
+    )
+
+    # Assert
+    event = queue.get_nowait()
+    assert event is not None
+    assert event.HasField("run_id") and event.run_id == 123
+    assert event.node_id == 42
+    assert event.metadata["test"] == "value"
+
+
+def test_event_dispatcher_handles_optional_run_id() -> None:
+    """Test that events can be emitted without run_id (None)."""
+    # Prepare
+    dispatcher = EventDispatcher()
+    queue = dispatcher.subscribe()
+
+    # Execute - emit event without run_id
+    dispatcher.emit_event(
+        event_type=EventType.NODE_CONNECTED,
+        node_id=5,
+        run_id=None,
+    )
+
+    # Assert
+    event = queue.get_nowait()
+    assert event is not None
+    assert event.node_id == 5
+    # run_id should not be set when None is passed
+    assert not event.HasField("run_id")
