@@ -343,8 +343,11 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         log(DEBUG, "ClientAppIoServicer.PushEvents")
 
         for event in request.events:
-            if request.run_id:
+            if request.run_id and not event.run_id:
                 event.run_id = request.run_id
+
+            if request.node.node_id and not event.node_id:
+                event.node_id = request.node.node_id
 
             self.event_dispatcher.emit(event)
 
