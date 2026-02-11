@@ -466,3 +466,121 @@ class ShowFederationResponse(google.protobuf.message.Message):
     def ClearField(self, field_name: typing.Literal["federation", b"federation", "now", b"now"]) -> None: ...
 
 global___ShowFederationResponse = ShowFederationResponse
+
+@typing.final
+class CreateFederationRequest(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    NAME_FIELD_NUMBER: builtins.int
+    DESCRIPTION_FIELD_NUMBER: builtins.int
+    name: builtins.str
+    description: builtins.str
+    def __init__(
+        self,
+        *,
+        name: builtins.str = ...,
+        description: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing.Literal["description", b"description", "name", b"name"]) -> None: ...
+
+global___CreateFederationRequest = CreateFederationRequest
+
+@typing.final
+class CreateFederationResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    FEDERATION_FIELD_NUMBER: builtins.int
+    @property
+    def federation(self) -> flwr.proto.federation_pb2.Federation: ...
+    def __init__(
+        self,
+        *,
+        federation: flwr.proto.federation_pb2.Federation | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing.Literal["federation", b"federation"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing.Literal["federation", b"federation"]) -> None: ...
+
+global___CreateFederationResponse = CreateFederationResponse
+
+@typing.final
+class ArchiveFederationRequest(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    FEDERATION_NAME_FIELD_NUMBER: builtins.int
+    federation_name: builtins.str
+    def __init__(
+        self,
+        *,
+        federation_name: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing.Literal["federation_name", b"federation_name"]) -> None: ...
+
+global___ArchiveFederationRequest = ArchiveFederationRequest
+
+@typing.final
+class ArchiveFederationResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    def __init__(
+        self,
+    ) -> None: ...
+
+global___ArchiveFederationResponse = ArchiveFederationResponse
+
+@typing.final
+class AddNodeToFederationRequest(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    FEDERATION_NAME_FIELD_NUMBER: builtins.int
+    NODE_IDS_FIELD_NUMBER: builtins.int
+    federation_name: builtins.str
+    @property
+    def node_ids(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.int]: ...
+    def __init__(
+        self,
+        *,
+        federation_name: builtins.str = ...,
+        node_ids: collections.abc.Iterable[builtins.int] | None = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing.Literal["federation_name", b"federation_name", "node_ids", b"node_ids"]) -> None: ...
+
+global___AddNodeToFederationRequest = AddNodeToFederationRequest
+
+@typing.final
+class AddNodeToFederationResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    def __init__(
+        self,
+    ) -> None: ...
+
+global___AddNodeToFederationResponse = AddNodeToFederationResponse
+
+@typing.final
+class RemoveNodeFromFederationRequest(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    FEDERATION_NAME_FIELD_NUMBER: builtins.int
+    NODE_IDS_FIELD_NUMBER: builtins.int
+    federation_name: builtins.str
+    @property
+    def node_ids(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.int]: ...
+    def __init__(
+        self,
+        *,
+        federation_name: builtins.str = ...,
+        node_ids: collections.abc.Iterable[builtins.int] | None = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing.Literal["federation_name", b"federation_name", "node_ids", b"node_ids"]) -> None: ...
+
+global___RemoveNodeFromFederationRequest = RemoveNodeFromFederationRequest
+
+@typing.final
+class RemoveNodeFromFederationResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    def __init__(
+        self,
+    ) -> None: ...
+
+global___RemoveNodeFromFederationResponse = RemoveNodeFromFederationResponse
