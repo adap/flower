@@ -54,6 +54,10 @@ from flwr.common.serde import (
 from flwr.common.typing import Fab, Run, RunStatus
 from flwr.proto import control_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
+    AddNodeToFederationRequest,
+    AddNodeToFederationResponse,
+    CreateFederationRequest,
+    CreateFederationResponse,
     GetAuthTokensRequest,
     GetAuthTokensResponse,
     GetLoginDetailsRequest,
@@ -580,6 +584,22 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         return ShowFederationResponse(
             federation=federation_proto, now=now().isoformat()
         )
+
+    def CreateFederation(
+        self, request: CreateFederationRequest, context: grpc.ServicerContext
+    ) -> CreateFederationResponse:
+        """Create a new Federation."""
+        log(INFO, "ControlServicer.CreateFederation")
+
+        raise NotImplementedError()
+
+    def AddNodeToFederation(
+        self, request: AddNodeToFederationRequest, context: grpc.ServicerContext
+    ) -> AddNodeToFederationResponse:
+        """Add a node to a Federation."""
+        log(INFO, "ControlServicer.AddNodeToFederation")
+
+        raise NotImplementedError()
 
 
 def _create_list_runs_response(
