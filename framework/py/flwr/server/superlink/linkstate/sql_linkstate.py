@@ -38,8 +38,10 @@ from flwr.common.constant import (
     Status,
     SubStatus,
 )
+from flwr.common.events import get_event_dispatcher
 from flwr.common.record import ConfigRecord
 from flwr.common.typing import Run, RunStatus
+from flwr.proto.event_pb2 import EventType
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.server.utils.validator import validate_message
 from flwr.supercore.constant import NodeStatus
@@ -695,25 +697,55 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
 
     def _check_and_tag_offline_nodes(self, node_ids: list[int] | None = None) -> None:
         """Check and tag offline nodes."""
-        # strftime will convert POSIX timestamp to ISO format
-        query = """
-            UPDATE node SET status = :offline,
-            last_deactivated_at =
-            strftime('%Y-%m-%dT%H:%M:%f+00:00', online_until, 'unixepoch')
-            WHERE online_until <= :current_time AND status = :online
-        """
-        params: dict[str, Any] = {
-            "offline": NodeStatus.OFFLINE,
-            "current_time": now().timestamp(),
+        dispatcher = get_event_dispatcher()
+        current_time = now().timestamp()
+
+        base_params: dict[str, Any] = {
+            "current_time": current_time,
             "online": NodeStatus.ONLINE,
         }
-        if node_ids is not None:
-            placeholders = ",".join([f":nid_{i}" for i in range(len(node_ids))])
-            query += f" AND node_id IN ({placeholders})"
-            params.update(
-                {f"nid_{i}": uint64_to_int64(nid) for i, nid in enumerate(node_ids)}
+
+        in_clause = ""
+        id_params: dict[str, Any] = {}
+
+        if node_ids:
+            placeholders = ", ".join(f":nid_{i}" for i in range(len(node_ids)))
+            in_clause = f" AND node_id IN ({placeholders})"
+            id_params = {
+                f"nid_{i}": uint64_to_int64(nid)
+                for i, nid in enumerate(node_ids)
+            }
+
+        select_query = f"""
+            SELECT node_id FROM node
+            WHERE online_until <= :current_time
+            AND status = :online
+            {in_clause}
+        """
+        offline_nodes = self.query(select_query, base_params | id_params)
+
+        update_query = f"""
+            UPDATE node
+            SET status = :offline,
+                last_deactivated_at =
+                    strftime('%Y-%m-%dT%H:%M:%f+00:00', online_until, 'unixepoch')
+            WHERE online_until <= :current_time
+            AND status = :online
+            {in_clause}
+        """
+        self.query(
+            update_query,
+            base_params | id_params | {"offline": NodeStatus.OFFLINE},
+        )
+
+        for row in offline_nodes:
+            dispatcher.emit_event(
+                node_id=row["node_id"],
+                event_type=EventType.NODE_DISCONNECTED,
+                metadata={
+                    "reason": "heartbeat_timeout",
+                },
             )
-        self.query(query, params)
 
     def get_node_info(  # pylint: disable=too-many-locals
         self,

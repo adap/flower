@@ -22,9 +22,11 @@ import grpc
 from google.protobuf.json_format import MessageToDict
 
 from flwr.common.constant import PUBLIC_KEY_ALREADY_IN_USE_MESSAGE
+from flwr.common.events import get_event_dispatcher
 from flwr.common.inflatable import UnexpectedObjectContentError
 from flwr.common.logger import log
 from flwr.common.typing import InvalidRunStatusException
+from flwr.proto.event_pb2 import EventType, PushEventsRequest, PushEventsResponse
 from flwr.proto import fleet_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
@@ -76,6 +78,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         self.objectstore_factory = objectstore_factory
         self.enable_supernode_auth = enable_supernode_auth
         self.lock = threading.Lock()
+        self.event_dispatcher = get_event_dispatcher()
 
     def RegisterNode(
         self, request: RegisterNodeFleetRequest, context: grpc.ServicerContext
@@ -96,6 +99,12 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
                 state=self.state_factory.state(),
             )
             log(DEBUG, "[Fleet.RegisterNode] Registered node_id=%s", response.node_id)
+
+            self.event_dispatcher.emit_event(
+                node_id=response.node_id,
+                event_type=EventType.NODE_CONNECTED
+            )
+
             return response
         except ValueError:
             # Public key already in use
@@ -166,6 +175,14 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
             )
 
         try:
+            self.event_dispatcher.emit_event(
+                node_id=request.node_id,
+                event_type=EventType.NODE_DISCONNECTED,
+                metadata={
+                    "reason": "unregistered",
+                },
+            )
+
             response = message_handler.unregister_node(
                 request=request,
                 state=self.state_factory.state(),
@@ -338,3 +355,20 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
             abort_grpc_context(e.message, context)
 
         return res
+
+    def PushEvents(
+        self, request: PushEventsRequest, context: grpc.ServicerContext
+    ) -> PushEventsResponse:
+        """Push events from SuperNode to SuperLink's EventDispatcher."""
+        log(DEBUG, "[Fleet.PushEvents] Received %d events", len(request.events))
+
+        for event in request.events:
+            if request.run_id and not event.run_id:
+                event.run_id = request.run_id
+
+            if request.node.node_id and not event.node_id:
+                event.node_id = request.node.node_id
+
+            self.event_dispatcher.emit(event)
+
+        return PushEventsResponse()

@@ -29,6 +29,7 @@ from flwr.client.numpy_client import NumPyClient
 from flwr.client.typing import ClientFnExt
 from flwr.common import ConfigRecord, Context, Message, Metadata, RecordDict, log
 from flwr.common.constant import MessageTypeLegacy
+from flwr.common.events import get_event_dispatcher
 from flwr.common.recorddict_compat import (
     evaluateres_to_recorddict,
     fitres_to_recorddict,
@@ -39,6 +40,7 @@ from flwr.common.recorddict_compat import (
     recorddict_to_getparametersins,
     recorddict_to_getpropertiesins,
 )
+from flwr.proto.event_pb2 import EventType
 from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
     ClientMessage,
     Reason,
@@ -126,18 +128,81 @@ def handle_legacy_message_from_msgtype(
         )
     # Handle FitIns
     elif message_type == MessageType.TRAIN:
-        fit_res = maybe_call_fit(
-            client=client,
-            fit_ins=recorddict_to_fitins(message.content, keep_input=True),
+        dispatcher = get_event_dispatcher()
+        dispatcher.emit_event(
+            run_id=message.metadata.run_id,
+            node_id=message.metadata.dst_node_id,
+            event_type=EventType.NODE_FIT_STARTED,
+            metadata={
+                "group_id": str(message.metadata.group_id),
+            },
         )
-        out_recorddict = fitres_to_recorddict(fit_res, keep_input=False)
+
+        try:
+            fit_res = maybe_call_fit(
+                client=client,
+                fit_ins=recorddict_to_fitins(message.content, keep_input=True),
+            )
+
+            dispatcher.emit_event(
+                run_id=message.metadata.run_id,
+                node_id=message.metadata.dst_node_id,
+                event_type=EventType.NODE_FIT_COMPLETED,
+                metadata={k: str(v) for k, v in fit_res.metrics.items()},
+            )
+
+            out_recorddict = fitres_to_recorddict(fit_res, keep_input=False)
+        except Exception as e:
+            dispatcher.emit_event(
+                run_id=message.metadata.run_id,
+                node_id=message.metadata.dst_node_id,
+                event_type=EventType.NODE_FIT_FAILED,
+                metadata={
+                    "group_id": str(message.metadata.group_id),
+                    "error_type": type(e).__name__,
+                    "error_message": str(e),
+                },
+            )
+            raise
     # Handle EvaluateIns
     elif message_type == MessageType.EVALUATE:
-        evaluate_res = maybe_call_evaluate(
-            client=client,
-            evaluate_ins=recorddict_to_evaluateins(message.content, keep_input=True),
+        dispatcher = get_event_dispatcher()
+        dispatcher.emit_event(
+            run_id=message.metadata.run_id,
+            node_id=message.metadata.dst_node_id,
+            event_type=EventType.NODE_EVALUATE_STARTED,
+            metadata={
+                "group_id": str(message.metadata.group_id),
+            },
         )
-        out_recorddict = evaluateres_to_recorddict(evaluate_res)
+
+        try:
+            evaluate_res = maybe_call_evaluate(
+                client=client,
+                evaluate_ins=recorddict_to_evaluateins(message.content, keep_input=True),
+            )
+
+            dispatcher = get_event_dispatcher()
+            dispatcher.emit_event(
+                run_id=message.metadata.run_id,
+                node_id=message.metadata.dst_node_id,
+                event_type=EventType.NODE_EVALUATE_COMPLETED,
+                metadata={k: str(v) for k, v in evaluate_res.metrics.items()},
+            )
+
+            out_recorddict = evaluateres_to_recorddict(evaluate_res)
+        except Exception as e:
+            dispatcher.emit_event(
+                run_id=message.metadata.run_id,
+                node_id=message.metadata.dst_node_id,
+                event_type=EventType.NODE_EVALUATE_FAILED,
+                metadata={
+                    "group_id": str(message.metadata.group_id),
+                    "error_type": type(e).__name__,
+                    "error_message": str(e),
+                },
+            )
+            raise
     else:
         raise ValueError(f"Invalid message type: {message_type}")
 

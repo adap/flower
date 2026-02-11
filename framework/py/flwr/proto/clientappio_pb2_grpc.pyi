@@ -20,6 +20,7 @@ limitations under the License.
 import abc
 import collections.abc
 import flwr.proto.appio_pb2
+import flwr.proto.event_pb2
 import flwr.proto.heartbeat_pb2
 import flwr.proto.message_pb2
 import flwr.proto.run_pb2
@@ -122,6 +123,12 @@ class ClientAppIoStub:
     ]
     """Pull Message"""
 
+    PushEvents: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.event_pb2.PushEventsRequest,
+        flwr.proto.event_pb2.PushEventsResponse,
+    ]
+    """Push training events from ClientApp"""
+
 class ClientAppIoAsyncStub:
     ListAppsToLaunch: grpc.aio.UnaryUnaryMultiCallable[
         flwr.proto.appio_pb2.ListAppsToLaunchRequest,
@@ -208,6 +215,12 @@ class ClientAppIoAsyncStub:
         flwr.proto.appio_pb2.PullAppMessagesResponse,
     ]
     """Pull Message"""
+
+    PushEvents: grpc.aio.UnaryUnaryMultiCallable[
+        flwr.proto.event_pb2.PushEventsRequest,
+        flwr.proto.event_pb2.PushEventsResponse,
+    ]
+    """Push training events from ClientApp"""
 
 class ClientAppIoServicer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
@@ -317,5 +330,13 @@ class ClientAppIoServicer(metaclass=abc.ABCMeta):
         context: _ServicerContext,
     ) -> typing.Union[flwr.proto.appio_pb2.PullAppMessagesResponse, collections.abc.Awaitable[flwr.proto.appio_pb2.PullAppMessagesResponse]]:
         """Pull Message"""
+
+    @abc.abstractmethod
+    def PushEvents(
+        self,
+        request: flwr.proto.event_pb2.PushEventsRequest,
+        context: _ServicerContext,
+    ) -> typing.Union[flwr.proto.event_pb2.PushEventsResponse, collections.abc.Awaitable[flwr.proto.event_pb2.PushEventsResponse]]:
+        """Push training events from ClientApp"""
 
 def add_ClientAppIoServicer_to_server(servicer: ClientAppIoServicer, server: typing.Union[grpc.Server, grpc.aio.Server]) -> None: ...

@@ -41,6 +41,7 @@ from flwr.common.serde import (
     run_from_proto,
 )
 from flwr.common.typing import Fab, Run
+from flwr.proto.event_pb2 import PushEventsRequest, PushEventsResponse
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     ActivateNodeRequest,
@@ -356,6 +357,10 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
         )
         fn(object_id)
 
+    def push_events(req: PushEventsRequest) -> PushEventsResponse:
+        """Push events from SuperNode to SuperLink."""
+        return stub.PushEvents(req)
+
     try:
         if self_registered:
             register_node()
@@ -370,6 +375,7 @@ def grpc_request_response(  # pylint: disable=R0913,R0914,R0915,R0917
             pull_object,
             push_object,
             confirm_message_received,
+            push_events,
         )
     except Exception as exc:  # pylint: disable=broad-except
         log(ERROR, exc)

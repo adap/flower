@@ -32,6 +32,7 @@ from flwr.common.constant import (
     GRPC_ADAPTER_METADATA_MESSAGE_QUALNAME_KEY,
     GRPC_ADAPTER_METADATA_SHOULD_EXIT_KEY,
 )
+from flwr.proto.event_pb2 import PushEventsRequest, PushEventsResponse
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     ActivateNodeRequest,
@@ -197,3 +198,9 @@ class GrpcAdapter:
     ) -> ConfirmMessageReceivedResponse:
         """."""
         return self._send_and_receive(request, ConfirmMessageReceivedResponse, **kwargs)
+
+    def PushEvents(  # pylint: disable=C0103
+        self, request: PushEventsRequest, **kwargs: Any
+    ) -> PushEventsResponse:
+        """."""
+        return self._send_and_receive(request, PushEventsResponse, **kwargs)

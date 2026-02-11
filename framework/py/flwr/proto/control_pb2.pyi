@@ -19,6 +19,7 @@ limitations under the License.
 
 import builtins
 import collections.abc
+import flwr.proto.event_pb2
 import flwr.proto.fab_pb2
 import flwr.proto.federation_pb2
 import flwr.proto.node_pb2
@@ -133,6 +134,40 @@ class StreamLogsResponse(google.protobuf.message.Message):
     def ClearField(self, field_name: typing.Literal["latest_timestamp", b"latest_timestamp", "log_output", b"log_output"]) -> None: ...
 
 global___StreamLogsResponse = StreamLogsResponse
+
+@typing.final
+class StreamEventsRequest(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    AFTER_TIMESTAMP_FIELD_NUMBER: builtins.int
+    after_timestamp: builtins.float
+    def __init__(
+        self,
+        *,
+        after_timestamp: builtins.float = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing.Literal["after_timestamp", b"after_timestamp"]) -> None: ...
+
+global___StreamEventsRequest = StreamEventsRequest
+
+@typing.final
+class StreamEventsResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    EVENTS_FIELD_NUMBER: builtins.int
+    LATEST_TIMESTAMP_FIELD_NUMBER: builtins.int
+    latest_timestamp: builtins.float
+    @property
+    def events(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[flwr.proto.event_pb2.Event]: ...
+    def __init__(
+        self,
+        *,
+        events: collections.abc.Iterable[flwr.proto.event_pb2.Event] | None = ...,
+        latest_timestamp: builtins.float = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing.Literal["events", b"events", "latest_timestamp", b"latest_timestamp"]) -> None: ...
+
+global___StreamEventsResponse = StreamEventsResponse
 
 @typing.final
 class ListRunsRequest(google.protobuf.message.Message):

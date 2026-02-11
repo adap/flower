@@ -20,6 +20,7 @@ limitations under the License.
 import abc
 import collections.abc
 import flwr.proto.appio_pb2
+import flwr.proto.event_pb2
 import flwr.proto.heartbeat_pb2
 import flwr.proto.log_pb2
 import flwr.proto.message_pb2
@@ -123,6 +124,12 @@ class ServerAppIoStub:
         flwr.proto.log_pb2.PushLogsResponse,
     ]
     """Push ServerApp logs"""
+
+    PushEvents: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.event_pb2.PushEventsRequest,
+        flwr.proto.event_pb2.PushEventsResponse,
+    ]
+    """Push training events from ServerApp"""
 
     PushMessages: grpc.UnaryUnaryMultiCallable[
         flwr.proto.appio_pb2.PushAppMessagesRequest,
@@ -233,6 +240,12 @@ class ServerAppIoAsyncStub:
         flwr.proto.log_pb2.PushLogsResponse,
     ]
     """Push ServerApp logs"""
+
+    PushEvents: grpc.aio.UnaryUnaryMultiCallable[
+        flwr.proto.event_pb2.PushEventsRequest,
+        flwr.proto.event_pb2.PushEventsResponse,
+    ]
+    """Push training events from ServerApp"""
 
     PushMessages: grpc.aio.UnaryUnaryMultiCallable[
         flwr.proto.appio_pb2.PushAppMessagesRequest,
@@ -365,6 +378,14 @@ class ServerAppIoServicer(metaclass=abc.ABCMeta):
         context: _ServicerContext,
     ) -> typing.Union[flwr.proto.log_pb2.PushLogsResponse, collections.abc.Awaitable[flwr.proto.log_pb2.PushLogsResponse]]:
         """Push ServerApp logs"""
+
+    @abc.abstractmethod
+    def PushEvents(
+        self,
+        request: flwr.proto.event_pb2.PushEventsRequest,
+        context: _ServicerContext,
+    ) -> typing.Union[flwr.proto.event_pb2.PushEventsResponse, collections.abc.Awaitable[flwr.proto.event_pb2.PushEventsResponse]]:
+        """Push training events from ServerApp"""
 
     @abc.abstractmethod
     def PushMessages(

@@ -23,6 +23,7 @@ import "flwr/proto/recorddict.proto";
 import "flwr/proto/run.proto";
 import "flwr/proto/node.proto";
 import "flwr/proto/federation.proto";
+import "flwr/proto/event.proto";
 
 service Control {
   // Start run upon request
@@ -33,6 +34,9 @@ service Control {
 
   // Start log stream upon request
   rpc StreamLogs(StreamLogsRequest) returns (stream StreamLogsResponse) {}
+
+  // Start event stream upon request
+  rpc StreamEvents(StreamEventsRequest) returns (stream StreamEventsResponse) {}
 
   // flwr ls command
   rpc ListRuns(ListRunsRequest) returns (ListRunsResponse) {}
@@ -78,6 +82,13 @@ message StreamLogsRequest {
 }
 message StreamLogsResponse {
   string log_output = 1;
+  double latest_timestamp = 2;
+}
+message StreamEventsRequest {
+  double after_timestamp = 2;
+}
+message StreamEventsResponse {
+  repeated Event events = 1;
   double latest_timestamp = 2;
 }
 message ListRunsRequest { optional uint64 run_id = 1; }

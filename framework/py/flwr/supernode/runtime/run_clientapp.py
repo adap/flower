@@ -60,6 +60,7 @@ from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
     PushAppOutputsRequest,
     PushAppOutputsResponse,
 )
+from flwr.common.events import start_event_uploader, stop_event_uploader
 from flwr.proto.clientappio_pb2_grpc import ClientAppIoStub
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.supercore.app_utils import start_parent_process_monitor
@@ -88,10 +89,14 @@ def run_clientapp(  # pylint: disable=R0913, R0914, R0917
     )
     channel.subscribe(on_channel_state_change)
     heartbeat_sender = None
+    event_uploader = None
+    event_queue = None
 
     def on_exit() -> None:
         if heartbeat_sender is not None and heartbeat_sender.is_running:
             heartbeat_sender.stop()
+        if event_uploader is not None and event_queue is not None:
+            stop_event_uploader(event_queue, event_uploader)
         channel.close()
 
     register_signal_handlers(
@@ -111,6 +116,13 @@ def run_clientapp(  # pylint: disable=R0913, R0914, R0917
 
         # Pull Message, Context, Run and (optional) FAB from SuperNode
         message, context, run, fab = pull_appinputs(stub=stub, token=token)
+
+        # Start event uploader for this node
+        event_uploader, event_queue = start_event_uploader(
+            node_id=context.node_id,
+            run_id=run.run_id,
+            stub=stub,
+        )
 
         try:
 

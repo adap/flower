@@ -21,6 +21,7 @@ import "flwr/proto/heartbeat.proto";
 import "flwr/proto/run.proto";
 import "flwr/proto/message.proto";
 import "flwr/proto/appio.proto";
+import "flwr/proto/event.proto";
 
 service ClientAppIo {
 
@@ -75,4 +76,7 @@ service ClientAppIo {
 
   // Pull Message
   rpc PullMessage(PullAppMessagesRequest) returns (PullAppMessagesResponse) {}
+
+  // Push training events from ClientApp
+  rpc PushEvents(PushEventsRequest) returns (PushEventsResponse) {}
 }
