@@ -489,16 +489,16 @@ global___CreateFederationRequest = CreateFederationRequest
 class CreateFederationResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
 
-    NAME_FIELD_NUMBER: builtins.int
-    name: builtins.str
+    FEDERATION_FIELD_NUMBER: builtins.int
+    @property
+    def federation(self) -> flwr.proto.federation_pb2.Federation: ...
     def __init__(
         self,
         *,
-        name: builtins.str | None = ...,
+        federation: flwr.proto.federation_pb2.Federation | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["_name", b"_name", "name", b"name"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["_name", b"_name", "name", b"name"]) -> None: ...
-    def WhichOneof(self, oneof_group: typing.Literal["_name", b"_name"]) -> typing.Literal["name"] | None: ...
+    def HasField(self, field_name: typing.Literal["federation", b"federation"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing.Literal["federation", b"federation"]) -> None: ...
 
 global___CreateFederationResponse = CreateFederationResponse
 
@@ -507,17 +507,17 @@ class AddNodeToFederationRequest(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
 
     FEDERATION_NAME_FIELD_NUMBER: builtins.int
-    NODE_ID_FIELD_NUMBER: builtins.int
+    NODE_IDS_FIELD_NUMBER: builtins.int
     federation_name: builtins.str
     @property
-    def node_id(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.int]: ...
+    def node_ids(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.int]: ...
     def __init__(
         self,
         *,
         federation_name: builtins.str = ...,
-        node_id: collections.abc.Iterable[builtins.int] | None = ...,
+        node_ids: collections.abc.Iterable[builtins.int] | None = ...,
     ) -> None: ...
-    def ClearField(self, field_name: typing.Literal["federation_name", b"federation_name", "node_id", b"node_id"]) -> None: ...
+    def ClearField(self, field_name: typing.Literal["federation_name", b"federation_name", "node_ids", b"node_ids"]) -> None: ...
 
 global___AddNodeToFederationRequest = AddNodeToFederationRequest
 
