@@ -111,11 +111,23 @@ class ControlStub:
     ]
     """Create Federation"""
 
+    ArchiveFederation: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.control_pb2.ArchiveFederationRequest,
+        flwr.proto.control_pb2.ArchiveFederationResponse,
+    ]
+    """Archive Federation"""
+
     AddNodeToFederation: grpc.UnaryUnaryMultiCallable[
         flwr.proto.control_pb2.AddNodeToFederationRequest,
         flwr.proto.control_pb2.AddNodeToFederationResponse,
     ]
     """Add SuperNode to Federation"""
+
+    RemoveNodeFromFederation: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.control_pb2.RemoveNodeFromFederationRequest,
+        flwr.proto.control_pb2.RemoveNodeFromFederationResponse,
+    ]
+    """Remove SuperNode from Federation"""
 
 class ControlAsyncStub:
     StartRun: grpc.aio.UnaryUnaryMultiCallable[
@@ -196,11 +208,23 @@ class ControlAsyncStub:
     ]
     """Create Federation"""
 
+    ArchiveFederation: grpc.aio.UnaryUnaryMultiCallable[
+        flwr.proto.control_pb2.ArchiveFederationRequest,
+        flwr.proto.control_pb2.ArchiveFederationResponse,
+    ]
+    """Archive Federation"""
+
     AddNodeToFederation: grpc.aio.UnaryUnaryMultiCallable[
         flwr.proto.control_pb2.AddNodeToFederationRequest,
         flwr.proto.control_pb2.AddNodeToFederationResponse,
     ]
     """Add SuperNode to Federation"""
+
+    RemoveNodeFromFederation: grpc.aio.UnaryUnaryMultiCallable[
+        flwr.proto.control_pb2.RemoveNodeFromFederationRequest,
+        flwr.proto.control_pb2.RemoveNodeFromFederationResponse,
+    ]
+    """Remove SuperNode from Federation"""
 
 class ControlServicer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
@@ -308,11 +332,27 @@ class ControlServicer(metaclass=abc.ABCMeta):
         """Create Federation"""
 
     @abc.abstractmethod
+    def ArchiveFederation(
+        self,
+        request: flwr.proto.control_pb2.ArchiveFederationRequest,
+        context: _ServicerContext,
+    ) -> typing.Union[flwr.proto.control_pb2.ArchiveFederationResponse, collections.abc.Awaitable[flwr.proto.control_pb2.ArchiveFederationResponse]]:
+        """Archive Federation"""
+
+    @abc.abstractmethod
     def AddNodeToFederation(
         self,
         request: flwr.proto.control_pb2.AddNodeToFederationRequest,
         context: _ServicerContext,
     ) -> typing.Union[flwr.proto.control_pb2.AddNodeToFederationResponse, collections.abc.Awaitable[flwr.proto.control_pb2.AddNodeToFederationResponse]]:
         """Add SuperNode to Federation"""
+
+    @abc.abstractmethod
+    def RemoveNodeFromFederation(
+        self,
+        request: flwr.proto.control_pb2.RemoveNodeFromFederationRequest,
+        context: _ServicerContext,
+    ) -> typing.Union[flwr.proto.control_pb2.RemoveNodeFromFederationResponse, collections.abc.Awaitable[flwr.proto.control_pb2.RemoveNodeFromFederationResponse]]:
+        """Remove SuperNode from Federation"""
 
 def add_ControlServicer_to_server(servicer: ControlServicer, server: typing.Union[grpc.Server, grpc.aio.Server]) -> None: ...

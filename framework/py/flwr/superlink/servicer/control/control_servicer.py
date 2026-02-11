@@ -56,6 +56,8 @@ from flwr.proto import control_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     AddNodeToFederationRequest,
     AddNodeToFederationResponse,
+    ArchiveFederationRequest,
+    ArchiveFederationResponse,
     CreateFederationRequest,
     CreateFederationResponse,
     GetAuthTokensRequest,
@@ -72,6 +74,8 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     PullArtifactsResponse,
     RegisterNodeRequest,
     RegisterNodeResponse,
+    RemoveNodeFromFederationRequest,
+    RemoveNodeFromFederationResponse,
     ShowFederationRequest,
     ShowFederationResponse,
     StartRunRequest,
@@ -593,11 +597,27 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
 
         raise NotImplementedError()
 
+    def ArchiveFederation(
+        self, request: ArchiveFederationRequest, context: grpc.ServicerContext
+    ) -> ArchiveFederationResponse:
+        """Archive a Federation."""
+        log(INFO, "ControlServicer.ArchiveFederation")
+
+        raise NotImplementedError()
+
     def AddNodeToFederation(
         self, request: AddNodeToFederationRequest, context: grpc.ServicerContext
     ) -> AddNodeToFederationResponse:
         """Add a node to a Federation."""
         log(INFO, "ControlServicer.AddNodeToFederation")
+
+        raise NotImplementedError()
+
+    def RemoveNodeFromFederation(
+        self, request: RemoveNodeFromFederationRequest, context: grpc.ServicerContext
+    ) -> RemoveNodeFromFederationResponse:
+        """Remove a node from a Federation."""
+        log(INFO, "ControlServicer.RemoveNodeFromFederation")
 
         raise NotImplementedError()
 
