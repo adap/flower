@@ -16,6 +16,7 @@
 
 
 import argparse
+import json
 from logging import DEBUG, ERROR, INFO
 from pathlib import Path
 from queue import Queue
@@ -27,6 +28,7 @@ from flwr.cli.config_utils import get_fab_metadata
 from flwr.cli.install import install_from_fab
 from flwr.cli.utils import get_sha256_hash
 from flwr.common.args import add_args_flwr_app_common
+from flwr.common import ConfigRecord
 from flwr.common.config import (
     get_flwr_dir,
     get_fused_config_from_dir,
@@ -46,6 +48,13 @@ from flwr.common.logger import (
     restore_output,
     start_log_uploader,
     stop_log_uploader,
+)
+from flwr.common.profiling import (
+    ProfileRecorder,
+    clear_active_profiler,
+    clear_profile_publisher,
+    set_active_profiler,
+    set_profile_publisher,
 )
 from flwr.common.serde import (
     context_from_proto,
@@ -141,6 +150,7 @@ def run_serverapp(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
     heartbeat_sender = None
     grid = None
     context = None
+    profile_recorder: ProfileRecorder | None = None
     exit_code = ExitCode.SUCCESS
 
     def on_exit() -> None:
@@ -221,6 +231,29 @@ def run_serverapp(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
         context.run_config = server_app_run_config
         grid.pull_interval = float(server_app_run_config.get("grid.pull-interval", 3.0))
 
+        # Initialize profiler if enabled
+        if context.run_config.get("profile.enabled"):
+            profile_recorder = ProfileRecorder(run_id=run.run_id)
+            set_active_profiler(profile_recorder)
+            last_summary: bytes | None = None
+
+            def _publish(summary: dict[str, object]) -> None:
+                nonlocal last_summary
+                summary_json = json.dumps(summary).encode()
+                if summary_json == last_summary:
+                    return
+                last_summary = summary_json
+                context.state["profile_summary"] = ConfigRecord({"json": summary_json})
+                context.state["profile_live"] = ConfigRecord(
+                    {"enabled": True, "final": False}
+                )
+                out_req = PushAppOutputsRequest(
+                    token=token, run_id=run.run_id, context=context_to_proto(context)
+                )
+                _ = grid._stub.PushAppOutputs(out_req)
+
+            set_profile_publisher(_publish)
+
         log(
             DEBUG,
             "[flwr-serverapp] Will load ServerApp `%s` in %s",
@@ -248,6 +281,16 @@ def run_serverapp(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
         )
 
         # Send resulting context
+        if profile_recorder is not None:
+            summary_json = json.dumps(profile_recorder.summarize()).encode()
+            updated_context.state["profile_summary"] = ConfigRecord(
+                {"json": summary_json}
+            )
+            updated_context.state["profile_live"] = ConfigRecord(
+                {"enabled": True, "final": True}
+            )
+            clear_profile_publisher()
+            clear_active_profiler()
         context_proto = context_to_proto(updated_context)
         log(DEBUG, "[flwr-serverapp] Will push ServerAppOutputs")
         out_req = PushAppOutputsRequest(

@@ -169,6 +169,7 @@ class ClientApp:
             # Inject profiling metric if enabled
             if context.run_config.get("profile.enabled"):
                 duration_ms = (perf_counter() - start) * 1000.0
+                task_name = category if action == DEFAULT_ACTION else f"{category}.{action}"
                 if out_message is not None and not out_message.has_error():
                     record = None
                     if out_message.content is not None:
@@ -181,11 +182,20 @@ class ClientApp:
                             out_message.content["metrics"] = record
                     if record is not None:
                         record["profile.client.total.ms"] = duration_ms
+                        record[f"profile.client.{task_name}.ms"] = duration_ms
                 profiler = get_active_profiler()
                 if profiler is not None:
                     profiler.record(
                         scope="client",
                         task="total",
+                        round=None,
+                        node_id=context.node_id,
+                        duration_ms=duration_ms,
+                        metadata={},
+                    )
+                    profiler.record(
+                        scope="client",
+                        task=task_name,
                         round=None,
                         node_id=context.node_id,
                         duration_ms=duration_ms,

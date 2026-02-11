@@ -296,14 +296,15 @@ class FedAvgStreaming(FedAvg):
                 )
                 if profiler is not None and start_time is not None:
                     duration_ms = (perf_counter() - start_time) * 1000.0
-                    profiler.record(
-                        scope="server",
-                        task="aggregate",
-                        round=current_round,
-                        node_id=None,
-                        duration_ms=duration_ms,
-                        metadata={"mode": "all_at_once"},
-                    )
+                        profiler.record(
+                            scope="server",
+                            task="aggregate",
+                            round=current_round,
+                            node_id=None,
+                            duration_ms=duration_ms,
+                            metadata={"mode": "all_at_once"},
+                        )
+                        publish_profile_summary()
                 after_mb = process.memory_info().rss / (1024**2)
                 log(
                     INFO,

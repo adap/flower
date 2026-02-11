@@ -105,7 +105,16 @@ def profile(
                         if output_format == CliOutputFormat.JSON:
                             Console().print_json(json.dumps(summary))
                         else:
-                            Console().print(_to_table(summary))
+                            entries, network_entries = _split_entries(summary)
+                            Console().print(_render_table(summary, title="Run Profile Summary", entries=entries))
+                            if network_entries:
+                                Console().print(
+                                    _render_table(
+                                        summary,
+                                        title="Network Profile",
+                                        entries=_rename_network_tasks(network_entries),
+                                    )
+                                )
                         if suppress_output:
                             redirect_output(captured_output)
                 return
@@ -140,7 +149,16 @@ def profile(
         if output_format == CliOutputFormat.JSON:
             Console().print_json(json.dumps(summary))
         else:
-            Console().print(_to_table(summary))
+            entries, network_entries = _split_entries(summary)
+            Console().print(_render_table(summary, title="Run Profile Summary", entries=entries))
+            if network_entries:
+                Console().print(
+                    _render_table(
+                        summary,
+                        title="Network Profile",
+                        entries=_rename_network_tasks(network_entries),
+                    )
+                )
     except (typer.Exit, Exception) as err:  # pylint: disable=broad-except
         if suppress_output:
             restore_output()
@@ -161,17 +179,21 @@ def profile(
 
 def _to_table(summary: dict) -> Table:
     """Format the summary to a rich Table."""
-    table = Table(title="Run Profile Summary")
+    return _render_table(summary, title="Run Profile Summary")
+
+
+def _render_table(summary: dict, *, title: str, entries: list[dict] | None = None) -> Table:
+    table = Table(title=title)
     table.add_column("Task", style="white")
-    table.add_column("Scope", style="bright_black")
+    table.add_column("Scope", style="white")
     table.add_column("Round", style="cyan")
     table.add_column("Node", style="magenta")
     table.add_column("Avg (ms)", justify="right")
     table.add_column("Max (ms)", justify="right")
     table.add_column("Count", justify="right")
 
-    entries = summary.get("entries", [])
-    for entry in entries:
+    use_entries = entries if entries is not None else summary.get("entries", [])
+    for entry in use_entries:
         table.add_row(
             str(entry.get("task", "")),
             str(entry.get("scope", "")),
@@ -182,3 +204,31 @@ def _to_table(summary: dict) -> Table:
             str(entry.get("count", 0)),
         )
     return table
+
+
+def _split_entries(summary: dict) -> tuple[list[dict], list[dict]]:
+    entries = summary.get("entries", [])
+    network_tasks = {"network_upstream", "network_downstream", "send_and_receive"}
+    network_entries: list[dict] = []
+    other_entries: list[dict] = []
+    for entry in entries:
+        if entry.get("scope") == "server" and entry.get("task") in network_tasks:
+            network_entries.append(entry)
+        else:
+            other_entries.append(entry)
+    return other_entries, network_entries
+
+
+def _rename_network_tasks(entries: list[dict]) -> list[dict]:
+    renamed: list[dict] = []
+    mapping = {
+        "network_upstream": "upstream",
+        "network_downstream": "downstream",
+        "send_and_receive": "combined",
+    }
+    for entry in entries:
+        task = entry.get("task")
+        if task in mapping:
+            entry = {**entry, "task": mapping[task]}
+        renamed.append(entry)
+    return renamed
