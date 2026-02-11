@@ -105,6 +105,18 @@ class ControlStub:
     ]
     """Show Federation"""
 
+    CreateFederation: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.control_pb2.CreateFederationRequest,
+        flwr.proto.control_pb2.CreateFederationResponse,
+    ]
+    """Create Federation"""
+
+    AddNodeToFederation: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.control_pb2.AddNodeToFederationRequest,
+        flwr.proto.control_pb2.AddNodeToFederationResponse,
+    ]
+    """Add SuperNode to Federation"""
+
 class ControlAsyncStub:
     StartRun: grpc.aio.UnaryUnaryMultiCallable[
         flwr.proto.control_pb2.StartRunRequest,
@@ -177,6 +189,18 @@ class ControlAsyncStub:
         flwr.proto.control_pb2.ShowFederationResponse,
     ]
     """Show Federation"""
+
+    CreateFederation: grpc.aio.UnaryUnaryMultiCallable[
+        flwr.proto.control_pb2.CreateFederationRequest,
+        flwr.proto.control_pb2.CreateFederationResponse,
+    ]
+    """Create Federation"""
+
+    AddNodeToFederation: grpc.aio.UnaryUnaryMultiCallable[
+        flwr.proto.control_pb2.AddNodeToFederationRequest,
+        flwr.proto.control_pb2.AddNodeToFederationResponse,
+    ]
+    """Add SuperNode to Federation"""
 
 class ControlServicer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
@@ -274,5 +298,21 @@ class ControlServicer(metaclass=abc.ABCMeta):
         context: _ServicerContext,
     ) -> typing.Union[flwr.proto.control_pb2.ShowFederationResponse, collections.abc.Awaitable[flwr.proto.control_pb2.ShowFederationResponse]]:
         """Show Federation"""
+
+    @abc.abstractmethod
+    def CreateFederation(
+        self,
+        request: flwr.proto.control_pb2.CreateFederationRequest,
+        context: _ServicerContext,
+    ) -> typing.Union[flwr.proto.control_pb2.CreateFederationResponse, collections.abc.Awaitable[flwr.proto.control_pb2.CreateFederationResponse]]:
+        """Create Federation"""
+
+    @abc.abstractmethod
+    def AddNodeToFederation(
+        self,
+        request: flwr.proto.control_pb2.AddNodeToFederationRequest,
+        context: _ServicerContext,
+    ) -> typing.Union[flwr.proto.control_pb2.AddNodeToFederationResponse, collections.abc.Awaitable[flwr.proto.control_pb2.AddNodeToFederationResponse]]:
+        """Add SuperNode to Federation"""
 
 def add_ControlServicer_to_server(servicer: ControlServicer, server: typing.Union[grpc.Server, grpc.aio.Server]) -> None: ...
