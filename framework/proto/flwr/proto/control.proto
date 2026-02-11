@@ -140,7 +140,7 @@ message CreateFederationRequest {
   string name = 1;
   string description = 2;
 }
-message CreateFederationResponse { optional string name = 1; }
+message CreateFederationResponse { Federation federation = 1; }
 
 message AddNodeToFederationRequest {
   string federation_name = 1;
