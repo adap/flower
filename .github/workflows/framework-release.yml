@@ -33,7 +33,7 @@ jobs:
         GITHUB_REF: ${{ github.ref }}
       working-directory: framework
       run: |
-        # Strip "framework-v" prefix from tag (e.g., framework-v1.27.0 -> 1.27.0)
+        # Strip "framework-v" prefix from tag (e.g., `framework-v1.27.0` -> `1.27.0`)
         tag_name="${GITHUB_REF_NAME#framework-v}"
         echo "flwr-version=$tag_name" >> "$GITHUB_OUTPUT"
 

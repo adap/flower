@@ -27,7 +27,7 @@ jobs:
           wait-interval: 10
       - name: Download wheel
         run: |
-          # Strip "framework-v" prefix from tag (e.g., framework-v1.27.0 -> 1.27.0)
+          # Strip "framework-v" prefix from tag (e.g., `framework-v1.27.0` -> `1.27.0`)
           tag_name="${GITHUB_REF_NAME#framework-v}"
           echo "TAG_NAME=$tag_name" >> "$GITHUB_ENV"
 
@@ -37,7 +37,7 @@ jobs:
           tar_name="flwr-${tag_name}.tar.gz"
           echo "TAR_NAME=$tar_name" >> "$GITHUB_ENV"
 
-          # Derive release branch from tag (e.g., 1.27.0 -> release/framework-1.27)
+          # Derive release branch from tag (e.g., `1.27.0` -> `release/framework-1.27`)
           release_series="${tag_name%.*}"
           branch="release/framework-${release_series}"
 
