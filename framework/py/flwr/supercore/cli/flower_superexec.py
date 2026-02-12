@@ -154,12 +154,13 @@ def _get_plugin_and_stub_class(
     plugin_type: str,
 ) -> tuple[type[ExecPlugin], type[object]]:
     """Get the plugin class and stub class based on the plugin type."""
-    if plugin_type == ExecPluginType.CLIENT_APP:
-        return ClientAppExecPlugin, ClientAppIoStub
-    if plugin_type == ExecPluginType.SERVER_APP:
-        return ServerAppExecPlugin, ServerAppIoStub
-    if plugin_type == ExecPluginType.SIMULATION:
-        return SimulationExecPlugin, SimulationIoStub
+    mapping: dict[str, tuple[type[ExecPlugin], type[object]]] = {
+        ExecPluginType.CLIENT_APP: (ClientAppExecPlugin, ClientAppIoStub),
+        ExecPluginType.SERVER_APP: (ServerAppExecPlugin, ServerAppIoStub),
+        ExecPluginType.SIMULATION: (SimulationExecPlugin, SimulationIoStub),
+    }
+    if plugin_type in mapping:
+        return mapping[plugin_type]
     if ret := get_ee_plugin_and_stub_class(plugin_type):
         return ret  # type: ignore[no-any-return]
     raise ValueError(f"Unknown plugin type: {plugin_type}")
