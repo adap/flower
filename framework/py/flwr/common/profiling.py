@@ -86,6 +86,10 @@ class ProfileRecorder:
                     "sum_ms": 0.0,
                     "min_ms": None,
                     "max_ms": None,
+                    "sum_mem_mb": 0.0,
+                    "min_mem_mb": None,
+                    "max_mem_mb": None,
+                    "mem_count": 0,
                 }
                 stats[key] = stat
             stat["count"] += 1
@@ -100,10 +104,29 @@ class ProfileRecorder:
                 if stat["max_ms"] is None
                 else max(stat["max_ms"], event.duration_ms)
             )
+            if "memory_mb" in event.metadata:
+                mem_val = float(event.metadata["memory_mb"])
+                stat["sum_mem_mb"] += mem_val
+                stat["mem_count"] += 1
+                stat["min_mem_mb"] = (
+                    mem_val
+                    if stat["min_mem_mb"] is None
+                    else min(stat["min_mem_mb"], mem_val)
+                )
+                stat["max_mem_mb"] = (
+                    mem_val
+                    if stat["max_mem_mb"] is None
+                    else max(stat["max_mem_mb"], mem_val)
+                )
 
         entries: list[dict[str, Any]] = []
         for stat in stats.values():
             avg_ms = stat["sum_ms"] / stat["count"] if stat["count"] else 0.0
+            avg_mem = (
+                stat["sum_mem_mb"] / stat["mem_count"]
+                if stat["mem_count"]
+                else None
+            )
             entries.append(
                 {
                     "scope": stat["scope"],
@@ -113,6 +136,10 @@ class ProfileRecorder:
                     "avg_ms": avg_ms,
                     "min_ms": stat["min_ms"] or 0.0,
                     "max_ms": stat["max_ms"] or 0.0,
+                    "avg_mem_mb": avg_mem,
+                    "min_mem_mb": stat["min_mem_mb"],
+                    "max_mem_mb": stat["max_mem_mb"],
+                    "node_id": stat["node_id"],
                 }
             )
 
@@ -227,21 +254,30 @@ def record_profile_metrics_from_messages(messages: Iterable[Message]) -> None:
             continue
         try:
             for metric_record in msg.content.metric_records.values():
+                durations: dict[str, float] = {}
+                mems: dict[str, float] = {}
                 for key, value in metric_record.items():
                     if not key.startswith("profile.client."):
                         continue
-                    if not key.endswith(".ms"):
-                        continue
                     if not isinstance(value, (int, float)):
                         continue
-                    task = key[len("profile.client.") : -3]
+                    if key.endswith(".ms"):
+                        task = key[len("profile.client.") : -3]
+                        durations[task] = float(value)
+                    elif key.endswith(".mem_mb"):
+                        task = key[len("profile.client.") : -7]
+                        mems[task] = float(value)
+                for task, duration in durations.items():
+                    metadata = {}
+                    if task in mems:
+                        metadata["memory_mb"] = mems[task]
                     profiler.record(
                         scope="client",
                         task=task,
                         round=round_id,
                         node_id=msg.metadata.src_node_id,
-                        duration_ms=float(value),
-                        metadata={},
+                        duration_ms=duration,
+                        metadata=metadata,
                     )
         except Exception:
             # Profiling should never break normal control flow

@@ -31,6 +31,11 @@ from flwr.common.profiling import (
     publish_profile_summary,
     record_profile_metrics_from_messages,
 )
+
+try:
+    import psutil  # type: ignore
+except Exception:  # pragma: no cover - optional dependency
+    psutil = None
 from flwr.common.constant import (
     SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
     SUPERLINK_NODE_ID,
@@ -397,6 +402,11 @@ class GrpcGrid(Grid):
         """
         profiler = get_active_profiler()
         start = perf_counter() if profiler is not None else None
+        mem_mb = (
+            psutil.Process().memory_info().rss / (1024**2)
+            if psutil is not None
+            else None
+        )
 
         # Push messages
         push_start = perf_counter() if profiler is not None else None
@@ -408,7 +418,10 @@ class GrpcGrid(Grid):
                 round=get_current_round(),
                 node_id=None,
                 duration_ms=(perf_counter() - push_start) * 1000.0,
-                metadata={"expected_replies": len(msg_ids)},
+                metadata={
+                    "expected_replies": len(msg_ids),
+                    "memory_mb": mem_mb,
+                },
             )
         del messages
         expected_replies = len(msg_ids)
@@ -437,7 +450,7 @@ class GrpcGrid(Grid):
                 round=get_current_round(),
                 node_id=None,
                 duration_ms=(perf_counter() - pull_start) * 1000.0,
-                metadata={"received": len(ret)},
+                metadata={"received": len(ret), "memory_mb": mem_mb},
             )
         if profiler is not None and start is not None:
             duration_ms = (perf_counter() - start) * 1000.0
@@ -447,7 +460,7 @@ class GrpcGrid(Grid):
                 round=get_current_round(),
                 node_id=None,
                 duration_ms=duration_ms,
-                metadata={"expected_replies": expected_replies},
+                metadata={"expected_replies": expected_replies, "memory_mb": mem_mb},
             )
             publish_profile_summary()
 

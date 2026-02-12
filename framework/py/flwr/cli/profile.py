@@ -190,17 +190,26 @@ def _render_table(summary: dict, *, title: str, entries: list[dict] | None = Non
     table.add_column("Node", style="magenta")
     table.add_column("Avg (ms)", justify="right")
     table.add_column("Max (ms)", justify="right")
+    table.add_column("Avg Mem (MB)", justify="right")
+    table.add_column("Max Mem (MB)", justify="right")
     table.add_column("Count", justify="right")
 
     use_entries = entries if entries is not None else summary.get("entries", [])
     for entry in use_entries:
+        node_val = entry.get("node_id")
+        if node_val is None and entry.get("scope") == "server":
+            node_val = "server"
+        avg_mem = entry.get("avg_mem_mb")
+        max_mem = entry.get("max_mem_mb")
         table.add_row(
             str(entry.get("task", "")),
             str(entry.get("scope", "")),
             str(entry.get("round", "N/A")),
-            str(entry.get("node_id", "N/A")),
+            str(node_val if node_val is not None else "N/A"),
             f"{entry.get('avg_ms', 0.0):.2f}",
             f"{entry.get('max_ms', 0.0):.2f}",
+            f"{avg_mem:.2f}" if isinstance(avg_mem, (int, float)) else "-",
+            f"{max_mem:.2f}" if isinstance(max_mem, (int, float)) else "-",
             str(entry.get("count", 0)),
         )
     return table
@@ -212,6 +221,8 @@ def _split_entries(summary: dict) -> tuple[list[dict], list[dict]]:
     network_entries: list[dict] = []
     other_entries: list[dict] = []
     for entry in entries:
+        if entry.get("scope") == "client" and entry.get("task") == "total":
+            continue
         if entry.get("scope") == "server" and entry.get("task") in network_tasks:
             network_entries.append(entry)
         else:

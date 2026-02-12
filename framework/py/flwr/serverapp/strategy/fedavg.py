@@ -29,6 +29,11 @@ from flwr.common import (
     log,
 )
 from flwr.common.profiling import get_active_profiler, publish_profile_summary
+
+try:
+    import psutil  # type: ignore
+except Exception:  # pragma: no cover - optional dependency
+    psutil = None
 from flwr.server import Grid
 
 from .strategy import Strategy
@@ -263,6 +268,11 @@ class FedAvg(Strategy):
             # Aggregate ArrayRecords
             profiler = get_active_profiler()
             start = time.perf_counter() if profiler is not None else None
+            mem_mb = (
+                psutil.Process().memory_info().rss / (1024**2)
+                if psutil is not None
+                else None
+            )
             arrays = aggregate_arrayrecords(
                 reply_contents,
                 self.weighted_by_key,
@@ -275,7 +285,7 @@ class FedAvg(Strategy):
                     round=server_round,
                     node_id=None,
                     duration_ms=duration_ms,
-                    metadata={"num_replies": len(valid_replies)},
+                    metadata={"num_replies": len(valid_replies), "memory_mb": mem_mb},
                 )
                 publish_profile_summary()
 

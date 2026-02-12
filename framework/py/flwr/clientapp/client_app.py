@@ -20,6 +20,11 @@ from time import perf_counter
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 
+try:
+    import psutil  # type: ignore
+except Exception:  # pragma: no cover - optional dependency
+    psutil = None
+
 from flwr.app.metadata import validate_message_type
 from flwr.client.client import Client
 from flwr.client.message_handler.message_handler import (
@@ -169,7 +174,12 @@ class ClientApp:
             # Inject profiling metric if enabled
             if context.run_config.get("profile.enabled"):
                 duration_ms = (perf_counter() - start) * 1000.0
-                task_name = category if action == DEFAULT_ACTION else f"{category}.{action}"
+                task_name = (
+                    category if action == DEFAULT_ACTION else f"{category}.{action}"
+                )
+                mem_mb = None
+                if psutil is not None:
+                    mem_mb = psutil.Process().memory_info().rss / (1024**2)
                 if out_message is not None and not out_message.has_error():
                     record = None
                     if out_message.content is not None:
@@ -183,6 +193,9 @@ class ClientApp:
                     if record is not None:
                         record["profile.client.total.ms"] = duration_ms
                         record[f"profile.client.{task_name}.ms"] = duration_ms
+                        if mem_mb is not None:
+                            record["profile.client.total.mem_mb"] = mem_mb
+                            record[f"profile.client.{task_name}.mem_mb"] = mem_mb
                 profiler = get_active_profiler()
                 if profiler is not None:
                     profiler.record(
@@ -191,7 +204,7 @@ class ClientApp:
                         round=None,
                         node_id=context.node_id,
                         duration_ms=duration_ms,
-                        metadata={},
+                        metadata={"memory_mb": mem_mb} if mem_mb is not None else {},
                     )
                     profiler.record(
                         scope="client",
@@ -199,7 +212,7 @@ class ClientApp:
                         round=None,
                         node_id=context.node_id,
                         duration_ms=duration_ms,
-                        metadata={},
+                        metadata={"memory_mb": mem_mb} if mem_mb is not None else {},
                     )
 
             return out_message

@@ -30,6 +30,7 @@ fraction-evaluate = 0.5
 local-epochs = 1
 learning-rate = 0.1
 batch-size = 32
+profile.enabled = false
 
 [tool.flwr.federations]
 default = "local-simulation"
@@ -41,3 +42,7 @@ options.num-supernodes = 10
 options.num-supernodes = 10
 options.backend.client-resources.num-cpus = 2 # each ClientApp assumes to use 2CPUs
 options.backend.client-resources.num-gpus = 0.2 # at most 5 ClientApp will run in a given GPU
+
+[tool.flwr.federations.local-deployment]
+insecure=true
+address="0.0.0.0:9093"
