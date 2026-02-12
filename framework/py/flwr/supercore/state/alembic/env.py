@@ -21,12 +21,12 @@ from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
+from flwr.supercore.state.alembic.utils import get_combined_metadata
+
 try:
     importlib.import_module("flwr.ee.state.alembic")
 except ImportError:
     pass
-
-from flwr.supercore.state.alembic.utils import get_combined_metadata
 
 # Alembic Config object
 config = context.config  # pylint: disable=no-member
