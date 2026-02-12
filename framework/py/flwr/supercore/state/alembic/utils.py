@@ -54,7 +54,9 @@ def register_metadata_provider(provider: MetadataProvider) -> None:
         A callable that returns a SQLAlchemy MetaData object containing
         table definitions to be included in migrations.
     """
-    _metadata_providers.append(provider)
+    # Avoid duplicate registration to keep the registry idempotent
+    if provider not in _metadata_providers:
+        _metadata_providers.append(provider)
 
 
 def get_combined_metadata() -> MetaData:
