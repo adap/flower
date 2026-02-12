@@ -55,13 +55,13 @@ update.
 
 - Clients A, B and C have the following updates:
 
-  .. math::
+.. math::
 
-      u_A = [2,\; 5]
+    u_A = [2,\; 5]
 
-      u_B = [4,\; 1]
+    u_B = [4,\; 1]
 
-      u_C = [3,\; 2]
+    u_C = [3,\; 2]
 
 - So the correct aggregate sum is:
 
@@ -80,13 +80,13 @@ key exchange <https://en.wikipedia.org/wiki/Diffie%E2%80%93Hellman_key_exchange>
 Each noise vector is associated with an ordered pair of the two clients that share it
 (client order determined beforehand):
 
-    .. math::
+.. math::
 
-        \text{noise}_{AB} = [7,\; 9]
+    \text{noise}_{AB} = [7,\; 9]
 
-        \text{noise}_{AC} = [8,\; 6]
+    \text{noise}_{AC} = [8,\; 6]
 
-        \text{noise}_{BC} = [5,\; 4]
+    \text{noise}_{BC} = [5,\; 4]
 
 Each client builds a mask from the shared noise
 ===============================================
@@ -95,22 +95,22 @@ Then, each client constructs a mask by adding or subtracting each of its shared 
 vectors. The clients know whether to add or subtract a given noise vector based on if
 they are the first or second client in the ordered pair:
 
-    .. math::
+.. math::
 
-        \text{mask}_A
-        = +\text{noise}_{AB} + \text{noise}_{AC}
-        = [7,\; 9] + [8,\; 6]
-        = [15,\; 15]
+    \text{mask}_A
+    = +\text{noise}_{AB} + \text{noise}_{AC}
+    = [7,\; 9] + [8,\; 6]
+    = [15,\; 15]
 
-        \text{mask}_B
-        = -\text{noise}_{AB} + \text{noise}_{BC}
-        = [-7,\; -9] + [5,\; 4]
-        = [-2,\; -5]
+    \text{mask}_B
+    = -\text{noise}_{AB} + \text{noise}_{BC}
+    = [-7,\; -9] + [5,\; 4]
+    = [-2,\; -5]
 
-        \text{mask}_C
-        = -\text{noise}_{AC} - \text{noise}_{BC}
-        = [-8,\; -6] + [-5,\; -4]
-        = [-13,\; -10]
+    \text{mask}_C
+    = -\text{noise}_{AC} - \text{noise}_{BC}
+    = [-8,\; -6] + [-5,\; -4]
+    = [-13,\; -10]
 
 Clients send masked updates to the server
 =========================================
