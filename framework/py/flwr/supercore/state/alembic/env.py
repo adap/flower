@@ -15,13 +15,14 @@
 """Alembic environment configuration for State migrations."""
 
 
+import importlib
 from logging.config import fileConfig
 
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
 try:
-    import flwr.ee.state.alembic  # noqa: F401
+    importlib.import_module("flwr.ee.state.alembic")
 except ImportError:
     pass
 
