@@ -23,15 +23,17 @@ from unittest.mock import patch
 from alembic.autogenerate import compare_metadata
 from alembic.runtime.migration import MigrationContext
 from alembic.script import ScriptDirectory
-from sqlalchemy import create_engine, inspect
+from sqlalchemy import Column, Integer, MetaData, String, Table, create_engine, inspect
 from sqlalchemy.engine import Engine
 
 from flwr.common.exit import ExitCode
 from flwr.supercore.state.alembic.utils import (
     ALEMBIC_VERSION_TABLE,
     _get_baseline_metadata,
+    _metadata_providers,
     build_alembic_config,
     get_combined_metadata,
+    register_metadata_provider,
     run_migrations,
 )
 
@@ -240,3 +242,68 @@ def check_migrations_pending(engine: Engine) -> bool:
     if current is None:
         return True
     return current not in heads
+
+
+class TestMetadataProviderRegistry(unittest.TestCase):
+    """Test external metadata provider registration and collision detection."""
+
+    def setUp(self) -> None:
+        """Save the current state of the metadata providers registry."""
+        self.original_providers = _metadata_providers.copy()
+
+    def tearDown(self) -> None:
+        """Restore the metadata providers registry to its original state."""
+        _metadata_providers.clear()
+        _metadata_providers.extend(self.original_providers)
+
+    def test_external_provider_table_is_included_in_combined_metadata(self) -> None:
+        """Ensure external provider tables are included in combined metadata."""
+
+        # Prepare: Define a mock external metadata provider with a unique table
+        def mock_external_provider() -> MetaData:
+            metadata = MetaData()
+            Table(
+                "external_custom_table",
+                metadata,
+                Column("id", Integer, primary_key=True),
+                Column("name", String),
+            )
+            return metadata
+
+        # Execute: Register the provider
+        register_metadata_provider(mock_external_provider)
+
+        # Assert: The external table should be in the combined metadata
+        combined = get_combined_metadata()
+        self.assertIn("external_custom_table", combined.tables)
+        # Verify the table has expected columns
+        table = combined.tables["external_custom_table"]
+        column_names = {col.name for col in table.columns}
+        self.assertEqual(column_names, {"id", "name"})
+
+    def test_external_provider_collision_raises_error(self) -> None:
+        """Ensure table name collisions from external providers raise ValueError."""
+
+        # Prepare: Define a mock provider that collides with existing 'node' table
+        # (node is defined in linkstate_tables.py)
+        def mock_colliding_provider() -> MetaData:
+            metadata = MetaData()
+            Table(
+                "node",  # This table already exists in linkstate_tables
+                metadata,
+                Column("id", Integer, primary_key=True),
+            )
+            return metadata
+
+        # Execute: Register the colliding provider
+        register_metadata_provider(mock_colliding_provider)
+
+        # Assert: Getting combined metadata should raise ValueError
+        with self.assertRaises(ValueError) as context:
+            get_combined_metadata()
+
+        # Verify error message identifies the collision
+        error_msg = str(context.exception)
+        self.assertIn("node", error_msg)
+        self.assertIn("collision", error_msg.lower())
+        self.assertIn("mock_colliding_provider", error_msg)

@@ -87,6 +87,13 @@ def get_combined_metadata() -> MetaData:
     for provider in _metadata_providers:
         extra_metadata = provider()
         for table in extra_metadata.tables.values():
+            if table.name in metadata.tables:
+                raise ValueError(
+                    f"Table name collision: '{table.name}' from provider "
+                    f"'{provider.__module__}.{provider.__qualname__}' "
+                    f"conflicts with an existing table. External providers"
+                    "must use unique table names."
+                )
             table.to_metadata(metadata)
 
     return metadata
