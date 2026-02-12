@@ -27,8 +27,8 @@ from git import Repo
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
 
-# Fixing path issue for autodoc
-sys.path.insert(0, os.path.abspath("../../src/py"))
+# Fixing path issue for autodoc, in case `flwr` project is not installed.
+sys.path.insert(0, os.path.abspath("../../py"))
 
 # -- Versioning switcher -----------------------------------------------------
 

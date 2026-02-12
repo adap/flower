@@ -13,11 +13,12 @@
 # limitations under the License.
 # ==============================================================================
 
+
 import os
 import sys
 
+# Add current directory to sys.path to import conf_base.py
 sys.path.insert(0, os.path.dirname(__file__))
-
 from conf_base import *  # noqa: F403
 
 # The full version of the next release, including alpha/beta/rc tags
@@ -33,3 +34,13 @@ rst_prolog = """
 .. |python_version| replace:: 3.10
 .. |python_full_version| replace:: 3.10.19
 """
+
+# Sphinx redirects, implemented after the doc filename changes.
+# To prevent 404 errors and redirect to the new pages.
+redirects = {
+    **redirects,  # Keep existing redirects from conf_base.py
+    # Renamed pages
+    "how-to-authenticate-users": "how-to-authenticate-accounts.html",
+    # Restructuring: contributor references
+    "secagg": "explanation-ref-secure-aggregation-protocols.html",
+}
