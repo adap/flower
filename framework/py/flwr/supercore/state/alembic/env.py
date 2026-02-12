@@ -20,6 +20,11 @@ from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
+try:
+    import flwr.ee.state.alembic  # noqa: F401
+except ImportError:
+    pass
+
 from flwr.supercore.state.alembic.utils import get_combined_metadata
 
 # Alembic Config object
