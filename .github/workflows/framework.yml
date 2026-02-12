@@ -4,11 +4,11 @@ on:
   push:
     branches:
       - main
-      - 'release/framework/*'
+      - 'release/framework-*'
   pull_request:
     branches:
       - main
-      - 'release/framework/*'
+      - 'release/framework-*'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.run_id || github.event.pull_request.number || github.ref }}
