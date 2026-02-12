@@ -83,7 +83,7 @@ def get_combined_metadata() -> MetaData:
     for table in objectstore_metadata.tables.values():
         table.to_metadata(metadata)
 
-    # Add tables from registered external providers (e.g., Flower EE)
+    # Add tables from registered external providers
     for provider in _metadata_providers:
         extra_metadata = provider()
         for table in extra_metadata.tables.values():
