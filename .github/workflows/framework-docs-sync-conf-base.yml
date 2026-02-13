@@ -1,0 +1,35 @@
+name: Framework Docs - Sync conf_base.py
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - framework/docs/source/conf_base.py
+  workflow_dispatch:
+
+env:
+  FLWR_TELEMETRY_ENABLED: 0
+
+jobs:
+  trigger_release_builds:
+    runs-on: ubuntu-22.04
+    name: Trigger docs rebuild on all release branches
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Get all release branches
+        id: get_branches
+        run: |
+          branches=$(git branch -r | grep 'origin/release/framework-' | sed 's|origin/||' | tr '\n' ' ')
+          echo "branches=${branches}" >> "$GITHUB_OUTPUT"
+          echo "Found release branches: ${branches}"
+      - name: Trigger workflow on each release branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for branch in ${{ steps.get_branches.outputs.branches }}; do
+            echo "Triggering workflow on branch: ${branch}"
+            gh workflow run framework-docs.yml --ref "${branch}"
+          done

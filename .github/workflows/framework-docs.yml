@@ -1,0 +1,77 @@
+name: Framework Docs
+
+on:
+  push:
+    branches:
+      - main
+      - release/framework-*
+    paths:
+      - framework/docs/**
+  pull_request:
+    branches:
+      - main
+      - release/framework-*
+    paths:
+      - framework/docs/**
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.run_id || github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLWR_TELEMETRY_ENABLED: 0
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-22.04
+    name: Build and deploy framework docs
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Check copyright line
+        run: ./dev/test-copyright.sh
+      - name: Bootstrap
+        uses: ./.github/actions/bootstrap
+      - name: Install pandoc
+        run: sudo apt install pandoc
+      - name: Install Flower Framework
+        run: |
+          cd framework
+          python -m poetry install
+      - name: Use conf_base.py from main for release branches
+        if: ${{ startsWith(github.ref, 'refs/heads/release/framework-') }}
+        run: |
+          echo "Using conf_base.py from main branch for release branch"
+          git fetch origin main
+          git checkout origin/main -- framework/docs/source/conf_base.py
+      - name: Resolve docs version
+        id: doc_version
+        shell: bash
+        run: |
+          ref="${GITHUB_REF#refs/heads/}"
+          if [ "$ref" = "main" ]; then
+            echo "version=main" >> "$GITHUB_OUTPUT"
+          elif [[ "$ref" =~ ^release/framework-([0-9]+)\.([0-9]+)$ ]]; then
+            echo "version=v${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.x" >> "$GITHUB_OUTPUT"
+          else
+            echo "Unsupported branch: $ref" >&2
+            exit 1
+          fi
+      - name: Build docs
+        env:
+          DOC_VERSION: ${{ steps.doc_version.outputs.version }}
+        run: |
+          echo "Building docs for version: ${DOC_VERSION}"
+          ./framework/docs/build-single-version-docs.sh
+      - name: Deploy docs
+        if: ${{ github.event_name == 'push' && github.repository == 'adap/flower' }}
+        env:
+          AWS_DEFAULT_REGION: ${{ secrets.DOCS_AWS_DEFAULT_REGION }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.DOCS_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.DOCS_AWS_SECRET_KEY_ID }}
+          DOC_VERSION: ${{ steps.doc_version.outputs.version }}
+        run: |
+          echo "Deploying docs for version: ${DOC_VERSION}"
+          aws s3 sync --delete --exclude ".*" --cache-control "no-cache" ./framework/docs/build/html/${DOC_VERSION}/ s3://${{ secrets.DOCS_AWS_BUCKET_NAME }}/docs/framework/${DOC_VERSION}
