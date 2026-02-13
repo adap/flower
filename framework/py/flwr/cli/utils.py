@@ -287,12 +287,32 @@ def load_cli_auth_plugin_from_connection(
         ) from None
 
 
+def get_executed_command() -> str:
+    """Get the full command path from the current Click context.
+
+    Traverses up the Click context hierarchy to build the complete command path.
+
+    Returns
+    -------
+    str
+        The full command path including the "flwr" prefix.
+    """
+    ctx: click.Context | None = click.get_current_context()
+    cmd_parts = []
+    while ctx is not None:
+        if ctx.info_name:
+            cmd_parts.append(ctx.info_name)
+        ctx = ctx.parent
+    cmd_parts.reverse()
+    return " ".join(cmd_parts)
+
+
 def require_superlink_address(connection: SuperLinkConnection) -> str:
     """Return the SuperLink address or exit if it is not configured."""
     if connection.address is None:
-        cmd = click.get_current_context().command.name
+        cmd = get_executed_command()
         raise click.ClickException(
-            f"`flwr {cmd}` currently works with a SuperLink. Ensure that the "
+            f"`{cmd}` currently works with a SuperLink. Ensure that the "
             "correct SuperLink (Control API) address is provided SuperLink connection "
             "you are using. Check your Flower configuration file. You may use `flwr "
             "config list` to see its location in the file system."
