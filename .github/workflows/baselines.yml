@@ -78,7 +78,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: baselines/${{ matrix.baseline }}
-        run: pip install ."[dev]"
+        run: poetry install
 
       - name: Testing ${{ matrix.baseline }}
         working-directory: baselines

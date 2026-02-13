@@ -1,6 +1,6 @@
 [build-system]
-requires = ["poetry-core>=1.4.0"]
-build-backend = "poetry.masonry.api"
+requires = ["poetry-core>=2.2.1"]
+build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "hfedxgboost" # <----- Ensure it matches the name of your baseline directory containing all the source code
@@ -22,10 +22,7 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: Implementation :: CPython",
     "Topic :: Scientific/Engineering",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
@@ -48,7 +45,7 @@ tqdm = "4.66.3"
 torchvision = "0.23.0"
 wandb = "0.15.12"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 isort = "==5.13.2"
 black = "==24.2.0"
 docformatter = "==1.7.5"
