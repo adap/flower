@@ -363,17 +363,6 @@ html_sidebars = {
 
 nbsphinx_execute = "never"
 
-_open_in_colab_button = """
-.. raw:: html
-
-    <br/>
-    <a href="https://colab.research.google.com/github/adap/flower/blob/main/framework/docs/source/{{ env.doc2path(env.docname, base=None) }}">
-        <img alt="Open in Colab" src="https://colab.research.google.com/assets/colab-badge.svg"/>
-    </a>
-"""
-nbsphinx_prolog = _open_in_colab_button
-nbsphinx_epilog = _open_in_colab_button
-
 # -- Options for sphinxcontrib-mermaid -------------------------------------
 # Don't load it automatically through the extension as we are loading it through the
 # theme (see base.html) as the inclusion of require.js by the extension `nbsphinx`
