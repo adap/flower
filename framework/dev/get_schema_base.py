@@ -41,8 +41,8 @@ for md in (linkstate_metadata, corestate_metadata, objectstore_metadata):
 
 # Include EE tables if available
 try:
-    ee_tables = importlib.import_module("flwr.ee.state.alembic.tables")
-    ee_metadata = ee_tables.create_ee_metadata()
+    from flwr.ee.state.alembic.tables import create_ee_metadata
+    ee_metadata = create_ee_metadata()
     for table in ee_metadata.tables.values():
         table.tometadata(combined_metadata)
 except ImportError:
