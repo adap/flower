@@ -19,6 +19,8 @@ import os
 import sys
 
 from git import Repo
+from packaging.version import InvalidVersion, Version
+
 
 # Configuration file for the Sphinx documentation builder.
 #
@@ -32,6 +34,13 @@ sys.path.insert(0, os.path.abspath("../../py"))
 
 # -- Versioning switcher -----------------------------------------------------
 
+# The minimum version to be included in the version switcher
+MIN_VERSION = Version("1.8.0")
+
+# Starting from this version, we will use the minor version label (e.g. v1.21.x) instead
+# of the full version (e.g. v1.21.0) in the version switcher dropdown in the docs.
+MINOR_LABEL_FROM = Version("1.21.0")
+
 html_context = dict()
 
 # Make current language accessible for the html templates
@@ -40,6 +49,16 @@ if "current_language" in os.environ:
 else:
     current_language = "en"
 html_context["current_language"] = current_language
+
+
+def _display_version(version: str) -> str:
+    try:
+        if (ver := Version(version)) >= MINOR_LABEL_FROM:
+            return f"v{ver.release[0]}.{ver.release[1]}.x"
+    except InvalidVersion:
+        pass
+    return version
+
 
 # Make current version accessible for the html templates
 repo = Repo(search_parent_directories=True)
@@ -54,30 +73,33 @@ else:
 
 # Format current version for the html templates
 html_context["current_version"] = {}
-html_context["current_version"]["url"] = current_version
-html_context["current_version"]["full_name"] = (
-    "main"
-    if current_version == "main"
-    else f"{'' if local else 'Flower Framework '}{current_version}"
-)
+display_version = _display_version(current_version)
+html_context["current_version"]["url"] = display_version
+html_context["current_version"]["full_name"] = display_version
 
 # Make version list accessible for the html templates
-html_context["versions"] = list()
-versions = sorted(
-    [
-        tag.name
-        for tag in repo.tags
-        if not tag.name.startswith("intelligence/")
-        and tag.name[0] == "v"
-        and int(tag.name[1]) > 0
-        and int(tag.name.split(".")[1]) >= 8
-    ],
-    key=lambda x: [int(part) for part in x[1:].split(".")],
-    reverse=True,  # Latest version tags first
-)
-versions.insert(0, "main")  # Ensure "main" appears first
-for version in versions:
-    html_context["versions"].append({"name": version})
+html_context["versions"] = [{"name": "main"}]  # Ensure "main" appears first
+versions: list[Version] = []
+for tag in repo.tags:
+    # Filter framework tags (starting with `v`/`framework-v`)
+    if tag.name.startswith("framework-v") or tag.name.startswith("v"):
+        ver = Version(tag.name.split("v")[-1])
+        if ver < MIN_VERSION:
+            continue
+        versions.append(ver)
+versions.sort(reverse=True)  # Latest version tags first
+
+added_version_names: set[str] = {"main"}
+for ver in versions:
+    # Get display name
+    if ver >= MINOR_LABEL_FROM:
+        name = f"v{ver.release[0]}.{ver.release[1]}.x"
+    else:
+        name = f"v{ver}"
+    # Add to versions list if not already added
+    if name not in added_version_names:
+        html_context["versions"].append({"name": name})
+        added_version_names.add(name)
 
 
 # -- Translation options -----------------------------------------------------
