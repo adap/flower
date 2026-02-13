@@ -44,8 +44,9 @@ jobs:
         if: ${{ startsWith(github.ref, 'refs/heads/release/framework-') }}
         run: |
           echo "Using conf_base.py from main branch for release branch"
-          git fetch origin main
-          git checkout origin/main -- framework/docs/source/conf_base.py
+          echo "Skipped for debugging."
+          # git fetch origin main
+          # git checkout origin/main -- framework/docs/source/conf_base.py
       - name: Resolve docs version
         id: doc_version
         shell: bash
