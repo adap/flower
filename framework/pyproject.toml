@@ -153,6 +153,7 @@ devtool = [{ path = "./devtool", develop = true }]
 [tool.docstrfmt]
 extend_exclude = [
     "docs/source/conf.py",
+    "docs/source/conf_base.py",
     "docs/source/tutorial-quickstart-huggingface.rst",
     "docs/source/_templates/autosummary/*",
     "docs/source/ref-api/*",
