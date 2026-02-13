@@ -178,7 +178,9 @@ class UpdateRunStatusRequest(google.protobuf.message.Message):
 
     RUN_ID_FIELD_NUMBER: builtins.int
     RUN_STATUS_FIELD_NUMBER: builtins.int
+    TOKEN_FIELD_NUMBER: builtins.int
     run_id: builtins.int
+    token: builtins.str
     @property
     def run_status(self) -> global___RunStatus: ...
     def __init__(
@@ -186,9 +188,10 @@ class UpdateRunStatusRequest(google.protobuf.message.Message):
         *,
         run_id: builtins.int = ...,
         run_status: global___RunStatus | None = ...,
+        token: builtins.str = ...,
     ) -> None: ...
     def HasField(self, field_name: typing.Literal["run_status", b"run_status"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["run_id", b"run_id", "run_status", b"run_status"]) -> None: ...
+    def ClearField(self, field_name: typing.Literal["run_id", b"run_id", "run_status", b"run_status", "token", b"token"]) -> None: ...
 
 global___UpdateRunStatusRequest = UpdateRunStatusRequest
 

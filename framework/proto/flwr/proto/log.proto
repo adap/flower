@@ -23,5 +23,6 @@ message PushLogsRequest {
   Node node = 1;
   uint64 run_id = 2;
   repeated string logs = 3;
+  string token = 4;
 }
 message PushLogsResponse {}

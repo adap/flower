@@ -34,7 +34,9 @@ class PushLogsRequest(google.protobuf.message.Message):
     NODE_FIELD_NUMBER: builtins.int
     RUN_ID_FIELD_NUMBER: builtins.int
     LOGS_FIELD_NUMBER: builtins.int
+    TOKEN_FIELD_NUMBER: builtins.int
     run_id: builtins.int
+    token: builtins.str
     @property
     def node(self) -> flwr.proto.node_pb2.Node: ...
     @property
@@ -45,9 +47,10 @@ class PushLogsRequest(google.protobuf.message.Message):
         node: flwr.proto.node_pb2.Node | None = ...,
         run_id: builtins.int = ...,
         logs: collections.abc.Iterable[builtins.str] | None = ...,
+        token: builtins.str = ...,
     ) -> None: ...
     def HasField(self, field_name: typing.Literal["node", b"node"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["logs", b"logs", "node", b"node", "run_id", b"run_id"]) -> None: ...
+    def ClearField(self, field_name: typing.Literal["logs", b"logs", "node", b"node", "run_id", b"run_id", "token", b"token"]) -> None: ...
 
 global___PushLogsRequest = PushLogsRequest
 

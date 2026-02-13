@@ -34,13 +34,16 @@ class GetNodesRequest(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
 
     RUN_ID_FIELD_NUMBER: builtins.int
+    TOKEN_FIELD_NUMBER: builtins.int
     run_id: builtins.int
+    token: builtins.str
     def __init__(
         self,
         *,
         run_id: builtins.int = ...,
+        token: builtins.str = ...,
     ) -> None: ...
-    def ClearField(self, field_name: typing.Literal["run_id", b"run_id"]) -> None: ...
+    def ClearField(self, field_name: typing.Literal["run_id", b"run_id", "token", b"token"]) -> None: ...
 
 global___GetNodesRequest = GetNodesRequest
 
