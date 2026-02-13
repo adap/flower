@@ -62,6 +62,10 @@ from flwr.proto.message_pb2 import (  # pylint: disable=E0611
     ConfirmMessageReceivedRequest,
     ConfirmMessageReceivedResponse,
 )
+from flwr.proto.log_pb2 import (  # pylint: disable=E0611
+    PushLogsRequest,
+    PushLogsResponse,
+)
 from flwr.proto.message_pb2 import Message as ProtoMessage  # pylint: disable=E0611
 from flwr.proto.message_pb2 import (  # pylint: disable=E0611
     ObjectTree,
@@ -197,6 +201,11 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
             "/flwr.proto.ServerAppIo/UpdateRunStatus",
             request_serializer=UpdateRunStatusRequest.SerializeToString,
             response_deserializer=UpdateRunStatusResponse.FromString,
+        )
+        self._push_logs = self._channel.unary_unary(
+            "/flwr.proto.ServerAppIo/PushLogs",
+            request_serializer=PushLogsRequest.SerializeToString,
+            response_deserializer=PushLogsResponse.FromString,
         )
         self._send_app_heartbeat = self._channel.unary_unary(
             "/flwr.proto.ServerAppIo/SendAppHeartbeat",
@@ -633,6 +642,54 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
             self._push_serverapp_outputs.with_call(request=request)
         assert e.exception.code() == grpc.StatusCode.PERMISSION_DENIED
         assert e.exception.details() == "Invalid token for run ID."
+
+    def test_push_serverapp_outputs_keeps_token_until_run_finishes(self) -> None:
+        """Test token remains valid after `PushAppOutputs` until terminal status."""
+        # Prepare
+        run_id = self._create_dummy_run(running=False)
+        token = self.state.create_token(run_id)
+        assert token is not None
+        self._transition_run_status(run_id, 2)  # pending -> starting -> running
+
+        maker = RecordMaker()
+        context = Context(
+            run_id=run_id,
+            node_id=0,
+            node_config=maker.user_config(),
+            state=maker.recorddict(1, 1, 1),
+            run_config=maker.user_config(),
+        )
+
+        # Push outputs (token must remain valid for final shutdown RPCs)
+        outputs_req = PushAppOutputsRequest(
+            token=token, run_id=run_id, context=context_to_proto(context)
+        )
+        _, outputs_call = self._push_serverapp_outputs.with_call(request=outputs_req)
+        assert grpc.StatusCode.OK == outputs_call.code()
+
+        # Push final logs with same token
+        logs_req = PushLogsRequest(
+            node=Node(node_id=0), run_id=run_id, logs=["x"], token=token
+        )
+        _, logs_call = self._push_logs.with_call(request=logs_req)
+        assert grpc.StatusCode.OK == logs_call.code()
+
+        # Finish run with same token
+        status_req = UpdateRunStatusRequest(
+            run_id=run_id,
+            run_status=run_status_to_proto(
+                RunStatus(Status.FINISHED, SubStatus.COMPLETED, "")
+            ),
+            token=token,
+        )
+        _, status_call = self._update_run_status.with_call(request=status_req)
+        assert grpc.StatusCode.OK == status_call.code()
+
+        # Token should be invalid after terminal status
+        with self.assertRaises(grpc.RpcError) as e:
+            self._push_logs.with_call(request=logs_req)
+        assert e.exception.code() == grpc.StatusCode.PERMISSION_DENIED
+        assert e.exception.details() == "Invalid token."
 
     def _assert_push_serverapp_outputs_not_allowed(
         self, token: str, context: Context

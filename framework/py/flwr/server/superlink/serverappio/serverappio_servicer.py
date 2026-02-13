@@ -384,9 +384,6 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         )
 
         state.set_serverapp_context(request.run_id, context_from_proto(request.context))
-
-        # Remove the token
-        state.delete_token(run_id)
         return PushAppOutputsResponse()
 
     def UpdateRunStatus(
@@ -410,6 +407,9 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
 
         # If the run is finished, delete the run from ObjectStore
         if request.run_status.status == Status.FINISHED:
+            # Invalidate app token only once the run is terminal. This keeps
+            # authentication available for final log/status RPCs after PushAppOutputs.
+            state.delete_token(request.run_id)
             # Delete all objects related to the run
             store.delete_objects_in_run(request.run_id)
 
