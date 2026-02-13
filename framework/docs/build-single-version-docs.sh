@@ -17,12 +17,12 @@ cd "$(git rev-parse --show-toplevel)/framework/docs"
 rm -rf build
 
 # Get a list of languages based on the folders in locales
-languages="en fr"
-# for lang_dir in locales/*; do
-#   if [ -d "$lang_dir" ]; then
-#     languages="$languages $(basename "$lang_dir")"
-#   fi
-# done
+languages="en"
+for lang_dir in locales/*; do
+  if [ -d "$lang_dir" ]; then
+    languages="$languages $(basename "$lang_dir")"
+  fi
+done
 
 current_version="$DOC_VERSION"
 export current_version
