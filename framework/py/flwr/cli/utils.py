@@ -295,7 +295,7 @@ def get_executed_command() -> str:
     Returns
     -------
     str
-        The full command path without the "flwr" prefix.
+        The full command path including the "flwr" prefix.
     """
     ctx = click.get_current_context()
     cmd_parts = []
