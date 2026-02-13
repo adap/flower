@@ -62,3 +62,69 @@ class FederationManager(ABC):
     @abstractmethod
     def get_details(self, federation: str) -> Federation:
         """Get details of the federation."""
+
+    @abstractmethod
+    def create_federation(self, name: str, description: str) -> None:
+        """Create a new federation.
+
+        Parameters
+        ----------
+        name : str
+            The unique name of the federation.
+        description : str
+            A human-readable description of the federation.
+
+        Raises
+        ------
+        ValueError
+            If a federation with the given name already exists.
+        """
+
+    @abstractmethod
+    def archive_federation(self, name: str) -> None:
+        """Archive an existing federation.
+
+        Parameters
+        ----------
+        name : str
+            The name of the federation to archive.
+
+        Raises
+        ------
+        ValueError
+            If the federation does not exist.
+        """
+
+    @abstractmethod
+    def add_supernode(self, federation: str, node_id: int) -> None:
+        """Add a supernode to a federation.
+
+        Parameters
+        ----------
+        federation : str
+            The name of the federation.
+        node_id : int
+            The ID of the node to add.
+
+        Raises
+        ------
+        ValueError
+            If the federation does not exist.
+        """
+
+    @abstractmethod
+    def remove_supernode(self, federation: str, node_id: int) -> None:
+        """Remove a supernode from a federation.
+
+        Parameters
+        ----------
+        federation : str
+            The name of the federation.
+        node_id : int
+            The ID of the node to remove.
+
+        Raises
+        ------
+        ValueError
+            If the federation does not exist or the node is not in the federation.
+        """
