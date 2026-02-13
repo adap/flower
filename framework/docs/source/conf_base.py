@@ -56,7 +56,8 @@ def _display_version(version: str) -> str:
         if (ver := Version(version)) >= MINOR_LABEL_FROM:
             return f"v{ver.release[0]}.{ver.release[1]}.x"
     except InvalidVersion:
-        pass
+        # If the version string cannot be parsed, fall back to the original value.
+        return version
     return version
 
 
