@@ -16,10 +16,8 @@
 
 
 # pylint: disable=too-many-lines
-import socket
 import tempfile
 import unittest
-from contextlib import closing
 from datetime import timedelta
 from unittest.mock import Mock, patch
 
