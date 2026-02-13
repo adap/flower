@@ -65,6 +65,25 @@ jobs:
         run: |
           echo "Building docs for version: ${DOC_VERSION}"
           ./framework/docs/build-single-version-docs.sh
+      - name: Determine if this is the latest stable version
+        if: ${{ github.event_name == 'push' && github.repository == 'adap/flower' && startsWith(github.ref, 'refs/heads/release/framework-') }}
+        id: latest_check
+        run: |
+          # Get all framework version tags and find the latest one
+          all_versions=$(git tag -l 'v*.*.*' 'framework-v*.*.*' | sed 's/framework-v/v/' | sed 's/^v//' | sort -V)
+          latest_version=$(echo "$all_versions" | tail -n 1)
+          latest_major_minor=$(echo "$latest_version" | cut -d. -f1-2)
+
+          # Extract version from current branch (e.g., `release/framework-1.26` -> `1.26`)
+          current_branch="${GITHUB_REF#refs/heads/release/framework-}"
+
+          if [ "$current_branch" = "$latest_major_minor" ]; then
+            echo "is_latest=true" >> "$GITHUB_OUTPUT"
+            echo "This is the latest stable version: $current_branch"
+          else
+            echo "is_latest=false" >> "$GITHUB_OUTPUT"
+            echo "Not the latest stable version. Current: $current_branch, Latest: $latest_major_minor"
+          fi
       - name: Deploy docs
         if: ${{ github.event_name == 'push' && github.repository == 'adap/flower' }}
         env:
@@ -75,3 +94,9 @@ jobs:
         run: |
           echo "Deploying docs for version: ${DOC_VERSION}"
           aws s3 sync --delete --exclude ".*" --cache-control "no-cache" ./framework/docs/build/html/${DOC_VERSION}/ s3://${{ secrets.DOCS_AWS_BUCKET_NAME }}/docs/framework/${DOC_VERSION}
+
+          # Deploy latest stable version to root (if applicable)
+          if [ "${{ steps.latest_check.outputs.is_latest }}" = "true" ]; then
+            echo "Deploying latest stable version (${DOC_VERSION}) English docs to root"
+            aws s3 sync --delete --exclude ".*" --cache-control "no-cache" ./framework/docs/build/html/${DOC_VERSION}/en/ s3://${{ secrets.DOCS_AWS_BUCKET_NAME }}/docs/framework/
+          fi
