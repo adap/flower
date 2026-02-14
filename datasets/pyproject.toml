@@ -48,9 +48,9 @@ dependencies = [
     "numpy>=1.26.0,<3.0.0",
     "datasets>=2.14.6,<5.0.0",
     "tqdm>=4.66.1,<5.0.0",
+    "rich>=13.5.0",
     "matplotlib>=3.7.5,<4.0.0",
     "seaborn>=0.13.0,<0.14.0",
-    "rich>=13.5.0",
 ]
 
 [project.optional-dependencies]
