@@ -6,9 +6,9 @@ build-backend = "hatchling.build"
 name = "flwr-datasets"
 version = "0.6.0"
 description = "Flower Datasets"
-readme = "README.md"
 license = "Apache-2.0"
 authors = [{ name = "The Flower Authors", email = "hello@flower.ai" }]
+readme = "README.md"
 requires-python = ">=3.10"
 keywords = [
     "Artificial Intelligence",
