@@ -70,7 +70,6 @@ Information-oriented API reference and other reference material.
    :maxdepth: 1
    :caption: Contributor tutorials
 
-   contributor-how-to-develop
    contributor-how-to-contribute-dataset
 
 
