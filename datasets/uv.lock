@@ -245,11 +245,16 @@ wheels = [
 
 [[package]]
 name = "beautysh"
-version = "6.1.0"
+version = "6.4.2"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/f8/97/3bc3fb9c85e1f257333d1350020b8a6e925e5ba2b2eb12299a6e69b7e24e/beautysh-6.1.0.tar.gz", hash = "sha256:966b4acb877ad3606a96524e42c8368f0fdff30058340b497788ec4161b7d544", size = 9590, upload-time = "2021-05-04T07:44:30.22Z" }
+dependencies = [
+    { name = "colorama" },
+    { name = "editorconfig" },
+    { name = "tomli", marker = "python_full_version < '3.11'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/49/88/ce91f2dfb01112a39b2f36ae4296dcb49056cf2a3d0d39bd510bda3e4815/beautysh-6.4.2.tar.gz", hash = "sha256:e3d762006e8930e6fec8842adeb7e124c283bd63dbd83a1466f91e4caf5765b4", size = 73109, upload-time = "2025-11-18T22:36:06.265Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/36/c8/23a1c06e462cb107f29d741ffd8851bf5469738d1aeb8d977d271db69b89/beautysh-6.1.0-py3-none-any.whl", hash = "sha256:b90242fa9bc7bc58a466b57603c2a3bc560b75a370c8c476a1e1e7fdc7e69afa", size = 9666, upload-time = "2021-05-04T07:44:28.743Z" },
+    { url = "https://files.pythonhosted.org/packages/25/cb/1e7140c5207dba33e63e8bbcb5d201d918c5201ffb0e6b3be16813887013/beautysh-6.4.2-py3-none-any.whl", hash = "sha256:42bb7dc79d55fbb4734fb7d91c61b52da06abd11929d44a1616e4702335eaff5", size = 26371, upload-time = "2025-11-18T22:36:05.218Z" },
 ]
 
 [[package]]
@@ -920,7 +925,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "beautysh", specifier = "==6.1.0" },
+    { name = "beautysh", specifier = "==6.4.2" },
     { name = "black", specifier = "==25.11.0" },
     { name = "clang-format", specifier = "==17.0.6" },
     { name = "docformatter", specifier = "==1.7.5" },
@@ -928,10 +933,10 @@ requires-dist = [
     { name = "furo", specifier = "==2024.8.6" },
     { name = "gitpython", specifier = "==3.1.32" },
     { name = "isort", specifier = "==5.13.2" },
-    { name = "mdformat", specifier = "==0.7.22" },
-    { name = "mdformat-beautysh", specifier = "==0.1.1" },
-    { name = "mdformat-frontmatter", specifier = "==2.0.1" },
-    { name = "mdformat-gfm", specifier = "==0.3.6" },
+    { name = "mdformat", specifier = "==1.0.0" },
+    { name = "mdformat-beautysh", specifier = "==1.0.0" },
+    { name = "mdformat-frontmatter", specifier = "==2.0.10" },
+    { name = "mdformat-gfm", specifier = "==1.0.0" },
     { name = "myst-parser", specifier = "==3.0.1" },
     { name = "nbsphinx", specifier = "==0.9.5" },
     { name = "nbstripout", specifier = "==0.6.1" },
@@ -1014,6 +1019,15 @@ wheels = [
 ]
 
 [[package]]
+name = "editorconfig"
+version = "0.17.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/88/3a/a61d9a1f319a186b05d14df17daea42fcddea63c213bcd61a929fb3a6796/editorconfig-0.17.1.tar.gz", hash = "sha256:23c08b00e8e08cc3adcddb825251c497478df1dada6aefeb01e626ad37303745", size = 14695, upload-time = "2025-06-09T08:21:37.097Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/96/fd/a40c621ff207f3ce8e484aa0fc8ba4eb6e3ecf52e15b42ba764b457a9550/editorconfig-0.17.1-py3-none-any.whl", hash = "sha256:1eda9c2c0db8c16dbd50111b710572a5e6de934e39772de1959d41f64fc17c82", size = 16360, upload-time = "2025-06-09T08:21:35.654Z" },
+]
+
+[[package]]
 name = "exceptiongroup"
 version = "1.3.1"
 source = { registry = "https://pypi.org/simple" }
@@ -1054,13 +1068,14 @@ wheels = [
 
 [[package]]
 name = "flwr-datasets"
-version = "0.5.0"
+version = "0.6.0"
 source = { editable = "." }
 dependencies = [
     { name = "datasets" },
     { name = "matplotlib" },
     { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "numpy", version = "2.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "rich" },
     { name = "seaborn" },
     { name = "tqdm" },
 ]
@@ -1098,6 +1113,7 @@ requires-dist = [
     { name = "matplotlib", specifier = ">=3.7.5,<4.0.0" },
     { name = "numpy", specifier = ">=1.26.0,<3.0.0" },
     { name = "pillow", marker = "extra == 'vision'", specifier = ">=6.2.1" },
+    { name = "rich", specifier = ">=13.5.0" },
     { name = "seaborn", specifier = ">=0.13.0,<0.14.0" },
     { name = "soundfile", marker = "extra == 'audio'", specifier = ">=0.12.1" },
     { name = "torch", marker = "extra == 'audio'", specifier = ">=2.8.0" },
@@ -1816,18 +1832,6 @@ wheels = [
 ]
 
 [[package]]
-name = "linkify-it-py"
-version = "2.0.3"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "uc-micro-py" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/2a/ae/bb56c6828e4797ba5a4821eec7c43b8bf40f69cda4d4f5f8c8a2810ec96a/linkify-it-py-2.0.3.tar.gz", hash = "sha256:68cda27e162e9215c17d786649d1da0021a451bdc436ef9e0fa0ba5234b9b048", size = 27946, upload-time = "2024-02-04T14:48:04.179Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/04/1e/b832de447dee8b582cac175871d2f6c3d5077cc56d5575cadba1fd1cccfa/linkify_it_py-2.0.3-py3-none-any.whl", hash = "sha256:6bcbc417b0ac14323382aef5c5192c0075bf8a9d6b41820a2b66371eac6b6d79", size = 19820, upload-time = "2024-02-04T14:48:02.496Z" },
-]
-
-[[package]]
 name = "markdown-it-py"
 version = "3.0.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1837,11 +1841,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/38/71/3b932df36c1a044d397a1f92d1cf91ee0a503d91e470cbd670aa66b07ed0/markdown-it-py-3.0.0.tar.gz", hash = "sha256:e3f60a94fa066dc52ec76661e37c851cb232d92f9886b15cb560aaada2df8feb", size = 74596, upload-time = "2023-06-03T06:41:14.443Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/42/d7/1ec15b46af6af88f19b8e5ffea08fa375d433c998b8a7639e76935c14f1f/markdown_it_py-3.0.0-py3-none-any.whl", hash = "sha256:355216845c60bd96232cd8d8c40e8f9765cc86f46880e43a8fd22dc1a1a8cab1", size = 87528, upload-time = "2023-06-03T06:41:11.019Z" },
-]
-
-[package.optional-dependencies]
-linkify = [
-    { name = "linkify-it-py" },
 ]
 
 [[package]]
@@ -2027,70 +2026,57 @@ wheels = [
 
 [[package]]
 name = "mdformat"
-version = "0.7.22"
+version = "1.0.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "markdown-it-py" },
     { name = "tomli", marker = "python_full_version < '3.11'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/fc/eb/b5cbf2484411af039a3d4aeb53a5160fae25dd8c84af6a4243bc2f3fedb3/mdformat-0.7.22.tar.gz", hash = "sha256:eef84fa8f233d3162734683c2a8a6222227a229b9206872e6139658d99acb1ea", size = 34610, upload-time = "2025-01-30T18:00:51.418Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/3f/05/32b5e14b192b0a8a309f32232c580aefedd9d06017cb8fe8fce34bec654c/mdformat-1.0.0.tar.gz", hash = "sha256:4954045fcae797c29f86d4ad879e43bb151fa55dbaf74ac6eaeacf1d45bb3928", size = 56953, upload-time = "2025-10-16T12:05:03.695Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f2/6f/94a7344f6d634fe3563bea8b33bccedee37f2726f7807e9a58440dc91627/mdformat-0.7.22-py3-none-any.whl", hash = "sha256:61122637c9e1d9be1329054f3fa216559f0d1f722b7919b060a8c2a4ae1850e5", size = 34447, upload-time = "2025-01-30T18:00:48.708Z" },
+    { url = "https://files.pythonhosted.org/packages/54/9a/8fe71b95985ca7a4001effbcc58e5a07a1f2a2884203f74dcf48a3b08315/mdformat-1.0.0-py3-none-any.whl", hash = "sha256:bca015d65a1d063a02e885a91daee303057bc7829c2cd37b2075a50dbb65944b", size = 53288, upload-time = "2025-10-16T12:05:02.607Z" },
 ]
 
 [[package]]
 name = "mdformat-beautysh"
-version = "0.1.1"
+version = "1.0.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "beautysh" },
     { name = "mdformat" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/71/d2/e29d0f7a2f6b8112b5b96399b427dad20fcfc54a458b52614f8b4dca45cc/mdformat-beautysh-0.1.1.tar.gz", hash = "sha256:b63a0e3adfc29238917b5d163483952f9326f7737cbe3137d3c6c512daf70789", size = 3077, upload-time = "2020-09-24T00:55:24.048Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/a3/e9/f2b37a54442a2e59278b486a6e1b83e6ea140e7ba6bce8392ca9e2b99c5e/mdformat_beautysh-1.0.0.tar.gz", hash = "sha256:10bb22859ffed2a433f2b9b30de4faf7fcdebb9f9d95bd39ecbd437c6a3c686e", size = 2533, upload-time = "2025-11-03T09:20:12.3Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/dd/05/79f8253b4206e7bc00d7ba201c32b0c7668d03c142dacf37d981dfb225df/mdformat_beautysh-0.1.1-py3-none-any.whl", hash = "sha256:23e52dc93ce4cdee12033766a6146f656c72095f74bc80a2bdfde1974a50ee72", size = 3055, upload-time = "2020-09-24T00:55:25.698Z" },
+    { url = "https://files.pythonhosted.org/packages/d0/ac/e12f4aef06c7db4b6c35cd513c91ce9461b8f61ae954ef6f8c710135d43e/mdformat_beautysh-1.0.0-py3-none-any.whl", hash = "sha256:9209b42e87dd94c44615669b613ea6cf704c6fd25b6ace5a9ce1e0452088faf2", size = 3161, upload-time = "2025-11-03T09:20:10.96Z" },
 ]
 
 [[package]]
 name = "mdformat-frontmatter"
-version = "2.0.1"
+version = "2.0.10"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "mdformat" },
     { name = "mdit-py-plugins" },
     { name = "ruamel-yaml" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/47/5d/7d28c6f3f789ee7719f48f625886cba4ef00eb1e105e36b554465898b81e/mdformat_frontmatter-2.0.1.tar.gz", hash = "sha256:a05c188ba2f483ab434b4e46e312c1a2ccf145e9ab95e3f493f8967c182ffd5c", size = 6401, upload-time = "2023-01-21T06:29:58.755Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/c0/94/ccb15e0535f35c21b2b533cafb232f11ac0e7046dd122029b7ec0513c82e/mdformat_frontmatter-2.0.10.tar.gz", hash = "sha256:decefcb4beb66cf111f17e8c0d82e60b208104c7922ec09564d05365db551bd8", size = 3958, upload-time = "2026-01-19T23:42:23.672Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/09/61/ee676ce4d8e53828e60a4b7d7d8c4fcd731071f99e3c970140f24e4ecf43/mdformat_frontmatter-2.0.1-py3-none-any.whl", hash = "sha256:354143935a103d6049239f5c2df288c80d0fbea8f7dd9e535ccc180e8c5aa235", size = 4465, upload-time = "2023-01-21T06:29:57.624Z" },
+    { url = "https://files.pythonhosted.org/packages/ea/40/e61f8ed549bed3159a9677eadb89849ccca6de30eb90bf61e1b6026df96d/mdformat_frontmatter-2.0.10-py3-none-any.whl", hash = "sha256:c99f7c52de0403e39f48b6a1c2bb79a4c8ce69304a799ff0e403e3957aa3669b", size = 4636, upload-time = "2026-01-19T23:42:22.341Z" },
 ]
 
 [[package]]
 name = "mdformat-gfm"
-version = "0.3.6"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "markdown-it-py", extra = ["linkify"] },
-    { name = "mdformat" },
-    { name = "mdformat-tables" },
-    { name = "mdit-py-plugins" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/d4/1c/bb685eceffb95411739976de0611f2d0cd85dd03156894f0636777028b8a/mdformat_gfm-0.3.6.tar.gz", hash = "sha256:b405ebf651a15c186ca06712100e33bbe72afeafb02aa4a4a28ea26cc3219678", size = 4563, upload-time = "2024-01-29T17:55:35.471Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/a6/40/6487c7a7b0749a5561c08b80faa87d8e708452142983c3128b716ec7be46/mdformat_gfm-0.3.6-py3-none-any.whl", hash = "sha256:579e3619bedd3b7123df888b6929ab8ac5dfc8205d0b67153b1633262bdafc42", size = 4904, upload-time = "2024-01-29T17:55:34.222Z" },
-]
-
-[[package]]
-name = "mdformat-tables"
 version = "1.0.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
+    { name = "markdown-it-py" },
     { name = "mdformat" },
+    { name = "mdit-py-plugins" },
     { name = "wcwidth" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/64/fc/995ba209096bdebdeb8893d507c7b32b7e07d9a9f2cdc2ec07529947794b/mdformat_tables-1.0.0.tar.gz", hash = "sha256:a57db1ac17c4a125da794ef45539904bb8a9592e80557d525e1f169c96daa2c8", size = 6106, upload-time = "2024-08-23T23:41:33.413Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/56/6f/a626ebb142a290474401b67e2d61e73ce096bf7798ee22dfe6270f924b3f/mdformat_gfm-1.0.0.tar.gz", hash = "sha256:d1d49a409a6acb774ce7635c72d69178df7dce1dc8cdd10e19f78e8e57b72623", size = 10112, upload-time = "2025-10-16T09:12:22.402Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/2a/37/d78e37d14323da3f607cd1af7daf262cb87fe614a245c15ad03bb03a2706/mdformat_tables-1.0.0-py3-none-any.whl", hash = "sha256:94cd86126141b2adc3b04c08d1441eb1272b36c39146bab078249a41c7240a9a", size = 5104, upload-time = "2024-08-23T23:41:31.863Z" },
+    { url = "https://files.pythonhosted.org/packages/e6/18/6bc2189b744dd383cad03764f41f30352b1278d2205096f77a29c0b327ad/mdformat_gfm-1.0.0-py3-none-any.whl", hash = "sha256:7305a50efd2a140d7c83505b58e3ac5df2b09e293f9bbe72f6c7bee8c678b005", size = 10970, upload-time = "2025-10-16T09:12:21.276Z" },
 ]
 
 [[package]]
@@ -3619,6 +3605,19 @@ wheels = [
 ]
 
 [[package]]
+name = "rich"
+version = "14.3.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "markdown-it-py" },
+    { name = "pygments" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/74/99/a4cab2acbb884f80e558b0771e97e21e939c5dfb460f488d19df485e8298/rich-14.3.2.tar.gz", hash = "sha256:e712f11c1a562a11843306f5ed999475f09ac31ffb64281f73ab29ffdda8b3b8", size = 230143, upload-time = "2026-02-01T16:20:47.908Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ef/45/615f5babd880b4bd7d405cc0dc348234c5ffb6ed1ea33e152ede08b2072d/rich-14.3.2-py3-none-any.whl", hash = "sha256:08e67c3e90884651da3239ea668222d19bea7b589149d8014a21c633420dbb69", size = 309963, upload-time = "2026-02-01T16:20:46.078Z" },
+]
+
+[[package]]
 name = "roman"
 version = "5.2"
 source = { registry = "https://pypi.org/simple" }
@@ -4277,6 +4276,10 @@ dependencies = [
     { name = "typing-extensions" },
 ]
 wheels = [
+    { url = "https://files.pythonhosted.org/packages/e3/ea/304cf7afb744aa626fa9855245526484ee55aba610d9973a0521c552a843/torch-2.10.0-1-cp310-none-macosx_11_0_arm64.whl", hash = "sha256:c37fc46eedd9175f9c81814cc47308f1b42cfe4987e532d4b423d23852f2bf63", size = 79411450, upload-time = "2026-02-06T17:37:35.75Z" },
+    { url = "https://files.pythonhosted.org/packages/25/d8/9e6b8e7df981a1e3ea3907fd5a74673e791da483e8c307f0b6ff012626d0/torch-2.10.0-1-cp311-none-macosx_11_0_arm64.whl", hash = "sha256:f699f31a236a677b3118bc0a3ef3d89c0c29b5ec0b20f4c4bf0b110378487464", size = 79423460, upload-time = "2026-02-06T17:37:39.657Z" },
+    { url = "https://files.pythonhosted.org/packages/c9/2f/0b295dd8d199ef71e6f176f576473d645d41357b7b8aa978cc6b042575df/torch-2.10.0-1-cp312-none-macosx_11_0_arm64.whl", hash = "sha256:6abb224c2b6e9e27b592a1c0015c33a504b00a0e0938f1499f7f514e9b7bfb5c", size = 79498197, upload-time = "2026-02-06T17:37:27.627Z" },
+    { url = "https://files.pythonhosted.org/packages/a4/1b/af5fccb50c341bd69dc016769503cb0857c1423fbe9343410dfeb65240f2/torch-2.10.0-1-cp313-none-macosx_11_0_arm64.whl", hash = "sha256:7350f6652dfd761f11f9ecb590bfe95b573e2961f7a242eccb3c8e78348d26fe", size = 79498248, upload-time = "2026-02-06T17:37:31.982Z" },
     { url = "https://files.pythonhosted.org/packages/0c/1a/c61f36cfd446170ec27b3a4984f072fd06dab6b5d7ce27e11adb35d6c838/torch-2.10.0-cp310-cp310-manylinux_2_28_aarch64.whl", hash = "sha256:5276fa790a666ee8becaffff8acb711922252521b28fbce5db7db5cf9cb2026d", size = 145992962, upload-time = "2026-01-21T16:24:14.04Z" },
     { url = "https://files.pythonhosted.org/packages/b5/60/6662535354191e2d1555296045b63e4279e5a9dbad49acf55a5d38655a39/torch-2.10.0-cp310-cp310-manylinux_2_28_x86_64.whl", hash = "sha256:aaf663927bcd490ae971469a624c322202a2a1e68936eb952535ca4cd3b90444", size = 915599237, upload-time = "2026-01-21T16:23:25.497Z" },
     { url = "https://files.pythonhosted.org/packages/40/b8/66bbe96f0d79be2b5c697b2e0b187ed792a15c6c4b8904613454651db848/torch-2.10.0-cp310-cp310-win_amd64.whl", hash = "sha256:a4be6a2a190b32ff5c8002a0977a25ea60e64f7ba46b1be37093c141d9c49aeb", size = 113720931, upload-time = "2026-01-21T16:24:23.743Z" },
@@ -4442,15 +4445,6 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/5e/a7/c202b344c5ca7daf398f3b8a477eeb205cf3b6f32e7ec3a6bac0629ca975/tzdata-2025.3.tar.gz", hash = "sha256:de39c2ca5dc7b0344f2eba86f49d614019d29f060fc4ebc8a417896a620b56a7", size = 196772, upload-time = "2025-12-13T17:45:35.667Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/c7/b0/003792df09decd6849a5e39c28b513c06e84436a54440380862b5aeff25d/tzdata-2025.3-py2.py3-none-any.whl", hash = "sha256:06a47e5700f3081aab02b2e513160914ff0694bce9947d6b76ebd6bf57cfc5d1", size = 348521, upload-time = "2025-12-13T17:45:33.889Z" },
-]
-
-[[package]]
-name = "uc-micro-py"
-version = "1.0.3"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/91/7a/146a99696aee0609e3712f2b44c6274566bc368dfe8375191278045186b8/uc-micro-py-1.0.3.tar.gz", hash = "sha256:d321b92cff673ec58027c04015fcaa8bb1e005478643ff4a500882eaab88c48a", size = 6043, upload-time = "2024-02-09T16:52:01.654Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/37/87/1f677586e8ac487e29672e4b17455758fce261de06a0d086167bb760361a/uc_micro_py-1.0.3-py3-none-any.whl", hash = "sha256:db1dffff340817673d7b466ec86114a9dc0e9d4d9b5ba229d9d60e5c12600cd5", size = 6229, upload-time = "2024-02-09T16:52:00.371Z" },
 ]
 
 [[package]]

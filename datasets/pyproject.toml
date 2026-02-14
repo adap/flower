@@ -50,7 +50,11 @@ dependencies = [
     "tqdm>=4.66.1,<5.0.0",
     "matplotlib>=3.7.5,<4.0.0",
     "seaborn>=0.13.0,<0.14.0",
+    "rich>=13.5.0",
 ]
+
+[project.scripts]
+flwr-datasets = "flwr_datasets.cli.app:app"
 
 [project.optional-dependencies]
 vision = ["pillow>=6.2.1"]
@@ -61,22 +65,37 @@ Homepage = "https://flower.ai"
 Repository = "https://github.com/adap/flower"
 Documentation = "https://flower.ai/docs/datasets"
 
-[tool.poetry.group.dev.dependencies]
-tomli = { version = "^2.0.1", python = "<3.11" }
-types-requests = "==2.31.0.20240125"
-types-setuptools = "==80.9.0.20250822"
-setuptools = "==80.9.0"
-isort = "==5.13.2"
-black = { version = "==25.11.0", extras = ["jupyter"] }
-taplo = "==0.9.3"
-docformatter = "==1.7.5"
-mypy = "==1.8.0"
-pylint = "==3.3.1"
-parameterized = "==0.9.0"
-pytest = "==7.4.4"
-pytest-watcher = "==0.4.3"
-ruff = "==0.14.5"
-devtool = [{ path = "./devtool", develop = true }]
+[dependency-groups]
+dev = [
+    "types-requests==2.31.0.20240125",
+    "types-setuptools==80.9.0.20250822",
+    "isort==5.13.2",
+    "black[jupyter]==25.11.0",
+    "taplo==0.9.3",
+    "docformatter==1.7.5",
+    "mypy==1.8.0",
+    "pylint==3.3.1",
+    "parameterized==0.9.0",
+    "pytest==7.4.4",
+    "pytest-watcher==0.4.3",
+    "ruff==0.14.5",
+    "devtool",
+]
+
+[tool.uv]
+default-groups = ["dev"]
+
+[tool.uv.sources]
+devtool = { path = "devtool", editable = true }
+
+[tool.hatch.build.targets.wheel]
+packages = ["flwr_datasets"]
+
+[tool.hatch.build.targets.sdist]
+include = ["README.md", "pyproject.toml", "flwr_datasets/**"]
+
+[tool.hatch.build]
+exclude = ["/flwr_datasets/**/*_test.py"]
 
 [tool.isort]
 line_length = 88

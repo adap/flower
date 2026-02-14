@@ -70,4 +70,3 @@ If everything works, it should print the version of Flower Datasets to the comma
 .. parsed-literal::
 
   |release|
-
