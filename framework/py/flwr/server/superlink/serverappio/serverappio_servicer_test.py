@@ -58,13 +58,13 @@ from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
     SendAppHeartbeatRequest,
     SendAppHeartbeatResponse,
 )
-from flwr.proto.message_pb2 import (  # pylint: disable=E0611
-    ConfirmMessageReceivedRequest,
-    ConfirmMessageReceivedResponse,
-)
 from flwr.proto.log_pb2 import (  # pylint: disable=E0611
     PushLogsRequest,
     PushLogsResponse,
+)
+from flwr.proto.message_pb2 import (  # pylint: disable=E0611
+    ConfirmMessageReceivedRequest,
+    ConfirmMessageReceivedResponse,
 )
 from flwr.proto.message_pb2 import Message as ProtoMessage  # pylint: disable=E0611
 from flwr.proto.message_pb2 import (  # pylint: disable=E0611
