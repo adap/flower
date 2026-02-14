@@ -267,9 +267,9 @@ def _run_without_control_api(
     ]
 
     if simulation_options.backend:
-        # Stringify as JSON
+        # JSON-encode the backend configuration
         backend_serial = _serialize_simulation_options(simulation_options)
-        command.extend(["--backend-config", json.dumps(backend_serial)])
+        command.extend(["--backend-config", json.dumps(backend_serial["backend"])])
 
     if verbose:
         command.extend(["--verbose"])
