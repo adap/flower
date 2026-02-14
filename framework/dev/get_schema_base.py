@@ -19,6 +19,7 @@ production build. It combines all state table schemas into a single declarative 
 for tools like paracelsus to generate schema diagrams.
 """
 
+import importlib
 
 from sqlalchemy import MetaData
 from sqlalchemy.orm import declarative_base
@@ -37,5 +38,14 @@ objectstore_metadata = create_objectstore_metadata()
 for md in (linkstate_metadata, corestate_metadata, objectstore_metadata):
     for table in md.tables.values():
         table.tometadata(combined_metadata)
+
+# Include EE tables if available
+try:
+    from flwr.ee.state.alembic.tables import create_ee_metadata
+    ee_metadata = create_ee_metadata()
+    for table in ee_metadata.tables.values():
+        table.tometadata(combined_metadata)
+except ImportError:
+    pass
 
 Base = declarative_base(metadata=combined_metadata)
