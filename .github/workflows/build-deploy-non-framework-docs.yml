@@ -34,8 +34,14 @@ jobs:
           cd framework
           python -m poetry install
           python -m pip install -e ../datasets
-      - name: Build docs
-        run: ./dev/build-docs.sh ${{ github.ref == 'refs/heads/main' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork }}
+      - name: Update HTML theme options
+        run: python dev/update-html-themes.py
+      - name: Build baselines docs
+        run: ./dev/build-baseline-docs.sh
+      - name: Build examples docs
+        run: python dev/build-example-docs.py
+      - name: Build datasets docs
+        run: ./datasets/dev/build-flwr-datasets-docs.sh
       - name: Deploy docs
         if: ${{ github.ref == 'refs/heads/main' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork }}
         env:
