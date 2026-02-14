@@ -6,15 +6,13 @@ on:
       - main
     paths:
       - "datasets/**"
-      - ".github/workflows/datasets.yml"
-      - ".github/workflows/datasets-e2e.yml"
+      - ".github/workflows/datasets-*.yml"
   pull_request:
     branches:
       - main
     paths:
       - "datasets/**"
-      - ".github/workflows/datasets.yml"
-      - ".github/workflows/datasets-e2e.yml"
+      - ".github/workflows/datasets-*.yml"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.run_id || github.event.pull_request.number || github.ref }}
