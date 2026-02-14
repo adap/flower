@@ -29,6 +29,7 @@ from flwr.common.constant import (
     SERVERAPPIO_API_DEFAULT_SERVER_ADDRESS,
     SUPERLINK_NODE_ID,
     Status,
+    SubStatus,
 )
 from flwr.common.inflatable import (
     get_all_nested_objects,
