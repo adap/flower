@@ -95,5 +95,8 @@ service ServerAppIo {
 }
 
 // GetNodes messages
-message GetNodesRequest { uint64 run_id = 1; }
+message GetNodesRequest {
+  uint64 run_id = 1;
+  string token = 2;
+}
 message GetNodesResponse { repeated Node nodes = 1; }

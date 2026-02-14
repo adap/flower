@@ -7,6 +7,8 @@ import sys
 import time
 
 from flwr.common.constant import (
+    HEARTBEAT_DEFAULT_INTERVAL,
+    HEARTBEAT_PATIENCE,
     SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
     SIMULATIONIO_API_DEFAULT_CLIENT_ADDRESS,
     Status,
@@ -168,10 +170,14 @@ def main() -> None:
     # Allow time for SuperLink to start
     time.sleep(1)
 
+    # Allow enough time for token expiry based heartbeat detection:
+    # HEARTBEAT_PATIENCE * HEARTBEAT_DEFAULT_INTERVAL (+ buffer for restart/retries)
+    heartbeat_timeout = HEARTBEAT_PATIENCE * HEARTBEAT_DEFAULT_INTERVAL + 30
+
     # Allow time for SuperLink to detect heartbeat failures and update statuses
     tic = time.time()
     is_valid = False
-    while (time.time() - tic) < 25:
+    while (time.time() - tic) < heartbeat_timeout:
         run_status = flwr_ls()
         if (
             run_status[run_id1] == f"{Status.FINISHED}:{SubStatus.FAILED}"

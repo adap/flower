@@ -160,7 +160,9 @@ def run_serverapp(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
         if run and run_status and grid:
             try:
                 req = UpdateRunStatusRequest(
-                    run_id=run.run_id, run_status=run_status_to_proto(run_status)
+                    run_id=run.run_id,
+                    run_status=run_status_to_proto(run_status),
+                    token=token,
                 )
                 grid._stub.UpdateRunStatus(req)
             except grpc.RpcError:
@@ -182,6 +184,7 @@ def run_serverapp(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
         grid = GrpcGrid(
             serverappio_service_address=serverappio_api_address,
             root_certificates=certificates,
+            token=token,
         )
 
         # Pull ServerAppInputs from LinkState
@@ -207,6 +210,7 @@ def run_serverapp(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
             node_id=0,
             run_id=run.run_id,
             stub=grid._stub,
+            token=token,
         )
 
         log(DEBUG, "[flwr-serverapp] Start FAB installation.")
