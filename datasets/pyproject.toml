@@ -62,9 +62,9 @@ audio = ["soundfile>=0.12.1", "torch>=2.8.0", "torchcodec>=0.7.0"]
 flwr-datasets = "flwr_datasets.cli.app:app"
 
 [project.urls]
-Homepage = "https://flower.ai"
-Repository = "https://github.com/adap/flower"
-Documentation = "https://flower.ai/docs/datasets"
+homepage = "https://flower.ai"
+repository = "https://github.com/adap/flower"
+documentation = "https://flower.ai/docs/datasets"
 
 [dependency-groups]
 dev = [
