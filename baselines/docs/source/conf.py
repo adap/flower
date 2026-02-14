@@ -88,8 +88,8 @@ html_favicon = "_static/favicon.ico"
 html_baseurl = "https://flower.ai/docs/baselines/"
 
 html_theme_options = {
-    "light_logo": "fi-light-mode.png",
-    "dark_logo": "fi-dark-mode.png",
+    "light_logo": "baselines-light-mode.png",
+    "dark_logo": "baselines-dark-mode.png",
     "light_css_variables": {
         "color-announcement-background": "#17222d",
         "color-announcement-text": "#ffffff",
