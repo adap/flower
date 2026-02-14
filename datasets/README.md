@@ -20,69 +20,6 @@ For a complete installation guide visit the [Flower Datasets Documentation](http
 pip install flwr-datasets[vision]
 ```
 
-## Development (uv)
-
-Flower Datasets uses `uv` for development and CI.
-
-### Setup
-
-```bash
-cd datasets
-uv sync --all-extras
-```
-
-> [!TIP]
-> Use `uv sync --frozen --all-extras` to ensure `uv.lock` is not modified.
-
-### Run checks (formatting + unit tests)
-
-```bash
-cd datasets
-uv run ./dev/test.sh
-```
-
-### Format
-
-```bash
-cd datasets
-uv run ./dev/format.sh
-```
-
-### Build docs
-
-```bash
-cd datasets
-uv run ./dev/build-flwr-datasets-docs.sh
-```
-
-### Run E2E tests
-
-```bash
-cd datasets/e2e/pytorch
-uv sync --frozen
-uv run python -m unittest discover -p '*_test.py'
-```
-
-Repeat for `datasets/e2e/scikit-learn` and `datasets/e2e/tensorflow`.
-
-### Dependency management (no `uv pip`)
-
-```bash
-cd datasets
-
-# Add a runtime dependency
-uv add <package>
-
-# Add a dev dependency
-uv add --dev <package>
-
-# Add a dependency to an extra (e.g. "vision")
-uv add --optional vision <package>
-
-# Update lockfile (commit the result)
-uv lock
-```
-
 ## Overview
 
 Flower Datasets library supports:
