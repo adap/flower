@@ -19,7 +19,7 @@ jobs:
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
         with:
-          python-version: 3.11
+          python-version: 3.14
           poetry-skip: 'true'
       - name: Check PR title format 
         env:
