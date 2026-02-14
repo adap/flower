@@ -53,12 +53,12 @@ dependencies = [
     "rich>=13.5.0",
 ]
 
-[project.scripts]
-flwr-datasets = "flwr_datasets.cli.app:app"
-
 [project.optional-dependencies]
 vision = ["pillow>=6.2.1"]
 audio = ["soundfile>=0.12.1", "torch>=2.8.0", "torchcodec>=0.7.0"]
+
+[project.scripts]
+flwr-datasets = "flwr_datasets.cli.app:app"
 
 [project.urls]
 Homepage = "https://flower.ai"
