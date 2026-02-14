@@ -93,8 +93,8 @@ html_favicon = "_static/favicon.ico"
 html_baseurl = "https://flower.ai/docs/examples/"
 
 html_theme_options = {
-    "light_logo": "fi-light-mode.png",
-    "dark_logo": "fi-dark-mode.png",
+    "light_logo": "examples-light-mode.png",
+    "dark_logo": "examples-dark-mode.png",
     "light_css_variables": {
         "color-announcement-background": "#17222d",
         "color-announcement-text": "#ffffff",
