@@ -1,4 +1,4 @@
-name: PR update
+name: Update PR from `main`
 
 on:
   push:
