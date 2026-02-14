@@ -46,9 +46,9 @@ jobs:
           python-version: ${{ matrix.python }}
           poetry-skip: "true"
       - name: Set up uv
-        uses: astral-sh/setup-uv@v4
+        uses: astral-sh/setup-uv@v7
         with:
-          version: "0.9.11"
+          version: "0.10.2"
       - name: Free Disk Space (Ubuntu)
         uses: jlumbroso/free-disk-space@v1.3.1
         with:
