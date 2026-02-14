@@ -54,6 +54,12 @@ from flwr.common.serde import (
 from flwr.common.typing import Fab, Run, RunStatus
 from flwr.proto import control_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
+    AddNodeToFederationRequest,
+    AddNodeToFederationResponse,
+    ArchiveFederationRequest,
+    ArchiveFederationResponse,
+    CreateFederationRequest,
+    CreateFederationResponse,
     GetAuthTokensRequest,
     GetAuthTokensResponse,
     GetLoginDetailsRequest,
@@ -68,6 +74,8 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     PullArtifactsResponse,
     RegisterNodeRequest,
     RegisterNodeResponse,
+    RemoveNodeFromFederationRequest,
+    RemoveNodeFromFederationResponse,
     ShowFederationRequest,
     ShowFederationResponse,
     StartRunRequest,
@@ -580,6 +588,38 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         return ShowFederationResponse(
             federation=federation_proto, now=now().isoformat()
         )
+
+    def CreateFederation(
+        self, request: CreateFederationRequest, context: grpc.ServicerContext
+    ) -> CreateFederationResponse:
+        """Create a new Federation."""
+        log(INFO, "ControlServicer.CreateFederation")
+
+        raise NotImplementedError()
+
+    def ArchiveFederation(
+        self, request: ArchiveFederationRequest, context: grpc.ServicerContext
+    ) -> ArchiveFederationResponse:
+        """Archive a Federation."""
+        log(INFO, "ControlServicer.ArchiveFederation")
+
+        raise NotImplementedError()
+
+    def AddNodeToFederation(
+        self, request: AddNodeToFederationRequest, context: grpc.ServicerContext
+    ) -> AddNodeToFederationResponse:
+        """Add a node to a Federation."""
+        log(INFO, "ControlServicer.AddNodeToFederation")
+
+        raise NotImplementedError()
+
+    def RemoveNodeFromFederation(
+        self, request: RemoveNodeFromFederationRequest, context: grpc.ServicerContext
+    ) -> RemoveNodeFromFederationResponse:
+        """Remove a node from a Federation."""
+        log(INFO, "ControlServicer.RemoveNodeFromFederation")
+
+        raise NotImplementedError()
 
 
 def _create_list_runs_response(

@@ -22,6 +22,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
+import click
+
 from flwr.common.constant import (
     ACCESS_TOKEN_KEY,
     AUTHN_TYPE_JSON_KEY,
@@ -31,6 +33,7 @@ from flwr.common.constant import (
 
 from .utils import (
     build_pathspec,
+    get_executed_command,
     get_sha256_hash,
     load_gitignore_patterns,
     validate_credentials_content,
@@ -159,3 +162,28 @@ def test_load_gitignore_patterns_with_pathspec() -> None:
 
     # Should not match normal files
     assert spec.match_file("good.py") is False
+
+
+def test_get_executed_command_single() -> None:
+    """Test get_executed_command with a two-word command (e.g., flwr ls)."""
+    root_group = click.Group("flwr")
+    ls_cmd = click.Command("ls")
+
+    with click.Context(root_group, info_name="flwr") as root_ctx:
+        with click.Context(ls_cmd, parent=root_ctx, info_name="ls"):
+            assert get_executed_command() == "flwr ls"
+
+
+def test_get_executed_command_nested() -> None:
+    """Test get_executed_command with nested commands (e.g., flwr federation list)."""
+    # Create parent group "flwr" with child group "federation" and command "list"
+    root_group = click.Group("flwr")
+    federation_group = click.Group("federation")
+    list_cmd = click.Command("list")
+
+    with click.Context(root_group, info_name="flwr") as root_ctx:
+        with click.Context(
+            federation_group, parent=root_ctx, info_name="federation"
+        ) as fed_ctx:
+            with click.Context(list_cmd, parent=fed_ctx, info_name="list"):
+                assert get_executed_command() == "flwr federation list"
