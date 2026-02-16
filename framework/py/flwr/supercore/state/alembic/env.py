@@ -22,11 +22,6 @@ from sqlalchemy import engine_from_config, pool
 
 from flwr.supercore.state.alembic.utils import get_combined_metadata
 
-try:
-    from flwr.ee.state.alembic.tables import create_ee_metadata  # noqa: F401
-except ImportError:
-    pass
-
 # Alembic Config object
 config = context.config  # pylint: disable=no-member
 
