@@ -16,6 +16,7 @@
 
 from typing import Annotated
 
+import click
 import typer
 
 from flwr.cli.config_migration import migrate
@@ -31,7 +32,6 @@ from ..utils import (
     cli_output_handler,
     flwr_cli_grpc_exc_handler,
     init_channel_from_connection,
-    print_json_to_stdout,
 )
 
 
@@ -91,18 +91,6 @@ def _create_federation(
 ) -> None:
     """Create a federation."""
     with flwr_cli_grpc_exc_handler():
-        response: CreateFederationResponse = stub.CreateFederation(request)
+        _: CreateFederationResponse = stub.CreateFederation(request)
 
-    if response.federation:
-        typer.secho(
-            f"✅ Federation '{response.federation.name}' created successfully.",
-            fg=typer.colors.GREEN,
-        )
-        if is_json:
-            print_json_to_stdout(
-                {
-                    "success": True,
-                    "name": response.federation.name,
-                    "description": response.federation.description,
-                }
-            )
+    raise click.ClickException("Command not fully implemented.")

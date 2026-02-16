@@ -16,6 +16,7 @@
 
 from typing import Annotated
 
+import click
 import typer
 
 from flwr.cli.config_migration import migrate
@@ -31,7 +32,6 @@ from ..utils import (
     cli_output_handler,
     flwr_cli_grpc_exc_handler,
     init_channel_from_connection,
-    print_json_to_stdout,
 )
 
 
@@ -89,14 +89,4 @@ def _archive_federation(
     with flwr_cli_grpc_exc_handler():
         _: ArchiveFederationResponse = stub.ArchiveFederation(request)
 
-    typer.secho(
-        f"✅ Federation '{name}' archived successfully.",
-        fg=typer.colors.GREEN,
-    )
-    if is_json:
-        print_json_to_stdout(
-            {
-                "success": True,
-                "name": name,
-            }
-        )
+    raise click.ClickException("Command not fully implemented.")
