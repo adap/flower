@@ -356,6 +356,7 @@ class TestVersionLocationRegistry(unittest.TestCase):
 
             # Assert: version_locations includes both base and external paths
             version_locations = config.get_main_option("version_locations")
+            assert version_locations is not None
             base_versions = str(ALEMBIC_DIR / "versions")
             self.assertIn(base_versions, version_locations)
             self.assertIn(str(external_versions), version_locations)
