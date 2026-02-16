@@ -85,21 +85,25 @@ class FederationManager(ABC):
         """
 
     @abstractmethod
-    def archive_federation(self, name: str) -> None:
+    def archive_federation(self, flwr_aid: str, name: str) -> None:
         """Archive an existing federation.
 
         Parameters
         ----------
+        flwr_aid : str
+            The ID of the account archiving the federation.
         name : str
             The name of the federation to archive.
         """
 
     @abstractmethod
-    def add_supernode(self, federation: str, node_id: int) -> None:
+    def add_supernode(self, flwr_aid: str, federation: str, node_id: int) -> None:
         """Add a supernode to a federation.
 
         Parameters
         ----------
+        flwr_aid : str
+            The ID of the account adding the supernode.
         federation : str
             The name of the federation.
         node_id : int
@@ -107,11 +111,13 @@ class FederationManager(ABC):
         """
 
     @abstractmethod
-    def remove_supernode(self, federation: str, node_id: int) -> None:
+    def remove_supernode(self, flwr_aid: str, federation: str, node_id: int) -> None:
         """Remove a supernode from a federation.
 
         Parameters
         ----------
+        flwr_aid : str
+            The ID of the account removing the supernode.
         federation : str
             The name of the federation.
         node_id : int
