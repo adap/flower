@@ -110,9 +110,8 @@ addopts = "-qq"
 testpaths = ["./"]
 
 [tool.mypy]
-plugins = ["numpy.typing.mypy_plugin"]
-ignore_missing_imports = true
 strict = true
+ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = ["importlib.metadata.*", "importlib_metadata.*"]

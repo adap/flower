@@ -153,6 +153,7 @@ devtool = [{ path = "./devtool", develop = true }]
 [tool.docstrfmt]
 extend_exclude = [
     "docs/source/conf.py",
+    "docs/source/conf_base.py",
     "docs/source/tutorial-quickstart-huggingface.rst",
     "docs/source/_templates/autosummary/*",
     "docs/source/ref-api/*",
@@ -185,8 +186,8 @@ patterns = ["*.py"]
 ignore_patterns = []
 
 [tool.mypy]
-ignore_missing_imports = true
 strict = true
+ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = ["importlib.metadata.*", "importlib_metadata.*"]
