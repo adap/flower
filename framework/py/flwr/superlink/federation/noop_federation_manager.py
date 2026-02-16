@@ -16,6 +16,7 @@
 
 
 from flwr.common.constant import (
+    FEDERATION_COULD_NOT_BE_ARCHIVED_MESSAGE,
     FEDERATION_COULD_NOT_BE_CREATED_MESSAGE,
     NOOP_ACCOUNT_NAME,
     NOOP_FLWR_AID,
@@ -84,7 +85,7 @@ class NoOpFederationManager(FederationManager):
 
     def archive_federation(self, name: str) -> None:
         """Archive an existing federation."""
-        raise NotImplementedError()
+        raise NotImplementedError(FEDERATION_COULD_NOT_BE_ARCHIVED_MESSAGE % name)
 
     def add_supernode(self, federation: str, node_id: int) -> None:
         """Add a supernode to a federation."""
