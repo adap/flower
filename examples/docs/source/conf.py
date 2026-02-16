@@ -88,7 +88,6 @@ redirects = {
 #
 html_theme = "furo"
 html_title = f"Flower Examples {release}"
-html_logo = "_static/flower-logo.png"
 html_favicon = "_static/favicon.ico"
 html_baseurl = "https://flower.ai/docs/examples/"
 
