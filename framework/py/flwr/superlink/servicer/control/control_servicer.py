@@ -595,7 +595,22 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         """Create a new Federation."""
         log(INFO, "ControlServicer.CreateFederation")
 
-        raise NotImplementedError()
+        # Init link state
+        state = self.linkstate_factory.state()
+
+        flwr_aid = get_current_account_info().flwr_aid
+        flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
+
+        # Create federation
+        try:
+            state.federation_manager.create_federation(
+                name=request.name,
+                description=request.description,
+                flwr_aid=flwr_aid,
+            )
+        except NotImplementedError as e:
+            log(ERROR, "Could not create federation: %s", str(e))
+            context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(e))
 
     def ArchiveFederation(
         self, request: ArchiveFederationRequest, context: grpc.ServicerContext

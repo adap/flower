@@ -15,8 +15,10 @@
 """Flower command line interface `federation` command."""
 
 
+from .create import create as create
 from .ls import ls as ls
 
 __all__ = [
+    "create",
     "ls",
 ]
