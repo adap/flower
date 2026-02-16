@@ -83,14 +83,14 @@ class NoOpFederationManager(FederationManager):
         """Create a new federation."""
         raise NotImplementedError(FEDERATION_COULD_NOT_BE_CREATED_MESSAGE % name)
 
-    def archive_federation(self, name: str) -> None:
+    def archive_federation(self, flwr_aid: str, name: str) -> None:
         """Archive an existing federation."""
         raise NotImplementedError(FEDERATION_COULD_NOT_BE_ARCHIVED_MESSAGE % name)
 
-    def add_supernode(self, federation: str, node_id: int) -> None:
+    def add_supernode(self, flwr_aid: str, federation: str, node_id: int) -> None:
         """Add a supernode to a federation."""
         raise NotImplementedError()
 
-    def remove_supernode(self, federation: str, node_id: int) -> None:
+    def remove_supernode(self, flwr_aid: str, federation: str, node_id: int) -> None:
         """Remove a supernode from a federation."""
         raise NotImplementedError()
