@@ -1,6 +1,6 @@
 [build-system]
-requires = ["poetry-core>=1.4.0"]
-build-backend = "poetry.masonry.api"
+requires = ["poetry-core>=2.2.1"]
+build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "fedper" # <----- Ensure it matches the name of your baseline directory containing all the source code
@@ -43,7 +43,7 @@ tqdm = "^4.66.1"
 torch = { url = "https://download.pytorch.org/whl/cu117/torch-2.0.1%2Bcu117-cp310-cp310-linux_x86_64.whl" }
 torchvision = { url = "https://download.pytorch.org/whl/cu117/torchvision-0.15.2%2Bcu117-cp310-cp310-linux_x86_64.whl" }
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 isort = "==5.13.2"
 black = "==24.2.0"
 docformatter = "==1.7.5"

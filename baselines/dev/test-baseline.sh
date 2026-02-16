@@ -13,31 +13,31 @@ echo "=== test.sh ==="
 echo "- Start Python checks"
 
 echo "- isort: start"
-python -m isort --check-only .
+poetry run python -m isort --check-only .
 echo "- isort: done"
 
 echo "- black: start"
-python -m black --check .
+poetry run python -m black --check .
 echo "- black: done"
 
 echo "- docformatter: start"
-python -m docformatter -c -r .
+poetry run python -m docformatter -c -r .
 echo "- docformatter:  done"
 
 echo "- ruff: start"
-python -m ruff check .
+poetry run python -m ruff check .
 echo "- ruff: done"
 
 echo "- mypy: start"
-python -m mypy .
+poetry run python -m mypy .
 echo "- mypy: done"
 
 echo "- pylint: start"
-python -m pylint ./$1
+poetry run python -m pylint ./$1
 echo "- pylint: done"
 
 echo "- pytest: start"
-python -m pytest . || ([ $? -eq 5 ] || [ $? -eq 0 ])
+poetry run python -m pytest . || ([ $? -eq 5 ] || [ $? -eq 0 ])
 echo "- pytest: done"
 
 echo "- All Python checks passed"

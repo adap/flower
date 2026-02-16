@@ -1,6 +1,6 @@
 [build-system]
-requires = ["poetry-core>=1.4.0"]
-build-backend = "poetry.masonry.api"
+requires = ["poetry-core>=2.2.1"]
+build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "fedvssl" # <----- Ensure it matches the name of your baseline directory containing all the source code
@@ -35,7 +35,7 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.10, <3.12.0"  # don't change this
+python = ">=3.10.0, <3.12.0"  # don't change this
 flwr = { extras = ["simulation"], version = "1.9.0" }
 hydra-core = "1.3.2" # don't change this
 torch = { url = "https://download.pytorch.org/whl/cu117/torch-1.13.1%2Bcu117-cp310-cp310-linux_x86_64.whl" }
@@ -46,7 +46,7 @@ tensorboard = "2.18.0"
 numpy = "1.23.0"
 mmcv-full = { url = "https://download.openmmlab.com/mmcv/dist/cu117/torch1.13.0/mmcv_full-1.7.1-cp310-cp310-manylinux1_x86_64.whl" }
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 isort = "==5.13.2"
 black = "==24.2.0"
 docformatter = "==1.7.5"
