@@ -15,7 +15,12 @@
 """NoOp implementation of FederationManager."""
 
 
-from flwr.common.constant import NOOP_ACCOUNT_NAME, NOOP_FLWR_AID
+from flwr.common.constant import (
+    FEDERATION_COULD_NOT_BE_ARCHIVED_MESSAGE,
+    FEDERATION_COULD_NOT_BE_CREATED_MESSAGE,
+    NOOP_ACCOUNT_NAME,
+    NOOP_FLWR_AID,
+)
 from flwr.common.typing import Federation
 from flwr.proto.federation_pb2 import Account  # pylint: disable=E0611
 from flwr.supercore.constant import NOOP_FEDERATION, NOOP_FEDERATION_DESCRIPTION
@@ -71,3 +76,21 @@ class NoOpFederationManager(FederationManager):
             nodes=nodes,
             runs=runs,
         )
+
+    def create_federation(
+        self, flwr_aid: str, name: str, description: str
+    ) -> Federation:
+        """Create a new federation."""
+        raise NotImplementedError(FEDERATION_COULD_NOT_BE_CREATED_MESSAGE % name)
+
+    def archive_federation(self, name: str) -> None:
+        """Archive an existing federation."""
+        raise NotImplementedError(FEDERATION_COULD_NOT_BE_ARCHIVED_MESSAGE % name)
+
+    def add_supernode(self, federation: str, node_id: int) -> None:
+        """Add a supernode to a federation."""
+        raise NotImplementedError()
+
+    def remove_supernode(self, federation: str, node_id: int) -> None:
+        """Remove a supernode from a federation."""
+        raise NotImplementedError()
