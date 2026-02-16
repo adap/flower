@@ -28,12 +28,15 @@ from sqlalchemy.engine import Engine
 
 from flwr.common.exit import ExitCode
 from flwr.supercore.state.alembic.utils import (
+    ALEMBIC_DIR,
     ALEMBIC_VERSION_TABLE,
     _get_baseline_metadata,
     _metadata_providers,
+    _version_locations,
     build_alembic_config,
     get_combined_metadata,
     register_metadata_provider,
+    register_version_location,
     run_migrations,
 )
 
@@ -307,3 +310,54 @@ class TestMetadataProviderRegistry(unittest.TestCase):
         self.assertIn("node", error_msg)
         self.assertIn("collision", error_msg.lower())
         self.assertIn("mock_colliding_provider", error_msg)
+
+
+class TestVersionLocationRegistry(unittest.TestCase):
+    """Test external version location registration and build_alembic_config."""
+
+    def setUp(self) -> None:
+        """Save the current state of the version locations registry."""
+        self.original_locations = _version_locations.copy()
+        self.temp_dir = TemporaryDirectory()  # pylint: disable=consider-using-with
+        self.temp_path = Path(self.temp_dir.name)
+
+    def tearDown(self) -> None:
+        """Restore the version locations registry to its original state."""
+        _version_locations.clear()
+        _version_locations.extend(self.original_locations)
+        self.temp_dir.cleanup()
+
+    def test_register_version_location_adds_to_registry_idempotently(self) -> None:
+        """Ensure register_version_location adds path to registry without duplicates."""
+        # Prepare
+        external_versions = Path("/some/external/versions")
+        initial_count = len(_version_locations)
+
+        # Execute: Register the same path twice
+        register_version_location(external_versions)
+        register_version_location(external_versions)
+
+        # Assert: Path is in registry exactly once
+        self.assertIn(external_versions, _version_locations)
+        self.assertEqual(len(_version_locations), initial_count + 1)
+
+    def test_build_alembic_config_includes_all_version_locations(self) -> None:
+        """Ensure build_alembic_config includes base and registered version
+        locations."""
+        # Prepare
+        db_path = self.temp_path / "state.db"
+        engine = create_engine(f"sqlite:///{db_path}")
+        external_versions = Path("/external/versions")
+        register_version_location(external_versions)
+
+        try:
+            # Execute
+            config = build_alembic_config(engine)
+
+            # Assert: version_locations includes both base and external paths
+            version_locations = config.get_main_option("version_locations")
+            base_versions = str(ALEMBIC_DIR / "versions")
+            self.assertIn(base_versions, version_locations)
+            self.assertIn(str(external_versions), version_locations)
+        finally:
+            engine.dispose()

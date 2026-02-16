@@ -36,6 +36,9 @@ MetadataProvider = Callable[[], MetaData]
 # Registry for additional metadata providers (e.g., from ee module)
 _metadata_providers: list[MetadataProvider] = []
 
+# Registry for additional version locations (e.g., from ee module)
+_version_locations: list[Path] = []
+
 ALEMBIC_DIR = Path(__file__).resolve().parent
 ALEMBIC_VERSION_TABLE = "alembic_version"
 FLWR_STATE_BASELINE_REVISION = "8e65d8ae60b0"
@@ -57,6 +60,22 @@ def register_metadata_provider(provider: MetadataProvider) -> None:
     # Avoid duplicate registration to keep the registry idempotent
     if provider not in _metadata_providers:
         _metadata_providers.append(provider)
+
+
+def register_version_location(version_dir: Path) -> None:
+    """Register an additional versions directory for Alembic migrations.
+
+    This allows external modules to register their migration scripts so
+    they are included when running Alembic migrations.
+
+    Parameters
+    ----------
+    version_dir : Path
+        Path to a directory containing Alembic migration scripts.
+    """
+    # Avoid duplicate registration to keep the registry idempotent
+    if version_dir not in _version_locations:
+        _version_locations.append(version_dir)
 
 
 def get_combined_metadata() -> MetaData:
@@ -151,10 +170,17 @@ def run_migrations(engine: Engine) -> None:
 
 
 def build_alembic_config(engine: Engine) -> Config:
-    """Create Alembic config with script location and DB URL."""
+    """Create Alembic config with script location, DB URL, and version locations."""
     config = Config()
     config.set_main_option("script_location", str(ALEMBIC_DIR))
     config.set_main_option("sqlalchemy.url", str(engine.url))
+
+    # Combine base version location with any registered external locations
+    base_versions = ALEMBIC_DIR / "versions"
+    all_version_locations = [base_versions] + _version_locations
+    version_locations_str = " ".join(str(loc) for loc in all_version_locations)
+    config.set_main_option("version_locations", version_locations_str)
+
     return config
 
 
