@@ -38,6 +38,8 @@ README.md @jafermarq @tanertopal @danieljanes
 # GitHub Actions and Workflows
 /.github/actions @tanertopal @danieljanes
 /.github/workflows @tanertopal @danieljanes
+/.github/workflows/datasets-e2e.yml @jafermarq
+/.github/workflows/datasets-test.yml @jafermarq
 
 # Docker-related files
 **/*.Dockerfile @tanertopal @danieljanes
