@@ -186,6 +186,11 @@ FEDERATION_COULD_NOT_BE_CREATED_MESSAGE = (
     "Federation '%s' could not be created, already exists or the targeted "
     "SuperLink does not support federation management."
 )
+FEDERATION_COULD_NOT_BE_ARCHIVED_MESSAGE = (
+    "Federation '%s' could not be archived because it doesn't exist, you lack the "
+    "necessary permissions, or the targeted "
+    "SuperLink does not support federation management."
+)
 
 
 class MessageTypeLegacy:
