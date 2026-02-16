@@ -71,7 +71,9 @@ def archive(
                 federation_name=federation_name,
             )
             _archive_federation(
-                stub=stub, request=request, is_json=is_json, name=federation_name
+                stub=stub,
+                request=request,
+                is_json=is_json,
             )
 
         finally:
@@ -79,11 +81,10 @@ def archive(
                 channel.close()
 
 
-def _archive_federation(
+def _archive_federation(  # pylint: disable=W0613
     stub: ControlStub,
     request: ArchiveFederationRequest,
     is_json: bool,
-    name: str,
 ) -> None:
     """Archive a federation."""
     with flwr_cli_grpc_exc_handler():

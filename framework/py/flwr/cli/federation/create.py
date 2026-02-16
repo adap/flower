@@ -86,7 +86,7 @@ def create(  # pylint: disable=R0914, R0913, R0917, R0912
                 channel.close()
 
 
-def _create_federation(
+def _create_federation(  # pylint: disable=W0613
     stub: ControlStub, request: CreateFederationRequest, is_json: bool
 ) -> None:
     """Create a federation."""
