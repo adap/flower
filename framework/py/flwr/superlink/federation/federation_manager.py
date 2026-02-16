@@ -64,20 +64,24 @@ class FederationManager(ABC):
         """Get details of the federation."""
 
     @abstractmethod
-    def create_federation(self, name: str, description: str) -> None:
+    def create_federation(
+        self, flwr_aid: str, name: str, description: str
+    ) -> Federation:
         """Create a new federation.
 
         Parameters
         ----------
+        flwr_aid : str
+            The ID of the account creating the federation.
         name : str
             The unique name of the federation.
         description : str
             A human-readable description of the federation.
 
-        Raises
-        ------
-        ValueError
-            If a federation with the given name already exists.
+        Returns
+        -------
+        Federation
+            The created federation.
         """
 
     @abstractmethod
@@ -88,11 +92,6 @@ class FederationManager(ABC):
         ----------
         name : str
             The name of the federation to archive.
-
-        Raises
-        ------
-        ValueError
-            If the federation does not exist.
         """
 
     @abstractmethod
@@ -105,11 +104,6 @@ class FederationManager(ABC):
             The name of the federation.
         node_id : int
             The ID of the node to add.
-
-        Raises
-        ------
-        ValueError
-            If the federation does not exist.
         """
 
     @abstractmethod
@@ -122,9 +116,4 @@ class FederationManager(ABC):
             The name of the federation.
         node_id : int
             The ID of the node to remove.
-
-        Raises
-        ------
-        ValueError
-            If the federation does not exist or the node is not in the federation.
         """
