@@ -183,7 +183,7 @@ NODE_NOT_FOUND_MESSAGE = "Node ID not found for account"
 FEDERATION_NOT_SPECIFIED_MESSAGE = "No federation specified in the request"
 FEDERATION_NOT_FOUND_MESSAGE = "Federation '%s' does not exist"
 FEDERATION_COULD_NOT_BE_CREATED_MESSAGE = (
-    "Federation '%s' could not be created, already exists or the targetted "
+    "Federation '%s' could not be created, already exists or the targeted "
     "SuperLink does not support federation management."
 )
 
