@@ -46,7 +46,7 @@ classifiers = [
 ]
 dependencies = [
     "numpy>=1.26.0,<3.0.0",
-    "datasets>=2.14.6,<5.0.0",
+    "datasets>=4.0.0,<5.0.0",
     "tqdm>=4.66.1,<5.0.0",
     "rich>=13.5.0",
     "matplotlib>=3.7.5,<4.0.0",
@@ -55,7 +55,7 @@ dependencies = [
 
 [project.optional-dependencies]
 vision = ["pillow>=6.2.1"]
-audio = ["soundfile>=0.12.1", "torch>=2.8.0", "torchcodec>=0.7.0"]
+audio = ["torch>=2.8.0", "torchcodec>=0.7.0"]
 
 [project.scripts]
 # `flwr-datasets` CLI
