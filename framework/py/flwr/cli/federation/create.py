@@ -41,10 +41,6 @@ def create(  # pylint: disable=R0914, R0913, R0917, R0912
         str,
         typer.Argument(help="Name of the federation to create."),
     ],
-    description: Annotated[
-        str,
-        typer.Argument(help="Description of the federation."),
-    ] = "",
     superlink: Annotated[
         str | None,
         typer.Argument(help="Name of the SuperLink connection."),
@@ -57,6 +53,14 @@ def create(  # pylint: disable=R0914, R0913, R0917, R0912
             help="Format output using 'default' view or 'json'",
         ),
     ] = CliOutputFormat.DEFAULT,
+    description: Annotated[
+        str | None,
+        typer.Option(
+            "--description",
+            case_sensitive=False,
+            help="Description of the federation.",
+        ),
+    ] = None,
 ) -> None:
     """Create a new federation."""
     with cli_output_handler(output_format=output_format) as is_json:
@@ -102,3 +106,14 @@ def _create_federation(
                     "description": response.federation.description,
                 }
             )
+    else:
+        error_msg = "Failed to create federation."
+        typer.secho(error_msg, fg=typer.colors.RED, err=True)
+        if is_json:
+            print_json_to_stdout(
+                {
+                    "success": False,
+                    "error": error_msg,
+                }
+            )
+        raise typer.Exit(code=1)

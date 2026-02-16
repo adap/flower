@@ -603,7 +603,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
 
         # Create federation
         try:
-            state.federation_manager.create_federation(
+            federation = state.federation_manager.create_federation(
                 name=request.name,
                 description=request.description,
                 flwr_aid=flwr_aid,
@@ -611,6 +611,13 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         except NotImplementedError as e:
             log(ERROR, "Could not create federation: %s", str(e))
             context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(e))
+
+        return CreateFederationResponse(
+            federation=Federation(
+                name=federation.name,
+                description=federation.description,
+            )
+        )
 
     def ArchiveFederation(
         self, request: ArchiveFederationRequest, context: grpc.ServicerContext
@@ -633,6 +640,8 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         except NotImplementedError as e:
             log(ERROR, "Could not archive federation: %s", str(e))
             context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(e))
+
+        return ArchiveFederationResponse()
 
     def AddNodeToFederation(
         self, request: AddNodeToFederationRequest, context: grpc.ServicerContext
