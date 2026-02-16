@@ -618,7 +618,21 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         """Archive a Federation."""
         log(INFO, "ControlServicer.ArchiveFederation")
 
-        raise NotImplementedError()
+        # Init link state
+        state = self.linkstate_factory.state()
+
+        flwr_aid = get_current_account_info().flwr_aid
+        flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
+
+        # Archive federation
+        try:
+            state.federation_manager.archive_federation(
+                flwr_aid=flwr_aid,
+                name=request.federation_name,
+            )
+        except NotImplementedError as e:
+            log(ERROR, "Could not archive federation: %s", str(e))
+            context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(e))
 
     def AddNodeToFederation(
         self, request: AddNodeToFederationRequest, context: grpc.ServicerContext

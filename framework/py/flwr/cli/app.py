@@ -26,6 +26,7 @@ from .app_cmd import publish as app_publish
 from .app_cmd import review as app_review
 from .build import build
 from .config import ls as config_list
+from .federation import archive as federation_archive
 from .federation import create as federation_create
 from .federation import ls as federation_list
 from .install import install
@@ -92,7 +93,8 @@ federation_app = typer.Typer(help="Manage Federations")
 federation_app.command("list", **ALLOW_EXTRAS)(federation_list)
 # Hide "ls" command (left as alias)
 federation_app.command(hidden=True, **ALLOW_EXTRAS)(federation_list)
-federation_app.command()(federation_create)
+federation_app.command(**ALLOW_EXTRAS)(federation_archive)
+federation_app.command(**ALLOW_EXTRAS)(federation_create)
 app.add_typer(federation_app, name="federation")
 
 # Create config command group
