@@ -106,14 +106,14 @@ html_theme_options = {
         "color-announcement-text": "#ffffff",
         "color-announcement-background": "#17222d",
         # Left sidebar
-        "color-sidebar-link-text": "#7c7c7c",
+        "color-sidebar-link-text": "#ffffff",
         "color-sidebar-link-text--top-level": "#ababab",
         "color-sidebar-item-background--hover": "#222222",
         "color-sidebar-background": "#161616",
         "color-sidebar-search-background": "#161616",
         "color-sidebar-search-background--focus": "#1c1c1c",
         # Right sidebar (On this page)
-        "color-toc-title-text": "#7c7c7c",
+        "color-toc-title-text": "#ffffff",
         "color-toc-item-text": "#ababab",
         "color-toc-item-text--hover": "#d2d2d2",
         "color-toc-item-text--active": "#fff5bf",
