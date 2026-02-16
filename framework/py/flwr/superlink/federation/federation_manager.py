@@ -62,3 +62,58 @@ class FederationManager(ABC):
     @abstractmethod
     def get_details(self, federation: str) -> Federation:
         """Get details of the federation."""
+
+    @abstractmethod
+    def create_federation(
+        self, flwr_aid: str, name: str, description: str
+    ) -> Federation:
+        """Create a new federation.
+
+        Parameters
+        ----------
+        flwr_aid : str
+            The ID of the account creating the federation.
+        name : str
+            The unique name of the federation.
+        description : str
+            A human-readable description of the federation.
+
+        Returns
+        -------
+        Federation
+            The created federation.
+        """
+
+    @abstractmethod
+    def archive_federation(self, name: str) -> None:
+        """Archive an existing federation.
+
+        Parameters
+        ----------
+        name : str
+            The name of the federation to archive.
+        """
+
+    @abstractmethod
+    def add_supernode(self, federation: str, node_id: int) -> None:
+        """Add a supernode to a federation.
+
+        Parameters
+        ----------
+        federation : str
+            The name of the federation.
+        node_id : int
+            The ID of the node to add.
+        """
+
+    @abstractmethod
+    def remove_supernode(self, federation: str, node_id: int) -> None:
+        """Remove a supernode from a federation.
+
+        Parameters
+        ----------
+        federation : str
+            The name of the federation.
+        node_id : int
+            The ID of the node to remove.
+        """
