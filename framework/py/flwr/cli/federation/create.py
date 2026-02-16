@@ -106,14 +106,3 @@ def _create_federation(
                     "description": response.federation.description,
                 }
             )
-    else:
-        error_msg = "Failed to create federation."
-        typer.secho(error_msg, fg=typer.colors.RED, err=True)
-        if is_json:
-            print_json_to_stdout(
-                {
-                    "success": False,
-                    "error": error_msg,
-                }
-            )
-        raise typer.Exit(code=1)
