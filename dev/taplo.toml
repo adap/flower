@@ -1,5 +1,4 @@
 include = ["**/*.toml"]
-exclude = ["**/.venv/**"]
 
 [formatting]
 align_comments = false
