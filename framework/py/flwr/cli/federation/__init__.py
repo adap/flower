@@ -18,9 +18,13 @@
 from .archive import archive as archive
 from .create import create as create
 from .ls import ls as ls
+from .supernode_add import add_supernode as add_supernode
+from .supernode_remove import remove_supernode as remove_supernode
 
 __all__ = [
+    "add_supernode",
     "archive",
     "create",
     "ls",
+    "remove_supernode",
 ]
