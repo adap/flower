@@ -47,7 +47,7 @@ def remove_supernode(
     ],
     superlink: Annotated[
         str | None,
-        typer.Option(help="Name of the SuperLink connection."),
+        typer.Argument(help="Name of the SuperLink connection."),
     ] = None,
     output_format: Annotated[
         str,
