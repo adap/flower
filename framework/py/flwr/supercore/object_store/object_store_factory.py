@@ -16,6 +16,7 @@
 
 
 from logging import DEBUG
+from threading import Lock
 
 from flwr.common.logger import log
 from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME
@@ -40,6 +41,8 @@ class ObjectStoreFactory:
     def __init__(self, database: str = FLWR_IN_MEMORY_DB_NAME) -> None:
         self.database = database
         self.store_instance: ObjectStore | None = None
+        # Guard lazy initialization so DB migrations happen exactly once.
+        self._init_lock = Lock()
 
     def store(self) -> ObjectStore:
         """Return an ObjectStore instance and create it, if necessary.
@@ -57,15 +60,24 @@ class ObjectStoreFactory:
                 log(DEBUG, "Using SqlObjectStore")
             return self.store_instance
 
-        # InMemoryObjectStore
-        if self.database == FLWR_IN_MEMORY_DB_NAME:
-            self.store_instance = InMemoryObjectStore()
-            log(DEBUG, "Using InMemoryObjectStore")
-            return self.store_instance
+        with self._init_lock:
+            # Another thread may have initialized while we waited.
+            if self.store_instance is not None:
+                if self.database == FLWR_IN_MEMORY_DB_NAME:
+                    log(DEBUG, "Using InMemoryObjectStore")
+                else:
+                    log(DEBUG, "Using SqlObjectStore")
+                return self.store_instance
 
-        # SqlObjectStore
-        store = SqlObjectStore(self.database)
-        store.initialize()
-        self.store_instance = store
-        log(DEBUG, "Using SqlObjectStore")
-        return store
+            # InMemoryObjectStore
+            if self.database == FLWR_IN_MEMORY_DB_NAME:
+                self.store_instance = InMemoryObjectStore()
+                log(DEBUG, "Using InMemoryObjectStore")
+                return self.store_instance
+
+            # SqlObjectStore
+            store = SqlObjectStore(self.database)
+            store.initialize()
+            self.store_instance = store
+            log(DEBUG, "Using SqlObjectStore")
+            return store

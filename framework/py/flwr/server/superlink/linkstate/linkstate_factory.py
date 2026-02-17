@@ -16,6 +16,7 @@
 
 
 from logging import DEBUG
+from threading import Lock
 
 from flwr.common.logger import log
 from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME
@@ -51,6 +52,8 @@ class LinkStateFactory:
     ) -> None:
         self.database = database
         self.state_instance: LinkState | None = None
+        # Guard lazy initialization so migrations run exactly once per process.
+        self._init_lock = Lock()
         self.federation_manager = federation_manager
         self.objectstore_factory = objectstore_factory
 
@@ -64,20 +67,29 @@ class LinkStateFactory:
                 log(DEBUG, "Using SqlLinkState")
             return self.state_instance
 
-        # Get the ObjectStore instance
-        object_store = self.objectstore_factory.store()
+        with self._init_lock:
+            # Another thread may have initialized while we waited.
+            if self.state_instance is not None:
+                if self.database == FLWR_IN_MEMORY_DB_NAME:
+                    log(DEBUG, "Using InMemoryState")
+                else:
+                    log(DEBUG, "Using SqlLinkState")
+                return self.state_instance
 
-        # InMemoryState
-        if self.database == FLWR_IN_MEMORY_DB_NAME:
-            self.state_instance = InMemoryLinkState(
-                self.federation_manager, object_store
-            )
-            log(DEBUG, "Using InMemoryState")
-            return self.state_instance
+            # Get the ObjectStore instance
+            object_store = self.objectstore_factory.store()
 
-        # SqlLinkState
-        state = SqlLinkState(self.database, self.federation_manager, object_store)
-        state.initialize()
-        self.state_instance = state
-        log(DEBUG, "Using SqlLinkState")
-        return state
+            # InMemoryState
+            if self.database == FLWR_IN_MEMORY_DB_NAME:
+                self.state_instance = InMemoryLinkState(
+                    self.federation_manager, object_store
+                )
+                log(DEBUG, "Using InMemoryState")
+                return self.state_instance
+
+            # SqlLinkState
+            state = SqlLinkState(self.database, self.federation_manager, object_store)
+            state.initialize()
+            self.state_instance = state
+            log(DEBUG, "Using SqlLinkState")
+            return state
