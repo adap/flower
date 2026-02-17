@@ -596,6 +596,13 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         """Create a new Federation."""
         log(INFO, "ControlServicer.CreateFederation")
 
+        # Check that a federation is specified
+        if not request.name:
+            context.abort(
+                grpc.StatusCode.FAILED_PRECONDITION,
+                FEDERATION_NOT_SPECIFIED_MESSAGE,
+            )
+
         # Init link state
         state = self.linkstate_factory.state()
 
@@ -625,6 +632,13 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
     ) -> ArchiveFederationResponse:
         """Archive a Federation."""
         log(INFO, "ControlServicer.ArchiveFederation")
+
+        # Check that a federation is specified
+        if not request.federation_name:
+            context.abort(
+                grpc.StatusCode.FAILED_PRECONDITION,
+                FEDERATION_NOT_SPECIFIED_MESSAGE,
+            )
 
         # Init link state
         state = self.linkstate_factory.state()

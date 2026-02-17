@@ -32,6 +32,8 @@ from flwr.common import ConfigRecord, now
 from flwr.common.constant import (
     FEDERATION_COULD_NOT_BE_ARCHIVED_MESSAGE,
     FEDERATION_COULD_NOT_BE_CREATED_MESSAGE,
+    FEDERATION_NOT_SPECIFIED_MESSAGE,
+    MAX_SUPERNODES_REGISTER_PER_REQUEST,
     NODE_NOT_FOUND_MESSAGE,
     PUBLIC_KEY_ALREADY_IN_USE_MESSAGE,
     PUBLIC_KEY_NOT_VALID,
@@ -40,12 +42,16 @@ from flwr.common.constant import (
 )
 from flwr.common.typing import Run, RunStatus
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
+    AddNodeToFederationRequest,
+    AddNodeToFederationResponse,
     ArchiveFederationRequest,
     CreateFederationRequest,
     ListNodesRequest,
     ListNodesResponse,
     ListRunsRequest,
     RegisterNodeRequest,
+    RemoveNodeFromFederationRequest,
+    RemoveNodeFromFederationResponse,
     ShowFederationRequest,
     ShowFederationResponse,
     StartRunRequest,
@@ -64,7 +70,11 @@ from flwr.superlink.servicer.control.control_account_auth_interceptor import (
     shared_account_info,
 )
 
-from .control_servicer import ControlServicer, _format_verification
+from .control_servicer import (
+    ControlServicer,
+    _format_verification,
+    _validate_federation_and_nodes_in_request,
+)
 
 FLWR_AID_MISMATCH_CASES = (
     # (context_flwr_aid, run_flwr_aid)
@@ -583,6 +593,221 @@ class TestControlServicerAuth(unittest.TestCase):
         ):
             response = self.servicer.ListRuns(request, ctx)
             self.assertEqual(set(response.run_dict.keys()), {run_id})
+
+
+class TestValidateFederationAndNodesInRequest(unittest.TestCase):
+    """Tests for the _validate_federation_and_nodes_in_request helper."""
+
+    def setUp(self) -> None:
+        """Set up test fixtures."""
+        self.tmp_dir = tempfile.TemporaryDirectory()  # pylint: disable=R1732
+        objectstore_factory = Mock(store=Mock(return_value=Mock()))
+        self.servicer = ControlServicer(
+            linkstate_factory=LinkStateFactory(
+                FLWR_IN_MEMORY_DB_NAME, NoOpFederationManager(), objectstore_factory
+            ),
+            ffs_factory=FfsFactory(self.tmp_dir.name),
+            objectstore_factory=objectstore_factory,
+            is_simulation=False,
+            authn_plugin=(authn_plugin := NoOpControlAuthnPlugin(Mock(), False)),
+        )
+        account_info = authn_plugin.validate_tokens_in_metadata([])[1]
+        assert account_info is not None
+        self.aid = account_info.flwr_aid
+        shared_account_info.set(account_info)
+        self.state = self.servicer.linkstate_factory.state()
+
+    def tearDown(self) -> None:
+        """Clean up after tests."""
+        self.tmp_dir.cleanup()
+
+    def _make_context(self) -> MagicMock:
+        """Create a mock gRPC context that raises on abort."""
+        ctx = MagicMock(spec=grpc.ServicerContext)
+        ctx.abort.side_effect = lambda code, msg: (_ for _ in ()).throw(
+            RuntimeError(f"{code}:{msg}")
+        )
+        return ctx
+
+    def _create_owned_node(self, owner_aid: str) -> int:
+        """Create a node owned by the given flwr_aid."""
+        pub_key = public_key_to_bytes(generate_key_pairs()[1])
+        return self.state.create_node(
+            owner_aid=owner_aid,
+            owner_name="test_owner",
+            public_key=pub_key,
+            heartbeat_interval=10,
+        )
+
+    # --- _validate_federation_and_nodes_in_request tests ---
+
+    def test_validate_aborts_when_federation_not_specified(self) -> None:
+        """Test abort when federation name is empty."""
+        ctx = self._make_context()
+        with self.assertRaises(RuntimeError) as cm:
+            _validate_federation_and_nodes_in_request(
+                self.state, self.aid, "", [1], ctx
+            )
+        ctx.abort.assert_called_once()
+        self.assertIn(FEDERATION_NOT_SPECIFIED_MESSAGE, str(cm.exception))
+
+    def test_validate_aborts_when_federation_not_found(self) -> None:
+        """Test abort when federation does not exist."""
+        ctx = self._make_context()
+        with self.assertRaises(RuntimeError) as cm:
+            _validate_federation_and_nodes_in_request(
+                self.state, self.aid, "nonexistent-fed", [1], ctx
+            )
+        ctx.abort.assert_called_once()
+        self.assertIn("nonexistent-fed", str(cm.exception))
+
+    def test_validate_aborts_when_not_a_member(self) -> None:
+        """Test abort when flwr_aid is not a member of the federation."""
+        ctx = self._make_context()
+        with self.assertRaises(RuntimeError) as cm:
+            _validate_federation_and_nodes_in_request(
+                self.state, "wrong-aid", NOOP_FEDERATION, [1], ctx
+            )
+        ctx.abort.assert_called_once()
+        self.assertIn("not a member", str(cm.exception))
+
+    def test_validate_aborts_when_no_node_ids(self) -> None:
+        """Test abort when node_ids is empty."""
+        ctx = self._make_context()
+        with self.assertRaises(RuntimeError) as cm:
+            _validate_federation_and_nodes_in_request(
+                self.state, self.aid, NOOP_FEDERATION, [], ctx
+            )
+        ctx.abort.assert_called_once()
+        self.assertIn("At least one node ID", str(cm.exception))
+
+    def test_validate_aborts_when_too_many_nodes(self) -> None:
+        """Test abort when node_ids exceeds MAX_SUPERNODES_REGISTER_PER_REQUEST."""
+        ctx = self._make_context()
+        too_many = list(range(1, MAX_SUPERNODES_REGISTER_PER_REQUEST + 2))
+        with self.assertRaises(RuntimeError) as cm:
+            _validate_federation_and_nodes_in_request(
+                self.state, self.aid, NOOP_FEDERATION, too_many, ctx
+            )
+        ctx.abort.assert_called_once()
+        self.assertIn("Cannot process more than", str(cm.exception))
+
+    def test_validate_aborts_when_node_not_owned(self) -> None:
+        """Test abort when a node is not owned by the requester."""
+        # Create a node owned by someone else
+        node_id = self._create_owned_node("other-aid")
+        ctx = self._make_context()
+        with self.assertRaises(RuntimeError) as cm:
+            _validate_federation_and_nodes_in_request(
+                self.state, self.aid, NOOP_FEDERATION, [node_id], ctx
+            )
+        ctx.abort.assert_called_once()
+        self.assertIn("not found or you are not its owner", str(cm.exception))
+
+    def test_validate_aborts_when_node_does_not_exist(self) -> None:
+        """Test abort when a node ID does not exist."""
+        ctx = self._make_context()
+        with self.assertRaises(RuntimeError) as cm:
+            _validate_federation_and_nodes_in_request(
+                self.state, self.aid, NOOP_FEDERATION, [999999], ctx
+            )
+        ctx.abort.assert_called_once()
+        self.assertIn("not found or you are not its owner", str(cm.exception))
+
+    def test_validate_deduplicates_node_ids(self) -> None:
+        """Test that duplicate node IDs are de-duplicated."""
+        node_id = self._create_owned_node(self.aid)
+        ctx = self._make_context()
+        result = _validate_federation_and_nodes_in_request(
+            self.state, self.aid, NOOP_FEDERATION, [node_id, node_id, node_id], ctx
+        )
+        self.assertEqual(result, {node_id})
+        ctx.abort.assert_not_called()
+
+    def test_validate_success_single_node(self) -> None:
+        """Test successful validation with a single owned node."""
+        node_id = self._create_owned_node(self.aid)
+        ctx = self._make_context()
+        result = _validate_federation_and_nodes_in_request(
+            self.state, self.aid, NOOP_FEDERATION, [node_id], ctx
+        )
+        self.assertEqual(result, {node_id})
+        ctx.abort.assert_not_called()
+
+    def test_validate_success_multiple_nodes(self) -> None:
+        """Test successful validation with multiple owned nodes."""
+        node_id_1 = self._create_owned_node(self.aid)
+        node_id_2 = self._create_owned_node(self.aid)
+        ctx = self._make_context()
+        result = _validate_federation_and_nodes_in_request(
+            self.state, self.aid, NOOP_FEDERATION, [node_id_1, node_id_2], ctx
+        )
+        self.assertEqual(result, {node_id_1, node_id_2})
+        ctx.abort.assert_not_called()
+
+    # --- AddNodeToFederation / RemoveNodeFromFederation integration tests ---
+
+    def test_add_node_to_federation_success(self) -> None:
+        """Test AddNodeToFederation succeeds with valid inputs."""
+        node_id = self._create_owned_node(self.aid)
+        request = AddNodeToFederationRequest(
+            federation_name=NOOP_FEDERATION, node_ids=[node_id]
+        )
+        ctx = self._make_context()
+
+        with patch.object(
+            self.state.federation_manager,
+            "add_supernodes",
+            return_value=None,
+        ) as mock_add:
+            response = self.servicer.AddNodeToFederation(request, ctx)
+
+        mock_add.assert_called_once_with(
+            flwr_aid=self.aid,
+            federation=NOOP_FEDERATION,
+            node_ids={node_id},
+        )
+        self.assertIsInstance(response, AddNodeToFederationResponse)
+        ctx.abort.assert_not_called()
+
+    def test_add_node_to_federation_aborts_no_federation(self) -> None:
+        """Test AddNodeToFederation aborts when no federation is specified."""
+        request = AddNodeToFederationRequest(federation_name="", node_ids=[1])
+        ctx = self._make_context()
+        with self.assertRaises(RuntimeError) as cm:
+            self.servicer.AddNodeToFederation(request, ctx)
+        self.assertIn(FEDERATION_NOT_SPECIFIED_MESSAGE, str(cm.exception))
+
+    def test_remove_node_from_federation_success(self) -> None:
+        """Test RemoveNodeFromFederation succeeds with valid inputs."""
+        node_id = self._create_owned_node(self.aid)
+        request = RemoveNodeFromFederationRequest(
+            federation_name=NOOP_FEDERATION, node_ids=[node_id]
+        )
+        ctx = self._make_context()
+
+        with patch.object(
+            self.state.federation_manager,
+            "remove_supernodes",
+            return_value=None,
+        ) as mock_remove:
+            response = self.servicer.RemoveNodeFromFederation(request, ctx)
+
+        mock_remove.assert_called_once_with(
+            flwr_aid=self.aid,
+            federation=NOOP_FEDERATION,
+            node_ids={node_id},
+        )
+        self.assertIsInstance(response, RemoveNodeFromFederationResponse)
+        ctx.abort.assert_not_called()
+
+    def test_remove_node_from_federation_aborts_no_federation(self) -> None:
+        """Test RemoveNodeFromFederation aborts when no federation is specified."""
+        request = RemoveNodeFromFederationRequest(federation_name="", node_ids=[1])
+        ctx = self._make_context()
+        with self.assertRaises(RuntimeError) as cm:
+            self.servicer.RemoveNodeFromFederation(request, ctx)
+        self.assertIn(FEDERATION_NOT_SPECIFIED_MESSAGE, str(cm.exception))
 
 
 def test_format_verification_compact() -> None:
