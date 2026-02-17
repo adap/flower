@@ -41,7 +41,7 @@ class ObjectStoreFactory:
     def __init__(self, database: str = FLWR_IN_MEMORY_DB_NAME) -> None:
         self.database = database
         self.store_instance: ObjectStore | None = None
-        # Guard lazy initialization so DB migrations happen exactly once.
+        # Guard lazy initialization so DB migrations happen exactly once
         self._init_lock = Lock()
 
     def store(self) -> ObjectStore:
@@ -61,7 +61,7 @@ class ObjectStoreFactory:
             return self.store_instance
 
         with self._init_lock:
-            # Another thread may have initialized while we waited.
+            # Another thread may have initialized while we waited
             if self.store_instance is not None:
                 if self.database == FLWR_IN_MEMORY_DB_NAME:
                     log(DEBUG, "Using InMemoryObjectStore")

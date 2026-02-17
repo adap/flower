@@ -52,7 +52,7 @@ class LinkStateFactory:
     ) -> None:
         self.database = database
         self.state_instance: LinkState | None = None
-        # Guard lazy initialization so migrations run exactly once per process.
+        # Guard lazy initialization so migrations run exactly once per process
         self._init_lock = Lock()
         self.federation_manager = federation_manager
         self.objectstore_factory = objectstore_factory
@@ -68,7 +68,7 @@ class LinkStateFactory:
             return self.state_instance
 
         with self._init_lock:
-            # Another thread may have initialized while we waited.
+            # Another thread may have initialized while we waited
             if self.state_instance is not None:
                 if self.database == FLWR_IN_MEMORY_DB_NAME:
                     log(DEBUG, "Using InMemoryState")
