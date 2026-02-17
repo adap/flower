@@ -20,6 +20,8 @@ from flwr.common.constant import (
     FEDERATION_COULD_NOT_BE_CREATED_MESSAGE,
     NOOP_ACCOUNT_NAME,
     NOOP_FLWR_AID,
+    SUPERNODE_COULD_NOT_BE_ADDED_TO_FEDERATION_MESSAGE,
+    SUPERNODE_COULD_NOT_BE_REMOVED_FROM_FEDERATION_MESSAGE,
 )
 from flwr.common.typing import Federation
 from flwr.proto.federation_pb2 import Account  # pylint: disable=E0611
@@ -87,10 +89,16 @@ class NoOpFederationManager(FederationManager):
         """Archive an existing federation."""
         raise NotImplementedError(FEDERATION_COULD_NOT_BE_ARCHIVED_MESSAGE % name)
 
-    def add_supernode(self, flwr_aid: str, federation: str, node_id: int) -> None:
-        """Add a supernode to a federation."""
-        raise NotImplementedError()
+    def add_supernodes(
+        self, flwr_aid: str, federation: str, node_ids: set[int]
+    ) -> None:
+        """Add supernodes to a federation."""
+        raise NotImplementedError(SUPERNODE_COULD_NOT_BE_ADDED_TO_FEDERATION_MESSAGE)
 
-    def remove_supernode(self, flwr_aid: str, federation: str, node_id: int) -> None:
-        """Remove a supernode from a federation."""
-        raise NotImplementedError()
+    def remove_supernodes(
+        self, flwr_aid: str, federation: str, node_ids: set[int]
+    ) -> None:
+        """Remove supernodes from a federation."""
+        raise NotImplementedError(
+            SUPERNODE_COULD_NOT_BE_REMOVED_FROM_FEDERATION_MESSAGE
+        )

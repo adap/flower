@@ -97,29 +97,33 @@ class FederationManager(ABC):
         """
 
     @abstractmethod
-    def add_supernode(self, flwr_aid: str, federation: str, node_id: int) -> None:
-        """Add a supernode to a federation.
+    def add_supernodes(
+        self, flwr_aid: str, federation: str, node_ids: set[int]
+    ) -> None:
+        """Add supernodes to a federation.
 
         Parameters
         ----------
         flwr_aid : str
-            The ID of the account adding the supernode.
+            The ID of the account adding the supernodes.
         federation : str
             The name of the federation.
-        node_id : int
-            The ID of the node to add.
+        node_ids : set[int]
+            The IDs of the nodes to add.
         """
 
     @abstractmethod
-    def remove_supernode(self, flwr_aid: str, federation: str, node_id: int) -> None:
-        """Remove a supernode from a federation.
+    def remove_supernodes(
+        self, flwr_aid: str, federation: str, node_ids: set[int]
+    ) -> None:
+        """Remove supernodes from a federation.
 
         Parameters
         ----------
         flwr_aid : str
-            The ID of the account removing the supernode.
+            The ID of the account removing the supernodes.
         federation : str
             The name of the federation.
-        node_id : int
-            The ID of the node to remove.
+        node_ids : set[int]
+            The IDs of the nodes to remove.
         """

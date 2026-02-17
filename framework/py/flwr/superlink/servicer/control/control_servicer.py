@@ -33,6 +33,7 @@ from flwr.common.constant import (
     FEDERATION_NOT_SPECIFIED_MESSAGE,
     HEARTBEAT_DEFAULT_INTERVAL,
     LOG_STREAM_INTERVAL,
+    MAX_SUPERNODES_REGISTER_PER_REQUEST,
     NO_ACCOUNT_AUTH_MESSAGE,
     NO_ARTIFACT_PROVIDER_MESSAGE,
     NODE_NOT_FOUND_MESSAGE,
@@ -649,7 +650,47 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         """Add a node to a Federation."""
         log(INFO, "ControlServicer.AddNodeToFederation")
 
-        raise NotImplementedError()
+        # Init link state
+        state = self.linkstate_factory.state()
+
+        flwr_aid = get_current_account_info().flwr_aid
+        flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
+
+        # Ensure not exceeded maximum number of supernodes per request
+        if len(request.node_ids) > MAX_SUPERNODES_REGISTER_PER_REQUEST:
+            context.abort(
+                grpc.StatusCode.FAILED_PRECONDITION,
+                f"Cannot add more than {MAX_SUPERNODES_REGISTER_PER_REQUEST} nodes "
+                "to a federation in a single request.",
+            )
+
+        # Get info of the nodes to be added
+        nodes_info = state.get_node_info(node_ids=list(request.node_ids))
+        owned_node_ids = {
+            node.node_id for node in nodes_info if node.owner_aid == flwr_aid
+        }
+        # Ensure the requester owns all nodes to be added to the federation
+        # A node that does not exist or is not owned by the requester is
+        # treated the same way.
+        for node_id in request.node_ids:
+            if node_id not in owned_node_ids:
+                context.abort(
+                    grpc.StatusCode.FAILED_PRECONDITION,
+                    f"Node {node_id} not found or you are not its owner.",
+                )
+
+        # Add nodes to the federation
+        try:
+            state.federation_manager.add_supernodes(
+                flwr_aid=flwr_aid,
+                federation=request.federation_name,
+                node_ids=set(request.node_ids),
+            )
+        except NotImplementedError as e:
+            log(ERROR, "Could not add node(s) to federation: %s", str(e))
+            context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(e))
+
+        return AddNodeToFederationResponse()
 
     def RemoveNodeFromFederation(
         self, request: RemoveNodeFromFederationRequest, context: grpc.ServicerContext
@@ -657,7 +698,47 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         """Remove a node from a Federation."""
         log(INFO, "ControlServicer.RemoveNodeFromFederation")
 
-        raise NotImplementedError()
+        # Init link state
+        state = self.linkstate_factory.state()
+
+        flwr_aid = get_current_account_info().flwr_aid
+        flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
+
+        # Ensure not exceeded maximum number of supernodes per request
+        if len(request.node_ids) > MAX_SUPERNODES_REGISTER_PER_REQUEST:
+            context.abort(
+                grpc.StatusCode.FAILED_PRECONDITION,
+                f"Cannot remove more than {MAX_SUPERNODES_REGISTER_PER_REQUEST} "
+                "nodes from a federation in a single request.",
+            )
+
+        # Get info of the nodes to be removed
+        nodes_info = state.get_node_info(node_ids=list(request.node_ids))
+        owned_node_ids = {
+            node.node_id for node in nodes_info if node.owner_aid == flwr_aid
+        }
+        # Ensure the requester owns all nodes to be removed from the federation
+        # A node that does not exist or is not owned by the requester is
+        # treated the same way.
+        for node_id in request.node_ids:
+            if node_id not in owned_node_ids:
+                context.abort(
+                    grpc.StatusCode.FAILED_PRECONDITION,
+                    f"Node {node_id} not found or you are not its owner.",
+                )
+
+        # Remove nodes from the federation
+        try:
+            state.federation_manager.remove_supernodes(
+                flwr_aid=flwr_aid,
+                federation=request.federation_name,
+                node_ids=set(request.node_ids),
+            )
+        except NotImplementedError as e:
+            log(ERROR, "Could not remove node(s) from federation: %s", str(e))
+            context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(e))
+
+        return RemoveNodeFromFederationResponse()
 
 
 def _create_list_runs_response(
