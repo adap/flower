@@ -75,6 +75,7 @@ input[type='checkbox'] {
      data-flwr-versioning
      data-runtime-config-url="{{ docs_runtime_config_url }}"
      data-current-version="{{ current_version.url }}"
+     data-current-version-label="{{ current_version.full_name }}"
      data-current-language="{{ current_language }}"
      data-pagename="{{ pagename }}"
      data-docs-base-url="https://flower.ai/docs/framework">
@@ -85,9 +86,9 @@ input[type='checkbox'] {
       <ul data-flwr-version-list>
         {%- for item in versions %}
         <li>
-          <a href="https://flower.ai/docs/framework/{{ item.name }}/{{ current_language }}/{{ pagename }}.html"
-             data-version-name="{{ item.name }}">
-             {{ item.name }}
+          <a href="https://flower.ai/docs/framework/{{ item.url|default(item.name) }}/{{ current_language }}/{{ pagename }}.html"
+             data-version-url="{{ item.url|default(item.name) }}">
+             {{ item.name|default(item.url) }}
           </a>
         </li>
         {%- endfor %}

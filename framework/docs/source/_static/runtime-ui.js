@@ -5,9 +5,27 @@
     if (!Array.isArray(rawVersions)) {
       return [];
     }
-    return rawVersions.filter(
-      (item) => item && typeof item.name === "string" && item.name.trim() !== "",
-    );
+    return rawVersions
+      .map((item) => {
+        if (typeof item === "string" && item.trim() !== "") {
+          return { name: item.trim(), url: item.trim() };
+        }
+        if (!item || typeof item !== "object") {
+          return null;
+        }
+
+        const rawName = typeof item.name === "string" ? item.name.trim() : "";
+        const rawUrl = typeof item.url === "string" ? item.url.trim() : "";
+        const name = rawName || rawUrl;
+        const url = rawUrl || rawName;
+
+        if (!name || !url) {
+          return null;
+        }
+
+        return { name, url };
+      })
+      .filter((item) => item !== null);
   }
 
   function getVersioningContainer() {
@@ -40,9 +58,16 @@
     return versioningContainer.dataset.currentVersion || "";
   }
 
-  async function checkPageExistence(versionName, currentLanguage, pagename, docsBaseUrl) {
-    const newUrl = `${docsBaseUrl}/${versionName}/${currentLanguage}/${pagename}.html`;
-    const fallbackUrl = `${docsBaseUrl}/${versionName}/${currentLanguage}/index.html#references`;
+  function getCurrentVersionLabel(versioningContainer) {
+    if (!versioningContainer) {
+      return "";
+    }
+    return versioningContainer.dataset.currentVersionLabel || "";
+  }
+
+  async function checkPageExistence(versionUrl, currentLanguage, pagename, docsBaseUrl) {
+    const newUrl = `${docsBaseUrl}/${versionUrl}/${currentLanguage}/${pagename}.html`;
+    const fallbackUrl = `${docsBaseUrl}/${versionUrl}/${currentLanguage}/index.html#references`;
 
     try {
       const response = await fetch(newUrl);
@@ -62,18 +87,18 @@
     const currentLanguage = versioningContainer.dataset.currentLanguage || "en";
     const pagename = versioningContainer.dataset.pagename || "index";
 
-    const links = versioningContainer.querySelectorAll("a[data-version-name]");
+    const links = versioningContainer.querySelectorAll("a[data-version-url]");
     links.forEach((link) => {
       if (link.dataset.boundVersionClick === "true") {
         return;
       }
-      const versionName = link.dataset.versionName;
-      if (!versionName) {
+      const versionUrl = link.dataset.versionUrl;
+      if (!versionUrl) {
         return;
       }
       link.addEventListener("click", (event) => {
         event.preventDefault();
-        checkPageExistence(versionName, currentLanguage, pagename, docsBaseUrl);
+        checkPageExistence(versionUrl, currentLanguage, pagename, docsBaseUrl);
       });
       link.dataset.boundVersionClick = "true";
     });
@@ -98,8 +123,8 @@
     versions.forEach((item) => {
       const li = document.createElement("li");
       const link = document.createElement("a");
-      link.href = `${docsBaseUrl}/${item.name}/${currentLanguage}/${pagename}.html`;
-      link.dataset.versionName = item.name;
+      link.href = `${docsBaseUrl}/${item.url}/${currentLanguage}/${pagename}.html`;
+      link.dataset.versionUrl = item.url;
       link.textContent = item.name;
       li.appendChild(link);
       list.appendChild(li);
@@ -137,8 +162,17 @@
 
   function getLatestStableVersion(versions) {
     for (const version of versions) {
-      if (version && version.name && version.name !== "main") {
+      if (version && version.url && version.url !== "main") {
         return version.name;
+      }
+    }
+    return "";
+  }
+
+  function getLatestStableVersionUrl(versions) {
+    for (const version of versions) {
+      if (version && version.url && version.url !== "main") {
+        return version.url;
       }
     }
     return "";
@@ -159,13 +193,16 @@
     }
 
     const currentVersion = getCurrentVersion(versioningContainer);
+    const currentVersionLabel = getCurrentVersionLabel(versioningContainer) || currentVersion;
     const latestStableVersion = getLatestStableVersion(versions);
+    const latestStableVersionUrl = getLatestStableVersionUrl(versions);
 
     if (
       !currentVersion ||
       !latestStableVersion ||
+      !latestStableVersionUrl ||
       currentVersion === "main" ||
-      currentVersion === latestStableVersion
+      currentVersion === latestStableVersionUrl
     ) {
       return;
     }
@@ -180,14 +217,14 @@
 
     const message = document.createElement("span");
     message.className = "flwr-old-version-banner__text";
-    message.innerHTML = `This is documentation for an old version (<strong>${currentVersion}</strong>).`;
+    message.innerHTML = `This is documentation for an old version (<strong>${currentVersionLabel}</strong>).`;
 
     const action = document.createElement("button");
     action.type = "button";
     action.className = "flwr-old-version-banner__action";
     action.textContent = "Switch to stable version";
     action.addEventListener("click", () => {
-      checkPageExistence(latestStableVersion, currentLanguage, pagename, docsBaseUrl);
+      checkPageExistence(latestStableVersionUrl, currentLanguage, pagename, docsBaseUrl);
     });
 
     const close = document.createElement("button");

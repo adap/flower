@@ -48,7 +48,7 @@ jobs:
           git checkout origin/main -- \
             framework/docs/source/conf_base.py \
             framework/docs/source/docs-ui-config.json \
-            framework/docs/source/_templates/sidebar/versioning.html \
+            framework/docs/source/_templates/ \
             framework/docs/source/_static/runtime-ui.js \
             framework/docs/generate-runtime-ui-config.py
       - name: Resolve docs version
@@ -59,7 +59,7 @@ jobs:
           if [ "$ref" = "main" ]; then
             echo "version=main" >> "$GITHUB_OUTPUT"
           elif [[ "$ref" =~ ^release/framework-([0-9]+)\.([0-9]+)$ ]]; then
-            echo "version=v${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.x" >> "$GITHUB_OUTPUT"
+            echo "version=${BASH_REMATCH[1]}.${BASH_REMATCH[2]}" >> "$GITHUB_OUTPUT"
           else
             echo "Unsupported branch: $ref" >&2
             exit 1
@@ -75,7 +75,7 @@ jobs:
         id: latest_check
         run: |
           # Get all framework version tags and find the latest one
-          all_versions=$(git tag -l 'v*.*.*' 'framework-v*.*.*' | sed 's/framework-v/v/' | sed 's/^v//' | sort -V)
+          all_versions=$(git tag -l 'v*.*.*' 'framework-*.*.*' | sed 's/framework-/v/' | sed 's/^v//' | sort -V)
           latest_version=$(echo "$all_versions" | tail -n 1)
           latest_major_minor=$(echo "$latest_version" | cut -d. -f1-2)
 
@@ -111,8 +111,8 @@ jobs:
             echo "Deploying latest stable version (${DOC_VERSION}) English docs to root"
             aws s3 sync --delete --exclude ".*" --cache-control "no-cache" ./framework/docs/build/html/${DOC_VERSION}/en/ s3://${{ secrets.DOCS_AWS_BUCKET_NAME }}/docs/framework/
           fi
-      - name: Deploy shared runtime metadata
-        if: ${{ github.repository == 'adap/flower' && (github.ref == 'refs/heads/main' || steps.latest_check.outputs.is_latest == 'true') }}
+      - name: Deploy shared runtime metadata from main
+        if: ${{ github.repository == 'adap/flower' && github.ref == 'refs/heads/main'}}
         env:
           AWS_DEFAULT_REGION: ${{ secrets.DOCS_AWS_DEFAULT_REGION }}
           AWS_ACCESS_KEY_ID: ${{ secrets.DOCS_AWS_ACCESS_KEY_ID }}

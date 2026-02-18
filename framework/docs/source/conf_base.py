@@ -21,7 +21,6 @@ import sys
 from git import Repo
 from packaging.version import InvalidVersion, Version
 
-
 # Configuration file for the Sphinx documentation builder.
 #
 # This file only contains a selection of the most common options. For a full
@@ -34,13 +33,6 @@ sys.path.insert(0, os.path.abspath("../../py"))
 
 # -- Versioning switcher -----------------------------------------------------
 
-# The minimum version to be included in the version switcher
-MIN_VERSION = Version("1.8.0")
-
-# Starting from this version, we will use the minor version label (e.g. v1.21.x) instead
-# of the full version (e.g. v1.21.0) in the version switcher dropdown in the docs.
-MINOR_LABEL_FROM = Version("1.21.0")
-
 html_context = dict()
 
 # Make current language accessible for the html templates
@@ -51,22 +43,10 @@ else:
 html_context["current_language"] = current_language
 
 # Shared runtime metadata (versions + announcement) used by all docs versions.
-DOCS_RUNTIME_CONFIG_URL = os.getenv(
+html_context["docs_runtime_config_url"] = os.getenv(
     "FLWR_DOCS_RUNTIME_CONFIG_URL",
     "https://flower.ai/docs/framework-config/runtime-ui.json",
 )
-html_context["docs_runtime_config_url"] = DOCS_RUNTIME_CONFIG_URL
-
-
-def _display_version(version: str) -> str:
-    try:
-        if (ver := Version(version)) >= MINOR_LABEL_FROM:
-            return f"v{ver.release[0]}.{ver.release[1]}.x"
-    except InvalidVersion:
-        # If the version string cannot be parsed, fall back to the original value.
-        pass
-    return version
-
 
 # Make current version accessible for the html templates
 repo = Repo(search_parent_directories=True)
@@ -79,35 +59,22 @@ else:
     local = True
     current_version = repo.active_branch.name
 
+# Derive full name for the current version (e.g., v1.26.x)
+try:
+    ver = Version(current_version)
+    full_name = f"v{ver.release[0]}.{ver.release[1]}.x"
+except InvalidVersion:
+    full_name = current_version
+
+
 # Format current version for the html templates
-html_context["current_version"] = {}
-display_version = _display_version(current_version)
-html_context["current_version"]["url"] = display_version
-html_context["current_version"]["full_name"] = display_version
+html_context["current_version"] = {
+    "url": current_version,
+    "full_name": full_name,
+}
 
-# Make version list accessible for the html templates
-html_context["versions"] = [{"name": "main"}]  # Ensure "main" appears first
-versions: list[Version] = []
-for tag in repo.tags:
-    # Filter framework tags (starting with `v`/`framework-v`)
-    if tag.name.startswith("framework-v") or tag.name.startswith("v"):
-        ver = Version(tag.name.split("v")[-1])
-        if ver < MIN_VERSION:
-            continue
-        versions.append(ver)
-versions.sort(reverse=True)  # Latest version tags first
-
-added_version_names: set[str] = {"main"}
-for ver in versions:
-    # Get display name
-    if ver >= MINOR_LABEL_FROM:
-        name = f"v{ver.release[0]}.{ver.release[1]}.x"
-    else:
-        name = f"v{ver}"
-    # Add to versions list if not already added
-    if name not in added_version_names:
-        html_context["versions"].append({"name": name})
-        added_version_names.add(name)
+# Keep sidebar templates enabled; runtime JSON provides the authoritative list.
+html_context["versions"] = [{"name": "main", "url": "main"}]
 
 
 # -- Translation options -----------------------------------------------------

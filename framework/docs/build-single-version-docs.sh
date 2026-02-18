@@ -6,7 +6,7 @@ if [ -n "$1" ]; then
 fi
 
 if [ -z "$DOC_VERSION" ]; then
-  echo "DOC_VERSION is required (e.g. main or v1.26.x)" >&2
+  echo "DOC_VERSION is required (e.g. main or v1.26)" >&2
   exit 1
 fi
 

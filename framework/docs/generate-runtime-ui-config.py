@@ -18,9 +18,15 @@ def _display_version(version: Version) -> str:
     return f"v{version}"
 
 
+def _version_url(version: Version) -> str:
+    if version >= MINOR_LABEL_FROM:
+        return f"{version.release[0]}.{version.release[1]}"
+    return f"v{version}"
+
+
 def _collect_versions() -> list[dict[str, str]]:
     tags = subprocess.run(
-        ["git", "tag", "-l", "v*.*.*", "framework-v*.*.*"],
+        ["git", "tag", "-l", "v*.*.*", "framework-*.*.*"],
         check=True,
         capture_output=True,
         text=True,
@@ -38,13 +44,13 @@ def _collect_versions() -> list[dict[str, str]]:
 
     versions.sort(reverse=True)
 
-    version_items = [{"name": "main"}]
+    version_items = [{"name": "main", "url": "main"}]
     added_names = {"main"}
     for version in versions:
         name = _display_version(version)
         if name in added_names:
             continue
-        version_items.append({"name": name})
+        version_items.append({"name": name, "url": _version_url(version)})
         added_names.add(name)
 
     return version_items
