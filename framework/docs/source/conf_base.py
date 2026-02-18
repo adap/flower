@@ -50,6 +50,13 @@ else:
     current_language = "en"
 html_context["current_language"] = current_language
 
+# Shared runtime metadata (versions + announcement) used by all docs versions.
+DOCS_RUNTIME_CONFIG_URL = os.getenv(
+    "FLWR_DOCS_RUNTIME_CONFIG_URL",
+    "https://flower.ai/docs/framework-config/runtime-ui.json",
+)
+html_context["docs_runtime_config_url"] = DOCS_RUNTIME_CONFIG_URL
+
 
 def _display_version(version: str) -> str:
     try:
@@ -325,12 +332,7 @@ html_theme_options = {
     #     "color-brand-content": "#292F36",
     #     "color-admonition-background": "#F2B705",
     # },
-    "announcement": (
-        "<a href='https://flower.ai/events/flower-ai-summit-2026/'>"
-        "<strong style='color: #f2b705;'>👉 Register now</strong></a> "
-        "for Flower AI Summit 2026!<br />"
-        "April 15-16, 🇬🇧 London"
-    ),
+    "announcement": "<span id='flwr-runtime-announcement'></span>",
     "light_logo": "flower-logo-light.png",
     "dark_logo": "flower-logo-dark.png",
     "light_css_variables": {
@@ -369,6 +371,7 @@ html_theme_options = {
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
 html_css_files = ["custom.css"]
+html_js_files = ["runtime-ui.js"]
 
 # Set modules for custom sidebar
 html_sidebars = {

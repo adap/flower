@@ -40,12 +40,17 @@ jobs:
         run: |
           cd framework
           python -m poetry install
-      - name: Use conf_base.py from main for release branches
+      - name: Use shared docs runtime files from main for release branches
         if: ${{ startsWith(github.ref, 'refs/heads/release/framework-') }}
         run: |
-          echo "Using conf_base.py from main branch for release branch"
+          echo "Using shared runtime docs files from main branch for release branch"
           git fetch origin main
-          git checkout origin/main -- framework/docs/source/conf_base.py
+          git checkout origin/main -- \
+            framework/docs/source/conf_base.py \
+            framework/docs/source/docs-ui-config.json \
+            framework/docs/source/_templates/sidebar/versioning.html \
+            framework/docs/source/_static/runtime-ui.js \
+            framework/docs/generate-runtime-ui-config.py
       - name: Resolve docs version
         id: doc_version
         shell: bash
@@ -84,8 +89,14 @@ jobs:
             echo "is_latest=false" >> "$GITHUB_OUTPUT"
             echo "Not the latest stable version. Current: $current_branch, Latest: $latest_major_minor"
           fi
-      - name: Deploy docs
-        if: ${{ github.event_name == 'push' && github.repository == 'adap/flower' }}
+      - name: Generate runtime docs metadata
+        if: ${{ github.ref == 'refs/heads/main' || steps.latest_check.outputs.is_latest == 'true' }}
+        run: |
+          python ./framework/docs/generate-runtime-ui-config.py \
+            --ui-config ./framework/docs/source/docs-ui-config.json \
+            --output ./framework/docs/build/runtime/runtime-ui.json
+      - name: Deploy docs HTML
+        if: ${{ github.repository == 'adap/flower' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') }}
         env:
           AWS_DEFAULT_REGION: ${{ secrets.DOCS_AWS_DEFAULT_REGION }}
           AWS_ACCESS_KEY_ID: ${{ secrets.DOCS_AWS_ACCESS_KEY_ID }}
@@ -100,3 +111,11 @@ jobs:
             echo "Deploying latest stable version (${DOC_VERSION}) English docs to root"
             aws s3 sync --delete --exclude ".*" --cache-control "no-cache" ./framework/docs/build/html/${DOC_VERSION}/en/ s3://${{ secrets.DOCS_AWS_BUCKET_NAME }}/docs/framework/
           fi
+      - name: Deploy shared runtime metadata
+        if: ${{ github.repository == 'adap/flower' && (github.ref == 'refs/heads/main' || steps.latest_check.outputs.is_latest == 'true') }}
+        env:
+          AWS_DEFAULT_REGION: ${{ secrets.DOCS_AWS_DEFAULT_REGION }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.DOCS_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.DOCS_AWS_SECRET_KEY_ID }}
+        run: |
+          aws s3 cp --cache-control "no-cache" ./framework/docs/build/runtime/runtime-ui.json s3://${{ secrets.DOCS_AWS_BUCKET_NAME }}/docs/framework-config/runtime-ui.json
