@@ -30,6 +30,8 @@ from parameterized import parameterized
 
 from flwr.common import ConfigRecord, now
 from flwr.common.constant import (
+    FEDERATION_COULD_NOT_BE_ARCHIVED_MESSAGE,
+    FEDERATION_COULD_NOT_BE_CREATED_MESSAGE,
     NODE_NOT_FOUND_MESSAGE,
     PUBLIC_KEY_ALREADY_IN_USE_MESSAGE,
     PUBLIC_KEY_NOT_VALID,
@@ -38,6 +40,8 @@ from flwr.common.constant import (
 )
 from flwr.common.typing import Run, RunStatus
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
+    ArchiveFederationRequest,
+    CreateFederationRequest,
     ListNodesRequest,
     ListNodesResponse,
     ListRunsRequest,
@@ -319,6 +323,96 @@ class TestControlServicer(unittest.TestCase):
         # Assert
         self.assertLess(abs(retrieved_timestamp - now().timestamp()), 1e-3)
         self.assertEqual(response.federation.name, NOOP_FEDERATION)
+
+    def test_create_federation_success(self) -> None:
+        """Test CreateFederation succeeds when federation_manager.create_federation
+        works."""
+        # Prepare
+        name = "test-federation"
+        description = "A test federation"
+        request = CreateFederationRequest(
+            name=name,
+            description=description,
+        )
+        mock_federation = SimpleNamespace(name=name, description=description)
+
+        # Execute
+        with patch.object(
+            self.state.federation_manager,
+            "create_federation",
+            return_value=mock_federation,
+        ) as mock_create:
+            response = self.servicer.CreateFederation(request, Mock())
+
+        # Assert
+        mock_create.assert_called_once_with(
+            name=name,
+            description=description,
+            flwr_aid=self.aid,
+        )
+        self.assertEqual(response.federation.name, name)
+        self.assertEqual(response.federation.description, description)
+
+    def test_create_federation_fails_on_manager_error(self) -> None:
+        """Test CreateFederation aborts when federation_manager.create_federation
+        raises."""
+        # Prepare
+        name = "test-federation"
+        description = "A test federation"
+        request = CreateFederationRequest(
+            name=name,
+            description=description,
+        )
+        mock_context = Mock()
+        mock_context.abort.side_effect = grpc.RpcError()
+
+        # Execute & Assert
+        with self.assertRaises(grpc.RpcError):
+            self.servicer.CreateFederation(request, mock_context)
+
+        mock_context.abort.assert_called_once_with(
+            grpc.StatusCode.FAILED_PRECONDITION,
+            FEDERATION_COULD_NOT_BE_CREATED_MESSAGE % name,
+        )
+
+    def test_archive_federation_success(self) -> None:
+        """Test ArchiveFederation succeeds when federation_manager.archive_federation
+        works."""
+        # Prepare
+        request = ArchiveFederationRequest(federation_name="test-federation")
+
+        # Execute
+        with patch.object(
+            self.state.federation_manager,
+            "archive_federation",
+            return_value=None,
+        ) as mock_archive:
+            response = self.servicer.ArchiveFederation(request, Mock())
+
+        # Assert
+        mock_archive.assert_called_once_with(
+            flwr_aid=self.aid,
+            name="test-federation",
+        )
+        self.assertIsNotNone(response)
+
+    def test_archive_federation_fails_on_manager_error(self) -> None:
+        """Test ArchiveFederation aborts when federation_manager.archive_federation
+        raises."""
+        # Prepare
+        name = "test-federation"
+        request = ArchiveFederationRequest(federation_name=name)
+        mock_context = Mock()
+        mock_context.abort.side_effect = grpc.RpcError()
+
+        # Execute & Assert
+        with self.assertRaises(grpc.RpcError):
+            self.servicer.ArchiveFederation(request, mock_context)
+
+        mock_context.abort.assert_called_once_with(
+            grpc.StatusCode.FAILED_PRECONDITION,
+            FEDERATION_COULD_NOT_BE_ARCHIVED_MESSAGE % name,
+        )
 
 
 class TestControlServicerAuth(unittest.TestCase):
