@@ -41,7 +41,7 @@ jobs:
           cd framework
           python -m poetry install
       - name: Use shared docs runtime files from main for release branches
-        if: ${{ startsWith(github.ref, 'refs/heads/release/framework-') }}
+        if: ${{ startsWith(github.ref, 'refs/heads/release/framework-') || (github.event_name == 'pull_request' && startsWith(github.base_ref, 'release/framework-')) }}
         run: |
           echo "Using shared runtime docs files from main branch for release branch"
           git fetch origin main
@@ -52,7 +52,12 @@ jobs:
         id: doc_version
         shell: bash
         run: |
-          ref="${GITHUB_REF#refs/heads/}"
+          if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
+            ref="${GITHUB_BASE_REF}"
+          else
+            ref="${GITHUB_REF#refs/heads/}"
+          fi
+
           if [ "$ref" = "main" ]; then
             echo "version=main" >> "$GITHUB_OUTPUT"
           elif [[ "$ref" =~ ^release/framework-([0-9]+)\.([0-9]+)$ ]]; then
