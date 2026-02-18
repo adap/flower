@@ -7,12 +7,14 @@ on:
       - release/framework-*
     paths:
       - framework/docs/**
+      - .github/workflows/framework-docs.yml
   pull_request:
     branches:
       - main
       - release/framework-*
     paths:
       - framework/docs/**
+      - .github/workflows/framework-docs.yml
   workflow_dispatch:
 
 concurrency:
@@ -41,19 +43,23 @@ jobs:
           cd framework
           python -m poetry install
       - name: Use shared docs runtime files from main for release branches
-        if: ${{ startsWith(github.ref, 'refs/heads/release/framework-') }}
+        if: ${{ startsWith(github.ref, 'refs/heads/release/framework-') || (github.event_name == 'pull_request' && startsWith(github.base_ref, 'release/framework-')) }}
         run: |
           echo "Using shared runtime docs files from main branch for release branch"
           git fetch origin main
           git checkout origin/main -- \
             framework/docs/source/conf_base.py \
-            framework/docs/source/_templates/ \
-            framework/docs/source/_static/runtime-ui.js
+            framework/docs/source/_templates/
       - name: Resolve docs version
         id: doc_version
         shell: bash
         run: |
-          ref="${GITHUB_REF#refs/heads/}"
+          if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
+            ref="${GITHUB_BASE_REF}"
+          else
+            ref="${GITHUB_REF#refs/heads/}"
+          fi
+
           if [ "$ref" = "main" ]; then
             echo "version=main" >> "$GITHUB_OUTPUT"
           elif [[ "$ref" =~ ^release/framework-([0-9]+)\.([0-9]+)$ ]]; then
@@ -69,7 +75,7 @@ jobs:
           echo "Building docs for version: ${DOC_VERSION}"
           ./framework/docs/build-single-version-docs.sh
       - name: Determine if this is the latest stable version
-        if: ${{ github.event_name == 'push' && github.repository == 'adap/flower' && startsWith(github.ref, 'refs/heads/release/framework-') }}
+        if: ${{ github.repository == 'adap/flower' && startsWith(github.ref, 'refs/heads/release/framework-') && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') }}
         id: latest_check
         run: |
           # Get all framework version tags and find the latest one
