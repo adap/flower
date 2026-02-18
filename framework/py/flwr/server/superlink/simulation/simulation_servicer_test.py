@@ -23,12 +23,13 @@ import grpc
 from parameterized import parameterized
 
 from flwr.common import ConfigRecord, Context
-from flwr.common.constant import SIMULATIONIO_API_DEFAULT_SERVER_ADDRESS, Status
 from flwr.common.constant import (
-    ExecPluginType,
+    SIMULATIONIO_API_DEFAULT_SERVER_ADDRESS,
     SUPEREXEC_PUBLIC_KEY_HEADER,
     SUPEREXEC_SIGNATURE_HEADER,
     SUPEREXEC_TIMESTAMP_HEADER,
+    ExecPluginType,
+    Status,
 )
 from flwr.common.serde import context_to_proto, run_status_to_proto
 from flwr.common.serde_test import RecordMaker
@@ -384,6 +385,8 @@ class TestSimulationIoServicerSuperExecAuth(unittest.TestCase):
         with self.assertRaises(grpc.RpcError) as err:
             self._get_run.with_call(
                 request=GetRunRequest(run_id=run_id, token=token),
-                metadata=self._make_superexec_metadata("/flwr.proto.SimulationIo/GetRun"),
+                metadata=self._make_superexec_metadata(
+                    "/flwr.proto.SimulationIo/GetRun"
+                ),
             )
         assert err.exception.code() == grpc.StatusCode.INVALID_ARGUMENT

@@ -21,7 +21,7 @@ from logging import DEBUG, ERROR, INFO
 import grpc
 
 from flwr.common import Message
-from flwr.common.constant import ExecPluginType, SUPERLINK_NODE_ID, Status
+from flwr.common.constant import SUPERLINK_NODE_ID, ExecPluginType, Status
 from flwr.common.inflatable import (
     UnexpectedObjectContentError,
     get_all_nested_objects,
@@ -104,6 +104,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         objectstore_factory: ObjectStoreFactory,
         superexec_auth_config: SuperExecAuthConfig | None = None,
     ) -> None:
+        """Initialize ServerAppIo servicer dependencies and auth settings."""
         self.state_factory = state_factory
         self.ffs_factory = ffs_factory
         self.objectstore_factory = objectstore_factory
@@ -584,6 +585,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     def _verify_superexec_auth_if_enabled(
         self, context: grpc.ServicerContext, method: str
     ) -> None:
+        """Verify SuperExec signed metadata when SuperExec auth is enabled."""
         if not self.superexec_auth_config.enabled:
             return
         verify_superexec_signed_metadata(
@@ -596,6 +598,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     def _verify_get_run_auth_if_enabled(
         self, request: GetRunRequest, context: grpc.ServicerContext, method: str
     ) -> None:
+        """Authorize GetRun with one mechanism when SuperExec auth is enabled."""
         if not self.superexec_auth_config.enabled:
             # Legacy behavior by design: when SuperExec auth is disabled, GetRun
             # remains unauthenticated and tokenless requests are allowed.

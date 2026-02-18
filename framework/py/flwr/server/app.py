@@ -794,9 +794,9 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
 def _validate_superexec_auth_settings(
     args: argparse.Namespace, superexec_auth_config: SuperExecAuthConfig
 ) -> None:
-    if (
-        getattr(args, "auth_superexec_private_key", None)
-        and not getattr(args, "superexec_auth_config", None)
+    """Validate SuperExec auth CLI settings and emit startup auth status logs."""
+    if getattr(args, "auth_superexec_private_key", None) and not getattr(
+        args, "superexec_auth_config", None
     ):
         flwr_exit(
             ExitCode.SUPERLINK_INVALID_ARGS,
@@ -804,9 +804,8 @@ def _validate_superexec_auth_settings(
             "`--superexec-auth-config`.",
         )
 
-    if (
-        args.isolation == ISOLATION_MODE_PROCESS
-        and getattr(args, "auth_superexec_private_key", None)
+    if args.isolation == ISOLATION_MODE_PROCESS and getattr(
+        args, "auth_superexec_private_key", None
     ):
         log(
             WARN,
@@ -826,9 +825,8 @@ def _validate_superexec_auth_settings(
 
     log(INFO, "SuperExec authentication is enabled for AppIO APIs.")
 
-    if (
-        args.isolation == ISOLATION_MODE_SUBPROCESS
-        and not getattr(args, "auth_superexec_private_key", None)
+    if args.isolation == ISOLATION_MODE_SUBPROCESS and not getattr(
+        args, "auth_superexec_private_key", None
     ):
         flwr_exit(
             ExitCode.SUPERLINK_INVALID_ARGS,

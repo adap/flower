@@ -79,6 +79,7 @@ class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
         ffs_factory: FfsFactory,
         superexec_auth_config: SuperExecAuthConfig | None = None,
     ) -> None:
+        """Initialize SimulationIo servicer dependencies and auth settings."""
         self.state_factory = state_factory
         self.ffs_factory = ffs_factory
         self.superexec_auth_config = (
@@ -295,6 +296,7 @@ class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
     def _verify_token_for_run(
         self, token: str, run_id: int, context: grpc.ServicerContext
     ) -> None:
+        """Verify token and ensure it belongs to the provided run ID."""
         token_run_id = self._verify_token(token, context)
         if token_run_id != run_id:
             context.abort(
@@ -306,6 +308,7 @@ class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
     def _verify_superexec_auth_if_enabled(
         self, context: grpc.ServicerContext, method: str
     ) -> None:
+        """Verify SuperExec signed metadata when SuperExec auth is enabled."""
         if not self.superexec_auth_config.enabled:
             return
         verify_superexec_signed_metadata(
@@ -318,6 +321,7 @@ class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
     def _verify_get_run_auth_if_enabled(
         self, request: GetRunRequest, context: grpc.ServicerContext, method: str
     ) -> None:
+        """Authorize GetRun with one mechanism when SuperExec auth is enabled."""
         if not self.superexec_auth_config.enabled:
             # Legacy behavior by design: when SuperExec auth is disabled, GetRun
             # remains unauthenticated and tokenless requests are allowed.

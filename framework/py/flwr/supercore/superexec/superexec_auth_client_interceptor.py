@@ -39,6 +39,7 @@ class SuperExecAuthClientInterceptor(grpc.UnaryUnaryClientInterceptor):  # type:
         private_key: ec.EllipticCurvePrivateKey,
         public_key: ec.EllipticCurvePublicKey,
     ):
+        """Initialize interceptor with SuperExec signing key material."""
         self.private_key = private_key
         self.public_key_bytes = public_key_to_bytes(public_key)
 

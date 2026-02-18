@@ -28,12 +28,12 @@ from cryptography.hazmat.primitives.asymmetric import ec
 
 from flwr.common import now
 from flwr.common.constant import (
-    ExecPluginType,
     SUPEREXEC_PUBLIC_KEY_HEADER,
     SUPEREXEC_SIGNATURE_HEADER,
     SUPEREXEC_TIMESTAMP_HEADER,
     SYSTEM_TIME_TOLERANCE,
     TIMESTAMP_TOLERANCE,
+    ExecPluginType,
 )
 from flwr.supercore.primitives.asymmetric import (
     bytes_to_public_key,
@@ -93,7 +93,7 @@ def load_superexec_auth_config(path: str | None) -> SuperExecAuthConfig:
     if not isinstance(tolerance, int) or tolerance <= 0:
         raise ValueError("`timestamp_tolerance_sec` must be a positive integer.")
 
-    allowed_public_keys = {
+    allowed_public_keys: dict[str, set[bytes]] = {
         ExecPluginType.SERVER_APP: set(),
         ExecPluginType.SIMULATION: set(),
     }
@@ -203,6 +203,7 @@ def verify_superexec_signed_metadata(
 
 
 def _parse_public_key_entry(entry: object) -> tuple[str, set[str]]:
+    """Parse one `public_keys` entry into key text and allowed plugin types."""
     # Shorthand form: a plain public key string is accepted for both plugin types.
     if isinstance(entry, str):
         return entry, set(_DEFAULT_SUPEREXEC_PLUGINS)
@@ -217,26 +218,28 @@ def _parse_public_key_entry(entry: object) -> tuple[str, set[str]]:
 
     # If plugin scope is omitted, default to all supported SuperExec plugin types.
     allowed_plugins_raw = entry.get("allowed_plugins", list(_DEFAULT_SUPEREXEC_PLUGINS))
+    allowed_plugins: set[str]
     if isinstance(allowed_plugins_raw, str):
         allowed_plugins = {allowed_plugins_raw}
     elif isinstance(allowed_plugins_raw, list):
+        if not all(isinstance(plugin, str) for plugin in allowed_plugins_raw):
+            raise ValueError("`allowed_plugins` must contain only strings.")
         allowed_plugins = set(allowed_plugins_raw)
     else:
         raise ValueError("`allowed_plugins` must be a string or list of strings.")
 
     if not allowed_plugins:
         raise ValueError("`allowed_plugins` must not be empty.")
-    if not all(isinstance(plugin, str) for plugin in allowed_plugins):
-        raise ValueError("`allowed_plugins` must contain only strings.")
     # Reject unknown plugin labels early so config failures are explicit.
     if not allowed_plugins.issubset(_DEFAULT_SUPEREXEC_PLUGINS):
         allowed = ", ".join(sorted(_DEFAULT_SUPEREXEC_PLUGINS))
         raise ValueError(f"`allowed_plugins` must only contain: {allowed}.")
 
-    return public_key_str, cast(set[str], allowed_plugins)
+    return public_key_str, allowed_plugins
 
 
 def _parse_and_serialize_public_key(public_key: str) -> bytes:
+    """Parse a configured public key string and return canonical key bytes."""
     key_bytes = public_key.encode("utf-8")
     parsed_key = _load_public_key(key_bytes)
     if not uses_nist_ec_curve(parsed_key):
@@ -245,6 +248,7 @@ def _parse_and_serialize_public_key(public_key: str) -> bytes:
 
 
 def _load_public_key(key_bytes: bytes) -> ec.EllipticCurvePublicKey:
+    """Load an EC public key from SSH or PEM encoded bytes."""
     for loader in (
         serialization.load_ssh_public_key,
         serialization.load_pem_public_key,

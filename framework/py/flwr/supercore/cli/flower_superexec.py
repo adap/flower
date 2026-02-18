@@ -188,6 +188,7 @@ def _get_plugin_and_stub_class(
 def _try_load_superexec_auth_keys(
     key_path: str | None,
 ) -> tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey] | None:
+    """Load a SuperExec EC private key and return the key pair."""
     if key_path is None:
         return None
 
@@ -195,16 +196,16 @@ def _try_load_superexec_auth_keys(
     ssh_err: Exception | None = None
 
     try:
-        private_key = load_ssh_private_key(key_bytes, None)
+        ssh_private_key = load_ssh_private_key(key_bytes, None)
     except (ValueError, UnsupportedAlgorithm) as err:
         ssh_err = err
     else:
-        if isinstance(private_key, ec.EllipticCurvePrivateKey):
-            return private_key, private_key.public_key()
+        if isinstance(ssh_private_key, ec.EllipticCurvePrivateKey):
+            return ssh_private_key, ssh_private_key.public_key()
         raise ValueError("SuperExec key must be an EC private key.")
 
     try:
-        private_key = load_pem_private_key(key_bytes, None)
+        pem_private_key = load_pem_private_key(key_bytes, None)
     except (ValueError, TypeError, UnsupportedAlgorithm):
         source_err = (
             ssh_err if ssh_err is not None else ValueError("Unable to parse key")
@@ -214,6 +215,6 @@ def _try_load_superexec_auth_keys(
             "(accepted formats: SSH EC private key, PEM EC private key)."
         ) from source_err
 
-    if not isinstance(private_key, ec.EllipticCurvePrivateKey):
+    if not isinstance(pem_private_key, ec.EllipticCurvePrivateKey):
         raise ValueError("SuperExec key must be an EC private key.")
-    return private_key, private_key.public_key()
+    return pem_private_key, pem_private_key.public_key()

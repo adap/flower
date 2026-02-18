@@ -21,9 +21,9 @@ from unittest.mock import patch
 import pytest
 
 from flwr.common.constant import (
-    ExecPluginType,
     ISOLATION_MODE_PROCESS,
     ISOLATION_MODE_SUBPROCESS,
+    ExecPluginType,
 )
 from flwr.common.exit import ExitCode
 from flwr.server.app import _validate_superexec_auth_settings

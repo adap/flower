@@ -2,9 +2,9 @@
 .. meta::
     :description: Configure SuperExec authentication in Flower using signed metadata and a SuperExec auth YAML file.
 
-########################
+#########################
  Authenticate SuperExecs
-########################
+#########################
 
 This guide explains how SuperExec authentication works for AppIO RPCs and how to create
 ``superexec_auth_config.yaml``.
@@ -17,9 +17,9 @@ At a high level, authentication is signature-based:
 - Authorization is controlled by ``public_keys`` entries in
   ``superexec_auth_config.yaml``.
 
-*************************
+**************************
  Runtime behavior summary
-*************************
+**************************
 
 When SuperExec auth is enabled, SuperLink enforces the following on protected AppIO
 calls:
@@ -33,32 +33,26 @@ Current AppIO behavior:
 
 - ``ListAppsToLaunch``: SuperExec signed metadata required (when enabled)
 - ``RequestToken``: SuperExec signed metadata required (when enabled)
-- ``GetRun``: exactly one auth mechanism when enabled:
-  - valid run token, or
-  - valid SuperExec signed metadata
+- ``GetRun``: exactly one auth mechanism when enabled: - valid run token, or - valid
+  SuperExec signed metadata
 
 If you do not pass ``--superexec-auth-config`` to ``flower-superlink``, SuperExec auth
 is disabled.
 
-*******************************
+********************************
  ``superexec_auth_config.yaml``
-*******************************
+********************************
 
 Supported fields:
 
-- ``enabled`` (bool, optional)
-  - default: ``true`` when the file is provided
-  - set to ``false`` to keep SuperExec auth configured but disabled
-- ``timestamp_tolerance_sec`` (int, optional)
-  - default: ``300``
-  - maximum age allowed for signed timestamps (clock drift allowance is also applied)
-- ``public_keys`` (list, optional but required when ``enabled: true``)
-  - list of authorized SuperExec public keys
-  - each entry is either:
-    - a string (public key, authorized for all supported plugin types), or
-    - a mapping with:
-      - ``public_key`` (string, required)
-      - ``allowed_plugins`` (string or list of strings, optional)
+- ``enabled`` (bool, optional): default is ``true`` when the file is provided. Set to
+  ``false`` to keep config present but disable SuperExec auth checks.
+- ``timestamp_tolerance_sec`` (int, optional): default is ``300``. Sets the maximum
+  accepted age for signed timestamps (clock drift allowance is also applied).
+- ``public_keys`` (list, optional but required when ``enabled: true``): list of
+  authorized SuperExec public keys. Each item must be either: ``"<public-key-string>"``
+  (key allowed for all supported plugin types), or a mapping with ``public_key``
+  (required) and ``allowed_plugins`` (optional string or list).
 
 Allowed plugin labels in ``allowed_plugins``:
 
@@ -70,25 +64,23 @@ Public key requirements:
 - key must be an EC public key on a NIST curve
 - SSH public key and PEM public key formats are accepted
 
-*************************************
+**************************************
  Key scope: all plugins vs per-plugin
-*************************************
+**************************************
 
 You can authorize keys in two ways:
 
-- One key for all plugin types
-  - easier key management
-  - less separation between ``serverapp`` and ``simulation`` identities
-- Different keys per plugin type
-  - stronger separation of identities and permissions
-  - more operational overhead (more keys to manage/rotate)
+- One key for all plugin types - easier key management - less separation between
+  ``serverapp`` and ``simulation`` identities
+- Different keys per plugin type - stronger separation of identities and permissions -
+  more operational overhead (more keys to manage/rotate)
 
 If you are starting simple, one shared key is usually acceptable. If you need stronger
 control boundaries, use per-plugin keys.
 
-**************
+***************
  YAML examples
-**************
+***************
 
 Shared key for both ``serverapp`` and ``simulation``:
 
@@ -123,9 +115,9 @@ Disabled (explicit):
     timestamp_tolerance_sec: 300
     public_keys: []
 
-**************
+***************
  Launching CLI
-**************
+***************
 
 Subprocess isolation (SuperLink spawns SuperExec):
 
@@ -163,11 +155,12 @@ Important:
   ``flower-superlink`` does not configure an external SuperExec process
 - pass the private key directly to each external ``flower-superexec``
 
-**********************
+*****************************
  Common configuration errors
-**********************
+*****************************
 
-- ``enabled: true`` but no ``public_keys``: SuperLink exits with invalid configuration
+Some common configuration errors to watch out for:
+
 - invalid key format or unsupported curve: SuperLink rejects the key
 - unknown ``allowed_plugins`` value: SuperLink rejects the config
-
+- if enabled: true but no public keys provided: SuperLink rejects the config

@@ -77,6 +77,9 @@ def run_superexec(  # pylint: disable=R0913,R0914,R0917
     health_server_address : Optional[str] (default: None)
         The address of the health server. If `None` is provided, the health server will
         NOT be started.
+    auth_keys : Optional[tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]]
+        SuperExec private/public key pair used to sign AppIO requests with metadata.
+        If `None`, no SuperExec signed metadata interceptor is attached.
     """
     # Start monitoring the parent process if a PID is provided
     if parent_pid is not None:
