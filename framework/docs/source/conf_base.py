@@ -303,7 +303,7 @@ html_theme_options = {
     #     "color-admonition-background": "#F2B705",
     # },
     "announcement": (
-        "<a href='https://flower.ai/events/flower-ai-summit-2026/'>"
+        "<a href='https://flower.ai/events/flower-ai-summit-2026/?utm_source=docs'>"
         "<strong style='color: #f2b705;'>👉 Register now</strong></a> "
         "for Flower AI Summit 2026!<br />"
         "April 15-16, 🇬🇧 London"
