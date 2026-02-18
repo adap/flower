@@ -73,7 +73,7 @@ jobs:
           echo "Building docs for version: ${DOC_VERSION}"
           ./framework/docs/build-single-version-docs.sh
       - name: Determine if this is the latest stable version
-        if: ${{ github.event_name == 'push' && github.repository == 'adap/flower' && startsWith(github.ref, 'refs/heads/release/framework-') }}
+        if: ${{ github.repository == 'adap/flower' && startsWith(github.ref, 'refs/heads/release/framework-') && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') }}
         id: latest_check
         run: |
           # Get all framework version tags and find the latest one
