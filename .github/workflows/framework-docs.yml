@@ -7,12 +7,14 @@ on:
       - release/framework-*
     paths:
       - framework/docs/**
+      - .github/workflows/framework-docs.yml
   pull_request:
     branches:
       - main
       - release/framework-*
     paths:
       - framework/docs/**
+      - .github/workflows/framework-docs.yml
   workflow_dispatch:
 
 concurrency:
