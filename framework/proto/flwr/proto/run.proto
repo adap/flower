@@ -52,6 +52,7 @@ message RunStatus {
 message GetRunRequest {
   Node node = 1;
   uint64 run_id = 2;
+  string token = 3;
 }
 message GetRunResponse { Run run = 1; }
 

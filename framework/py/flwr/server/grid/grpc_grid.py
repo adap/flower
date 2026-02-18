@@ -169,7 +169,7 @@ class GrpcGrid(Grid):  # pylint: disable=too-many-instance-attributes
     def set_run(self, run_id: int) -> None:
         """Set the run."""
         # Get the run info
-        req = GetRunRequest(run_id=run_id)
+        req = GetRunRequest(run_id=run_id, token=self._token)
         res: GetRunResponse = self._stub.GetRun(req)
         if not res.HasField("run"):
             raise RuntimeError(f"Cannot find the run with ID: {run_id}")

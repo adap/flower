@@ -26,6 +26,7 @@ from flwr.proto.serverappio_pb2_grpc import (  # pylint: disable=E0611
     add_ServerAppIoServicer_to_server,
 )
 from flwr.server.superlink.linkstate import LinkStateFactory
+from flwr.server.superlink.superexec_auth import SuperExecAuthConfig
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStoreFactory
 
@@ -38,6 +39,7 @@ def run_serverappio_api_grpc(
     ffs_factory: FfsFactory,
     objectstore_factory: ObjectStoreFactory,
     certificates: tuple[bytes, bytes, bytes] | None,
+    superexec_auth_config: SuperExecAuthConfig | None = None,
 ) -> grpc.Server:
     """Run ServerAppIo API (gRPC, request-response)."""
     # Create ServerAppIo API gRPC server
@@ -45,6 +47,7 @@ def run_serverappio_api_grpc(
         state_factory=state_factory,
         ffs_factory=ffs_factory,
         objectstore_factory=objectstore_factory,
+        superexec_auth_config=superexec_auth_config,
     )
     serverappio_add_servicer_to_server_fn = add_ServerAppIoServicer_to_server
     serverappio_grpc_server = generic_create_grpc_server(

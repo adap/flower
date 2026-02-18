@@ -21,7 +21,7 @@ from logging import DEBUG, ERROR, INFO
 import grpc
 
 from flwr.common import Message
-from flwr.common.constant import SUPERLINK_NODE_ID, Status
+from flwr.common.constant import ExecPluginType, SUPERLINK_NODE_ID, Status
 from flwr.common.inflatable import (
     UnexpectedObjectContentError,
     get_all_nested_objects,
@@ -82,6 +82,12 @@ from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     GetNodesResponse,
 )
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
+from flwr.server.superlink.superexec_auth import (
+    SuperExecAuthConfig,
+    get_disabled_superexec_auth_config,
+    superexec_auth_metadata_present,
+    verify_superexec_signed_metadata,
+)
 from flwr.server.superlink.utils import abort_if
 from flwr.server.utils.validator import validate_message
 from flwr.supercore.ffs import FfsFactory
@@ -96,10 +102,14 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         state_factory: LinkStateFactory,
         ffs_factory: FfsFactory,
         objectstore_factory: ObjectStoreFactory,
+        superexec_auth_config: SuperExecAuthConfig | None = None,
     ) -> None:
         self.state_factory = state_factory
         self.ffs_factory = ffs_factory
         self.objectstore_factory = objectstore_factory
+        self.superexec_auth_config = (
+            superexec_auth_config or get_disabled_superexec_auth_config()
+        )
         self.lock = threading.RLock()
 
     def ListAppsToLaunch(
@@ -109,6 +119,9 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     ) -> ListAppsToLaunchResponse:
         """Get run IDs with pending messages."""
         log(DEBUG, "ServerAppIoServicer.ListAppsToLaunch")
+        self._verify_superexec_auth_if_enabled(
+            context=context, method="/flwr.proto.ServerAppIo/ListAppsToLaunch"
+        )
 
         # Initialize state connection
         state = self.state_factory.state()
@@ -128,6 +141,9 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     ) -> RequestTokenResponse:
         """Request token."""
         log(DEBUG, "ServerAppIoServicer.RequestToken")
+        self._verify_superexec_auth_if_enabled(
+            context=context, method="/flwr.proto.ServerAppIo/RequestToken"
+        )
 
         # Initialize state connection
         state = self.state_factory.state()
@@ -302,6 +318,9 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     ) -> GetRunResponse:
         """Get run information."""
         log(DEBUG, "ServerAppIoServicer.GetRun")
+        self._verify_get_run_auth_if_enabled(
+            request=request, context=context, method="/flwr.proto.ServerAppIo/GetRun"
+        )
 
         # Init state
         state: LinkState = self.state_factory.state()
@@ -561,6 +580,46 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
                 "Invalid token for run ID.",
             )
             raise RuntimeError("This line should never be reached.")
+
+    def _verify_superexec_auth_if_enabled(
+        self, context: grpc.ServicerContext, method: str
+    ) -> None:
+        if not self.superexec_auth_config.enabled:
+            return
+        verify_superexec_signed_metadata(
+            context=context,
+            method=method,
+            plugin_type=ExecPluginType.SERVER_APP,
+            cfg=self.superexec_auth_config,
+        )
+
+    def _verify_get_run_auth_if_enabled(
+        self, request: GetRunRequest, context: grpc.ServicerContext, method: str
+    ) -> None:
+        if not self.superexec_auth_config.enabled:
+            # Legacy behavior by design: when SuperExec auth is disabled, GetRun
+            # remains unauthenticated and tokenless requests are allowed.
+            return
+
+        token_present = bool(request.token)
+        signed_metadata_present = superexec_auth_metadata_present(context)
+        if token_present == signed_metadata_present:
+            context.abort(
+                grpc.StatusCode.INVALID_ARGUMENT,
+                "Exactly one authentication mechanism must be provided.",
+            )
+            raise RuntimeError("This line should never be reached.")
+
+        if token_present:
+            self._verify_token_for_run(request.token, request.run_id, context)
+            return
+
+        verify_superexec_signed_metadata(
+            context=context,
+            method=method,
+            plugin_type=ExecPluginType.SERVER_APP,
+            cfg=self.superexec_auth_config,
+        )
 
 
 def _raise_if(validation_error: bool, request_name: str, detail: str) -> None:

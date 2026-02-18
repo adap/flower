@@ -139,6 +139,11 @@ TIMESTAMP_HEADER = "flwr-timestamp"
 TIMESTAMP_TOLERANCE = 300  # General tolerance for timestamp verification
 SYSTEM_TIME_TOLERANCE = 5  # Allowance for system time drift
 
+# Constants for SuperExec authentication
+SUPEREXEC_PUBLIC_KEY_HEADER = "flwr-superexec-public-key-bin"
+SUPEREXEC_SIGNATURE_HEADER = "flwr-superexec-signature-bin"
+SUPEREXEC_TIMESTAMP_HEADER = "flwr-superexec-timestamp"
+
 # Constants for grpc retry
 GRPC_RETRY_MAX_DELAY = 20  # Maximum delay duration between two consecutive retries.
 

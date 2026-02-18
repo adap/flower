@@ -26,7 +26,11 @@ from parameterized import parameterized
 
 from flwr.common import ConfigRecord, Context, Error, Message, RecordDict
 from flwr.common.constant import (
+    ExecPluginType,
     SERVERAPPIO_API_DEFAULT_SERVER_ADDRESS,
+    SUPEREXEC_PUBLIC_KEY_HEADER,
+    SUPEREXEC_SIGNATURE_HEADER,
+    SUPEREXEC_TIMESTAMP_HEADER,
     SUPERLINK_NODE_ID,
     Status,
     SubStatus,
@@ -90,11 +94,17 @@ from flwr.server.superlink.linkstate.linkstate_factory import LinkStateFactory
 from flwr.server.superlink.linkstate.linkstate_test import create_ins_message
 from flwr.server.superlink.serverappio.serverappio_grpc import run_serverappio_api_grpc
 from flwr.server.superlink.serverappio.serverappio_servicer import _raise_if
+from flwr.server.superlink.superexec_auth import SuperExecAuthConfig
 from flwr.server.superlink.utils import _STATUS_TO_MSG
 from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME, NOOP_FEDERATION
 from flwr.supercore.date import now
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStoreFactory
+from flwr.supercore.primitives.asymmetric import (
+    generate_key_pairs,
+    public_key_to_bytes,
+    sign_message,
+)
 from flwr.superlink.federation import NoOpFederationManager
 
 # pylint: disable=broad-except
@@ -1084,3 +1094,133 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         assert grpc.StatusCode.OK == call.code()
         run_status = self.state.get_run_status({run_id})[run_id]
         assert run_status.status == Status.RUNNING
+
+
+class TestServerAppIoServicerSuperExecAuth(unittest.TestCase):
+    """ServerAppIoServicer tests with SuperExec auth enabled."""
+
+    def setUp(self) -> None:
+        """Initialize gRPC server with SuperExec auth enabled."""
+        self.temp_dir = tempfile.TemporaryDirectory()  # pylint: disable=R1732
+        self.addCleanup(self.temp_dir.cleanup)
+
+        objectstore_factory = ObjectStoreFactory()
+        state_factory = LinkStateFactory(
+            FLWR_IN_MEMORY_DB_NAME, NoOpFederationManager(), objectstore_factory
+        )
+        self.state = state_factory.state()
+        ffs_factory = FfsFactory(self.temp_dir.name)
+
+        self.superexec_sk, superexec_pk = generate_key_pairs()
+        self.superexec_pk_bytes = public_key_to_bytes(superexec_pk)
+        superexec_auth_config = SuperExecAuthConfig(
+            enabled=True,
+            timestamp_tolerance_sec=300,
+            allowed_public_keys={
+                ExecPluginType.SERVER_APP: {self.superexec_pk_bytes},
+                ExecPluginType.SIMULATION: set(),
+            },
+        )
+
+        self._server: grpc.Server = run_serverappio_api_grpc(
+            SERVERAPPIO_API_DEFAULT_SERVER_ADDRESS,
+            state_factory,
+            ffs_factory,
+            objectstore_factory,
+            None,
+            superexec_auth_config=superexec_auth_config,
+        )
+
+        self._channel = grpc.insecure_channel("localhost:9091")
+        self._list_apps_to_launch = self._channel.unary_unary(
+            "/flwr.proto.ServerAppIo/ListAppsToLaunch",
+            request_serializer=ListAppsToLaunchRequest.SerializeToString,
+            response_deserializer=ListAppsToLaunchResponse.FromString,
+        )
+        self._request_token = self._channel.unary_unary(
+            "/flwr.proto.ServerAppIo/RequestToken",
+            request_serializer=RequestTokenRequest.SerializeToString,
+            response_deserializer=RequestTokenResponse.FromString,
+        )
+        self._get_run = self._channel.unary_unary(
+            "/flwr.proto.ServerAppIo/GetRun",
+            request_serializer=GetRunRequest.SerializeToString,
+            response_deserializer=GetRunResponse.FromString,
+        )
+
+    def tearDown(self) -> None:
+        """Stop gRPC server."""
+        self._server.stop(None)
+
+    def _create_dummy_run(self, running: bool = False) -> int:
+        run_id = self.state.create_run(
+            "", "", "", {}, NOOP_FEDERATION, ConfigRecord(), ""
+        )
+        if running:
+            self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
+            self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
+        return run_id
+
+    def _make_superexec_metadata(self, method: str) -> list[tuple[str, bytes | str]]:
+        timestamp = now().isoformat()
+        payload = f"{timestamp}\n{method}".encode()
+        signature = sign_message(self.superexec_sk, payload)
+        return [
+            (SUPEREXEC_PUBLIC_KEY_HEADER, self.superexec_pk_bytes),
+            (SUPEREXEC_TIMESTAMP_HEADER, timestamp),
+            (SUPEREXEC_SIGNATURE_HEADER, signature),
+        ]
+
+    def test_list_apps_to_launch_requires_superexec_metadata(self) -> None:
+        """ListAppsToLaunch must reject unsigned calls when auth is enabled."""
+        with self.assertRaises(grpc.RpcError) as err:
+            self._list_apps_to_launch.with_call(request=ListAppsToLaunchRequest())
+        assert err.exception.code() == grpc.StatusCode.UNAUTHENTICATED
+
+    def test_request_token_accepts_valid_superexec_metadata(self) -> None:
+        """RequestToken should succeed with valid SuperExec metadata."""
+        run_id = self._create_dummy_run()
+        response, call = self._request_token.with_call(
+            request=RequestTokenRequest(run_id=run_id),
+            metadata=self._make_superexec_metadata(
+                "/flwr.proto.ServerAppIo/RequestToken"
+            ),
+        )
+        assert isinstance(response, RequestTokenResponse)
+        assert call.code() == grpc.StatusCode.OK
+        assert response.token != ""
+
+    def test_get_run_accepts_token_without_superexec_metadata(self) -> None:
+        """GetRun supports ServerApp token auth when SuperExec auth is enabled."""
+        run_id = self._create_dummy_run()
+        token = self.state.create_token(run_id)
+        assert token is not None
+        response, call = self._get_run.with_call(
+            request=GetRunRequest(run_id=run_id, token=token)
+        )
+        assert isinstance(response, GetRunResponse)
+        assert call.code() == grpc.StatusCode.OK
+        assert response.run.run_id == run_id
+
+    def test_get_run_accepts_superexec_metadata_without_token(self) -> None:
+        """GetRun supports SuperExec signed metadata when token is absent."""
+        run_id = self._create_dummy_run()
+        response, call = self._get_run.with_call(
+            request=GetRunRequest(run_id=run_id),
+            metadata=self._make_superexec_metadata("/flwr.proto.ServerAppIo/GetRun"),
+        )
+        assert isinstance(response, GetRunResponse)
+        assert call.code() == grpc.StatusCode.OK
+        assert response.run.run_id == run_id
+
+    def test_get_run_rejects_both_auth_mechanisms(self) -> None:
+        """GetRun must reject requests with both auth mechanisms present."""
+        run_id = self._create_dummy_run()
+        token = self.state.create_token(run_id)
+        assert token is not None
+        with self.assertRaises(grpc.RpcError) as err:
+            self._get_run.with_call(
+                request=GetRunRequest(run_id=run_id, token=token),
+                metadata=self._make_superexec_metadata("/flwr.proto.ServerAppIo/GetRun"),
+            )
+        assert err.exception.code() == grpc.StatusCode.INVALID_ARGUMENT
