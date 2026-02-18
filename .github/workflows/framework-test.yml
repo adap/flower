@@ -33,12 +33,12 @@ jobs:
           filters: |
             framework:
               - 'framework/**/*'
-              - '.github/workflows/framework.yml'
+              - '.github/workflows/framework-test.yml'
             ex_bench:
               - 'examples/**/*'
               - 'benchmarks/**/*'
               - 'dev/test.sh'
-              - '.github/workflows/framework.yml'
+              - '.github/workflows/framework-test.yml'
 
   test_core:
     runs-on: ubuntu-22.04
