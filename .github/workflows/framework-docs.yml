@@ -15,6 +15,8 @@ on:
     paths:
       - framework/docs/**
       - .github/workflows/framework-docs.yml
+  release:
+    types: [released]
   workflow_dispatch:
 
 concurrency:
@@ -43,7 +45,7 @@ jobs:
           cd framework
           python -m poetry install
       - name: Use shared docs runtime files from main for release branches
-        if: ${{ startsWith(github.ref, 'refs/heads/release/framework-') || (github.event_name == 'pull_request' && startsWith(github.base_ref, 'release/framework-')) }}
+        if: ${{ startsWith(github.ref, 'refs/heads/release/framework-') || (github.event_name == 'pull_request' && startsWith(github.base_ref, 'release/framework-')) || (github.event_name == 'release' && startsWith(github.ref, 'refs/tags/framework-')) }}
         run: |
           echo "Using shared runtime docs files from main branch for release branch"
           git fetch origin main
@@ -54,6 +56,16 @@ jobs:
         id: doc_version
         shell: bash
         run: |
+          if [ "${GITHUB_EVENT_NAME}" = "release" ]; then
+            tag="${GITHUB_REF_NAME}"
+            if [[ "$tag" =~ ^framework-([0-9]+)\.([0-9]+)\.[0-9]+$ ]]; then
+              echo "version=${BASH_REMATCH[1]}.${BASH_REMATCH[2]}" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            echo "Unsupported release tag: $tag" >&2
+            exit 1
+          fi
+
           if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
             ref="${GITHUB_BASE_REF}"
           else
@@ -75,16 +87,21 @@ jobs:
           echo "Building docs for version: ${DOC_VERSION}"
           ./framework/docs/build-single-version-docs.sh
       - name: Determine if this is the latest stable version
-        if: ${{ github.repository == 'adap/flower' && startsWith(github.ref, 'refs/heads/release/framework-') && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') }}
+        if: ${{ github.repository == 'adap/flower' && ((startsWith(github.ref, 'refs/heads/release/framework-') && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')) || (github.event_name == 'release' && startsWith(github.ref, 'refs/tags/framework-'))) }}
         id: latest_check
         run: |
           # Get all framework version tags and find the latest one
-          all_versions=$(git tag -l 'v*.*.*' 'framework-*.*.*' | sed 's/framework-/v/' | sed 's/^v//' | sort -V)
+          all_versions=$(git tag -l 'framework-*.*.*' 'v*.*.*' | sed 's/^framework-//' | sed 's/^v//' | sort -V)
           latest_version=$(echo "$all_versions" | tail -n 1)
           latest_major_minor=$(echo "$latest_version" | cut -d. -f1-2)
 
-          # Extract version from current branch (e.g., `release/framework-1.26` -> `1.26`)
-          current_branch="${GITHUB_REF#refs/heads/release/framework-}"
+          if [ "${GITHUB_EVENT_NAME}" = "release" ]; then
+            # Extract version from tag (e.g., `framework-1.26.0` -> `1.26`)
+            current_branch=$(echo "${GITHUB_REF_NAME#framework-}" | cut -d. -f1-2)
+          else
+            # Extract version from current branch (e.g., `release/framework-1.26` -> `1.26`)
+            current_branch="${GITHUB_REF#refs/heads/release/framework-}"
+          fi
 
           if [ "$current_branch" = "$latest_major_minor" ]; then
             echo "is_latest=true" >> "$GITHUB_OUTPUT"
@@ -94,7 +111,7 @@ jobs:
             echo "Not the latest stable version. Current: $current_branch, Latest: $latest_major_minor"
           fi
       - name: Deploy docs HTML
-        if: ${{ github.repository == 'adap/flower' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') }}
+        if: ${{ github.repository == 'adap/flower' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event_name == 'release') }}
         env:
           AWS_DEFAULT_REGION: ${{ secrets.DOCS_AWS_DEFAULT_REGION }}
           AWS_ACCESS_KEY_ID: ${{ secrets.DOCS_AWS_ACCESS_KEY_ID }}
