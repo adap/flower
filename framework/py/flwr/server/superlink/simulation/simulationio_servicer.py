@@ -73,6 +73,10 @@ from flwr.supercore.ffs import FfsFactory
 class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
     """SimulationIo API servicer."""
 
+    _METHOD_LIST_APPS_TO_LAUNCH = "/flwr.proto.SimulationIo/ListAppsToLaunch"
+    _METHOD_REQUEST_TOKEN = "/flwr.proto.SimulationIo/RequestToken"
+    _METHOD_GET_RUN = "/flwr.proto.SimulationIo/GetRun"
+
     def __init__(
         self,
         state_factory: LinkStateFactory,
@@ -95,7 +99,7 @@ class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
         """Get run IDs with pending messages."""
         log(DEBUG, "SimulationIoServicer.ListAppsToLaunch")
         self._verify_superexec_auth_if_enabled(
-            context=context, method="/flwr.proto.SimulationIo/ListAppsToLaunch"
+            context=context, method=self._METHOD_LIST_APPS_TO_LAUNCH
         )
 
         # Initialize state connection
@@ -117,7 +121,7 @@ class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
         """Request token."""
         log(DEBUG, "SimulationIoServicer.RequestToken")
         self._verify_superexec_auth_if_enabled(
-            context=context, method="/flwr.proto.SimulationIo/RequestToken"
+            context=context, method=self._METHOD_REQUEST_TOKEN
         )
 
         # Initialize state connection
@@ -142,7 +146,7 @@ class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
         """Get run information."""
         log(DEBUG, "SimulationIoServicer.GetRun")
         self._verify_get_run_auth_if_enabled(
-            request=request, context=context, method="/flwr.proto.SimulationIo/GetRun"
+            request=request, context=context, method=self._METHOD_GET_RUN
         )
 
         # Init state

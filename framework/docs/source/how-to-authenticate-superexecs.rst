@@ -33,8 +33,12 @@ Current AppIO behavior:
 
 - ``ListAppsToLaunch``: SuperExec signed metadata required (when enabled)
 - ``RequestToken``: SuperExec signed metadata required (when enabled)
-- ``GetRun``: exactly one auth mechanism when enabled: - valid run token, or - valid
-  SuperExec signed metadata
+- ``GetRun``: exactly one auth mechanism when enabled.
+
+  Accepted authentication mechanisms:
+
+  - valid run token
+  - valid SuperExec signed metadata
 
 If you do not pass ``--superexec-auth-config`` to ``flower-superlink``, SuperExec auth
 is disabled.
@@ -70,10 +74,13 @@ Public key requirements:
 
 You can authorize keys in two ways:
 
-- One key for all plugin types - easier key management - less separation between
-  ``serverapp`` and ``simulation`` identities
-- Different keys per plugin type - stronger separation of identities and permissions -
-  more operational overhead (more keys to manage/rotate)
+One key for all plugin types
+    Easier key management. Less separation between ``serverapp`` and ``simulation``
+    identities.
+
+Different keys per plugin type
+    Stronger separation of identities and permissions. More operational overhead (more
+    keys to manage/rotate).
 
 If you are starting simple, one shared key is usually acceptable. If you need stronger
 control boundaries, use per-plugin keys.

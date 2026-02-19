@@ -18,7 +18,7 @@
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import cast
+from typing import NoReturn, cast
 
 import grpc
 import yaml
@@ -127,6 +127,7 @@ def superexec_auth_metadata_present(context: grpc.ServicerContext) -> bool:
 
 
 # pylint: disable=too-many-locals
+# Reason: explicit step-by-step validation is easier to audit for auth logic.
 def verify_superexec_signed_metadata(
     context: grpc.ServicerContext,
     method: str,
@@ -140,11 +141,7 @@ def verify_superexec_signed_metadata(
         header for header in _SUPEREXEC_AUTH_HEADERS if header not in metadata
     )
     if missing_headers:
-        context.abort(
-            grpc.StatusCode.UNAUTHENTICATED,
-            "Missing SuperExec authentication metadata.",
-        )
-        raise RuntimeError("Unreachable")
+        _abort_unauthenticated(context, "Missing SuperExec authentication metadata.")
 
     public_key_bytes = cast(bytes, metadata[SUPEREXEC_PUBLIC_KEY_HEADER])
     signature = cast(bytes, metadata[SUPEREXEC_SIGNATURE_HEADER])
@@ -152,58 +149,45 @@ def verify_superexec_signed_metadata(
 
     # Check the caller key is authorized for this plugin type.
     if plugin_type not in cfg.allowed_public_keys:
-        context.abort(
-            grpc.StatusCode.UNAUTHENTICATED,
-            "SuperExec caller type is not allowed.",
-        )
-        raise RuntimeError("Unreachable")
+        _abort_unauthenticated(context, "SuperExec caller type is not allowed.")
 
     if public_key_bytes not in cfg.allowed_public_keys[plugin_type]:
-        context.abort(
-            grpc.StatusCode.UNAUTHENTICATED,
-            "SuperExec key is not authorized.",
-        )
-        raise RuntimeError("Unreachable")
+        _abort_unauthenticated(context, "SuperExec key is not authorized.")
 
     # Parse and validate key format/curve before signature verification.
     try:
         public_key = bytes_to_public_key(public_key_bytes)
-    except ValueError as err:
-        context.abort(
-            grpc.StatusCode.UNAUTHENTICATED,
-            "Invalid SuperExec public key.",
-        )
-        raise RuntimeError("Unreachable") from err
+    except ValueError:
+        _abort_unauthenticated(context, "Invalid SuperExec public key.")
 
     if not uses_nist_ec_curve(public_key):
-        context.abort(
-            grpc.StatusCode.UNAUTHENTICATED,
-            "Invalid SuperExec public key curve.",
-        )
-        raise RuntimeError("Unreachable")
+        _abort_unauthenticated(context, "Invalid SuperExec public key curve.")
 
     # Signature binds both timestamp and method to prevent cross-method replay.
     signed_payload = f"{timestamp_iso}\n{method}".encode()
     if not verify_signature(public_key, signed_payload, signature):
-        context.abort(grpc.StatusCode.UNAUTHENTICATED, "Invalid SuperExec signature.")
-        raise RuntimeError("Unreachable")
+        _abort_unauthenticated(context, "Invalid SuperExec signature.")
 
     try:
         timestamp = datetime.fromisoformat(timestamp_iso)
-    except ValueError as err:
-        context.abort(grpc.StatusCode.UNAUTHENTICATED, "Invalid SuperExec timestamp.")
-        raise RuntimeError("Unreachable") from err
+    except ValueError:
+        _abort_unauthenticated(context, "Invalid SuperExec timestamp.")
 
     # Enforce freshness with a small clock-drift allowance.
     diff_sec = (now() - timestamp).total_seconds()
     min_diff = -SYSTEM_TIME_TOLERANCE
     max_diff = cfg.timestamp_tolerance_sec + SYSTEM_TIME_TOLERANCE
     if not min_diff < diff_sec < max_diff:
-        context.abort(grpc.StatusCode.UNAUTHENTICATED, "Expired SuperExec timestamp.")
-        raise RuntimeError("Unreachable")
+        _abort_unauthenticated(context, "Expired SuperExec timestamp.")
 
 
 # pylint: enable=too-many-locals
+
+
+def _abort_unauthenticated(context: grpc.ServicerContext, detail: str) -> NoReturn:
+    """Abort the RPC with `UNAUTHENTICATED`."""
+    context.abort(grpc.StatusCode.UNAUTHENTICATED, detail)
+    raise RuntimeError("Unreachable")
 
 
 def _parse_public_key_entry(entry: object) -> tuple[str, set[str]]:

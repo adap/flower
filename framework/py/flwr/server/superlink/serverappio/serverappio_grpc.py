@@ -34,6 +34,7 @@ from .serverappio_servicer import ServerAppIoServicer
 
 
 # pylint: disable=too-many-arguments,too-many-positional-arguments
+# Reason: server bootstrap wiring needs explicit dependency injection.
 def run_serverappio_api_grpc(
     address: str,
     state_factory: LinkStateFactory,

@@ -1098,6 +1098,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
 
 
 class TestServerAppIoServicerSuperExecAuth(  # pylint: disable=too-many-instance-attributes
+    # Reason: gRPC test fixtures keep multiple stubs/handles on `self`.
     unittest.TestCase
 ):
     """ServerAppIoServicer tests with SuperExec auth enabled."""

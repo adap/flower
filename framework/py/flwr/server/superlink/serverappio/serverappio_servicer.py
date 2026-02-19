@@ -97,6 +97,10 @@ from flwr.supercore.object_store import NoObjectInStoreError, ObjectStoreFactory
 class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     """ServerAppIo API servicer."""
 
+    _METHOD_LIST_APPS_TO_LAUNCH = "/flwr.proto.ServerAppIo/ListAppsToLaunch"
+    _METHOD_REQUEST_TOKEN = "/flwr.proto.ServerAppIo/RequestToken"
+    _METHOD_GET_RUN = "/flwr.proto.ServerAppIo/GetRun"
+
     def __init__(
         self,
         state_factory: LinkStateFactory,
@@ -121,7 +125,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         """Get run IDs with pending messages."""
         log(DEBUG, "ServerAppIoServicer.ListAppsToLaunch")
         self._verify_superexec_auth_if_enabled(
-            context=context, method="/flwr.proto.ServerAppIo/ListAppsToLaunch"
+            context=context, method=self._METHOD_LIST_APPS_TO_LAUNCH
         )
 
         # Initialize state connection
@@ -143,7 +147,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         """Request token."""
         log(DEBUG, "ServerAppIoServicer.RequestToken")
         self._verify_superexec_auth_if_enabled(
-            context=context, method="/flwr.proto.ServerAppIo/RequestToken"
+            context=context, method=self._METHOD_REQUEST_TOKEN
         )
 
         # Initialize state connection
@@ -320,7 +324,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         """Get run information."""
         log(DEBUG, "ServerAppIoServicer.GetRun")
         self._verify_get_run_auth_if_enabled(
-            request=request, context=context, method="/flwr.proto.ServerAppIo/GetRun"
+            request=request, context=context, method=self._METHOD_GET_RUN
         )
 
         # Init state
