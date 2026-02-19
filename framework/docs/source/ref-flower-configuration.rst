@@ -161,7 +161,7 @@ configure connections that point to a remote SuperLink.
 
     [superlink.remote-deployment]
     address = "<SUPERLINK-ADDRESS>:<PORT>"
-    root-certificate = "path/to/root/cert.pem"  # Optional, for TLS
+    root-certificates = "/absolute/path/to/root/cert.crt"  # Optional, for TLS
     # insecure = true  # Disable TLS (not recommended for production)
 
 **Explanation**
