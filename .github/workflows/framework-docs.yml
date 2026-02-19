@@ -42,7 +42,6 @@ jobs:
         run: sudo apt install pandoc
       - name: Install Flower Framework
         run: |
-          cd framework
           python -m poetry install
       - name: Sync required docs build assets from main for release branches
         if: ${{ startsWith(github.ref, 'refs/heads/release/framework-') || (github.event_name == 'pull_request' && startsWith(github.base_ref, 'release/framework-')) || (github.event_name == 'release' && startsWith(github.ref, 'refs/tags/framework-')) }}
