@@ -42,9 +42,9 @@ else:
     current_language = "en"
 html_context["current_language"] = current_language
 
-# Shared runtime metadata (versions + announcement) used by all docs versions.
-html_context["docs_runtime_config_url"] = os.getenv(
-    "FLWR_DOCS_RUNTIME_CONFIG_URL",
+# Shared UI metadata (versions + announcement) used by all docs versions.
+html_context["docs_ui_metadata_url"] = os.getenv(
+    "FLWR_DOCS_UI_METADATA_URL",
     "https://flower.ai/docs/framework/docs-ui-metadata.json",
 )
 
