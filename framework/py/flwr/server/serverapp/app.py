@@ -20,6 +20,8 @@ import json
 from logging import DEBUG, ERROR, INFO
 from pathlib import Path
 from queue import Queue
+from typing import Any
+import os
 
 import grpc
 
@@ -78,6 +80,27 @@ from flwr.supercore.app_utils import start_parent_process_monitor
 from flwr.supercore.heartbeat import HeartbeatSender, make_app_heartbeat_fn_grpc
 from flwr.supercore.superexec.plugin import ServerAppExecPlugin
 from flwr.supercore.superexec.run_superexec import run_with_deprecation_warning
+
+
+def _resolve_profile_enabled(
+    run_config: dict[str, Any], override_config: dict[str, Any]
+) -> bool:
+    def _to_bool(value: Any) -> bool:
+        if isinstance(value, bool):
+            return value
+        if isinstance(value, (int, float)):
+            return value != 0
+        if isinstance(value, str):
+            return value.strip().lower() in {"1", "true", "yes", "on"}
+        return bool(value)
+
+    for key in ("profile.enabled", "profiling.enabled"):
+        if key in override_config:
+            return _to_bool(override_config[key])
+    for key in ("profile.enabled", "profiling.enabled"):
+        if key in run_config:
+            return _to_bool(run_config[key])
+    return False
 
 
 def flwr_serverapp() -> None:
@@ -231,8 +254,23 @@ def run_serverapp(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
         context.run_config = server_app_run_config
         grid.pull_interval = float(server_app_run_config.get("grid.pull-interval", 3.0))
 
+        # Ensure profile.enabled reflects overrides (even if not in defaults)
+        if (
+            "profile.enabled" in run.override_config
+            or "profiling.enabled" in run.override_config
+        ):
+            context.run_config["profile.enabled"] = _resolve_profile_enabled(
+                context.run_config, run.override_config
+            )
+
         # Initialize profiler if enabled
-        if context.run_config.get("profile.enabled"):
+        profile_enabled = _resolve_profile_enabled(
+            context.run_config, run.override_config
+        )
+        log(INFO, "[flwr-serverapp] profile.enabled resolved to %s", profile_enabled)
+        log(INFO, "[flwr-serverapp] module path: %s", __file__)
+        log(INFO, "[flwr-serverapp] python: %s", os.getenv("PYTHON_EXECUTABLE", ""))
+        if profile_enabled:
             profile_recorder = ProfileRecorder(run_id=run.run_id)
             set_active_profiler(profile_recorder)
             last_summary: bytes | None = None

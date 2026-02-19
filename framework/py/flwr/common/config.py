@@ -246,6 +246,17 @@ def parse_config_args(config: list[str] | None, flatten: bool = True) -> dict[st
                 )
                 raise typer.Exit(code=1) from err
 
+    # Backwards/alias handling: allow "profiling.*" to map to "profile.*"
+    if flatten:
+        normalized: dict[str, Any] = {}
+        for key, value in flat_overrides.items():
+            if isinstance(key, str) and key.startswith("profiling."):
+                alias_key = "profile." + key[len("profiling.") :]
+                if alias_key not in flat_overrides:
+                    normalized[alias_key] = value
+            normalized[key] = value
+        flat_overrides = normalized
+
     return flat_overrides
 
 

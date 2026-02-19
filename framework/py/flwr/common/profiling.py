@@ -18,6 +18,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime, timezone
+import time
 import threading
 from typing import Any, Callable, Iterable
 
@@ -28,6 +29,7 @@ from .message import Message
 class ProfileEvent:
     """A single profiling event."""
 
+    timestamp_ms: float
     scope: str
     task: str
     round: int | None
@@ -52,11 +54,13 @@ class ProfileRecorder:
         node_id: int | None,
         duration_ms: float,
         metadata: dict[str, Any] | None = None,
+        timestamp_ms: float | None = None,
     ) -> None:
         """Record a profiling event."""
         if duration_ms is None:
             return
         event = ProfileEvent(
+            timestamp_ms=timestamp_ms if timestamp_ms is not None else time.time() * 1000.0,
             scope=scope,
             task=task,
             round=round,
@@ -90,6 +94,19 @@ class ProfileRecorder:
                     "min_mem_mb": None,
                     "max_mem_mb": None,
                     "mem_count": 0,
+                    "sum_mem_delta_mb": 0.0,
+                    "min_mem_delta_mb": None,
+                    "max_mem_delta_mb": None,
+                    "mem_delta_count": 0,
+                    "sum_disk_read_mb": 0.0,
+                    "sum_disk_write_mb": 0.0,
+                    "min_disk_read_mb": None,
+                    "max_disk_read_mb": None,
+                    "min_disk_write_mb": None,
+                    "max_disk_write_mb": None,
+                    "disk_read_count": 0,
+                    "disk_write_count": 0,
+                    "disk_sources": set(),
                 }
                 stats[key] = stat
             stat["count"] += 1
@@ -104,7 +121,7 @@ class ProfileRecorder:
                 if stat["max_ms"] is None
                 else max(stat["max_ms"], event.duration_ms)
             )
-            if "memory_mb" in event.metadata:
+            if "memory_mb" in event.metadata and event.metadata["memory_mb"] is not None:
                 mem_val = float(event.metadata["memory_mb"])
                 stat["sum_mem_mb"] += mem_val
                 stat["mem_count"] += 1
@@ -118,6 +135,53 @@ class ProfileRecorder:
                     if stat["max_mem_mb"] is None
                     else max(stat["max_mem_mb"], mem_val)
                 )
+            if (
+                "memory_delta_mb" in event.metadata
+                and event.metadata["memory_delta_mb"] is not None
+            ):
+                mem_delta = float(event.metadata["memory_delta_mb"])
+                stat["sum_mem_delta_mb"] += mem_delta
+                stat["mem_delta_count"] += 1
+                stat["min_mem_delta_mb"] = (
+                    mem_delta
+                    if stat["min_mem_delta_mb"] is None
+                    else min(stat["min_mem_delta_mb"], mem_delta)
+                )
+                stat["max_mem_delta_mb"] = (
+                    mem_delta
+                    if stat["max_mem_delta_mb"] is None
+                    else max(stat["max_mem_delta_mb"], mem_delta)
+                )
+            if "disk_read_mb" in event.metadata and event.metadata["disk_read_mb"] is not None:
+                disk_read = float(event.metadata["disk_read_mb"])
+                stat["sum_disk_read_mb"] += disk_read
+                stat["disk_read_count"] += 1
+                stat["min_disk_read_mb"] = (
+                    disk_read
+                    if stat["min_disk_read_mb"] is None
+                    else min(stat["min_disk_read_mb"], disk_read)
+                )
+                stat["max_disk_read_mb"] = (
+                    disk_read
+                    if stat["max_disk_read_mb"] is None
+                    else max(stat["max_disk_read_mb"], disk_read)
+                )
+            if "disk_write_mb" in event.metadata and event.metadata["disk_write_mb"] is not None:
+                disk_write = float(event.metadata["disk_write_mb"])
+                stat["sum_disk_write_mb"] += disk_write
+                stat["disk_write_count"] += 1
+                stat["min_disk_write_mb"] = (
+                    disk_write
+                    if stat["min_disk_write_mb"] is None
+                    else min(stat["min_disk_write_mb"], disk_write)
+                )
+                stat["max_disk_write_mb"] = (
+                    disk_write
+                    if stat["max_disk_write_mb"] is None
+                    else max(stat["max_disk_write_mb"], disk_write)
+                )
+            if "disk_source" in event.metadata and event.metadata["disk_source"]:
+                stat["disk_sources"].add(event.metadata["disk_source"])
 
         entries: list[dict[str, Any]] = []
         for stat in stats.values():
@@ -127,6 +191,28 @@ class ProfileRecorder:
                 if stat["mem_count"]
                 else None
             )
+            avg_mem_delta = (
+                stat["sum_mem_delta_mb"] / stat["mem_delta_count"]
+                if stat["mem_delta_count"]
+                else None
+            )
+            avg_disk_read = (
+                stat["sum_disk_read_mb"] / stat["disk_read_count"]
+                if stat["disk_read_count"]
+                else None
+            )
+            avg_disk_write = (
+                stat["sum_disk_write_mb"] / stat["disk_write_count"]
+                if stat["disk_write_count"]
+                else None
+            )
+            disk_sources = stat["disk_sources"]
+            if len(disk_sources) == 1:
+                disk_source = next(iter(disk_sources))
+            elif len(disk_sources) > 1:
+                disk_source = "mixed"
+            else:
+                disk_source = None
             entries.append(
                 {
                     "scope": stat["scope"],
@@ -139,6 +225,14 @@ class ProfileRecorder:
                     "avg_mem_mb": avg_mem,
                     "min_mem_mb": stat["min_mem_mb"],
                     "max_mem_mb": stat["max_mem_mb"],
+                    "avg_mem_delta_mb": avg_mem_delta,
+                    "min_mem_delta_mb": stat["min_mem_delta_mb"],
+                    "max_mem_delta_mb": stat["max_mem_delta_mb"],
+                    "avg_disk_read_mb": avg_disk_read,
+                    "max_disk_read_mb": stat["max_disk_read_mb"],
+                    "avg_disk_write_mb": avg_disk_write,
+                    "max_disk_write_mb": stat["max_disk_write_mb"],
+                    "disk_source": disk_source,
                     "node_id": stat["node_id"],
                 }
             )
@@ -182,10 +276,31 @@ class ProfileRecorder:
             )
         )
 
+        event_entries = []
+        for event in events:
+            metadata = event.metadata or {}
+            event_entries.append(
+                {
+                    "timestamp_ms": event.timestamp_ms,
+                    "scope": event.scope,
+                    "task": event.task,
+                    "round": event.round,
+                    "node_id": event.node_id,
+                    "duration_ms": event.duration_ms,
+                    "memory_start_mb": metadata.get("memory_start_mb"),
+                    "memory_end_mb": metadata.get("memory_end_mb"),
+                    "memory_delta_mb": metadata.get("memory_delta_mb"),
+                    "disk_read_mb": metadata.get("disk_read_mb"),
+                    "disk_write_mb": metadata.get("disk_write_mb"),
+                    "disk_source": metadata.get("disk_source"),
+                }
+            )
+
         return {
             "run_id": self.run_id,
             "generated_at": datetime.now(tz=timezone.utc).isoformat(),
             "entries": entries,
+            "events": event_entries,
         }
 
 
@@ -256,21 +371,72 @@ def record_profile_metrics_from_messages(messages: Iterable[Message]) -> None:
             for metric_record in msg.content.metric_records.values():
                 durations: dict[str, float] = {}
                 mems: dict[str, float] = {}
+                mem_starts: dict[str, float] = {}
+                mem_ends: dict[str, float] = {}
+                mem_deltas: dict[str, float] = {}
+                disk_reads: dict[str, float] = {}
+                disk_writes: dict[str, float] = {}
+                disk_sources: dict[str, str] = {}
                 for key, value in metric_record.items():
                     if not key.startswith("profile.client."):
                         continue
-                    if not isinstance(value, (int, float)):
-                        continue
                     if key.endswith(".ms"):
+                        if not isinstance(value, (int, float)):
+                            continue
                         task = key[len("profile.client.") : -3]
                         durations[task] = float(value)
                     elif key.endswith(".mem_mb"):
+                        if not isinstance(value, (int, float)):
+                            continue
                         task = key[len("profile.client.") : -7]
                         mems[task] = float(value)
+                    elif key.endswith(".mem_start_mb"):
+                        if not isinstance(value, (int, float)):
+                            continue
+                        task = key[len("profile.client.") : -13]
+                        mem_starts[task] = float(value)
+                    elif key.endswith(".mem_end_mb"):
+                        if not isinstance(value, (int, float)):
+                            continue
+                        task = key[len("profile.client.") : -11]
+                        mem_ends[task] = float(value)
+                    elif key.endswith(".mem_delta_mb"):
+                        if not isinstance(value, (int, float)):
+                            continue
+                        task = key[len("profile.client.") : -13]
+                        mem_deltas[task] = float(value)
+                    elif key.endswith(".disk_read_mb"):
+                        if not isinstance(value, (int, float)):
+                            continue
+                        task = key[len("profile.client.") : -14]
+                        disk_reads[task] = float(value)
+                    elif key.endswith(".disk_write_mb"):
+                        if not isinstance(value, (int, float)):
+                            continue
+                        task = key[len("profile.client.") : -15]
+                        disk_writes[task] = float(value)
+                    elif key.endswith(".disk_source"):
+                        if not isinstance(value, str):
+                            continue
+                        task = key[len("profile.client.") : -12]
+                        disk_sources[task] = value
                 for task, duration in durations.items():
                     metadata = {}
+                    if task in mem_starts:
+                        metadata["memory_start_mb"] = mem_starts[task]
+                    if task in mem_ends:
+                        metadata["memory_end_mb"] = mem_ends[task]
+                        metadata["memory_mb"] = mem_ends[task]
                     if task in mems:
-                        metadata["memory_mb"] = mems[task]
+                        metadata.setdefault("memory_mb", mems[task])
+                    if task in mem_deltas:
+                        metadata["memory_delta_mb"] = mem_deltas[task]
+                    if task in disk_reads:
+                        metadata["disk_read_mb"] = disk_reads[task]
+                    if task in disk_writes:
+                        metadata["disk_write_mb"] = disk_writes[task]
+                    if task in disk_sources:
+                        metadata["disk_source"] = disk_sources[task]
                     profiler.record(
                         scope="client",
                         task=task,

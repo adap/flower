@@ -113,6 +113,8 @@ def profile(
                                         summary,
                                         title="Network Profile",
                                         entries=_rename_network_tasks(network_entries),
+                                        include_memory=False,
+                                        include_disk=False,
                                     )
                                 )
                         if suppress_output:
@@ -157,6 +159,8 @@ def profile(
                         summary,
                         title="Network Profile",
                         entries=_rename_network_tasks(network_entries),
+                        include_memory=False,
+                        include_disk=False,
                     )
                 )
     except (typer.Exit, Exception) as err:  # pylint: disable=broad-except
@@ -182,7 +186,14 @@ def _to_table(summary: dict) -> Table:
     return _render_table(summary, title="Run Profile Summary")
 
 
-def _render_table(summary: dict, *, title: str, entries: list[dict] | None = None) -> Table:
+def _render_table(
+    summary: dict,
+    *,
+    title: str,
+    entries: list[dict] | None = None,
+    include_memory: bool = True,
+    include_disk: bool = True,
+) -> Table:
     table = Table(title=title)
     table.add_column("Task", style="white")
     table.add_column("Scope", style="white")
@@ -190,8 +201,14 @@ def _render_table(summary: dict, *, title: str, entries: list[dict] | None = Non
     table.add_column("Node", style="magenta")
     table.add_column("Avg (ms)", justify="right")
     table.add_column("Max (ms)", justify="right")
-    table.add_column("Avg Mem (MB)", justify="right")
-    table.add_column("Max Mem (MB)", justify="right")
+    if include_memory:
+        table.add_column("Avg Mem (MB)", justify="right")
+        table.add_column("Max Mem (MB)", justify="right")
+        table.add_column("Avg ΔMem (MB)", justify="right")
+    if include_disk:
+        table.add_column("Avg Read (MB)", justify="right")
+        table.add_column("Avg Write (MB)", justify="right")
+        table.add_column("Disk Src", justify="right")
     table.add_column("Count", justify="right")
 
     use_entries = entries if entries is not None else summary.get("entries", [])
@@ -201,6 +218,10 @@ def _render_table(summary: dict, *, title: str, entries: list[dict] | None = Non
             node_val = "server"
         avg_mem = entry.get("avg_mem_mb")
         max_mem = entry.get("max_mem_mb")
+        avg_mem_delta = entry.get("avg_mem_delta_mb")
+        avg_read = entry.get("avg_disk_read_mb")
+        avg_write = entry.get("avg_disk_write_mb")
+        disk_source = entry.get("disk_source")
         table.add_row(
             str(entry.get("task", "")),
             str(entry.get("scope", "")),
@@ -208,8 +229,26 @@ def _render_table(summary: dict, *, title: str, entries: list[dict] | None = Non
             str(node_val if node_val is not None else "N/A"),
             f"{entry.get('avg_ms', 0.0):.2f}",
             f"{entry.get('max_ms', 0.0):.2f}",
-            f"{avg_mem:.2f}" if isinstance(avg_mem, (int, float)) else "-",
-            f"{max_mem:.2f}" if isinstance(max_mem, (int, float)) else "-",
+            *(
+                [
+                    f"{avg_mem:.2f}" if isinstance(avg_mem, (int, float)) else "-",
+                    f"{max_mem:.2f}" if isinstance(max_mem, (int, float)) else "-",
+                    f"{avg_mem_delta:.2f}"
+                    if isinstance(avg_mem_delta, (int, float))
+                    else "-",
+                ]
+                if include_memory
+                else []
+            ),
+            *(
+                [
+                    f"{avg_read:.2f}" if isinstance(avg_read, (int, float)) else "-",
+                    f"{avg_write:.2f}" if isinstance(avg_write, (int, float)) else "-",
+                    str(disk_source) if disk_source else "-",
+                ]
+                if include_disk
+                else []
+            ),
             str(entry.get("count", 0)),
         )
     return table

@@ -29,6 +29,7 @@ from flwr.common import (
     log,
 )
 from flwr.common.profiling import get_active_profiler, publish_profile_summary
+from flwr.common.system_metrics import DiskIoSnapshot, read_disk_io_mb
 
 try:
     import psutil  # type: ignore
@@ -268,24 +269,73 @@ class FedAvg(Strategy):
             # Aggregate ArrayRecords
             profiler = get_active_profiler()
             start = time.perf_counter() if profiler is not None else None
-            mem_mb = (
-                psutil.Process().memory_info().rss / (1024**2)
-                if psutil is not None
-                else None
-            )
+            proc = psutil.Process() if psutil is not None else None
+
+            def _disk_delta(
+                start_snapshot: DiskIoSnapshot | None,
+                end_snapshot: DiskIoSnapshot | None,
+            ) -> tuple[float | None, float | None, str | None]:
+                if (
+                    start_snapshot is None
+                    or end_snapshot is None
+                    or not start_snapshot.source
+                    or start_snapshot.source != end_snapshot.source
+                ):
+                    return None, None, None
+                read_delta = (
+                    end_snapshot.read_mb - start_snapshot.read_mb
+                    if end_snapshot.read_mb is not None
+                    and start_snapshot.read_mb is not None
+                    else None
+                )
+                write_delta = (
+                    end_snapshot.write_mb - start_snapshot.write_mb
+                    if end_snapshot.write_mb is not None
+                    and start_snapshot.write_mb is not None
+                    else None
+                )
+                return read_delta, write_delta, end_snapshot.source
+
+            mem_start_mb = None
+            disk_start = None
+            if proc is not None:
+                mem_start_mb = proc.memory_info().rss / (1024**2)
+                disk_start = read_disk_io_mb(proc)
             arrays = aggregate_arrayrecords(
                 reply_contents,
                 self.weighted_by_key,
             )
             if profiler is not None and start is not None:
                 duration_ms = (time.perf_counter() - start) * 1000.0
+                mem_end_mb = None
+                mem_delta_mb = None
+                disk_read_mb = None
+                disk_write_mb = None
+                disk_source = None
+                if proc is not None:
+                    mem_end_mb = proc.memory_info().rss / (1024**2)
+                    if mem_start_mb is not None:
+                        mem_delta_mb = mem_end_mb - mem_start_mb
+                    disk_end = read_disk_io_mb(proc)
+                    disk_read_mb, disk_write_mb, disk_source = _disk_delta(
+                        disk_start, disk_end
+                    )
                 profiler.record(
                     scope="server",
                     task="aggregate",
                     round=server_round,
                     node_id=None,
                     duration_ms=duration_ms,
-                    metadata={"num_replies": len(valid_replies), "memory_mb": mem_mb},
+                    metadata={
+                        "num_replies": len(valid_replies),
+                        "memory_start_mb": mem_start_mb,
+                        "memory_end_mb": mem_end_mb,
+                        "memory_delta_mb": mem_delta_mb,
+                        "memory_mb": mem_end_mb,
+                        "disk_read_mb": disk_read_mb,
+                        "disk_write_mb": disk_write_mb,
+                        "disk_source": disk_source,
+                    },
                 )
                 publish_profile_summary()
 
