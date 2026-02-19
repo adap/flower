@@ -50,7 +50,7 @@ jobs:
           echo "Syncing required docs build assets from main branch for release branch"
           git fetch origin main
           git checkout origin/main -- \
-            framework/docs/source/_static/runtime-ui.js \
+            framework/docs/source/_static/docs-ui.js \
             framework/docs/source/_static/custom.css \
             framework/docs/source/conf_base.py \
             framework/docs/source/_templates/

@@ -338,7 +338,7 @@ html_theme_options = {
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
 html_css_files = ["custom.css"]
-html_js_files = ["runtime-ui.js"]
+html_js_files = ["docs-ui.js"]
 
 # Set modules for custom sidebar
 html_sidebars = {

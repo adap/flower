@@ -41,13 +41,13 @@
     );
   }
 
-  function getRuntimeConfigUrl(versioningContainer) {
+  function getDocsUiMetadataUrl(versioningContainer) {
     if (!versioningContainer) {
-      return "https://flower.ai/docs/framework-config/runtime-ui.json";
+      return "https://flower.ai/docs/framework/docs-ui-metadata.json";
     }
     return (
-      versioningContainer.dataset.runtimeConfigUrl ||
-      "https://flower.ai/docs/framework-config/runtime-ui.json"
+      versioningContainer.dataset.docsUiMetadataUrl ||
+      "https://flower.ai/docs/framework/docs-ui-metadata.json"
     );
   }
 
@@ -265,15 +265,15 @@
     }
   }
 
-  async function loadRuntimeConfig(runtimeConfigUrl) {
+  async function loadDocsUiMetadata(docsUiMetadataUrl) {
     try {
-      const response = await fetch(runtimeConfigUrl, { cache: "no-store" });
+      const response = await fetch(docsUiMetadataUrl, { cache: "no-store" });
       if (!response.ok) {
         return null;
       }
       return await response.json();
     } catch (error) {
-      console.warn("Could not load docs runtime metadata:", error);
+      console.warn("Could not load docs UI metadata:", error);
       return null;
     }
   }
@@ -283,15 +283,15 @@
     bindVersionLinks(versioningContainer);
     hideEmptyAnnouncementFallback();
 
-    const runtimeConfigUrl = getRuntimeConfigUrl(versioningContainer);
-    const runtimeConfig = await loadRuntimeConfig(runtimeConfigUrl);
-    if (!runtimeConfig || typeof runtimeConfig !== "object") {
+    const docsUiMetadataUrl = getDocsUiMetadataUrl(versioningContainer);
+    const docsUiMetadata = await loadDocsUiMetadata(docsUiMetadataUrl);
+    if (!docsUiMetadata || typeof docsUiMetadata !== "object") {
       return;
     }
 
-    const runtimeVersions = normalizeVersions(runtimeConfig.versions);
-    renderVersionList(versioningContainer, runtimeVersions);
-    renderOldVersionBanner(versioningContainer, runtimeVersions);
-    renderAnnouncement(runtimeConfig.announcement);
+    const versions = normalizeVersions(docsUiMetadata.versions);
+    renderVersionList(versioningContainer, versions);
+    renderOldVersionBanner(versioningContainer, versions);
+    renderAnnouncement(docsUiMetadata.announcement);
   });
 })();
