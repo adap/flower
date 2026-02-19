@@ -15,6 +15,7 @@
 """ServerAppIoServicer tests."""
 
 
+# pylint: disable=too-many-lines
 import tempfile
 import unittest
 from datetime import timedelta
@@ -28,6 +29,7 @@ from flwr.common.constant import (
     SERVERAPPIO_API_DEFAULT_SERVER_ADDRESS,
     SUPERLINK_NODE_ID,
     Status,
+    SubStatus,
 )
 from flwr.common.inflatable import (
     get_all_nested_objects,
@@ -57,6 +59,10 @@ from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
     SendAppHeartbeatRequest,
     SendAppHeartbeatResponse,
 )
+from flwr.proto.log_pb2 import (  # pylint: disable=E0611
+    PushLogsRequest,
+    PushLogsResponse,
+)
 from flwr.proto.message_pb2 import (  # pylint: disable=E0611
     ConfirmMessageReceivedRequest,
     ConfirmMessageReceivedResponse,
@@ -71,6 +77,8 @@ from flwr.proto.message_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
+    GetRunRequest,
+    GetRunResponse,
     UpdateRunStatusRequest,
     UpdateRunStatusResponse,
 )
@@ -195,10 +203,20 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
             request_serializer=UpdateRunStatusRequest.SerializeToString,
             response_deserializer=UpdateRunStatusResponse.FromString,
         )
+        self._push_logs = self._channel.unary_unary(
+            "/flwr.proto.ServerAppIo/PushLogs",
+            request_serializer=PushLogsRequest.SerializeToString,
+            response_deserializer=PushLogsResponse.FromString,
+        )
         self._send_app_heartbeat = self._channel.unary_unary(
             "/flwr.proto.ServerAppIo/SendAppHeartbeat",
             request_serializer=SendAppHeartbeatRequest.SerializeToString,
             response_deserializer=SendAppHeartbeatResponse.FromString,
+        )
+        self._get_run = self._channel.unary_unary(
+            "/flwr.proto.ServerAppIo/GetRun",
+            request_serializer=GetRunRequest.SerializeToString,
+            response_deserializer=GetRunResponse.FromString,
         )
         self._push_object = self._channel.unary_unary(
             "/flwr.proto.ServerAppIo/PushObject",
@@ -255,7 +273,9 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         """Test `GetNode` success."""
         # Prepare
         run_id = self._create_dummy_run()
-        request = GetNodesRequest(run_id=run_id)
+        token = self.state.create_token(run_id)
+        assert token is not None
+        request = GetNodesRequest(run_id=run_id, token=token)
 
         # Execute
         response, call = self._get_nodes.with_call(request=request)
@@ -267,7 +287,9 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
     def _assert_get_nodes_not_allowed(self, run_id: int) -> None:
         """Assert `GetNodes` not allowed."""
         run_status = self.state.get_run_status({run_id})[run_id]
-        request = GetNodesRequest(run_id=run_id)
+        token = self.state.create_token(run_id)
+        assert token is not None
+        request = GetNodesRequest(run_id=run_id, token=token)
 
         with self.assertRaises(grpc.RpcError) as e:
             self._get_nodes.with_call(request=request)
@@ -304,7 +326,10 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         # Construct message to descendant mapping
         message = message_from_proto(message_ins)
         descendant_mapping = get_message_to_descendant_id_mapping(message)
+        token = self.state.create_token(run_id)
+        assert token is not None
         request = PushAppMessagesRequest(
+            token=token,
             messages_list=[message_ins],
             run_id=run_id,
             message_object_trees=[get_object_tree(message)],
@@ -333,7 +358,13 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
     ) -> None:
         """Assert `PushInsMessages` not allowed."""
         run_status = self.state.get_run_status({run_id})[run_id]
-        request = PushAppMessagesRequest(messages_list=[message], run_id=run_id)
+        token = self.state.create_token(run_id)
+        assert token is not None
+        request = PushAppMessagesRequest(
+            token=token,
+            messages_list=[message],
+            run_id=run_id,
+        )
 
         with self.assertRaises(grpc.RpcError) as e:
             self._push_messages.with_call(request=request)
@@ -400,7 +431,11 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
                 run_id, get_object_tree(reply_msg)
             )
 
-        request = PullAppMessagesRequest(message_ids=[str(msg_id)], run_id=run_id)
+        token = self.state.create_token(run_id)
+        assert token is not None
+        request = PullAppMessagesRequest(
+            token=token, message_ids=[str(msg_id)], run_id=run_id
+        )
 
         # Execute
         response, call = self._pull_messages.with_call(request=request)
@@ -463,7 +498,11 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         self.state.store_message_res(message=reply_msg)
         # Register response in ObjectStore (so pulling message request can be completed)
         self.store.preregister(run_id, get_object_tree(reply_msg))
-        request = PullAppMessagesRequest(message_ids=[str(msg_id)], run_id=run_id)
+        token = self.state.create_token(run_id)
+        assert token is not None
+        request = PullAppMessagesRequest(
+            token=token, message_ids=[str(msg_id)], run_id=run_id
+        )
 
         # Execute
         response, call = self._pull_messages.with_call(request=request)
@@ -477,7 +516,9 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
     def _assert_pull_messages_not_allowed(self, run_id: int) -> None:
         """Assert `PullMessages` not allowed."""
         run_status = self.state.get_run_status({run_id})[run_id]
-        request = PullAppMessagesRequest(run_id=run_id)
+        token = self.state.create_token(run_id)
+        assert token is not None
+        request = PullAppMessagesRequest(token=token, run_id=run_id)
 
         with self.assertRaises(grpc.RpcError) as e:
             self._pull_messages.with_call(request=request)
@@ -523,7 +564,11 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         with patch("datetime.datetime") as mock_dt:
             mock_dt.now.return_value = future_dt  # over TTL limit
 
-            request = PullAppMessagesRequest(message_ids=[str(msg_id)], run_id=run_id)
+            token = self.state.create_token(run_id)
+            assert token is not None
+            request = PullAppMessagesRequest(
+                token=token, message_ids=[str(msg_id)], run_id=run_id
+            )
 
             # Execute
             response, call = self._pull_messages.with_call(request=request)
@@ -571,6 +616,81 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         # Assert
         assert isinstance(response, PushAppOutputsResponse)
         assert grpc.StatusCode.OK == call.code()
+
+    def test_push_serverapp_outputs_fails_on_run_id_mismatch(self) -> None:
+        """Test `PushServerAppOutputs` fails if run_id and token don't match."""
+        # Prepare
+        run_id = self._create_dummy_run(running=False)
+        other_run_id = self._create_dummy_run(running=False)
+        token = self.state.create_token(run_id)
+        assert token is not None
+
+        maker = RecordMaker()
+        context = Context(
+            run_id=other_run_id,
+            node_id=0,
+            node_config=maker.user_config(),
+            state=maker.recorddict(1, 1, 1),
+            run_config=maker.user_config(),
+        )
+        self._transition_run_status(other_run_id, 2)
+        request = PushAppOutputsRequest(
+            token=token, run_id=other_run_id, context=context_to_proto(context)
+        )
+
+        # Execute & Assert
+        with self.assertRaises(grpc.RpcError) as e:
+            self._push_serverapp_outputs.with_call(request=request)
+        assert e.exception.code() == grpc.StatusCode.PERMISSION_DENIED
+        assert e.exception.details() == "Invalid token for run ID."
+
+    def test_push_serverapp_outputs_keeps_token_until_run_finishes(self) -> None:
+        """Test token remains valid after `PushAppOutputs` until terminal status."""
+        # Prepare
+        run_id = self._create_dummy_run(running=False)
+        token = self.state.create_token(run_id)
+        assert token is not None
+        self._transition_run_status(run_id, 2)  # pending -> starting -> running
+
+        maker = RecordMaker()
+        context = Context(
+            run_id=run_id,
+            node_id=0,
+            node_config=maker.user_config(),
+            state=maker.recorddict(1, 1, 1),
+            run_config=maker.user_config(),
+        )
+
+        # Push outputs (token must remain valid for final shutdown RPCs)
+        outputs_req = PushAppOutputsRequest(
+            token=token, run_id=run_id, context=context_to_proto(context)
+        )
+        _, outputs_call = self._push_serverapp_outputs.with_call(request=outputs_req)
+        assert grpc.StatusCode.OK == outputs_call.code()
+
+        # Push final logs with same token
+        logs_req = PushLogsRequest(
+            node=Node(node_id=0), run_id=run_id, logs=["x"], token=token
+        )
+        _, logs_call = self._push_logs.with_call(request=logs_req)
+        assert grpc.StatusCode.OK == logs_call.code()
+
+        # Finish run with same token
+        status_req = UpdateRunStatusRequest(
+            run_id=run_id,
+            run_status=run_status_to_proto(
+                RunStatus(Status.FINISHED, SubStatus.COMPLETED, "")
+            ),
+            token=token,
+        )
+        _, status_call = self._update_run_status.with_call(request=status_req)
+        assert grpc.StatusCode.OK == status_call.code()
+
+        # Token should be invalid after terminal status
+        with self.assertRaises(grpc.RpcError) as e:
+            self._push_logs.with_call(request=logs_req)
+        assert e.exception.code() == grpc.StatusCode.PERMISSION_DENIED
+        assert e.exception.details() == "Invalid token."
 
     def _assert_push_serverapp_outputs_not_allowed(
         self, token: str, context: Context
@@ -641,8 +761,12 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
             _ = self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
             next_run_status = RunStatus(Status.FINISHED, "", "")
 
+        token = self.state.create_token(run_id)
+        assert token is not None
         request = UpdateRunStatusRequest(
-            run_id=run_id, run_status=run_status_to_proto(next_run_status)
+            run_id=run_id,
+            run_status=run_status_to_proto(next_run_status),
+            token=token,
         )
 
         # Execute
@@ -661,8 +785,12 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         run_status = self.state.get_run_status({run_id})[run_id]
         next_run_status = RunStatus(Status.FINISHED, "", "")
 
+        token = self.state.create_token(run_id)
+        assert token is not None
         request = UpdateRunStatusRequest(
-            run_id=run_id, run_status=run_status_to_proto(next_run_status)
+            run_id=run_id,
+            run_status=run_status_to_proto(next_run_status),
+            token=token,
         )
 
         with self.assertRaises(grpc.RpcError) as e:
@@ -696,6 +824,8 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
 
         # Pre-register object
         self.store.preregister(run_id, get_object_tree(obj))
+        token = self.state.create_token(run_id)
+        assert token is not None
 
         # Execute
         req = PushObjectRequest(
@@ -703,6 +833,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
             run_id=run_id,
             object_id=obj.object_id,
             object_content=obj_b,
+            token=token,
         )
         res: PushObjectResponse = self._push_object(request=req)
 
@@ -712,15 +843,17 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
     def test_push_object_fails(self) -> None:
         """Test `PushObject` in unsupported scenarios."""
         run_id = self._create_dummy_run(running=False)
+        token = self.state.create_token(run_id)
+        assert token is not None
         # Run is not running
-        req = PushObjectRequest(node=Node(node_id=123), run_id=run_id)
+        req = PushObjectRequest(node=Node(node_id=123), run_id=run_id, token=token)
         with self.assertRaises(grpc.RpcError) as e:
             self._push_object(request=req)
         assert e.exception.code() == grpc.StatusCode.PERMISSION_DENIED
 
         # Run is running but node ID isn't recognized
         self._transition_run_status(run_id, 2)
-        req = PushObjectRequest(node=Node(node_id=123), run_id=run_id)
+        req = PushObjectRequest(node=Node(node_id=123), run_id=run_id, token=token)
         with self.assertRaises(grpc.RpcError) as e:
             self._push_object(request=req)
         assert e.exception.code() == grpc.StatusCode.FAILED_PRECONDITION
@@ -735,6 +868,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
             run_id=run_id,
             object_id=obj.object_id,
             object_content=obj_b,
+            token=token,
         )
         res: PushObjectResponse = self._push_object(request=req)
 
@@ -752,6 +886,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
             run_id=run_id,
             object_id=fake_object_id,
             object_content=obj_b,
+            token=token,
         )
         res = self._push_object(request=req)
 
@@ -762,6 +897,8 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         """Test `PullObject` functionality."""
         # Prepare
         run_id = self._create_dummy_run()
+        token = self.state.create_token(run_id)
+        assert token is not None
         obj = ConfigRecord({"a": 123, "b": [4, 5, 6]})
         obj_b = obj.deflate()
 
@@ -770,7 +907,10 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
 
         # Pull
         req = PullObjectRequest(
-            node=Node(node_id=SUPERLINK_NODE_ID), run_id=run_id, object_id=obj.object_id
+            node=Node(node_id=SUPERLINK_NODE_ID),
+            run_id=run_id,
+            object_id=obj.object_id,
+            token=token,
         )
         res: PullObjectResponse = self._pull_object(req)
 
@@ -782,7 +922,10 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         # Put object in store, then check it can be pulled
         self.store.put(object_id=obj.object_id, object_content=obj_b)
         req = PullObjectRequest(
-            node=Node(node_id=SUPERLINK_NODE_ID), run_id=run_id, object_id=obj.object_id
+            node=Node(node_id=SUPERLINK_NODE_ID),
+            run_id=run_id,
+            object_id=obj.object_id,
+            token=token,
         )
         res = self._pull_object(req)
 
@@ -794,22 +937,27 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
     def test_pull_object_fails(self) -> None:
         """Test `PullObject` in unsuported scenarios."""
         run_id = self._create_dummy_run(running=False)
+        token = self.state.create_token(run_id)
+        assert token is not None
         # Run is not running
-        req = PullObjectRequest(node=Node(node_id=123), run_id=run_id)
+        req = PullObjectRequest(node=Node(node_id=123), run_id=run_id, token=token)
         with self.assertRaises(grpc.RpcError) as e:
             self._pull_object(request=req)
         assert e.exception.code() == grpc.StatusCode.PERMISSION_DENIED
 
         # Run is running but node ID isn't recognized
         self._transition_run_status(run_id, 2)
-        req = PullObjectRequest(node=Node(node_id=123), run_id=run_id)
+        req = PullObjectRequest(node=Node(node_id=123), run_id=run_id, token=token)
         with self.assertRaises(grpc.RpcError) as e:
             self._pull_object(request=req)
         assert e.exception.code() == grpc.StatusCode.FAILED_PRECONDITION
 
         # Attempt pulling object that doesn't exist
         req = PullObjectRequest(
-            node=Node(node_id=SUPERLINK_NODE_ID), run_id=run_id, object_id="1234"
+            node=Node(node_id=SUPERLINK_NODE_ID),
+            run_id=run_id,
+            object_id="1234",
+            token=token,
         )
         res: PullObjectResponse = self._pull_object(req)
         # Empty response
@@ -835,12 +983,15 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
 
         # Assert: All objects are stored in the ObjectStore
         assert len(self.store) == len(all_objects)
+        token = self.state.create_token(run_id)
+        assert token is not None
 
         # Execute: Confirm message received
         request = ConfirmMessageReceivedRequest(
             node=Node(node_id=self.node_id),
             run_id=run_id,
             message_object_id=message_res.object_id,
+            token=token,
         )
         response, call = self._confirm_message_received.with_call(request=request)
 
@@ -867,6 +1018,20 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
 
         # Assert: Run ID 2 is returned
         assert response.run_ids == [run_id2]
+
+    def test_get_run_successful_without_token(self) -> None:
+        """Test `GetRun` remains accessible without token."""
+        # Prepare
+        run_id = self._create_dummy_run(running=False)
+        request = GetRunRequest(run_id=run_id)
+
+        # Execute
+        response, call = self._get_run.with_call(request=request)
+
+        # Assert
+        assert isinstance(response, GetRunResponse)
+        assert grpc.StatusCode.OK == call.code()
+        assert response.run.run_id == run_id
 
     def test_request_token(self) -> None:
         """Test `RequestToken`."""

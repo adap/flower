@@ -150,6 +150,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     ) -> GetNodesResponse:
         """Get available nodes."""
         log(DEBUG, "ServerAppIoServicer.GetNodes")
+        self._verify_token_for_run(request.token, request.run_id, context)
 
         # Init state and store
         state = self.state_factory.state()
@@ -173,6 +174,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     ) -> PushAppMessagesResponse:
         """Push a set of Messages."""
         log(DEBUG, "ServerAppIoServicer.PushMessages")
+        self._verify_token_for_run(request.token, request.run_id, context)
 
         # Init state and store
         state = self.state_factory.state()
@@ -228,6 +230,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     ) -> PullAppMessagesResponse:
         """Pull a set of Messages."""
         log(DEBUG, "ServerAppIoServicer.PullMessages")
+        self._verify_token_for_run(request.token, request.run_id, context)
 
         # Init state and store
         state = self.state_factory.state()
@@ -360,6 +363,12 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
 
         # Validate the token
         run_id = self._verify_token(request.token, context)
+        if request.run_id != run_id:
+            context.abort(
+                grpc.StatusCode.PERMISSION_DENIED,
+                "Invalid token for run ID.",
+            )
+            raise RuntimeError("Unreachable code")  # for mypy
 
         # Init state and store
         state = self.state_factory.state()
@@ -375,9 +384,6 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         )
 
         state.set_serverapp_context(request.run_id, context_from_proto(request.context))
-
-        # Remove the token
-        state.delete_token(run_id)
         return PushAppOutputsResponse()
 
     def UpdateRunStatus(
@@ -385,6 +391,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     ) -> UpdateRunStatusResponse:
         """Update the status of a run."""
         log(DEBUG, "ServerAppIoServicer.UpdateRunStatus")
+        self._verify_token_for_run(request.token, request.run_id, context)
 
         # Init state and store
         state = self.state_factory.state()
@@ -400,6 +407,9 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
 
         # If the run is finished, delete the run from ObjectStore
         if request.run_status.status == Status.FINISHED:
+            # Invalidate app token only once the run is terminal. This keeps
+            # authentication available for final log/status RPCs after PushAppOutputs.
+            state.delete_token(request.run_id)
             # Delete all objects related to the run
             store.delete_objects_in_run(request.run_id)
 
@@ -410,6 +420,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     ) -> PushLogsResponse:
         """Push logs."""
         log(DEBUG, "ServerAppIoServicer.PushLogs")
+        self._verify_token_for_run(request.token, request.run_id, context)
         state = self.state_factory.state()
 
         # Add logs to LinkState
@@ -435,6 +446,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     ) -> PushObjectResponse:
         """Push an object to the ObjectStore."""
         log(DEBUG, "ServerAppIoServicer.PushObject")
+        self._verify_token_for_run(request.token, request.run_id, context)
 
         # Init state and store
         state = self.state_factory.state()
@@ -471,6 +483,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     ) -> PullObjectResponse:
         """Pull an object from the ObjectStore."""
         log(DEBUG, "ServerAppIoServicer.PullObject")
+        self._verify_token_for_run(request.token, request.run_id, context)
 
         # Init state and store
         state = self.state_factory.state()
@@ -505,6 +518,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     ) -> ConfirmMessageReceivedResponse:
         """Confirm message received."""
         log(DEBUG, "ServerAppIoServicer.ConfirmMessageReceived")
+        self._verify_token_for_run(request.token, request.run_id, context)
 
         # Init state and store
         state = self.state_factory.state()
@@ -535,6 +549,18 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             )
             raise RuntimeError("This line should never be reached.")
         return run_id
+
+    def _verify_token_for_run(
+        self, token: str, run_id: int, context: grpc.ServicerContext
+    ) -> None:
+        """Verify token and ensure it belongs to the given run ID."""
+        token_run_id = self._verify_token(token, context)
+        if token_run_id != run_id:
+            context.abort(
+                grpc.StatusCode.PERMISSION_DENIED,
+                "Invalid token for run ID.",
+            )
+            raise RuntimeError("This line should never be reached.")
 
 
 def _raise_if(validation_error: bool, request_name: str, detail: str) -> None:
