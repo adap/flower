@@ -97,9 +97,17 @@ def flwr_ls(max_retries: int = 5, retry_delay: float = 0.5) -> dict[str, str]:
             except json.JSONDecodeError as err:
                 last_error = f"invalid JSON output: {err}"
             else:
-                if data.get("success", False):
-                    return {entry["run-id"]: entry["status"] for entry in data["runs"]}
-                last_error = f"unsuccessful response: {data}"
+                try:
+                    if data.get("success", False):
+                        return {
+                            entry["run-id"]: entry["status"]
+                            for entry in data["runs"]
+                        }
+                    last_error = f"unsuccessful response: {data}"
+                except (KeyError, TypeError) as err:
+                    last_error = (
+                        f"malformed JSON structure: {err}; data: {data}"
+                    )
 
         if attempt < max_retries - 1:
             time.sleep(retry_delay)
