@@ -126,7 +126,7 @@ jobs:
             echo "Deploying latest stable version (${DOC_VERSION}) English docs to root"
             aws s3 sync --delete --exclude ".*" --cache-control "no-cache" ./framework/docs/build/html/${DOC_VERSION}/en/ s3://${{ secrets.DOCS_AWS_BUCKET_NAME }}/docs/framework/
           fi
-      - name: Generate and deploy shared runtime metadata from main
+      - name: Generate and deploy shared doc UI metadata from main
         if: ${{github.repository == 'adap/flower' && (github.ref == 'refs/heads/main' || github.event_name == 'release')}}
         env:
           AWS_DEFAULT_REGION: ${{ secrets.DOCS_AWS_DEFAULT_REGION }}
@@ -134,13 +134,13 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.DOCS_AWS_SECRET_KEY_ID }}
         run: |
           if [ "${GITHUB_EVENT_NAME}" = "release" ]; then
-            echo "Release event detected; generating runtime metadata from main"
+            echo "Release event detected; generating docs UI metadata from main"
             git fetch origin main
             git checkout origin/main
           fi
 
-          python ./framework/docs/generate-runtime-ui-config.py \
-            --ui-config ./framework/docs/source/docs-ui-config.json \
-            --output ./framework/docs/build/runtime/runtime-ui.json
+          python ./framework/docs/generate_docs_ui_metadata.py \
+            --docs-ui-config ./dev/docs-ui-config.yml \
+            --output ./framework/docs/build/docs-ui-metadata.json
 
-          aws s3 cp --cache-control "no-cache" ./framework/docs/build/runtime/runtime-ui.json s3://${{ secrets.DOCS_AWS_BUCKET_NAME }}/docs/framework-config/runtime-ui.json
+          aws s3 cp --cache-control "no-cache" ./framework/docs/build/docs-ui-metadata.json s3://${{ secrets.DOCS_AWS_BUCKET_NAME }}/docs/framework/docs-ui-metadata.json

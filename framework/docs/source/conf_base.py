@@ -45,7 +45,7 @@ html_context["current_language"] = current_language
 # Shared runtime metadata (versions + announcement) used by all docs versions.
 html_context["docs_runtime_config_url"] = os.getenv(
     "FLWR_DOCS_RUNTIME_CONFIG_URL",
-    "https://flower.ai/docs/framework-config/runtime-ui.json",
+    "https://flower.ai/docs/framework/docs-ui-metadata.json",
 )
 
 # Make current version accessible for the html templates
