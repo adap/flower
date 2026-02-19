@@ -136,7 +136,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.DOCS_AWS_SECRET_KEY_ID }}
         run: |
           if [ "${GITHUB_EVENT_NAME}" = "release" ]; then
-            echo "Release event detected; generating docs UI metadata from main"
+            echo "GitHub release event detected; generating docs UI metadata from `main`"
             git fetch origin main
             git checkout origin/main
           fi
