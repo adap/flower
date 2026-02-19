@@ -31,6 +31,7 @@ from flwr.common.constant import (
     SUPEREXEC_SIGNATURE_HEADER,
     SUPEREXEC_TIMESTAMP_HEADER,
     SUPERLINK_NODE_ID,
+    SYSTEM_TIME_TOLERANCE,
     ExecPluginType,
     Status,
     SubStatus,
@@ -1115,9 +1116,10 @@ class TestServerAppIoServicerSuperExecAuth(  # pylint: disable=too-many-instance
 
         self.superexec_sk, superexec_pk = generate_key_pairs()
         self.superexec_pk_bytes = public_key_to_bytes(superexec_pk)
+        self.timestamp_tolerance_sec = 300
         superexec_auth_config = SuperExecAuthConfig(
             enabled=True,
-            timestamp_tolerance_sec=300,
+            timestamp_tolerance_sec=self.timestamp_tolerance_sec,
             allowed_public_keys={
                 ExecPluginType.SERVER_APP: {self.superexec_pk_bytes},
                 ExecPluginType.SIMULATION: set(),
@@ -1163,8 +1165,10 @@ class TestServerAppIoServicerSuperExecAuth(  # pylint: disable=too-many-instance
             self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
         return run_id
 
-    def _make_superexec_metadata(self, method: str) -> list[tuple[str, bytes | str]]:
-        timestamp = now().isoformat()
+    def _make_superexec_metadata(
+        self, method: str, timestamp: str | None = None
+    ) -> list[tuple[str, bytes | str]]:
+        timestamp = timestamp or now().isoformat()
         payload = f"{timestamp}\n{method}".encode()
         signature = sign_message(self.superexec_sk, payload)
         return [
@@ -1228,3 +1232,36 @@ class TestServerAppIoServicerSuperExecAuth(  # pylint: disable=too-many-instance
                 ),
             )
         assert err.exception.code() == grpc.StatusCode.INVALID_ARGUMENT
+
+    def test_get_run_rejects_stale_superexec_timestamp(self) -> None:
+        """GetRun must reject stale SuperExec signed metadata."""
+        run_id = self._create_dummy_run()
+        stale_ts = (
+            now()
+            - timedelta(
+                seconds=self.timestamp_tolerance_sec + SYSTEM_TIME_TOLERANCE + 2
+            )
+        ).isoformat()
+        with self.assertRaises(grpc.RpcError) as err:
+            self._get_run.with_call(
+                request=GetRunRequest(run_id=run_id),
+                metadata=self._make_superexec_metadata(
+                    "/flwr.proto.ServerAppIo/GetRun", timestamp=stale_ts
+                ),
+            )
+        assert err.exception.code() == grpc.StatusCode.UNAUTHENTICATED
+        assert err.exception.details() == "Expired SuperExec timestamp."
+
+    def test_get_run_rejects_future_timestamp_beyond_clock_drift(self) -> None:
+        """GetRun must reject future timestamps past drift allowance."""
+        run_id = self._create_dummy_run()
+        future_ts = (now() + timedelta(seconds=SYSTEM_TIME_TOLERANCE + 2)).isoformat()
+        with self.assertRaises(grpc.RpcError) as err:
+            self._get_run.with_call(
+                request=GetRunRequest(run_id=run_id),
+                metadata=self._make_superexec_metadata(
+                    "/flwr.proto.ServerAppIo/GetRun", timestamp=future_ts
+                ),
+            )
+        assert err.exception.code() == grpc.StatusCode.UNAUTHENTICATED
+        assert err.exception.details() == "Expired SuperExec timestamp."
