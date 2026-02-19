@@ -148,6 +148,10 @@ Learn more in the `How to Run Simulations
 <https://flower.ai/docs/framework/how-to-run-simulations.html>`_ guide about other
 optional parameters you can use to configure your local simulation.
 
+When you use a local simulation profile (``options.*``), Flower CLI commands that
+communicate with SuperLink use the Control API. If the profile has no explicit
+``address``, Flower starts a local SuperLink automatically when needed.
+
 ***************************
  Remote Deployment Example
 ***************************
