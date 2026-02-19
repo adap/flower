@@ -50,7 +50,6 @@ jobs:
           echo "Syncing required docs build assets from main branch for release branch"
           git fetch origin main
           git checkout origin/main -- \
-            dev/docs-ui-config.yml \
             framework/docs/source/_static/runtime-ui.js \
             framework/docs/source/_static/custom.css \
             framework/docs/source/conf_base.py \
@@ -129,7 +128,7 @@ jobs:
             echo "Deploying latest stable version (${DOC_VERSION}) English docs to root"
             aws s3 sync --delete --exclude ".*" --cache-control "no-cache" ./framework/docs/build/html/${DOC_VERSION}/en/ s3://${{ secrets.DOCS_AWS_BUCKET_NAME }}/docs/framework/
           fi
-      - name: Generate and deploy shared doc UI metadata from main
+      - name: Generate and deploy shared docs UI metadata from main
         if: ${{github.repository == 'adap/flower' && (github.ref == 'refs/heads/main' || github.event_name == 'release')}}
         env:
           AWS_DEFAULT_REGION: ${{ secrets.DOCS_AWS_DEFAULT_REGION }}
