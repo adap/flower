@@ -194,12 +194,12 @@ FEDERATION_COULD_NOT_BE_ARCHIVED_MESSAGE = (
 # Maximum number of SuperNodes to add/remove in a `flwr federation` request
 MAX_SUPERNODES_PER_REQUEST = 50
 SUPERNODE_COULD_NOT_BE_ADDED_TO_FEDERATION_MESSAGE = (
-    "One or more nodes could not be added to the federation. Ensure all node IDs are "
+    "One or more SuperNodes could not be added to the federation. Ensure all node IDs are "
     "correct, owned by you, not already in the federation, and that the targeted "
     "SuperLink supports federation management."
 )
 SUPERNODE_COULD_NOT_BE_REMOVED_FROM_FEDERATION_MESSAGE = (
-    "One or more nodes could not be removed from the federation. Ensure all node IDs "
+    "One or more SuperNodes could not be removed from the federation. Ensure all node IDs "
     "are correct, owned by you, are in the federation, and that the targeted "
     "SuperLink supports federation management."
 )
