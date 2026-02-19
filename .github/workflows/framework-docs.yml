@@ -126,7 +126,7 @@ jobs:
           # Deploy latest stable version to root (if applicable)
           if [ "${{ steps.latest_check.outputs.is_latest }}" = "true" ]; then
             echo "Deploying latest stable version (${DOC_VERSION}) English docs to root"
-            aws s3 sync --delete --exclude ".*" --cache-control "no-cache" ./framework/docs/build/html/${DOC_VERSION}/en/ s3://${{ secrets.DOCS_AWS_BUCKET_NAME }}/docs/framework/
+            aws s3 sync --exclude ".*" --cache-control "no-cache" ./framework/docs/build/html/${DOC_VERSION}/en/ s3://${{ secrets.DOCS_AWS_BUCKET_NAME }}/docs/framework/
           fi
       - name: Generate and deploy shared docs UI metadata from main
         if: ${{ github.repository == 'adap/flower' && (github.ref == 'refs/heads/main' || github.event_name == 'release') }}
