@@ -69,7 +69,6 @@ def update_conf_file(file_path: Path, new_fields_str: str) -> None:
     Insert new_fields_str into the html_theme_options block of file_path.
     The new fields are inserted just before the closing brace.
     """
-
     if not new_fields_str.strip():
         print(f"Skipping {file_path} (no new fields to insert)")
         return
