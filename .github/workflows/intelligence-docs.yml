@@ -26,7 +26,7 @@ jobs:
     runs-on: ubuntu-22.04
     name: Check Docs Formatting
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
       - name: Install dependencies (mandatory only)
@@ -41,7 +41,7 @@ jobs:
     runs-on: ubuntu-22.04
     name: Build TypeScript Docs
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
       - name: Setup Node.js
@@ -72,9 +72,11 @@ jobs:
     runs-on: macos-14
     name: Build Swift Docs
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
+        with:
+          python-version: "3.10"
       - uses: swift-actions/setup-swift@v2
         with:
           swift-version: "6.0.0"
@@ -103,7 +105,7 @@ jobs:
     runs-on: ubuntu-22.04
     name: Build Kotlin Docs
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
@@ -129,7 +131,7 @@ jobs:
     needs: [build_ts_docs, build_swift_docs, build_kt_docs]
     name: Deploy Docs
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         if: ${{ github.ref == 'refs/heads/main' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork }}
       - name: Bootstrap
         if: ${{ github.ref == 'refs/heads/main' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork }}
@@ -168,9 +170,8 @@ jobs:
       - name: Deploy docs
         if: ${{ github.ref == 'refs/heads/main' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork }}
         env:
-          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          DOCS_BUCKET: flower.ai
+          AWS_DEFAULT_REGION: ${{ secrets.DOCS_AWS_DEFAULT_REGION }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.DOCS_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.DOCS_AWS_SECRET_KEY_ID }}
         run: |
-          aws s3 sync --delete --exclude ".*" --exclude "v/*" --cache-control "no-cache" ./intelligence/docs/build/html/ s3://${{ env.DOCS_BUCKET }}/docs/intelligence
+          aws s3 sync --delete --exclude ".*" --exclude "v/*" --cache-control "no-cache" ./intelligence/docs/build/html/ s3://${{ secrets.DOCS_AWS_BUCKET_NAME }}/docs/intelligence

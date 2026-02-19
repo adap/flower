@@ -1,4 +1,4 @@
-name: PR Check
+name: Check PR title format
 
 on:
   pull_request:
@@ -15,11 +15,13 @@ jobs:
     runs-on: ubuntu-22.04
     name: Title format
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
         with:
-          python-version: 3.11
+          python-version: 3.13
           poetry-skip: 'true'
       - name: Check PR title format 
-        run: python ./dev/check_pr_title.py "${{ github.event.pull_request.title }}"
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: python ./dev/check_pr_title.py "$PR_TITLE"
