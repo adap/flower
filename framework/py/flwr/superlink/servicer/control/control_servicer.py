@@ -33,7 +33,7 @@ from flwr.common.constant import (
     FEDERATION_NOT_SPECIFIED_MESSAGE,
     HEARTBEAT_DEFAULT_INTERVAL,
     LOG_STREAM_INTERVAL,
-    MAX_SUPERNODES_REGISTER_PER_REQUEST,
+    MAX_SUPERNODES_PER_REQUEST,
     NO_ACCOUNT_AUTH_MESSAGE,
     NO_ARTIFACT_PROVIDER_MESSAGE,
     NODE_NOT_FOUND_MESSAGE,
@@ -761,10 +761,10 @@ def _validate_federation_and_nodes_in_request(
         )
 
     # Ensure not exceeded maximum number of supernodes per request
-    if len(unique_node_ids) > MAX_SUPERNODES_REGISTER_PER_REQUEST:
+    if len(unique_node_ids) > MAX_SUPERNODES_PER_REQUEST:
         context.abort(
             grpc.StatusCode.FAILED_PRECONDITION,
-            f"Cannot process more than {MAX_SUPERNODES_REGISTER_PER_REQUEST} "
+            f"Cannot process more than {MAX_SUPERNODES_PER_REQUEST} "
             "nodes in a single request.",
         )
 

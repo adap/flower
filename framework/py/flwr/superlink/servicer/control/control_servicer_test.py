@@ -33,7 +33,7 @@ from flwr.common.constant import (
     FEDERATION_COULD_NOT_BE_ARCHIVED_MESSAGE,
     FEDERATION_COULD_NOT_BE_CREATED_MESSAGE,
     FEDERATION_NOT_SPECIFIED_MESSAGE,
-    MAX_SUPERNODES_REGISTER_PER_REQUEST,
+    MAX_SUPERNODES_PER_REQUEST,
     NODE_NOT_FOUND_MESSAGE,
     PUBLIC_KEY_ALREADY_IN_USE_MESSAGE,
     PUBLIC_KEY_NOT_VALID,
@@ -685,7 +685,7 @@ class TestValidateFederationAndNodesInRequest(unittest.TestCase):
     def test_validate_aborts_when_too_many_nodes(self) -> None:
         """Test abort when node_ids exceeds MAX_SUPERNODES_REGISTER_PER_REQUEST."""
         ctx = self._make_context()
-        too_many = list(range(1, MAX_SUPERNODES_REGISTER_PER_REQUEST + 2))
+        too_many = list(range(1, MAX_SUPERNODES_PER_REQUEST + 2))
         with self.assertRaises(RuntimeError) as cm:
             _validate_federation_and_nodes_in_request(
                 self.state, self.aid, NOOP_FEDERATION, too_many, ctx
