@@ -1,4 +1,4 @@
-name: Publish `@flwr/flwr` release on NPM
+name: Publish `@flwr/flwr` (NPM) and `ai.flower:flwr` (Maven)
 
 on:
   push:
@@ -10,14 +10,31 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  publish:
+  check-version:
+    name: Check version consistency
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22.14.0'
+          registry-url: https://registry.npmjs.org
+
+      - name: Run version consistency check
+        run: ./intelligence/dev/check-version-consistency.sh
+
+  publish-typescript:
+    needs: check-version
     if: ${{ github.repository == 'adap/flower' }}
-    name: Publish release
+    name: Publish Flower Intelligence TypeScript SDK to NPM
     runs-on: ubuntu-22.04
     timeout-minutes: 10
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -41,3 +58,30 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: pnpm publish . --access public --no-git-checks
+
+  publish-kotlin:
+    needs: check-version
+    if: ${{ github.repository == 'adap/flower' }}
+    name: Publish Flower Intelligence Kotlin SDK to Maven Central
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+
+    env:
+      MVN_CENTRAL_USER: ${{ secrets.MVN_CENTRAL_USER }}
+      MVN_CENTRAL_PASSWORD: ${{ secrets.MVN_CENTRAL_PASSWORD }}
+      ORG_GRADLE_PROJECT_signingKey: ${{ secrets.GRADLE_SIGNING_KEY }}
+      ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.GRADLE_SIGNING_PASSWORD }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Publish Kotlin package
+        working-directory: intelligence/kt
+        run: ./dev/publish.sh

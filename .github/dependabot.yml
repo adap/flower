@@ -76,3 +76,9 @@ updates:
     schedule:
       # Check for updates to GitHub Actions every week
       interval: "weekly"
+
+  - package-ecosystem: "docker"
+    directories:
+      - "/framework/docker/base/**/*"
+    schedule:
+      interval: "weekly"
