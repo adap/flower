@@ -26,7 +26,7 @@ import yaml
 from packaging.version import Version
 
 MIN_VERSION = Version("1.8.0")
-MINOR_LABEL_FROM = Version("1.21.0")
+MINOR_LABEL_FROM = Version("1.17.0")
 
 
 def _collect_versions() -> list[dict[str, str]]:
