@@ -44,10 +44,10 @@ jobs:
         run: |
           cd framework
           python -m poetry install
-      - name: Use shared docs runtime files from main for release branches
+      - name: Sync required docs build assets from main for release branches
         if: ${{ startsWith(github.ref, 'refs/heads/release/framework-') || (github.event_name == 'pull_request' && startsWith(github.base_ref, 'release/framework-')) || (github.event_name == 'release' && startsWith(github.ref, 'refs/tags/framework-')) }}
         run: |
-          echo "Using shared runtime docs files from main branch for release branch"
+          echo "Syncing required docs build assets from main branch for release branch"
           git fetch origin main
           git checkout origin/main -- \
             framework/docs/source/conf_base.py \
