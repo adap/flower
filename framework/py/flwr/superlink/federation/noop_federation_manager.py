@@ -20,8 +20,6 @@ from flwr.common.constant import (
     FEDERATION_COULD_NOT_BE_CREATED_MESSAGE,
     NOOP_ACCOUNT_NAME,
     NOOP_FLWR_AID,
-    SUPERNODE_COULD_NOT_BE_ADDED_TO_FEDERATION_MESSAGE,
-    SUPERNODE_COULD_NOT_BE_REMOVED_FROM_FEDERATION_MESSAGE,
 )
 from flwr.common.typing import Federation
 from flwr.proto.federation_pb2 import Account  # pylint: disable=E0611
@@ -93,10 +91,14 @@ class NoOpFederationManager(FederationManager):
         self, flwr_aid: str, federation: str, node_ids: set[int]
     ) -> None:
         """Add supernodes to a federation."""
-        raise NotImplementedError("`add_supernodes` is not supported by NoopFederationManager.")
+        raise NotImplementedError(
+            "`add_supernodes` is not supported by NoopFederationManager."
+        )
 
     def remove_supernodes(
         self, flwr_aid: str, federation: str, node_ids: set[int]
     ) -> None:
         """Remove supernodes from a federation."""
-        raise NotImplementedError("`remove_supernodes` is not supported by NoopFederationManager.")
+        raise NotImplementedError(
+            "`remove_supernodes` is not supported by NoopFederationManager."
+        )

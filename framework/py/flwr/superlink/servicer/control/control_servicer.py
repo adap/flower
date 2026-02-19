@@ -684,7 +684,10 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             )
         except NotImplementedError as e:
             log(ERROR, "Could not add node(s) to federation: %s", str(e))
-            context.abort(grpc.StatusCode.FAILED_PRECONDITION, "SuperLink does not support federation management.")
+            context.abort(
+                grpc.StatusCode.FAILED_PRECONDITION,
+                "SuperLink does not support federation management.",
+            )
 
         return AddNodeToFederationResponse()
 
@@ -714,7 +717,10 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             )
         except NotImplementedError as e:
             log(ERROR, "Could not remove node(s) from federation: %s", str(e))
-            context.abort(grpc.StatusCode.FAILED_PRECONDITION, "SuperLink does not support federation management.")
+            context.abort(
+                grpc.StatusCode.FAILED_PRECONDITION,
+                "SuperLink does not support federation management.",
+            )
 
         return RemoveNodeFromFederationResponse()
 
