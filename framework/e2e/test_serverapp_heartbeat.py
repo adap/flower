@@ -62,28 +62,49 @@ def flwr_run() -> str:
     return data["run-id"]
 
 
-def flwr_ls() -> dict[str, str]:
+def flwr_ls(max_retries: int = 5, retry_delay: float = 0.5) -> dict[str, str]:
     """Run `flwr ls` command and return a mapping of run_id to status.
+
+    Parameters
+    ----------
+    max_retries : int
+        Maximum number of `flwr ls` attempts before failing.
+    retry_delay : float
+        Delay in seconds between retry attempts.
 
     Returns
     -------
     dict[str, str]
         A dictionary where keys are run IDs and values are their statuses.
     """
-    # Run the command
-    result = subprocess.run(
-        ["flwr", "ls", "e2e", "--format", "json"],
-        capture_output=True,
-        text=True,
-        check=True,
-    )
+    last_error: str = ""
+    for attempt in range(max_retries):
+        result = subprocess.run(
+            ["flwr", "ls", "e2e", "--format", "json"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
 
-    # Parse JSON output and ensure the command succeeded
-    data = json.loads(result.stdout)
-    assert data["success"], "flwr ls failed"
+        if result.returncode != 0:
+            last_error = (
+                "non-zero return code "
+                f"{result.returncode}: {result.stderr.strip() or result.stdout.strip()}"
+            )
+        else:
+            try:
+                data = json.loads(result.stdout)
+            except json.JSONDecodeError as err:
+                last_error = f"invalid JSON output: {err}"
+            else:
+                if data.get("success", False):
+                    return {entry["run-id"]: entry["status"] for entry in data["runs"]}
+                last_error = f"unsuccessful response: {data}"
 
-    # Return a dictionary mapping run_id to status
-    return {entry["run-id"]: entry["status"] for entry in data["runs"]}
+        if attempt < max_retries - 1:
+            time.sleep(retry_delay)
+
+    raise AssertionError(f"flwr ls failed after retries: {last_error}")
 
 
 def get_pids(command: str) -> list[int]:
