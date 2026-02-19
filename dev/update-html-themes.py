@@ -37,7 +37,7 @@ NEW_FIELDS: dict[str, Optional[Union[dict[str, str], str]]] = {
     },
 }
 
-with Path("./docs-ui-config.yml").open() as f:
+with (ROOT_DIR / "dev" / "docs-ui-config.yml").open() as f:
     announcement = yaml.safe_load(f)["announcement"]
     if announcement["enabled"]:
         NEW_FIELDS["announcement"] = announcement["html"]
