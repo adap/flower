@@ -33,6 +33,7 @@ from flwr.supercore.object_store import ObjectStoreFactory
 from .serverappio_servicer import ServerAppIoServicer
 
 
+# pylint: disable=too-many-arguments,too-many-positional-arguments
 def run_serverappio_api_grpc(
     address: str,
     state_factory: LinkStateFactory,
@@ -64,3 +65,6 @@ def run_serverappio_api_grpc(
     serverappio_grpc_server.start()
 
     return serverappio_grpc_server
+
+
+# pylint: enable=too-many-arguments,too-many-positional-arguments

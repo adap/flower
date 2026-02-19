@@ -274,7 +274,9 @@ class TestSimulationIoServicer(unittest.TestCase):  # pylint: disable=R0902
         mock_ack_method.assert_called_once_with(token)
 
 
-class TestSimulationIoServicerSuperExecAuth(unittest.TestCase):
+class TestSimulationIoServicerSuperExecAuth(  # pylint: disable=too-many-instance-attributes
+    unittest.TestCase
+):
     """SimulationIoServicer tests with SuperExec auth enabled."""
 
     def setUp(self) -> None:

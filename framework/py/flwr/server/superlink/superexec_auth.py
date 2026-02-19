@@ -126,6 +126,7 @@ def superexec_auth_metadata_present(context: grpc.ServicerContext) -> bool:
     return any(header in metadata for header in _SUPEREXEC_AUTH_HEADERS)
 
 
+# pylint: disable=too-many-locals
 def verify_superexec_signed_metadata(
     context: grpc.ServicerContext,
     method: str,
@@ -200,6 +201,9 @@ def verify_superexec_signed_metadata(
     if not min_diff < diff_sec < max_diff:
         context.abort(grpc.StatusCode.UNAUTHENTICATED, "Expired SuperExec timestamp.")
         raise RuntimeError("Unreachable")
+
+
+# pylint: enable=too-many-locals
 
 
 def _parse_public_key_entry(entry: object) -> tuple[str, set[str]]:

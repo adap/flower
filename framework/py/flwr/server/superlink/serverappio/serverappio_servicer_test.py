@@ -1096,7 +1096,9 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         assert run_status.status == Status.RUNNING
 
 
-class TestServerAppIoServicerSuperExecAuth(unittest.TestCase):
+class TestServerAppIoServicerSuperExecAuth(  # pylint: disable=too-many-instance-attributes
+    unittest.TestCase
+):
     """ServerAppIoServicer tests with SuperExec auth enabled."""
 
     def setUp(self) -> None:
