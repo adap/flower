@@ -127,6 +127,12 @@ jobs:
             echo "Deploying latest stable version (${DOC_VERSION}) English docs to root"
             aws s3 sync --delete --exclude ".*" --cache-control "no-cache" ./framework/docs/build/html/${DOC_VERSION}/en/ s3://${{ secrets.DOCS_AWS_BUCKET_NAME }}/docs/framework/
           fi
+
+          python ./framework/docs/generate_docs_ui_metadata.py \
+            --docs-ui-config ./dev/docs-ui-config.yml \
+            --output ./framework/docs/build/docs-ui-metadata.json
+
+          aws s3 cp --cache-control "no-cache" ./framework/docs/build/docs-ui-metadata.json s3://${{ secrets.DOCS_AWS_BUCKET_NAME }}/docs/framework/docs-ui-metadata.json
       - name: Generate and deploy shared docs UI metadata from main
         if: ${{ github.repository == 'adap/flower' && (github.ref == 'refs/heads/main' || github.event_name == 'release') }}
         env:
