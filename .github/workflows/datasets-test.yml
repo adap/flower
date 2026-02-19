@@ -6,15 +6,13 @@ on:
       - main
     paths:
       - "datasets/**"
-      - ".github/workflows/datasets.yml"
-      - ".github/workflows/datasets-e2e.yml"
+      - ".github/workflows/datasets-*.yml"
   pull_request:
     branches:
       - main
     paths:
       - "datasets/**"
-      - ".github/workflows/datasets.yml"
-      - ".github/workflows/datasets-e2e.yml"
+      - ".github/workflows/datasets-*.yml"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.run_id || github.event.pull_request.number || github.ref }}
@@ -44,6 +42,20 @@ jobs:
         uses: ./.github/actions/bootstrap
         with:
           python-version: ${{ matrix.python }}
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@v1.3.1
+        with:
+          tool-cache: false
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: false
+          docker-images: false
+          swap-storage: false
+      - name: Install dependencies (system)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
       - name: Install dependencies (mandatory only)
         run: |
           cd datasets

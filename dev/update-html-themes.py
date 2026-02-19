@@ -19,6 +19,7 @@ import json
 import re
 from pathlib import Path
 from typing import Optional, Union
+import yaml
 
 # Change this if you want to search a different directory.
 ROOT_DIR = Path(".")
@@ -26,21 +27,20 @@ ROOT_DIR = Path(".")
 # Define new fields to be added to the `html_theme_options` dictionary in `conf.py`.
 # If no fields are needed, set to an empty dictionary.
 NEW_FIELDS: dict[str, Optional[Union[dict[str, str], str]]] = {
-    # "announcement": (
-    #     "<a href='https://flower.ai/events/flower-ai-day-2025/'>"
-    #     "<strong style='color: #f2b705;'>👉 Register now</strong></a> "
-    #     "for Flower AI Day 2025!<br />"
-    #     "September 25, 🇺🇸 San Francisco"
-    # ),
-    # "light_css_variables": {
-    #     "color-announcement-background": "#292f36",
-    #     "color-announcement-text": "#ffffff",
-    # },
-    # "dark_css_variables": {
-    #     "color-announcement-background": "#292f36",
-    #     "color-announcement-text": "#ffffff",
-    # },
+    "light_css_variables": {
+        "color-announcement-background": "#292f36",
+        "color-announcement-text": "#ffffff",
+    },
+    "dark_css_variables": {
+        "color-announcement-background": "#292f36",
+        "color-announcement-text": "#ffffff",
+    },
 }
+
+with (ROOT_DIR / "dev" / "docs-ui-config.yml").open() as f:
+    announcement = yaml.safe_load(f)["announcement"]
+    if announcement["enabled"]:
+        NEW_FIELDS["announcement"] = announcement["html"]
 
 
 def dict_to_fields_str(fields: dict[str, Optional[Union[dict[str, str], str]]]) -> str:
@@ -113,6 +113,8 @@ def main() -> None:
         return
 
     for conf_file in conf_files:
+        if "framework/docs/source/conf.py" in str(conf_file):
+            continue  # Skip updating conf.py for framework docs
         update_conf_file(conf_file, new_fields_str)
 
 

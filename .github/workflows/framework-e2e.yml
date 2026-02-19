@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - main
+      - 'release/framework-*'
   pull_request:
     branches:
       - main
+      - 'release/framework-*'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.run_id || github.event.pull_request.number || github.ref }}
@@ -307,6 +309,8 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 10
     needs: [changes, wheel]
+    env:
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
     strategy:
       matrix:
         include:
@@ -341,7 +345,7 @@ jobs:
           # Replace tensorflow with tensorflow-cpu to avoid GPU warnings in CI
           sed -i 's/"tensorflow\([^"]*\)"/"tensorflow-cpu\1"/g' pyproject.toml
           pip install flwr[simulation]
-          pip install .
+          pip install .  --extra-index-url https://download.pytorch.org/whl/cpu
       - name: Run project
         if: ${{ needs.changes.outputs.framework == 'true' }}
         working-directory: examples/${{ matrix.example }}
