@@ -129,7 +129,7 @@ jobs:
             aws s3 sync --delete --exclude ".*" --cache-control "no-cache" ./framework/docs/build/html/${DOC_VERSION}/en/ s3://${{ secrets.DOCS_AWS_BUCKET_NAME }}/docs/framework/
           fi
       - name: Generate and deploy shared docs UI metadata from main
-        if: ${{github.repository == 'adap/flower' && (github.ref == 'refs/heads/main' || github.event_name == 'release')}}
+        if: ${{ github.repository == 'adap/flower' && (github.ref == 'refs/heads/main' || github.event_name == 'release') }}
         env:
           AWS_DEFAULT_REGION: ${{ secrets.DOCS_AWS_DEFAULT_REGION }}
           AWS_ACCESS_KEY_ID: ${{ secrets.DOCS_AWS_ACCESS_KEY_ID }}

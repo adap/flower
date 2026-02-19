@@ -23,7 +23,7 @@ from pathlib import Path
 from typing import Any
 
 import yaml
-from packaging.version import InvalidVersion, Version
+from packaging.version import Version
 
 MIN_VERSION = Version("1.8.0")
 MINOR_LABEL_FROM = Version("1.21.0")
@@ -75,6 +75,7 @@ def _load_announcement(config_path: Path) -> dict[str, Any]:
 
 
 def main() -> None:
+    """Generate docs UI metadata."""
     parser = argparse.ArgumentParser(description="Generate docs UI metadata")
     parser.add_argument(
         "--docs-ui-config",
