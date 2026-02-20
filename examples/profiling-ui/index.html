@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Flower Profiling UI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Goldman:wght@400;700&family=Montserrat:wght@400;500;600;700&family=Share+Tech+Mono&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="bg-orb bg-orb-1"></div>
+    <div class="bg-orb bg-orb-2"></div>
+    <header class="header">
+      <div class="header-top">
+        <div class="brand">
+          <div class="brand-mark">
+            <img src="assets/flower-mark.svg" alt="Flower logo" />
+          </div>
+          <div>
+            <div class="brand-title">Flower Profiling</div>
+            <div class="brand-subtitle">Time, memory, disk, network</div>
+          </div>
+        </div>
+        <div class="actions">
+          <div class="inline-input">
+            <label for="run-id-input">Run ID</label>
+            <input id="run-id-input" type="text" placeholder="e.g. 11499293074092490504" />
+          </div>
+          <label class="toggle">
+            <input id="live-toggle" type="checkbox" />
+            <span>Live</span>
+          </label>
+          <button id="parse-button" class="secondary">Parse JSON</button>
+          <button id="fetch-button" class="primary">Fetch</button>
+        </div>
+      </div>
+      <div class="input-panel">
+        <textarea
+          id="json-input"
+          placeholder="Optional: paste profile JSON (or use the Fetch button)"
+        ></textarea>
+        <div id="drop-zone">Drop JSON here</div>
+      </div>
+    </header>
+
+    <main class="content">
+      <section class="cards">
+        <div class="card">
+          <div class="card-label">Run ID</div>
+          <div id="run-id" class="card-value">—</div>
+          <div id="generated-at" class="card-subvalue">—</div>
+        </div>
+        <div class="card">
+          <div class="card-label">Events</div>
+          <div id="event-count" class="card-value">—</div>
+          <div id="task-count" class="card-subvalue">—</div>
+        </div>
+        <div class="card">
+          <div class="card-label">Nodes</div>
+          <div id="node-count" class="card-value">—</div>
+          <div id="round-count" class="card-subvalue">—</div>
+        </div>
+      </section>
+
+      <section class="grid">
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <h2>Memory Delta Over Time</h2>
+              <p class="muted">Shows change in RSS during each task.</p>
+            </div>
+            <div class="panel-controls">
+              <select id="mem-scope"></select>
+              <select id="mem-task"></select>
+            </div>
+          </div>
+          <canvas id="mem-chart" height="220"></canvas>
+        </div>
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <h2>Disk IO Over Time</h2>
+              <p class="muted">Per-task read/write deltas when available.</p>
+            </div>
+            <div class="panel-controls">
+              <select id="disk-scope"></select>
+              <select id="disk-task"></select>
+            </div>
+          </div>
+          <canvas id="disk-chart" height="220"></canvas>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <h2>Task Summary</h2>
+            <p class="muted">Aggregated timing, memory, and disk metrics.</p>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table id="summary-table">
+            <thead>
+              <tr>
+                <th>Task</th>
+                <th>Scope</th>
+                <th>Round</th>
+                <th>Node</th>
+                <th>Avg (ms)</th>
+                <th>Max (ms)</th>
+                <th>Avg Mem (MB)</th>
+                <th>Avg ΔMem (MB)</th>
+                <th>Avg Read (MB)</th>
+                <th>Avg Write (MB)</th>
+                <th>Disk Src</th>
+                <th>Count</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <h2>Network Summary</h2>
+            <p class="muted">Upstream, downstream, and combined transfer timing.</p>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table id="network-table">
+            <thead>
+              <tr>
+                <th>Task</th>
+                <th>Round</th>
+                <th>Node</th>
+                <th>Avg (ms)</th>
+                <th>Max (ms)</th>
+                <th>Count</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div>
+        Built for Flower profiling summaries. Drop in JSON from
+        <code>flwr profile --format json</code>.
+      </div>
+    </footer>
+
+    <script src="app.js"></script>
+  </body>
+</html>

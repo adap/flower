@@ -287,6 +287,14 @@ class FedAvgStreaming(FedAvg):
                 valid_replies, _ = self._check_and_log_replies(
                     train_replies, is_train=True
                 )
+                if not valid_replies:
+                    log(
+                        WARNING,
+                        "No valid training replies for all_at_once aggregation, "
+                        "skipping round %s",
+                        current_round,
+                    )
+                    continue
                 reply_contents = [msg.content for msg in valid_replies]
                 profiler = get_active_profiler()
                 start_time = perf_counter() if profiler is not None else None
@@ -296,15 +304,15 @@ class FedAvgStreaming(FedAvg):
                 )
                 if profiler is not None and start_time is not None:
                     duration_ms = (perf_counter() - start_time) * 1000.0
-                        profiler.record(
-                            scope="server",
-                            task="aggregate",
-                            round=current_round,
-                            node_id=None,
-                            duration_ms=duration_ms,
-                            metadata={"mode": "all_at_once"},
-                        )
-                        publish_profile_summary()
+                    profiler.record(
+                        scope="server",
+                        task="aggregate",
+                        round=current_round,
+                        node_id=None,
+                        duration_ms=duration_ms,
+                        metadata={"mode": "all_at_once"},
+                    )
+                    publish_profile_summary()
                 after_mb = process.memory_info().rss / (1024**2)
                 log(
                     INFO,
@@ -320,7 +328,7 @@ class FedAvgStreaming(FedAvg):
                         tensor.detach().cpu() if hasattr(tensor, "cpu") else tensor
                     )
                     chunk_slices = _chunk_slices(cpu_tensor, self._max_chunk_bytes)
-                    agg_tensor = torch.empty_like(cpu_tensor)
+                    agg_tensor = cpu_tensor.clone()
 
                     num_chunks = len(chunk_slices)
                     for chunk_idx, (start, end) in enumerate(chunk_slices):
