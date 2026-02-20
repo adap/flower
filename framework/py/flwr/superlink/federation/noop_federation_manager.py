@@ -87,13 +87,13 @@ class NoOpFederationManager(FederationManager):
         )
 
     def add_supernode(self, flwr_aid: str, federation: str, node_id: int) -> None:
-        """Add a supernode to a federation."""
+        """Add a SuperNode to a federation."""
         raise NotImplementedError(
             "`add_supernode` is not supported by NoOpFederationManager."
         )
 
     def remove_supernode(self, flwr_aid: str, federation: str, node_id: int) -> None:
-        """Remove a supernode from a federation."""
+        """Remove a SuperNode from a federation."""
         raise NotImplementedError(
             "`remove_supernode` is not supported by NoOpFederationManager."
         )
