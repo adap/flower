@@ -58,21 +58,19 @@ class SqlCoreState(CoreState, SqlMixin):
         """Return SQLAlchemy MetaData needed for CoreState tables."""
         return create_corestate_metadata()
 
-    def create_token(self, run_id: int, message_id: str | None = None) -> str | None:
+    def create_token(self, run_id: int) -> str | None:
         """Create a token for the given run ID."""
         token = secrets.token_hex(FLWR_APP_TOKEN_LENGTH)  # Generate a random token
         current = now().timestamp()
         active_until = current + HEARTBEAT_DEFAULT_INTERVAL
-        message_id_value = message_id or ""
-        # Idempotent per (run_id, message_id) so model/connector sandboxes start.
+        # Idempotent per run_id.
         existing_query = """
             SELECT token
             FROM token_store
-            WHERE run_id = :run_id AND message_id = :message_id;
+            WHERE run_id = :run_id;
         """
         existing_data = {
             "run_id": uint64_to_int64(run_id),
-            "message_id": message_id_value,
         }
         rows = self.query(existing_query, existing_data)
         if rows:
@@ -81,20 +79,19 @@ class SqlCoreState(CoreState, SqlMixin):
             "run_id": uint64_to_int64(run_id),
             "token": token,
             "active_until": active_until,
-            "message_id": message_id_value,
         }
         if self._engine and self._engine.dialect.name == "sqlite":
             insert_query = """
                 INSERT OR IGNORE INTO token_store
-                (run_id, token, active_until, message_id)
-                VALUES (:run_id, :token, :active_until, :message_id);
+                (run_id, token, active_until)
+                VALUES (:run_id, :token, :active_until);
             """
         else:
             insert_query = """
                 INSERT INTO token_store
-                (run_id, token, active_until, message_id)
-                VALUES (:run_id, :token, :active_until, :message_id)
-                ON CONFLICT (run_id, message_id) DO NOTHING;
+                (run_id, token, active_until)
+                VALUES (:run_id, :token, :active_until)
+                ON CONFLICT (run_id) DO NOTHING;
             """
         try:
             self.query(insert_query, insert_data)
@@ -132,17 +129,6 @@ class SqlCoreState(CoreState, SqlMixin):
         if not rows:
             return None
         return int64_to_uint64(rows[0]["run_id"])
-
-    def get_message_id_by_token(self, token: str) -> str | None:
-        """Get the message ID associated with a given token."""
-        self._cleanup_expired_tokens()
-        query = "SELECT message_id FROM token_store WHERE token = :token;"
-        data = {"token": token}
-        rows = self.query(query, data)
-        if not rows:
-            return None
-        message_id = cast(str, rows[0]["message_id"])
-        return message_id or None
 
     def acknowledge_app_heartbeat(self, token: str) -> bool:
         """Acknowledge an app heartbeat with the provided token."""
@@ -202,23 +188,16 @@ class SqlCoreState(CoreState, SqlMixin):
                     query = """
                         DELETE FROM token_store
                         WHERE active_until < :current
-                        RETURNING run_id, active_until, message_id;
+                        RETURNING run_id, active_until;
                     """
-                    deleted_rows = (
+                    rows = (
                         session.execute(text(query), {"current": current})
                         .mappings()
                         .all()
                     )
-                    expired_records = []
-                    for row in deleted_rows:
-                        message_id = row["message_id"] or ""
-                        # Only root tokens (no message_id) should fail a run on
-                        # expiry.
-                        if message_id == "":
-                            expired_records.append(
-                                (int64_to_uint64(row["run_id"]), row["active_until"])
-                            )
-
+                    expired_records = [
+                        (int64_to_uint64(row["run_id"]), row["active_until"]) for row in rows
+                    ]
                     # Hook for subclasses
                     if expired_records:
                         self._on_tokens_expired(expired_records)
