@@ -30,13 +30,12 @@ from parameterized import parameterized
 
 from flwr.common import ConfigRecord, now
 from flwr.common.constant import (
-    FEDERATION_COULD_NOT_BE_ARCHIVED_MESSAGE,
-    FEDERATION_COULD_NOT_BE_CREATED_MESSAGE,
     FEDERATION_NOT_SPECIFIED_MESSAGE,
     MAX_SUPERNODES_PER_REQUEST,
     NODE_NOT_FOUND_MESSAGE,
     PUBLIC_KEY_ALREADY_IN_USE_MESSAGE,
     PUBLIC_KEY_NOT_VALID,
+    SUPERLINK_DOES_NOT_SUPPORT_FED_MANAGEMENT_MESSAGE,
     Status,
     SubStatus,
 )
@@ -382,7 +381,7 @@ class TestControlServicer(unittest.TestCase):
 
         mock_context.abort.assert_called_once_with(
             grpc.StatusCode.FAILED_PRECONDITION,
-            FEDERATION_COULD_NOT_BE_CREATED_MESSAGE % name,
+            SUPERLINK_DOES_NOT_SUPPORT_FED_MANAGEMENT_MESSAGE,
         )
 
     def test_archive_federation_success(self) -> None:
@@ -421,7 +420,7 @@ class TestControlServicer(unittest.TestCase):
 
         mock_context.abort.assert_called_once_with(
             grpc.StatusCode.FAILED_PRECONDITION,
-            FEDERATION_COULD_NOT_BE_ARCHIVED_MESSAGE % name,
+            SUPERLINK_DOES_NOT_SUPPORT_FED_MANAGEMENT_MESSAGE,
         )
 
 

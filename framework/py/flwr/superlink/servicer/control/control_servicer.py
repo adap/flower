@@ -41,6 +41,7 @@ from flwr.common.constant import (
     PUBLIC_KEY_NOT_VALID,
     PULL_UNFINISHED_RUN_MESSAGE,
     RUN_ID_NOT_FOUND_MESSAGE,
+    SUPERLINK_DOES_NOT_SUPPORT_FED_MANAGEMENT_MESSAGE,
     SUPERLINK_NODE_ID,
     TRANSPORT_TYPE_GRPC_ADAPTER,
     Status,
@@ -618,7 +619,10 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             )
         except NotImplementedError as e:
             log(ERROR, "Could not create federation: %s", str(e))
-            context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(e))
+            context.abort(
+                grpc.StatusCode.FAILED_PRECONDITION,
+                SUPERLINK_DOES_NOT_SUPPORT_FED_MANAGEMENT_MESSAGE,
+            )
 
         return CreateFederationResponse(
             federation=Federation(
@@ -654,7 +658,10 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             )
         except NotImplementedError as e:
             log(ERROR, "Could not archive federation: %s", str(e))
-            context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(e))
+            context.abort(
+                grpc.StatusCode.FAILED_PRECONDITION,
+                SUPERLINK_DOES_NOT_SUPPORT_FED_MANAGEMENT_MESSAGE,
+            )
 
         return ArchiveFederationResponse()
 
@@ -686,7 +693,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             log(ERROR, "Could not add node(s) to federation: %s", str(e))
             context.abort(
                 grpc.StatusCode.FAILED_PRECONDITION,
-                "SuperLink does not support federation management.",
+                SUPERLINK_DOES_NOT_SUPPORT_FED_MANAGEMENT_MESSAGE,
             )
 
         return AddNodeToFederationResponse()
@@ -719,7 +726,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             log(ERROR, "Could not remove node(s) from federation: %s", str(e))
             context.abort(
                 grpc.StatusCode.FAILED_PRECONDITION,
-                "SuperLink does not support federation management.",
+                SUPERLINK_DOES_NOT_SUPPORT_FED_MANAGEMENT_MESSAGE,
             )
 
         return RemoveNodeFromFederationResponse()
