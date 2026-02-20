@@ -30,9 +30,12 @@ from ..logger import log
 from .exit_code import EXIT_CODE_HELP
 from .exit_handler import trigger_exit_handlers
 
-HELP_PAGE_URL = (
-    f"https://flower.ai/docs/framework/v{package_version}/en/ref-exit-codes/"
-)
+
+def _get_code_url(code: int) -> str:
+    """Get the help URL for a given exit code."""
+    doc_pth = f"{package_version.rsplit('.', 1)[0]}/en/ref-exit-codes/{code}.html"
+    return f"https://flower.ai/docs/framework/{doc_pth}"
+
 
 
 def flwr_exit(
@@ -74,8 +77,7 @@ def flwr_exit(
 
     # Add help URL for non-successful/graceful exits
     if is_error:
-        help_url = f"{HELP_PAGE_URL}{code}.html"
-        exit_message += f"\n\nFor more information, visit: <{help_url}>"
+        exit_message += f"\n\nFor more information, visit: <{_get_code_url(code)}>"
 
     # Telemetry event
     event_type = event_type or _try_obtain_telemetry_event()
