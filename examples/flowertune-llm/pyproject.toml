@@ -73,3 +73,7 @@ default = "local-simulation"
 options.num-supernodes = 4
 options.backend.client-resources.num-cpus = 8
 #options.backend.client-resources.num-gpus = 1.0
+
+[tool.flwr.federations.remote-deployment]
+address = "0.0.0.0:9093"
+insecure = true
