@@ -668,16 +668,6 @@ class TestValidateFederationAndNodesInRequest(unittest.TestCase):
         ctx.abort.assert_called_once()
         self.assertIn("not a member", str(cm.exception))
 
-    def test_validate_aborts_when_no_node_id(self) -> None:
-        """Test abort when node_id is not set (zero)."""
-        ctx = self._make_context()
-        with self.assertRaises(RuntimeError) as cm:
-            _validate_federation_and_node_in_request(
-                self.state, self.aid, NOOP_FEDERATION, 0, ctx
-            )
-        ctx.abort.assert_called_once()
-        self.assertIn("A node ID must be provided", str(cm.exception))
-
     def test_validate_aborts_when_node_not_owned(self) -> None:
         """Test abort when a node is not owned by the requester."""
         # Create a node owned by someone else
@@ -699,16 +689,6 @@ class TestValidateFederationAndNodesInRequest(unittest.TestCase):
             )
         ctx.abort.assert_called_once()
         self.assertIn("not found or you are not its owner", str(cm.exception))
-
-    def test_validate_success_single_node(self) -> None:
-        """Test successful validation with a single owned node."""
-        node_id = self._create_owned_node(self.aid)
-        ctx = self._make_context()
-        result = _validate_federation_and_node_in_request(
-            self.state, self.aid, NOOP_FEDERATION, node_id, ctx
-        )
-        self.assertEqual(result, node_id)
-        ctx.abort.assert_not_called()
 
     # --- AddNodeToFederation / RemoveNodeFromFederation integration tests ---
 

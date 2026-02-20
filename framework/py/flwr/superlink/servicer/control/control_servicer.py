@@ -677,7 +677,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
 
         # Validate federation, node ID, and ownership
-        node_id = _validate_federation_and_node_in_request(
+        _validate_federation_and_node_in_request(
             state, flwr_aid, request.federation_name, request.node_id, context
         )
 
@@ -686,7 +686,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             state.federation_manager.add_supernode(
                 flwr_aid=flwr_aid,
                 federation=request.federation_name,
-                node_id=node_id,
+                node_id=request.node_id,
             )
         except NotImplementedError as e:
             log(ERROR, "Could not add node to federation: %s", str(e))
@@ -710,7 +710,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
 
         # Validate federation, node ID, and ownership
-        node_id = _validate_federation_and_node_in_request(
+        _validate_federation_and_node_in_request(
             state, flwr_aid, request.federation_name, request.node_id, context
         )
 
@@ -719,7 +719,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             state.federation_manager.remove_supernode(
                 flwr_aid=flwr_aid,
                 federation=request.federation_name,
-                node_id=node_id,
+                node_id=request.node_id,
             )
         except NotImplementedError as e:
             log(ERROR, "Could not remove node from federation: %s", str(e))
@@ -737,12 +737,9 @@ def _validate_federation_and_node_in_request(
     federation_name: str,
     node_id: int,
     context: grpc.ServicerContext,
-) -> int:
-    """Validate federation membership and node ID presence for adding/removing
-    a supernode to/from a federation.
-
-    Returns the validated node ID.
-    """
+) -> None:
+    """Validate federation membership and node ID presence for adding/removing a
+    supernode to/from a federation."""
     # Check that a federation is specified
     if not federation_name:
         context.abort(
@@ -764,13 +761,6 @@ def _validate_federation_and_node_in_request(
             f"You are not a member of the federation '{federation_name}'.",
         )
 
-    # Check that a node ID is provided
-    if not node_id:
-        context.abort(
-            grpc.StatusCode.FAILED_PRECONDITION,
-            "A node ID must be provided.",
-        )
-
     # Ensure the requester owns the specified node
     # A node that does not exist or is not owned by the requester is
     # treated the same way.
@@ -781,8 +771,6 @@ def _validate_federation_and_node_in_request(
             grpc.StatusCode.FAILED_PRECONDITION,
             f"Node {node_id} not found or you are not its owner.",
         )
-
-    return node_id
 
 
 def _create_list_runs_response(
