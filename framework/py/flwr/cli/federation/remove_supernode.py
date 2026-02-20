@@ -33,17 +33,13 @@ from ..utils import (
     flwr_cli_grpc_exc_handler,
     init_channel_from_connection,
 )
-from .utils import parse_node_ids
 
 
 def remove_supernode(
     ctx: typer.Context,
-    node_ids: Annotated[
-        str,
-        typer.Argument(
-            help="Comma-separated IDs of the SuperNodes to remove "
-            "(e.g. 124 or 124,125,126).",
-        ),
+    node_id: Annotated[
+        int,
+        typer.Argument(help="ID of the SuperNode to remove."),
     ],
     federation_name: Annotated[
         str,
@@ -62,9 +58,7 @@ def remove_supernode(
         ),
     ] = CliOutputFormat.DEFAULT,
 ) -> None:
-    """Remove SuperNode(s) from a federation."""
-    parsed_node_ids = parse_node_ids(node_ids)
-
+    """Remove a SuperNode from a federation."""
     with cli_output_handler(output_format=output_format) as is_json:
         # Migrate legacy usage if any
         migrate(superlink, args=ctx.args)
@@ -79,7 +73,7 @@ def remove_supernode(
 
             request = RemoveNodeFromFederationRequest(
                 federation_name=federation_name,
-                node_ids=parsed_node_ids,
+                node_ids=[node_id],
             )
             _remove_supernode(stub=stub, request=request, is_json=is_json)
 
@@ -93,7 +87,7 @@ def _remove_supernode(  # pylint: disable=W0613
     request: RemoveNodeFromFederationRequest,
     is_json: bool,
 ) -> None:
-    """Remove SuperNode(s) from a federation."""
+    """Remove a SuperNode from a federation."""
     with flwr_cli_grpc_exc_handler():
         _: RemoveNodeFromFederationResponse = stub.RemoveNodeFromFederation(request)
 
