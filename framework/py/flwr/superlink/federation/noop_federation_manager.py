@@ -15,12 +15,7 @@
 """NoOp implementation of FederationManager."""
 
 
-from flwr.common.constant import (
-    FEDERATION_COULD_NOT_BE_ARCHIVED_MESSAGE,
-    FEDERATION_COULD_NOT_BE_CREATED_MESSAGE,
-    NOOP_ACCOUNT_NAME,
-    NOOP_FLWR_AID,
-)
+from flwr.common.constant import NOOP_ACCOUNT_NAME, NOOP_FLWR_AID
 from flwr.common.typing import Federation
 from flwr.proto.federation_pb2 import Account  # pylint: disable=E0611
 from flwr.supercore.constant import NOOP_FEDERATION, NOOP_FEDERATION_DESCRIPTION
@@ -81,16 +76,28 @@ class NoOpFederationManager(FederationManager):
         self, flwr_aid: str, name: str, description: str
     ) -> Federation:
         """Create a new federation."""
-        raise NotImplementedError(FEDERATION_COULD_NOT_BE_CREATED_MESSAGE % name)
+        raise NotImplementedError(
+            "`create_federation` is not supported by NoopFederationManager."
+        )
 
     def archive_federation(self, flwr_aid: str, name: str) -> None:
         """Archive an existing federation."""
-        raise NotImplementedError(FEDERATION_COULD_NOT_BE_ARCHIVED_MESSAGE % name)
+        raise NotImplementedError(
+            "`archive_federation` is not supported by NoopFederationManager."
+        )
 
-    def add_supernode(self, flwr_aid: str, federation: str, node_id: int) -> None:
-        """Add a supernode to a federation."""
-        raise NotImplementedError()
+    def add_supernodes(
+        self, flwr_aid: str, federation: str, node_ids: set[int]
+    ) -> None:
+        """Add supernodes to a federation."""
+        raise NotImplementedError(
+            "`add_supernodes` is not supported by NoopFederationManager."
+        )
 
-    def remove_supernode(self, flwr_aid: str, federation: str, node_id: int) -> None:
-        """Remove a supernode from a federation."""
-        raise NotImplementedError()
+    def remove_supernodes(
+        self, flwr_aid: str, federation: str, node_ids: set[int]
+    ) -> None:
+        """Remove supernodes from a federation."""
+        raise NotImplementedError(
+            "`remove_supernodes` is not supported by NoopFederationManager."
+        )
