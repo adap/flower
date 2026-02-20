@@ -52,6 +52,7 @@ message RunStatus {
 message GetRunRequest {
   Node node = 1;
   uint64 run_id = 2;
+  string token = 3;
 }
 message GetRunResponse { Run run = 1; }
 
@@ -59,6 +60,7 @@ message GetRunResponse { Run run = 1; }
 message UpdateRunStatusRequest {
   uint64 run_id = 1;
   RunStatus run_status = 2;
+  string token = 3;
 }
 message UpdateRunStatusResponse {}
 

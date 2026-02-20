@@ -21,7 +21,7 @@ from logging import DEBUG, ERROR, INFO
 import grpc
 
 from flwr.common import Message
-from flwr.common.constant import SUPERLINK_NODE_ID, Status
+from flwr.common.constant import SUPERLINK_NODE_ID, ExecPluginType, Status
 from flwr.common.inflatable import (
     UnexpectedObjectContentError,
     get_all_nested_objects,
@@ -82,6 +82,12 @@ from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     GetNodesResponse,
 )
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
+from flwr.server.superlink.superexec_auth import (
+    SuperExecAuthConfig,
+    get_disabled_superexec_auth_config,
+    superexec_auth_metadata_present,
+    verify_superexec_signed_metadata,
+)
 from flwr.server.superlink.utils import abort_if
 from flwr.server.utils.validator import validate_message
 from flwr.supercore.ffs import FfsFactory
@@ -91,15 +97,24 @@ from flwr.supercore.object_store import NoObjectInStoreError, ObjectStoreFactory
 class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     """ServerAppIo API servicer."""
 
+    _METHOD_LIST_APPS_TO_LAUNCH = "/flwr.proto.ServerAppIo/ListAppsToLaunch"
+    _METHOD_REQUEST_TOKEN = "/flwr.proto.ServerAppIo/RequestToken"
+    _METHOD_GET_RUN = "/flwr.proto.ServerAppIo/GetRun"
+
     def __init__(
         self,
         state_factory: LinkStateFactory,
         ffs_factory: FfsFactory,
         objectstore_factory: ObjectStoreFactory,
+        superexec_auth_config: SuperExecAuthConfig | None = None,
     ) -> None:
+        """Initialize ServerAppIo servicer dependencies and auth settings."""
         self.state_factory = state_factory
         self.ffs_factory = ffs_factory
         self.objectstore_factory = objectstore_factory
+        self.superexec_auth_config = (
+            superexec_auth_config or get_disabled_superexec_auth_config()
+        )
         self.lock = threading.RLock()
 
     def ListAppsToLaunch(
@@ -109,6 +124,9 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     ) -> ListAppsToLaunchResponse:
         """Get run IDs with pending messages."""
         log(DEBUG, "ServerAppIoServicer.ListAppsToLaunch")
+        self._verify_superexec_auth_if_enabled(
+            context=context, method=self._METHOD_LIST_APPS_TO_LAUNCH
+        )
 
         # Initialize state connection
         state = self.state_factory.state()
@@ -128,6 +146,9 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     ) -> RequestTokenResponse:
         """Request token."""
         log(DEBUG, "ServerAppIoServicer.RequestToken")
+        self._verify_superexec_auth_if_enabled(
+            context=context, method=self._METHOD_REQUEST_TOKEN
+        )
 
         # Initialize state connection
         state = self.state_factory.state()
@@ -150,6 +171,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     ) -> GetNodesResponse:
         """Get available nodes."""
         log(DEBUG, "ServerAppIoServicer.GetNodes")
+        self._verify_token_for_run(request.token, request.run_id, context)
 
         # Init state and store
         state = self.state_factory.state()
@@ -173,6 +195,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     ) -> PushAppMessagesResponse:
         """Push a set of Messages."""
         log(DEBUG, "ServerAppIoServicer.PushMessages")
+        self._verify_token_for_run(request.token, request.run_id, context)
 
         # Init state and store
         state = self.state_factory.state()
@@ -228,6 +251,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     ) -> PullAppMessagesResponse:
         """Pull a set of Messages."""
         log(DEBUG, "ServerAppIoServicer.PullMessages")
+        self._verify_token_for_run(request.token, request.run_id, context)
 
         # Init state and store
         state = self.state_factory.state()
@@ -299,6 +323,9 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     ) -> GetRunResponse:
         """Get run information."""
         log(DEBUG, "ServerAppIoServicer.GetRun")
+        self._verify_get_run_auth_if_enabled(
+            request=request, context=context, method=self._METHOD_GET_RUN
+        )
 
         # Init state
         state: LinkState = self.state_factory.state()
@@ -360,6 +387,12 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
 
         # Validate the token
         run_id = self._verify_token(request.token, context)
+        if request.run_id != run_id:
+            context.abort(
+                grpc.StatusCode.PERMISSION_DENIED,
+                "Invalid token for run ID.",
+            )
+            raise RuntimeError("Unreachable code")  # for mypy
 
         # Init state and store
         state = self.state_factory.state()
@@ -375,9 +408,6 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         )
 
         state.set_serverapp_context(request.run_id, context_from_proto(request.context))
-
-        # Remove the token
-        state.delete_token(run_id)
         return PushAppOutputsResponse()
 
     def UpdateRunStatus(
@@ -385,6 +415,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     ) -> UpdateRunStatusResponse:
         """Update the status of a run."""
         log(DEBUG, "ServerAppIoServicer.UpdateRunStatus")
+        self._verify_token_for_run(request.token, request.run_id, context)
 
         # Init state and store
         state = self.state_factory.state()
@@ -400,6 +431,9 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
 
         # If the run is finished, delete the run from ObjectStore
         if request.run_status.status == Status.FINISHED:
+            # Invalidate app token only once the run is terminal. This keeps
+            # authentication available for final log/status RPCs after PushAppOutputs.
+            state.delete_token(request.run_id)
             # Delete all objects related to the run
             store.delete_objects_in_run(request.run_id)
 
@@ -410,6 +444,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     ) -> PushLogsResponse:
         """Push logs."""
         log(DEBUG, "ServerAppIoServicer.PushLogs")
+        self._verify_token_for_run(request.token, request.run_id, context)
         state = self.state_factory.state()
 
         # Add logs to LinkState
@@ -435,6 +470,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     ) -> PushObjectResponse:
         """Push an object to the ObjectStore."""
         log(DEBUG, "ServerAppIoServicer.PushObject")
+        self._verify_token_for_run(request.token, request.run_id, context)
 
         # Init state and store
         state = self.state_factory.state()
@@ -471,6 +507,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     ) -> PullObjectResponse:
         """Pull an object from the ObjectStore."""
         log(DEBUG, "ServerAppIoServicer.PullObject")
+        self._verify_token_for_run(request.token, request.run_id, context)
 
         # Init state and store
         state = self.state_factory.state()
@@ -505,6 +542,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     ) -> ConfirmMessageReceivedResponse:
         """Confirm message received."""
         log(DEBUG, "ServerAppIoServicer.ConfirmMessageReceived")
+        self._verify_token_for_run(request.token, request.run_id, context)
 
         # Init state and store
         state = self.state_factory.state()
@@ -535,6 +573,60 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             )
             raise RuntimeError("This line should never be reached.")
         return run_id
+
+    def _verify_token_for_run(
+        self, token: str, run_id: int, context: grpc.ServicerContext
+    ) -> None:
+        """Verify token and ensure it belongs to the given run ID."""
+        token_run_id = self._verify_token(token, context)
+        if token_run_id != run_id:
+            context.abort(
+                grpc.StatusCode.PERMISSION_DENIED,
+                "Invalid token for run ID.",
+            )
+            raise RuntimeError("This line should never be reached.")
+
+    def _verify_superexec_auth_if_enabled(
+        self, context: grpc.ServicerContext, method: str
+    ) -> None:
+        """Verify SuperExec signed metadata when SuperExec auth is enabled."""
+        if not self.superexec_auth_config.enabled:
+            return
+        verify_superexec_signed_metadata(
+            context=context,
+            method=method,
+            plugin_type=ExecPluginType.SERVER_APP,
+            cfg=self.superexec_auth_config,
+        )
+
+    def _verify_get_run_auth_if_enabled(
+        self, request: GetRunRequest, context: grpc.ServicerContext, method: str
+    ) -> None:
+        """Authorize GetRun with one mechanism when SuperExec auth is enabled."""
+        if not self.superexec_auth_config.enabled:
+            # Legacy behavior by design: when SuperExec auth is disabled, GetRun
+            # remains unauthenticated and tokenless requests are allowed.
+            return
+
+        token_present = bool(request.token)
+        signed_metadata_present = superexec_auth_metadata_present(context)
+        if token_present == signed_metadata_present:
+            context.abort(
+                grpc.StatusCode.INVALID_ARGUMENT,
+                "Exactly one authentication mechanism must be provided.",
+            )
+            raise RuntimeError("This line should never be reached.")
+
+        if token_present:
+            self._verify_token_for_run(request.token, request.run_id, context)
+            return
+
+        verify_superexec_signed_metadata(
+            context=context,
+            method=method,
+            plugin_type=ExecPluginType.SERVER_APP,
+            cfg=self.superexec_auth_config,
+        )
 
 
 def _raise_if(validation_error: bool, request_name: str, detail: str) -> None:

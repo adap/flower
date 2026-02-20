@@ -84,6 +84,7 @@ from .superlink.fleet.grpc_rere.node_auth_server_interceptor import (
 from .superlink.linkstate import LinkStateFactory
 from .superlink.serverappio.serverappio_grpc import run_serverappio_api_grpc
 from .superlink.simulation.simulationio_grpc import run_simulationio_api_grpc
+from .superlink.superexec_auth import SuperExecAuthConfig, load_superexec_auth_config
 
 BASE_DIR = get_flwr_dir() / "superlink" / "ffs"
 P = TypeVar("P", ControlAuthnPlugin, ControlAuthzPlugin)
@@ -298,6 +299,19 @@ def run_superlink() -> None:
     fed_config_path = getattr(args, "federations_config", None)
     federation_manager = get_federation_manager(fed_config_path)
 
+    # Load SuperExec auth config
+    try:
+        superexec_auth_config = load_superexec_auth_config(
+            getattr(args, "superexec_auth_config", None)
+        )
+    except (OSError, ValueError, yaml.YAMLError) as err:
+        flwr_exit(
+            ExitCode.SUPERLINK_INVALID_ARGS,
+            f"Invalid SuperExec auth config: {err}",
+        )
+
+    _validate_superexec_auth_settings(args, superexec_auth_config)
+
     # Initialize ObjectStoreFactory
     objectstore_factory = ObjectStoreFactory(args.database)
 
@@ -333,6 +347,7 @@ def run_superlink() -> None:
             state_factory=state_factory,
             ffs_factory=ffs_factory,
             certificates=None,  # SimulationAppIo API doesn't support SSL yet
+            superexec_auth_config=superexec_auth_config,
         )
         grpc_servers.append(simulationio_server)
 
@@ -344,6 +359,7 @@ def run_superlink() -> None:
             ffs_factory=ffs_factory,
             objectstore_factory=objectstore_factory,
             certificates=None,  # ServerAppIo API doesn't support SSL yet
+            superexec_auth_config=superexec_auth_config,
         )
         grpc_servers.append(serverappio_server)
 
@@ -436,6 +452,8 @@ def run_superlink() -> None:
             "--plugin-type",
             ExecPluginType.SIMULATION if is_simulation else ExecPluginType.SERVER_APP,
         ]
+        if getattr(args, "auth_superexec_private_key", None):
+            command += ["--auth-superexec-private-key", args.auth_superexec_private_key]
         command += ["--parent-pid", str(os.getpid())]
         # pylint: disable-next=consider-using-with
         subprocess.Popen(command)
@@ -758,6 +776,64 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
         action="store_true",
         help="Enable supernode authentication.",
     )
+    parser.add_argument(
+        "--superexec-auth-config",
+        default=None,
+        help="Path to a YAML file configuring SuperExec signed authentication "
+        "for AppIO APIs. If omitted, SuperExec auth is disabled.",
+    )
+    parser.add_argument(
+        "--auth-superexec-private-key",
+        default=None,
+        help="Path to a SuperExec private key used when SuperLink spawns "
+        "`flower-superexec` in subprocess isolation mode. Requires "
+        "`--superexec-auth-config`.",
+    )
+
+
+def _validate_superexec_auth_settings(
+    args: argparse.Namespace, superexec_auth_config: SuperExecAuthConfig
+) -> None:
+    """Validate SuperExec auth CLI settings and emit startup auth status logs."""
+    if getattr(args, "auth_superexec_private_key", None) and not getattr(
+        args, "superexec_auth_config", None
+    ):
+        flwr_exit(
+            ExitCode.SUPERLINK_INVALID_ARGS,
+            "The `--auth-superexec-private-key` argument requires "
+            "`--superexec-auth-config`.",
+        )
+
+    if args.isolation == ISOLATION_MODE_PROCESS and getattr(
+        args, "auth_superexec_private_key", None
+    ):
+        log(
+            WARN,
+            "The `--auth-superexec-private-key` argument is ignored when "
+            "`--isolation=process` because SuperLink does not spawn "
+            "`flower-superexec`. Pass the private key directly to the external "
+            "`flower-superexec` process instead.",
+        )
+
+    if not superexec_auth_config.enabled:
+        log(
+            WARN,
+            "SuperExec authentication is disabled. AppIO APIs will not verify "
+            "SuperExec caller identity.",
+        )
+        return
+
+    log(INFO, "SuperExec authentication is enabled for AppIO APIs.")
+
+    if args.isolation == ISOLATION_MODE_SUBPROCESS and not getattr(
+        args, "auth_superexec_private_key", None
+    ):
+        flwr_exit(
+            ExitCode.SUPERLINK_INVALID_ARGS,
+            "SuperExec authentication is enabled, but no SuperExec private key path "
+            "was provided to spawn authenticated subprocesses. Please set "
+            "`--auth-superexec-private-key`.",
+        )
 
 
 def _add_args_serverappio_api(parser: argparse.ArgumentParser) -> None:
