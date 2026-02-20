@@ -33,7 +33,7 @@ from flwr.common.constant import (
     FEDERATION_NOT_SPECIFIED_MESSAGE,
     HEARTBEAT_DEFAULT_INTERVAL,
     LOG_STREAM_INTERVAL,
-    MAX_SUPERNODES_REGISTER_PER_REQUEST,
+    MAX_SUPERNODES_PER_REQUEST,
     NO_ACCOUNT_AUTH_MESSAGE,
     NO_ARTIFACT_PROVIDER_MESSAGE,
     NODE_NOT_FOUND_MESSAGE,
@@ -41,6 +41,7 @@ from flwr.common.constant import (
     PUBLIC_KEY_NOT_VALID,
     PULL_UNFINISHED_RUN_MESSAGE,
     RUN_ID_NOT_FOUND_MESSAGE,
+    SUPERLINK_DOES_NOT_SUPPORT_FED_MANAGEMENT_MESSAGE,
     SUPERLINK_NODE_ID,
     TRANSPORT_TYPE_GRPC_ADAPTER,
     Status,
@@ -618,7 +619,10 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             )
         except NotImplementedError as e:
             log(ERROR, "Could not create federation: %s", str(e))
-            context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(e))
+            context.abort(
+                grpc.StatusCode.FAILED_PRECONDITION,
+                SUPERLINK_DOES_NOT_SUPPORT_FED_MANAGEMENT_MESSAGE,
+            )
 
         return CreateFederationResponse(
             federation=Federation(
@@ -654,7 +658,10 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             )
         except NotImplementedError as e:
             log(ERROR, "Could not archive federation: %s", str(e))
-            context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(e))
+            context.abort(
+                grpc.StatusCode.FAILED_PRECONDITION,
+                SUPERLINK_DOES_NOT_SUPPORT_FED_MANAGEMENT_MESSAGE,
+            )
 
         return ArchiveFederationResponse()
 
@@ -684,7 +691,10 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             )
         except NotImplementedError as e:
             log(ERROR, "Could not add node(s) to federation: %s", str(e))
-            context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(e))
+            context.abort(
+                grpc.StatusCode.FAILED_PRECONDITION,
+                SUPERLINK_DOES_NOT_SUPPORT_FED_MANAGEMENT_MESSAGE,
+            )
 
         return AddNodeToFederationResponse()
 
@@ -714,7 +724,10 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             )
         except NotImplementedError as e:
             log(ERROR, "Could not remove node(s) from federation: %s", str(e))
-            context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(e))
+            context.abort(
+                grpc.StatusCode.FAILED_PRECONDITION,
+                SUPERLINK_DOES_NOT_SUPPORT_FED_MANAGEMENT_MESSAGE,
+            )
 
         return RemoveNodeFromFederationResponse()
 
@@ -761,10 +774,10 @@ def _validate_federation_and_nodes_in_request(
         )
 
     # Ensure not exceeded maximum number of supernodes per request
-    if len(unique_node_ids) > MAX_SUPERNODES_REGISTER_PER_REQUEST:
+    if len(unique_node_ids) > MAX_SUPERNODES_PER_REQUEST:
         context.abort(
             grpc.StatusCode.FAILED_PRECONDITION,
-            f"Cannot process more than {MAX_SUPERNODES_REGISTER_PER_REQUEST} "
+            f"Cannot process more than {MAX_SUPERNODES_PER_REQUEST} "
             "nodes in a single request.",
         )
 
