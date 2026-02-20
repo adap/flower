@@ -17,13 +17,13 @@
 
 import time
 from logging import WARN
-from typing import Any, Optional, Union
+from typing import Any
 
 from flwr.common.config import get_flwr_dir
 from flwr.common.exit import ExitCode, flwr_exit, register_signal_handlers
 from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.logger import log
-from flwr.common.retry_invoker import _make_simple_grpc_retry_invoker, _wrap_stub
+from flwr.common.retry_invoker import make_simple_grpc_retry_invoker, wrap_stub
 from flwr.common.serde import run_from_proto
 from flwr.common.telemetry import EventType
 from flwr.common.typing import Run
@@ -43,14 +43,12 @@ from .plugin import ExecPlugin
 
 def run_superexec(  # pylint: disable=R0913,R0914,R0917
     plugin_class: type[ExecPlugin],
-    stub_class: Union[
-        type[ClientAppIoStub], type[ServerAppIoStub], type[SimulationIoStub]
-    ],
+    stub_class: type[ClientAppIoStub] | type[ServerAppIoStub] | type[SimulationIoStub],
     appio_api_address: str,
-    plugin_config: Optional[dict[str, Any]] = None,
-    flwr_dir: Optional[str] = None,
-    parent_pid: Optional[int] = None,
-    health_server_address: Optional[str] = None,
+    plugin_config: dict[str, Any] | None = None,
+    flwr_dir: str | None = None,
+    parent_pid: int | None = None,
+    health_server_address: str | None = None,
 ) -> None:
     """Run Flower SuperExec.
 
@@ -103,7 +101,7 @@ def run_superexec(  # pylint: disable=R0913,R0914,R0917
 
     # Create the gRPC stub for the AppIO API
     stub = stub_class(channel)
-    _wrap_stub(stub, _make_simple_grpc_retry_invoker())
+    wrap_stub(stub, make_simple_grpc_retry_invoker())
 
     def get_run(run_id: int) -> Run:
         _req = GetRunRequest(run_id=run_id)
@@ -158,12 +156,10 @@ def run_with_deprecation_warning(  # pylint: disable=R0913, R0917
     cmd: str,
     plugin_type: str,
     plugin_class: type[ExecPlugin],
-    stub_class: Union[
-        type[ClientAppIoStub], type[ServerAppIoStub], type[SimulationIoStub]
-    ],
+    stub_class: type[ClientAppIoStub] | type[ServerAppIoStub] | type[SimulationIoStub],
     appio_api_address: str,
-    flwr_dir: Optional[str],
-    parent_pid: Optional[int],
+    flwr_dir: str | None,
+    parent_pid: int | None,
     warn_run_once: bool,
 ) -> None:
     """Log a deprecation warning and run the equivalent `flower-superexec` command.

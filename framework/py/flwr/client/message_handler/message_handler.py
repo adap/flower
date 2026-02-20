@@ -16,8 +16,9 @@
 
 
 from logging import WARN
-from typing import Optional, cast
+from typing import cast
 
+from flwr.app.message_type import MessageType
 from flwr.client.client import (
     maybe_call_evaluate,
     maybe_call_fit,
@@ -27,7 +28,7 @@ from flwr.client.client import (
 from flwr.client.numpy_client import NumPyClient
 from flwr.client.typing import ClientFnExt
 from flwr.common import ConfigRecord, Context, Message, Metadata, RecordDict, log
-from flwr.common.constant import MessageType, MessageTypeLegacy
+from flwr.common.constant import MessageTypeLegacy
 from flwr.common.recorddict_compat import (
     evaluateres_to_recorddict,
     fitres_to_recorddict,
@@ -53,7 +54,7 @@ class UnknownServerMessage(Exception):
     """Exception indicating that the received message is unknown."""
 
 
-def handle_control_message(message: Message) -> tuple[Optional[Message], int]:
+def handle_control_message(message: Message) -> tuple[Message | None, int]:
     """Handle control part of the incoming message.
 
     Parameters

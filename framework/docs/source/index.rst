@@ -1,5 +1,6 @@
-Flower Framework Documentation
-==============================
+################################
+ Flower Framework Documentation
+################################
 
 .. meta::
     :description: Check out the documentation of the main Flower Framework enabling easy Python development for Federated Learning.
@@ -7,8 +8,9 @@ Flower Framework Documentation
 Welcome to Flower's documentation. `Flower <https://flower.ai>`_ is a friendly federated
 learning framework.
 
-Join the Flower Community
--------------------------
+***************************
+ Join the Flower Community
+***************************
 
 The Flower Community is growing quickly - we're a friendly group of researchers,
 engineers, students, professionals, academics, and other enthusiasts.
@@ -19,15 +21,16 @@ engineers, students, professionals, academics, and other enthusiasts.
 
     Join us on Slack
 
-Flower Framework
-----------------
+******************
+ Flower Framework
+******************
 
 The user guide is targeted at researchers and developers who want to use Flower to bring
 existing machine learning workloads into a federated setting. One of Flower's design
 goals was to make this simple. Read on to learn more.
 
 Tutorials
-~~~~~~~~~
+=========
 
 A learning-oriented series of federated learning tutorials, the best place to start.
 
@@ -55,26 +58,20 @@ Transformers <tutorial-quickstart-huggingface>` | :doc:`JAX <tutorial-quickstart
 <tutorial-quickstart-scikitlearn>` | :doc:`XGBoost <tutorial-quickstart-xgboost>` |
 :doc:`Android <tutorial-quickstart-android>` | :doc:`iOS <tutorial-quickstart-ios>`
 
-..
-    We also made video tutorials for PyTorch:
+.. We also made video tutorials for PyTorch:
 
-..
-    .. youtube:: jOmmuzMIQ4c
+.. .. youtube:: jOmmuzMIQ4c
 
-..
-    :width: 80%
+.. :width: 80%
 
-..
-    And TensorFlow:
+.. And TensorFlow:
 
-..
-    .. youtube:: FGTc2TQq7VM
+.. .. youtube:: FGTc2TQq7VM
 
-..
-    :width: 80%
+.. :width: 80%
 
 How-to Guides
-~~~~~~~~~~~~~
+=============
 
 Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
 
@@ -87,7 +84,7 @@ Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
     Deploy <deploy>
 
 Explanations
-~~~~~~~~~~~~
+============
 
 Understanding-oriented concept guides explain and discuss key topics and underlying
 ideas behind Flower and collaborative AI.
@@ -98,11 +95,12 @@ ideas behind Flower and collaborative AI.
 
     explanation-federated-evaluation
     explanation-differential-privacy
+    explanation-ref-secure-aggregation-protocols
     explanation-flower-architecture
     explanation-flower-strategy-abstraction
 
 References
-~~~~~~~~~~
+==========
 
 .. toctree::
     :titlesonly:
@@ -112,7 +110,7 @@ References
     reference
 
 Contribute
-~~~~~~~~~~
+==========
 
 The Flower community welcomes contributions. The following docs are intended to help
 along the way.
@@ -123,17 +121,12 @@ along the way.
 
     Contribute <contribute>
 
-..
-    Indices and tables
+.. Indices and tables
 
-..
-    ------------------
+.. ------------------
 
-..
-    * :ref:`genindex`
+.. * :ref:`genindex`
 
-..
-    * :ref:`modindex`
+.. * :ref:`modindex`
 
-..
-    * :ref:`search`
+.. * :ref:`search`

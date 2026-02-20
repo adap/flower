@@ -19,7 +19,6 @@ import random
 import threading
 from abc import ABC, abstractmethod
 from logging import INFO
-from typing import Optional
 
 from flwr.common.logger import log
 
@@ -80,8 +79,8 @@ class ClientManager(ABC):
     def sample(
         self,
         num_clients: int,
-        min_num_clients: Optional[int] = None,
-        criterion: Optional[Criterion] = None,
+        min_num_clients: int | None = None,
+        criterion: Criterion | None = None,
     ) -> list[ClientProxy]:
         """Sample a number of Flower ClientProxy instances."""
 
@@ -179,8 +178,8 @@ class SimpleClientManager(ClientManager):
     def sample(
         self,
         num_clients: int,
-        min_num_clients: Optional[int] = None,
-        criterion: Optional[Criterion] = None,
+        min_num_clients: int | None = None,
+        criterion: Criterion | None = None,
     ) -> list[ClientProxy]:
         """Sample a number of Flower ClientProxy instances."""
         # Block until at least num_clients are connected.

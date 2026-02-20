@@ -2,8 +2,9 @@
 .. meta::
     :description: Learn how to quickly set up Flower using Docker Compose, enable TLS, and persist application state for federated learning with minimal configuration effort.
 
-Quickstart with Docker Compose
-==============================
+################################
+ Quickstart with Docker Compose
+################################
 
 This quickstart shows you how to set up Flower using Docker Compose in a single command,
 allowing you to focus on developing your application without worrying about the
@@ -13,8 +14,9 @@ You will also learn how to easily enable TLS encryption and persist application 
 locally, giving you the freedom to choose the configuration that best suits your
 project's needs.
 
-Prerequisites
--------------
+***************
+ Prerequisites
+***************
 
 Before you start, make sure that:
 
@@ -22,8 +24,9 @@ Before you start, make sure that:
 - The Docker daemon is running.
 - Docker Compose V2 is `installed <https://docs.docker.com/compose/install/>`_.
 
-Step 1: Set Up
---------------
+****************
+ Step 1: Set Up
+****************
 
 1. Clone the Docker Compose ``complete`` directory:
 
@@ -34,25 +37,26 @@ Step 1: Set Up
                    && mv _tmp/framework/docker/complete . \
                    && rm -rf _tmp && cd complete
 
-2. Create a new Flower project (PyTorch):
+2. Create a new Flower app (PyTorch):
 
    .. code-block:: bash
 
-       $ flwr new quickstart-compose --framework PyTorch --username flower
+       $ flwr new @flwrlabs/quickstart-pytorch
 
 3. Export the path of the newly created project. The path should be relative to the
    location of the Docker Compose files:
 
    .. code-block:: bash
 
-       $ export PROJECT_DIR=quickstart-compose
+       $ export PROJECT_DIR=quickstart-pytorch
 
    Setting the ``PROJECT_DIR`` helps Docker Compose locate the ``pyproject.toml`` file,
    allowing it to install dependencies in the ``ServerApp`` and ``ClientApp`` images
    correctly.
 
-Step 2: Run Flower in Insecure Mode
------------------------------------
+*************************************
+ Step 2: Run Flower in Insecure Mode
+*************************************
 
 To begin, start Flower with the most basic configuration. In this setup, Flower will run
 without TLS and without persisting the state.
@@ -62,7 +66,7 @@ without TLS and without persisting the state.
     Without TLS, the data sent between the services remains **unencrypted**. Use it only
     for development purposes.
 
-    For production-oriented use cases, :ref:`enable TLS<TLS>` for secure data
+    For production-oriented use cases, :ref:`enable TLS <TLS>` for secure data
     transmission.
 
 Open your terminal and run:
@@ -77,21 +81,36 @@ Open your terminal and run:
     * ``--build``: Rebuild the images for each service if they don't already exist.
     * ``-d``: Detach the containers from the terminal and run them in the background.
 
-Step 3: Run the Quickstart Project
-----------------------------------
+************************************
+ Step 3: Run the Quickstart Project
+************************************
 
 Now that the Flower services have been started via Docker Compose, it is time to run the
 quickstart example.
 
 To ensure the ``flwr`` CLI connects to the SuperLink, you need to specify the SuperLink
-addresses in the ``pyproject.toml`` file.
+connection in your Flower configuration file.
 
-1. Add the following lines to the ``quickstart-compose/pyproject.toml``:
+1. Find the Flower Configuration TOML file in your machine. This file is automatically
+   create for your when you first use a Flower CLI command. Use ``flwr config list`` to
+   see available SuperLink connections as well as the path to the configuration file.
+
+   .. code-block:: console
+       :emphasize-lines: 3
+
+       $ flwr config list
+
+       Flower Config file: /path/to/.flwr/config.toml
+       SuperLink connections:
+         supergrid
+         local (default)
+
+2. Add the following lines to the ``config.toml``:
 
    .. code-block:: toml
-       :caption: quickstart-compose/pyproject.toml
+       :caption: config.toml
 
-       [tool.flwr.federations.local-deployment]
+       [superlink.local-deployment]
        address = "127.0.0.1:9093"
        insecure = true
 
@@ -100,19 +119,19 @@ addresses in the ``pyproject.toml`` file.
 
    .. code-block:: bash
 
-       $ flwr run quickstart-compose local-deployment --stream
+       $ flwr run quickstart-pytorch local-deployment --stream
 
-Step 4: Update the Application
-------------------------------
+********************************
+ Step 4: Update the Application
+********************************
 
 In the next step, change the application code.
 
-1. For example, go to the ``task.py`` file in the
-   ``quickstart-compose/quickstart_compose/`` directory and add a ``print`` call in the
-   ``get_weights`` function:
+1. For example, go to the ``task.py`` file in the ``quickstart-pytorch/pytorchexample/``
+   directory and add a ``print`` call in the ``get_weights`` function:
 
    .. code-block:: python
-       :caption: quickstart-compose/quickstart_compose/task.py
+       :caption: quickstart-pytorch/pytorchexample/task.py
 
        # ...
        def get_weights(net):
@@ -141,7 +160,7 @@ In the next step, change the application code.
 
    .. code-block:: bash
 
-       $ flwr run quickstart-compose local-deployment --stream
+       $ flwr run quickstart-pytorch local-deployment --stream
 
    In the ``ServerApp`` logs, you should find the ``Get weights`` line:
 
@@ -151,12 +170,13 @@ In the next step, change the application code.
        INFO :      Starting logstream for run_id `10386255862566726253`
        INFO :      Starting Flower ServerApp
        WARNING :   Option `--insecure` was set. Starting insecure HTTP channel to superlink:9091.
-       🎊 Successfully installed quickstart-compose to /app/.flwr/apps/flower.quickstart-compose.1.0.0.35361a47.
+       🎊 Successfully installed quickstart-pytorch to /app/.flwr/apps/flower.quickstart-pytorch.1.0.0.35361a47.
        Get weights
        INFO :      Starting Flower ServerApp, config: num_rounds=3, no round_timeout
 
-Step 5: Persisting the SuperLink State
---------------------------------------
+****************************************
+ Step 5: Persisting the SuperLink State
+****************************************
 
 In this step, Flower services are configured to persist the state of the SuperLink
 service, ensuring that it maintains its state even after a restart.
@@ -185,11 +205,11 @@ service, ensuring that it maintains its state even after a restart.
        * ``--build``: Rebuild the images for each service if they don't already exist.
        * ``-d``: Detach the containers from the terminal and run them in the background.
 
-2. Rerun the ``quickstart-compose`` project:
+2. Rerun the ``quickstart-pytorch`` project:
 
    .. code-block:: bash
 
-       $ flwr run quickstart-compose local-deployment --stream
+       $ flwr run quickstart-pytorch local-deployment --stream
 
 3. Check the content of the ``state`` directory:
 
@@ -205,8 +225,9 @@ service, ensuring that it maintains its state even after a restart.
 
 .. _tls:
 
-Step 6: Run Flower with TLS
----------------------------
+*****************************
+ Step 6: Run Flower with TLS
+*****************************
 
 1. To demonstrate how to enable TLS, generate self-signed certificates using the
    ``certs.yml`` Compose file.
@@ -224,14 +245,14 @@ Step 6: Run Flower with TLS
 
        $ docker compose -f certs.yml run --rm --build gen-certs
 
-2. Add the following lines to the ``quickstart-compose/pyproject.toml``:
+2. Add a new SuperLink connection to your Flower Configuration file:
 
    .. code-block:: toml
-       :caption: quickstart-compose/pyproject.toml
+       :caption: config.toml
 
-       [tool.flwr.federations.local-deployment-tls]
+       [superlink.local-deployment-tls]
        address = "127.0.0.1:9093"
-       root-certificates = "../superlink-certificates/ca.crt"
+       root-certificates = "/absolute/path/to/superlink-certificates/ca.crt"
 
 3. Restart the services with TLS enabled:
 
@@ -239,14 +260,15 @@ Step 6: Run Flower with TLS
 
        $ docker compose -f compose.yml -f with-tls.yml up --build -d
 
-4. Rerun the ``quickstart-compose`` project:
+4. Rerun the ``quickstart-pytorch`` project:
 
    .. code-block:: bash
 
-       $ flwr run quickstart-compose local-deployment-tls --stream
+       $ flwr run quickstart-pytorch local-deployment-tls --stream
 
-Step 7: Add another SuperNode and ClientApp
--------------------------------------------
+*********************************************
+ Step 7: Add another SuperNode and ClientApp
+*********************************************
 
 You can add more SuperNodes and ClientApps by uncommenting their definitions in the
 ``compose.yml`` file:
@@ -337,8 +359,9 @@ Restart the services with:
     # or with TLS enabled
     $ docker compose -f compose.yml -f with-tls.yml up --build -d
 
-Step 8: Persisting the SuperLink State and Enabling TLS
--------------------------------------------------------
+*********************************************************
+ Step 8: Persisting the SuperLink State and Enabling TLS
+*********************************************************
 
 To run Flower with persisted SuperLink state and enabled TLS, a slight change in the
 ``with-state.yml`` file is required:
@@ -372,14 +395,15 @@ To run Flower with persisted SuperLink state and enabled TLS, a slight change in
 
        $ docker compose -f compose.yml -f with-tls.yml -f with-state.yml up --build -d
 
-3. Rerun the ``quickstart-compose`` project:
+3. Rerun the ``quickstart-pytorch`` project:
 
    .. code-block:: bash
 
-       $ flwr run quickstart-compose local-deployment-tls --stream
+       $ flwr run quickstart-pytorch local-deployment-tls --stream
 
-Step 9: Merge Multiple Compose Files
-------------------------------------
+**************************************
+ Step 9: Merge Multiple Compose Files
+**************************************
 
 You can merge multiple Compose files into a single file. For instance, if you wish to
 combine the basic configuration with the TLS configuration, execute the following
@@ -393,8 +417,9 @@ command:
 This will merge the contents of ``compose.yml`` and ``with-tls.yml`` into a new file
 called ``my_compose.yml``.
 
-Step 10: Clean Up
------------------
+*******************
+ Step 10: Clean Up
+*******************
 
 Remove all services and volumes:
 
@@ -402,7 +427,8 @@ Remove all services and volumes:
 
     $ docker compose down -v
 
-Where to Go Next
-----------------
+******************
+ Where to Go Next
+******************
 
 - :doc:`run-quickstart-examples-docker-compose`

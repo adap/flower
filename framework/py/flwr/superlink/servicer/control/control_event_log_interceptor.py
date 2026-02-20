@@ -15,8 +15,8 @@
 """Flower Control API event log interceptor."""
 
 
-from collections.abc import Iterator
-from typing import Any, Callable, Union, cast
+from collections.abc import Callable, Iterator
+from typing import Any, cast
 
 import grpc
 from google.protobuf.message import Message as GrpcMessage
@@ -24,7 +24,7 @@ from google.protobuf.message import Message as GrpcMessage
 from flwr.common.event_log_plugin.event_log_plugin import EventLogWriterPlugin
 from flwr.common.typing import LogEntry
 
-from .control_account_auth_interceptor import shared_account_info
+from .control_account_auth_interceptor import get_current_account_info
 
 
 class ControlEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
@@ -60,13 +60,13 @@ class ControlEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
         def _generic_method_handler(
             request: GrpcMessage,
             context: grpc.ServicerContext,
-        ) -> Union[GrpcMessage, Iterator[GrpcMessage], BaseException]:
+        ) -> GrpcMessage | Iterator[GrpcMessage] | BaseException:
             log_entry: LogEntry
             # Log before call
             log_entry = self.log_plugin.compose_log_before_event(
                 request=request,
                 context=context,
-                account_info=shared_account_info.get(),
+                account_info=get_current_account_info(),
                 method_name=method_name,
             )
             self.log_plugin.write_log(log_entry)
@@ -85,7 +85,7 @@ class ControlEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
                     log_entry = self.log_plugin.compose_log_after_event(
                         request=request,
                         context=context,
-                        account_info=shared_account_info.get(),
+                        account_info=get_current_account_info(),
                         method_name=method_name,
                         response=unary_response or error,
                     )
@@ -115,7 +115,7 @@ class ControlEventLogInterceptor(grpc.ServerInterceptor):  # type: ignore
                         log_entry = self.log_plugin.compose_log_after_event(
                             request=request,
                             context=context,
-                            account_info=shared_account_info.get(),
+                            account_info=get_current_account_info(),
                             method_name=method_name,
                             response=stream_response or error,
                         )

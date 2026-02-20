@@ -17,7 +17,7 @@
 
 from __future__ import annotations
 
-from typing import Optional, cast
+from typing import cast
 
 DEFAULT_TTL = 43200  # This is 12 hours
 MESSAGE_INIT_ERROR_MESSAGE = (
@@ -54,7 +54,7 @@ class Error:
     @property
     def reason(self) -> str | None:
         """Reason reported about the error."""
-        return cast(Optional[str], self.__dict__["_reason"])
+        return cast(str | None, self.__dict__["_reason"])
 
     def __repr__(self) -> str:
         """Return a string representation of this instance."""

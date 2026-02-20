@@ -3,15 +3,14 @@
 
 <p align="center">
   <a href="https://flower.ai/">
-    <img src="https://flower.ai/_next/image/?url=%2F_next%2Fstatic%2Fmedia%2Fflwr-head.4d68867a.png&w=384&q=75" width="140px" alt="Flower Website" />
+    <img src="https://flower.ai/_next/image/?url=%2F_next%2Fstatic%2Fmedia%2Fflwr-head.194c330a.png&w=384&q=75" width="140px" alt="Flower Website" />
   </a>
 </p>
 <p align="center">
     <a href="https://flower.ai/">Website</a> |
     <a href="https://flower.ai/blog">Blog</a> |
     <a href="https://flower.ai/docs/">Docs</a> |
-    <a href="https://flower.ai/events/flower-ai-summit-2025">Summit</a> |
-    <a href="https://flower.ai/events/flower-ai-day-2025">AI Day</a> |
+    <a href="https://flower.ai/events/flower-ai-summit-2026">Summit</a> |
     <a href="https://flower.ai/join-slack">Slack</a>
     <br /><br />
 </p>
@@ -125,7 +124,7 @@ Quickstart examples:
 - [Quickstart (Pandas)](https://github.com/adap/flower/tree/main/examples/quickstart-pandas)
 - [Quickstart (JAX)](https://github.com/adap/flower/tree/main/examples/quickstart-jax)
 - [Quickstart (MONAI)](https://github.com/adap/flower/tree/main/examples/quickstart-monai)
-- [Quickstart (scikit-learn)](https://github.com/adap/flower/tree/main/examples/sklearn-logreg-mnist)
+- [Quickstart (scikit-learn)](https://github.com/adap/flower/tree/main/examples/quickstart-sklearn)
 - [Quickstart (Android [TFLite])](https://github.com/adap/flower/tree/main/examples/android)
 - [Quickstart (iOS [CoreML])](https://github.com/adap/flower/tree/main/examples/ios)
 - [Quickstart (MLX)](https://github.com/adap/flower/tree/main/examples/quickstart-mlx)
@@ -143,10 +142,8 @@ Other [examples](https://github.com/adap/flower/tree/main/examples):
 - [Advanced Flower with TensorFlow/Keras](https://github.com/adap/flower/tree/main/examples/advanced-tensorflow)
 - [Advanced Flower with PyTorch](https://github.com/adap/flower/tree/main/examples/advanced-pytorch)
 - [Comprehensive Flower+XGBoost](https://github.com/adap/flower/tree/main/examples/xgboost-comprehensive)
-- [Flower through Docker Compose and with Grafana dashboard](https://github.com/adap/flower/tree/main/examples/flower-via-docker-compose)
 - [Flower with KaplanMeierFitter from the lifelines library](https://github.com/adap/flower/tree/main/examples/federated-kaplan-meier-fitter)
 - [Sample Level Privacy with Opacus](https://github.com/adap/flower/tree/main/examples/opacus)
-- [Sample Level Privacy with TensorFlow-Privacy](https://github.com/adap/flower/tree/main/examples/tensorflow-privacy)
 - [Flower with a Tabular Dataset](https://github.com/adap/flower/tree/main/examples/fl-tabular)
 
 ## Community

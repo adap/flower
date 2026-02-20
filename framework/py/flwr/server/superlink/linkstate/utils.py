@@ -16,23 +16,27 @@
 
 
 from os import urandom
-from typing import Optional
+from typing import Any
 
 from flwr.common import ConfigRecord, Context, Error, Message, Metadata, now, serde
 from flwr.common.constant import (
     HEARTBEAT_PATIENCE,
     SUPERLINK_NODE_ID,
     ErrorCode,
-    MessageType,
     Status,
     SubStatus,
 )
 from flwr.common.message import make_message
+from flwr.common.serde import recorddict_from_proto, recorddict_to_proto
+from flwr.common.serde_utils import error_from_proto, error_to_proto
 from flwr.common.typing import RunStatus
 
 # pylint: disable=E0611
+from flwr.proto.error_pb2 import Error as ProtoError
 from flwr.proto.message_pb2 import Context as ProtoContext
 from flwr.proto.recorddict_pb2 import ConfigRecord as ProtoConfigRecord
+from flwr.proto.recorddict_pb2 import RecordDict as ProtoRecordDict
+from flwr.supercore.constant import SYSTEM_MESSAGE_TYPE
 from flwr.supercore.utils import int64_to_uint64, uint64_to_int64
 
 # pylint: enable=E0611
@@ -51,7 +55,8 @@ VALID_RUN_SUB_STATUSES = {
 }
 MESSAGE_UNAVAILABLE_ERROR_REASON = (
     "Error: Message Unavailable - The requested message could not be found in the "
-    "database. It may have expired due to its TTL or never existed."
+    "database. It may have expired due to its TTL, been deleted because the "
+    "destination SuperNode was removed from the federation, or never existed."
 )
 REPLY_MESSAGE_UNAVAILABLE_ERROR_REASON = (
     "Error: Reply Message Unavailable - The reply message has expired."
@@ -63,7 +68,7 @@ NODE_UNAVAILABLE_ERROR_REASON = (
 
 
 def generate_rand_int_from_bytes(
-    num_bytes: int, exclude: Optional[list[int]] = None
+    num_bytes: int, exclude: list[int] | None = None
 ) -> int:
     """Generate a random unsigned integer from `num_bytes` bytes.
 
@@ -233,7 +238,7 @@ def create_message_error_unavailable_ins_message(reply_to_message_id: str) -> Me
         dst_node_id=SUPERLINK_NODE_ID,
         reply_to_message_id=reply_to_message_id,
         group_id="",  # Unknown
-        message_type=MessageType.SYSTEM,
+        message_type=SYSTEM_MESSAGE_TYPE,
         created_at=now().timestamp(),
         ttl=0,
     )
@@ -257,7 +262,7 @@ def message_ttl_has_expired(message_metadata: Metadata, current_time: float) -> 
 def verify_message_ids(
     inquired_message_ids: set[str],
     found_message_ins_dict: dict[str, Message],
-    current_time: Optional[float] = None,
+    current_time: float | None = None,
     update_set: bool = True,
 ) -> dict[str, Message]:
     """Verify found Messages and generate error Messages for invalid ones.
@@ -300,7 +305,7 @@ def verify_found_message_replies(
     inquired_message_ids: set[str],
     found_message_ins_dict: dict[str, Message],
     found_message_res_list: list[Message],
-    current_time: Optional[float] = None,
+    current_time: float | None = None,
     update_set: bool = True,
 ) -> dict[str, Message]:
     """Verify found Message replies and generate error Message for invalid ones.
@@ -345,7 +350,7 @@ def check_node_availability_for_in_message(
     inquired_in_message_ids: set[str],
     found_in_message_dict: dict[str, Message],
     node_id_to_online_until: dict[int, float],
-    current_time: Optional[float] = None,
+    current_time: float | None = None,
     update_set: bool = True,
 ) -> dict[str, Message]:
     """Check node availability for given Message and generate error reply Message if
@@ -388,3 +393,45 @@ def check_node_availability_for_in_message(
             )
             ret_dict[in_message_id] = reply_message
     return ret_dict
+
+
+def message_to_dict(message: Message) -> dict[str, Any]:
+    """Transform Message to dict."""
+    result = {
+        "message_id": message.metadata.message_id,
+        "group_id": message.metadata.group_id,
+        "run_id": message.metadata.run_id,
+        "src_node_id": message.metadata.src_node_id,
+        "dst_node_id": message.metadata.dst_node_id,
+        "reply_to_message_id": message.metadata.reply_to_message_id,
+        "created_at": message.metadata.created_at,
+        "delivered_at": message.metadata.delivered_at,
+        "ttl": message.metadata.ttl,
+        "message_type": message.metadata.message_type,
+        "content": None,
+        "error": None,
+    }
+
+    if message.has_content():
+        result["content"] = recorddict_to_proto(message.content).SerializeToString()
+    else:
+        result["error"] = error_to_proto(message.error).SerializeToString()
+
+    return result
+
+
+def dict_to_message(message_dict: dict[str, Any]) -> Message:
+    """Transform dict to Message."""
+    content, error = None, None
+    if (b_content := message_dict.pop("content", None)) is not None:
+        content = recorddict_from_proto(ProtoRecordDict.FromString(b_content))
+    if (b_error := message_dict.pop("error", None)) is not None:
+        error = error_from_proto(ProtoError.FromString(b_error))
+
+    # Metadata constructor doesn't allow passing created_at. We set it later
+    metadata = Metadata(
+        **{k: v for k, v in message_dict.items() if k not in ["delivered_at"]}
+    )
+    msg = make_message(metadata=metadata, content=content, error=error)
+    msg.metadata.delivered_at = message_dict.get("delivered_at", "")
+    return msg

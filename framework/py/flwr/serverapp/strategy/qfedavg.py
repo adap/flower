@@ -18,10 +18,8 @@ Paper: openreview.net/pdf?id=ByexElSYDr
 """
 
 
-from collections import OrderedDict
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from logging import INFO
-from typing import Callable, Optional
 
 import numpy as np
 
@@ -105,12 +103,12 @@ class QFedAvg(FedAvg):
         weighted_by_key: str = "num-examples",
         arrayrecord_key: str = "arrays",
         configrecord_key: str = "config",
-        train_metrics_aggr_fn: Optional[
-            Callable[[list[RecordDict], str], MetricRecord]
-        ] = None,
-        evaluate_metrics_aggr_fn: Optional[
-            Callable[[list[RecordDict], str], MetricRecord]
-        ] = None,
+        train_metrics_aggr_fn: (
+            Callable[[list[RecordDict], str], MetricRecord] | None
+        ) = None,
+        evaluate_metrics_aggr_fn: (
+            Callable[[list[RecordDict], str], MetricRecord] | None
+        ) = None,
     ) -> None:
         super().__init__(
             fraction_train=fraction_train,
@@ -127,7 +125,7 @@ class QFedAvg(FedAvg):
         self.q = q
         self.client_learning_rate = client_learning_rate
         self.train_loss_key = train_loss_key
-        self.current_arrays: Optional[ArrayRecord] = None
+        self.current_arrays: ArrayRecord | None = None
 
     def summary(self) -> None:
         """Log summary configuration of the strategy."""
@@ -148,7 +146,7 @@ class QFedAvg(FedAvg):
         self,
         server_round: int,
         replies: Iterable[Message],
-    ) -> tuple[Optional[ArrayRecord], Optional[MetricRecord]]:
+    ) -> tuple[ArrayRecord | None, MetricRecord | None]:
         """Aggregate ArrayRecords and MetricRecords in the received Messages."""
         # Call FedAvg aggregate_train to perform validation and aggregation
         valid_replies, _ = self._check_and_log_replies(replies, is_train=True)
@@ -184,7 +182,7 @@ class QFedAvg(FedAvg):
             if sum_delta is None:
                 sum_delta = delta
             else:
-                sum_delta = [sd + d for sd, d in zip(sum_delta, delta)]
+                sum_delta = [sd + d for sd, d in zip(sum_delta, delta, strict=True)]
             sum_h += h
 
         # Compute new global weights and convert to Array type
@@ -192,7 +190,7 @@ class QFedAvg(FedAvg):
         assert sum_delta is not None  # Make mypy happy
         array_list = [
             Array(np.asarray(gw - (d / sum_h)))
-            for gw, d in zip(global_weights, sum_delta)
+            for gw, d in zip(global_weights, sum_delta, strict=True)
         ]
 
         # Aggregate MetricRecords
@@ -200,13 +198,16 @@ class QFedAvg(FedAvg):
             [msg.content for msg in valid_replies],
             self.weighted_by_key,
         )
-        return ArrayRecord(OrderedDict(zip(array_keys, array_list))), metrics
+        return (
+            ArrayRecord(dict(zip(array_keys, array_list, strict=True))),
+            metrics,
+        )
 
 
 def get_train_loss(msg: Message, loss_key: str) -> float:
     """Extract training loss from a Message."""
     metrics = list(msg.content.metric_records.values())[0]
-    if (loss := metrics.get(loss_key)) is None or not isinstance(loss, (int, float)):
+    if (loss := metrics.get(loss_key)) is None or not isinstance(loss, (int | float)):
         raise AggregationError(
             "Missing or invalid training loss. "
             f"The strategy expected a float value for the key '{loss_key}' "
@@ -236,7 +237,7 @@ def compute_delta_and_h(
 ) -> tuple[list[NDArray], float]:
     """Compute delta and h used in q-FedAvg aggregation."""
     # Compute gradient_k = L * (w - w_k)
-    for gw, lw in zip(global_weights, local_weights):
+    for gw, lw in zip(global_weights, local_weights, strict=True):
         np.subtract(gw, lw, out=lw)
         lw *= L
     grad = local_weights  # After in-place operations, local_weights is now grad

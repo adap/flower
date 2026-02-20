@@ -17,7 +17,7 @@
 
 import argparse
 from logging import INFO
-from typing import Any, Optional
+from typing import Any
 
 import yaml
 
@@ -54,7 +54,7 @@ except ImportError:
 
     def get_ee_plugin_and_stub_class(  # pylint: disable=unused-argument
         plugin_type: str,
-    ) -> Optional[tuple[type[ExecPlugin], type[object]]]:
+    ) -> tuple[type[ExecPlugin], type[object]] | None:
         """Get the EE plugin class and stub class based on the plugin type."""
         return None
 
@@ -75,7 +75,6 @@ def flower_superexec() -> None:
     # Log the first message after parsing arguments in case of `--help`
     log(INFO, "Starting Flower SuperExec")
 
-    # Trigger telemetry event
     event(EventType.RUN_SUPEREXEC_ENTER, {"plugin_type": args.plugin_type})
 
     # Load plugin config from YAML file if provided
@@ -83,7 +82,7 @@ def flower_superexec() -> None:
     if plugin_config_path := getattr(args, "plugin_config", None):
         try:
             with open(plugin_config_path, encoding="utf-8") as file:
-                yaml_config: Optional[dict[str, Any]] = yaml.safe_load(file)
+                yaml_config: dict[str, Any] | None = yaml.safe_load(file)
                 if yaml_config is None or EXEC_PLUGIN_SECTION not in yaml_config:
                     raise ValueError(f"Missing '{EXEC_PLUGIN_SECTION}' section.")
                 plugin_config = yaml_config[EXEC_PLUGIN_SECTION]
@@ -155,12 +154,13 @@ def _get_plugin_and_stub_class(
     plugin_type: str,
 ) -> tuple[type[ExecPlugin], type[object]]:
     """Get the plugin class and stub class based on the plugin type."""
-    if plugin_type == ExecPluginType.CLIENT_APP:
-        return ClientAppExecPlugin, ClientAppIoStub
-    if plugin_type == ExecPluginType.SERVER_APP:
-        return ServerAppExecPlugin, ServerAppIoStub
-    if plugin_type == ExecPluginType.SIMULATION:
-        return SimulationExecPlugin, SimulationIoStub
+    mapping: dict[str, tuple[type[ExecPlugin], type[object]]] = {
+        ExecPluginType.CLIENT_APP: (ClientAppExecPlugin, ClientAppIoStub),
+        ExecPluginType.SERVER_APP: (ServerAppExecPlugin, ServerAppIoStub),
+        ExecPluginType.SIMULATION: (SimulationExecPlugin, SimulationIoStub),
+    }
+    if plugin_type in mapping:
+        return mapping[plugin_type]
     if ret := get_ee_plugin_and_stub_class(plugin_type):
         return ret  # type: ignore[no-any-return]
     raise ValueError(f"Unknown plugin type: {plugin_type}")

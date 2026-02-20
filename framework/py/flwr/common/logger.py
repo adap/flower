@@ -26,7 +26,7 @@ from io import StringIO
 from logging import ERROR, WARN, LogRecord
 from logging.handlers import HTTPHandler
 from queue import Empty, Queue
-from typing import TYPE_CHECKING, Any, Optional, TextIO, Union
+from typing import TYPE_CHECKING, Any, TextIO
 
 import grpc
 import typer
@@ -68,7 +68,7 @@ class ConsoleHandler(StreamHandler):
         timestamps: bool = False,
         json: bool = False,
         colored: bool = True,
-        stream: Optional[TextIO] = None,
+        stream: TextIO | None = None,
     ) -> None:
         super().__init__(stream)
         self.timestamps = timestamps
@@ -103,9 +103,9 @@ class ConsoleHandler(StreamHandler):
 
 
 def update_console_handler(
-    level: Optional[Union[int, str]] = None,
-    timestamps: Optional[bool] = None,
-    colored: Optional[bool] = None,
+    level: int | str | None = None,
+    timestamps: bool | None = None,
+    colored: bool | None = None,
 ) -> None:
     """Update the logging handler."""
     for handler in logging.getLogger(LOGGER_NAME).handlers:
@@ -160,7 +160,7 @@ class CustomHTTPHandler(HTTPHandler):
         url: str,
         method: str = "GET",
         secure: bool = False,
-        credentials: Optional[tuple[str, str]] = None,
+        credentials: tuple[str, str] | None = None,
     ) -> None:
         super().__init__(host, url, method, secure, credentials)
         self.identifier = identifier
@@ -180,7 +180,7 @@ class CustomHTTPHandler(HTTPHandler):
 
 
 def configure(
-    identifier: str, filename: Optional[str] = None, host: Optional[str] = None
+    identifier: str, filename: str | None = None, host: str | None = None
 ) -> None:
     """Configure logging to file and/or remote log server."""
     # Create formatter
@@ -298,7 +298,7 @@ def set_logger_propagation(
     return child_logger
 
 
-def mirror_output_to_queue(log_queue: Queue[Optional[str]]) -> None:
+def mirror_output_to_queue(log_queue: Queue[str | None]) -> None:
     """Mirror stdout and stderr output to the provided queue."""
 
     def get_write_fn(stream: TextIO) -> Any:
@@ -335,7 +335,7 @@ def redirect_output(output_buffer: StringIO) -> None:
 
 
 def _log_uploader(
-    log_queue: Queue[Optional[str]], node_id: int, run_id: int, stub: ServerAppIoStub
+    log_queue: Queue[str | None], node_id: int, run_id: int, stub: ServerAppIoStub
 ) -> None:
     """Upload logs to the SuperLink."""
     exit_flag = False
@@ -378,21 +378,21 @@ def _log_uploader(
 
 
 def start_log_uploader(
-    log_queue: Queue[Optional[str]],
+    log_queue: Queue[str | None],
     node_id: int,
     run_id: int,
-    stub: Union[ServerAppIoStub, SimulationIoStub],
+    stub: ServerAppIoStub | SimulationIoStub,
 ) -> threading.Thread:
     """Start the log uploader thread and return it."""
     thread = threading.Thread(
-        target=_log_uploader, args=(log_queue, node_id, run_id, stub)
+        target=_log_uploader, args=(log_queue, node_id, run_id, stub), daemon=True
     )
     thread.start()
     return thread
 
 
 def stop_log_uploader(
-    log_queue: Queue[Optional[str]], log_uploader: threading.Thread
+    log_queue: Queue[str | None], log_uploader: threading.Thread
 ) -> None:
     """Stop the log uploader thread."""
     log_queue.put(None)
@@ -403,19 +403,19 @@ def _remove_emojis(text: str) -> str:
     """Remove emojis from the provided text."""
     emoji_pattern = re.compile(
         "["
-        "\U0001F600-\U0001F64F"  # Emoticons
-        "\U0001F300-\U0001F5FF"  # Symbols & Pictographs
-        "\U0001F680-\U0001F6FF"  # Transport & Map Symbols
-        "\U0001F1E0-\U0001F1FF"  # Flags
-        "\U00002702-\U000027B0"  # Dingbats
-        "\U000024C2-\U0001F251"
+        "\U0001f600-\U0001f64f"  # Emoticons
+        "\U0001f300-\U0001f5ff"  # Symbols & Pictographs
+        "\U0001f680-\U0001f6ff"  # Transport & Map Symbols
+        "\U0001f1e0-\U0001f1ff"  # Flags
+        "\U00002702-\U000027b0"  # Dingbats
+        "\U000024c2-\U0001f251"
         "]+",
         flags=re.UNICODE,
     )
     return emoji_pattern.sub(r"", text)
 
 
-def print_json_error(msg: str, e: Union[typer.Exit, Exception]) -> None:
+def print_json_error(msg: str, e: typer.Exit | Exception) -> None:
     """Print error message as JSON."""
     Console().print_json(
         _json.dumps(

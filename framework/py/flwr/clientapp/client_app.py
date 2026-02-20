@@ -16,10 +16,10 @@
 
 
 import inspect
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from contextlib import contextmanager
-from typing import Callable, Optional
 
+from flwr.app.message_type import MessageType
 from flwr.app.metadata import validate_message_type
 from flwr.client.client import Client
 from flwr.client.message_handler.message_handler import (
@@ -27,7 +27,7 @@ from flwr.client.message_handler.message_handler import (
 )
 from flwr.client.mod.utils import make_ffn
 from flwr.client.typing import ClientFnExt, Mod
-from flwr.common import Context, Message, MessageType
+from flwr.common import Context, Message
 from flwr.common.logger import warn_deprecated_feature
 
 from .typing import ClientAppCallable
@@ -109,14 +109,14 @@ class ClientApp:
 
     def __init__(
         self,
-        client_fn: Optional[ClientFnExt] = None,  # Only for backward compatibility
-        mods: Optional[list[Mod]] = None,
+        client_fn: ClientFnExt | None = None,  # Only for backward compatibility
+        mods: list[Mod] | None = None,
     ) -> None:
         self._mods: list[Mod] = mods if mods is not None else []
         self._registered_funcs: dict[str, ClientAppCallable] = {}
 
         # Create wrapper function for `handle`
-        self._call: Optional[ClientAppCallable] = None
+        self._call: ClientAppCallable | None = None
         if client_fn is not None:
 
             client_fn = _inspect_maybe_adapt_client_fn_signature(client_fn)
@@ -163,7 +163,7 @@ class ClientApp:
             raise ValueError(f"No {category} function registered with name '{action}'")
 
     def train(
-        self, action: str = DEFAULT_ACTION, *, mods: Optional[list[Mod]] = None
+        self, action: str = DEFAULT_ACTION, *, mods: list[Mod] | None = None
     ) -> Callable[[ClientAppCallable], ClientAppCallable]:
         """Register a train function with the ``ClientApp``.
 
@@ -218,7 +218,7 @@ class ClientApp:
         return _get_decorator(self, MessageType.TRAIN, action, mods)
 
     def evaluate(
-        self, action: str = DEFAULT_ACTION, *, mods: Optional[list[Mod]] = None
+        self, action: str = DEFAULT_ACTION, *, mods: list[Mod] | None = None
     ) -> Callable[[ClientAppCallable], ClientAppCallable]:
         """Register an evaluate function with the ``ClientApp``.
 
@@ -273,7 +273,7 @@ class ClientApp:
         return _get_decorator(self, MessageType.EVALUATE, action, mods)
 
     def query(
-        self, action: str = DEFAULT_ACTION, *, mods: Optional[list[Mod]] = None
+        self, action: str = DEFAULT_ACTION, *, mods: list[Mod] | None = None
     ) -> Callable[[ClientAppCallable], ClientAppCallable]:
         """Register a query function with the ``ClientApp``.
 
@@ -355,7 +355,7 @@ class ClientApp:
         """
 
         def lifespan_decorator(
-            lifespan_fn: Callable[[Context], Iterator[None]]
+            lifespan_fn: Callable[[Context], Iterator[None]],
         ) -> Callable[[Context], Iterator[None]]:
             """Register the lifespan fn with the ServerApp object."""
 
@@ -398,7 +398,7 @@ class LoadClientAppError(Exception):
 
 
 def _get_decorator(
-    app: ClientApp, category: str, action: str, mods: Optional[list[Mod]]
+    app: ClientApp, category: str, action: str, mods: list[Mod] | None
 ) -> Callable[[ClientAppCallable], ClientAppCallable]:
     """Get the decorator for the given category and action."""
     # pylint: disable=protected-access

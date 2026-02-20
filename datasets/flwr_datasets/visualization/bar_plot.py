@@ -15,7 +15,7 @@
 """Label distribution bar plotting."""
 
 
-from typing import Any, Optional, Union
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -27,16 +27,16 @@ from matplotlib.figure import Figure
 
 def _plot_bar(  # pylint: disable=R0912, R0913, R0914, R0917
     dataframe: pd.DataFrame,
-    axis: Optional[Axes],
-    figsize: Optional[tuple[float, float]],
+    axis: Axes | None,
+    figsize: tuple[float, float] | None,
     title: str,
-    colormap: Optional[Union[str, mcolors.Colormap]],
+    colormap: str | mcolors.Colormap | None,
     partition_id_axis: str,
     size_unit: str,
     legend: bool,
-    legend_title: Optional[str],
-    plot_kwargs: Optional[dict[str, Any]],
-    legend_kwargs: Optional[dict[str, Any]],
+    legend_title: str | None,
+    plot_kwargs: dict[str, Any] | None,
+    legend_kwargs: dict[str, Any] | None,
 ) -> Axes:
     if axis is None:
         if figsize is None:

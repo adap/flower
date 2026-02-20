@@ -16,7 +16,8 @@
 
 
 import contextvars
-from typing import Any, Callable, Union
+from collections.abc import Callable
+from typing import Any
 
 import grpc
 
@@ -33,21 +34,29 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
 )
 from flwr.superlink.auth_plugin import ControlAuthnPlugin, ControlAuthzPlugin
 
-Request = Union[
-    StartRunRequest,
-    StreamLogsRequest,
-    GetLoginDetailsRequest,
-    GetAuthTokensRequest,
-]
-
-Response = Union[
-    StartRunResponse, StreamLogsResponse, GetLoginDetailsResponse, GetAuthTokensResponse
-]
-
-
-shared_account_info: contextvars.ContextVar[AccountInfo] = contextvars.ContextVar(
-    "account_info", default=AccountInfo(flwr_aid=None, account_name=None)
+Request = (
+    StartRunRequest | StreamLogsRequest | GetLoginDetailsRequest | GetAuthTokensRequest
 )
+
+Response = (
+    StartRunResponse
+    | StreamLogsResponse
+    | GetLoginDetailsResponse
+    | GetAuthTokensResponse
+)
+
+
+shared_account_info: contextvars.ContextVar[AccountInfo | None] = (
+    contextvars.ContextVar("account_info", default=None)
+)
+
+
+def get_current_account_info() -> AccountInfo:
+    """Get the current account info from context, or return a default if not set."""
+    account_info = shared_account_info.get()
+    if account_info is None:
+        return AccountInfo(flwr_aid=None, account_name=None)
+    return account_info
 
 
 class ControlAccountAuthInterceptor(grpc.ServerInterceptor):  # type: ignore
@@ -93,7 +102,7 @@ class ControlAccountAuthInterceptor(grpc.ServerInterceptor):  # type: ignore
 
             # Intercept GetLoginDetails and GetAuthTokens requests, and return
             # the response without authentication
-            if isinstance(request, (GetLoginDetailsRequest, GetAuthTokensRequest)):
+            if isinstance(request, (GetLoginDetailsRequest | GetAuthTokensRequest)):
                 return call(request, context)  # type: ignore
 
             # For other requests, check if the account is authenticated

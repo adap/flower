@@ -16,17 +16,21 @@
 
 
 import hashlib
+import json
 import time
 from collections.abc import Generator, Sequence
 from logging import ERROR, INFO
-from typing import Any, Optional, cast
+from typing import Any, cast
 
 import grpc
+import requests
 
 from flwr.cli.config_utils import get_fab_metadata
 from flwr.common import Context, RecordDict, now
 from flwr.common.constant import (
     FAB_MAX_SIZE,
+    FEDERATION_NOT_FOUND_MESSAGE,
+    FEDERATION_NOT_SPECIFIED_MESSAGE,
     HEARTBEAT_DEFAULT_INTERVAL,
     LOG_STREAM_INTERVAL,
     NO_ACCOUNT_AUTH_MESSAGE,
@@ -36,6 +40,8 @@ from flwr.common.constant import (
     PUBLIC_KEY_NOT_VALID,
     PULL_UNFINISHED_RUN_MESSAGE,
     RUN_ID_NOT_FOUND_MESSAGE,
+    SUPERLINK_NODE_ID,
+    TRANSPORT_TYPE_GRPC_ADAPTER,
     Status,
     SubStatus,
 )
@@ -48,10 +54,18 @@ from flwr.common.serde import (
 from flwr.common.typing import Fab, Run, RunStatus
 from flwr.proto import control_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
+    AddNodeToFederationRequest,
+    AddNodeToFederationResponse,
+    ArchiveFederationRequest,
+    ArchiveFederationResponse,
+    CreateFederationRequest,
+    CreateFederationResponse,
     GetAuthTokensRequest,
     GetAuthTokensResponse,
     GetLoginDetailsRequest,
     GetLoginDetailsResponse,
+    ListFederationsRequest,
+    ListFederationsResponse,
     ListNodesRequest,
     ListNodesResponse,
     ListRunsRequest,
@@ -60,6 +74,10 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     PullArtifactsResponse,
     RegisterNodeRequest,
     RegisterNodeResponse,
+    RemoveNodeFromFederationRequest,
+    RemoveNodeFromFederationResponse,
+    ShowFederationRequest,
+    ShowFederationResponse,
     StartRunRequest,
     StartRunResponse,
     StopRunRequest,
@@ -69,15 +87,18 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     UnregisterNodeRequest,
     UnregisterNodeResponse,
 )
+from flwr.proto.federation_pb2 import Federation  # pylint: disable=E0611
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
+from flwr.supercore.constant import NOOP_FEDERATION, PLATFORM_API_URL
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
 from flwr.supercore.primitives.asymmetric import bytes_to_public_key, uses_nist_ec_curve
+from flwr.supercore.utils import parse_app_spec, request_download_link
 from flwr.superlink.artifact_provider import ArtifactProvider
 from flwr.superlink.auth_plugin import ControlAuthnPlugin
 
-from .control_account_auth_interceptor import shared_account_info
+from .control_account_auth_interceptor import get_current_account_info
 
 
 class ControlServicer(control_pb2_grpc.ControlServicer):
@@ -90,7 +111,8 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         objectstore_factory: ObjectStoreFactory,
         is_simulation: bool,
         authn_plugin: ControlAuthnPlugin,
-        artifact_provider: Optional[ArtifactProvider] = None,
+        artifact_provider: ArtifactProvider | None = None,
+        fleet_api_type: str | None = None,
     ) -> None:
         self.linkstate_factory = linkstate_factory
         self.ffs_factory = ffs_factory
@@ -98,8 +120,9 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         self.is_simulation = is_simulation
         self.authn_plugin = authn_plugin
         self.artifact_provider = artifact_provider
+        self.fleet_api_type = fleet_api_type
 
-    def StartRun(  # pylint: disable=too-many-locals
+    def StartRun(  # pylint: disable=too-many-locals, too-many-branches, too-many-statements
         self, request: StartRunRequest, context: grpc.ServicerContext
     ) -> StartRunResponse:
         """Create run ID."""
@@ -107,7 +130,15 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         state = self.linkstate_factory.state()
         ffs = self.ffs_factory.ffs()
 
-        if len(request.fab.content) > FAB_MAX_SIZE:
+        verification_dict: dict[str, str] = {}
+        if request.app_spec:
+            fab_file, verification_dict = _get_remote_fab(
+                self.fleet_api_type, request.app_spec, context
+            )
+        else:
+            fab_file = request.fab.content
+
+        if len(fab_file) > FAB_MAX_SIZE:
             log(
                 ERROR,
                 "FAB size exceeds maximum allowed size of %d bytes.",
@@ -115,11 +146,10 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             )
             return StartRunResponse()
 
-        flwr_aid = shared_account_info.get().flwr_aid
-        _check_flwr_aid_exists(flwr_aid, context)
+        flwr_aid = get_current_account_info().flwr_aid
+        flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
         override_config = user_config_from_proto(request.override_config)
         federation_options = config_record_from_proto(request.federation_options)
-        fab_file = request.fab.content
 
         try:
             # Check that num-supernodes is set
@@ -128,15 +158,30 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                     "Federation options doesn't contain key `num-supernodes`."
                 )
 
+            # Check (1) federation exists and (2) the flwr_aid is a member
+            federation = request.federation or NOOP_FEDERATION
+            if not state.federation_manager.exists(federation):
+                if request.federation:
+                    raise ValueError(FEDERATION_NOT_FOUND_MESSAGE % federation)
+                raise ValueError(FEDERATION_NOT_SPECIFIED_MESSAGE)
+
+            if not state.federation_manager.has_member(flwr_aid, federation):
+                raise ValueError(
+                    f"Account with ID '{flwr_aid}' is not a member of the "
+                    f"federation '{federation}'. Please log in with another account "
+                    "or request access to this federation."
+                )
+
             # Create run
             fab = Fab(
                 hashlib.sha256(fab_file).hexdigest(),
                 fab_file,
-                dict(request.fab.verifications),
+                verification_dict,
             )
-            fab_hash = ffs.put(fab.content, {})
+            fab_hash = ffs.put(fab.content, fab.verifications)
+
             if fab_hash != fab.hash_str:
-                raise RuntimeError(
+                raise ValueError(
                     f"FAB ({fab.hash_str}) hash from request doesn't match contents"
                 )
             fab_id, fab_version = get_fab_metadata(fab.content)
@@ -146,6 +191,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 fab_version,
                 fab_hash,
                 override_config,
+                federation,
                 federation_options,
                 flwr_aid,
             )
@@ -161,7 +207,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             # Create an empty context for the Run
             context = Context(
                 run_id=run_id,
-                node_id=0,
+                node_id=SUPERLINK_NODE_ID,
                 # Dict is invariant in mypy
                 node_config=node_config,  # type: ignore[arg-type]
                 state=RecordDict(),
@@ -171,10 +217,9 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             # Register the context at the LinkState
             state.set_serverapp_context(run_id=run_id, context=context)
 
-        # pylint: disable-next=broad-except
-        except Exception as e:
+        except ValueError as e:
             log(ERROR, "Could not start run: %s", str(e))
-            return StartRunResponse()
+            context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(e))
 
         log(INFO, "Created run %s", str(run_id))
         return StartRunResponse(run_id=run_id)
@@ -195,7 +240,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             context.abort(grpc.StatusCode.NOT_FOUND, RUN_ID_NOT_FOUND_MESSAGE)
 
         # Check if `flwr_aid` matches the run's `flwr_aid`
-        flwr_aid = shared_account_info.get().flwr_aid
+        flwr_aid = get_current_account_info().flwr_aid
         _check_flwr_aid_in_run(flwr_aid=flwr_aid, run=cast(Run, run), context=context)
 
         after_timestamp = request.after_timestamp + 1e-6
@@ -234,7 +279,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         if not request.HasField("run_id"):
             # If no `run_id` is specified and account auth is enabled,
             # return run IDs for the authenticated account
-            flwr_aid = shared_account_info.get().flwr_aid
+            flwr_aid = get_current_account_info().flwr_aid
             _check_flwr_aid_exists(flwr_aid, context)
             run_ids = state.get_run_ids(flwr_aid=flwr_aid)
         # Build a set of run IDs for `flwr ls --run-id <run_id>`
@@ -249,7 +294,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 raise grpc.RpcError()  # This line is unreachable
 
             # Check if `flwr_aid` matches the run's `flwr_aid`
-            flwr_aid = shared_account_info.get().flwr_aid
+            flwr_aid = get_current_account_info().flwr_aid
             _check_flwr_aid_in_run(flwr_aid=flwr_aid, run=run, context=context)
 
             run_ids = {run_id}
@@ -275,7 +320,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             raise grpc.RpcError()  # This line is unreachable
 
         # Check if `flwr_aid` matches the run's `flwr_aid`
-        flwr_aid = shared_account_info.get().flwr_aid
+        flwr_aid = get_current_account_info().flwr_aid
         _check_flwr_aid_in_run(flwr_aid=flwr_aid, run=run, context=context)
 
         run_status = state.get_run_status({run_id})[run_id]
@@ -285,10 +330,14 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 f"Run ID {run_id} is already finished",
             )
 
+        # Update run status to finished:stopped
         update_success = state.update_run_status(
             run_id=run_id,
             new_status=RunStatus(Status.FINISHED, SubStatus.STOPPED, ""),
         )
+
+        # Delete the token associated with the run to stop further operations
+        state.delete_token(run_id)
 
         if update_success:
             message_ids: set[str] = state.get_message_ids_from_run_id(run_id)
@@ -385,7 +434,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             )
 
         # Check if `flwr_aid` matches the run's `flwr_aid`
-        flwr_aid = shared_account_info.get().flwr_aid
+        flwr_aid = get_current_account_info().flwr_aid
         _check_flwr_aid_in_run(flwr_aid=flwr_aid, run=run, context=context)
 
         # Call artifact provider
@@ -415,11 +464,14 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         state = self.linkstate_factory.state()
         node_id = 0
 
-        flwr_aid = shared_account_info.get().flwr_aid
+        flwr_aid = get_current_account_info().flwr_aid
         flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
+        # Account name exists if `flwr_aid` exists
+        account_name = cast(str, get_current_account_info().account_name)
         try:
             node_id = state.create_node(
                 owner_aid=flwr_aid,
+                owner_name=account_name,
                 public_key=request.public_key,
                 heartbeat_interval=HEARTBEAT_DEFAULT_INTERVAL,
             )
@@ -443,7 +495,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         # Init link state
         state = self.linkstate_factory.state()
 
-        flwr_aid = shared_account_info.get().flwr_aid
+        flwr_aid = get_current_account_info().flwr_aid
         flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
         try:
             state.delete_node(owner_aid=flwr_aid, node_id=request.node_id)
@@ -463,7 +515,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             log(ERROR, "ListNodes is not available in simulation mode.")
             context.abort(
                 grpc.StatusCode.UNIMPLEMENTED,
-                "ListNodesis not available in simulation mode.",
+                "ListNodes is not available in simulation mode.",
             )
             raise grpc.RpcError()  # This line is unreachable
 
@@ -471,12 +523,141 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         # Init link state
         state = self.linkstate_factory.state()
 
-        flwr_aid = shared_account_info.get().flwr_aid
+        flwr_aid = get_current_account_info().flwr_aid
         flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
         # Retrieve all nodes for the account
         nodes_info = state.get_node_info(owner_aids=[flwr_aid])
 
         return ListNodesResponse(nodes_info=nodes_info, now=now().isoformat())
+
+    def ListFederations(
+        self, request: ListFederationsRequest, context: grpc.ServicerContext
+    ) -> ListFederationsResponse:
+        """List all SuperNodes."""
+        log(INFO, "ControlServicer.ListFederations")
+
+        # Init link state
+        state = self.linkstate_factory.state()
+
+        flwr_aid = get_current_account_info().flwr_aid
+        flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
+
+        # Get federations the account is a member of
+        federations = state.federation_manager.get_federations(flwr_aid=flwr_aid)
+        return ListFederationsResponse(
+            federations=[
+                Federation(name=fed[0], description=fed[1]) for fed in federations
+            ]
+        )
+
+    def ShowFederation(
+        self, request: ShowFederationRequest, context: grpc.ServicerContext
+    ) -> ShowFederationResponse:
+        """Show details of a specific Federation."""
+        log(INFO, "ControlServicer.ShowFederation")
+
+        # Init link state
+        state = self.linkstate_factory.state()
+
+        flwr_aid = get_current_account_info().flwr_aid
+        flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
+
+        # Get federations the account is a member of
+        federations = state.federation_manager.get_federations(flwr_aid=flwr_aid)
+
+        # Ensure flwr_aid is a member of the requested federation
+        federation = request.federation_name
+        if federation not in [fed[0] for fed in federations]:
+            context.abort(
+                grpc.StatusCode.FAILED_PRECONDITION,
+                f"Federation '{federation}' does not exist or you are "
+                "not a member of it.",
+            )
+
+        # Fetch federation details
+        details = state.federation_manager.get_details(federation)
+
+        # Build Federation proto object
+        federation_proto = Federation(
+            name=federation,
+            member_aids=[acc.id for acc in details.accounts],  # Deprecated in v1.26.0
+            accounts=details.accounts,
+            nodes=details.nodes,
+            runs=[run_to_proto(run) for run in details.runs],
+        )
+        return ShowFederationResponse(
+            federation=federation_proto, now=now().isoformat()
+        )
+
+    def CreateFederation(
+        self, request: CreateFederationRequest, context: grpc.ServicerContext
+    ) -> CreateFederationResponse:
+        """Create a new Federation."""
+        log(INFO, "ControlServicer.CreateFederation")
+
+        # Init link state
+        state = self.linkstate_factory.state()
+
+        flwr_aid = get_current_account_info().flwr_aid
+        flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
+
+        # Create federation
+        try:
+            federation = state.federation_manager.create_federation(
+                name=request.name,
+                description=request.description,
+                flwr_aid=flwr_aid,
+            )
+        except NotImplementedError as e:
+            log(ERROR, "Could not create federation: %s", str(e))
+            context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(e))
+
+        return CreateFederationResponse(
+            federation=Federation(
+                name=federation.name,
+                description=federation.description,
+            )
+        )
+
+    def ArchiveFederation(
+        self, request: ArchiveFederationRequest, context: grpc.ServicerContext
+    ) -> ArchiveFederationResponse:
+        """Archive a Federation."""
+        log(INFO, "ControlServicer.ArchiveFederation")
+
+        # Init link state
+        state = self.linkstate_factory.state()
+
+        flwr_aid = get_current_account_info().flwr_aid
+        flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
+
+        # Archive federation
+        try:
+            state.federation_manager.archive_federation(
+                flwr_aid=flwr_aid,
+                name=request.federation_name,
+            )
+        except NotImplementedError as e:
+            log(ERROR, "Could not archive federation: %s", str(e))
+            context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(e))
+
+        return ArchiveFederationResponse()
+
+    def AddNodeToFederation(
+        self, request: AddNodeToFederationRequest, context: grpc.ServicerContext
+    ) -> AddNodeToFederationResponse:
+        """Add a node to a Federation."""
+        log(INFO, "ControlServicer.AddNodeToFederation")
+
+        raise NotImplementedError()
+
+    def RemoveNodeFromFederation(
+        self, request: RemoveNodeFromFederationRequest, context: grpc.ServicerContext
+    ) -> RemoveNodeFromFederationResponse:
+        """Remove a node from a Federation."""
+        log(INFO, "ControlServicer.RemoveNodeFromFederation")
+
+        raise NotImplementedError()
 
 
 def _create_list_runs_response(
@@ -496,9 +677,7 @@ def _create_list_runs_response(
     )
 
 
-def _check_flwr_aid_exists(
-    flwr_aid: Optional[str], context: grpc.ServicerContext
-) -> str:
+def _check_flwr_aid_exists(flwr_aid: str | None, context: grpc.ServicerContext) -> str:
     """Guard clause to check if `flwr_aid` exists."""
     if flwr_aid is None:
         context.abort(
@@ -510,7 +689,7 @@ def _check_flwr_aid_exists(
 
 
 def _check_flwr_aid_in_run(
-    flwr_aid: Optional[str], run: Run, context: grpc.ServicerContext
+    flwr_aid: str | None, run: Run, context: grpc.ServicerContext
 ) -> None:
     """Guard clause to check if `flwr_aid` matches the run's `flwr_aid`."""
     _check_flwr_aid_exists(flwr_aid, context)
@@ -528,3 +707,71 @@ def _check_flwr_aid_in_run(
             grpc.StatusCode.PERMISSION_DENIED,
             "⛔️ Run ID does not belong to the account",
         )
+
+
+def _format_verification(verifications: list[dict[str, str]]) -> dict[str, str]:
+    """Format verification information for FAB."""
+    # Convert verifications to dict[str, str] type
+    verification_dict = {
+        item["public_key_id"]: json.dumps(
+            {k: v for k, v in item.items() if k != "public_key_id"}
+        )
+        for item in verifications
+    }
+    verification_dict.update({"valid_license": "Valid"})
+
+    return verification_dict
+
+
+def _get_remote_fab(
+    fleet_api_type: str | None,
+    app_spec: str,
+    context: grpc.ServicerContext,
+) -> tuple[bytes, dict[str, str]]:
+    """Get remote FAB from Flower platform API."""
+    if fleet_api_type == TRANSPORT_TYPE_GRPC_ADAPTER:
+        context.abort(
+            grpc.StatusCode.FAILED_PRECONDITION,
+            "The selected SuperLink transport type is not "
+            "supported for connecting to Flower Platform.",
+        )
+
+    # Parse and validate app specification
+    try:
+        app_id, app_version = parse_app_spec(app_spec)
+    except ValueError as e:
+        context.abort(
+            grpc.StatusCode.FAILED_PRECONDITION,
+            f"{e}",
+        )
+
+    # Request download link and verification information
+    url = f"{PLATFORM_API_URL}/hub/fetch-fab"
+    try:
+        presigned_url, verifications = request_download_link(
+            app_id, app_version, url, "fab_url"
+        )
+    except ValueError as e:
+        context.abort(
+            grpc.StatusCode.FAILED_PRECONDITION,
+            f"{e}",
+        )
+
+    # Format verification information
+    verification_dict = (
+        _format_verification(verifications)
+        if verifications is not None
+        else {"valid_license": ""}
+    )
+
+    # Download FAB from Flower platform API
+    try:
+        r = requests.get(presigned_url, timeout=60)
+        r.raise_for_status()
+    except requests.RequestException as e:
+        context.abort(
+            grpc.StatusCode.FAILED_PRECONDITION,
+            f"FAB download failed: {str(e)}",
+        )
+    fab_file = r.content
+    return fab_file, verification_dict

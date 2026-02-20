@@ -21,7 +21,7 @@ case "$2" in
     rest_arg_supernode="--rest"
     server_address="http://localhost:9095"
     server_app_address="127.0.0.1:9091"
-    db_arg="--database :flwr-in-memory-state:"
+    db_arg="--database :flwr-in-memory:"
     server_auth=""
     client_auth_1=""
     client_auth_2=""
@@ -41,7 +41,7 @@ case "$2" in
     rest_arg_supernode=""
     server_address="127.0.0.1:9092"
     server_app_address="127.0.0.1:9091"
-    db_arg="--database :flwr-in-memory-state:"
+    db_arg="--database :flwr-in-memory:"
     server_auth="--enable-supernode-auth"
     client_auth_1="--auth-supernode-private-key keys/client_credentials_1 --auth-supernode-public-key keys/client_credentials_1.pub"
     client_auth_2="--auth-supernode-private-key keys/client_credentials_2 --auth-supernode-public-key keys/client_credentials_2.pub"
@@ -51,7 +51,7 @@ case "$2" in
     rest_arg_supernode=""
     server_address="127.0.0.1:9092"
     server_app_address="127.0.0.1:9091"
-    db_arg="--database :flwr-in-memory-state:"
+    db_arg="--database :flwr-in-memory:"
     server_auth=""
     client_auth_1=""
     client_auth_2=""
@@ -60,6 +60,14 @@ esac
 
 # Install Flower app
 pip install -e . --no-deps
+
+# revert changes if any in pyproject.toml
+# This is needed for multi-stage CI tests that 
+# perform migrations more than once. A conflict
+# arise when toml-federations are migrated and then 
+# re-injected with commands below. It's safer to
+# start from a clean slate.
+git checkout pyproject.toml
 
 # Remove any duplicates
 sed -i '/^\[tool\.flwr\.federations\.e2e\]/,/^$/d' pyproject.toml
@@ -77,10 +85,13 @@ timeout 5m flower-superlink $server_arg $db_arg $rest_arg_superlink $server_auth
 sl_pid=$(pgrep -f "flower-superlink")
 sleep 3
 
+# Trigger migration
+flwr ls "." e2e || true
+
 if [ "$2" = "client-auth" ]; then
   # Register two SuperNodes using the Flower CLI
-  flwr supernode register keys/client_credentials_1.pub "." e2e
-  flwr supernode register keys/client_credentials_2.pub "." e2e
+  flwr supernode register keys/client_credentials_1.pub e2e
+  flwr supernode register keys/client_credentials_2.pub e2e
 fi
 
 timeout 5m flower-supernode $client_arg $rest_arg_supernode \
@@ -114,7 +125,7 @@ cleanup_and_exit() {
 # Check for "finished:completed" status in a loop with a timeout
 while [ "$found_success" = false ] && [ $elapsed -lt $timeout ]; do
     # Run the command and capture output
-    output=$(flwr ls . e2e --format=json)
+    output=$(flwr ls e2e --format=json)
 
     # Extract status from the first run (or loop over all if needed)
     status=$(echo "$output" | jq -r '.runs[0].status')

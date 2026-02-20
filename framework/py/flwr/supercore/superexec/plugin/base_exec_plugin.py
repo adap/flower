@@ -18,7 +18,6 @@
 import os
 import subprocess
 from collections.abc import Sequence
-from typing import Optional
 
 from .exec_plugin import ExecPlugin
 
@@ -33,7 +32,7 @@ class BaseExecPlugin(ExecPlugin):
     command = ""
     appio_api_address_arg = ""
 
-    def select_run_id(self, candidate_run_ids: Sequence[int]) -> Optional[int]:
+    def select_run_id(self, candidate_run_ids: Sequence[int]) -> int | None:
         """Select a run ID to execute from a sequence of candidates."""
         if not candidate_run_ids:
             return None

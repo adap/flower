@@ -17,7 +17,7 @@
 
 import signal
 import threading
-from typing import Callable
+from collections.abc import Callable
 
 from .exit_code import ExitCode
 
@@ -58,5 +58,9 @@ def trigger_exit_handlers() -> None:
     """Trigger all registered exit handlers in LIFO order."""
     with _lock_handlers:
         for handler in reversed(registered_exit_handlers):
-            handler()
+            try:
+                handler()
+            except Exception:  # pylint: disable=broad-exception-caught
+                # Ignore exceptions in exit handlers
+                pass
         registered_exit_handlers.clear()

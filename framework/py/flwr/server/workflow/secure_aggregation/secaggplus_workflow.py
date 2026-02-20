@@ -18,15 +18,15 @@
 import random
 from dataclasses import dataclass, field
 from logging import DEBUG, ERROR, INFO, WARN
-from typing import Optional, Union, cast
+from typing import cast
 
 import flwr.common.recorddict_compat as compat
+from flwr.app.message_type import MessageType
 from flwr.common import (
     ConfigRecord,
     Context,
     FitRes,
     Message,
-    MessageType,
     NDArrays,
     RecordDict,
     bytes_to_ndarray,
@@ -169,14 +169,14 @@ class SecAggPlusWorkflow:
 
     def __init__(  # pylint: disable=R0913
         self,
-        num_shares: Union[int, float],
-        reconstruction_threshold: Union[int, float],
+        num_shares: int | float,
+        reconstruction_threshold: int | float,
         *,
         max_weight: float = 1000.0,
         clipping_range: float = 8.0,
         quantization_range: int = 4194304,
         modulus_range: int = 4294967296,
-        timeout: Optional[float] = None,
+        timeout: float | None = None,
     ) -> None:
         self.num_shares = num_shares
         self.reconstruction_threshold = reconstruction_threshold
@@ -211,7 +211,7 @@ class SecAggPlusWorkflow:
 
     def _check_init_params(self) -> None:  # pylint: disable=R0912
         # Check `num_shares`
-        if not isinstance(self.num_shares, (int, float)):
+        if not isinstance(self.num_shares, (int | float)):
             raise TypeError("`num_shares` must be of type int or float.")
         if isinstance(self.num_shares, int):
             if self.num_shares == 1:
@@ -229,7 +229,7 @@ class SecAggPlusWorkflow:
             raise ValueError("`num_shares` as a float must be greater than 0.")
 
         # Check `reconstruction_threshold`
-        if not isinstance(self.reconstruction_threshold, (int, float)):
+        if not isinstance(self.reconstruction_threshold, (int | float)):
             raise TypeError("`reconstruction_threshold` must be of type int or float.")
         if isinstance(self.reconstruction_threshold, int):
             if self.reconstruction_threshold == 1:
@@ -467,7 +467,7 @@ class SecAggPlusWorkflow:
             dsts += dst_lst
             ciphertexts += ctxt_lst
 
-        for src, dst, ciphertext in zip(srcs, dsts, ciphertexts):
+        for src, dst, ciphertext in zip(srcs, dsts, ciphertexts, strict=True):
             if dst in fwd_ciphertexts:
                 fwd_ciphertexts[dst].append(ciphertext)
                 fwd_srcs[dst].append(src)
@@ -604,7 +604,7 @@ class SecAggPlusWorkflow:
             res_dict = msg.content.config_records[RECORD_KEY_CONFIGS]
             nids = cast(list[int], res_dict[Key.NODE_ID_LIST])
             shares = cast(list[bytes], res_dict[Key.SHARE_LIST])
-            for owner_nid, share in zip(nids, shares):
+            for owner_nid, share in zip(nids, shares, strict=True):
                 collected_shares_dict[owner_nid].append(share)
 
         # Remove masks for every active client after collect_masked_vectors stage

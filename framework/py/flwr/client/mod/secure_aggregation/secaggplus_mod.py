@@ -20,6 +20,7 @@ from dataclasses import dataclass, field
 from logging import DEBUG, WARNING
 from typing import Any, cast
 
+from flwr.app.message_type import MessageType
 from flwr.client.typing import ClientAppCallable
 from flwr.common import (
     ConfigRecord,
@@ -31,7 +32,6 @@ from flwr.common import (
     parameters_to_ndarrays,
 )
 from flwr.common import recorddict_compat as compat
-from flwr.common.constant import MessageType
 from flwr.common.logger import log
 from flwr.common.secure_aggregation.crypto.shamir import create_shares
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
@@ -112,9 +112,9 @@ class SecAggPlusState:
                     updated_values = [
                         tuple(values[i : i + 2]) for i in range(0, len(values), 2)
                     ]
-                    new_v = dict(zip(keys, updated_values))
+                    new_v = dict(zip(keys, updated_values, strict=True))
                 else:
-                    new_v = dict(zip(keys, values))
+                    new_v = dict(zip(keys, values, strict=True))
             self.__setattr__(k, new_v)
 
     def to_dict(self) -> dict[str, ConfigRecordValues]:
@@ -426,7 +426,7 @@ def _collect_masked_vectors(
         raise ValueError("Not enough available neighbour clients.")
 
     # Decrypt ciphertexts, verify their sources, and store shares.
-    for src, ciphertext in zip(srcs, ciphertexts):
+    for src, ciphertext in zip(srcs, ciphertexts, strict=True):
         shared_key = state.ss2_dict[src]
         plaintext = decrypt(shared_key, ciphertext)
         actual_src, dst, rd_seed_share, sk1_share = share_keys_plaintext_separate(

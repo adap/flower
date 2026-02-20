@@ -1,17 +1,20 @@
-Build from source
-=================
+###################
+ Build from source
+###################
 
 This concise guide explains how to build the Flower Intelligence TypeScript SDK from
 source. It also explains how to install and use ``pnpm`` as your package manager.
 
-Prerequisites
--------------
+***************
+ Prerequisites
+***************
 
 - ``git`` and ``Node.js`` must be installed.
 - A working Internet connection for installing dependencies.
 
-Installing ``pnpm``
--------------------
+*********************
+ Installing ``pnpm``
+*********************
 
 You can install ``pnpm`` globally using npm. Open your terminal and run:
 
@@ -26,8 +29,9 @@ pnpm with:
 
     corepack enable pnpm
 
-Setting up the repo
--------------------
+*********************
+ Setting up the repo
+*********************
 
 If you already have the Flower repository cloned somewhere, you can skip this step and
 navigate to it and run ``git pull``.
@@ -39,8 +43,9 @@ navigate to it and run ``git pull``.
     git clone https://github.com/adap/flower.git
     cd flower/
 
-Building from source
---------------------
+**********************
+ Building from source
+**********************
 
 1. **Navigate to the TypeScript SDK:**
 

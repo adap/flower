@@ -40,8 +40,9 @@
 
 .. _result_link: ref-api/flwr.serverapp.strategy.Result.html
 
-OpenFL Migration Guide
-======================
+########################
+ OpenFL Migration Guide
+########################
 
 It was `recently announced
 <https://github.com/securefederatedai/openfederatedlearning>`_ that The Open Federated
@@ -49,13 +50,14 @@ Learning project (formerly known as OpenFL) is no longer being developed or main
 This guide, written in collaboration with the OpenFL developers, aims to create an easy
 path for OpenFL users to bring their workloads into Flower.
 
-Creating a Flower App for OpenFL code
--------------------------------------
+***************************************
+ Creating a Flower App for OpenFL code
+***************************************
 
 Let's start by creating a Flower app where the OpenFL code can be migrated to.
 
 Install dependencies
-~~~~~~~~~~~~~~~~~~~~
+====================
 
 First, we install the Flower package ``flwr``:
 
@@ -64,16 +66,15 @@ First, we install the Flower package ``flwr``:
     # In a new Python environment
     $ pip install -U "flwr[simulation]"
 
-Then, we create a new Flower app called ``flower-tutorial`` using the PyTorch template.
-We also specify a username (``flwrlabs``) for the project:
+Then, run the command below:
 
 .. code-block:: shell
 
-    $ flwr new flower-tutorial --framework pytorch --username flwrlabs
+    $ flwr new @flwrlabs/quickstart-pytorch
 
-After running the command, a new directory called ``flower-tutorial`` will be created.
-Here is a comparison between it and the relevant files in a typical ``openfl-example``
-folder:
+After running the command, a new directory called ``quickstart-pytorch`` will be
+created. Here is a comparison between it and the relevant files in a typical
+``openfl-example`` folder:
 
 .. grid:: 2
 
@@ -100,13 +101,13 @@ folder:
                ├── utils.py
                └── dataloader.py
 
-    .. grid-item-card:: Flower Tutorial
+    .. grid-item-card:: Flower Quickstart (PyTorch)
 
         .. code-block:: text
            :emphasize-lines: 4-6
 
-           flower-tutorial
-           ├── flower_tutorial
+           quickstart-pytorch
+           ├── pytorchexample
            │   ├── __init__.py
            │   ├── client_app.py
            │   ├── server_app.py
@@ -129,15 +130,15 @@ guide:
   aggregation algorithm is defined as a |strategy_link|_.
 
 Migrate your model
-~~~~~~~~~~~~~~~~~~
+==================
 
 The model is very straightforward to port from OpenFL to Flower. If you are working with
 a PyTorch model, OpenFL has a ``PyTorchTaskRunner`` that inherits from ``nn.module`` (in
 ``taskrunner.py``) - and includes other things like the ``train`` and ``validate``
 functions. Flower assumes you bring a standard PyTorch model, so it's as easy as moving
-the model definition to ``task.py`` in the ``flower_tutorial`` directory, and changing
-the inheritance of the Net back to ``nn.module``. For a concrete example, see the
-following OpenFL TaskRunner code snippet:
+the model definition to ``task.py`` in the ``quickstart-pytorch`` directory, and
+changing the inheritance of the Net back to ``nn.module``. For a concrete example, see
+the following OpenFL TaskRunner code snippet:
 
 .. code-block:: python
     :emphasize-lines: 2,50-60
@@ -229,7 +230,7 @@ And the corresponding PyTorch model used by Flower:
             return self.fc3(x)
 
 Migrate your training and test functions
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+========================================
 
 Recent versions of OpenFL had a simple way of defining training and evaluation
 functions. The setting and extraction of model weights was hidden from users, and a list
@@ -434,7 +435,7 @@ changing `self` to `model`) to fit with the Flower variables, but the logic rema
 same.
 
 Migrating the Data Loaders
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+==========================
 
 Unlike OpenFL, Flower does not require that you use their own Dataloaders when
 developing your application. This means you can simply DataLoaders in the same way that
@@ -459,7 +460,7 @@ representative of what can be expected in real world settings. For more informat
 the `flwr-datasets <https://flower.ai/docs/datasets/>`_ documentation for details.
 
 Client-side Code
-~~~~~~~~~~~~~~~~
+================
 
 In OpenFL, the client side code was known as a Collaborator. In Flower, the application
 that data owners operate is referred to as a ``ClientApp``. Each of the files referred
@@ -487,7 +488,7 @@ Plan (FLPlan) concept in OpenFL captured in the ``plan.yaml`` file of every work
     ...
 
 Server-side Code
-~~~~~~~~~~~~~~~~
+================
 
 In OpenFL, all of the aggregator-side code is configured via the `plan.yaml` file
 through the specification of different arguments. In Flower, the exact tasks performed
@@ -547,8 +548,9 @@ modifications, and Flower has support for an extensive set of deep learning fram
 in it's `examples <https://github.com/adap/flower/tree/main/examples>`_ (Tensorflow,
 FastAI, Huggingface, etc.) should you need reference code.
 
-Further help
-------------
+**************
+ Further help
+**************
 
 For a complete PyTorch example that goes into depth on various Flower components, see
 the `Get started with Flower

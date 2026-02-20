@@ -16,7 +16,6 @@
 
 
 from abc import ABC, abstractmethod
-from typing import Optional
 
 from datasets import Dataset
 
@@ -29,7 +28,7 @@ class Partitioner(ABC):
     """
 
     def __init__(self) -> None:
-        self._dataset: Optional[Dataset] = None
+        self._dataset: Dataset | None = None
 
     @property
     def dataset(self) -> Dataset:

@@ -18,7 +18,6 @@
 import hashlib
 import json
 from pathlib import Path
-from typing import Optional
 
 from .ffs import Ffs
 
@@ -34,7 +33,7 @@ class DiskFfs(Ffs):  # pylint: disable=R0904
         base_dir : str
             The base directory to store the objects.
         """
-        self.base_dir = Path(base_dir)
+        self.base_dir = Path(base_dir).expanduser()
 
     def put(self, content: bytes, meta: dict[str, str]) -> str:
         """Store bytes and metadata and return key (hash of content).
@@ -59,7 +58,7 @@ class DiskFfs(Ffs):  # pylint: disable=R0904
 
         return content_hash
 
-    def get(self, key: str) -> Optional[tuple[bytes, dict[str, str]]]:
+    def get(self, key: str) -> tuple[bytes, dict[str, str]] | None:
         """Return tuple containing the object content and metadata.
 
         Parameters

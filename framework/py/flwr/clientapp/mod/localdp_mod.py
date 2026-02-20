@@ -15,7 +15,6 @@
 """Local DP modifier."""
 
 
-from collections import OrderedDict
 from logging import INFO
 
 import numpy as np
@@ -157,13 +156,13 @@ class LocalDpMod:
 
         # Replace outgoing ArrayRecord's Array while preserving their keys
         out_msg.content[new_array_record_key] = ArrayRecord(
-            OrderedDict(
-                {
-                    k: Array(v)
-                    for k, v in zip(
-                        client_to_server_arrecord.keys(), client_to_server_ndarrays
-                    )
-                }
-            )
+            {
+                k: Array(v)
+                for k, v in zip(
+                    client_to_server_arrecord.keys(),
+                    client_to_server_ndarrays,
+                    strict=True,
+                )
+            }
         )
         return out_msg

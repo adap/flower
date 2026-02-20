@@ -21,8 +21,33 @@
 
 - `unstable`
   - points to the last successful build of the `main` branch
-- `nightly`, `<version>.dev<YYYYMMDD>` e.g. `1.23.0.dev20250921`
-  - uses Python 3.12 and Ubuntu 24.04
+- `nightly`, `<version>.dev<YYYYMMDD>` e.g. `1.27.0.dev20260207`
+  - uses Python 3.13 and Ubuntu 24.04
+- `1.26.1-py3.13-alpine3.22`
+- `1.26.1-py3.13-ubuntu24.04`
+- `1.26.1-py3.12-ubuntu24.04`
+- `1.26.1-py3.11-ubuntu24.04`
+- `1.26.1-py3.10-ubuntu24.04`
+- `1.26.0-py3.13-alpine3.22`
+- `1.26.0-py3.13-ubuntu24.04`
+- `1.26.0-py3.12-ubuntu24.04`
+- `1.26.0-py3.11-ubuntu24.04`
+- `1.26.0-py3.10-ubuntu24.04`
+- `1.25.0-py3.13-alpine3.22`
+- `1.25.0-py3.13-ubuntu24.04`
+- `1.25.0-py3.12-ubuntu24.04`
+- `1.25.0-py3.11-ubuntu24.04`
+- `1.25.0-py3.10-ubuntu24.04`
+- `1.24.0-py3.13-alpine3.22`
+- `1.24.0-py3.13-ubuntu24.04`
+- `1.24.0-py3.12-ubuntu24.04`
+- `1.24.0-py3.11-ubuntu24.04`
+- `1.24.0-py3.10-ubuntu24.04`
+- `1.23.0-py3.12-alpine3.22`
+- `1.23.0-py3.12-ubuntu24.04`
+- `1.23.0-py3.11-ubuntu24.04`
+- `1.23.0-py3.10-ubuntu24.04`
+- `1.23.0-py3.9-ubuntu24.04`
 - `1.22.0-py3.12-alpine3.22`
 - `1.22.0-py3.12-ubuntu24.04`
 - `1.22.0-py3.11-ubuntu24.04`

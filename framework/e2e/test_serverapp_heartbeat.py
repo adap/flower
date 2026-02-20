@@ -6,10 +6,9 @@ import subprocess
 import sys
 import time
 
-import tomli
-import tomli_w
-
 from flwr.common.constant import (
+    HEARTBEAT_DEFAULT_INTERVAL,
+    HEARTBEAT_PATIENCE,
     SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
     SIMULATIONIO_API_DEFAULT_CLIENT_ADDRESS,
     Status,
@@ -24,27 +23,6 @@ address_arg = (
     else SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS
 )
 app_cmd = "flwr-simulation" if use_sim else "flwr-serverapp"
-
-
-def add_e2e_federation() -> None:
-    """Add e2e federation to pyproject.toml."""
-    # Load the pyproject.toml file
-    with open("pyproject.toml", "rb") as f:
-        pyproject = tomli.load(f)
-
-    # Remove e2e federation if exists
-    pyproject["tool"]["flwr"]["federations"].pop("e2e", None)
-
-    # Add e2e federation
-    pyproject["tool"]["flwr"]["federations"]["e2e"] = {
-        "address": "127.0.0.1:9093",
-        "insecure": True,
-        "options": {"num-supernodes": 0},
-    }
-
-    # Write the updated pyproject.toml file
-    with open("pyproject.toml", "wb") as f:
-        tomli_w.dump(pyproject, f)
 
 
 def run_superlink() -> subprocess.Popen:
@@ -66,7 +44,7 @@ def run_superexec() -> subprocess.Popen:
     return subprocess.Popen(cmd)
 
 
-def flwr_run() -> int:
+def flwr_run() -> str:
     """Run the `flwr run` command and return `run_id`."""
     # Run the command
     result = subprocess.run(
@@ -84,17 +62,17 @@ def flwr_run() -> int:
     return data["run-id"]
 
 
-def flwr_ls() -> dict[int, str]:
+def flwr_ls() -> dict[str, str]:
     """Run `flwr ls` command and return a mapping of run_id to status.
 
     Returns
     -------
-    dict[int, str]
+    dict[str, str]
         A dictionary where keys are run IDs and values are their statuses.
     """
     # Run the command
     result = subprocess.run(
-        ["flwr", "ls", ".", "e2e", "--format", "json"],
+        ["flwr", "ls", "e2e", "--format", "json"],
         capture_output=True,
         text=True,
         check=True,
@@ -122,22 +100,28 @@ def get_pids(command: str) -> list[int]:
 
 def main() -> None:
     """."""
+    # Trigger migration to Flower configuration
+    subprocess.run(
+        ["flwr", "ls"],
+        check=False,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+
     # Determine if the test is running in simulation mode
     print(f"Running in {'simulation' if use_sim else 'deployment'} mode.")
-
-    # Add e2e federation to pyproject.toml
-    add_e2e_federation()
 
     # Start the SuperLink
     print("Starting SuperLink...")
     superlink_proc = run_superlink()
 
     # Allow time for SuperLink to start
-    time.sleep(1)
+    time.sleep(3)
 
     # Start the SuperExec
     print("Starting SuperExec...")
     superexec_proc = run_superexec()
+    time.sleep(1)
 
     # Submit the first run
     print("Starting the first run...")
@@ -186,10 +170,14 @@ def main() -> None:
     # Allow time for SuperLink to start
     time.sleep(1)
 
+    # Allow enough time for token expiry based heartbeat detection:
+    # HEARTBEAT_PATIENCE * HEARTBEAT_DEFAULT_INTERVAL (+ buffer for restart/retries)
+    heartbeat_timeout = HEARTBEAT_PATIENCE * HEARTBEAT_DEFAULT_INTERVAL + 30
+
     # Allow time for SuperLink to detect heartbeat failures and update statuses
     tic = time.time()
     is_valid = False
-    while (time.time() - tic) < 25:
+    while (time.time() - tic) < heartbeat_timeout:
         run_status = flwr_ls()
         if (
             run_status[run_id1] == f"{Status.FINISHED}:{SubStatus.FAILED}"

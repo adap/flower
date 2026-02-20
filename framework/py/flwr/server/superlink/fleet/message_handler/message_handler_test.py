@@ -21,68 +21,12 @@ from flwr.common import Metadata, RecordDict, now
 from flwr.common.message import make_message
 from flwr.common.serde import message_to_proto
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
-    CreateNodeRequest,
-    DeleteNodeRequest,
     PullMessagesRequest,
     PushMessagesRequest,
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 
-from .message_handler import create_node, delete_node, pull_messages, push_messages
-
-
-def test_create_node() -> None:
-    """Test create_node."""
-    # Prepare
-    request = CreateNodeRequest()
-    state = MagicMock()
-
-    # Execute
-    create_node(request=request, state=state)
-
-    # Assert
-    state.create_node.assert_called_once()
-    state.delete_node.assert_not_called()
-    state.store_message_ins.assert_not_called()
-    state.get_message_ins.assert_not_called()
-    state.store_message_res.assert_not_called()
-    state.get_message_res.assert_not_called()
-
-
-def test_delete_node_failure() -> None:
-    """Test delete_node."""
-    # Prepare
-    request = DeleteNodeRequest()
-    state = MagicMock()
-
-    # Execute
-    delete_node(request=request, state=state)
-
-    # Assert
-    state.create_node.assert_not_called()
-    state.delete_node.assert_not_called()
-    state.store_message_ins.assert_not_called()
-    state.get_message_ins.assert_not_called()
-    state.store_message_res.assert_not_called()
-    state.get_message_res.assert_not_called()
-
-
-def test_delete_node_success() -> None:
-    """Test delete_node."""
-    # Prepare
-    request = DeleteNodeRequest(node=Node(node_id=123))
-    state = MagicMock()
-
-    # Execute
-    delete_node(request=request, state=state)
-
-    # Assert
-    state.create_node.assert_not_called()
-    state.delete_node.assert_called_once()
-    state.store_message_ins.assert_not_called()
-    state.get_message_ins.assert_not_called()
-    state.store_message_res.assert_not_called()
-    state.get_message_res.assert_not_called()
+from .message_handler import pull_messages, push_messages
 
 
 def test_pull_messages() -> None:
@@ -102,6 +46,44 @@ def test_pull_messages() -> None:
     state.get_message_ins.assert_called_once()
     state.store_message_res.assert_not_called()
     state.get_message_res.assert_not_called()
+    state.store_traffic.assert_not_called()
+
+
+def test_pull_messages_records_traffic_when_messages_found() -> None:
+    """Test pull_messages records traffic when messages are successfully retrieved."""
+    # Prepare
+    msg = make_message(
+        content=RecordDict(),
+        metadata=Metadata(
+            run_id=234,
+            message_id="msg-234",
+            group_id="",
+            src_node_id=0,
+            dst_node_id=1234,
+            reply_to_message_id="",
+            created_at=now().timestamp(),
+            ttl=123,
+            message_type="query",
+        ),
+    )
+    request = PullMessagesRequest(node=Node(node_id=2345))
+    state = MagicMock()
+    state.get_message_ins.return_value = [msg]
+    store = MagicMock()
+    store.get_object_tree.return_value = {}
+
+    # Execute
+    pull_messages(request=request, state=state, store=store)
+
+    # Assert
+    state.get_message_ins.assert_called_once()
+    store.get_object_tree.assert_called_once_with("msg-234")
+    state.store_traffic.assert_called_once()
+    # Verify store_traffic was called with run_id=123, bytes_sent > 0, bytes_recv=0
+    call_args = state.store_traffic.call_args
+    assert call_args[0][0] == 234  # run_id
+    assert call_args[1]["bytes_sent"] > 0
+    assert call_args[1]["bytes_recv"] > 0
 
 
 def test_push_messages() -> None:
@@ -136,3 +118,4 @@ def test_push_messages() -> None:
     state.get_message_ins.assert_not_called()
     state.store_message_res.assert_called_once()
     state.get_message_res.assert_not_called()
+    state.store_traffic.assert_called_once()

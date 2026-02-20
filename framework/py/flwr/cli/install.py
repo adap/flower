@@ -21,8 +21,9 @@ import tempfile
 import zipfile
 from io import BytesIO
 from pathlib import Path
-from typing import IO, Annotated, Optional, Union
+from typing import IO, Annotated
 
+import click
 import typer
 
 from flwr.common.config import get_flwr_dir, get_metadata_from_config
@@ -34,11 +35,11 @@ from .utils import get_sha256_hash
 
 def install(
     source: Annotated[
-        Optional[Path],
+        Path | None,
         typer.Argument(metavar="source", help="The source FAB file to install."),
     ] = None,
     flwr_dir: Annotated[
-        Optional[Path],
+        Path | None,
         typer.Option(help="The desired install path."),
     ] = None,
 ) -> None:
@@ -62,34 +63,49 @@ def install(
     if source is None:
         source = Path(typer.prompt("Enter the source FAB file"))
 
-    source = source.resolve()
+    source = source.expanduser().resolve()
     if not source.exists() or not source.is_file():
-        typer.secho(
-            f"❌ The source {source} does not exist or is not a file.",
-            fg=typer.colors.RED,
-            bold=True,
+        raise click.ClickException(
+            f"The source {source} does not exist or is not a file."
         )
-        raise typer.Exit(code=1)
 
     if source.suffix != ".fab":
-        typer.secho(
-            f"❌ The source {source} is not a `.fab` file.",
-            fg=typer.colors.RED,
-            bold=True,
-        )
-        raise typer.Exit(code=1)
+        raise click.ClickException(f"The source {source} is not a `.fab` file.")
 
-    install_from_fab(source, flwr_dir)
+    try:
+        install_from_fab(source, flwr_dir)
+    except ValueError as e:
+        raise click.ClickException(str(e)) from None
 
 
 def install_from_fab(
-    fab_file: Union[Path, bytes],
-    flwr_dir: Optional[Path],
+    fab_file: Path | bytes,
+    flwr_dir: Path | None,
     skip_prompt: bool = False,
 ) -> Path:
-    """Install from a FAB file after extracting and validating."""
-    fab_file_archive: Union[Path, IO[bytes]]
-    fab_name: Optional[str]
+    """Install from a FAB file after extracting and validating.
+
+    Parameters
+    ----------
+    fab_file : Path | bytes
+        Either a path to the FAB file or the FAB file content as bytes.
+    flwr_dir : Path | None
+        Target installation directory, or None to use default.
+    skip_prompt : bool
+        If True, skip confirmation prompts. Default is False.
+
+    Returns
+    -------
+    Path
+        Path to the installed application directory.
+
+    Raises
+    ------
+    click.ClickException
+        If FAB format is invalid or hash verification fails.
+    """
+    fab_file_archive: Path | IO[bytes]
+    fab_name: str | None
     if isinstance(fab_file, bytes):
         fab_file_archive = BytesIO(fab_file)
         fab_hash = hashlib.sha256(fab_file).hexdigest()
@@ -107,24 +123,14 @@ def install_from_fab(
             tmpdir_path = Path(tmpdir)
             info_dir = tmpdir_path / ".info"
             if not info_dir.exists():
-                typer.secho(
-                    "❌ FAB file has incorrect format.",
-                    fg=typer.colors.RED,
-                    bold=True,
-                )
-                raise typer.Exit(code=1)
+                raise click.ClickException("FAB file has incorrect format.")
 
             content_file = info_dir / "CONTENT"
 
             if not content_file.exists() or not _verify_hashes(
                 content_file.read_text(), tmpdir_path
             ):
-                typer.secho(
-                    "❌ File hashes couldn't be verified.",
-                    fg=typer.colors.RED,
-                    bold=True,
-                )
-                raise typer.Exit(code=1)
+                raise click.ClickException("File hashes couldn't be verified.")
 
             shutil.rmtree(info_dir)
 
@@ -139,20 +145,36 @@ def install_from_fab(
 def validate_and_install(
     project_dir: Path,
     fab_hash: str,
-    fab_name: Optional[str],
-    flwr_dir: Optional[Path],
+    fab_name: str | None,
+    flwr_dir: Path | None,
     skip_prompt: bool = False,
 ) -> Path:
-    """Validate TOML files and install the project to the desired directory."""
-    config, _, _ = load_and_validate(project_dir / "pyproject.toml", check_module=False)
+    """Validate the TOML file and install the project to the desired directory.
 
-    if config is None:
-        typer.secho(
-            "❌ Invalid config inside FAB file.",
-            fg=typer.colors.RED,
-            bold=True,
-        )
-        raise typer.Exit(code=1)
+    Parameters
+    ----------
+    project_dir : Path
+        Path to the extracted project directory.
+    fab_hash : str
+        SHA-256 hash of the FAB file.
+    fab_name : str | None
+        Name of the FAB file, or None if installing from bytes.
+    flwr_dir : Path | None
+        Target installation directory, or None to use default.
+    skip_prompt : bool (default: False)
+        If True, skip confirmation prompts.
+
+    Returns
+    -------
+    Path
+        Path to the installed application directory.
+
+    Raises
+    ------
+    click.ClickException
+        If configuration is invalid or metadata doesn't match.
+    """
+    config, _ = load_and_validate(project_dir / "pyproject.toml", check_module=False)
 
     fab_id, version = get_metadata_from_config(config)
     publisher, project_name = fab_id.split("/")
@@ -198,7 +220,20 @@ def validate_and_install(
 
 
 def _verify_hashes(list_content: str, tmpdir: Path) -> bool:
-    """Verify file hashes based on the LIST content."""
+    """Verify file hashes based on the CONTENT manifest.
+
+    Parameters
+    ----------
+    list_content : str
+        Content of the CONTENT manifest file with hash information.
+    tmpdir : Path
+        Temporary directory containing extracted files.
+
+    Returns
+    -------
+    bool
+        True if all file hashes match, False otherwise.
+    """
     for line in list_content.strip().split("\n"):
         rel_path, hash_expected, _ = line.split(",")
         file_path = tmpdir / rel_path
@@ -210,7 +245,20 @@ def _verify_hashes(list_content: str, tmpdir: Path) -> bool:
 def _validate_fab_and_config_metadata(
     fab_name: str, config_metadata: tuple[str, str, str, str]
 ) -> None:
-    """Validate metadata from the FAB filename and config."""
+    """Validate metadata from the FAB filename and config.
+
+    Parameters
+    ----------
+    fab_name : str
+        The FAB filename (with or without .fab extension).
+    config_metadata : tuple[str, str, str, str]
+        Tuple of (publisher, project_name, version, fab_hash).
+
+    Raises
+    ------
+    click.ClickException
+        If filename format is incorrect or hash doesn't match.
+    """
     publisher, project_name, version, fab_hash = config_metadata
 
     fab_name = fab_name.removesuffix(".fab")
@@ -224,30 +272,21 @@ def _validate_fab_and_config_metadata(
         != f"{publisher}.{project_name}.{version}"
         or len(fab_shorthash) != FAB_HASH_TRUNCATION  # Verify hash length
     ):
-        typer.secho(
-            "❌ FAB file has incorrect name. The file name must follow the format "
-            "`<publisher>.<project_name>.<version>.<8hexchars>.fab`.",
-            fg=typer.colors.RED,
-            bold=True,
+        raise click.ClickException(
+            "FAB file has incorrect name. The file name must follow the format "
+            "`<publisher>.<project_name>.<version>.<8hexchars>.fab`."
         )
-        raise typer.Exit(code=1)
 
     # Verify hash is a valid hexadecimal
     try:
         _ = int(fab_shorthash, 16)
     except Exception as e:
-        typer.secho(
-            f"❌ FAB file has an invalid hexadecimal string `{fab_shorthash}`.",
-            fg=typer.colors.RED,
-            bold=True,
-        )
-        raise typer.Exit(code=1) from e
+        raise click.ClickException(
+            f"FAB file has an invalid hexadecimal string `{fab_shorthash}`."
+        ) from e
 
     # Verify shorthash matches
     if fab_shorthash != fab_hash[:FAB_HASH_TRUNCATION]:
-        typer.secho(
-            "❌ The hash in the FAB file name does not match the hash of the FAB.",
-            fg=typer.colors.RED,
-            bold=True,
+        raise click.ClickException(
+            "The hash in the FAB file name does not match the hash of the FAB."
         )
-        raise typer.Exit(code=1)

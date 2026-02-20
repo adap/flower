@@ -15,10 +15,10 @@
 """Utility functions for performing operations on Numpy NDArrays."""
 
 
-from typing import Any, Union
+from typing import Any
 
 import numpy as np
-from numpy.typing import DTypeLike, NDArray
+from numpy.typing import NDArray
 
 
 def factor_combine(factor: int, parameters: list[NDArray[Any]]) -> list[NDArray[Any]]:
@@ -38,8 +38,11 @@ def get_parameters_shape(parameters: list[NDArray[Any]]) -> list[tuple[int, ...]
     return [arr.shape for arr in parameters]
 
 
+default_numpy_dtype = np.dtype(np.int64)
+
+
 def get_zero_parameters(
-    dimensions_list: list[tuple[int, ...]], dtype: DTypeLike = np.int64
+    dimensions_list: list[tuple[int, ...]], dtype: np.dtype[Any] = default_numpy_dtype
 ) -> list[NDArray[Any]]:
     """Generate zero parameters based on the dimensions list."""
     return [np.zeros(dimensions, dtype=dtype) for dimensions in dimensions_list]
@@ -68,14 +71,14 @@ def parameters_mod(parameters: list[NDArray[Any]], divisor: int) -> list[NDArray
 
 
 def parameters_multiply(
-    parameters: list[NDArray[Any]], multiplier: Union[int, float]
+    parameters: list[NDArray[Any]], multiplier: int | float
 ) -> list[NDArray[Any]]:
     """Multiply parameters by an integer/float multiplier."""
     return [parameters[idx] * multiplier for idx in range(len(parameters))]
 
 
 def parameters_divide(
-    parameters: list[NDArray[Any]], divisor: Union[int, float]
+    parameters: list[NDArray[Any]], divisor: int | float
 ) -> list[NDArray[Any]]:
     """Divide weight by an integer/float divisor."""
     return [parameters[idx] / divisor for idx in range(len(parameters))]

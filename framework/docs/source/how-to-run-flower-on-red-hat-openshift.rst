@@ -2,8 +2,9 @@
 .. meta::
     :description: A step-by-step guide to learn how to create, deploy and run a Flower app on Red Hat OpenShift using the Red Hat OpenShift Service on AWS.
 
-Run Flower on Red Hat OpenShift
-===============================
+#################################
+ Run Flower on Red Hat OpenShift
+#################################
 
 In this guide, you will learn how to create, deploy, and run a Flower app on the `Red
 Hat OpenShift (RHOS)
@@ -12,8 +13,9 @@ platform. The platform will be hosted in AWS and we will follow the steps to ins
 cluster on installer-provisioned infrastructure using the `Red Hat OpenShift Service on
 AWS <https://aws.amazon.com/rosa/>`_.
 
-Login to Red Hat OpenShift Console
-----------------------------------
+************************************
+ Login to Red Hat OpenShift Console
+************************************
 
 Start by logging in to your `Red Hat Hybrid Cloud Console
 <https://console.redhat.com/>`_ and click on ``OpenShift`` link in the ``Red Hat
@@ -36,7 +38,7 @@ pre-requisites that you have to fulfill before you can create a cluster:
    Hat account.
 
 Complete AWS Pre-requisites
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+===========================
 
 Follow the steps required to fulfill the pre-requisites for AWS to create and manage a
 Red Hat OpenShift cluster:
@@ -57,7 +59,7 @@ Red Hat OpenShift cluster:
 For more details, refer to the RHOS getting started guide from your AWS console.
 
 Complete ROSA Pre-requisites
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+============================
 
 Follow the steps shown in the section to download and install the ROSA CLI tool.
 
@@ -110,8 +112,9 @@ Finally, create a Virtual Private Network (VPC) for your cluster:
 
 With the AWS and ROSA pre-requisites completed, you are now ready to deploy a cluster.
 
-Create a Red Hat OpenShift Cluster on AWS
------------------------------------------
+*******************************************
+ Create a Red Hat OpenShift Cluster on AWS
+*******************************************
 
 There are three ways to create the cluster: via ``rosa`` CLI, web interface, or with
 Terraform. For this guide, we will use the web interface. Click on the ``Create with web
@@ -188,8 +191,9 @@ be taken to the OpenShift web console:
 Congratulations! You now have a running Red Hat OpenShift cluster on AWS. Now, let's
 walk through how to deploy Flower on your OpenShift cluster.
 
-Deploy Flower SuperLink and SuperNodes on OpenShift
----------------------------------------------------
+*****************************************************
+ Deploy Flower SuperLink and SuperNodes on OpenShift
+*****************************************************
 
 With the OpenShift cluster active, we can now deploy SuperLink and SuperNode pods and
 run a federated workload. In this guide, we will deploy four pods: 1x SuperLink, 2x
@@ -427,8 +431,9 @@ should be able to view the SuperLink logs showing two connected SuperNodes.
     you can delete the pods by selecting them and clicking on the ``Delete Deployment``
     button.
 
-Deploy Red Hat OpenShift AI
----------------------------
+*****************************
+ Deploy Red Hat OpenShift AI
+*****************************
 
 To interface with the deployed SuperLink and SuperNode in the OpenShift cluster, we want
 to make use of OpenShift AI workbench. So, we need to enable this Operator in the
@@ -453,7 +458,7 @@ Operators`` tab:
     Red Hat OpenShift AI Operator in OpenShift.
 
 Install Data Science Cluster
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+============================
 
 After installing the Operator, we need to install the ``DataScienceCluster`` using the
 web console. Follow the official steps `in this link
@@ -535,7 +540,7 @@ Follow the instructions when prompted to ``Log in with OpenShift``. After loggin
 you will be taken to the OpenShift AI dashboard.
 
 Create a Custom OpenShift AI Image with Flower
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+==============================================
 
 In OpenShift AI, you will be building and running your Flower app in a workbench, which
 is a Jupyter notebook environment. However, the default OpenShift AI workbench image
@@ -597,7 +602,7 @@ successful, you should see your custom image in the list of workbench images:
     Custom OpenShift AI workbench image with Flower.
 
 Create a Data Science Project
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=============================
 
 Now we are ready to create a Data Science project in OpenShift AI and create a workbench
 using the custom image we just created from the previous section.
@@ -631,8 +636,9 @@ minutes:
 
 Now, click on your workbench and launch the JupyterLab environment.
 
-Run the Flower App in OpenShift AI
-----------------------------------
+************************************
+ Run the Flower App in OpenShift AI
+************************************
 
 With a running workbench and deployed SuperLink and SuperNode pods in your OpenShift
 cluster, you are now ready to run a Flower app! In the JupyterLab environment of your
@@ -650,16 +656,31 @@ With Flower running correctly, you can now follow the usual steps of using ``flw
 to create a new Flower app from a template, and ``flwr run`` to run your Flower app on
 the deployed SuperLink and SuperNode pods. Given that we deployed the OpenShift AI
 instance in the same namespace (``flower-openshift-demo``) as the SuperLink in the
-OpenShift cluster, the only change you need to make is to specify the SuperLink service
-name as the address in your ``pyproject.toml``:
+OpenShift cluster, the only change you need to make is to define a new SuperLink
+connection in the Flower Configuration file:
 
-.. code-block:: toml
+1. Run ``flwr config list`` to locate the Flower configuration file on your machine and
+   view available SuperLink connections.
 
-    # ... Existing code in pyproject.toml ...
+   .. code-block:: console
+       :emphasize-lines: 3
 
-    [tool.flwr.federations.remote]
-    address = "superlink-service:9093"  # use the service name created earlier
-    insecure = true
+         $ flwr config list
+
+         Flower Config file: /path/to/.flwr/config.toml
+         SuperLink connections:
+           supergrid
+           local (default)
+
+2. Open the Flower Configuration file (``config.toml``) and add a new SuperLink
+   connection at the end:
+
+   .. code-block:: toml
+       :caption: config.toml
+
+       [superlink.remote]
+       address = "superlink-service:9093"  # use the service name created earlier
+       insecure = true
 
 And finally, run your Flower app as usual with ``flwr run``:
 

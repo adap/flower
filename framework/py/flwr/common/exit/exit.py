@@ -15,14 +15,16 @@
 """Unified exit function."""
 
 
-from __future__ import annotations
-
+import os
 import sys
+import threading
+import time
 from logging import ERROR, INFO
 from typing import Any, NoReturn
 
 from flwr.common import EventType, event
-from flwr.common.version import package_version
+from flwr.supercore.constant import FORCE_EXIT_TIMEOUT_SECONDS
+from flwr.supercore.version import package_version
 
 from ..logger import log
 from .exit_code import EXIT_CODE_HELP
@@ -53,6 +55,10 @@ def flwr_exit(
     - `<message>`: Optional context or additional information about the exit.
     - `<short-help-message>`: A brief explanation for the given exit code.
     - `<help-page-url>`: A URL providing detailed documentation and resolution steps.
+
+    Notes
+    -----
+    This function MUST be called from the main thread.
     """
     is_error = not 0 <= code < 100  # 0-99 are success exit codes
 
@@ -80,6 +86,13 @@ def flwr_exit(
 
     # Log the exit message
     log(log_level, exit_message)
+
+    # Start a daemon thread to force exit if graceful exit fails
+    def force_exit() -> None:
+        time.sleep(FORCE_EXIT_TIMEOUT_SECONDS)
+        os._exit(sys_exit_code)
+
+    threading.Thread(target=force_exit, daemon=True).start()
 
     # Trigger exit handlers
     trigger_exit_handlers()

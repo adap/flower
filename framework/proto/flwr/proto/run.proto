@@ -17,7 +17,6 @@ syntax = "proto3";
 
 package flwr.proto;
 
-import "flwr/proto/fab.proto";
 import "flwr/proto/node.proto";
 import "flwr/proto/recorddict.proto";
 import "flwr/proto/transport.proto";
@@ -34,6 +33,10 @@ message Run {
   string finished_at = 9;
   RunStatus status = 10;
   string flwr_aid = 11;
+  string federation = 12;
+  uint64 bytes_sent = 13;
+  uint64 bytes_recv = 14;
+  double clientapp_runtime = 15;
 }
 
 message RunStatus {
@@ -58,13 +61,6 @@ message UpdateRunStatusRequest {
   RunStatus run_status = 2;
 }
 message UpdateRunStatusResponse {}
-
-// GetRunStatus
-message GetRunStatusRequest {
-  Node node = 1;
-  repeated uint64 run_ids = 2;
-}
-message GetRunStatusResponse { map<uint64, RunStatus> run_status_dict = 1; }
 
 // Get Federation Options associated with run
 message GetFederationOptionsRequest { uint64 run_id = 1; }

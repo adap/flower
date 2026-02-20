@@ -17,7 +17,6 @@
 
 from abc import abstractmethod
 from collections.abc import Sequence
-from typing import Optional
 
 from flwr.common import Context, Message
 from flwr.common.typing import Run
@@ -36,7 +35,7 @@ class NodeState(CoreState):
         """Get the node ID."""
 
     @abstractmethod
-    def store_message(self, message: Message) -> Optional[str]:
+    def store_message(self, message: Message) -> str | None:
         """Store a message.
 
         Parameters
@@ -54,9 +53,9 @@ class NodeState(CoreState):
     def get_messages(
         self,
         *,
-        run_ids: Optional[Sequence[int]] = None,
-        is_reply: Optional[bool] = None,
-        limit: Optional[int] = None,
+        run_ids: Sequence[int] | None = None,
+        is_reply: bool | None = None,
+        limit: int | None = None,
     ) -> Sequence[Message]:
         """Retrieve messages based on the specified filters.
 
@@ -89,7 +88,7 @@ class NodeState(CoreState):
     def delete_messages(
         self,
         *,
-        message_ids: Optional[Sequence[str]] = None,
+        message_ids: Sequence[str] | None = None,
     ) -> None:
         """Delete messages based on the specified filters.
 
@@ -118,7 +117,7 @@ class NodeState(CoreState):
         """
 
     @abstractmethod
-    def get_run(self, run_id: int) -> Optional[Run]:
+    def get_run(self, run_id: int) -> Run | None:
         """Retrieve a run by its ID.
 
         Parameters
@@ -143,7 +142,7 @@ class NodeState(CoreState):
         """
 
     @abstractmethod
-    def get_context(self, run_id: int) -> Optional[Context]:
+    def get_context(self, run_id: int) -> Context | None:
         """Retrieve a context by its run ID.
 
         Parameters
@@ -168,4 +167,49 @@ class NodeState(CoreState):
         -------
         Sequence[int]
             Sequence of run IDs with pending messages.
+        """
+
+    @abstractmethod
+    def record_message_processing_start(self, message_id: str) -> None:
+        """Record the start time of message processing based on the message ID.
+
+        Parameters
+        ----------
+        message_id : str
+            The ID of the message associated with the start time.
+        """
+
+    @abstractmethod
+    def record_message_processing_end(self, message_id: str) -> None:
+        """Record the end time of message processing based on the message ID.
+
+        Parameters
+        ----------
+        message_id : str
+            The ID of the message associated with the end time.
+
+        Raises
+        ------
+        ValueError
+            If the message ID is not found.
+        """
+
+    @abstractmethod
+    def get_message_processing_duration(self, message_id: str) -> float:
+        """Get the message processing duration based on the message ID.
+
+        Parameters
+        ----------
+        message_id : str
+            The ID of the message.
+
+        Returns
+        -------
+        float
+            The processing duration in seconds.
+
+        Raises
+        ------
+        ValueError
+            If the message ID is not found, or if start/end times are missing.
         """

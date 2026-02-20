@@ -16,7 +16,8 @@
 
 
 import datetime
-from typing import Any, Callable, cast
+from collections.abc import Callable
+from typing import Any, cast
 
 import grpc
 from google.protobuf.message import Message as GrpcMessage
@@ -29,7 +30,10 @@ from flwr.common.constant import (
     TIMESTAMP_HEADER,
     TIMESTAMP_TOLERANCE,
 )
-from flwr.proto.fleet_pb2 import CreateNodeRequest  # pylint: disable=E0611
+from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
+    ActivateNodeRequest,
+    RegisterNodeFleetRequest,
+)
 from flwr.server.superlink.linkstate import LinkStateFactory
 from flwr.supercore.primitives.asymmetric import bytes_to_public_key, verify_signature
 
@@ -104,24 +108,31 @@ class NodeAuthServerInterceptor(grpc.ServerInterceptor):  # type: ignore
     def _wrap_method_handler(
         self,
         method_handler: grpc.RpcMethodHandler,
-        expected_public_key: bytes,
+        received_public_key: bytes,
     ) -> grpc.RpcMethodHandler:
         def _generic_method_handler(
             request: GrpcMessage,
             context: grpc.ServicerContext,
         ) -> GrpcMessage:
-            # Retrieve the public key
-            if isinstance(request, CreateNodeRequest):
-                actual_public_key = request.public_key
-            else:
-                # Note: This function runs in a different thread
-                # than the `intercept_service` function.
-                actual_public_key = self.state_factory.state().get_node_public_key(
-                    request.node.node_id  # type: ignore
+            # Note: This function runs in a different thread
+            # than the `intercept_service` function.
+
+            # Skip registration and activation requests
+            if not isinstance(request, (RegisterNodeFleetRequest, ActivateNodeRequest)):
+                # Retrieve the node ID from the request
+                if hasattr(request, "node"):
+                    received_node_id = request.node.node_id
+                else:
+                    received_node_id = request.node_id  # type: ignore[attr-defined]
+
+                # Get the actual node ID based on the received public key
+                node_id = self.state_factory.state().get_node_id_by_public_key(
+                    received_public_key
                 )
-            # Verify the public key
-            if actual_public_key != expected_public_key:
-                context.abort(grpc.StatusCode.UNAUTHENTICATED, "Invalid node ID")
+
+                # Verify that the received node ID matches the actual node ID
+                if received_node_id != node_id:
+                    context.abort(grpc.StatusCode.UNAUTHENTICATED, "Invalid node ID")
 
             response: GrpcMessage = method_handler.unary_unary(request, context)
             return response

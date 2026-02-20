@@ -29,7 +29,6 @@ from flwr.common.serde import (
     context_to_proto,
     fab_to_proto,
     run_status_from_proto,
-    run_status_to_proto,
     run_to_proto,
 )
 from flwr.common.typing import Fab, RunStatus
@@ -57,8 +56,6 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     GetFederationOptionsResponse,
     GetRunRequest,
     GetRunResponse,
-    GetRunStatusRequest,
-    GetRunStatusResponse,
     UpdateRunStatusRequest,
     UpdateRunStatusResponse,
 )
@@ -110,6 +107,13 @@ class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
         # Attempt to create a token for the provided run ID
         token = state.create_token(request.run_id)
 
+        # Transition the run to STARTING if token creation was successful
+        if token:
+            state.update_run_status(
+                run_id=request.run_id,
+                new_status=RunStatus(Status.STARTING, "", ""),
+            )
+
         # Return the token
         return RequestTokenResponse(token=token or "")
 
@@ -152,8 +156,8 @@ class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
                 if result := ffs.get(run.fab_hash):
                     fab = Fab(run.fab_hash, result[0], result[1])
             if run and fab and serverapp_ctxt:
-                # Update run status to STARTING
-                if state.update_run_status(run_id, RunStatus(Status.STARTING, "", "")):
+                # Update run status to RUNNING
+                if state.update_run_status(run_id, RunStatus(Status.RUNNING, "", "")):
                     log(INFO, "Starting run %d", run_id)
                     return PullAppInputsResponse(
                         context=context_to_proto(serverapp_ctxt),
@@ -162,8 +166,12 @@ class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
                     )
 
         # Raise an exception if the Run or Fab is not found,
-        # or if the status cannot be updated to STARTING
-        raise RuntimeError(f"Failed to start run {run_id}")
+        # or if the status cannot be updated to RUNNING
+        context.abort(
+            grpc.StatusCode.FAILED_PRECONDITION,
+            f"Failed to start run {run_id}",
+        )
+        raise RuntimeError("Unreachable code")  # for mypy
 
     def PushAppOutputs(
         self, request: PushAppOutputsRequest, context: ServicerContext
@@ -208,22 +216,6 @@ class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
         )
         return UpdateRunStatusResponse()
 
-    def GetRunStatus(
-        self, request: GetRunStatusRequest, context: ServicerContext
-    ) -> GetRunStatusResponse:
-        """Get status of requested runs."""
-        log(DEBUG, "SimultionIoServicer.GetRunStatus")
-        state = self.state_factory.state()
-
-        statuses = state.get_run_status(set(request.run_ids))
-
-        return GetRunStatusResponse(
-            run_status_dict={
-                run_id: run_status_to_proto(status)
-                for run_id, status in statuses.items()
-            }
-        )
-
     def PushLogs(
         self, request: PushLogsRequest, context: grpc.ServicerContext
     ) -> PushLogsResponse:
@@ -257,20 +249,14 @@ class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
     def SendAppHeartbeat(
         self, request: SendAppHeartbeatRequest, context: grpc.ServicerContext
     ) -> SendAppHeartbeatResponse:
-        """Handle a heartbeat from the ServerApp in simulation."""
-        log(DEBUG, "SimultionIoServicer.SendAppHeartbeat")
+        """Handle a heartbeat from an app process."""
+        log(DEBUG, "SimulationIoServicer.SendAppHeartbeat")
 
         # Init state
         state = self.state_factory.state()
 
         # Acknowledge the heartbeat
-        # The app heartbeat can only be acknowledged if the run is in
-        # starting or running status.
-        success = state.acknowledge_app_heartbeat(
-            run_id=request.run_id,
-            heartbeat_interval=request.heartbeat_interval,
-        )
-
+        success = state.acknowledge_app_heartbeat(request.token)
         return SendAppHeartbeatResponse(success=success)
 
     def _verify_token(self, token: str, context: grpc.ServicerContext) -> int:

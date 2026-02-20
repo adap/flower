@@ -2,8 +2,9 @@
 .. meta::
     :description: Deploy a Flower project on multiple machines using Docker Compose to configure server and client components with TLS encryption and persistent SuperLink state.
 
-Deploy Flower on Multiple Machines with Docker Compose
-======================================================
+########################################################
+ Deploy Flower on Multiple Machines with Docker Compose
+########################################################
 
 This guide will help you set up a Flower project on multiple machines using Docker
 Compose.
@@ -18,8 +19,9 @@ This guide assumes you have completed the :doc:`tutorial-quickstart-docker-compo
 tutorial. It is highly recommended that you follow and understand the contents of that
 tutorial before proceeding with this guide.
 
-Prerequisites
--------------
+***************
+ Prerequisites
+***************
 
 Before you begin, make sure you have the following prerequisites:
 
@@ -36,8 +38,9 @@ Before you begin, make sure you have the following prerequisites:
     If your project has a different name or location, please remember to adjust the
     commands/paths accordingly.
 
-Step 1: Set Up
---------------
+****************
+ Step 1: Set Up
+****************
 
 1. Clone the Flower repository and change to the ``distributed`` directory:
 
@@ -71,8 +74,9 @@ Step 1: Set Up
 
        $ docker compose -f certs.yml -f ../complete/certs.yml run --rm --build gen-certs
 
-Step 2: Copy the Server Compose Files
--------------------------------------
+***************************************
+ Step 2: Copy the Server Compose Files
+***************************************
 
 Use the method that works best for you to copy the ``server`` directory, the
 certificates, and the ``pyproject.toml`` file of your Flower project to the remote
@@ -84,10 +88,11 @@ For example, you can use ``scp`` to copy the directories:
 
     $ scp -r ./server \
            ./superlink-certificates \
-           ../../../examples/quickstart-sklearn-tabular/pyproject.toml remote:~/distributed
+           ../../../examples/quickstart-sklearn/pyproject.toml remote:~/distributed
 
-Step 3: Start the Flower Server Components
-------------------------------------------
+********************************************
+ Step 3: Start the Flower Server Components
+********************************************
 
 Log into the remote machine using ``ssh`` and run the following command to start the
 SuperLink and ``ServerApp`` services:
@@ -121,15 +126,16 @@ SuperLink and ``ServerApp`` services:
 
 Go back to your terminal on your local machine.
 
-Step 4: Start the Flower Client Components
-------------------------------------------
+********************************************
+ Step 4: Start the Flower Client Components
+********************************************
 
 On your local machine, run the following command to start the client components:
 
 .. code-block:: bash
 
     # In the `docker/distributed` directory
-    $ export PROJECT_DIR=../../../../examples/quickstart-sklearn-tabular
+    $ export PROJECT_DIR=../../../../examples/quickstart-sklearn
     $ docker compose -f client/compose.yml up --build -d
 
 .. note::
@@ -137,36 +143,47 @@ On your local machine, run the following command to start the client components:
     The path to the ``PROJECT_DIR`` containing the ``pyproject.toml`` file should be
     relative to the location of the client ``compose.yml`` file.
 
-Step 5: Run Your Flower Project
--------------------------------
+*********************************
+ Step 5: Run Your Flower Project
+*********************************
 
-Specify the remote SuperLink IP addresses and the path to the root certificate in the
-``[tool.flwr.federations.remote-deployment]`` table in the ``pyproject.toml`` file.
-Here, we have named our remote federation ``remote-deployment``:
+Specify the remote SuperLink IP addresses and the path to the root certificate in the in
+a new SuperLink connection in your Flower Configuration file. The easiest way to locate
+this file is by means of ``flwr config list``:
+
+.. code-block:: console
+    :emphasize-lines: 3
+
+    $ flwr config list
+
+    Flower Config file: /path/to/.flwr/config.toml
+    SuperLink connections:
+    supergrid
+    local (default)
+
+With the file located in your system, edit it and add a new connection named
+``remote-deployment``:
 
 .. code-block:: toml
-    :caption: examples/quickstart-sklearn-tabular/pyproject.toml
+    :caption: config.toml
 
-    [tool.flwr.federations.remote-deployment]
+    [superlink.remote-deployment]
     address = "192.168.2.33:9093"
-    root-certificates = "../../framework/docker/distributed/superlink-certificates/ca.crt"
-
-.. note::
-
-    The path of the ``root-certificates`` should be relative to the location of the
-    ``pyproject.toml`` file.
+    root-certificates = "/absolute/path/to/superlink-certificates/ca.crt"
 
 Run the project and follow the ``ServerApp`` logs:
 
 .. code-block:: bash
 
-    $ flwr run ../../../examples/quickstart-sklearn-tabular remote-deployment --stream
+    $ cd flower/examples/quickstart-sklearn
+    $ flwr run ../../../examples/quickstart-sklearn remote-deployment --stream
 
 That's it! With these steps, you've set up Flower on two separate machines and are ready
 to start using it.
 
-Step 6: Clean Up
-----------------
+******************
+ Step 6: Clean Up
+******************
 
 Shut down the Flower client components:
 
@@ -183,6 +200,6 @@ Shut down the Flower server components and delete the SuperLink state:
     $ cd <path-to-``distributed``-directory>
     $ docker compose -f server/compose.yml down -v
 
-.. |quickstart_sklearn_tabular| replace:: ``examples/quickstart-sklearn-tabular``
+.. |quickstart_sklearn_tabular| replace:: ``examples/quickstart-sklearn``
 
-.. _quickstart_sklearn_tabular: https://github.com/adap/flower/tree/main/examples/quickstart-sklearn-tabular
+.. _quickstart_sklearn_tabular: https://github.com/adap/flower/tree/main/examples/quickstart-sklearn

@@ -17,8 +17,6 @@
 
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
-from pathlib import Path
-from typing import Optional, Union
 
 from flwr.common.typing import AccountAuthCredentials, AccountAuthLoginDetails
 from flwr.proto.control_pb2_grpc import ControlStub
@@ -36,8 +34,8 @@ class CliAuthPlugin(ABC):
 
     Parameters
     ----------
-    credentials_path : Path
-        Path to the Flower account's authentication credentials file.
+    host : str
+        The address of the SuperLink Control API server.
     """
 
     @staticmethod
@@ -67,29 +65,25 @@ class CliAuthPlugin(ABC):
         """
 
     @abstractmethod
-    def __init__(self, credentials_path: Path):
+    def __init__(self, host: str):
         """Abstract constructor."""
 
     @abstractmethod
     def store_tokens(self, credentials: AccountAuthCredentials) -> None:
-        """Store authentication tokens to the `credentials_path`.
-
-        The credentials, including tokens, will be saved as a JSON file
-        at `credentials_path`.
-        """
+        """Store authentication tokens to the credential store."""
 
     @abstractmethod
     def load_tokens(self) -> None:
-        """Load authentication tokens from the `credentials_path`."""
+        """Load authentication tokens from the credential store."""
 
     @abstractmethod
     def write_tokens_to_metadata(
-        self, metadata: Sequence[tuple[str, Union[str, bytes]]]
-    ) -> Sequence[tuple[str, Union[str, bytes]]]:
+        self, metadata: Sequence[tuple[str, str | bytes]]
+    ) -> Sequence[tuple[str, str | bytes]]:
         """Write authentication tokens to the provided metadata."""
 
     @abstractmethod
     def read_tokens_from_metadata(
-        self, metadata: Sequence[tuple[str, Union[str, bytes]]]
-    ) -> Optional[AccountAuthCredentials]:
+        self, metadata: Sequence[tuple[str, str | bytes]]
+    ) -> AccountAuthCredentials | None:
         """Read authentication tokens from the provided metadata."""

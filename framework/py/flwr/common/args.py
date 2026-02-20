@@ -20,7 +20,6 @@ import sys
 from logging import DEBUG, ERROR, INFO, WARN
 from os.path import isfile
 from pathlib import Path
-from typing import Optional, Union
 
 from flwr.common.constant import TRANSPORT_TYPE_REST
 from flwr.common.logger import log
@@ -70,9 +69,9 @@ def add_args_flwr_app_common(parser: argparse.ArgumentParser) -> None:
 def try_obtain_root_certificates(
     args: argparse.Namespace,
     grpc_server_address: str,
-) -> Optional[Union[bytes, str]]:
+) -> bytes | str | None:
     """Validate and return the root certificates."""
-    root_cert_path: Optional[str] = args.root_certificates
+    root_cert_path: str | None = args.root_certificates
     if args.insecure:
         if root_cert_path is not None:
             sys.exit(
@@ -90,13 +89,13 @@ def try_obtain_root_certificates(
     else:
         # Load the certificates if provided, or load the system certificates
         if root_cert_path is None:
-            log(INFO, "Using system certificates")
+            log(INFO, "Using system certificates for TLS connection")
             root_certificates = None
         elif not isfile(root_cert_path):
             log(ERROR, "Path argument `--root-certificates` does not point to a file.")
             sys.exit(1)
         else:
-            root_certificates = Path(root_cert_path).read_bytes()
+            root_certificates = Path(root_cert_path).expanduser().read_bytes()
         log(
             DEBUG,
             "Starting secure HTTPS channel to %s "
@@ -111,7 +110,7 @@ def try_obtain_root_certificates(
 
 def try_obtain_server_certificates(
     args: argparse.Namespace,
-) -> Optional[tuple[bytes, bytes, bytes]]:
+) -> tuple[bytes, bytes, bytes] | None:
     """Validate and return the CA cert, server cert, and server private key."""
     if args.insecure:
         log(
@@ -130,9 +129,9 @@ def try_obtain_server_certificates(
         if not isfile(args.ssl_keyfile):
             sys.exit("Path argument `--ssl-keyfile` does not point to a file.")
         certificates = (
-            Path(args.ssl_ca_certfile).read_bytes(),  # CA certificate
-            Path(args.ssl_certfile).read_bytes(),  # server certificate
-            Path(args.ssl_keyfile).read_bytes(),  # server private key
+            Path(args.ssl_ca_certfile).expanduser().read_bytes(),  # CA certificate
+            Path(args.ssl_certfile).expanduser().read_bytes(),  # server certificate
+            Path(args.ssl_keyfile).expanduser().read_bytes(),  # server private key
         )
         return certificates
     if args.ssl_certfile or args.ssl_keyfile or args.ssl_ca_certfile:

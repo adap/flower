@@ -40,15 +40,16 @@
 
 .. _result_link: ref-api/flwr.serverapp.strategy.Result.html
 
-Quickstart XGBoost
-==================
+####################
+ Quickstart XGBoost
+####################
 
 In this federated learning tutorial, we will learn how to train a simple XGBoost
 classifier on Higgs dataset using Flower and XGBoost. It is recommended to create a
 virtual environment and run everything within a :doc:`virtualenv
 <contributor-how-to-set-up-a-virtual-env>`.
 
-Let's use `flwr new` to create a complete Flower+XGBoost project. It will generate all
+Let's use ``flwr new`` to create a complete Flower+XGBoost project. It will generate all
 the files needed to run, by default with the Simulation Engine, a federation of 10 nodes
 using |fedxgbbagging_link|_ strategy. The dataset will be partitioned using Flower
 Dataset's `IidPartitioner
@@ -67,21 +68,19 @@ install Flower in your new environment:
     # In a new Python environment
     $ pip install flwr
 
-Then, run the command below. You will be prompted to select one of the available
-templates (choose ``XGBoost``), give a name to your project, and enter your developer
-name:
+Then, run the command below:
 
 .. code-block:: shell
 
-    $ flwr new
+    $ flwr new @flwrlabs/quickstart-xgboost
 
-After running it you'll notice a new directory with your project name has been created.
-It should have the following structure:
+After running it you'll notice a new directory named ``quickstart-xgboost`` has been
+created. It should have the following structure:
 
 .. code-block:: shell
 
-    <your-project-name>
-    ├── <your-project-name>
+    quickstart-xgboost
+    ├── quickstart_xgboost
     │   ├── __init__.py
     │   ├── client_app.py   # Defines your ClientApp
     │   ├── server_app.py   # Defines your ServerApp
@@ -181,8 +180,9 @@ What follows is an explanation of each component in the project you just created
 configurations, dataset partitioning, defining the ``ClientApp``, and defining the
 ``ServerApp``.
 
-The Configurations
-------------------
+********************
+ The Configurations
+********************
 
 We define all required configurations / hyper-parameters inside the ``pyproject.toml``
 file:
@@ -209,8 +209,9 @@ The ``local-epochs`` represents the number of iterations for local tree boost. W
 CPU for the training in default. One can assign it to a GPU by setting ``tree-method``
 to ``gpu_hist``. We use AUC as evaluation metric.
 
-The Data
---------
+**********
+ The Data
+**********
 
 We will use `Flower Datasets <https://flower.ai/docs/datasets/>`_ to easily download and
 partition the `Higgs` dataset. In this example, you'll make use of the `IidPartitioner
@@ -263,8 +264,9 @@ to DMatrix for the ``xgboost`` package. The functions of ``train_test_split`` an
         new_data = xgb.DMatrix(x, label=y)
         return new_data
 
-The ClientApp
--------------
+***************
+ The ClientApp
+***************
 
 The main changes we have to make to use `XGBoost` with `Flower` have to do with
 converting the |arrayrecord_link|_ received in the |message_link|_ into a `XGBoost`
@@ -372,17 +374,16 @@ follows:
 
 .. code-block:: python
 
-    def _local_boost(self, bst_input):
+    def _local_boost(bst_input, num_local_round, train_dmatrix):
         # Update trees based on local training data.
-        for i in range(self.num_local_round):
-            bst_input.update(self.train_dmatrix, bst_input.num_boosted_rounds())
+        for i in range(num_local_round):
+            bst_input.update(train_dmatrix, bst_input.num_boosted_rounds())
 
         # Bagging: extract the last N=num_local_round trees for sever aggregation
         bst = bst_input[
             bst_input.num_boosted_rounds()
-            - self.num_local_round : bst_input.num_boosted_rounds()
+            - num_local_round : bst_input.num_boosted_rounds()
         ]
-
         return bst
 
 Given ``num_local_round``, we update trees by calling ``bst_input.update`` method. After
@@ -393,8 +394,9 @@ model is not locally trained, instead it is used to evaluate its performance on 
 locally held-out validation set; (2) including the model in the reply Message is no
 longer needed because it is not locally modified.
 
-The ServerApp
--------------
+***************
+ The ServerApp
+***************
 
 To construct a |serverapp_link|_, we define its ``@app.main()`` method. This method
 receives as input arguments:
@@ -467,6 +469,11 @@ weights as an ``ArrayRecord``, and federated training and evaluation metrics as
 ``MetricRecords``.
 
 Congratulations! You've successfully built and run your first federated learning system.
+
+.. tip::
+
+    Check the :doc:`how-to-run-simulations` documentation to learn more about how to
+    configure and run Flower simulations.
 
 .. note::
 

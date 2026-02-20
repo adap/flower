@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "flwr"
-version = "1.23.0"
+version = "1.27.0"
 description = "Flower: A Friendly Federated AI Framework"
 license = "Apache-2.0"
 authors = ["The Flower Authors <hello@flower.ai>"]
@@ -31,7 +31,6 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -62,28 +61,33 @@ flwr-serverapp = "flwr.server.serverapp:flwr_serverapp"
 flwr-clientapp = "flwr.supernode.cli:flwr_clientapp"
 
 [tool.poetry.dependencies]
-python = "^3.9.2"
+python = "^3.10"
 # Mandatory dependencies
 numpy = ">=1.26.0,<3.0.0"
-grpcio = "^1.62.3,!=1.65.0"
-grpcio-health-checking = "^1.62.3"
-protobuf = "^4.21.6"
-cryptography = "^44.0.1"
+grpcio = "^1.70.0"
+grpcio-health-checking = "^1.70.0"
+protobuf = ">=5.28.0,<7.0.0"
+cryptography = "^46.0.5"
 pycryptodome = "^3.18.0"
 iterators = "^0.0.2"
-typer = "^0.12.5"
+typer = ">=0.12.5,<0.21.0"
 tomli = "^2.0.1"
 tomli-w = "^1.0.0"
 pathspec = "^0.12.1"
 rich = "^13.5.0"
 pyyaml = "^6.0.2"
 requests = "^2.31.0"
-click = "<8.2.0"
+click = "^8.0.0"
+SQLAlchemy = "^2.0.45"
+alembic = "^1.18.1"
 # Optional dependencies (Simulation Engine)
-ray = { version = "==2.31.0", optional = true, python = ">=3.9,<3.13" }
+ray = [
+    { version = "==2.51.1", optional = true, python = ">=3.10,<3.13" },
+    { version = "==2.51.1", optional = true, python = "==3.13", markers = "sys_platform != 'win32'" },
+]
 # Optional dependencies (REST transport layer)
-starlette = { version = "^0.45.2", optional = true }
-uvicorn = { version = "^0.34.0", extras = ["standard"], optional = true }
+starlette = { version = "^0.50.0", optional = true }
+uvicorn = { version = "^0.40.0", extras = ["standard"], optional = true }
 
 [tool.poetry.extras]
 simulation = ["ray"]
@@ -91,12 +95,13 @@ rest = ["starlette", "uvicorn"]
 
 [tool.poetry.group.dev.dependencies]
 types-dataclasses = "==0.6.6"
-types-protobuf = "==4.21.0.7"
+types-protobuf = "==5.29.1.20250403"
 types-requests = "==2.31.0.20240125"
-types-setuptools = "==69.0.0.20240125"
+types-setuptools = "==80.9.0.20250822"
+setuptools = "==80.9.0"
 clang-format = "==17.0.6"
 isort = "==5.13.2"
-black = { version = "==24.2.0", extras = ["jupyter"] }
+black = { version = "==25.11.0", extras = ["jupyter"] }
 taplo = "==0.9.3"
 docformatter = "==1.7.5"
 mypy = "==1.8.0"
@@ -105,8 +110,8 @@ parameterized = "==0.9.0"
 pytest = "==7.4.4"
 pytest-cov = "==4.1.0"
 pytest-watcher = "==0.4.3"
-grpcio-tools = "==1.62.3"
-mypy-protobuf = "==3.2.0"
+grpcio-tools = "==1.70.0"
+mypy-protobuf = "==3.6.0"
 jupyterlab = "==4.0.12"
 rope = "==1.13.0"
 semver = "==3.0.2"
@@ -122,30 +127,33 @@ furo = "==2024.8.6"
 sphinx-reredirects = "==0.1.5"
 nbsphinx = "==0.9.5"
 nbstripout = "==0.6.1"
-ruff = "==0.4.5"
+ruff = "==0.14.5"
 sphinx-argparse = "==0.4.0"
 pipreqs = "==0.4.13"
-mdformat = "==0.7.22"
-mdformat-gfm = "==0.3.6"
-mdformat-frontmatter = "==2.0.1"
-mdformat-beautysh = "==0.1.1"
+mdformat = "==1.0.0"
+mdformat-gfm = "==1.0.0"
+mdformat-frontmatter = "==2.0.10"
+mdformat-beautysh = "==1.0.0"
+beautysh = "==6.4.2"
 twine = "==5.1.1"
 types-PyYAML = "^6.0.2"
 pyroma = "==4.2"
-check-wheel-contents = "==0.4.0"
+check-wheel-contents = "==0.6.3"
 GitPython = "==3.1.32"
 PyGithub = "==2.1.1"
 licensecheck = "==2025.1.0"
 pre-commit = "==3.5.0"
 sphinx-substitution-extensions = "2022.02.16"
 sphinxext-opengraph = "==0.9.1"
-docstrfmt = { git = "https://github.com/charlesbvll/docstrfmt.git", branch = "patch-2" }
+docstrfmt = { git = "https://github.com/charlesbvll/docstrfmt.git", branch = "patch-2", python = ">=3.10,<4.0.0" }
 docsig = "==0.64.0"
+paracelsus = "==0.15.0"
 devtool = [{ path = "./devtool", develop = true }]
 
 [tool.docstrfmt]
 extend_exclude = [
     "docs/source/conf.py",
+    "docs/source/conf_base.py",
     "docs/source/tutorial-quickstart-huggingface.rst",
     "docs/source/_templates/autosummary/*",
     "docs/source/ref-api/*",
@@ -157,7 +165,7 @@ known_first_party = ["flwr", "flwr_tool"]
 
 [tool.black]
 line-length = 88
-target-version = ["py39", "py310", "py311"]
+target-version = ["py310", "py311", "py312", "py313"]
 
 [tool.pylint."MESSAGES CONTROL"]
 disable = "duplicate-code,too-few-public-methods,useless-import-alias"
@@ -178,9 +186,8 @@ patterns = ["*.py"]
 ignore_patterns = []
 
 [tool.mypy]
-plugins = ["numpy.typing.mypy_plugin"]
-ignore_missing_imports = true
 strict = true
+ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = ["importlib.metadata.*", "importlib_metadata.*"]
@@ -193,12 +200,16 @@ module = "torch.*"
 follow_imports = "skip"
 follow_imports_for_stubs = true
 
+[[tool.mypy.overrides]]
+module = "flwr.proto.*"
+warn_unused_ignores = false
+
 [tool.docformatter]
 wrap-summaries = 88
 wrap-descriptions = 88
 
 [tool.ruff]
-target-version = "py39"
+target-version = "py310"
 line-length = 88
 exclude = [
     ".bzr",

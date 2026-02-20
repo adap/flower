@@ -14,8 +14,9 @@
 
 .. _flower_docker_index: docker/index.html
 
-Run Flower on Azure
-===================
+#####################
+ Run Flower on Azure
+#####################
 
 .. note::
 
@@ -35,14 +36,15 @@ On the Federation server VM we will deploy the long-running Flower server
 Flower client (``SuperNode``). For more details For more details regarding the
 ``SuperLink`` and ``SuperNode`` concepts, please see the |flower_architecture_link|_ .
 
-Azure VMs
----------
+***********
+ Azure VMs
+***********
 
 First we need to create the three VMs configure their Python environments, and inbound
 networking rules to allow cross-VM communication.
 
 VM Create
-~~~~~~~~~
+=========
 
 Assuming we are already inside the Microsoft Azure portal, we navigate to the ``Create``
 page and we select ``Azure virtual machine``. In the new page, for each VM we edit the
@@ -81,7 +83,7 @@ our local machine by running the following command (by default Azure creates the
     ssh -i <PATH_TO_PEM_FILE> azureuser@<PUBLIC_IP>
 
 VM Networking
-~~~~~~~~~~~~~
+=============
 
 During the execution of the Flower application, the server VM (``SuperLink``) will be
 responsible to orchestrate the execution of the application across the client VMs
@@ -148,8 +150,9 @@ Otherwise, we change the properties as follows:
     - - **Destination port ranges**
       - ``9093``
 
-Flower Environment
-------------------
+********************
+ Flower Environment
+********************
 
 Assuming we have been able to login to each VM, and create a Python environment with
 Flower and all its dependencies installed (``pip install flwr``), we can create a Flower
@@ -164,7 +167,7 @@ type of the Flower Framework we want to run, e.g., ``numpy``.
     to the |flower_docker_index|_ guide.
 
 Server Initialization
-~~~~~~~~~~~~~~~~~~~~~
+=====================
 
 After configuring the Flower application environment, we proceed by starting the Flower
 long-running processes (i.e., ``SuperLink`` and ``SuperNode``) at each VM instance. In
@@ -193,27 +196,49 @@ and then at each client (``SuperNode``).
       --superlink="SUPERLINK_PUBLIC_IP:9092"  # SuperLink public ip and port
 
 Run Flower App
-~~~~~~~~~~~~~~
+==============
 
 Finally, after all running Flower processes have been initialized on the Microsoft Azure
-cluster, in our local machine, we first need to install Flower and can create a project
-with a similar structure as the one we have in the server and the clients, or copy the
-project structure from one of them. Once we have the project locally, we can open the
-``pyproject.toml`` file, and then add the following sections:
+cluster, in our local machine, we first need to install Flower and create a Flower App.
 
 .. code-block:: bash
 
-    [tool.flwr.federations]
-    default = "my-federation"  # replaced the default value with "my-federation"
+    # Install flower
+    pip install -U flwr
 
-    [tool.flwr.federations.my-federation]  # replaced name with "my-federation"
-    address = "SUPERLINK_PUBLIC_IP:9093"  # Address of the SuperLink Control API
-    insecure = true
+    # This creates a basic Flower App using the numpy framework
+    flwr new @flwrlabs/quickstart-numpy
+
+Next, we need to create a new SuperLink connection in the Flower Configuration file:
+
+1. Run ``flwr config list`` to locate the Flower configuration file on your machine and
+   view available SuperLink connections.
+
+   .. code-block:: console
+       :emphasize-lines: 3
+
+         $ flwr config list
+
+         Flower Config file: /path/to/.flwr/config.toml
+         SuperLink connections:
+           supergrid
+           local (default)
+
+2. Open the Flower Configuration file (``config.toml``) and add a new SuperLink
+   connection at the end:
+
+   .. code-block:: toml
+       :caption: config.toml
+
+       [superlink.my-federation]
+       address = "SUPERLINK_PUBLIC_IP:9093"  # Address of the SuperLink Control API
+       insecure = true
 
 Then from our local machine we need to run ``flwr run . my-federation``.
 
-Next Steps
-----------
+************
+ Next Steps
+************
 
 .. warning::
 

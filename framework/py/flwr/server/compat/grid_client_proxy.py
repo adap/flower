@@ -15,10 +15,9 @@
 """Flower ClientProxy implementation using Grid."""
 
 
-from typing import Optional
-
 from flwr import common
-from flwr.common import Message, MessageType, MessageTypeLegacy, RecordDict
+from flwr.app.message_type import MessageType
+from flwr.common import Message, MessageTypeLegacy, RecordDict
 from flwr.common import recorddict_compat as compat
 from flwr.server.client_proxy import ClientProxy
 
@@ -37,8 +36,8 @@ class GridClientProxy(ClientProxy):
     def get_properties(
         self,
         ins: common.GetPropertiesIns,
-        timeout: Optional[float],
-        group_id: Optional[int],
+        timeout: float | None,
+        group_id: int | None,
     ) -> common.GetPropertiesRes:
         """Return client's properties."""
         # Ins to RecordDict
@@ -53,8 +52,8 @@ class GridClientProxy(ClientProxy):
     def get_parameters(
         self,
         ins: common.GetParametersIns,
-        timeout: Optional[float],
-        group_id: Optional[int],
+        timeout: float | None,
+        group_id: int | None,
     ) -> common.GetParametersRes:
         """Return the current local model parameters."""
         # Ins to RecordDict
@@ -67,7 +66,7 @@ class GridClientProxy(ClientProxy):
         return compat.recorddict_to_getparametersres(in_recorddict, False)
 
     def fit(
-        self, ins: common.FitIns, timeout: Optional[float], group_id: Optional[int]
+        self, ins: common.FitIns, timeout: float | None, group_id: int | None
     ) -> common.FitRes:
         """Train model parameters on the locally held dataset."""
         # Ins to RecordDict
@@ -80,7 +79,7 @@ class GridClientProxy(ClientProxy):
         return compat.recorddict_to_fitres(in_recorddict, keep_input=False)
 
     def evaluate(
-        self, ins: common.EvaluateIns, timeout: Optional[float], group_id: Optional[int]
+        self, ins: common.EvaluateIns, timeout: float | None, group_id: int | None
     ) -> common.EvaluateRes:
         """Evaluate model parameters on the locally held dataset."""
         # Ins to RecordDict
@@ -95,8 +94,8 @@ class GridClientProxy(ClientProxy):
     def reconnect(
         self,
         ins: common.ReconnectIns,
-        timeout: Optional[float],
-        group_id: Optional[int],
+        timeout: float | None,
+        group_id: int | None,
     ) -> common.DisconnectRes:
         """Disconnect and (optionally) reconnect later."""
         return common.DisconnectRes(reason="")  # Nothing to do here (yet)
@@ -105,8 +104,8 @@ class GridClientProxy(ClientProxy):
         self,
         recorddict: RecordDict,
         message_type: str,
-        timeout: Optional[float],
-        group_id: Optional[int],
+        timeout: float | None,
+        group_id: int | None,
     ) -> RecordDict:
 
         # Create message

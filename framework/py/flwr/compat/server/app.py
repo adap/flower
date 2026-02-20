@@ -17,10 +17,8 @@
 
 import sys
 from logging import INFO
-from typing import Optional
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
-from flwr.common.address import parse_address
 from flwr.common.constant import FLEET_API_GRPC_BIDI_DEFAULT_ADDRESS
 from flwr.common.exit import register_signal_handlers
 from flwr.common.logger import log, warn_deprecated_feature
@@ -30,17 +28,18 @@ from flwr.server.server import Server, init_defaults, run_fl
 from flwr.server.server_config import ServerConfig
 from flwr.server.strategy import Strategy
 from flwr.server.superlink.fleet.grpc_bidi.grpc_server import start_grpc_server
+from flwr.supercore.address import parse_address
 
 
 def start_server(  # pylint: disable=too-many-arguments,too-many-locals
     *,
     server_address: str = FLEET_API_GRPC_BIDI_DEFAULT_ADDRESS,
-    server: Optional[Server] = None,
-    config: Optional[ServerConfig] = None,
-    strategy: Optional[Strategy] = None,
-    client_manager: Optional[ClientManager] = None,
+    server: Server | None = None,
+    config: ServerConfig | None = None,
+    strategy: Strategy | None = None,
+    client_manager: ClientManager | None = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
-    certificates: Optional[tuple[bytes, bytes, bytes]] = None,
+    certificates: tuple[bytes, bytes, bytes] | None = None,
 ) -> History:
     """Start a Flower server using the gRPC transport layer.
 

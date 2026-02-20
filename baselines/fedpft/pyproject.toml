@@ -44,7 +44,7 @@ torch = {url = "https://download.pytorch.org/whl/cu118/torch-2.6.0%2Bcu118-cp310
 scikit-learn = "1.5.0"
 flwr-datasets = "0.1.0"
 torchvision = {url = "https://download.pytorch.org/whl/cu118/torchvision-0.21.0%2Bcu118-cp310-cp310-linux_x86_64.whl#sha256=aae1fd398fb97a099bd3bd619a85e923c2191d348b90786514c8f81541afd010"}
-transformers = "4.50.0"
+transformers = "4.53.0"
 datasets = "2.18.0"
 
 [tool.poetry.dev-dependencies]
@@ -58,7 +58,7 @@ pytest = "==6.2.4"
 pytest-watch = "==4.2.0"
 ruff = "==0.4.5"
 types-requests = "==2.27.7"
-virtualenv = "==20.21.0"
+virtualenv = "==20.36.1"
 
 [tool.isort]
 line_length = 88

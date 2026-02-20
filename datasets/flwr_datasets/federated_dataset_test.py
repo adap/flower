@@ -17,7 +17,6 @@
 
 
 import unittest
-from typing import Union
 from unittest.mock import Mock, patch
 
 import numpy as np
@@ -51,7 +50,6 @@ natural_id_datasets = [
 mocked_natural_id_datasets = [
     "flwrlabs/ucf101",
     "flwrlabs/ambient-acoustic-context",
-    "LIUM/tedlium",
 ]
 
 
@@ -386,7 +384,7 @@ class PartitionersSpecificationForFederatedDatasets(unittest.TestCase):
         """Test if partitioners are passed directly (no recreation)."""
         num_train_partitions = 100
         num_test_partitions = 100
-        partitioners: dict[str, Union[Partitioner, int]] = {
+        partitioners: dict[str, Partitioner | int] = {
             "train": IidPartitioner(num_partitions=num_train_partitions),
             "test": IidPartitioner(num_partitions=num_test_partitions),
         }
@@ -420,7 +418,7 @@ class PartitionersSpecificationForFederatedDatasets(unittest.TestCase):
         """Test if an instantiated partitioner is passed directly."""
         num_train_partitions = 100
         num_test_partitions = 100
-        partitioners: dict[str, Union[Partitioner, int]] = {
+        partitioners: dict[str, Partitioner | int] = {
             "train": IidPartitioner(num_partitions=num_train_partitions),
             "test": num_test_partitions,
         }
@@ -434,7 +432,7 @@ class PartitionersSpecificationForFederatedDatasets(unittest.TestCase):
         """Test if an IidPartitioner partitioner is created."""
         num_train_partitions = 100
         num_test_partitions = 100
-        partitioners: dict[str, Union[Partitioner, int]] = {
+        partitioners: dict[str, Partitioner | int] = {
             "train": IidPartitioner(num_partitions=num_train_partitions),
             "test": num_test_partitions,
         }
@@ -454,7 +452,6 @@ class PartitionersSpecificationForFederatedDatasets(unittest.TestCase):
         ("flwrlabs/femnist", "", "", "writer_id"),
         ("flwrlabs/ucf101", "test", None, "video_id"),
         ("flwrlabs/ambient-acoustic-context", "", None, "speaker_id"),
-        ("LIUM/tedlium", "test", "release3", "speaker_id"),
     ],
 )
 class NaturalIdPartitionerIntegrationTest(unittest.TestCase):
@@ -536,11 +533,6 @@ class IncorrectUsageFederatedDatasets(unittest.TestCase):
         with pytest.raises(ValueError):
             dataset_fds.load_partition(0, "non-existent-split")
 
-    def test_unsupported_dataset(self) -> None:
-        """Test creating FederatedDataset for unsupported dataset."""
-        with pytest.warns(UserWarning):
-            FederatedDataset(dataset="food101", partitioners={"train": 100})
-
     def test_cannot_use_the_old_split_names(self) -> None:
         """Test if the initial split names can not be used."""
         datasets.load_dataset("mnist")
@@ -572,7 +564,7 @@ class IncorrectUsageFederatedDatasets(unittest.TestCase):
     def test_incorrect_two_partitioners(self) -> None:
         """Test if the method raises ValueError with incorrect partitioners."""
         partitioner = IidPartitioner(num_partitions=10)
-        partitioners: dict[str, Union[Partitioner, int]] = {
+        partitioners: dict[str, Partitioner | int] = {
             "train": partitioner,
             "test": partitioner,
         }
@@ -593,7 +585,7 @@ class IncorrectUsageFederatedDatasets(unittest.TestCase):
     def test_incorrect_three_partitioners(self) -> None:
         """Test if the method raises ValueError with incorrect partitioners."""
         partitioner = IidPartitioner(num_partitions=10)
-        partitioners: dict[str, Union[int, Partitioner]] = {
+        partitioners: dict[str, int | Partitioner] = {
             "train1": partitioner,
             "train2": 10,
             "test": partitioner,
@@ -621,6 +613,7 @@ class IncorrectUsageFederatedDatasets(unittest.TestCase):
         )
 
 
+# pylint: disable=too-many-return-statements
 def datasets_are_equal(ds1: Dataset, ds2: Dataset) -> bool:
     """Check if two Datasets have the same values."""
     # Check if both datasets have the same length
@@ -628,7 +621,7 @@ def datasets_are_equal(ds1: Dataset, ds2: Dataset) -> bool:
         return False
 
     # Iterate over each row and check for equality
-    for row1, row2 in zip(ds1, ds2):
+    for row1, row2 in zip(ds1, ds2, strict=False):
         # Ensure all keys are the same in both rows
         if set(row1.keys()) != set(row2.keys()):
             return False
@@ -637,14 +630,18 @@ def datasets_are_equal(ds1: Dataset, ds2: Dataset) -> bool:
         for key in row1:
             if key == "audio":
                 # Special handling for 'audio' key
-                if not all(
-                    [
-                        np.array_equal(row1[key]["array"], row2[key]["array"]),
-                        row1[key]["path"] == row2[key]["path"],
-                        row1[key]["sampling_rate"] == row2[key]["sampling_rate"],
-                    ]
-                ):
+                # Check array and sampling_rate
+                if not np.array_equal(row1[key]["array"], row2[key]["array"]):
                     return False
+                if row1[key]["sampling_rate"] != row2[key]["sampling_rate"]:
+                    return False
+
+                # Check path if available (AudioDecoder raises TypeError)
+                try:
+                    if row1[key]["path"] != row2[key]["path"]:
+                        return False
+                except TypeError:
+                    pass
             elif row1[key] != row2[key]:
                 # Direct comparison for other keys
                 return False

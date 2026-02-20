@@ -18,9 +18,10 @@
 import io
 import timeit
 from logging import INFO, WARN
-from typing import Optional, Union, cast
+from typing import cast
 
 import flwr.common.recorddict_compat as compat
+from flwr.app.message_type import MessageType
 from flwr.common import (
     ArrayRecord,
     Code,
@@ -32,7 +33,7 @@ from flwr.common import (
     Message,
     log,
 )
-from flwr.common.constant import MessageType, MessageTypeLegacy
+from flwr.common.constant import MessageTypeLegacy
 
 from ..client_proxy import ClientProxy
 from ..compat.app_utils import start_update_client_manager_thread
@@ -47,8 +48,8 @@ class DefaultWorkflow:
 
     def __init__(
         self,
-        fit_workflow: Optional[Workflow] = None,
-        evaluate_workflow: Optional[Workflow] = None,
+        fit_workflow: Workflow | None = None,
+        evaluate_workflow: Workflow | None = None,
     ) -> None:
         if fit_workflow is None:
             fit_workflow = default_fit_workflow
@@ -275,7 +276,7 @@ def default_fit_workflow(grid: Grid, context: Context) -> None:  # pylint: disab
 
     # Aggregate training results
     results: list[tuple[ClientProxy, FitRes]] = []
-    failures: list[Union[tuple[ClientProxy, FitRes], BaseException]] = []
+    failures: list[tuple[ClientProxy, FitRes] | BaseException] = []
     for msg in messages:
         if msg.has_content():
             proxy = node_id_to_proxy[msg.metadata.src_node_id]
@@ -357,7 +358,7 @@ def default_evaluate_workflow(grid: Grid, context: Context) -> None:
 
     # Aggregate the evaluation results
     results: list[tuple[ClientProxy, EvaluateRes]] = []
-    failures: list[Union[tuple[ClientProxy, EvaluateRes], BaseException]] = []
+    failures: list[tuple[ClientProxy, EvaluateRes] | BaseException] = []
     for msg in messages:
         if msg.has_content():
             proxy = node_id_to_proxy[msg.metadata.src_node_id]

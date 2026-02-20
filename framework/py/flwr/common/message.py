@@ -20,11 +20,11 @@ from __future__ import annotations
 from logging import WARNING
 from typing import Any, cast, overload
 
-from flwr.common.date import now
 from flwr.common.logger import warn_deprecated_feature
 from flwr.proto.message_pb2 import Message as ProtoMessage  # pylint: disable=E0611
 from flwr.proto.message_pb2 import Metadata as ProtoMetadata  # pylint: disable=E0611
 from flwr.proto.message_pb2 import ObjectIDs  # pylint: disable=E0611
+from flwr.supercore.date import now
 
 from ..app.error import Error
 from ..app.metadata import Metadata
@@ -105,7 +105,7 @@ class Message(InflatableObject):
     """
 
     @overload
-    def __init__(  # pylint: disable=too-many-arguments  # noqa: E704
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         content: RecordDict,
         dst_node_id: int,
@@ -116,12 +116,12 @@ class Message(InflatableObject):
     ) -> None: ...
 
     @overload
-    def __init__(  # noqa: E704
+    def __init__(
         self, content: RecordDict, *, reply_to: Message, ttl: float | None = None
     ) -> None: ...
 
     @overload
-    def __init__(  # noqa: E704
+    def __init__(
         self, error: Error, *, reply_to: Message, ttl: float | None = None
     ) -> None: ...
 
@@ -511,7 +511,7 @@ def _check_arg_types(  # pylint: disable=too-many-arguments, R0917
         and (message_type is None or isinstance(message_type, str))
         and (content is None or isinstance(content, RecordDict))
         and (error is None or isinstance(error, Error))
-        and (ttl is None or isinstance(ttl, (int, float)))
+        and (ttl is None or isinstance(ttl, (int | float)))
         and (group_id is None or isinstance(group_id, str))
         and (reply_to is None or isinstance(reply_to, Message))
         and (metadata is None or isinstance(metadata, Metadata))

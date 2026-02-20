@@ -17,7 +17,6 @@
 
 # pylint: disable=W0212, R0913
 import unittest
-from typing import Optional
 
 from datasets import Dataset
 from flwr_datasets.partitioner.shard_partitioner import ShardPartitioner
@@ -27,8 +26,8 @@ def _dummy_setup(  # pylint: disable=R0917
     num_rows: int,
     partition_by: str,
     num_partitions: int,
-    num_shards_per_partition: Optional[int],
-    shard_size: Optional[int],
+    num_shards_per_partition: int | None,
+    shard_size: int | None,
     keep_incomplete_shard: bool = False,
 ) -> tuple[Dataset, ShardPartitioner]:
     """Create a dummy dataset for testing."""

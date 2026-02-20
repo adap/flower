@@ -35,7 +35,7 @@ from flwr.common.typing import Fab, Run
 
 # pylint: disable=E0611
 from flwr.proto import clientappio_pb2_grpc
-from flwr.proto.appio_pb2 import (  # pylint: disable=E0401
+from flwr.proto.appio_pb2 import (
     ListAppsToLaunchRequest,
     ListAppsToLaunchResponse,
     PullAppInputsRequest,
@@ -49,6 +49,7 @@ from flwr.proto.appio_pb2 import (  # pylint: disable=E0401
     RequestTokenRequest,
     RequestTokenResponse,
 )
+from flwr.proto.heartbeat_pb2 import SendAppHeartbeatRequest, SendAppHeartbeatResponse
 from flwr.proto.message_pb2 import (
     ConfirmMessageReceivedRequest,
     ConfirmMessageReceivedResponse,
@@ -57,12 +58,11 @@ from flwr.proto.message_pb2 import (
     PushObjectRequest,
     PushObjectResponse,
 )
-from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
+from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse
 
 # pylint: disable=E0601
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import NoObjectInStoreError, ObjectStoreFactory
-from flwr.supercore.object_store.utils import store_mapping_and_register_objects
 from flwr.supernode.nodestate import NodeStateFactory
 
 
@@ -129,11 +129,11 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
 
         return GetRunResponse(run=run_to_proto(run))
 
-    def PullClientAppInputs(
+    def PullAppInputs(
         self, request: PullAppInputsRequest, context: grpc.ServicerContext
     ) -> PullAppInputsResponse:
         """Pull Message, Context, and Run."""
-        log(DEBUG, "ClientAppIo.PullClientAppInputs")
+        log(DEBUG, "ClientAppIo.PullAppInputs")
 
         # Initialize state and ffs connection
         state = self.state_factory.state()
@@ -151,7 +151,24 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         # Retrieve context, run and fab for this run
         context = cast(Context, state.get_context(run_id))
         run = cast(Run, state.get_run(run_id))
-        fab = Fab(run.fab_hash, ffs.get(run.fab_hash)[0], ffs.get(run.fab_hash)[1])  # type: ignore
+
+        # Retrieve FAB from FFS
+        if result := ffs.get(run.fab_hash):
+            content, verifications = result
+            log(
+                DEBUG,
+                "Retrieved FAB: hash=%s, content_len=%d, verifications=%s",
+                run.fab_hash,
+                len(content),
+                verifications,
+            )
+            fab = Fab(run.fab_hash, content, verifications)
+        else:
+            context.abort(
+                grpc.StatusCode.NOT_FOUND,
+                f"FAB with hash {run.fab_hash} not found in FFS.",
+            )
+            raise RuntimeError("This line should never be reached.")
 
         return PullAppInputsResponse(
             context=context_to_proto(context),
@@ -159,11 +176,11 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
             fab=fab_to_proto(fab),
         )
 
-    def PushClientAppOutputs(
+    def PushAppOutputs(
         self, request: PushAppOutputsRequest, context: grpc.ServicerContext
     ) -> PushAppOutputsResponse:
         """Push Message and Context."""
-        log(DEBUG, "ClientAppIo.PushClientAppOutputs")
+        log(DEBUG, "ClientAppIo.PushAppOutputs")
 
         # Initialize state connection
         state = self.state_factory.state()
@@ -206,6 +223,9 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         # Retrieve message for this run
         message = state.get_messages(run_ids=[run_id], is_reply=False)[0]
 
+        # Record message processing start time
+        state.record_message_processing_start(message_id=message.metadata.message_id)
+
         # Retrieve the object tree for the message
         object_tree = store.get_object_tree(message.metadata.message_id)
 
@@ -231,19 +251,37 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
             )
             raise RuntimeError("This line should never be reached.")
 
-        # Save the message to the state
-        state.store_message(message_from_proto(request.messages_list[0]))
+        # Record message processing end time
+        state.record_message_processing_end(
+            message_id=request.messages_list[0].metadata.reply_to_message_id
+        )
 
         # Store Message object to descendants mapping and preregister objects
-        objects_to_push = store_mapping_and_register_objects(store, request=request)
+        objects_to_push: set[str] = set()
+        for object_tree in request.message_object_trees:
+            objects_to_push |= set(store.preregister(run_id, object_tree))
 
+        # Save the message to the state
+        state.store_message(message_from_proto(request.messages_list[0]))
         return PushAppMessagesResponse(objects_to_push=objects_to_push)
+
+    def SendAppHeartbeat(
+        self, request: SendAppHeartbeatRequest, context: grpc.ServicerContext
+    ) -> SendAppHeartbeatResponse:
+        """Handle a heartbeat from an app process."""
+        log(DEBUG, "ClientAppIoServicer.SendAppHeartbeat")
+        # Initialize state
+        state = self.state_factory.state()
+
+        # Acknowledge the heartbeat
+        success = state.acknowledge_app_heartbeat(request.token)
+        return SendAppHeartbeatResponse(success=success)
 
     def PushObject(
         self, request: PushObjectRequest, context: grpc.ServicerContext
     ) -> PushObjectResponse:
         """Push an object to the ObjectStore."""
-        log(DEBUG, "ServerAppIoServicer.PushObject")
+        log(DEBUG, "ClientAppIoServicer.PushObject")
 
         # Init state and store
         store = self.objectstore_factory.store()
@@ -265,7 +303,7 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         self, request: PullObjectRequest, context: grpc.ServicerContext
     ) -> PullObjectResponse:
         """Pull an object from the ObjectStore."""
-        log(DEBUG, "ServerAppIoServicer.PullObject")
+        log(DEBUG, "ClientAppIoServicer.PullObject")
 
         # Init state and store
         store = self.objectstore_factory.store()
@@ -285,7 +323,7 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         self, request: ConfirmMessageReceivedRequest, context: grpc.ServicerContext
     ) -> ConfirmMessageReceivedResponse:
         """Confirm message received."""
-        log(DEBUG, "ServerAppIoServicer.ConfirmMessageReceived")
+        log(DEBUG, "ClientAppIoServicer.ConfirmMessageReceived")
 
         # Init state and store
         store = self.objectstore_factory.store()
