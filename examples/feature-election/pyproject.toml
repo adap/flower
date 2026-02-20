@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "feature-election"
-version = "1.0.0"
+version = "1.0.1"
 description = "Feature Election - Federated Feature Selection with Flower"
 license = "Apache-2.0"
 dependencies = [
@@ -23,7 +23,7 @@ authors = [
 packages = ["."]
 
 [tool.flwr.app]
-publisher = "Ioannis Christofilogiannis"
+publisher = "christofilojohn"
 
 # Define app components
 [tool.flwr.app.components]
