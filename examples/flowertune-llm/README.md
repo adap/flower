@@ -122,6 +122,29 @@ Then use the new CLI command to display a summary:
 flwr profile <run_id>
 ```
 
+### Layer-wise Aggregation + Profiling (Quickstart)
+
+From this example directory:
+
+```bash
+flwr run . local-deployment \
+  --run-config "aggregation.mode='layerwise' profile.enabled=true"
+```
+
+After the run starts, capture the run ID from the logs and query profiling:
+
+```bash
+flwr profile <run_id> . local-deployment
+```
+
+To launch the profiling UI (Flask) from the repo root:
+
+```bash
+python examples/profiling-ui/app.py --app . --federation local-deployment
+```
+
+Then open `http://127.0.0.1:5000` and enter the run ID.
+
 ## Expected results
 
 ![](_static/train_loss_smooth.png)
