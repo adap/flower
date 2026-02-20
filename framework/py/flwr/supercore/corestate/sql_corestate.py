@@ -196,7 +196,8 @@ class SqlCoreState(CoreState, SqlMixin):
                         .all()
                     )
                     expired_records = [
-                        (int64_to_uint64(row["run_id"]), row["active_until"]) for row in rows
+                        (int64_to_uint64(row["run_id"]), row["active_until"])
+                        for row in rows
                     ]
                     # Hook for subclasses
                     if expired_records:
