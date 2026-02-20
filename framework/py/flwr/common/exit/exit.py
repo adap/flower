@@ -16,6 +16,7 @@
 
 
 import os
+import re
 import sys
 import threading
 import time
@@ -33,9 +34,11 @@ from .exit_handler import trigger_exit_handlers
 
 def _get_code_url(code: int) -> str:
     """Get the help URL for a given exit code."""
-    doc_pth = f"{package_version.rsplit('.', 1)[0]}/en/ref-exit-codes/{code}.html"
+    if not (match := re.match(r"\d+\.\d+", package_version)):
+        doc_pth = f"ref-exit-codes/{code}.html"  # Fallback for non-standard versions
+    else:
+        doc_pth = f"{match.group(0)}/en/ref-exit-codes/{code}.html"
     return f"https://flower.ai/docs/framework/{doc_pth}"
-
 
 
 def flwr_exit(
