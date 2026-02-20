@@ -63,56 +63,31 @@ class SqlCoreState(CoreState, SqlMixin):
         token = secrets.token_hex(FLWR_APP_TOKEN_LENGTH)  # Generate a random token
         current = now().timestamp()
         active_until = current + HEARTBEAT_DEFAULT_INTERVAL
-        # Idempotent per run_id.
-        existing_query = """
-            SELECT token
-            FROM token_store
-            WHERE run_id = :run_id;
+        query = """
+            INSERT INTO token_store (run_id, token, active_until)
+            VALUES (:run_id, :token, :active_until)
+            RETURNING token;
         """
-        existing_data = {
-            "run_id": uint64_to_int64(run_id),
-        }
-        rows = self.query(existing_query, existing_data)
-        if rows:
-            return cast(str, rows[0]["token"])
-        insert_data = {
+        data = {
             "run_id": uint64_to_int64(run_id),
             "token": token,
             "active_until": active_until,
         }
-        if self._engine and self._engine.dialect.name == "sqlite":
-            insert_query = """
-                INSERT OR IGNORE INTO token_store
-                (run_id, token, active_until)
-                VALUES (:run_id, :token, :active_until);
-            """
-        else:
-            insert_query = """
-                INSERT INTO token_store
-                (run_id, token, active_until)
-                VALUES (:run_id, :token, :active_until)
-                ON CONFLICT (run_id) DO NOTHING;
-            """
         try:
-            self.query(insert_query, insert_data)
-        except IntegrityError:
-            pass
-        rows = self.query(existing_query, existing_data)
-        if rows:
+            rows = self.query(query, data)
             return cast(str, rows[0]["token"])
-        return None
+        except IntegrityError:
+            return None  # Token already created for this run ID
 
     def verify_token(self, run_id: int, token: str) -> bool:
         """Verify a token for the given run ID."""
         self._cleanup_expired_tokens()
-        query = """
-            SELECT 1
-            FROM token_store
-            WHERE run_id = :run_id AND token = :token;
-        """
-        data = {"run_id": uint64_to_int64(run_id), "token": token}
+        query = "SELECT token FROM token_store WHERE run_id = :run_id;"
+        data = {"run_id": uint64_to_int64(run_id)}
         rows = self.query(query, data)
-        return bool(rows)
+        if not rows:
+            return False
+        return cast(str, rows[0]["token"]) == token
 
     def delete_token(self, run_id: int) -> None:
         """Delete the token for the given run ID."""
