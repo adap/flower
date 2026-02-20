@@ -182,13 +182,9 @@ PUBLIC_KEY_NOT_VALID = "The provided public key is not valid"
 NODE_NOT_FOUND_MESSAGE = "Node ID not found for account"
 FEDERATION_NOT_SPECIFIED_MESSAGE = "No federation specified in the request"
 FEDERATION_NOT_FOUND_MESSAGE = "Federation '%s' does not exist"
-FEDERATION_COULD_NOT_BE_CREATED_MESSAGE = (
-    "Federation '%s' could not be created, already exists or the targeted "
-    "SuperLink does not support federation management."
-)
-FEDERATION_COULD_NOT_BE_ARCHIVED_MESSAGE = (
-    "Federation '%s' could not be archived because it doesn't exist, you lack the "
-    "necessary permissions, or the targeted "
+# Maximum number of SuperNodes to add/remove in a `flwr federation` request
+MAX_SUPERNODES_PER_REQUEST = 50
+SUPERLINK_DOES_NOT_SUPPORT_FED_MANAGEMENT_MESSAGE = (
     "SuperLink does not support federation management."
 )
 
