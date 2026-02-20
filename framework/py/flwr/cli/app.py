@@ -95,10 +95,12 @@ federation_app = typer.Typer(help="Manage Federations")
 federation_app.command("list", **ALLOW_EXTRAS)(federation_list)
 # Hide "ls" command (left as alias)
 federation_app.command(hidden=True, **ALLOW_EXTRAS)(federation_list)
-federation_app.command(**ALLOW_EXTRAS)(federation_archive)
-federation_app.command(**ALLOW_EXTRAS)(federation_create)
-federation_app.command("add-supernode", **ALLOW_EXTRAS)(federation_add_supernode)
-federation_app.command("remove-supernode", **ALLOW_EXTRAS)(federation_remove_supernode)
+federation_app.command()(federation_archive)
+federation_app.command()(federation_create)
+federation_app.command(
+    "add-supernode",
+)(federation_add_supernode)
+federation_app.command("remove-supernode")(federation_remove_supernode)
 app.add_typer(federation_app, name="federation")
 
 # Create config command group

@@ -33,13 +33,17 @@ from ..utils import (
     flwr_cli_grpc_exc_handler,
     init_channel_from_connection,
 )
+from .utils import parse_node_ids
 
 
 def add_supernode(
     ctx: typer.Context,
     node_ids: Annotated[
-        list[int],
-        typer.Argument(help="IDs of the SuperNodes to add."),
+        str,
+        typer.Argument(
+            help="Comma-separated IDs of the SuperNodes to add "
+            "(e.g. 124 or 124,125,126).",
+        ),
     ],
     federation_name: Annotated[
         str,
@@ -59,6 +63,8 @@ def add_supernode(
     ] = CliOutputFormat.DEFAULT,
 ) -> None:
     """Add SuperNode(s) to a federation."""
+    parsed_node_ids = parse_node_ids(node_ids)
+
     with cli_output_handler(output_format=output_format) as is_json:
         # Migrate legacy usage if any
         migrate(superlink, args=ctx.args)
@@ -73,7 +79,7 @@ def add_supernode(
 
             request = AddNodeToFederationRequest(
                 federation_name=federation_name,
-                node_ids=node_ids,
+                node_ids=parsed_node_ids,
             )
             _add_supernode(stub=stub, request=request, is_json=is_json)
 

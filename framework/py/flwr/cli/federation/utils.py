@@ -1,4 +1,4 @@
-# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2026 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,19 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower command line interface `federation` command."""
+"""Flower command line interface `federation` utilities."""
+
+import click
 
 
-from .add_supernode import add_supernode as add_supernode
-from .archive import archive as archive
-from .create import create as create
-from .ls import ls as ls
-from .remove_supernode import remove_supernode as remove_supernode
-
-__all__ = [
-    "add_supernode",
-    "archive",
-    "create",
-    "ls",
-    "remove_supernode",
-]
+def parse_node_ids(raw: str) -> list[int]:
+    """Parse a comma-separated string of node IDs into a list of ints."""
+    try:
+        return [int(nid.strip()) for nid in raw.split(",") if nid.strip()]
+    except ValueError as exc:
+        raise click.BadParameter(
+            f"Invalid node IDs '{raw}'. Expected comma-separated integers "
+            "(e.g. 124 or 124,125,126)."
+        ) from exc
