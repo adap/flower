@@ -16,10 +16,12 @@
 
 
 import secrets
+import threading
+from logging import DEBUG
 from typing import cast
 
 from sqlalchemy import MetaData, text
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, OperationalError
 
 from flwr.common import now
 from flwr.common.constant import (
@@ -27,6 +29,7 @@ from flwr.common.constant import (
     HEARTBEAT_DEFAULT_INTERVAL,
     HEARTBEAT_PATIENCE,
 )
+from flwr.common.logger import log
 from flwr.supercore.sql_mixin import SqlMixin
 from flwr.supercore.state.schema.corestate_tables import create_corestate_metadata
 from flwr.supercore.utils import int64_to_uint64, uint64_to_int64
@@ -38,9 +41,13 @@ from .corestate import CoreState
 class SqlCoreState(CoreState, SqlMixin):
     """SQLAlchemy-based CoreState implementation."""
 
+    _TOKEN_CLEANUP_INTERVAL_SECONDS = 0.5
+
     def __init__(self, database_path: str, object_store: ObjectStore) -> None:
         super().__init__(database_path)
         self._object_store = object_store
+        self._cleanup_lock = threading.Lock()
+        self._last_cleanup_timestamp = 0.0
 
     @property
     def object_store(self) -> ObjectStore:
@@ -51,36 +58,64 @@ class SqlCoreState(CoreState, SqlMixin):
         """Return SQLAlchemy MetaData needed for CoreState tables."""
         return create_corestate_metadata()
 
-    def create_token(self, run_id: int) -> str | None:
+    def create_token(self, run_id: int, message_id: str | None = None) -> str | None:
         """Create a token for the given run ID."""
         token = secrets.token_hex(FLWR_APP_TOKEN_LENGTH)  # Generate a random token
         current = now().timestamp()
         active_until = current + HEARTBEAT_DEFAULT_INTERVAL
-        query = """
-            INSERT INTO token_store (run_id, token, active_until)
-            VALUES (:run_id, :token, :active_until)
-            RETURNING token;
+        message_id_value = message_id or ""
+        # Idempotent per (run_id, message_id) so model/connector sandboxes start.
+        existing_query = """
+            SELECT token
+            FROM token_store
+            WHERE run_id = :run_id AND message_id = :message_id;
         """
-        data = {
+        existing_data = {
+            "run_id": uint64_to_int64(run_id),
+            "message_id": message_id_value,
+        }
+        rows = self.query(existing_query, existing_data)
+        if rows:
+            return cast(str, rows[0]["token"])
+        insert_data = {
             "run_id": uint64_to_int64(run_id),
             "token": token,
             "active_until": active_until,
+            "message_id": message_id_value,
         }
+        if self._engine and self._engine.dialect.name == "sqlite":
+            insert_query = """
+                INSERT OR IGNORE INTO token_store
+                (run_id, token, active_until, message_id)
+                VALUES (:run_id, :token, :active_until, :message_id);
+            """
+        else:
+            insert_query = """
+                INSERT INTO token_store
+                (run_id, token, active_until, message_id)
+                VALUES (:run_id, :token, :active_until, :message_id)
+                ON CONFLICT (run_id, message_id) DO NOTHING;
+            """
         try:
-            rows = self.query(query, data)
-            return cast(str, rows[0]["token"])
+            self.query(insert_query, insert_data)
         except IntegrityError:
-            return None  # Token already created for this run ID
+            pass
+        rows = self.query(existing_query, existing_data)
+        if rows:
+            return cast(str, rows[0]["token"])
+        return None
 
     def verify_token(self, run_id: int, token: str) -> bool:
         """Verify a token for the given run ID."""
         self._cleanup_expired_tokens()
-        query = "SELECT token FROM token_store WHERE run_id = :run_id;"
-        data = {"run_id": uint64_to_int64(run_id)}
+        query = """
+            SELECT 1
+            FROM token_store
+            WHERE run_id = :run_id AND token = :token;
+        """
+        data = {"run_id": uint64_to_int64(run_id), "token": token}
         rows = self.query(query, data)
-        if not rows:
-            return False
-        return cast(str, rows[0]["token"]) == token
+        return bool(rows)
 
     def delete_token(self, run_id: int) -> None:
         """Delete the token for the given run ID."""
@@ -97,6 +132,17 @@ class SqlCoreState(CoreState, SqlMixin):
         if not rows:
             return None
         return int64_to_uint64(rows[0]["run_id"])
+
+    def get_message_id_by_token(self, token: str) -> str | None:
+        """Get the message ID associated with a given token."""
+        self._cleanup_expired_tokens()
+        query = "SELECT message_id FROM token_store WHERE token = :token;"
+        data = {"token": token}
+        rows = self.query(query, data)
+        if not rows:
+            return None
+        message_id = cast(str, rows[0]["message_id"])
+        return message_id or None
 
     def acknowledge_app_heartbeat(self, token: str) -> bool:
         """Acknowledge an app heartbeat with the provided token."""
@@ -123,22 +169,66 @@ class SqlCoreState(CoreState, SqlMixin):
         Subclasses can override `_on_tokens_expired` to add custom cleanup logic.
         """
         current = now().timestamp()
+        if (
+            current - self._last_cleanup_timestamp
+            < self._TOKEN_CLEANUP_INTERVAL_SECONDS
+        ):
+            return
 
-        with self.session() as session:
-            # Delete expired tokens and get their run_ids and active_until timestamps
-            query = """
-                DELETE FROM token_store
-                WHERE active_until < :current
-                RETURNING run_id, active_until;
-            """
-            rows = session.execute(text(query), {"current": current}).mappings().all()
-            expired_records = [
-                (int64_to_uint64(row["run_id"]), row["active_until"]) for row in rows
-            ]
+        with self._cleanup_lock:
+            current = now().timestamp()
+            if (
+                current - self._last_cleanup_timestamp
+                < self._TOKEN_CLEANUP_INTERVAL_SECONDS
+            ):
+                return
 
-            # Hook for subclasses
-            if expired_records:
-                self._on_tokens_expired(expired_records)
+            # Best-effort cleanup throttling: set timestamp before cleanup so lock
+            # contention does not cause every request to retry this write path.
+            self._last_cleanup_timestamp = current
+            try:
+                # Super cheap read-first check to avoid entering DELETE write path when
+                # there are no expired tokens.
+                has_expired_rows = self.query(
+                    "SELECT 1 FROM token_store WHERE active_until < :current LIMIT 1;",
+                    {"current": current},
+                )
+                if not has_expired_rows:
+                    return
+
+                with self.session() as session:
+                    # Delete expired tokens and get their run_ids and active_until
+                    # timestamps.
+                    query = """
+                        DELETE FROM token_store
+                        WHERE active_until < :current
+                        RETURNING run_id, active_until, message_id;
+                    """
+                    deleted_rows = (
+                        session.execute(text(query), {"current": current})
+                        .mappings()
+                        .all()
+                    )
+                    expired_records = []
+                    for row in deleted_rows:
+                        message_id = row["message_id"] or ""
+                        # Only root tokens (no message_id) should fail a run on
+                        # expiry.
+                        if message_id == "":
+                            expired_records.append(
+                                (int64_to_uint64(row["run_id"]), row["active_until"])
+                            )
+
+                    # Hook for subclasses
+                    if expired_records:
+                        self._on_tokens_expired(expired_records)
+            except OperationalError:
+                # Skip cleanup and let the next cleanup tick retry.
+                log(
+                    DEBUG,
+                    "Skipping token cleanup due to SQLite lock contention",
+                )
+                return
 
     def _on_tokens_expired(self, expired_records: list[tuple[int, float]]) -> None:
         """Handle cleanup of expired tokens.
