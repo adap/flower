@@ -89,10 +89,7 @@ def flwr_ls(max_retries: int = 5, retry_delay: float = 0.5) -> dict[str, str]:
         data = json.loads(result.stdout)  # fail immediately on invalid JSON
 
         if data["success"]:
-            return {
-                entry["run-id"]: entry["status"]
-                for entry in data["runs"]
-            }
+            return {entry["run-id"]: entry["status"] for entry in data["runs"]}
 
         last_error = data["error-message"]
 
