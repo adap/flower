@@ -9,7 +9,7 @@ on:
       - framework/docs/source/conf_base.py
       - framework/docs/source/_templates/**
       - .github/workflows/framework-docs.yml
-      - .github/workflows/framework-docs-release-fanout.yml
+      - .github/workflows/framework-docs-dispatch-release-branches.yml
   workflow_dispatch:
 
 permissions:
