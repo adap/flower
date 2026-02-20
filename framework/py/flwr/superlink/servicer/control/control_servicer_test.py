@@ -71,7 +71,7 @@ from flwr.superlink.servicer.control.control_account_auth_interceptor import (
 from .control_servicer import (
     ControlServicer,
     _format_verification,
-    _validate_federation_and_nodes_in_request,
+    _validate_federation_and_node_in_request,
 )
 
 FLWR_AID_MISMATCH_CASES = (
@@ -594,7 +594,7 @@ class TestControlServicerAuth(unittest.TestCase):
 
 
 class TestValidateFederationAndNodesInRequest(unittest.TestCase):
-    """Tests for the _validate_federation_and_nodes_in_request helper."""
+    """Tests for the _validate_federation_and_node_in_request helper."""
 
     def setUp(self) -> None:
         """Set up test fixtures."""
@@ -638,13 +638,13 @@ class TestValidateFederationAndNodesInRequest(unittest.TestCase):
             heartbeat_interval=10,
         )
 
-    # --- _validate_federation_and_nodes_in_request tests ---
+    # --- _validate_federation_and_node_in_request tests ---
 
     def test_validate_aborts_when_federation_not_specified(self) -> None:
         """Test abort when federation name is empty."""
         ctx = self._make_context()
         with self.assertRaises(RuntimeError) as cm:
-            _validate_federation_and_nodes_in_request(self.state, self.aid, "", 1, ctx)
+            _validate_federation_and_node_in_request(self.state, self.aid, "", 1, ctx)
         ctx.abort.assert_called_once()
         self.assertIn(FEDERATION_NOT_SPECIFIED_MESSAGE, str(cm.exception))
 
@@ -652,7 +652,7 @@ class TestValidateFederationAndNodesInRequest(unittest.TestCase):
         """Test abort when federation does not exist."""
         ctx = self._make_context()
         with self.assertRaises(RuntimeError) as cm:
-            _validate_federation_and_nodes_in_request(
+            _validate_federation_and_node_in_request(
                 self.state, self.aid, "nonexistent-fed", 1, ctx
             )
         ctx.abort.assert_called_once()
@@ -662,7 +662,7 @@ class TestValidateFederationAndNodesInRequest(unittest.TestCase):
         """Test abort when flwr_aid is not a member of the federation."""
         ctx = self._make_context()
         with self.assertRaises(RuntimeError) as cm:
-            _validate_federation_and_nodes_in_request(
+            _validate_federation_and_node_in_request(
                 self.state, "wrong-aid", NOOP_FEDERATION, 1, ctx
             )
         ctx.abort.assert_called_once()
@@ -672,7 +672,7 @@ class TestValidateFederationAndNodesInRequest(unittest.TestCase):
         """Test abort when node_id is not set (zero)."""
         ctx = self._make_context()
         with self.assertRaises(RuntimeError) as cm:
-            _validate_federation_and_nodes_in_request(
+            _validate_federation_and_node_in_request(
                 self.state, self.aid, NOOP_FEDERATION, 0, ctx
             )
         ctx.abort.assert_called_once()
@@ -684,7 +684,7 @@ class TestValidateFederationAndNodesInRequest(unittest.TestCase):
         node_id = self._create_owned_node("other-aid")
         ctx = self._make_context()
         with self.assertRaises(RuntimeError) as cm:
-            _validate_federation_and_nodes_in_request(
+            _validate_federation_and_node_in_request(
                 self.state, self.aid, NOOP_FEDERATION, node_id, ctx
             )
         ctx.abort.assert_called_once()
@@ -694,7 +694,7 @@ class TestValidateFederationAndNodesInRequest(unittest.TestCase):
         """Test abort when a node ID does not exist."""
         ctx = self._make_context()
         with self.assertRaises(RuntimeError) as cm:
-            _validate_federation_and_nodes_in_request(
+            _validate_federation_and_node_in_request(
                 self.state, self.aid, NOOP_FEDERATION, 999999, ctx
             )
         ctx.abort.assert_called_once()
@@ -704,7 +704,7 @@ class TestValidateFederationAndNodesInRequest(unittest.TestCase):
         """Test successful validation with a single owned node."""
         node_id = self._create_owned_node(self.aid)
         ctx = self._make_context()
-        result = _validate_federation_and_nodes_in_request(
+        result = _validate_federation_and_node_in_request(
             self.state, self.aid, NOOP_FEDERATION, node_id, ctx
         )
         self.assertEqual(result, node_id)

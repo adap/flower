@@ -677,7 +677,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
 
         # Validate federation, node ID, and ownership
-        node_id = _validate_federation_and_nodes_in_request(
+        node_id = _validate_federation_and_node_in_request(
             state, flwr_aid, request.federation_name, request.node_id, context
         )
 
@@ -710,7 +710,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
 
         # Validate federation, node ID, and ownership
-        node_id = _validate_federation_and_nodes_in_request(
+        node_id = _validate_federation_and_node_in_request(
             state, flwr_aid, request.federation_name, request.node_id, context
         )
 
@@ -731,15 +731,15 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         return RemoveNodeFromFederationResponse()
 
 
-def _validate_federation_and_nodes_in_request(
+def _validate_federation_and_node_in_request(
     state: LinkState,
     flwr_aid: str,
     federation_name: str,
     node_id: int,
     context: grpc.ServicerContext,
 ) -> int:
-    """Validate federation membership and node ID for adding/removing a supernode
-    to/from a federation.
+    """Validate federation membership and node ID presence for adding/removing
+    a supernode to/from a federation.
 
     Returns the validated node ID.
     """
