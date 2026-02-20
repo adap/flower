@@ -44,7 +44,7 @@ Next, activate your environment, then run:
     # Install project and dependencies
     $ pip install -e .
 
-By default, Flower Simulation Engine will be started and it will create a federation of
+By default, Flower Simulation Runtime will be started and it will create a federation of
 4 nodes using |fedavg|_ as the aggregation strategy. The dataset will be partitioned
 using Flower Dataset's |iidpartitioner|_. To run the project, do:
 

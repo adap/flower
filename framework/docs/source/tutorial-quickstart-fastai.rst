@@ -43,7 +43,7 @@ Next, activate your environment, then run:
     # Install project and dependencies
     $ pip install -e .
 
-This example by default runs the Flower Simulation Engine, creating a federation of 10
+This example by default runs the Flower Simulation Runtime, creating a federation of 10
 nodes using `FedAvg
 <https://flower.ai/docs/framework/ref-api/flwr.serverapp.strategy.FedAvg.html#flwr.server.strategy.FedAvg>`_
 as the aggregation strategy. The dataset will be partitioned using Flower Dataset's

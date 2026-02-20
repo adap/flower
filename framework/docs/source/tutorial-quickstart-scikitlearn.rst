@@ -42,7 +42,7 @@ environment and run everything within a :doc:`virtualenv
 <contributor-how-to-set-up-a-virtual-env>`.
 
 Let's use ``flwr new`` to create a complete Flower+scikit-learn project. It will
-generate all the files needed to run, by default with the Flower Simulation Engine, a
+generate all the files needed to run, by default with the Flower Simulation Runtime, a
 federation of 10 nodes using |fedavg_link|_ The dataset will be partitioned using
 |flowerdatasets|_'s |iidpartitioner|_
 

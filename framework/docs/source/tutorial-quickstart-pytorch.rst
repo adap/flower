@@ -50,7 +50,7 @@ environment and run everything within a :doc:`virtualenv
 <contributor-how-to-set-up-a-virtual-env>`.
 
 Let's use ``flwr new`` to create a complete Flower+PyTorch project. It will generate all
-the files needed to run, by default with the Flower Simulation Engine, a federation of
+the files needed to run, by default with the Flower Simulation Runtime, a federation of
 10 nodes using |fedavg_link|_. The dataset will be partitioned using Flower Dataset's
 `IidPartitioner
 <https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.IidPartitioner.html#flwr_datasets.partitioner.IidPartitioner>`_.

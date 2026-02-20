@@ -1,6 +1,6 @@
-:og:description: Beginner’s guide to running Flower quickstart examples with the Deployment Engine using Docker Compose, showcasing its powerful federated learning capabilities.
+:og:description: Beginner’s guide to running Flower quickstart examples with the Deployment Runtime using Docker Compose, showcasing its powerful federated learning capabilities.
 .. meta::
-    :description: Beginner’s guide to running Flower quickstart examples with the Deployment Engine using Docker Compose, showcasing its powerful federated learning capabilities.
+    :description: Beginner’s guide to running Flower quickstart examples with the Deployment Runtime using Docker Compose, showcasing its powerful federated learning capabilities.
 
 ####################################################
  Run Flower Quickstart Examples with Docker Compose
@@ -9,8 +9,8 @@
 Flower provides a set of `quickstart examples
 <https://github.com/adap/flower/tree/main/examples>`_ to help you get started with the
 framework. These examples are designed to demonstrate the capabilities of Flower and by
-default run using the Simulation Engine. This guide demonstrates how to run them using
-Flower's Deployment Engine via Docker Compose.
+default run using the Simulation Runtime. This guide demonstrates how to run them using
+Flower's Deployment Runtime via Docker Compose.
 
 .. important::
 

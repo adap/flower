@@ -15,7 +15,7 @@ create a virtual environment and run everything within a :doc:`virtualenv
 <contributor-how-to-set-up-a-virtual-env>`.
 
 Let's use ``flwr new`` to create a complete Flower+JAX project. It will generate all the
-files needed to run, by default with the Flower Simulation Engine, a federation of 50
+files needed to run, by default with the Flower Simulation Runtime, a federation of 50
 nodes using |fedavg|_. The MNIST dataset will be partitioned using |flowerdatasets|_'s
 |iidpartitioner|_.
 
