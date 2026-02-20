@@ -22,7 +22,7 @@ from parameterized import parameterized
 from .exit import _get_code_url
 
 
-@parameterized.expand(
+@parameterized.expand(  # type: ignore
     [
         ("1.2.3", "1.2/en/"),
         ("0.9.0", "0.9/en/"),
