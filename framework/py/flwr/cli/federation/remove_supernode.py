@@ -73,7 +73,7 @@ def remove_supernode(
 
             request = RemoveNodeFromFederationRequest(
                 federation_name=federation_name,
-                node_ids=[node_id],
+                node_id=node_id,
             )
             _remove_supernode(stub=stub, request=request, is_json=is_json)
 
