@@ -1,0 +1,73 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "feature-election"
+version = "1.0.1"
+description = "Feature Election - Federated Feature Selection with Flower"
+license = "Apache-2.0"
+dependencies = [
+    "flwr[simulation]>=1.26.1",
+    "scikit-learn>=1.8.0",
+    "pandas>=1.3.0",
+    "numpy>=1.21.0",
+    "PyImpetus>=0.0.6"
+]
+
+authors = [
+    { name = "Ioannis Christofilogiannis", email = "jchr2001@gmail.com" }
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[tool.flwr.app]
+publisher = "christofilojohn"
+
+# Define app components
+[tool.flwr.app.components]
+serverapp = "feature_election.server_app:app"
+clientapp = "feature_election.client_app:app"
+
+# Runtime configuration
+[tool.flwr.app.config]
+# Feature Election parameters
+skip-feature-election = false
+auto-tune = true
+tuning-rounds = 4             # Number of rounds to spend searching for best Freedom Degree (FD)
+freedom-degree = 0.6          # Starting point for search
+aggregation-mode = "weighted"
+fs-method = "mutual_info"
+eval-metric = "f1"
+
+# Federated learning parameters
+num-rounds = 15             # Total number of experiment rounds
+fraction-train = 1.0
+fraction-evaluate = 1.0
+min-train-nodes = 2
+min-evaluate-nodes = 2
+
+# Data parameters
+split-strategy = "random"
+test-size = 0.2
+
+# Dataset parameters - only useful for synthetic dataset example
+n-samples = 1000
+n-features = 100
+n-informative = 20
+n-redundant = 50
+
+# Define simulation resources
+[tool.flwr.federations]
+default = "local-simulation"
+
+[tool.flwr.federations.local-simulation]
+options.num-supernodes = 10
+options.backend.client-resources.num-cpus = 2
+options.backend.client-resources.num-gpus = 0.0
+
+[tool.flwr.federations.local-simulation-gpu]
+options.num-supernodes = 10
+options.backend.client-resources.num-cpus = 2
+options.backend.client-resources.num-gpus = 0.5
