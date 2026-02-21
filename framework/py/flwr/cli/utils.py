@@ -60,6 +60,7 @@ from .auth_plugin import CliAuthPlugin, get_cli_plugin_class
 from .cli_account_auth_interceptor import CliAccountAuthInterceptor
 from .config_utils import load_certificate_in_connection
 from .constant import AUTHN_TYPE_STORE_KEY
+from .local_superlink import ensure_local_superlink
 
 
 def print_json_to_stdout(data: str | Any) -> None:
@@ -337,6 +338,7 @@ def init_channel_from_connection(
     grpc.Channel
         Configured gRPC channel with authentication interceptors.
     """
+    connection = ensure_local_superlink(connection)
     address = require_superlink_address(connection)
 
     root_certificates_bytes = load_certificate_in_connection(connection)
