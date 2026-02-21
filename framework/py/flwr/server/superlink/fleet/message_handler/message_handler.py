@@ -366,8 +366,7 @@ def _validate_node_in_federation(
     node_id: int,
     run_id: int,
 ) -> Run:
-    """Raise if the requesting SuperNode is not part of the federation the run belongs
-    to."""
+    """Raise if the requesting SuperNode is not in the run's federation."""
     run = state.get_run(run_id)
     if not run:
         raise ValueError(f"Run ID not found: {run_id}")

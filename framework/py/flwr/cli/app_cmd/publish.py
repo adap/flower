@@ -92,11 +92,10 @@ def publish(
 
 
 def _depth_of(relative_path_to_root: Path) -> int:
-    """Return depth that is number of parts (directories) in the relative path
-    (excluding filename).
+    """Return the directory depth of `relative_path_to_root`.
 
-    Example: "a/b/c.py" -> depth 2
-    Interpret "directory depth" as number of directories: len(parts) - 1
+    Depth is the number of directory components, excluding the filename. For example,
+    `"a/b/c.py"` has depth 2.
     """
     return max(0, len(relative_path_to_root.parts) - 1)
 

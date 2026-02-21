@@ -109,8 +109,7 @@ def worker(
     backend: Backend,
     f_stop: threading.Event,
 ) -> None:
-    """Process messages from the queue, execute them, update context, and enqueue
-    replies."""
+    """Process queued messages, update context, and enqueue replies."""
     while not f_stop.is_set():
         out_mssg = None
         try:

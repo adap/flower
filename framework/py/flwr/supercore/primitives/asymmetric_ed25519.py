@@ -152,8 +152,9 @@ def verify_signature(
 
 
 def create_message_to_sign(fab_digest: bytes, timestamp: int) -> bytes:
-    """Create a canonical message:
-    timestamp (8 bytes big-endian) + fab_digest.
+    """Create the canonical message payload to sign.
+
+    The payload is `timestamp` as 8 big-endian bytes followed by `fab_digest`.
     """
     timestamp_bytes = timestamp.to_bytes(8, byteorder="big")
     return timestamp_bytes + fab_digest

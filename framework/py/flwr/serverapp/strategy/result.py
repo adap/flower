@@ -94,8 +94,7 @@ def format_value(val: MetricRecordValues) -> str:
 
 
 def stringify_dict(d: dict[int, MetricRecord]) -> dict[int, dict[str, str]]:
-    """Return a copy results metrics but with values converted to string and formatted
-    accordingtly."""
+    """Return a metrics copy with values converted to formatted strings."""
     new_metrics_dict = {}
     for k, inner in d.items():
         new_inner = {}

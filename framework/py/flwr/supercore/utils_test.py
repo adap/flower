@@ -123,8 +123,7 @@ def test_parse_app_spec_rejects_invalid_formats(value: str) -> None:
 def test_request_download_link_all_scenarios(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """Single table-driven test covering all major outcomes for
-    request_download_link."""
+    """Table-driven test covering major outcomes for `request_download_link`."""
     app_id: str = "@user/app"
     app_version: str | None = "1.0.0"
     in_url = "https://example.ai/hub/fetch-fab"

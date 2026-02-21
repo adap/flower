@@ -86,8 +86,7 @@ def test_download_fab_success(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_download_fab_failure(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Test that _download_fab() exits with click.ClickException when the GET request
-    fails."""
+    """Test that `_download_fab()` raises `click.ClickException` on GET failure."""
 
     class Boom(requests.RequestException):
         """Custom RequestException subclass used to simulate network errors in tests."""

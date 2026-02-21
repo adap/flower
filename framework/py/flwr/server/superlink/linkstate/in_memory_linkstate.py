@@ -520,8 +520,7 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
                         ).isoformat()
 
     def get_node_id_by_public_key(self, public_key: bytes) -> int | None:
-        """Get `node_id` for the specified `public_key` if it exists and is not
-        deleted."""
+        """Return `node_id` for `public_key` if it exists and is not deleted."""
         with self.lock:
             node_id = self.node_public_key_to_node_id.get(public_key)
 
