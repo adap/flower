@@ -353,9 +353,10 @@ def check_node_availability_for_in_message(
     current_time: float | None = None,
     update_set: bool = True,
 ) -> dict[str, Message]:
-    """Check node availability for given Message and generate error reply Message if
-    unavailable. A Message error indicating node unavailability will be generated for
-    each given Message whose destination node is offline or non-existent.
+    """Check node availability for Messages and generate error replies.
+
+    A Message error indicating node unavailability will be generated for each
+    given Message whose destination node is offline or non-existent.
 
     Parameters
     ----------

@@ -93,8 +93,7 @@ add_exit_handler(_shutdown_thread_pool_executors)
 
 
 class ObjectUnavailableError(Exception):
-    """Exception raised when an object has been pre-registered but is not yet
-    available."""
+    """Raised when a pre-registered object is not yet available."""
 
     def __init__(self, object_id: str):
         super().__init__(f"Object with ID '{object_id}' is not yet available.")
@@ -108,8 +107,7 @@ class ObjectIdNotPreregisteredError(Exception):
 
 
 def get_num_workers(max_concurrent: int) -> int:
-    """Get number of workers based on the number of CPU cores and the maximum
-    allowed."""
+    """Return worker count based on CPU cores and the configured maximum."""
     num_cores = os.cpu_count() or 1
     return min(max_concurrent, num_cores)
 

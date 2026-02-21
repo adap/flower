@@ -156,8 +156,7 @@ class TestAlembicRun(unittest.TestCase):
             engine.dispose()
 
     def test_legacy_mismatch_with_missing_columns_exits_with_guidance(self) -> None:
-        """Ensure legacy schemas with missing columns should fail and exit with a clear
-        error."""
+        """Ensure legacy schemas with missing columns fail with a clear exit error."""
         # Prepare
         engine = self.create_engine()
         try:
@@ -342,8 +341,7 @@ class TestVersionLocationRegistry(unittest.TestCase):
         self.assertEqual(len(_version_locations), initial_count + 1)
 
     def test_build_alembic_config_includes_all_version_locations(self) -> None:
-        """Ensure build_alembic_config includes base and registered version
-        locations."""
+        """Ensure `build_alembic_config` includes base and registered version paths."""
         # Prepare
         db_path = self.temp_path / "state.db"
         engine = create_engine(f"sqlite:///{db_path}")
