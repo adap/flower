@@ -1,0 +1,12 @@
+__pycache__/
+*.egg-info/
+dist/
+build/
+*.pt
+*.pth
+outputs/
+logs/
+wandb/
+dev.env
+.env
+demo_data/
