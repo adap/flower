@@ -77,27 +77,23 @@ class NoOpFederationManager(FederationManager):
     ) -> Federation:
         """Create a new federation."""
         raise NotImplementedError(
-            "`create_federation` is not supported by NoopFederationManager."
+            "`create_federation` is not supported by NoOpFederationManager."
         )
 
     def archive_federation(self, flwr_aid: str, name: str) -> None:
         """Archive an existing federation."""
         raise NotImplementedError(
-            "`archive_federation` is not supported by NoopFederationManager."
+            "`archive_federation` is not supported by NoOpFederationManager."
         )
 
-    def add_supernodes(
-        self, flwr_aid: str, federation: str, node_ids: set[int]
-    ) -> None:
-        """Add supernodes to a federation."""
+    def add_supernode(self, flwr_aid: str, federation: str, node_id: int) -> None:
+        """Add a SuperNode to a federation."""
         raise NotImplementedError(
-            "`add_supernodes` is not supported by NoopFederationManager."
+            "`add_supernode` is not supported by NoOpFederationManager."
         )
 
-    def remove_supernodes(
-        self, flwr_aid: str, federation: str, node_ids: set[int]
-    ) -> None:
-        """Remove supernodes from a federation."""
+    def remove_supernode(self, flwr_aid: str, federation: str, node_id: int) -> None:
+        """Remove a SuperNode from a federation."""
         raise NotImplementedError(
-            "`remove_supernodes` is not supported by NoopFederationManager."
+            "`remove_supernode` is not supported by NoOpFederationManager."
         )
