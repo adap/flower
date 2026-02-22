@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-10 00:15+0000\n"
+"POT-Creation-Date: 2026-02-22 00:10+0000\n"
 "PO-Revision-Date: 2024-05-25 11:09+0000\n"
 "Last-Translator: Gustavo Bertoli <gubertoli@gmail.com>\n"
 "Language: pt_BR\n"
@@ -5551,8 +5551,8 @@ msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:40
 msgid ""
-"For more details, visit: [Run simulations](../how-to-run-simulations.rst"
-"#run-simulations) guide."
+"For more details, visit the [Run simulations](../how-to-run-"
+"simulations.rst) guide."
 msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:49
@@ -5713,7 +5713,7 @@ msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:195
 msgid ""
-"`auth_url`: The OpenID Connect authentication endpoint where users "
+"`authn_url`: The OpenID Connect authentication endpoint where users "
 "authenticate."
 msgstr ""
 
@@ -5755,7 +5755,7 @@ msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:231
 msgid ""
-"The flower-server chat component supports OpenFGA as a fine-grained "
+"The Flower server chart component supports OpenFGA as a fine-grained "
 "authorization service, but it is disabled by default."
 msgstr ""
 
@@ -5807,7 +5807,7 @@ msgid "Authorization model file `model.fga`"
 msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md
-msgid "User permissions file `tuples.fga`"
+msgid "User permissions file `tuples.yaml`"
 msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:288
@@ -5952,7 +5952,7 @@ msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:444
 msgid ""
-"See the [Ingress Configuration](###generate-a-certificate-via-ingress-"
+"See the [Ingress Configuration](#generate-a-certificate-via-ingress-"
 "annotations) section for more information."
 msgstr ""
 
@@ -9597,7 +9597,7 @@ msgstr ""
 #: ../../source/how-to-configure-audit-logging.rst:89
 msgid ""
 "Note that the audit logging feature can only be activated with the "
-":doc:`user authentication feature <how-to-authenticate-users>`."
+":doc:`user authentication feature <how-to-authenticate-accounts>`."
 msgstr ""
 
 #: ../../source/how-to-configure-audit-logging.rst:94
@@ -10724,11 +10724,11 @@ msgstr ""
 msgid ""
 "The model is very straightforward to port from OpenFL to Flower. If you "
 "are working with a PyTorch model, OpenFL has a ``PyTorchTaskRunner`` that"
-" inherits from ``nn.module`` (in ``taskrunner.py``) - and includes other "
+" inherits from ``nn.Module`` (in ``taskrunner.py``) - and includes other "
 "things like the ``train`` and ``validate`` functions. Flower assumes you "
 "bring a standard PyTorch model, so it's as easy as moving the model "
 "definition to ``task.py`` in the ``quickstart-pytorch`` directory, and "
-"changing the inheritance of the Net back to ``nn.module``. For a concrete"
+"changing the inheritance of the Net back to ``nn.Module``. For a concrete"
 " example, see the following OpenFL TaskRunner code snippet:"
 msgstr ""
 
@@ -15438,8 +15438,8 @@ msgstr ""
 msgid "Arguments"
 msgstr "Argumento de compilação"
 
-#: ../../flwr app federation install:1 list:1 log:1 login:1 new:1 publish:1
-#: pull:1 register:1 run:1 stop:1 supernode unregister:1
+#: ../../flwr app archive:1 create:1 federation install:1 list:1 log:1 login:1
+#: new:1 publish:1 pull:1 register:1 run:1 stop:1 supernode unregister:1
 #, fuzzy
 msgid "Optional argument"
 msgstr "Argumento de compilação"
@@ -15454,8 +15454,8 @@ msgid ""
 "confirmation sign & submit the review to the Platform."
 msgstr ""
 
-#: ../../flwr app log:1 pull:1 register:1 review:1 stop:1 supernode
-#: unregister:1
+#: ../../flwr app archive:1 create:1 federation log:1 pull:1 register:1
+#: review:1 stop:1 supernode unregister:1
 #, fuzzy
 msgid "Required argument"
 msgstr "Argumento de compilação"
@@ -15496,17 +15496,18 @@ msgstr "``FLWR_VERSION``"
 msgid "List all SuperLink connections (alias: ls)."
 msgstr "``FLWR_VERSION``"
 
-#: ../../flwr config federation list:1 register:1 run:1 stop:1 supernode
-#: unregister:1
+#: ../../flwr archive:1 config create:1 federation list:1 register:1 run:1
+#: stop:1 supernode unregister:1
 msgid "Format output using 'default' view or 'json'"
 msgstr ""
 
-#: ../../flwr config federation list log register run stop supernode unregister
+#: ../../flwr archive config create federation list log register run stop
+#: supernode unregister
 msgid "default"
 msgstr ""
 
-#: ../../flwr config federation list:1 register:1 run:1 stop:1 supernode
-#: unregister:1
+#: ../../flwr archive:1 config create:1 federation list:1 register:1 run:1
+#: stop:1 supernode unregister:1
 #, fuzzy
 msgid "``'default'``"
 msgstr "``FLWR_VERSION``"
@@ -15514,6 +15515,37 @@ msgstr "``FLWR_VERSION``"
 #: ../../flwr federation:1
 #, fuzzy
 msgid "Manage Federations"
+msgstr "``FLWR_VERSION``"
+
+#: ../../flwr archive:1 federation
+#, fuzzy
+msgid "Archive an existing federation."
+msgstr "``FLWR_VERSION``"
+
+#: ../../flwr archive:1 federation
+#, fuzzy
+msgid "Name of the federation to archive."
+msgstr "``FLWR_VERSION``"
+
+#: ../../flwr archive:1 create:1 federation list:1 log:1 login:1 pull:1
+#: register:1 run:1 stop:1 supernode unregister:1
+#, fuzzy
+msgid "Name of the SuperLink connection."
+msgstr "``FLWR_VERSION``"
+
+#: ../../flwr create:1 federation
+#, fuzzy
+msgid "Create a new federation."
+msgstr "``FLWR_VERSION``"
+
+#: ../../flwr create:1 federation
+#, fuzzy
+msgid "Description of the federation."
+msgstr "``FLWR_VERSION``"
+
+#: ../../flwr create:1 federation
+#, fuzzy
+msgid "Name of the federation to create."
 msgstr "``FLWR_VERSION``"
 
 #: ../../flwr federation list:1
@@ -15525,12 +15557,6 @@ msgstr ""
 #: ../../flwr federation list:1
 #, fuzzy
 msgid "Name of the federation to display"
-msgstr "``FLWR_VERSION``"
-
-#: ../../flwr federation list:1 log:1 login:1 pull:1 register:1 run:1 stop:1
-#: supernode unregister:1
-#, fuzzy
-msgid "Name of the SuperLink connection."
 msgstr "``FLWR_VERSION``"
 
 #: ../../flwr install:1
@@ -30957,7 +30983,7 @@ msgstr ""
 
 #: ../../source/ref-flower-configuration.rst:171
 msgid ""
-"``root-certificate``: Path to the root certificate file for TLS "
+"``root-certificates``: Path to the root certificate file for TLS "
 "encryption. This secures the communication between your CLI and the "
 "SuperLink. If omitted, Flower uses the default gRPC root certificate. "
 "This field is ignored if ``insecure`` is set to ``true``."
@@ -30983,13 +31009,13 @@ msgstr ""
 
 #: ../../source/ref-flower-configuration.rst:184
 msgid ""
-"Providing a ``root-certificate`` file (recommended for custom "
+"Providing a ``root-certificates`` file (recommended for custom "
 "certificates)"
 msgstr ""
 
 #: ../../source/ref-flower-configuration.rst:185
 msgid ""
-"Omitting both ``root-certificate`` and ``insecure`` to use default "
+"Omitting both ``root-certificates`` and ``insecure`` to use default "
 "certificates"
 msgstr ""
 
@@ -66483,5 +66509,79 @@ msgstr ""
 #~ "`Copilot`, `Daniel J. Beutel`, `Heng "
 #~ "Pan`, `Javier`, `Taner Topal` <!---"
 #~ "TOKEN_v1.26.1-->"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "For more details, visit: [Run "
+#~ "simulations](../how-to-run-simulations.rst#run-"
+#~ "simulations) guide."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "`auth_url`: The OpenID Connect authentication"
+#~ " endpoint where users authenticate."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The flower-server chat component "
+#~ "supports OpenFGA as a fine-grained "
+#~ "authorization service, but it is "
+#~ "disabled by default."
+#~ msgstr ""
+
+#~ msgid "User permissions file `tuples.fga`"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "See the [Ingress Configuration](###generate-a"
+#~ "-certificate-via-ingress-annotations) section "
+#~ "for more information."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Note that the audit logging feature "
+#~ "can only be activated with the "
+#~ ":doc:`user authentication feature <how-to-"
+#~ "authenticate-users>`."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The model is very straightforward to "
+#~ "port from OpenFL to Flower. If you"
+#~ " are working with a PyTorch model,"
+#~ " OpenFL has a ``PyTorchTaskRunner`` that"
+#~ " inherits from ``nn.module`` (in "
+#~ "``taskrunner.py``) - and includes other "
+#~ "things like the ``train`` and "
+#~ "``validate`` functions. Flower assumes you "
+#~ "bring a standard PyTorch model, so "
+#~ "it's as easy as moving the model"
+#~ " definition to ``task.py`` in the "
+#~ "``quickstart-pytorch`` directory, and changing"
+#~ " the inheritance of the Net back "
+#~ "to ``nn.module``. For a concrete "
+#~ "example, see the following OpenFL "
+#~ "TaskRunner code snippet:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "``root-certificate``: Path to the root"
+#~ " certificate file for TLS encryption. "
+#~ "This secures the communication between "
+#~ "your CLI and the SuperLink. If "
+#~ "omitted, Flower uses the default gRPC"
+#~ " root certificate. This field is "
+#~ "ignored if ``insecure`` is set to "
+#~ "``true``."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Providing a ``root-certificate`` file "
+#~ "(recommended for custom certificates)"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Omitting both ``root-certificate`` and "
+#~ "``insecure`` to use default certificates"
 #~ msgstr ""
 
