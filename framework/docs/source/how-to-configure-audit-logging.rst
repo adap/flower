@@ -87,7 +87,7 @@ follows:
     ➜ flower-superlink --enable-event-log <other flags>
 
 Note that the audit logging feature can only be activated with the :doc:`user
-authentication feature <how-to-authenticate-users>`.
+authentication feature <how-to-authenticate-accounts>`.
 
 *****************
  Example Outputs
