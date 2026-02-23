@@ -87,7 +87,7 @@ jobs:
           DOC_VERSION: ${{ steps.doc_version.outputs.version }}
         run: |
           echo "Building docs for version: ${DOC_VERSION}"
-          ./framework/docs/build-single-version-docs.sh
+          ./framework/dev/build-docs.sh full
       - name: Determine if this is the latest stable version
         if: ${{ github.repository == 'adap/flower' && ((startsWith(github.ref, 'refs/heads/release/framework-') && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')) || (github.event_name == 'release' && startsWith(github.ref, 'refs/tags/framework-'))) }}
         id: latest_check
