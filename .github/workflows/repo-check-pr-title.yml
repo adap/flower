@@ -1,4 +1,4 @@
-name: PR Check
+name: Check PR title format
 
 on:
   pull_request:
@@ -19,7 +19,7 @@ jobs:
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
         with:
-          python-version: 3.11
+          python-version: 3.13
           poetry-skip: 'true'
       - name: Check PR title format 
         env:

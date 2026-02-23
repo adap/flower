@@ -1,4 +1,6 @@
-# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
+#!/bin/bash
+
+# Copyright 2026 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,19 +14,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower command line interface `federation` command."""
 
+set -e
+cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 
-from .add_supernode import add_supernode as add_supernode
-from .archive import archive as archive
-from .create import create as create
-from .ls import ls as ls
-from .remove_supernode import remove_supernode as remove_supernode
+cd e2e/pytorch
+uv lock
 
-__all__ = [
-    "add_supernode",
-    "archive",
-    "create",
-    "ls",
-    "remove_supernode",
-]
+cd ../scikit-learn
+uv lock
+
+cd ../tensorflow
+uv lock
