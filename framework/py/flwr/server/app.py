@@ -129,8 +129,7 @@ except ImportError:
         """Return all Control API authorization plugins for EE."""
         return {}
 
-    # pylint: disable-next=unused-argument
-    def get_ee_federation_manager(config_path: str) -> FederationManager:
+    def get_ee_federation_manager() -> FederationManager:
         """Return the EE FederationManager."""
         raise NotImplementedError("No federation manager is currently supported.")
 
@@ -147,12 +146,12 @@ def get_control_authz_plugins() -> dict[str, type[ControlAuthzPlugin]]:
     return ee_dict | {AuthzType.NOOP: NoOpControlAuthzPlugin}
 
 
-def get_federation_manager(config_path: str | None = None) -> FederationManager:
+def get_federation_manager() -> FederationManager:
     """Return the FederationManager."""
-    if config_path is None:
+    try:
+        return get_ee_federation_manager()
+    except NotImplementedError:
         return NoOpFederationManager()
-    federation_manager: FederationManager = get_ee_federation_manager(config_path)
-    return federation_manager
 
 
 # pylint: disable=too-many-branches, too-many-locals, too-many-statements
@@ -295,8 +294,7 @@ def run_superlink() -> None:
         )
 
     # Load Federation Manager
-    fed_config_path = getattr(args, "federations_config", None)
-    federation_manager = get_federation_manager(fed_config_path)
+    federation_manager = get_federation_manager()
 
     # Initialize ObjectStoreFactory
     objectstore_factory = ObjectStoreFactory(args.database)
