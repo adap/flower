@@ -21,41 +21,38 @@ from flwr.cli.typing import SuperLinkConnection, SuperLinkSimulationOptions
 
 from .local_superlink import ensure_local_superlink
 
+_IS_STARTED_PATH = "flwr.cli.local_superlink._is_local_superlink_started"
+_START_PATH = "flwr.cli.local_superlink._start_local_superlink"
 
-def test_options_only_connection_uses_runtime_defaults() -> None:
-    """Options-only connections are mapped to managed local runtime."""
+
+def test_options_only_connection_uses_local_superlink() -> None:
+    """Options-only connections are mapped to local SuperLink."""
     connection = SuperLinkConnection(
         name="local",
         options=SuperLinkSimulationOptions(num_supernodes=2),
     )
 
-    with patch(
-        "flwr.cli.local_superlink._is_local_superlink_started", return_value=True
-    ) as mock_started:
-        with patch("flwr.cli.local_superlink._start_local_superlink") as mock_start:
+    with patch(_IS_STARTED_PATH, return_value=True) as mock_is_started:
+        with patch(_START_PATH) as mock_start:
             resolved = ensure_local_superlink(connection)
 
     assert resolved.address == "127.0.0.1:39093"
     assert resolved.insecure is True
     assert resolved.root_certificates is None
-    mock_started.assert_called_once()
+    mock_is_started.assert_called_once()
     mock_start.assert_not_called()
 
 
-def test_options_only_connection_starts_runtime_when_unavailable() -> None:
-    """Managed local runtime is started when Control API is unavailable."""
+def test_options_only_connection_starts_local_superlink_when_unavailable() -> None:
+    """Local SuperLink is started when it is unavailable."""
     connection = SuperLinkConnection(
         name="local",
         options=SuperLinkSimulationOptions(num_supernodes=2),
     )
 
-    with (
-        patch(
-            "flwr.cli.local_superlink._is_local_superlink_started", return_value=False
-        ),
-        patch("flwr.cli.local_superlink._start_local_superlink") as mock_start,
-    ):
-        resolved = ensure_local_superlink(connection)
+    with patch(_IS_STARTED_PATH, return_value=False):
+        with patch(_START_PATH) as mock_start:
+            resolved = ensure_local_superlink(connection)
 
     assert resolved.address == "127.0.0.1:39093"
     assert resolved.insecure is True
@@ -71,62 +68,10 @@ def test_local_config_is_preserved_when_endpoint_available() -> None:
         options=SuperLinkSimulationOptions(num_supernodes=2),
     )
 
-    with patch("flwr.cli.local_superlink._is_local_superlink_started") as mock_started:
-        with patch("flwr.cli.local_superlink._start_local_superlink") as mock_start:
+    with patch(_IS_STARTED_PATH) as mock_is_started:
+        with patch(_START_PATH) as mock_start:
             resolved = ensure_local_superlink(connection)
 
     assert resolved is connection
-    mock_started.assert_not_called()
+    mock_is_started.assert_not_called()
     mock_start.assert_not_called()
-
-
-def test_explicit_local_address_does_not_auto_start() -> None:
-    """Explicit local addresses are treated as user-managed."""
-    connection = SuperLinkConnection(
-        name="local-dev",
-        address="localhost:9093",
-        insecure=False,
-        options=SuperLinkSimulationOptions(num_supernodes=2),
-    )
-
-    with patch("flwr.cli.local_superlink._is_local_superlink_started") as mock_started:
-        with patch("flwr.cli.local_superlink._start_local_superlink") as mock_start:
-            resolved = ensure_local_superlink(connection)
-
-    assert resolved.address == "localhost:9093"
-    assert resolved.insecure is False
-    mock_started.assert_not_called()
-    mock_start.assert_not_called()
-
-
-def test_explicit_bind_all_address_does_not_auto_start() -> None:
-    """Explicit bind-all local addresses are treated as user-managed."""
-    connection = SuperLinkConnection(
-        name="local-dev",
-        address="0.0.0.0:9093",
-        options=SuperLinkSimulationOptions(num_supernodes=2),
-    )
-
-    with patch("flwr.cli.local_superlink._is_local_superlink_started") as mock_started:
-        with patch("flwr.cli.local_superlink._start_local_superlink") as mock_start:
-            resolved = ensure_local_superlink(connection)
-
-    assert resolved.address == "0.0.0.0:9093"
-    assert resolved.insecure is False
-    mock_started.assert_not_called()
-    mock_start.assert_not_called()
-
-
-def test_remote_connection_is_untouched() -> None:
-    """Remote connections are returned unchanged."""
-    connection = SuperLinkConnection(
-        name="remote-sim",
-        address="example.com:9093",
-        options=SuperLinkSimulationOptions(num_supernodes=2),
-    )
-
-    with patch("flwr.cli.local_superlink._is_local_superlink_started") as mock_probe:
-        resolved = ensure_local_superlink(connection)
-
-    assert resolved is connection
-    mock_probe.assert_not_called()

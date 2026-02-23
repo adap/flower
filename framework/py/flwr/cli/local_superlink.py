@@ -17,7 +17,6 @@
 
 from __future__ import annotations
 
-import os
 import subprocess
 import time
 from pathlib import Path
@@ -30,18 +29,14 @@ from flwr.common.constant import ISOLATION_MODE_SUBPROCESS
 from flwr.common.grpc import create_channel
 from flwr.supercore.utils import get_flwr_home
 
+from .constant import (
+    CONTROL_API_PROBE_INTERVAL,
+    CONTROL_API_PROBE_TIMEOUT,
+    LOCAL_CONTROL_API_ADDRESS,
+    LOCAL_SIMULATIONIO_API_ADDRESS,
+    LOCAL_SUPERLINK_STARTUP_TIMEOUT,
+)
 from .typing import SuperLinkConnection
-
-# Local SuperLink ports and addresses
-LOCAL_CONTROL_API_PORT = os.environ.get("FLWR_LOCAL_SUPERLINK_PORT", "39093")
-LOCAL_SIMULATIONIO_API_PORT = os.environ.get("FLWR_LOCAL_SIMULATIONIO_PORT", "39094")
-LOCAL_CONTROL_API_ADDRESS = f"127.0.0.1:{LOCAL_CONTROL_API_PORT}"
-LOCAL_SIMULATIONIO_API_ADDRESS = f"127.0.0.1:{LOCAL_SIMULATIONIO_API_PORT}"
-
-# Local SuperLink startup configuration
-LOCAL_SUPERLINK_STARTUP_TIMEOUT_SEC = 15.0
-CONTROL_API_PROBE_TIMEOUT_SEC = 0.4
-CONTROL_API_PROBE_INTERVAL_SEC = 0.2
 
 
 def ensure_local_superlink(connection: SuperLinkConnection) -> SuperLinkConnection:
@@ -90,7 +85,7 @@ def _is_local_superlink_started() -> bool:
     """Return True if local SuperLink's Control API endpoint is reachable."""
     channel = create_channel(server_address=LOCAL_CONTROL_API_ADDRESS, insecure=True)
     try:
-        grpc.channel_ready_future(channel).result(timeout=CONTROL_API_PROBE_TIMEOUT_SEC)
+        grpc.channel_ready_future(channel).result(timeout=CONTROL_API_PROBE_TIMEOUT)
         return True
     except (grpc.FutureTimeoutError, grpc.RpcError):
         return False
@@ -134,11 +129,10 @@ def _start_local_superlink() -> None:
             )
     except OSError as exc:
         raise click.ClickException(
-            f"Unable to launch `flower-superlink` for local simulation: {exc}\n\n"
-            "Ensure Flower is installed in the active environment."
+            f"Unable to launch `flower-superlink` for local simulation: {exc}"
         ) from exc
 
-    deadline = time.monotonic() + LOCAL_SUPERLINK_STARTUP_TIMEOUT_SEC
+    deadline = time.monotonic() + LOCAL_SUPERLINK_STARTUP_TIMEOUT
     while time.monotonic() < deadline:
         # Early exit when local SuperLink process has terminated
         if process.poll() is not None:
@@ -150,11 +144,11 @@ def _start_local_superlink() -> None:
 
         if _is_local_superlink_started():
             return
-        time.sleep(CONTROL_API_PROBE_INTERVAL_SEC)
+        time.sleep(CONTROL_API_PROBE_INTERVAL)
 
     # Timeout while waiting for local SuperLink to start
     raise click.ClickException(
         "Failed to start local SuperLink within "
-        f"{LOCAL_SUPERLINK_STARTUP_TIMEOUT_SEC:.0f}s. "
+        f"{LOCAL_SUPERLINK_STARTUP_TIMEOUT:.0f}s. "
         f"See logs at {log_file_path}."
     )
