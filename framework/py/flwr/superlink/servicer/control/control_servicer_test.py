@@ -32,6 +32,7 @@ from flwr.common import ConfigRecord, now
 from flwr.common.constant import (
     FEDERATION_NOT_SPECIFIED_MESSAGE,
     NODE_NOT_FOUND_MESSAGE,
+    NOOP_ACCOUNT_NAME,
     PUBLIC_KEY_ALREADY_IN_USE_MESSAGE,
     PUBLIC_KEY_NOT_VALID,
     SUPERLINK_DOES_NOT_SUPPORT_FED_MANAGEMENT_MESSAGE,
@@ -338,11 +339,12 @@ class TestControlServicer(unittest.TestCase):
         # Prepare
         name = "test-federation"
         description = "A test federation"
+        expected_name = f"@{NOOP_ACCOUNT_NAME}/{name}"
         request = CreateFederationRequest(
             name=name,
             description=description,
         )
-        mock_federation = SimpleNamespace(name=name, description=description)
+        mock_federation = SimpleNamespace(name=expected_name, description=description)
 
         # Execute
         with patch.object(
@@ -354,11 +356,11 @@ class TestControlServicer(unittest.TestCase):
 
         # Assert
         mock_create.assert_called_once_with(
-            name=name,
+            name=expected_name,
             description=description,
             flwr_aid=self.aid,
         )
-        self.assertEqual(response.federation.name, name)
+        self.assertEqual(response.federation.name, expected_name)
         self.assertEqual(response.federation.description, description)
 
     def test_create_federation_fails_on_manager_error(self) -> None:
