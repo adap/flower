@@ -41,7 +41,7 @@ Base = declarative_base(metadata=combined_metadata)
 
 # EE tables (optional, only available when the EE module is installed)
 try:
-    from flwr.ee_.state.alembic.tables import create_ee_metadata
+    from flwr.ee.state.alembic.tables import create_ee_metadata
 
     ee_combined_metadata = MetaData()
     for table in create_ee_metadata().tables.values():
