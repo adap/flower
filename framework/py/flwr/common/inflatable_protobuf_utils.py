@@ -38,7 +38,7 @@ def make_pull_object_fn_protobuf(
     pull_object_protobuf: Callable[[PullObjectRequest], PullObjectResponse],
     node: Node,
     run_id: int,
-    # TODO: remove default setting once token use is added to ClientAppIO calls
+    # Default setting required as long as ClientAppIO calls do not include tokens
     token: str = "",
 ) -> Callable[[str], bytes]:
     """Create a pull object function that uses gRPC to pull objects.
@@ -81,7 +81,7 @@ def make_push_object_fn_protobuf(
     push_object_protobuf: Callable[[PushObjectRequest], PushObjectResponse],
     node: Node,
     run_id: int,
-    # TODO: remove default setting once token use is added to ClientAppIO calls
+    # Default setting required as long as ClientAppIO calls do not include tokens
     token: str = "",
 ) -> Callable[[str, bytes], None]:
     """Create a push object function that uses gRPC to push objects.
@@ -125,7 +125,7 @@ def make_confirm_message_received_fn_protobuf(
     confirm_message_received_protobuf: ConfirmMessageReceivedProtobuf,
     node: Node,
     run_id: int,
-    # TODO: remove default setting once token use is added to ClientAppIO calls
+    # Default setting required as long as ClientAppIO calls do not include tokens
     token: str = "",
 ) -> Callable[[str], None]:
     """Create a confirm message received function that uses protobuf.
