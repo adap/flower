@@ -47,5 +47,5 @@ try:
     for table in create_ee_metadata().tables.values():
         table.tometadata(ee_combined_metadata)
     EEBase = declarative_base(metadata=ee_combined_metadata)
-except ModuleNotFoundError:
+except ImportError:
     EEBase = None
