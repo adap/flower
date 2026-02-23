@@ -49,17 +49,11 @@
     "test": "NODE_PATH=./src NODE_ENV=test vitest"
   },
   "devDependencies": {
-    "ajv": "^6.14.0",
-    "@eslint/eslintrc": "^3.3.3",
     "@eslint/js": "^10.0.1",
-    "@typescript-eslint/eslint-plugin": "^8.56.0",
-    "@typescript-eslint/parser": "^8.56.0",
     "eslint": "^10.0.1",
-    "eslint-import-resolver-typescript": "^4.4.4",
-    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-simple-import-sort": "^12.1.1",
     "globals": "^16.5.0",
     "http-server": "^14.1.1",
-    "minimatch": "10.2.2",
     "prettier": "^3.8.1",
     "typedoc": "^0.28.17",
     "typedoc-plugin-markdown": "^4.10.0",
