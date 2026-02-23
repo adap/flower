@@ -607,8 +607,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         state = self.linkstate_factory.state()
 
         account_info = get_current_account_info()
-        flwr_aid = account_info.flwr_aid
-        flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
+        flwr_aid = _check_flwr_aid_exists(account_info.flwr_aid, context)
 
         # Construct federation name
         federation_name = f"@{account_info.account_name}/{request.name}"
