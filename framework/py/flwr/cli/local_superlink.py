@@ -140,18 +140,21 @@ def _start_local_superlink() -> None:
 
     deadline = time.monotonic() + LOCAL_SUPERLINK_STARTUP_TIMEOUT_SEC
     while time.monotonic() < deadline:
+        # Early exit when local SuperLink process has terminated
+        if process.poll() is not None:
+            raise click.ClickException(
+                "Failed to start local SuperLink: "
+                f"`flower-superlink` exited with code {process.poll()}. "
+                f"See logs at {log_file_path}."
+            )
+
         if _is_local_superlink_started():
             return
         time.sleep(CONTROL_API_PROBE_INTERVAL_SEC)
 
-    process_state = process.poll()
-    details = (
-        f" Process exited with code {process_state}."
-        if process_state is not None
-        else ""
-    )
+    # Timeout while waiting for local SuperLink to start
     raise click.ClickException(
         "Failed to start local SuperLink within "
-        f"{LOCAL_SUPERLINK_STARTUP_TIMEOUT_SEC:.0f}s.{details} "
+        f"{LOCAL_SUPERLINK_STARTUP_TIMEOUT_SEC:.0f}s. "
         f"See logs at {log_file_path}."
     )
