@@ -14,6 +14,21 @@
 # ==============================================================================
 """Shared authentication helpers for AppIO servicers."""
 
+# Reviewer note:
+# This mixin contains AppIO RPC authorization flow shared by ServerAppIo and
+# SimulationIo:
+# 1) Validate run tokens and token-to-run binding
+# 2) Enforce SuperExec signed-metadata checks when enabled
+# 3) Apply GetRun dual-mode rule: exactly one auth mechanism per call
+#
+# Servicers provide `_EXEC_PLUGIN_TYPE` and call these helpers from RPC
+# handlers.
+# Cryptographic verification and config parsing are delegated to
+# `superexec_auth.py`.
+#
+# Future direction:
+# As platform-wide auth abstractions converge, this shared flow may be moved
+# into a broader auth-policy layer used consistently by multiple services.
 
 import grpc
 

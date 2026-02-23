@@ -14,6 +14,21 @@
 # ==============================================================================
 """SuperExec authentication helpers for AppIO services."""
 
+# Reviewer note:
+# This module contains low-level SuperExec auth primitives:
+# 1) Parse/load auth config (enabled flag, timestamp tolerance, allowed
+#    keys)
+# 2) Verify incoming signed metadata (key allowlist, signature,
+#    timestamp freshness)
+#
+# It intentionally does NOT decide RPC-level policy
+# (which RPC requires what auth mode).
+# That policy lives in AppIO servicer auth flow (`appio_auth.py`).
+#
+# Future direction:
+# As auth abstractions become more consistent across the platform, we may
+# split this further (for example, separate config loading from signature
+# verification).
 
 from dataclasses import dataclass
 from datetime import datetime
