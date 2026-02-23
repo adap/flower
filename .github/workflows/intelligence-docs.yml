@@ -87,7 +87,21 @@ jobs:
         run: brew install sourcedocs
       - name: Build Swift docs
         run: |
-          sourcedocs generate --module-name FlowerIntelligence -- -scheme Flwr -destination 'platform=macOS'
+          SWIFT_DOCS_DERIVED_DATA="$RUNNER_TEMP/swift-docs-derived-data"
+          rm -rf "$SWIFT_DOCS_DERIVED_DATA"
+
+          SWIFT_DOCS_BUILT=0
+          for SWIFT_DOCS_SCHEME in Flwr FlowerIntelligence; do
+            if sourcedocs generate --module-name FlowerIntelligence -- -scheme "$SWIFT_DOCS_SCHEME" -destination 'platform=macOS,arch=arm64' -derivedDataPath "$SWIFT_DOCS_DERIVED_DATA"; then
+              SWIFT_DOCS_BUILT=1
+              break
+            fi
+          done
+
+          if [ "$SWIFT_DOCS_BUILT" -ne 1 ]; then
+            echo "Could not generate Swift docs with any known scheme."
+            exit 1
+          fi
           mkdir -p intelligence/docs/source/swift-api-ref
           cp -r Documentation/Reference/* intelligence/docs/source/swift-api-ref/
           mv intelligence/docs/source/swift-api-ref/README.md intelligence/docs/source/swift-api-ref/index.md
