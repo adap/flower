@@ -95,12 +95,21 @@ echo "- All rST checks passed"
 
 echo "- Start SQLAlchemy schema checks"
 
+# Core schema check
 paracelsus inject py/flwr/supercore/state/schema/README.md dev.get_schema_base:Base \
   --import-module "flwr.supercore.state.schema.linkstate_tables:*" \
   --import-module "flwr.supercore.state.schema.corestate_tables:*" \
   --import-module "flwr.supercore.state.schema.objectstore_tables:*" \
   --layout elk \
   --check
+
+# EE schema check (if available)
+if python -c "import flwr.ee.state.alembic.tables" 2>/dev/null; then
+  paracelsus inject py/flwr/ee/state/schema/README.md dev.get_schema_base:EEBase \
+    --import-module "flwr.ee.state.alembic.tables:*" \
+    --layout elk \
+    --check
+fi
 
 echo "- All SQLAlchemy schema checks passed"
 
