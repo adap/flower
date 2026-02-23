@@ -3,7 +3,7 @@ name: Framework Draft Release
 on:
   push:
     tags:
-      - "framework-v*.*.*"
+      - "framework-*.*.*"
 
 env:
   ARTIFACT_BUCKET: artifact.flower.ai
@@ -27,8 +27,8 @@ jobs:
           wait-interval: 10
       - name: Download wheel
         run: |
-          # Strip "framework-v" prefix from tag (e.g., `framework-v1.27.0` -> `1.27.0`)
-          tag_name="${GITHUB_REF_NAME#framework-v}"
+          # Strip "framework-" prefix from tag (e.g., `framework-1.27.0` -> `1.27.0`)
+          tag_name="${GITHUB_REF_NAME#framework-}"
           echo "TAG_NAME=$tag_name" >> "$GITHUB_ENV"
 
           wheel_name="flwr-${tag_name}-py3-none-any.whl"

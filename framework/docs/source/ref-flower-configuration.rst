@@ -165,14 +165,14 @@ configure connections that point to a remote SuperLink.
 
     [superlink.remote-deployment]
     address = "<SUPERLINK-ADDRESS>:<PORT>"
-    root-certificate = "path/to/root/cert.pem"  # Optional, for TLS
+    root-certificates = "/absolute/path/to/root/cert.crt"  # Optional, for TLS
     # insecure = true  # Disable TLS (not recommended for production)
 
 **Explanation**
 
 - ``address`` (required): The address of the SuperLink Control API to connect to (e.g.,
   ``my-server.example.com:9093``).
-- ``root-certificate``: Path to the root certificate file for TLS encryption. This
+- ``root-certificates``: Path to the root certificate file for TLS encryption. This
   secures the communication between your CLI and the SuperLink. If omitted, Flower uses
   the default gRPC root certificate. This field is ignored if ``insecure`` is set to
   ``true``.
@@ -185,8 +185,8 @@ configure connections that point to a remote SuperLink.
 TLS encrypts the communication between your local machine and the remote SuperLink to
 prevent eavesdropping and tampering. In production, you should always use TLS by either:
 
-- Providing a ``root-certificate`` file (recommended for custom certificates)
-- Omitting both ``root-certificate`` and ``insecure`` to use default certificates
+- Providing a ``root-certificates`` file (recommended for custom certificates)
+- Omitting both ``root-certificates`` and ``insecure`` to use default certificates
 
 Only set ``insecure = true`` for local testing environments.
 
