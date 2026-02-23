@@ -565,6 +565,7 @@ class ServerAppIoServicer(AppIoAuthMixin, serverappio_pb2_grpc.ServerAppIoServic
 
         return ConfirmMessageReceivedResponse()
 
+
 def _raise_if(validation_error: bool, request_name: str, detail: str) -> None:
     """Raise a `ValueError` with a detailed message if a validation error occurs."""
     if validation_error:
