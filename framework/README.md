@@ -170,4 +170,4 @@ Please also consider adding your publication to the list of Flower-based publica
 
 ## Contributing to Flower
 
-We welcome contributions. Please see [CONTRIBUTING.md](CONTRIBUTING.md) to get started!
+We welcome contributions. Please see [CONTRIBUTING.md](../CONTRIBUTING.md) to get started!
