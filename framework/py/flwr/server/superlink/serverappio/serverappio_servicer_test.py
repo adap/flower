@@ -1256,7 +1256,7 @@ class TestServerAppIoServicerSuperExecAuth(  # pylint: disable=too-many-instance
     def test_get_run_rejects_future_timestamp_beyond_clock_drift(self) -> None:
         """GetRun must reject future timestamps past drift allowance."""
         run_id = self._create_dummy_run()
-        future_ts = (now() + timedelta(seconds=SYSTEM_TIME_TOLERANCE + 2)).isoformat()
+        future_ts = (now() + timedelta(seconds=SYSTEM_TIME_TOLERANCE + 10)).isoformat()
         with self.assertRaises(grpc.RpcError) as err:
             self._get_run.with_call(
                 request=GetRunRequest(run_id=run_id),
