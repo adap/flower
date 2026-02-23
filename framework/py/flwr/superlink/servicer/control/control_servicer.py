@@ -606,13 +606,16 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         # Init link state
         state = self.linkstate_factory.state()
 
-        flwr_aid = get_current_account_info().flwr_aid
-        flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
+        account_info = get_current_account_info()
+        flwr_aid = _check_flwr_aid_exists(account_info.flwr_aid, context)
+
+        # Construct federation name
+        federation_name = f"@{account_info.account_name}/{request.name}"
 
         # Create federation
         try:
             federation = state.federation_manager.create_federation(
-                name=request.name,
+                name=federation_name,
                 description=request.description,
                 flwr_aid=flwr_aid,
             )
