@@ -339,6 +339,7 @@ def _log_uploader(
     node_id: int,
     run_id: int,
     stub: ServerAppIoStub | SimulationIoStub,
+    # TODO: remove default setting once token use is added to ClientAppIO calls
     token: str = "",
 ) -> None:
     """Upload logs to the SuperLink."""
@@ -387,6 +388,7 @@ def start_log_uploader(
     node_id: int,
     run_id: int,
     stub: ServerAppIoStub | SimulationIoStub,
+    # TODO: remove default setting once token use is added to ClientAppIO calls
     token: str = "",
 ) -> threading.Thread:
     """Start the log uploader thread and return it."""
