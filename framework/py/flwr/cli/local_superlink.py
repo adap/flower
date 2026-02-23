@@ -17,29 +17,28 @@
 
 from __future__ import annotations
 
-import hashlib
+import os
 import subprocess
 import time
 from pathlib import Path
-from typing import cast
 
 import click
 import grpc
 import typer
 
-from flwr.common.constant import (
-    CONTROL_API_PORT,
-    ISOLATION_MODE_SUBPROCESS,
-    SIMULATIONIO_PORT,
-)
-from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
-from flwr.supercore.address import parse_address, resolve_bind_address
+from flwr.common.constant import ISOLATION_MODE_SUBPROCESS
+from flwr.common.grpc import create_channel
 from flwr.supercore.utils import get_flwr_home
 
-from .config_utils import load_certificate_in_connection
 from .typing import SuperLinkConnection
 
-DEFAULT_LOCAL_CONTROL_API_ADDRESS = f"127.0.0.1:{CONTROL_API_PORT}"
+# Local SuperLink ports and addresses
+LOCAL_CONTROL_API_PORT = os.environ.get("FLWR_LOCAL_SUPERLINK_PORT", "39093")
+LOCAL_SIMULATIONIO_API_PORT = os.environ.get("FLWR_LOCAL_SIMULATIONIO_PORT", "39094")
+LOCAL_CONTROL_API_ADDRESS = f"127.0.0.1:{LOCAL_CONTROL_API_PORT}"
+LOCAL_SIMULATIONIO_API_ADDRESS = f"127.0.0.1:{LOCAL_SIMULATIONIO_API_PORT}"
+
+# Local SuperLink startup configuration
 LOCAL_SUPERLINK_STARTUP_TIMEOUT_SEC = 15.0
 CONTROL_API_PROBE_TIMEOUT_SEC = 0.4
 CONTROL_API_PROBE_INTERVAL_SEC = 0.2
@@ -60,71 +59,38 @@ def ensure_local_superlink(connection: SuperLinkConnection) -> SuperLinkConnecti
 
     # Options-only local profile (for example: [superlink.local] with options.* only).
     if connection.address is None:
-        runtime_connection = _runtime_connection_from(connection)
-        if not _is_control_api_available(runtime_connection):
-            _start_local_superlink(runtime_connection)
+        runtime_connection = SuperLinkConnection(
+            name=connection.name,
+            address=LOCAL_CONTROL_API_ADDRESS,
+            root_certificates=None,
+            insecure=True,
+            federation=connection.federation,
+            options=connection.options,
+        )
+        if not _is_local_superlink_started():
+            _start_local_superlink()
         return runtime_connection
 
     # Explicit addresses are user-managed.
     return connection
 
 
-def _runtime_connection_from(connection: SuperLinkConnection) -> SuperLinkConnection:
-    """Return an effective connection for managed local runtime."""
-    raw_address = connection.address or DEFAULT_LOCAL_CONTROL_API_ADDRESS
-    address = resolve_bind_address(raw_address)
-    return SuperLinkConnection(
-        name=connection.name,
-        address=address,
-        root_certificates=None,
-        insecure=True,
-        federation=connection.federation,
-        options=connection.options,
-    )
-
-
-def _format_host_port(host: str, port: int, is_v6: bool | None) -> str:
-    """Build host:port, preserving IPv6 bracket format."""
-    return f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
-
-
-def _derive_simulationio_address(control_api_address: str) -> str:
-    """Derive the SimulationIo API address from the Control API address."""
-    parsed = parse_address(control_api_address)
-    if not parsed:
-        return f"127.0.0.1:{SIMULATIONIO_PORT}"
-
-    host, _, is_v6 = parsed
-    return _format_host_port(host, int(SIMULATIONIO_PORT), is_v6)
-
-
-def _runtime_paths_for_address(address: str) -> tuple[Path, Path, Path]:
-    """Return (database_path, storage_dir, log_file_path) for managed local runtime."""
-    digest = hashlib.sha256(address.encode("utf-8")).hexdigest()[:16]
-    runtime_dir = get_flwr_home() / "superlink" / digest
+def _get_local_superlink_paths() -> tuple[Path, Path, Path]:
+    """Return (database_path, storage_dir, log_file_path) for local SuperLink."""
+    runtime_dir = get_flwr_home() / "local-superlink"
     database_path = runtime_dir / "state.db"
     storage_dir = runtime_dir / "ffs"
     log_file_path = runtime_dir / "superlink.log"
+    log_file_path.parent.mkdir(parents=True, exist_ok=True)
+    storage_dir.mkdir(parents=True, exist_ok=True)
     return database_path, storage_dir, log_file_path
 
 
-def _is_control_api_available(
-    connection: SuperLinkConnection,
-    probe_timeout_sec: float = CONTROL_API_PROBE_TIMEOUT_SEC,
-) -> bool:
-    """Return True if the connection's Control API endpoint is reachable."""
-    if connection.address is None:
-        return False
-
-    root_certificates = load_certificate_in_connection(connection)
-    channel = create_channel(
-        server_address=connection.address,
-        insecure=connection.insecure,
-        root_certificates=root_certificates,
-        max_message_length=GRPC_MAX_MESSAGE_LENGTH,
-    )
+def _is_local_superlink_started() -> bool:
+    """Return True if local SuperLink's Control API endpoint is reachable."""
+    channel = create_channel(server_address=LOCAL_CONTROL_API_ADDRESS, insecure=True)
     try:
-        grpc.channel_ready_future(channel).result(timeout=probe_timeout_sec)
+        grpc.channel_ready_future(channel).result(timeout=CONTROL_API_PROBE_TIMEOUT_SEC)
         return True
     except (grpc.FutureTimeoutError, grpc.RpcError):
         return False
@@ -132,16 +98,12 @@ def _is_control_api_available(
         channel.close()
 
 
-def _start_local_superlink(runtime_connection: SuperLinkConnection) -> None:
+def _start_local_superlink() -> None:
     """Start a managed local SuperLink in simulation mode and wait for readiness."""
-    address = cast(str, runtime_connection.address)
-    simulationio_address = _derive_simulationio_address(address)
-    database_path, storage_dir, log_file_path = _runtime_paths_for_address(address)
-    log_file_path.parent.mkdir(parents=True, exist_ok=True)
-    storage_dir.mkdir(parents=True, exist_ok=True)
+    database_path, storage_dir, log_file_path = _get_local_superlink_paths()
 
     typer.secho(
-        f"Starting local SuperLink on {address}...",
+        f"Starting local SuperLink on {LOCAL_CONTROL_API_ADDRESS}...",
         fg=typer.colors.BLUE,
     )
 
@@ -152,9 +114,9 @@ def _start_local_superlink(runtime_connection: SuperLinkConnection) -> None:
         "--isolation",
         ISOLATION_MODE_SUBPROCESS,
         "--control-api-address",
-        address,
+        LOCAL_CONTROL_API_ADDRESS,
         "--simulationio-api-address",
-        simulationio_address,
+        LOCAL_SIMULATIONIO_API_ADDRESS,
         "--database",
         str(database_path),
         "--storage-dir",
@@ -172,13 +134,13 @@ def _start_local_superlink(runtime_connection: SuperLinkConnection) -> None:
             )
     except OSError as exc:
         raise click.ClickException(
-            "Unable to launch `flower-superlink`. Ensure Flower is installed in the "
-            "active environment."
+            f"Unable to launch `flower-superlink` for local simulation: {exc}\n\n"
+            "Ensure Flower is installed in the active environment."
         ) from exc
 
     deadline = time.monotonic() + LOCAL_SUPERLINK_STARTUP_TIMEOUT_SEC
     while time.monotonic() < deadline:
-        if _is_control_api_available(runtime_connection):
+        if _is_local_superlink_started():
             return
         time.sleep(CONTROL_API_PROBE_INTERVAL_SEC)
 

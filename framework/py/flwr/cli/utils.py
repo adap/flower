@@ -308,19 +308,6 @@ def get_executed_command() -> str:
     return " ".join(cmd_parts)
 
 
-def require_superlink_address(connection: SuperLinkConnection) -> str:
-    """Return the SuperLink address or exit if it is not configured."""
-    if connection.address is None:
-        cmd = get_executed_command()
-        raise click.ClickException(
-            f"`{cmd}` currently works with a SuperLink. Ensure that the "
-            "correct SuperLink (Control API) address is provided SuperLink connection "
-            "you are using. Check your Flower configuration file. You may use `flwr "
-            "config list` to see its location in the file system."
-        )
-    return connection.address
-
-
 def init_channel_from_connection(
     connection: SuperLinkConnection, auth_plugin: CliAuthPlugin | None = None
 ) -> grpc.Channel:
@@ -339,7 +326,7 @@ def init_channel_from_connection(
         Configured gRPC channel with authentication interceptors.
     """
     connection = ensure_local_superlink(connection)
-    address = require_superlink_address(connection)
+    address = cast(str, connection.address)
 
     root_certificates_bytes = load_certificate_in_connection(connection)
 

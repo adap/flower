@@ -106,9 +106,9 @@ multiple apps to choose from. The example below uses the ``PyTorch`` quickstart 
 Then, follow the instructions shown after completing the |flwr_new_link|_ command. When
 you execute |flwr_run_link|_, you'll be using the ``Simulation Engine``.
 
-For local simulation profiles, ``flwr run`` submits the run to a local SuperLink via
-the Control API. If the profile has ``options.*`` and no explicit ``address``, Flower
-starts a local SuperLink automatically when needed.
+For local simulation profiles, ``flwr run`` submits the run to a local SuperLink via the
+Control API. If the profile has ``options.*`` and no explicit ``address``, Flower starts
+a local SuperLink automatically when needed.
 
 Simulation examples
 ===================
