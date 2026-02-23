@@ -147,6 +147,8 @@ def _start_local_superlink() -> None:
         time.sleep(CONTROL_API_PROBE_INTERVAL)
 
     # Timeout while waiting for local SuperLink to start
+    if process.poll() is None:
+        process.kill()
     raise click.ClickException(
         "Failed to start local SuperLink within "
         f"{LOCAL_SUPERLINK_STARTUP_TIMEOUT:.0f}s. "
