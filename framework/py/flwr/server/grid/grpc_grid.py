@@ -120,7 +120,7 @@ class GrpcGrid(Grid):  # pylint: disable=too-many-instance-attributes
         self,
         serverappio_service_address: str = SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
         root_certificates: bytes | None = None,
-        # TODO: remove default setting once token use is added to ClientAppIO calls
+        # Default setting required as long as ClientAppIO calls do not include tokens
         token: str = "",
     ) -> None:
         self._addr = serverappio_service_address
