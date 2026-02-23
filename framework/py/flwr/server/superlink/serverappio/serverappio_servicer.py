@@ -608,6 +608,8 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             # remains unauthenticated and tokenless requests are allowed.
             return
 
+        # Here we require exactly one of the following authentication mechanisms:
+        # 1) A valid token in the request, or 2) Valid SuperExec signed metadata in the context.
         token_present = bool(request.token)
         signed_metadata_present = superexec_auth_metadata_present(context)
         if token_present == signed_metadata_present:
