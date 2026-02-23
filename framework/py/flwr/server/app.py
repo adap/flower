@@ -149,7 +149,8 @@ def get_control_authz_plugins() -> dict[str, type[ControlAuthzPlugin]]:
 def get_federation_manager() -> FederationManager:
     """Return the FederationManager."""
     try:
-        return get_ee_federation_manager()
+        federation_manager: FederationManager = get_ee_federation_manager()
+        return federation_manager
     except NotImplementedError:
         return NoOpFederationManager()
 
