@@ -178,8 +178,7 @@ def test_get_head_values_from_object_content(children: list[InflatableObject]) -
 
 
 def test_get_object_type_from_object_content() -> None:
-    """Test helper function that extracts the name of the class of the deflated
-    object."""
+    """Test extraction of the class name from deflated object content."""
     data = b"this is a test"
     obj = CustomDataClass(data)
     obj_b = obj.deflate()

@@ -29,8 +29,7 @@ from .constant import HEAD_BODY_DIVIDER, HEAD_VALUE_DIVIDER
 
 
 class UnexpectedObjectContentError(Exception):
-    """Exception raised when the content of an object does not conform to the expected
-    structure for an InflatableObject (i.e., head, body, and values within the head)."""
+    """Raised when deflated object content does not match expected structure."""
 
     def __init__(self, object_id: str, reason: str):
         super().__init__(

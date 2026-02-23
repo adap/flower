@@ -20,8 +20,7 @@ from flwr.common.exit import ExitCode
 
 
 class InconsistentMessageReplies(AppExitException):
-    """Exception triggered when replies are inconsistent and therefore aggregation must
-    be skipped."""
+    """Raised when inconsistent replies prevent safe aggregation."""
 
     exit_code = ExitCode.SERVERAPP_STRATEGY_PRECONDITION_UNMET
 
