@@ -206,7 +206,7 @@ def _show_federation(
     formatted_runs = format_runs(runs, res.now)
 
     return (
-        [(fa.account.name, fa.role) for fa in fed_proto.members],
+        [(mm.account.name, mm.role) for mm in fed_proto.members],
         list(fed_proto.nodes),
         formatted_runs,
     )
