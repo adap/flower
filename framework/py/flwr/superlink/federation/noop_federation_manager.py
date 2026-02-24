@@ -64,12 +64,10 @@ class NoOpFederationManager(FederationManager):
         runs = [
             run for run_id in run_ids if (run := self.linkstate.get_run(run_id=run_id))
         ]
-        only_account = Account(id=NOOP_FLWR_AID, name=NOOP_ACCOUNT_NAME)
         return Federation(
             name=NOOP_FEDERATION,
             description=NOOP_FEDERATION_DESCRIPTION,
-            owner=only_account,
-            accounts=[only_account],
+            accounts=[Account(id=NOOP_FLWR_AID, name=NOOP_ACCOUNT_NAME, is_owner=True)],
             nodes=nodes,
             runs=runs,
         )

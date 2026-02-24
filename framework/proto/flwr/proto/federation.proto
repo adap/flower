@@ -22,6 +22,7 @@ import "flwr/proto/node.proto";
 message Account {
   string id = 1;
   string name = 2;
+  bool is_owner = 3;
 }
 
 message Federation {

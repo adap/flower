@@ -34,15 +34,18 @@ class Account(google.protobuf.message.Message):
 
     ID_FIELD_NUMBER: builtins.int
     NAME_FIELD_NUMBER: builtins.int
+    IS_OWNER_FIELD_NUMBER: builtins.int
     id: builtins.str
     name: builtins.str
+    is_owner: builtins.bool
     def __init__(
         self,
         *,
         id: builtins.str = ...,
         name: builtins.str = ...,
+        is_owner: builtins.bool = ...,
     ) -> None: ...
-    def ClearField(self, field_name: typing.Literal["id", b"id", "name", b"name"]) -> None: ...
+    def ClearField(self, field_name: typing.Literal["id", b"id", "is_owner", b"is_owner", "name", b"name"]) -> None: ...
 
 global___Account = Account
 

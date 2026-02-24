@@ -630,6 +630,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             federation=Federation(
                 name=federation.name,
                 description=federation.description,
+                accounts=federation.accounts,
             )
         )
 

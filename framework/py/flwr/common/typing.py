@@ -344,7 +344,6 @@ class Federation:
 
     name: str
     description: str
-    owner: Account
     accounts: list[Account]
     nodes: list[NodeInfo]
     runs: list[Run]
