@@ -64,15 +64,21 @@ Example:
    - For Deployment, generate demo data using the CLI command :code:`flwr-datasets create` (see the `deployment data guide <https://flower.ai/docs/datasets/how-to-generate-demo-data-for-deployment.html>`_ for details).
 
 
+Update App Metadata
+~~~~~~~~~~~~~~~~~~~
+
+Before publishing, ensure that your app's metadata is complete and accurate. This includes app name, version, description and license defined under :code:`[project]` in :code:`pyproject.toml`, as well as the publisher name under :code:`[tool.flwr.app]`.
+
+
 Create a Flower Account
 -----------------------
 
 If you don't already have one, create a Flower account at: `https://flower.ai/ <https://flower.ai/>`_.
 
-Click **Sign Up** in the top-right corner and follow the instructions.
+Click **Sign Up** in the top-right corner and follow the instructions. Make sure the username is same as the publisher name defined in your app's :code:`pyproject.toml`.
 
 Publishing on behalf of an organization?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Since organization accounts are not yet officially supported, please:
 
