@@ -27,7 +27,7 @@ Your app should run in both **Simulation** and **Deployment** modes **without re
 
 To achieve this, implement separate data-loading logic for each mode while keeping the training logic identical.
 
-You can distinguish between Simulation and Deployment using :code:`context.node_config` inside your ClientApp. If the keys :code:`"partition-id"` and :code:`"num-partitions"` are present, the app is running in Simulation mode.
+One way to distinguish between Simulation and Deployment using :code:`context.node_config` inside your ClientApp. If the keys :code:`"partition-id"` and :code:`"num-partitions"` are present, the app is running in Simulation mode.
 
 Example:
 
