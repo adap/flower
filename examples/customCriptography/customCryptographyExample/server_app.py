@@ -44,7 +44,7 @@ class FedAvgWithServerEval(FedAvg):
             ram_end = metrics.get("ram_end_mb")
             ram_delta = metrics.get("ram_delta_mb")
             if cpu is not None and ram_start is not None and ram_end is not None:
-                print(
+                log_time(
                     f"[Round {server_round}] Client {cid} | "
                     f"CPU={cpu:.4f}s RAM_start={ram_start:.2f}MB "
                     f"RAM_end={ram_end:.2f}MB RAM_delta={ram_delta:.2f}MB"
