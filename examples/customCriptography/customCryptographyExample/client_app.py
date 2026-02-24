@@ -2,10 +2,8 @@
 import logging
 import os
 
-import numpy as np
 import psutil
 import torch
-
 
 from flwr.client import ClientApp, NumPyClient
 from flwr.common import Context
@@ -51,12 +49,17 @@ class FlowerClient(NumPyClient):
     def _cpu_time(self):
         t = self.process.cpu_times()
         return t.user + t.system
+
+    def _ram_mb(self):
+        return self.process.memory_info().rss / (1024 * 1024)
+
     def fit(self, parameters, config):
         try:
             set_weights(self.net, parameters)
 
-            # misurazione CPU
+            # misurazione CPU/RAM
             start_cpu = self._cpu_time()
+            start_ram_mb = self._ram_mb()
 
             results = train(
                 self.net,
@@ -68,7 +71,10 @@ class FlowerClient(NumPyClient):
             )
 
             end_cpu = self._cpu_time()
+            end_ram_mb = self._ram_mb()
             cpu_time = end_cpu - start_cpu
+            ram_delta_mb = end_ram_mb - start_ram_mb
+            ram_peak_mb = end_ram_mb
             # cpu_logger.info(f"{cpu_time:.3f}", extra={"pid": os.getpid()})
             weights = get_weights(self.net)
 
@@ -76,12 +82,23 @@ class FlowerClient(NumPyClient):
             packets = math.ceil(size_bytes / MSS)
 
             logging.info(
+                f"Client PID={os.getpid()} | CPU fit={cpu_time:.4f}s | "
+                f"RAM start={start_ram_mb:.2f}MB end={end_ram_mb:.2f}MB "
+                f"delta={ram_delta_mb:.2f}MB"
+            )
+            logging.info(
                 f"UPLOAD model: {size_bytes} bytes "
                 f"(~{size_bytes/(1024*1024):.2f} MB) "
                 f"-> ~{packets} pacchetti TCP (MSS={MSS})"
             )
 
-            return weights, len(self.trainloader.dataset), {"cpu_fit": cpu_time}
+            return weights, len(self.trainloader.dataset), {
+                "cpu_fit_s": cpu_time,
+                "ram_start_mb": start_ram_mb,
+                "ram_end_mb": end_ram_mb,
+                "ram_delta_mb": ram_delta_mb,
+                "ram_peak_mb": ram_peak_mb,
+            }
         except Exception:
             logging.exception("ERRORE in fit() sul client, il client sta crashando!")
             raise
