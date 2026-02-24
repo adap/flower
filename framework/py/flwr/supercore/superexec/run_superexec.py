@@ -19,6 +19,8 @@ import time
 from logging import WARN
 from typing import Any
 
+from cryptography.hazmat.primitives.asymmetric import ec
+
 from flwr.common.config import get_flwr_dir
 from flwr.common.exit import ExitCode, flwr_exit, register_signal_handlers
 from flwr.common.grpc import create_channel, on_channel_state_change
@@ -39,6 +41,7 @@ from flwr.supercore.app_utils import start_parent_process_monitor
 from flwr.supercore.grpc_health import run_health_server_grpc_no_tls
 
 from .plugin import ExecPlugin
+from .superexec_auth_client_interceptor import SuperExecAuthClientInterceptor
 
 
 def run_superexec(  # pylint: disable=R0913,R0914,R0917
@@ -49,6 +52,9 @@ def run_superexec(  # pylint: disable=R0913,R0914,R0917
     flwr_dir: str | None = None,
     parent_pid: int | None = None,
     health_server_address: str | None = None,
+    auth_keys: (
+        tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey] | None
+    ) = None,
 ) -> None:
     """Run Flower SuperExec.
 
@@ -71,6 +77,9 @@ def run_superexec(  # pylint: disable=R0913,R0914,R0917
     health_server_address : Optional[str] (default: None)
         The address of the health server. If `None` is provided, the health server will
         NOT be started.
+    auth_keys : Optional[tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]]
+        SuperExec private/public key pair used to sign AppIO requests with metadata.
+        If `None`, no SuperExec signed metadata interceptor is attached.
     """
     # Start monitoring the parent process if a PID is provided
     if parent_pid is not None:
@@ -88,6 +97,11 @@ def run_superexec(  # pylint: disable=R0913,R0914,R0917
         server_address=appio_api_address,
         insecure=True,
         root_certificates=None,
+        interceptors=(
+            [SuperExecAuthClientInterceptor(*auth_keys)]
+            if auth_keys is not None
+            else []
+        ),
     )
     channel.subscribe(on_channel_state_change)
 

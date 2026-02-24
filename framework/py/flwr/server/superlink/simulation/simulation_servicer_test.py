@@ -17,34 +17,56 @@
 
 import tempfile
 import unittest
+from datetime import timedelta
 from unittest.mock import Mock
 
 import grpc
 from parameterized import parameterized
 
 from flwr.common import ConfigRecord, Context
-from flwr.common.constant import SIMULATIONIO_API_DEFAULT_SERVER_ADDRESS, Status
+from flwr.common.constant import (
+    SIMULATIONIO_API_DEFAULT_SERVER_ADDRESS,
+    SUPEREXEC_PUBLIC_KEY_HEADER,
+    SUPEREXEC_SIGNATURE_HEADER,
+    SUPEREXEC_TIMESTAMP_HEADER,
+    SYSTEM_TIME_TOLERANCE,
+    ExecPluginType,
+    Status,
+)
 from flwr.common.serde import context_to_proto, run_status_to_proto
 from flwr.common.serde_test import RecordMaker
 from flwr.common.typing import RunStatus
 from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
+    ListAppsToLaunchRequest,
+    ListAppsToLaunchResponse,
     PushAppOutputsRequest,
     PushAppOutputsResponse,
+    RequestTokenRequest,
+    RequestTokenResponse,
 )
 from flwr.proto.heartbeat_pb2 import (  # pylint:disable=E0611
     SendAppHeartbeatRequest,
     SendAppHeartbeatResponse,
 )
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
+    GetRunRequest,
+    GetRunResponse,
     UpdateRunStatusRequest,
     UpdateRunStatusResponse,
 )
 from flwr.server.superlink.linkstate.linkstate_factory import LinkStateFactory
 from flwr.server.superlink.simulation.simulationio_grpc import run_simulationio_api_grpc
+from flwr.server.superlink.superexec_auth import SuperExecAuthConfig
 from flwr.server.superlink.utils import _STATUS_TO_MSG
 from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME, NOOP_FEDERATION
+from flwr.supercore.date import now
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStoreFactory
+from flwr.supercore.primitives.asymmetric import (
+    generate_key_pairs,
+    public_key_to_bytes,
+    sign_message,
+)
 from flwr.superlink.federation import NoOpFederationManager
 
 
@@ -252,3 +274,160 @@ class TestSimulationIoServicer(unittest.TestCase):  # pylint: disable=R0902
         self.assertIsInstance(response, SendAppHeartbeatResponse)
         self.assertEqual(response.success, success)
         mock_ack_method.assert_called_once_with(token)
+
+
+class TestSimulationIoServicerSuperExecAuth(  # pylint: disable=too-many-instance-attributes
+    # Reason: gRPC test fixtures keep multiple stubs/handles on `self`.
+    unittest.TestCase
+):
+    """SimulationIoServicer tests with SuperExec auth enabled."""
+
+    def setUp(self) -> None:
+        """Initialize gRPC server with SuperExec auth enabled."""
+        self.temp_dir = tempfile.TemporaryDirectory()  # pylint: disable=R1732
+        self.addCleanup(self.temp_dir.cleanup)
+
+        state_factory = LinkStateFactory(
+            FLWR_IN_MEMORY_DB_NAME, NoOpFederationManager(), ObjectStoreFactory()
+        )
+        self.state = state_factory.state()
+        ffs_factory = FfsFactory(self.temp_dir.name)
+
+        self.superexec_sk, superexec_pk = generate_key_pairs()
+        self.superexec_pk_bytes = public_key_to_bytes(superexec_pk)
+        self.timestamp_tolerance_sec = 300
+        superexec_auth_config = SuperExecAuthConfig(
+            enabled=True,
+            timestamp_tolerance_sec=self.timestamp_tolerance_sec,
+            allowed_public_keys={
+                ExecPluginType.SERVER_APP: set(),
+                ExecPluginType.SIMULATION: {self.superexec_pk_bytes},
+            },
+        )
+
+        self._server: grpc.Server = run_simulationio_api_grpc(
+            SIMULATIONIO_API_DEFAULT_SERVER_ADDRESS,
+            state_factory,
+            ffs_factory,
+            None,
+            superexec_auth_config=superexec_auth_config,
+        )
+
+        self._channel = grpc.insecure_channel("localhost:9096")
+        self._list_apps_to_launch = self._channel.unary_unary(
+            "/flwr.proto.SimulationIo/ListAppsToLaunch",
+            request_serializer=ListAppsToLaunchRequest.SerializeToString,
+            response_deserializer=ListAppsToLaunchResponse.FromString,
+        )
+        self._request_token = self._channel.unary_unary(
+            "/flwr.proto.SimulationIo/RequestToken",
+            request_serializer=RequestTokenRequest.SerializeToString,
+            response_deserializer=RequestTokenResponse.FromString,
+        )
+        self._get_run = self._channel.unary_unary(
+            "/flwr.proto.SimulationIo/GetRun",
+            request_serializer=GetRunRequest.SerializeToString,
+            response_deserializer=GetRunResponse.FromString,
+        )
+
+    def tearDown(self) -> None:
+        """Stop gRPC server."""
+        self._server.stop(None)
+
+    def _create_dummy_run(self, running: bool = False) -> int:
+        run_id = self.state.create_run(
+            "", "", "", {}, NOOP_FEDERATION, ConfigRecord(), ""
+        )
+        if running:
+            self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
+            self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
+        return run_id
+
+    def _make_superexec_metadata(
+        self, method: str, timestamp: str | None = None
+    ) -> list[tuple[str, bytes | str]]:
+        timestamp = timestamp or now().isoformat()
+        payload = f"{timestamp}\n{method}".encode()
+        signature = sign_message(self.superexec_sk, payload)
+        return [
+            (SUPEREXEC_PUBLIC_KEY_HEADER, self.superexec_pk_bytes),
+            (SUPEREXEC_TIMESTAMP_HEADER, timestamp),
+            (SUPEREXEC_SIGNATURE_HEADER, signature),
+        ]
+
+    def test_list_apps_to_launch_requires_superexec_metadata(self) -> None:
+        """ListAppsToLaunch must reject unsigned calls when auth is enabled."""
+        with self.assertRaises(grpc.RpcError) as err:
+            self._list_apps_to_launch.with_call(request=ListAppsToLaunchRequest())
+        assert err.exception.code() == grpc.StatusCode.UNAUTHENTICATED
+
+    def test_request_token_accepts_valid_superexec_metadata(self) -> None:
+        """RequestToken should succeed with valid SuperExec metadata."""
+        run_id = self._create_dummy_run()
+        response, call = self._request_token.with_call(
+            request=RequestTokenRequest(run_id=run_id),
+            metadata=self._make_superexec_metadata(
+                "/flwr.proto.SimulationIo/RequestToken"
+            ),
+        )
+        assert isinstance(response, RequestTokenResponse)
+        assert call.code() == grpc.StatusCode.OK
+        assert response.token != ""
+
+    def test_get_run_accepts_superexec_metadata_without_token(self) -> None:
+        """GetRun supports SuperExec signed metadata when token is absent."""
+        run_id = self._create_dummy_run()
+        response, call = self._get_run.with_call(
+            request=GetRunRequest(run_id=run_id),
+            metadata=self._make_superexec_metadata("/flwr.proto.SimulationIo/GetRun"),
+        )
+        assert isinstance(response, GetRunResponse)
+        assert call.code() == grpc.StatusCode.OK
+        assert response.run.run_id == run_id
+
+    def test_get_run_rejects_both_auth_mechanisms(self) -> None:
+        """GetRun must reject requests with both auth mechanisms present."""
+        run_id = self._create_dummy_run()
+        token = self.state.create_token(run_id)
+        assert token is not None
+        with self.assertRaises(grpc.RpcError) as err:
+            self._get_run.with_call(
+                request=GetRunRequest(run_id=run_id, token=token),
+                metadata=self._make_superexec_metadata(
+                    "/flwr.proto.SimulationIo/GetRun"
+                ),
+            )
+        assert err.exception.code() == grpc.StatusCode.INVALID_ARGUMENT
+
+    def test_get_run_rejects_stale_superexec_timestamp(self) -> None:
+        """GetRun must reject stale SuperExec signed metadata."""
+        run_id = self._create_dummy_run()
+        stale_ts = (
+            now()
+            - timedelta(
+                seconds=self.timestamp_tolerance_sec + SYSTEM_TIME_TOLERANCE + 2
+            )
+        ).isoformat()
+        with self.assertRaises(grpc.RpcError) as err:
+            self._get_run.with_call(
+                request=GetRunRequest(run_id=run_id),
+                metadata=self._make_superexec_metadata(
+                    "/flwr.proto.SimulationIo/GetRun", timestamp=stale_ts
+                ),
+            )
+        assert err.exception.code() == grpc.StatusCode.UNAUTHENTICATED
+        assert err.exception.details() == "Expired SuperExec timestamp."
+
+    def test_get_run_rejects_future_timestamp_beyond_clock_drift(self) -> None:
+        """GetRun must reject future timestamps past drift allowance."""
+        run_id = self._create_dummy_run()
+        future_ts = (now() + timedelta(seconds=SYSTEM_TIME_TOLERANCE + 60)).isoformat()
+        with self.assertRaises(grpc.RpcError) as err:
+            self._get_run.with_call(
+                request=GetRunRequest(run_id=run_id),
+                metadata=self._make_superexec_metadata(
+                    "/flwr.proto.SimulationIo/GetRun", timestamp=future_ts
+                ),
+            )
+        assert err.exception.code() == grpc.StatusCode.UNAUTHENTICATED
+        assert err.exception.details() == "Expired SuperExec timestamp."

@@ -17,9 +17,14 @@
 
 import argparse
 from logging import INFO
+from pathlib import Path
 from typing import Any
 
 import yaml
+from cryptography.exceptions import UnsupportedAlgorithm
+from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.primitives.serialization import load_pem_private_key
+from cryptography.hazmat.primitives.serialization.ssh import load_ssh_private_key
 
 from flwr.common import EventType, event
 from flwr.common.constant import ExecPluginType
@@ -94,6 +99,13 @@ def flower_superexec() -> None:
 
     # Get the plugin class and stub class based on the plugin type
     plugin_class, stub_class = _get_plugin_and_stub_class(args.plugin_type)
+    try:
+        auth_keys = _try_load_superexec_auth_keys(args.auth_superexec_private_key)
+    except (OSError, ValueError) as err:
+        flwr_exit(
+            ExitCode.SUPEREXEC_INVALID_PLUGIN_CONFIG,
+            f"Invalid `--auth-superexec-private-key`: {err}",
+        )
     run_superexec(
         plugin_class=plugin_class,
         stub_class=stub_class,  # type: ignore
@@ -102,6 +114,7 @@ def flower_superexec() -> None:
         flwr_dir=args.flwr_dir,
         parent_pid=args.parent_pid,
         health_server_address=args.health_server_address,
+        auth_keys=auth_keys,
     )
 
 
@@ -145,6 +158,12 @@ def _parse_args() -> argparse.ArgumentParser:
         help="The PID of the parent process. When set, the process will terminate "
         "when the parent process exits.",
     )
+    parser.add_argument(
+        "--auth-superexec-private-key",
+        type=str,
+        default=None,
+        help="Path to the SuperExec private key used for signed AppIO calls.",
+    )
     add_ee_args_superexec(parser)
     add_args_health(parser)
     return parser
@@ -164,3 +183,38 @@ def _get_plugin_and_stub_class(
     if ret := get_ee_plugin_and_stub_class(plugin_type):
         return ret  # type: ignore[no-any-return]
     raise ValueError(f"Unknown plugin type: {plugin_type}")
+
+
+def _try_load_superexec_auth_keys(
+    key_path: str | None,
+) -> tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey] | None:
+    """Load a SuperExec EC private key and return the key pair."""
+    if key_path is None:
+        return None
+
+    key_bytes = Path(key_path).expanduser().read_bytes()
+    ssh_err: Exception | None = None
+
+    try:
+        ssh_private_key = load_ssh_private_key(key_bytes, None)
+    except (ValueError, UnsupportedAlgorithm) as err:
+        ssh_err = err
+    else:
+        if isinstance(ssh_private_key, ec.EllipticCurvePrivateKey):
+            return ssh_private_key, ssh_private_key.public_key()
+        raise ValueError("SuperExec key must be an EC private key.")
+
+    try:
+        pem_private_key = load_pem_private_key(key_bytes, None)
+    except (ValueError, TypeError, UnsupportedAlgorithm):
+        source_err = (
+            ssh_err if ssh_err is not None else ValueError("Unable to parse key")
+        )
+        raise ValueError(
+            "Unable to parse `--auth-superexec-private-key` "
+            "(accepted formats: SSH EC private key, PEM EC private key)."
+        ) from source_err
+
+    if not isinstance(pem_private_key, ec.EllipticCurvePrivateKey):
+        raise ValueError("SuperExec key must be an EC private key.")
+    return pem_private_key, pem_private_key.public_key()
