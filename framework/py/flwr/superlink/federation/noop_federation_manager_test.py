@@ -21,7 +21,10 @@ import pytest
 
 from flwr.common.constant import NOOP_ACCOUNT_NAME, NOOP_FLWR_AID
 from flwr.common.typing import Federation, Run, RunStatus
-from flwr.proto.federation_pb2 import Account  # pylint: disable=E0611
+from flwr.proto.federation_pb2 import (  # pylint: disable=E0611
+    Account,
+    FederationAccount,
+)
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.supercore.constant import NOOP_FEDERATION, NOOP_FEDERATION_DESCRIPTION
 
@@ -106,8 +109,9 @@ def test_get_details_with_valid_federation() -> None:
     assert result.name == NOOP_FEDERATION
     assert result.description == NOOP_FEDERATION_DESCRIPTION
     assert len(result.accounts) == 1
-    assert result.accounts[0] == Account(
-        id=NOOP_FLWR_AID, name=NOOP_ACCOUNT_NAME, is_owner=True
+    assert result.accounts[0] == FederationAccount(
+        account=Account(id=NOOP_FLWR_AID, name=NOOP_ACCOUNT_NAME),
+        role="owner",
     )
     assert len(result.nodes) == 2
     assert mock_node_1 in result.nodes and mock_node_2 in result.nodes
@@ -145,8 +149,9 @@ def test_get_details_with_no_runs() -> None:
     # Assert
     assert result.name == NOOP_FEDERATION
     assert len(result.accounts) == 1
-    assert result.accounts[0] == Account(
-        id=NOOP_FLWR_AID, name=NOOP_ACCOUNT_NAME, is_owner=True
+    assert result.accounts[0] == FederationAccount(
+        account=Account(id=NOOP_FLWR_AID, name=NOOP_ACCOUNT_NAME),
+        role="owner",
     )
     assert len(result.nodes) == 0
     assert len(result.runs) == 0

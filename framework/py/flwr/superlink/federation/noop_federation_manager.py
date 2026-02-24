@@ -17,7 +17,10 @@
 
 from flwr.common.constant import NOOP_ACCOUNT_NAME, NOOP_FLWR_AID
 from flwr.common.typing import Federation
-from flwr.proto.federation_pb2 import Account  # pylint: disable=E0611
+from flwr.proto.federation_pb2 import (  # pylint: disable=E0611
+    Account,
+    FederationAccount,
+)
 from flwr.supercore.constant import NOOP_FEDERATION, NOOP_FEDERATION_DESCRIPTION
 
 from .federation_manager import FederationManager
@@ -64,10 +67,13 @@ class NoOpFederationManager(FederationManager):
         runs = [
             run for run_id in run_ids if (run := self.linkstate.get_run(run_id=run_id))
         ]
+        only_account = Account(id=NOOP_FLWR_AID, name=NOOP_ACCOUNT_NAME)
         return Federation(
             name=NOOP_FEDERATION,
             description=NOOP_FEDERATION_DESCRIPTION,
-            accounts=[Account(id=NOOP_FLWR_AID, name=NOOP_ACCOUNT_NAME, is_owner=True)],
+            accounts=[
+                FederationAccount(account=only_account, role="owner"),
+            ],
             nodes=nodes,
             runs=runs,
         )

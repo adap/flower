@@ -22,7 +22,11 @@ import "flwr/proto/node.proto";
 message Account {
   string id = 1;
   string name = 2;
-  bool is_owner = 3;
+}
+
+message FederationAccount {
+  Account account = 1;
+  string role = 2;
 }
 
 message Federation {
@@ -30,6 +34,6 @@ message Federation {
   repeated string member_aids = 2; // Deprecated in v1.26.0
   repeated NodeInfo nodes = 3;
   repeated Run runs = 4;
-  string description = 5;        // Added in v1.26.0
-  repeated Account accounts = 6; // Added in v1.26.0
+  string description = 5;                  // Added in v1.26.0
+  repeated FederationAccount accounts = 6; // Added in v1.26.0
 }
