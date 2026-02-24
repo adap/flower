@@ -59,7 +59,7 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     UpdateRunStatusRequest,
     UpdateRunStatusResponse,
 )
-from flwr.server.superlink.appio_auth import AppIoAuthMixin
+from flwr.server.superlink.appio_auth import AppIoAuthPolicy
 from flwr.server.superlink.linkstate import LinkStateFactory
 from flwr.server.superlink.superexec_auth import (
     SuperExecAuthConfig,
@@ -69,10 +69,9 @@ from flwr.server.superlink.utils import abort_if
 from flwr.supercore.ffs import FfsFactory
 
 
-class SimulationIoServicer(AppIoAuthMixin, simulationio_pb2_grpc.SimulationIoServicer):
+class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
     """SimulationIo API servicer."""
 
-    _EXEC_PLUGIN_TYPE = ExecPluginType.SIMULATION
     _METHOD_LIST_APPS_TO_LAUNCH = "/flwr.proto.SimulationIo/ListAppsToLaunch"
     _METHOD_REQUEST_TOKEN = "/flwr.proto.SimulationIo/RequestToken"
     _METHOD_GET_RUN = "/flwr.proto.SimulationIo/GetRun"
@@ -89,6 +88,11 @@ class SimulationIoServicer(AppIoAuthMixin, simulationio_pb2_grpc.SimulationIoSer
         self.superexec_auth_config = (
             superexec_auth_config or get_disabled_superexec_auth_config()
         )
+        self._auth_policy = AppIoAuthPolicy(
+            state_factory=self.state_factory,
+            superexec_auth_config=self.superexec_auth_config,
+            plugin_type=ExecPluginType.SIMULATION,
+        )
         self.lock = threading.RLock()
 
     def ListAppsToLaunch(
@@ -98,7 +102,7 @@ class SimulationIoServicer(AppIoAuthMixin, simulationio_pb2_grpc.SimulationIoSer
     ) -> ListAppsToLaunchResponse:
         """Get run IDs with pending messages."""
         log(DEBUG, "SimulationIoServicer.ListAppsToLaunch")
-        self._verify_superexec_auth_if_enabled(
+        self._auth_policy.verify_superexec_auth_if_enabled(
             context=context, method=self._METHOD_LIST_APPS_TO_LAUNCH
         )
 
@@ -120,7 +124,7 @@ class SimulationIoServicer(AppIoAuthMixin, simulationio_pb2_grpc.SimulationIoSer
     ) -> RequestTokenResponse:
         """Request token."""
         log(DEBUG, "SimulationIoServicer.RequestToken")
-        self._verify_superexec_auth_if_enabled(
+        self._auth_policy.verify_superexec_auth_if_enabled(
             context=context, method=self._METHOD_REQUEST_TOKEN
         )
 
@@ -145,7 +149,7 @@ class SimulationIoServicer(AppIoAuthMixin, simulationio_pb2_grpc.SimulationIoSer
     ) -> GetRunResponse:
         """Get run information."""
         log(DEBUG, "SimulationIoServicer.GetRun")
-        self._verify_get_run_auth_if_enabled(
+        self._auth_policy.verify_get_run_auth_if_enabled(
             token=request.token,
             run_id=request.run_id,
             context=context,
@@ -173,7 +177,7 @@ class SimulationIoServicer(AppIoAuthMixin, simulationio_pb2_grpc.SimulationIoSer
         ffs = self.ffs_factory.ffs()
 
         # Validate the token
-        run_id = self._verify_token(request.token, context)
+        run_id = self._auth_policy.verify_token(request.token, context)
 
         # Lock access to LinkState, preventing obtaining the same pending run_id
         with self.lock:
@@ -209,7 +213,7 @@ class SimulationIoServicer(AppIoAuthMixin, simulationio_pb2_grpc.SimulationIoSer
         log(DEBUG, "SimultionIoServicer.PushAppOutputs")
 
         # Validate the token
-        run_id = self._verify_token(request.token, context)
+        run_id = self._auth_policy.verify_token(request.token, context)
 
         # Init access to LinkState
         state = self.state_factory.state()

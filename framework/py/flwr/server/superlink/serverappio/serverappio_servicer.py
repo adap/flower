@@ -81,7 +81,7 @@ from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     GetNodesRequest,
     GetNodesResponse,
 )
-from flwr.server.superlink.appio_auth import AppIoAuthMixin
+from flwr.server.superlink.appio_auth import AppIoAuthPolicy
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
 from flwr.server.superlink.superexec_auth import (
     SuperExecAuthConfig,
@@ -93,10 +93,9 @@ from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import NoObjectInStoreError, ObjectStoreFactory
 
 
-class ServerAppIoServicer(AppIoAuthMixin, serverappio_pb2_grpc.ServerAppIoServicer):
+class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     """ServerAppIo API servicer."""
 
-    _EXEC_PLUGIN_TYPE = ExecPluginType.SERVER_APP
     _METHOD_LIST_APPS_TO_LAUNCH = "/flwr.proto.ServerAppIo/ListAppsToLaunch"
     _METHOD_REQUEST_TOKEN = "/flwr.proto.ServerAppIo/RequestToken"
     _METHOD_GET_RUN = "/flwr.proto.ServerAppIo/GetRun"
@@ -115,6 +114,11 @@ class ServerAppIoServicer(AppIoAuthMixin, serverappio_pb2_grpc.ServerAppIoServic
         self.superexec_auth_config = (
             superexec_auth_config or get_disabled_superexec_auth_config()
         )
+        self._auth_policy = AppIoAuthPolicy(
+            state_factory=self.state_factory,
+            superexec_auth_config=self.superexec_auth_config,
+            plugin_type=ExecPluginType.SERVER_APP,
+        )
         self.lock = threading.RLock()
 
     def ListAppsToLaunch(
@@ -124,7 +128,7 @@ class ServerAppIoServicer(AppIoAuthMixin, serverappio_pb2_grpc.ServerAppIoServic
     ) -> ListAppsToLaunchResponse:
         """Get run IDs with pending messages."""
         log(DEBUG, "ServerAppIoServicer.ListAppsToLaunch")
-        self._verify_superexec_auth_if_enabled(
+        self._auth_policy.verify_superexec_auth_if_enabled(
             context=context, method=self._METHOD_LIST_APPS_TO_LAUNCH
         )
 
@@ -146,7 +150,7 @@ class ServerAppIoServicer(AppIoAuthMixin, serverappio_pb2_grpc.ServerAppIoServic
     ) -> RequestTokenResponse:
         """Request token."""
         log(DEBUG, "ServerAppIoServicer.RequestToken")
-        self._verify_superexec_auth_if_enabled(
+        self._auth_policy.verify_superexec_auth_if_enabled(
             context=context, method=self._METHOD_REQUEST_TOKEN
         )
 
@@ -171,7 +175,7 @@ class ServerAppIoServicer(AppIoAuthMixin, serverappio_pb2_grpc.ServerAppIoServic
     ) -> GetNodesResponse:
         """Get available nodes."""
         log(DEBUG, "ServerAppIoServicer.GetNodes")
-        self._verify_token_for_run(request.token, request.run_id, context)
+        self._auth_policy.verify_token_for_run(request.token, request.run_id, context)
 
         # Init state and store
         state = self.state_factory.state()
@@ -195,7 +199,7 @@ class ServerAppIoServicer(AppIoAuthMixin, serverappio_pb2_grpc.ServerAppIoServic
     ) -> PushAppMessagesResponse:
         """Push a set of Messages."""
         log(DEBUG, "ServerAppIoServicer.PushMessages")
-        self._verify_token_for_run(request.token, request.run_id, context)
+        self._auth_policy.verify_token_for_run(request.token, request.run_id, context)
 
         # Init state and store
         state = self.state_factory.state()
@@ -251,7 +255,7 @@ class ServerAppIoServicer(AppIoAuthMixin, serverappio_pb2_grpc.ServerAppIoServic
     ) -> PullAppMessagesResponse:
         """Pull a set of Messages."""
         log(DEBUG, "ServerAppIoServicer.PullMessages")
-        self._verify_token_for_run(request.token, request.run_id, context)
+        self._auth_policy.verify_token_for_run(request.token, request.run_id, context)
 
         # Init state and store
         state = self.state_factory.state()
@@ -323,7 +327,7 @@ class ServerAppIoServicer(AppIoAuthMixin, serverappio_pb2_grpc.ServerAppIoServic
     ) -> GetRunResponse:
         """Get run information."""
         log(DEBUG, "ServerAppIoServicer.GetRun")
-        self._verify_get_run_auth_if_enabled(
+        self._auth_policy.verify_get_run_auth_if_enabled(
             token=request.token,
             run_id=request.run_id,
             context=context,
@@ -350,7 +354,7 @@ class ServerAppIoServicer(AppIoAuthMixin, serverappio_pb2_grpc.ServerAppIoServic
         state = self.state_factory.state()
 
         # Validate the token
-        run_id = self._verify_token(request.token, context)
+        run_id = self._auth_policy.verify_token(request.token, context)
 
         # Lock access to LinkState, preventing obtaining the same pending run_id
         with self.lock:
@@ -389,7 +393,7 @@ class ServerAppIoServicer(AppIoAuthMixin, serverappio_pb2_grpc.ServerAppIoServic
         log(DEBUG, "ServerAppIoServicer.PushAppOutputs")
 
         # Validate the token
-        run_id = self._verify_token(request.token, context)
+        run_id = self._auth_policy.verify_token(request.token, context)
         if request.run_id != run_id:
             context.abort(
                 grpc.StatusCode.PERMISSION_DENIED,
@@ -418,7 +422,7 @@ class ServerAppIoServicer(AppIoAuthMixin, serverappio_pb2_grpc.ServerAppIoServic
     ) -> UpdateRunStatusResponse:
         """Update the status of a run."""
         log(DEBUG, "ServerAppIoServicer.UpdateRunStatus")
-        self._verify_token_for_run(request.token, request.run_id, context)
+        self._auth_policy.verify_token_for_run(request.token, request.run_id, context)
 
         # Init state and store
         state = self.state_factory.state()
@@ -447,7 +451,7 @@ class ServerAppIoServicer(AppIoAuthMixin, serverappio_pb2_grpc.ServerAppIoServic
     ) -> PushLogsResponse:
         """Push logs."""
         log(DEBUG, "ServerAppIoServicer.PushLogs")
-        self._verify_token_for_run(request.token, request.run_id, context)
+        self._auth_policy.verify_token_for_run(request.token, request.run_id, context)
         state = self.state_factory.state()
 
         # Add logs to LinkState
@@ -473,7 +477,7 @@ class ServerAppIoServicer(AppIoAuthMixin, serverappio_pb2_grpc.ServerAppIoServic
     ) -> PushObjectResponse:
         """Push an object to the ObjectStore."""
         log(DEBUG, "ServerAppIoServicer.PushObject")
-        self._verify_token_for_run(request.token, request.run_id, context)
+        self._auth_policy.verify_token_for_run(request.token, request.run_id, context)
 
         # Init state and store
         state = self.state_factory.state()
@@ -510,7 +514,7 @@ class ServerAppIoServicer(AppIoAuthMixin, serverappio_pb2_grpc.ServerAppIoServic
     ) -> PullObjectResponse:
         """Pull an object from the ObjectStore."""
         log(DEBUG, "ServerAppIoServicer.PullObject")
-        self._verify_token_for_run(request.token, request.run_id, context)
+        self._auth_policy.verify_token_for_run(request.token, request.run_id, context)
 
         # Init state and store
         state = self.state_factory.state()
@@ -545,7 +549,7 @@ class ServerAppIoServicer(AppIoAuthMixin, serverappio_pb2_grpc.ServerAppIoServic
     ) -> ConfirmMessageReceivedResponse:
         """Confirm message received."""
         log(DEBUG, "ServerAppIoServicer.ConfirmMessageReceived")
-        self._verify_token_for_run(request.token, request.run_id, context)
+        self._auth_policy.verify_token_for_run(request.token, request.run_id, context)
 
         # Init state and store
         state = self.state_factory.state()

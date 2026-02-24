@@ -12,16 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Shared authentication helpers for AppIO servicers."""
+"""Shared authentication policy for AppIO servicers."""
 
 # Reviewer note:
-# This mixin contains AppIO RPC authorization flow shared by ServerAppIo and
+# This policy contains AppIO RPC authorization flow shared by ServerAppIo and
 # SimulationIo:
 # 1) Validate run tokens and token-to-run binding
 # 2) Enforce SuperExec signed-metadata checks when enabled
 # 3) Apply GetRun dual-mode rule: exactly one auth mechanism per call
 #
-# Servicers provide `_EXEC_PLUGIN_TYPE` and call these helpers from RPC
+# Servicers instantiate this policy with plugin type and call it from RPC
 # handlers.
 # Cryptographic verification and config parsing are delegated to
 # `superexec_auth.py`.
@@ -40,16 +40,23 @@ from flwr.server.superlink.superexec_auth import (
 )
 
 
-class AppIoAuthMixin:
-    """Shared authentication methods for AppIO servicers."""
+class AppIoAuthPolicy:
+    """Shared authentication policy methods for AppIO servicers."""
 
-    state_factory: LinkStateFactory
-    superexec_auth_config: SuperExecAuthConfig
-    _EXEC_PLUGIN_TYPE: str
+    def __init__(
+        self,
+        state_factory: LinkStateFactory,
+        superexec_auth_config: SuperExecAuthConfig,
+        plugin_type: str,
+    ) -> None:
+        """Initialize the AppIO auth policy."""
+        self._state_factory = state_factory
+        self._superexec_auth_config = superexec_auth_config
+        self._plugin_type = plugin_type
 
-    def _verify_token(self, token: str, context: grpc.ServicerContext) -> int:
+    def verify_token(self, token: str, context: grpc.ServicerContext) -> int:
         """Verify the token and return the associated run ID."""
-        state = self.state_factory.state()
+        state = self._state_factory.state()
         run_id = state.get_run_id_by_token(token)
         if run_id is None or not state.verify_token(run_id, token):
             context.abort(
@@ -59,11 +66,11 @@ class AppIoAuthMixin:
             raise RuntimeError("This line should never be reached.")
         return run_id
 
-    def _verify_token_for_run(
+    def verify_token_for_run(
         self, token: str, run_id: int, context: grpc.ServicerContext
     ) -> None:
         """Verify token and ensure it belongs to the provided run ID."""
-        token_run_id = self._verify_token(token, context)
+        token_run_id = self.verify_token(token, context)
         if token_run_id != run_id:
             context.abort(
                 grpc.StatusCode.PERMISSION_DENIED,
@@ -71,20 +78,20 @@ class AppIoAuthMixin:
             )
             raise RuntimeError("This line should never be reached.")
 
-    def _verify_superexec_auth_if_enabled(
+    def verify_superexec_auth_if_enabled(
         self, context: grpc.ServicerContext, method: str
     ) -> None:
         """Verify SuperExec signed metadata when SuperExec auth is enabled."""
-        if not self.superexec_auth_config.enabled:
+        if not self._superexec_auth_config.enabled:
             return
         verify_superexec_signed_metadata(
             context=context,
             method=method,
-            plugin_type=self._EXEC_PLUGIN_TYPE,
-            cfg=self.superexec_auth_config,
+            plugin_type=self._plugin_type,
+            cfg=self._superexec_auth_config,
         )
 
-    def _verify_get_run_auth_if_enabled(
+    def verify_get_run_auth_if_enabled(
         self,
         token: str,
         run_id: int,
@@ -92,7 +99,7 @@ class AppIoAuthMixin:
         method: str,
     ) -> None:
         """Authorize GetRun with one mechanism when SuperExec auth is enabled."""
-        if not self.superexec_auth_config.enabled:
+        if not self._superexec_auth_config.enabled:
             # Legacy behavior by design: when SuperExec auth is disabled, GetRun
             # remains unauthenticated and tokenless requests are allowed.
             return
@@ -107,12 +114,12 @@ class AppIoAuthMixin:
             raise RuntimeError("This line should never be reached.")
 
         if token_present:
-            self._verify_token_for_run(token, run_id, context)
+            self.verify_token_for_run(token, run_id, context)
             return
 
         verify_superexec_signed_metadata(
             context=context,
             method=method,
-            plugin_type=self._EXEC_PLUGIN_TYPE,
-            cfg=self.superexec_auth_config,
+            plugin_type=self._plugin_type,
+            cfg=self._superexec_auth_config,
         )
