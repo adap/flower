@@ -23,7 +23,7 @@ If you're unsure what to contribute, start by exploring the `available apps on F
 Simulation vs. Deployment
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Your app should run in both **Simulation** and **Deployment** modes **without requiring code changes**.
+Your app should run in both **Simulation** and **Deployment** runtimes **without requiring code changes**.
 
 To achieve this, implement separate data-loading logic for each mode while keeping the training logic identical.
 
