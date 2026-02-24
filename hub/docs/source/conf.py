@@ -26,6 +26,10 @@ import sys
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
 
+# Fixing path issue for autodoc
+sys.path.insert(0, os.path.abspath("../../src/py"))
+
+
 # -- Project information -----------------------------------------------------
 
 project = "Flower"

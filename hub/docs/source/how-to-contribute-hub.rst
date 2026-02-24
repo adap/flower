@@ -117,4 +117,29 @@ You can view it at:
 
     https://flower.ai/apps/<account_name>/<app_name>/
 
+
+Publish a New Version of Your App
+---------------------------------
+
+Published apps cannot be removed from Flower Hub. However, you can release updated versions of your app to introduce improvements, new features, or bug fixes.
+
+To publish a new version:
+
+1. Make the necessary changes to your app's source code.
+2. Update the :code:`version` field under :code:`[project]` in :code:`pyproject.toml`.
+
+For example, if the current version is ``0.1.0``, you might update it to:
+
+- ``0.1.1`` for a bug fix (patch release)
+- ``0.2.0`` for new features (minor release)
+- ``1.0.0`` for major changes
+
+After updating the version number, publish the new release using the same command:
+
+.. code-block:: bash
+
+    flwr app publish <your-app-path>
+
+The new version will be published alongside previous versions, allowing users to reference and run specific releases as needed.
+
 We encourage you to share your app with colleagues and on social media to help grow the Flower Hub ecosystem and make federated AI more accessible to everyone.
