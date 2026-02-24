@@ -88,6 +88,6 @@ def _archive_federation(  # pylint: disable=W0613
 ) -> None:
     """Archive a federation."""
     with flwr_cli_grpc_exc_handler():
-        _: ArchiveFederationResponse = stub.ArchiveFederation(request)
+        _ : ArchiveFederationResponse = stub.ArchiveFederation(request)
 
-    raise click.ClickException("Command not fully implemented.")
+        typer.secho(f"✅ Federation '{request.federation_name}' archived successfully.")

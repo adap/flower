@@ -32,6 +32,7 @@ from ..utils import (
     cli_output_handler,
     flwr_cli_grpc_exc_handler,
     init_channel_from_connection,
+    print_json_to_stdout,
 )
 
 
@@ -91,6 +92,17 @@ def _create_federation(  # pylint: disable=W0613
 ) -> None:
     """Create a federation."""
     with flwr_cli_grpc_exc_handler():
-        _: CreateFederationResponse = stub.CreateFederation(request)
+        response: CreateFederationResponse = stub.CreateFederation(request)
 
-    raise click.ClickException("Command not fully implemented.")
+    if response.federation.name:
+        if is_json:
+            print_json_to_stdout(
+                {
+                    "success": True,
+                    "name": response.federation.name,
+                }
+            )
+        else:
+            click.echo(f"✅ Federation '{response.federation.name}' created successfully.")
+    else:
+        raise click.ClickException("Federation couldn't be created.")
