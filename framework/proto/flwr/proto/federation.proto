@@ -34,7 +34,6 @@ message Federation {
   repeated string member_aids = 2; // Deprecated in v1.26.0
   repeated NodeInfo nodes = 3;
   repeated Run runs = 4;
-  string description = 5;        // Added in v1.26.0
-  repeated Account accounts = 6; // Added in v1.26.0
-  repeated Member members = 7;   // Added in v1.27.0
+  string description = 5;      // Added in v1.26.0
+  repeated Member members = 6; // Added in v1.27.0
 }

@@ -346,14 +346,12 @@ class TestControlServicer(unittest.TestCase):
             name=name,
             description=description,
         )
-        mock_accounts = [Account(id=self.aid)]
         mock_members = [
             Member(account=Account(id=self.aid), role="owner"),
         ]
         mock_federation = SimpleNamespace(
             name=expected_name,
             description=description,
-            accounts=mock_accounts,
             members=mock_members,
         )
 
@@ -373,8 +371,6 @@ class TestControlServicer(unittest.TestCase):
         )
         self.assertEqual(response.federation.name, expected_name)
         self.assertEqual(response.federation.description, description)
-        self.assertEqual(len(response.federation.accounts), 1)
-        self.assertEqual(response.federation.accounts[0].id, self.aid)
         self.assertEqual(len(response.federation.members), 1)
         self.assertEqual(response.federation.members[0].account.id, self.aid)
         self.assertEqual(response.federation.members[0].role, "owner")
