@@ -18,7 +18,7 @@ The Flower Community is growing quickly - we're a friendly group of researchers,
 Flower Hub
 ----------
 
-Flower Hub is a federated app store that enables seamless app discovery, distribution, execution, and decentralized verification across heterogeneous environments, without reliance on a centralized trust authority.
+Flower Hub is a federated app store that enables application discovery, distribution, execution, and decentralized verification across heterogeneous environments — without relying on a centralized trust authority.
 
 With Flower Hub, you can:
 
@@ -33,7 +33,7 @@ Explore the available applications on Flower Hub and contribute your own federat
 How-to guides
 ~~~~~~~~~~~~~
 
-Problem-oriented how-to guides provide step-by-step instructions to help you accomplish specific tasks.
+How-to guides provide step-by-step instructions to help you accomplish specific tasks.
 
 .. toctree::
   :maxdepth: 1
