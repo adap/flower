@@ -29,7 +29,7 @@ After fetching the app, you can run it in either **Simulation** or **Deployment*
 If you are new to Flower, we recommend starting with **Simulation mode**, as it requires fewer components to be launched manually. By default, :code:`flwr run` uses the Simulation Engine.
 
 
-Run with the Simulation Engine
+Run with the Simulation Runtime
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. tip::
