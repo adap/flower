@@ -87,7 +87,6 @@ class ConsoleHandler(logging.StreamHandler):  # type: ignore[type-arg]
                 markup=False,
                 no_color=not self.colored,
                 force_terminal=self.colored,
-                legacy_windows=False,
             )
             self._console_stream = self.stream
             self._console_colored = self.colored

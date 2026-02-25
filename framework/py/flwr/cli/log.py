@@ -15,6 +15,7 @@
 """Flower command line interface `log` command."""
 
 
+import re
 import time
 from logging import DEBUG, ERROR, INFO
 from typing import Annotated, cast
@@ -37,6 +38,14 @@ from flwr.proto.control_pb2_grpc import ControlStub
 from .utils import flwr_cli_grpc_exc_handler, init_channel_from_connection
 
 CONSOLE = Console(highlight=False, markup=False)
+LOG_STYLES = {
+    "DEBUG": "blue",
+    "INFO": "green",
+    "WARNING": "yellow",
+    "ERROR": "red",
+    "CRITICAL": "magenta",
+}
+LOG_LEVEL_RE = re.compile(r"^(DEBUG|INFO|WARNING|ERROR|CRITICAL)(?=[:\s])")
 
 
 class AllLogsRetrieved(BaseException):
@@ -49,7 +58,25 @@ class AllLogsRetrieved(BaseException):
 
 def _print_log_output(log_output: str, end: str = "\n") -> None:
     """Render streamed log output, including ANSI colors."""
-    CONSOLE.print(Text.from_ansi(log_output), end=end)
+    CONSOLE.print(_render_log_output(log_output), end=end)
+
+
+def _render_log_output(log_output: str) -> Text:
+    """Render streamed output from ANSI or plain log lines."""
+    if "\x1b[" in log_output:
+        return Text.from_ansi(log_output)
+
+    text = Text()
+    for line in log_output.splitlines(keepends=True):
+        level_match = LOG_LEVEL_RE.match(line)
+        head_end = line.find(":")
+        if level_match and head_end >= level_match.end():
+            level = level_match.group(1)
+            text.append(line[:head_end], style=LOG_STYLES[level])
+            text.append(line[head_end:])
+        else:
+            text.append(line)
+    return text
 
 
 def start_stream(

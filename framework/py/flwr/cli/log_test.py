@@ -20,8 +20,9 @@ from typing import NoReturn
 from unittest.mock import Mock, call, patch
 
 from flwr.proto.control_pb2 import StreamLogsResponse  # pylint: disable=E0611
+from rich.text import Text
 
-from .log import print_logs, stream_logs
+from .log import _render_log_output, print_logs, stream_logs
 
 
 class InterruptedStreamLogsResponse:
@@ -90,3 +91,18 @@ class TestFlwrLog(unittest.TestCase):
             print_logs(run_id=123, channel=self.mock_channel, timeout=0)
         # Assert that only the first log chunk was printed in show mode
         mock_print.assert_has_calls([call("log_output_1")])
+
+    def test_render_log_output_styles_plain_header(self) -> None:
+        """Test coloring plain log headers for streamed logs."""
+        text = _render_log_output("INFO:      hello\nplain line\n")
+        assert isinstance(text, Text)
+        assert text.plain == "INFO:      hello\nplain line\n"
+        assert text.spans
+        assert all(span.end <= len("INFO") for span in text.spans)
+
+    def test_render_log_output_from_ansi(self) -> None:
+        """Test parsing ANSI log output."""
+        text = _render_log_output("\x1b[32mINFO\x1b[0m:      hello\n")
+        assert isinstance(text, Text)
+        assert text.plain == "INFO:      hello"
+        assert text.spans

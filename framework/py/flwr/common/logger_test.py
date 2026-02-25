@@ -84,4 +84,3 @@ def test_console_handler_rebuilds_console_for_streamed_colored_logs(
     assert len(inits) == 2
     assert all(kwargs["force_terminal"] is True for kwargs in inits)
     assert all(kwargs["no_color"] is False for kwargs in inits)
-    assert all(kwargs["legacy_windows"] is False for kwargs in inits)
