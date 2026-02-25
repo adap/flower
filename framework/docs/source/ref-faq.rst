@@ -34,3 +34,22 @@ Flower.
     * `Flower meets KOSMoS <https://www.isw-sites.de/kosmos/wp-content/uploads/sites/13/2021/05/Talk-Flower-Summit-2021.pdf>`_.
     * `Flower meets Talan blog post <https://www.linkedin.com/pulse/federated-learning-same-mask-different-faces-imen-ayari/?trackingId=971oIlxLQ9%2BA9RB0IQ73XQ%3D%3D>`_ .
     * `Flower meets Talan GitHub Repository <https://gitlab.com/Talan_Innovation_Factory/food-waste-prevention>`_ .
+
+.. dropdown:: :fa:`eye,mr-1` I see weird terminal codes (e.g.: ``� □[32m□[1m``) on Windows. How do I fix this?
+
+    If you see output (ANSI escape sequences or broken emojis) like this:
+
+    - ``� □[32m□[1m``
+    - ``□[0m□[96m□[1m``
+    - ``�``
+
+    this is usually a terminal host issue (not a PowerShell version issue). Make sure you have installed the latest `Windows Terminal <https://aka.ms/terminal>`_ **application** (Microsoft's terminal app), then run Flower commands there.
+
+    To quickly check whether your current PowerShell session is running in Windows Terminal:
+
+    .. code-block:: powershell
+
+        echo $env:WT_SESSION
+
+    If this prints a value (for example, ``b4c5f2c8-...``), you are in Windows Terminal.
+    If it prints nothing, you are likely running in a non-Windows-Terminal host (for example, conhost), which can show raw ANSI escape codes or incorrect emoji rendering.
