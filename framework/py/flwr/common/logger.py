@@ -31,6 +31,7 @@ from typing import Any, TextIO
 import grpc
 import typer
 from rich.console import Console
+from rich.text import Text
 
 from flwr.proto.log_pb2 import PushLogsRequest  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
@@ -69,7 +70,12 @@ class ConsoleHandler(logging.StreamHandler):
         super().__init__(stream)
         self.timestamps = timestamps
         self.json = json
-        self.colored = colored
+        self.console = Console(
+            file=self.stream,
+            highlight=False,
+            markup=False,
+            no_color=not colored,
+        )
 
     def emit(self, record: LogRecord) -> None:
         """Emit a record."""
@@ -84,25 +90,21 @@ class ConsoleHandler(logging.StreamHandler):
                 f"time='{formatted_time}', "
                 f"msg='{message}'}}"
             )
-            style = None
+            renderable: str | Text = line
         else:
             separator = " " * (8 - len(record.levelname))
             timestamp = f" {formatted_time}" if self.timestamps else ""
-            line = f"{record.levelname}{timestamp}: {separator} {message}"
-            style = LOG_STYLES.get(record.levelname) if self.colored else None
+            head = f"{record.levelname}{timestamp}"
+            tail = f": {separator} {message}"
+            if not self.console.no_color:
+                renderable = Text.assemble(
+                    (head, LOG_STYLES.get(record.levelname)),
+                    tail,
+                )
+            else:
+                renderable = f"{head}{tail}"
 
-        Console(
-            file=self.stream,
-            highlight=False,
-            markup=False,
-            no_color=not self.colored,
-        ).print(
-            line,
-            style=style,
-            soft_wrap=True,
-            overflow="ignore",
-            crop=False,
-        )
+        self.console.print(renderable, soft_wrap=True, overflow="ignore", crop=False)
 
 
 def update_console_handler(
@@ -116,7 +118,7 @@ def update_console_handler(
     if timestamps is not None:
         console_handler.timestamps = timestamps
     if colored is not None:
-        console_handler.colored = colored
+        console_handler.console.no_color = not colored
 
 
 # Configure console logger
