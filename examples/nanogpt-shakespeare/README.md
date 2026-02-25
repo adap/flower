@@ -1,8 +1,6 @@
----
-tags: [basic, nlp, gpu]
-dataset: [Tiny Shakespeare]
-framework: [torch]
----
+______________________________________________________________________
+
+## tags: [basic, nlp, gpu] dataset: [Tiny Shakespeare] framework: [torch]
 
 # Federated Learning with NanoGPT and Flower
 
@@ -65,12 +63,12 @@ Expected output over 5 rounds (2 simulated clients, 50 steps each, CPU):
 
 | Round | Train Loss | Val Loss | Perplexity |
 |-------|-----------|----------|------------|
-| 0     | —         | 4.23     | 69.0       |
-| 1     | 3.26      | 2.97     | 19.5       |
-| 2     | 2.74      | 2.64     | 14.0       |
-| 3     | 2.60      | 2.56     | 13.0       |
-| 4     | 2.53      | 2.52     | 12.5       |
-| 5     | 2.50      | 2.52     | 12.4       |
+| 0 | — | 4.23 | 69.0 |
+| 1 | 3.26 | 2.97 | 19.5 |
+| 2 | 2.74 | 2.64 | 14.0 |
+| 3 | 2.60 | 2.56 | 13.0 |
+| 4 | 2.53 | 2.52 | 12.5 |
+| 5 | 2.50 | 2.52 | 12.4 |
 
 ### Run with the Deployment Engine
 
@@ -124,15 +122,15 @@ flwr run . my-federation
 
 ## Configuration
 
-| Parameter           | Default | Description                          |
+| Parameter | Default | Description |
 |---------------------|---------|--------------------------------------|
-| num-server-rounds   | 5       | Number of federated rounds           |
-| local-epochs        | 1       | Training epochs per client per round |
-| learning-rate       | 1e-3    | AdamW learning rate                  |
-| batch-size          | 64      | Training batch size                  |
-| block-size          | 256     | Context window length (chars)        |
-| max-steps           | 50      | Max training steps per round (0 = unlimited) |
-| n-layer             | 6       | Transformer layers                   |
-| n-head              | 6       | Attention heads                      |
-| n-embd              | 384     | Embedding dimension                  |
-| dropout             | 0.2     | Dropout rate                         |
+| num-server-rounds | 5 | Number of federated rounds |
+| local-epochs | 1 | Training epochs per client per round |
+| learning-rate | 1e-3 | AdamW learning rate |
+| batch-size | 64 | Training batch size |
+| block-size | 256 | Context window length (chars) |
+| max-steps | 50 | Max training steps per round (0 = unlimited) |
+| n-layer | 6 | Transformer layers |
+| n-head | 6 | Attention heads |
+| n-embd | 384 | Embedding dimension |
+| dropout | 0.2 | Dropout rate |

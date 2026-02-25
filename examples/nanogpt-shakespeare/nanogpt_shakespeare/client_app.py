@@ -3,7 +3,6 @@
 import torch
 from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
 from flwr.clientapp import ClientApp
-
 from nanogpt_shakespeare.task import build_model, load_data, load_local_data
 from nanogpt_shakespeare.task import test as test_fn
 from nanogpt_shakespeare.task import train as train_fn
@@ -42,7 +41,8 @@ def train(msg: Message, context: Context):
     trainloader, _ = _load_trainval(context)
 
     train_loss = train_fn(
-        model, trainloader,
+        model,
+        trainloader,
         epochs=int(cfg["local-epochs"]),
         lr=msg.content["config"]["lr"],
         device=str(device),

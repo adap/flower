@@ -159,8 +159,12 @@ class CausalSelfAttention(nn.Module):
         q = q.view(B, T, self.n_head, C // self.n_head).transpose(1, 2)
         v = v.view(B, T, self.n_head, C // self.n_head).transpose(1, 2)
         y = F.scaled_dot_product_attention(
-            q, k, v, attn_mask=None,
-            dropout_p=self.dropout if self.training else 0, is_causal=True,
+            q,
+            k,
+            v,
+            attn_mask=None,
+            dropout_p=self.dropout if self.training else 0,
+            is_causal=True,
         )
         y = y.transpose(1, 2).contiguous().view(B, T, C)
         y = self.resid_dropout(self.c_proj(y))
@@ -212,13 +216,15 @@ class GPT(nn.Module):
     def __init__(self, config: GPTConfig):
         super().__init__()
         self.config = config
-        self.transformer = nn.ModuleDict(dict(
-            wte=nn.Embedding(config.vocab_size, config.n_embd),
-            wpe=nn.Embedding(config.block_size, config.n_embd),
-            drop=nn.Dropout(config.dropout),
-            h=nn.ModuleList([Block(config) for _ in range(config.n_layer)]),
-            ln_f=LayerNorm(config.n_embd, bias=config.bias),
-        ))
+        self.transformer = nn.ModuleDict(
+            dict(
+                wte=nn.Embedding(config.vocab_size, config.n_embd),
+                wpe=nn.Embedding(config.block_size, config.n_embd),
+                drop=nn.Dropout(config.dropout),
+                h=nn.ModuleList([Block(config) for _ in range(config.n_layer)]),
+                ln_f=LayerNorm(config.n_embd, bias=config.bias),
+            )
+        )
         self.lm_head = nn.Linear(config.n_embd, config.vocab_size, bias=False)
         self.transformer.wte.weight = self.lm_head.weight  # weight tying
 
@@ -248,9 +254,7 @@ class GPT(nn.Module):
         x = self.transformer.ln_f(x)
         if targets is not None:
             logits = self.lm_head(x)
-            loss = F.cross_entropy(
-                logits.view(-1, logits.size(-1)), targets.view(-1)
-            )
+            loss = F.cross_entropy(logits.view(-1, logits.size(-1)), targets.view(-1))
         else:
             logits = self.lm_head(x[:, [-1], :])
             loss = None
@@ -294,8 +298,14 @@ def build_model(run_config: dict) -> GPT:
 # ---------------------------------------------------------------------------
 
 
-def train(model: GPT, trainloader: DataLoader, epochs: int, lr: float, device: str,
-          max_steps: int = 0):
+def train(
+    model: GPT,
+    trainloader: DataLoader,
+    epochs: int,
+    lr: float,
+    device: str,
+    max_steps: int = 0,
+):
     """Train the model and return average loss. max_steps=0 means unlimited."""
     model.to(device)
     model.train()

@@ -4,8 +4,7 @@ import torch
 from flwr.app import ArrayRecord, ConfigRecord, Context, MetricRecord
 from flwr.serverapp import Grid, ServerApp
 from flwr.serverapp.strategy import FedAvg
-
-from nanogpt_shakespeare.task import build_model, load_centralized_data, test, _get_meta
+from nanogpt_shakespeare.task import _get_meta, build_model, load_centralized_data, test
 
 app = ServerApp()
 
@@ -38,6 +37,7 @@ def main(grid: Grid, context: Context) -> None:
 
 def make_evaluate_fn(cfg: dict):
     """Create a global evaluation function."""
+
     def global_evaluate(server_round: int, arrays: ArrayRecord) -> MetricRecord:
         model = build_model(cfg)
         model.load_state_dict(arrays.to_torch_state_dict())
@@ -48,6 +48,7 @@ def make_evaluate_fn(cfg: dict):
         loss, ppl = test(model, valloader, "cpu")
         print(f"  [Round {server_round}] val_loss={loss:.4f}  perplexity={ppl:.2f}")
         return MetricRecord({"val_loss": loss, "perplexity": ppl})
+
     return global_evaluate
 
 
