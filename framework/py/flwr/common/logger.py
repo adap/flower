@@ -22,6 +22,7 @@ import re
 import sys
 import threading
 import time
+from functools import lru_cache
 from io import StringIO
 from logging import ERROR, WARN, LogRecord
 from logging.handlers import HTTPHandler
@@ -60,6 +61,73 @@ else:
     StreamHandler = logging.StreamHandler
 
 
+@lru_cache(maxsize=4)
+def _windows_supports_ansi(fileno: int) -> bool:
+    """Return True if ANSI colors are supported for the given stream on Windows."""
+    try:
+        import ctypes
+        import msvcrt
+    except ImportError:
+        return False
+
+    try:
+        handle = msvcrt.get_osfhandle(fileno)
+    except OSError:
+        return False
+
+    enable_virtual_terminal_processing = 0x0004
+    mode = ctypes.c_uint()
+    kernel32 = ctypes.windll.kernel32  # pylint: disable=no-member
+    if kernel32.GetConsoleMode(handle, ctypes.byref(mode)) == 0:
+        return False
+    if mode.value & enable_virtual_terminal_processing:
+        return True
+    return bool(
+        kernel32.SetConsoleMode(handle, mode.value | enable_virtual_terminal_processing)
+    )
+
+
+def _stream_supports_color(stream: TextIO | None) -> bool:
+    """Return True if colored output should be used for the provided stream."""
+    if os.getenv("NO_COLOR") is not None:
+        return False
+
+    force_color = os.getenv("FORCE_COLOR")
+    if force_color is not None and force_color != "0":
+        return True
+
+    try:
+        is_tty = stream is not None and hasattr(stream, "isatty") and stream.isatty()
+    except OSError:
+        return False
+
+    if not is_tty:
+        return False
+
+    term = os.getenv("TERM", "").lower()
+    if term == "dumb":
+        return False
+
+    if os.name != "nt":
+        return True
+
+    if os.getenv("WT_SESSION"):
+        return True
+    if os.getenv("ANSICON"):
+        return True
+    if os.getenv("ConEmuANSI", "").upper() == "ON":
+        return True
+    if term.startswith(("xterm", "ansi", "cygwin")):
+        return True
+
+    try:
+        fileno = stream.fileno()
+    except (AttributeError, OSError, ValueError):
+        return False
+
+    return _windows_supports_ansi(fileno)
+
+
 class ConsoleHandler(StreamHandler):
     """Console handler that allows configurable formatting."""
 
@@ -89,13 +157,15 @@ class ConsoleHandler(StreamHandler):
     def format(self, record: LogRecord) -> str:
         """Format function that adds colors to log level."""
         seperator = " " * (8 - len(record.levelname))
+        use_colors = self.colored and _stream_supports_color(self.stream)
+        level_color = LOG_COLORS.get(record.levelname, "")
         if self.json:
             log_fmt = "{lvl='%(levelname)s', time='%(asctime)s', msg='%(message)s'}"
         else:
             log_fmt = (
-                f"{LOG_COLORS[record.levelname] if self.colored else ''}"
+                f"{level_color if use_colors else ''}"
                 f"%(levelname)s {'%(asctime)s' if self.timestamps else ''}"
-                f"{LOG_COLORS['RESET'] if self.colored else ''}"
+                f"{LOG_COLORS['RESET'] if use_colors else ''}"
                 f": {seperator} %(message)s"
             )
         formatter = logging.Formatter(log_fmt)
