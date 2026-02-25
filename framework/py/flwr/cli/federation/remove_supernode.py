@@ -16,7 +16,6 @@
 
 from typing import Annotated
 
-import click
 import typer
 
 from flwr.cli.config_migration import migrate
@@ -90,18 +89,9 @@ def _remove_supernode(  # pylint: disable=W0613
 ) -> None:
     """Remove a SuperNode from a federation."""
     with flwr_cli_grpc_exc_handler():
-        res: RemoveNodeFromFederationResponse = stub.RemoveNodeFromFederation(request)
+        _: RemoveNodeFromFederationResponse = stub.RemoveNodeFromFederation(request)
 
-    if res.node_id:
-        if is_json:
-            print_json_to_stdout({"success": True, "node_id": res.node_id})
-        else:
-            typer.secho(
-                f"✅ SuperNode '{res.node_id}' removed from federation "
-                f"'{request.federation_name}'."
-            )
-
+    if is_json:
+        print_json_to_stdout({"success": True})
     else:
-        raise click.ClickException(
-            "SuperNode could not be removed from the federation."
-        )
+        typer.secho("✅ SuperNode removed from federation.")

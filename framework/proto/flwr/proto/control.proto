@@ -157,10 +157,10 @@ message AddNodeToFederationRequest {
   string federation_name = 1;
   uint64 node_id = 2;
 }
-message AddNodeToFederationResponse { uint64 node_id = 1; }
+message AddNodeToFederationResponse {}
 
 message RemoveNodeFromFederationRequest {
   string federation_name = 1;
   uint64 node_id = 2;
 }
-message RemoveNodeFromFederationResponse { uint64 node_id = 1; }
+message RemoveNodeFromFederationResponse {}

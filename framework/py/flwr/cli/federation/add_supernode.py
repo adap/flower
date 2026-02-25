@@ -16,7 +16,6 @@
 
 from typing import Annotated
 
-import click
 import typer
 
 from flwr.cli.config_migration import migrate
@@ -90,15 +89,9 @@ def _add_supernode(  # pylint: disable=W0613
 ) -> None:
     """Add a SuperNode to a federation."""
     with flwr_cli_grpc_exc_handler():
-        res: AddNodeToFederationResponse = stub.AddNodeToFederation(request)
+        _: AddNodeToFederationResponse = stub.AddNodeToFederation(request)
 
-    if res.node_id:
-        if is_json:
-            print_json_to_stdout({"success": True, "node_id": res.node_id})
-        else:
-            typer.secho(
-                f"✅ SuperNode '{res.node_id}' added to federation "
-                f"'{request.federation_name}'."
-            )
+    if is_json:
+        print_json_to_stdout({"success": True})
     else:
-        raise click.ClickException("SuperNode could not be added to the federation.")
+        typer.secho("✅ SuperNode added to federation.")

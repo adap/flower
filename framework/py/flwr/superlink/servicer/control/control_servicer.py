@@ -698,7 +698,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 SUPERLINK_DOES_NOT_SUPPORT_FED_MANAGEMENT_MESSAGE,
             )
 
-        return AddNodeToFederationResponse(node_id=request.node_id)
+        return AddNodeToFederationResponse()
 
     def RemoveNodeFromFederation(
         self, request: RemoveNodeFromFederationRequest, context: grpc.ServicerContext
@@ -731,7 +731,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 SUPERLINK_DOES_NOT_SUPPORT_FED_MANAGEMENT_MESSAGE,
             )
 
-        return RemoveNodeFromFederationResponse(node_id=request.node_id)
+        return RemoveNodeFromFederationResponse()
 
 
 def _validate_federation_and_node_in_request(
