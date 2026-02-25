@@ -32,6 +32,7 @@ from ..utils import (
     cli_output_handler,
     flwr_cli_grpc_exc_handler,
     init_channel_from_connection,
+    print_json_to_stdout,
 )
 
 
@@ -89,6 +90,21 @@ def _add_supernode(  # pylint: disable=W0613
 ) -> None:
     """Add a SuperNode to a federation."""
     with flwr_cli_grpc_exc_handler():
-        _: AddNodeToFederationResponse = stub.AddNodeToFederation(request)
+        res: AddNodeToFederationResponse = stub.AddNodeToFederation(request)
 
-    raise click.ClickException("Command not fully implemented.")
+    if res.node_id:
+        if is_json:
+            print_json_to_stdout(
+                {
+                    "success": True,
+                    "node_id": res.node_id,
+                }
+            )
+        else:
+            typer.secho(
+                f"✅ SuperNode '{res.node_id}' added to federation "
+                f"'{request.federation_name}'."
+            )
+
+    else:
+        raise click.ClickException("SuperNode could not be added to the federation.")
