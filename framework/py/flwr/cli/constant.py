@@ -14,6 +14,9 @@
 # ==============================================================================
 """Constants for CLI commands."""
 
+
+import os
+
 from flwr.supercore.constant import SUPERGRID_ADDRESS
 
 # General help message for config overrides
@@ -113,3 +116,14 @@ options.backend.client-resources.num-gpus = 0
 AUTHN_TYPE_STORE_KEY = "flower.account-auth.%s.authn-type"
 ACCESS_TOKEN_STORE_KEY = "flower.account-auth.%s.oidc-access-token"
 REFRESH_TOKEN_STORE_KEY = "flower.account-auth.%s.oidc-refresh-token"
+
+# Local SuperLink configuration
+LOCAL_CONTROL_API_PORT = os.environ.get("FLWR_LOCAL_CONTROL_API_PORT", "39093")
+LOCAL_SIMULATIONIO_API_PORT = os.environ.get(
+    "FLWR_LOCAL_SIMULATIONIO_API_PORT", "39094"
+)
+LOCAL_CONTROL_API_ADDRESS = f"127.0.0.1:{LOCAL_CONTROL_API_PORT}"
+LOCAL_SIMULATIONIO_API_ADDRESS = f"127.0.0.1:{LOCAL_SIMULATIONIO_API_PORT}"
+LOCAL_SUPERLINK_STARTUP_TIMEOUT = 15.0
+CONTROL_API_PROBE_TIMEOUT = 0.4
+CONTROL_API_PROBE_INTERVAL = 0.2
