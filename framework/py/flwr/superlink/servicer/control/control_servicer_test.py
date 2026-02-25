@@ -727,6 +727,7 @@ class TestValidateFederationAndNodesInRequest(unittest.TestCase):
             node_id=node_id,
         )
         self.assertIsInstance(response, AddNodeToFederationResponse)
+        self.assertEqual(response.node_id, node_id)
         ctx.abort.assert_not_called()
 
     def test_add_node_to_federation_aborts_no_federation(self) -> None:
@@ -758,6 +759,7 @@ class TestValidateFederationAndNodesInRequest(unittest.TestCase):
             node_id=node_id,
         )
         self.assertIsInstance(response, RemoveNodeFromFederationResponse)
+        self.assertEqual(response.node_id, node_id)
         ctx.abort.assert_not_called()
 
     def test_remove_node_from_federation_aborts_no_federation(self) -> None:
