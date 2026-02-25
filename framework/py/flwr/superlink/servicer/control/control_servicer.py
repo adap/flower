@@ -581,8 +581,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         # Build Federation proto object
         federation_proto = Federation(
             name=federation,
-            member_aids=[acc.id for acc in details.accounts],  # Deprecated in v1.26.0
-            accounts=details.accounts,
+            members=details.members,
             nodes=details.nodes,
             runs=[run_to_proto(run) for run in details.runs],
         )
@@ -606,13 +605,16 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         # Init link state
         state = self.linkstate_factory.state()
 
-        flwr_aid = get_current_account_info().flwr_aid
-        flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
+        account_info = get_current_account_info()
+        flwr_aid = _check_flwr_aid_exists(account_info.flwr_aid, context)
+
+        # Construct federation name
+        federation_name = f"@{account_info.account_name}/{request.name}"
 
         # Create federation
         try:
             federation = state.federation_manager.create_federation(
-                name=request.name,
+                name=federation_name,
                 description=request.description,
                 flwr_aid=flwr_aid,
             )
@@ -627,6 +629,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             federation=Federation(
                 name=federation.name,
                 description=federation.description,
+                members=federation.members,
             )
         )
 
