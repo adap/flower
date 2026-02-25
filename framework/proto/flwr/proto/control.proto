@@ -145,7 +145,7 @@ message ShowFederationResponse {
 }
 
 message CreateFederationRequest {
-  string name = 1;
+  string federation_name = 1;
   string description = 2;
 }
 message CreateFederationResponse { Federation federation = 1; }
