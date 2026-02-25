@@ -57,7 +57,7 @@ MESSAGE_FORMATTER = logging.Formatter("%(message)s")
 TIME_FORMATTER = logging.Formatter()
 
 
-class ConsoleHandler(logging.StreamHandler):
+class ConsoleHandler(logging.StreamHandler):  # type: ignore[type-arg]
     """Console handler that allows configurable formatting."""
 
     def __init__(
@@ -85,22 +85,15 @@ class ConsoleHandler(logging.StreamHandler):
             message = message.replace("\t", "").strip()
             if not message:
                 return
-            line = (
-                f"{{lvl='{record.levelname}', "
-                f"time='{formatted_time}', "
-                f"msg='{message}'}}"
-            )
-            renderable: str | Text = line
+            renderable: str | Text = f"{{lvl='{record.levelname}', "
+            renderable += f"time='{formatted_time}', msg='{message}'}}"
         else:
             separator = " " * (8 - len(record.levelname))
             timestamp = f" {formatted_time}" if self.timestamps else ""
             head = f"{record.levelname}{timestamp}"
             tail = f": {separator} {message}"
             if not self.console.no_color:
-                renderable = Text.assemble(
-                    (head, LOG_STYLES.get(record.levelname)),
-                    tail,
-                )
+                renderable = Text.assemble((head, LOG_STYLES[record.levelname]), tail)
             else:
                 renderable = f"{head}{tail}"
 
