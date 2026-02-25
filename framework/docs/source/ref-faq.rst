@@ -37,13 +37,15 @@ Flower.
 
 .. dropdown:: :fa:`eye,mr-1` I see weird terminal codes (e.g.: ``� □[32m□[1m``) on Windows. How do I fix this?
 
+    .. _faq-windows-weird-output:
+
     If you see output (ANSI escape sequences or broken emojis) like this:
 
     - ``� □[32m□[1m``
     - ``□[0m□[96m□[1m``
     - ``�``
 
-    this is usually a terminal host issue (not a PowerShell version issue). Make sure you have installed the latest `Windows Terminal <https://aka.ms/terminal>`_ **application** (Microsoft's terminal app), then run Flower commands there.
+    this is usually a terminal host issue (not a PowerShell version issue). Make sure you have installed the latest `Windows Terminal <https://aka.ms/terminal>`_ **application** (Microsoft's terminal app), and then run Flower CLI commands there.
 
     To quickly check whether your current PowerShell session is running in Windows Terminal:
 

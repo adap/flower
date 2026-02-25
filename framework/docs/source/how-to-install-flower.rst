@@ -65,11 +65,16 @@ or with ``mamba``:
 The following command can be used to verify if Flower was successfully installed. If
 everything worked, it should print the version of Flower to the command line:
 
-.. code-block:: bash
+.. code-block:: console
     :substitutions:
 
-    python -c "import flwr;print(flwr.__version__)"
-    |stable_flwr_version|
+    $ flwr --version
+    Flower version: |stable_flwr_version|
+
+.. note::
+
+    If you're on Windows and see weird terminal output (e.g.: ``� □[32m□[1m``), check
+    :ref:`this FAQ entry <faq-windows-weird-output>`.
 
 *******************************
  Advanced installation options
