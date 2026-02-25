@@ -46,8 +46,8 @@ workloads makes sense.
 
 .. note::
 
-    If you're on Windows and see weird terminal output (e.g.: ``� □[32m□[1m``), check
-    :ref:`this FAQ entry <faq-windows-weird-output>`.
+    If you're on Windows and see unexpected terminal output (e.g.: ``� □[32m□[1m``),
+    check :ref:`this FAQ entry <faq-windows-unexpected-output>`.
 
 Flower's ``Simulation Engine`` schedules, launches, and manages |clientapp_link|_
 instances. It does so through a ``Backend``, which contains several workers (i.e.,

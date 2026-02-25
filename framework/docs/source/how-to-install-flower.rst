@@ -73,8 +73,8 @@ everything worked, it should print the version of Flower to the command line:
 
 .. note::
 
-    If you're on Windows and see weird terminal output (e.g.: ``� □[32m□[1m``), check
-    :ref:`this FAQ entry <faq-windows-weird-output>`.
+    If you're on Windows and see unexpected terminal output (e.g.: ``� □[32m□[1m``),
+    check :ref:`this FAQ entry <faq-windows-unexpected-output>`.
 
 *******************************
  Advanced installation options

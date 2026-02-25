@@ -91,8 +91,8 @@ Then, run the command below:
 
 .. note::
 
-    If you're on Windows and see weird terminal output (e.g.: ``� □[32m□[1m``), check
-    :ref:`this FAQ entry <faq-windows-weird-output>`.
+    If you're on Windows and see unexpected terminal output (e.g.: ``� □[32m□[1m``),
+    check :ref:`this FAQ entry <faq-windows-unexpected-output>`.
 
 After running it you'll notice a new directory named ``quickstart-pytorch`` has been
 created. It should have the following structure:
