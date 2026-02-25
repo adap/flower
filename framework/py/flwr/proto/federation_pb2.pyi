@@ -71,7 +71,6 @@ class Federation(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
 
     NAME_FIELD_NUMBER: builtins.int
-    MEMBER_AIDS_FIELD_NUMBER: builtins.int
     NODES_FIELD_NUMBER: builtins.int
     RUNS_FIELD_NUMBER: builtins.int
     DESCRIPTION_FIELD_NUMBER: builtins.int
@@ -79,10 +78,6 @@ class Federation(google.protobuf.message.Message):
     name: builtins.str
     description: builtins.str
     """Added in v1.26.0"""
-    @property
-    def member_aids(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.str]:
-        """Deprecated in v1.26.0"""
-
     @property
     def nodes(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[flwr.proto.node_pb2.NodeInfo]: ...
     @property
@@ -95,12 +90,11 @@ class Federation(google.protobuf.message.Message):
         self,
         *,
         name: builtins.str = ...,
-        member_aids: collections.abc.Iterable[builtins.str] | None = ...,
         nodes: collections.abc.Iterable[flwr.proto.node_pb2.NodeInfo] | None = ...,
         runs: collections.abc.Iterable[flwr.proto.run_pb2.Run] | None = ...,
         description: builtins.str = ...,
         members: collections.abc.Iterable[global___Member] | None = ...,
     ) -> None: ...
-    def ClearField(self, field_name: typing.Literal["description", b"description", "member_aids", b"member_aids", "members", b"members", "name", b"name", "nodes", b"nodes", "runs", b"runs"]) -> None: ...
+    def ClearField(self, field_name: typing.Literal["description", b"description", "members", b"members", "name", b"name", "nodes", b"nodes", "runs", b"runs"]) -> None: ...
 
 global___Federation = Federation
