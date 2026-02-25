@@ -70,17 +70,23 @@ class TestFlwrLog(unittest.TestCase):
 
     def test_flwr_log_stream_method(self) -> None:
         """Test stream_logs."""
-        with patch("builtins.print") as mock_print:
+        with patch("flwr.cli.log._print_log_output") as mock_print:
             with self.assertRaises(KeyboardInterrupt):
                 stream_logs(
                     run_id=123, stub=self.mock_stub, duration=1, after_timestamp=0.0
                 )
-                # Assert that mock print was called with the expected arguments
-                mock_print.assert_has_calls(self.expected_stream_call)
+        # Assert that log chunks were printed as a stream
+        mock_print.assert_has_calls(
+            [
+                call("log_output_1", end=""),
+                call("log_output_2", end=""),
+                call("log_output_3", end=""),
+            ]
+        )
 
     def test_flwr_log_print_method(self) -> None:
         """Test print_logs."""
-        with patch("builtins.print") as mock_print:
+        with patch("flwr.cli.log._print_log_output") as mock_print:
             print_logs(run_id=123, channel=self.mock_channel, timeout=0)
-            # Assert that mock print was called with the expected arguments
-            mock_print.assert_has_calls(self.expected_print_call)
+        # Assert that only the first log chunk was printed in show mode
+        mock_print.assert_has_calls([call("log_output_1")])
