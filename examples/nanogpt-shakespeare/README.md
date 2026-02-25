@@ -21,7 +21,7 @@ Install Flower and clone the app:
 
 ```shell
 pip install "flwr[simulation]>=1.26.1"
-flwr new @zzsi/nanogpt-shakespeare --framework PyTorch
+flwr new @kungfuai/nanogpt-shakespeare --framework PyTorch
 ```
 
 This will create the following project layout:

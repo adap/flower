@@ -18,7 +18,7 @@ dependencies = [
 packages = ["."]
 
 [tool.flwr.app]
-publisher = "zzsi"
+publisher = "kungfuai"
 
 [tool.flwr.app.components]
 serverapp = "nanogpt_shakespeare.server_app:app"
