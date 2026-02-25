@@ -100,6 +100,5 @@ def _add_supernode(  # pylint: disable=W0613
                 f"✅ SuperNode '{res.node_id}' added to federation "
                 f"'{request.federation_name}'."
             )
-
     else:
         raise click.ClickException("SuperNode could not be added to the federation.")
