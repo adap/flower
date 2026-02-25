@@ -596,7 +596,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         log(INFO, "ControlServicer.CreateFederation")
 
         # Check that a federation is specified
-        if not request.name:
+        if not request.federation_name:
             context.abort(
                 grpc.StatusCode.FAILED_PRECONDITION,
                 FEDERATION_NOT_SPECIFIED_MESSAGE,
@@ -609,7 +609,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         flwr_aid = _check_flwr_aid_exists(account_info.flwr_aid, context)
 
         # Construct federation name
-        federation_name = f"@{account_info.account_name}/{request.name}"
+        federation_name = f"@{account_info.account_name}/{request.federation_name}"
 
         # Create federation
         try:
