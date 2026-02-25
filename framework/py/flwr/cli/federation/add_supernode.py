@@ -94,12 +94,7 @@ def _add_supernode(  # pylint: disable=W0613
 
     if res.node_id:
         if is_json:
-            print_json_to_stdout(
-                {
-                    "success": True,
-                    "node_id": res.node_id,
-                }
-            )
+            print_json_to_stdout({"success": True, "node_id": res.node_id})
         else:
             typer.secho(
                 f"✅ SuperNode '{res.node_id}' added to federation "
