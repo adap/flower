@@ -94,6 +94,26 @@ class ControlStub(object):
                 request_serializer=flwr_dot_proto_dot_control__pb2.ShowFederationRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_control__pb2.ShowFederationResponse.FromString,
                 _registered_method=True)
+        self.CreateFederation = channel.unary_unary(
+                '/flwr.proto.Control/CreateFederation',
+                request_serializer=flwr_dot_proto_dot_control__pb2.CreateFederationRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_control__pb2.CreateFederationResponse.FromString,
+                _registered_method=True)
+        self.ArchiveFederation = channel.unary_unary(
+                '/flwr.proto.Control/ArchiveFederation',
+                request_serializer=flwr_dot_proto_dot_control__pb2.ArchiveFederationRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_control__pb2.ArchiveFederationResponse.FromString,
+                _registered_method=True)
+        self.AddNodeToFederation = channel.unary_unary(
+                '/flwr.proto.Control/AddNodeToFederation',
+                request_serializer=flwr_dot_proto_dot_control__pb2.AddNodeToFederationRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_control__pb2.AddNodeToFederationResponse.FromString,
+                _registered_method=True)
+        self.RemoveNodeFromFederation = channel.unary_unary(
+                '/flwr.proto.Control/RemoveNodeFromFederation',
+                request_serializer=flwr_dot_proto_dot_control__pb2.RemoveNodeFromFederationRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_control__pb2.RemoveNodeFromFederationResponse.FromString,
+                _registered_method=True)
 
 
 class ControlServicer(object):
@@ -183,6 +203,34 @@ class ControlServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def CreateFederation(self, request, context):
+        """Create Federation
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ArchiveFederation(self, request, context):
+        """Archive Federation
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def AddNodeToFederation(self, request, context):
+        """Add SuperNode to Federation
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def RemoveNodeFromFederation(self, request, context):
+        """Remove SuperNode from Federation
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_ControlServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -245,6 +293,26 @@ def add_ControlServicer_to_server(servicer, server):
                     servicer.ShowFederation,
                     request_deserializer=flwr_dot_proto_dot_control__pb2.ShowFederationRequest.FromString,
                     response_serializer=flwr_dot_proto_dot_control__pb2.ShowFederationResponse.SerializeToString,
+            ),
+            'CreateFederation': grpc.unary_unary_rpc_method_handler(
+                    servicer.CreateFederation,
+                    request_deserializer=flwr_dot_proto_dot_control__pb2.CreateFederationRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_control__pb2.CreateFederationResponse.SerializeToString,
+            ),
+            'ArchiveFederation': grpc.unary_unary_rpc_method_handler(
+                    servicer.ArchiveFederation,
+                    request_deserializer=flwr_dot_proto_dot_control__pb2.ArchiveFederationRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_control__pb2.ArchiveFederationResponse.SerializeToString,
+            ),
+            'AddNodeToFederation': grpc.unary_unary_rpc_method_handler(
+                    servicer.AddNodeToFederation,
+                    request_deserializer=flwr_dot_proto_dot_control__pb2.AddNodeToFederationRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_control__pb2.AddNodeToFederationResponse.SerializeToString,
+            ),
+            'RemoveNodeFromFederation': grpc.unary_unary_rpc_method_handler(
+                    servicer.RemoveNodeFromFederation,
+                    request_deserializer=flwr_dot_proto_dot_control__pb2.RemoveNodeFromFederationRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_control__pb2.RemoveNodeFromFederationResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -571,6 +639,114 @@ class Control(object):
             '/flwr.proto.Control/ShowFederation',
             flwr_dot_proto_dot_control__pb2.ShowFederationRequest.SerializeToString,
             flwr_dot_proto_dot_control__pb2.ShowFederationResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def CreateFederation(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/flwr.proto.Control/CreateFederation',
+            flwr_dot_proto_dot_control__pb2.CreateFederationRequest.SerializeToString,
+            flwr_dot_proto_dot_control__pb2.CreateFederationResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ArchiveFederation(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/flwr.proto.Control/ArchiveFederation',
+            flwr_dot_proto_dot_control__pb2.ArchiveFederationRequest.SerializeToString,
+            flwr_dot_proto_dot_control__pb2.ArchiveFederationResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def AddNodeToFederation(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/flwr.proto.Control/AddNodeToFederation',
+            flwr_dot_proto_dot_control__pb2.AddNodeToFederationRequest.SerializeToString,
+            flwr_dot_proto_dot_control__pb2.AddNodeToFederationResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def RemoveNodeFromFederation(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/flwr.proto.Control/RemoveNodeFromFederation',
+            flwr_dot_proto_dot_control__pb2.RemoveNodeFromFederationRequest.SerializeToString,
+            flwr_dot_proto_dot_control__pb2.RemoveNodeFromFederationResponse.FromString,
             options,
             channel_credentials,
             insecure,

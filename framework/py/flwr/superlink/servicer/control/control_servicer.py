@@ -40,6 +40,7 @@ from flwr.common.constant import (
     PUBLIC_KEY_NOT_VALID,
     PULL_UNFINISHED_RUN_MESSAGE,
     RUN_ID_NOT_FOUND_MESSAGE,
+    SUPERLINK_DOES_NOT_SUPPORT_FED_MANAGEMENT_MESSAGE,
     SUPERLINK_NODE_ID,
     TRANSPORT_TYPE_GRPC_ADAPTER,
     Status,
@@ -54,6 +55,12 @@ from flwr.common.serde import (
 from flwr.common.typing import Fab, Run, RunStatus
 from flwr.proto import control_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
+    AddNodeToFederationRequest,
+    AddNodeToFederationResponse,
+    ArchiveFederationRequest,
+    ArchiveFederationResponse,
+    CreateFederationRequest,
+    CreateFederationResponse,
     GetAuthTokensRequest,
     GetAuthTokensResponse,
     GetLoginDetailsRequest,
@@ -68,6 +75,8 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     PullArtifactsResponse,
     RegisterNodeRequest,
     RegisterNodeResponse,
+    RemoveNodeFromFederationRequest,
+    RemoveNodeFromFederationResponse,
     ShowFederationRequest,
     ShowFederationResponse,
     StartRunRequest,
@@ -572,13 +581,198 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         # Build Federation proto object
         federation_proto = Federation(
             name=federation,
-            member_aids=[acc.id for acc in details.accounts],  # Deprecated in v1.26.0
-            accounts=details.accounts,
+            members=details.members,
             nodes=details.nodes,
             runs=[run_to_proto(run) for run in details.runs],
         )
         return ShowFederationResponse(
             federation=federation_proto, now=now().isoformat()
+        )
+
+    def CreateFederation(
+        self, request: CreateFederationRequest, context: grpc.ServicerContext
+    ) -> CreateFederationResponse:
+        """Create a new Federation."""
+        log(INFO, "ControlServicer.CreateFederation")
+
+        # Check that a federation is specified
+        if not request.federation_name:
+            context.abort(
+                grpc.StatusCode.FAILED_PRECONDITION,
+                FEDERATION_NOT_SPECIFIED_MESSAGE,
+            )
+
+        # Init link state
+        state = self.linkstate_factory.state()
+
+        account_info = get_current_account_info()
+        flwr_aid = _check_flwr_aid_exists(account_info.flwr_aid, context)
+
+        # Construct federation name
+        federation_name = f"@{account_info.account_name}/{request.federation_name}"
+
+        # Create federation
+        try:
+            federation = state.federation_manager.create_federation(
+                name=federation_name,
+                description=request.description,
+                flwr_aid=flwr_aid,
+            )
+        except NotImplementedError as e:
+            log(ERROR, "Could not create federation: %s", str(e))
+            context.abort(
+                grpc.StatusCode.FAILED_PRECONDITION,
+                SUPERLINK_DOES_NOT_SUPPORT_FED_MANAGEMENT_MESSAGE,
+            )
+
+        return CreateFederationResponse(
+            federation=Federation(
+                name=federation.name,
+                description=federation.description,
+                members=federation.members,
+            )
+        )
+
+    def ArchiveFederation(
+        self, request: ArchiveFederationRequest, context: grpc.ServicerContext
+    ) -> ArchiveFederationResponse:
+        """Archive a Federation."""
+        log(INFO, "ControlServicer.ArchiveFederation")
+
+        # Check that a federation is specified
+        if not request.federation_name:
+            context.abort(
+                grpc.StatusCode.FAILED_PRECONDITION,
+                FEDERATION_NOT_SPECIFIED_MESSAGE,
+            )
+
+        # Init link state
+        state = self.linkstate_factory.state()
+
+        flwr_aid = get_current_account_info().flwr_aid
+        flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
+
+        # Archive federation
+        try:
+            state.federation_manager.archive_federation(
+                flwr_aid=flwr_aid,
+                name=request.federation_name,
+            )
+        except NotImplementedError as e:
+            log(ERROR, "Could not archive federation: %s", str(e))
+            context.abort(
+                grpc.StatusCode.FAILED_PRECONDITION,
+                SUPERLINK_DOES_NOT_SUPPORT_FED_MANAGEMENT_MESSAGE,
+            )
+
+        return ArchiveFederationResponse()
+
+    def AddNodeToFederation(
+        self, request: AddNodeToFederationRequest, context: grpc.ServicerContext
+    ) -> AddNodeToFederationResponse:
+        """Add a node to a Federation."""
+        log(INFO, "ControlServicer.AddNodeToFederation")
+
+        # Init link state
+        state = self.linkstate_factory.state()
+
+        flwr_aid = get_current_account_info().flwr_aid
+        flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
+
+        # Validate federation, node ID, and ownership
+        _validate_federation_and_node_in_request(
+            state, flwr_aid, request.federation_name, request.node_id, context
+        )
+
+        # Add node to the federation
+        try:
+            state.federation_manager.add_supernode(
+                flwr_aid=flwr_aid,
+                federation=request.federation_name,
+                node_id=request.node_id,
+            )
+        except NotImplementedError as e:
+            log(ERROR, "Could not add node to federation: %s", str(e))
+            context.abort(
+                grpc.StatusCode.FAILED_PRECONDITION,
+                SUPERLINK_DOES_NOT_SUPPORT_FED_MANAGEMENT_MESSAGE,
+            )
+
+        return AddNodeToFederationResponse()
+
+    def RemoveNodeFromFederation(
+        self, request: RemoveNodeFromFederationRequest, context: grpc.ServicerContext
+    ) -> RemoveNodeFromFederationResponse:
+        """Remove a node from a Federation."""
+        log(INFO, "ControlServicer.RemoveNodeFromFederation")
+
+        # Init link state
+        state = self.linkstate_factory.state()
+
+        flwr_aid = get_current_account_info().flwr_aid
+        flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
+
+        # Validate federation, node ID, and ownership
+        _validate_federation_and_node_in_request(
+            state, flwr_aid, request.federation_name, request.node_id, context
+        )
+
+        # Remove node from the federation
+        try:
+            state.federation_manager.remove_supernode(
+                flwr_aid=flwr_aid,
+                federation=request.federation_name,
+                node_id=request.node_id,
+            )
+        except NotImplementedError as e:
+            log(ERROR, "Could not remove node from federation: %s", str(e))
+            context.abort(
+                grpc.StatusCode.FAILED_PRECONDITION,
+                SUPERLINK_DOES_NOT_SUPPORT_FED_MANAGEMENT_MESSAGE,
+            )
+
+        return RemoveNodeFromFederationResponse()
+
+
+def _validate_federation_and_node_in_request(
+    state: LinkState,
+    flwr_aid: str,
+    federation_name: str,
+    node_id: int,
+    context: grpc.ServicerContext,
+) -> None:
+    """Validate federation membership and node ID presence for adding/removing a
+    supernode to/from a federation."""
+    # Check that a federation is specified
+    if not federation_name:
+        context.abort(
+            grpc.StatusCode.FAILED_PRECONDITION,
+            FEDERATION_NOT_SPECIFIED_MESSAGE,
+        )
+
+    # Check that the federation exists
+    if not state.federation_manager.exists(federation_name):
+        context.abort(
+            grpc.StatusCode.FAILED_PRECONDITION,
+            FEDERATION_NOT_FOUND_MESSAGE % federation_name,
+        )
+
+    # Check that the requester is a member of the federation
+    if not state.federation_manager.has_member(flwr_aid, federation_name):
+        context.abort(
+            grpc.StatusCode.FAILED_PRECONDITION,
+            f"You are not a member of the federation '{federation_name}'.",
+        )
+
+    # Ensure the requester owns the specified node
+    # A node that does not exist or is not owned by the requester is
+    # treated the same way.
+    nodes_info = state.get_node_info(node_ids=[node_id])
+    owned_node_ids = {node.node_id for node in nodes_info if node.owner_aid == flwr_aid}
+    if node_id not in owned_node_ids:
+        context.abort(
+            grpc.StatusCode.FAILED_PRECONDITION,
+            f"Node {node_id} not found or you are not its owner.",
         )
 
 

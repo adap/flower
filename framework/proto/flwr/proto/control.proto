@@ -62,6 +62,22 @@ service Control {
 
   // Show Federation
   rpc ShowFederation(ShowFederationRequest) returns (ShowFederationResponse) {}
+
+  // Create Federation
+  rpc CreateFederation(CreateFederationRequest)
+      returns (CreateFederationResponse) {}
+
+  // Archive Federation
+  rpc ArchiveFederation(ArchiveFederationRequest)
+      returns (ArchiveFederationResponse) {}
+
+  // Add SuperNode to Federation
+  rpc AddNodeToFederation(AddNodeToFederationRequest)
+      returns (AddNodeToFederationResponse) {}
+
+  // Remove SuperNode from Federation
+  rpc RemoveNodeFromFederation(RemoveNodeFromFederationRequest)
+      returns (RemoveNodeFromFederationResponse) {}
 }
 
 message StartRunRequest {
@@ -127,3 +143,24 @@ message ShowFederationResponse {
   Federation federation = 1;
   string now = 2;
 }
+
+message CreateFederationRequest {
+  string federation_name = 1;
+  string description = 2;
+}
+message CreateFederationResponse { Federation federation = 1; }
+
+message ArchiveFederationRequest { string federation_name = 1; }
+message ArchiveFederationResponse {}
+
+message AddNodeToFederationRequest {
+  string federation_name = 1;
+  uint64 node_id = 2;
+}
+message AddNodeToFederationResponse {}
+
+message RemoveNodeFromFederationRequest {
+  string federation_name = 1;
+  uint64 node_id = 2;
+}
+message RemoveNodeFromFederationResponse {}

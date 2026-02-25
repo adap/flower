@@ -21,17 +21,24 @@ import os
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import Mock, patch
 
+import click
+
+from flwr.cli.typing import SuperLinkConnection, SuperLinkSimulationOptions
 from flwr.common.constant import (
     ACCESS_TOKEN_KEY,
     AUTHN_TYPE_JSON_KEY,
     FLWR_DIR,
     REFRESH_TOKEN_KEY,
 )
+from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH
 
 from .utils import (
     build_pathspec,
+    get_executed_command,
     get_sha256_hash,
+    init_channel_from_connection,
     load_gitignore_patterns,
     validate_credentials_content,
 )
@@ -159,3 +166,66 @@ def test_load_gitignore_patterns_with_pathspec() -> None:
 
     # Should not match normal files
     assert spec.match_file("good.py") is False
+
+
+def test_get_executed_command_single() -> None:
+    """Test get_executed_command with a two-word command (e.g., flwr ls)."""
+    root_group = click.Group("flwr")
+    ls_cmd = click.Command("ls")
+
+    with click.Context(root_group, info_name="flwr") as root_ctx:
+        with click.Context(ls_cmd, parent=root_ctx, info_name="ls"):
+            assert get_executed_command() == "flwr ls"
+
+
+def test_get_executed_command_nested() -> None:
+    """Test get_executed_command with nested commands (e.g., flwr federation list)."""
+    # Create parent group "flwr" with child group "federation" and command "list"
+    root_group = click.Group("flwr")
+    federation_group = click.Group("federation")
+    list_cmd = click.Command("list")
+
+    with click.Context(root_group, info_name="flwr") as root_ctx:
+        with click.Context(
+            federation_group, parent=root_ctx, info_name="federation"
+        ) as fed_ctx:
+            with click.Context(list_cmd, parent=fed_ctx, info_name="list"):
+                assert get_executed_command() == "flwr federation list"
+
+
+def test_init_channel_from_connection_uses_resolved_connection() -> None:
+    """Ensure resolved connection values are used for channel creation."""
+    unresolved = SuperLinkConnection(
+        name="local",
+        options=SuperLinkSimulationOptions(num_supernodes=2),
+    )
+    resolved = SuperLinkConnection(
+        name="local",
+        address="127.0.0.1:9093",
+        insecure=True,
+        options=SuperLinkSimulationOptions(num_supernodes=2),
+    )
+    auth_plugin = Mock()
+    auth_plugin.load_tokens = Mock()
+
+    with patch(
+        "flwr.cli.utils.ensure_local_superlink", return_value=resolved
+    ) as mock_ensure:
+        with patch("flwr.cli.utils.load_certificate_in_connection", return_value=None):
+            with patch("flwr.cli.utils.create_channel") as mock_create:
+                channel = Mock()
+                mock_create.return_value = channel
+
+                ret = init_channel_from_connection(unresolved, auth_plugin)
+
+    assert ret is channel
+    mock_ensure.assert_called_once_with(unresolved)
+    auth_plugin.load_tokens.assert_called_once()
+
+    kwargs = mock_create.call_args.kwargs
+    assert kwargs["server_address"] == "127.0.0.1:9093"
+    assert kwargs["insecure"] is True
+    assert kwargs["root_certificates"] is None
+    assert kwargs["max_message_length"] == GRPC_MAX_MESSAGE_LENGTH
+    assert len(kwargs["interceptors"]) == 1
+    channel.subscribe.assert_called_once()
