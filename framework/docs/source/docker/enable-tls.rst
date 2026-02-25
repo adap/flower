@@ -271,5 +271,5 @@ connection and save it:
 
     In this example, ``local-deployment`` has been used. Just remember to replace
     ``local-deployment`` with your chosen name in both the ``superlink.`` string and the
-    corresponding ``flwr run .`` command. Refer to the `Flower configuration file
+    corresponding ``flwr run .`` command. Refer to the `Flower Configuration
     <ref-flower-configuration.html>`_ for more information.

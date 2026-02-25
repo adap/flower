@@ -182,6 +182,9 @@ PUBLIC_KEY_NOT_VALID = "The provided public key is not valid"
 NODE_NOT_FOUND_MESSAGE = "Node ID not found for account"
 FEDERATION_NOT_SPECIFIED_MESSAGE = "No federation specified in the request"
 FEDERATION_NOT_FOUND_MESSAGE = "Federation '%s' does not exist"
+SUPERLINK_DOES_NOT_SUPPORT_FED_MANAGEMENT_MESSAGE = (
+    "SuperLink does not support federation management."
+)
 
 
 class MessageTypeLegacy:

@@ -14,7 +14,7 @@ authors = [
     { name = "Alan Yi", email = "yi161@purdue.edu" }
 ]
 dependencies = [
-    "flwr[simulation]>=1.25.0",
+    "flwr[simulation]>=1.26.1",
     "flwr-datasets[vision]>=0.5.0",
     "torch==2.8.0",
     "torchvision==0.23.0",
@@ -43,14 +43,3 @@ fraction-evaluate = 0.5
 # Quantum circuit configuration
 n-qubits = 4
 n-layers = 3
-
-[tool.flwr.federations]
-default = "local-simulation"
-
-[tool.flwr.federations.local-simulation]
-options.num-supernodes = 10
-
-[tool.flwr.federations.local-simulation-gpu]
-options.num-supernodes = 10
-options.backend.client-resources.num-cpus = 2
-options.backend.client-resources.num-gpus = 0.2

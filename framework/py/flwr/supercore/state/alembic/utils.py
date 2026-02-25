@@ -15,6 +15,7 @@
 """Helpers for running and validating Alembic migrations."""
 
 
+from collections.abc import Callable
 from logging import INFO
 from pathlib import Path
 
@@ -29,16 +30,59 @@ from flwr.supercore.state.schema.corestate_tables import create_corestate_metada
 from flwr.supercore.state.schema.linkstate_tables import create_linkstate_metadata
 from flwr.supercore.state.schema.objectstore_tables import create_objectstore_metadata
 
+# Type alias for metadata provider functions
+MetadataProvider = Callable[[], MetaData]
+
+# Registry for additional metadata providers (e.g., from ee module)
+_metadata_providers: list[MetadataProvider] = []
+
+# Registry for additional version locations (e.g., from ee module)
+_version_locations: list[Path] = []
+
 ALEMBIC_DIR = Path(__file__).resolve().parent
 ALEMBIC_VERSION_TABLE = "alembic_version"
 FLWR_STATE_BASELINE_REVISION = "8e65d8ae60b0"
 
 
+def register_metadata_provider(provider: MetadataProvider) -> None:
+    """Register an additional metadata provider for Alembic migrations.
+
+    This allows external modules to register their table definitions so
+    they are included in the combined metadata used by Alembic for
+    migrations.
+
+    Parameters
+    ----------
+    provider : MetadataProvider
+        A callable that returns a SQLAlchemy MetaData object containing
+        table definitions to be included in migrations.
+    """
+    # Avoid duplicate registration to keep the registry idempotent
+    if provider not in _metadata_providers:
+        _metadata_providers.append(provider)
+
+
+def register_version_location(version_dir: Path) -> None:
+    """Register an additional versions directory for Alembic migrations.
+
+    This allows external modules to register their migration scripts so
+    they are included when running Alembic migrations.
+
+    Parameters
+    ----------
+    version_dir : Path
+        Path to a directory containing Alembic migration scripts.
+    """
+    # Avoid duplicate registration to keep the registry idempotent
+    if version_dir not in _version_locations:
+        _version_locations.append(version_dir)
+
+
 def get_combined_metadata() -> MetaData:
     """Combine all Flower state metadata objects into a single MetaData instance.
 
-    This ensures Alembic can track all tables across CoreState, LinkState, and
-    ObjectStore.
+    This ensures Alembic can track all tables across CoreState, LinkState,
+    ObjectStore, and any registered external modules.
 
     Returns
     -------
@@ -57,6 +101,19 @@ def get_combined_metadata() -> MetaData:
     objectstore_metadata = create_objectstore_metadata()
     for table in objectstore_metadata.tables.values():
         table.to_metadata(metadata)
+
+    # Add tables from registered external providers
+    for provider in _metadata_providers:
+        extra_metadata = provider()
+        for table in extra_metadata.tables.values():
+            if table.name in metadata.tables:
+                raise ValueError(
+                    f"Table name collision: '{table.name}' from provider "
+                    f"'{provider.__module__}.{provider.__qualname__}' "
+                    f"conflicts with an existing table. External providers"
+                    "must use unique table names."
+                )
+            table.to_metadata(metadata)
 
     return metadata
 
@@ -113,10 +170,17 @@ def run_migrations(engine: Engine) -> None:
 
 
 def build_alembic_config(engine: Engine) -> Config:
-    """Create Alembic config with script location and DB URL."""
+    """Create Alembic config with script location, DB URL, and version locations."""
     config = Config()
     config.set_main_option("script_location", str(ALEMBIC_DIR))
     config.set_main_option("sqlalchemy.url", str(engine.url))
+
+    # Combine base version location with any registered external locations
+    base_versions = ALEMBIC_DIR / "versions"
+    all_version_locations = [base_versions] + _version_locations
+    version_locations_str = " ".join(str(loc) for loc in all_version_locations)
+    config.set_main_option("version_locations", version_locations_str)
+
     return config
 
 
