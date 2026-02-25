@@ -138,7 +138,7 @@ def _to_table(federations: list[Federation]) -> Table:
 
 def _to_json(
     federations: list[Federation] | None = None,
-    members: list[str] | None = None,
+    members: list[tuple[str, str]] | None = None,
     nodes: list[NodeInfo] | None = None,
     runs: list[RunRow] | None = None,
 ) -> list[dict[str, str]] | list[list[dict[str, Any]]]:
@@ -153,8 +153,8 @@ def _to_json(
     nodes_list: list[dict[str, Any]] = []
     runs_list: list[dict[str, Any]] = []
 
-    for member in members:
-        members_list.append({"member_id": member, "role": "Member"})
+    for name, role in members:
+        members_list.append({"member_id": name, "role": role})
 
     for node in nodes:
         nodes_list.append(
@@ -180,7 +180,7 @@ def _to_json(
 
 def _show_federation(
     stub: ControlStub, federation: str
-) -> tuple[list[str], list[NodeInfo], list[RunRow]]:
+) -> tuple[list[tuple[str, str]], list[NodeInfo], list[RunRow]]:
     """Show federation details.
 
     Parameters
@@ -192,8 +192,9 @@ def _show_federation(
 
     Returns
     -------
-    tuple[list[str], list[NodeInfo], list[RunRow]]
-        A tuple containing (account_names, nodes, runs).
+    tuple[list[tuple[str, str]], list[NodeInfo], list[RunRow]]
+        A tuple containing (members, nodes, runs). Each member is
+        a (account_name, role) pair.
     """
     with flwr_cli_grpc_exc_handler():
         res: ShowFederationResponse = stub.ShowFederation(
@@ -205,19 +206,19 @@ def _show_federation(
     formatted_runs = format_runs(runs, res.now)
 
     return (
-        [account.name for account in fed_proto.accounts],
+        [(mm.account.name, mm.role) for mm in fed_proto.members],
         list(fed_proto.nodes),
         formatted_runs,
     )
 
 
-def _to_members_table(account_names: list[str]) -> Table:
+def _to_members_table(members: list[tuple[str, str]]) -> Table:
     """Format the provided list of federation members as a rich Table.
 
     Parameters
     ----------
-    account_names : list[str]
-        List of member account names.
+    members : list[tuple[str, str]]
+        List of (account_name, role) tuples.
 
     Returns
     -------
@@ -231,8 +232,8 @@ def _to_members_table(account_names: list[str]) -> Table:
     )
     table.add_column(Text("Role", justify="center"), style="bright_black", no_wrap=True)
 
-    for account_name in account_names:
-        table.add_row(account_name, "Member")
+    for account_name, role in members:
+        table.add_row(account_name, role)
 
     return table
 
