@@ -37,7 +37,7 @@ def safe_extract_zip(
             target.relative_to(base_dir)
         except ValueError:
             raise click.ClickException(
-                f"Unsafe path in FAB: {member.filename}"
+                f"Unsafe path in FAB archive: {member.filename}"
             ) from None
 
     zf.extractall(base_dir)

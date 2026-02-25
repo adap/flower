@@ -15,8 +15,8 @@
 """Test for Flower command line interface `new` command."""
 
 
-import io
 import importlib
+import io
 import zipfile
 from pathlib import Path
 
@@ -83,5 +83,5 @@ def test_download_remote_app_via_api_rejects_zip_slip(
         lambda *_args, **_kwargs: _Response(malicious_zip),
     )
 
-    with pytest.raises(click.ClickException, match="Unsafe path in ZIP archive"):
+    with pytest.raises(click.ClickException, match="Unsafe path in FAB archive"):
         download_remote_app_via_api("@account/app==1.2.3")
