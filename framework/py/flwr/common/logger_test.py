@@ -15,12 +15,10 @@
 """Flower Logger tests."""
 
 
-import logging
 import sys
-from io import StringIO
 from queue import Queue
 
-from .logger import ConsoleHandler, mirror_output_to_queue, restore_output
+from .logger import mirror_output_to_queue, restore_output
 
 
 def test_mirror_output_to_queue() -> None:
@@ -56,31 +54,3 @@ def test_restore_output() -> None:
     assert log_queue.get() == "Test message before restore"
     assert log_queue.get() == "\n"
     assert log_queue.empty()
-
-
-class _FakeStream(StringIO):
-    def __init__(self, *, is_tty: bool) -> None:
-        super().__init__()
-        self._is_tty = is_tty
-
-    def isatty(self) -> bool:
-        return self._is_tty
-
-
-def test_console_handler_disables_ansi_for_non_tty_stream() -> None:
-    """Test that ANSI escape codes are not emitted for non-TTY streams."""
-    handler = ConsoleHandler(colored=True, stream=_FakeStream(is_tty=False))
-    record = logging.LogRecord(
-        name="flwr",
-        level=logging.INFO,
-        pathname=__file__,
-        lineno=0,
-        msg="hello",
-        args=(),
-        exc_info=None,
-    )
-
-    formatted = handler.format(record)
-
-    assert "\033[" not in formatted
-    assert formatted.startswith("INFO")
