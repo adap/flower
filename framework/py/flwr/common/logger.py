@@ -70,15 +70,32 @@ class ConsoleHandler(logging.StreamHandler):  # type: ignore[type-arg]
         super().__init__(stream)
         self.timestamps = timestamps
         self.json = json
-        self.console = Console(
-            file=self.stream,
-            highlight=False,
-            markup=False,
-            no_color=not colored,
-        )
+        self.colored = colored
+        self.console: Console | None = None
+        self._console_stream: TextIO | None = None
+        self._console_colored: bool | None = None
+
+    def _get_console(self) -> Console:
+        if (
+            self.console is None
+            or self._console_stream is not self.stream
+            or self._console_colored != self.colored
+        ):
+            self.console = Console(
+                file=self.stream,
+                highlight=False,
+                markup=False,
+                no_color=not self.colored,
+                force_terminal=self.colored,
+                legacy_windows=False,
+            )
+            self._console_stream = self.stream
+            self._console_colored = self.colored
+        return self.console
 
     def emit(self, record: LogRecord) -> None:
         """Emit a record."""
+        console = self._get_console()
         message = MESSAGE_FORMATTER.format(record)
         formatted_time = TIME_FORMATTER.formatTime(record)
         if self.json:
@@ -92,12 +109,15 @@ class ConsoleHandler(logging.StreamHandler):  # type: ignore[type-arg]
             timestamp = f" {formatted_time}" if self.timestamps else ""
             head = f"{record.levelname}{timestamp}"
             tail = f": {separator} {message}"
-            if not self.console.no_color:
-                renderable = Text.assemble((head, LOG_STYLES[record.levelname]), tail)
+            if self.colored:
+                renderable = Text.assemble(
+                    (head, LOG_STYLES.get(record.levelname)),
+                    tail,
+                )
             else:
                 renderable = f"{head}{tail}"
 
-        self.console.print(renderable, soft_wrap=True, overflow="ignore", crop=False)
+        console.print(renderable, soft_wrap=True, overflow="ignore", crop=False)
 
 
 def update_console_handler(
@@ -111,7 +131,7 @@ def update_console_handler(
     if timestamps is not None:
         console_handler.timestamps = timestamps
     if colored is not None:
-        console_handler.console.no_color = not colored
+        console_handler.colored = colored
 
 
 # Configure console logger
