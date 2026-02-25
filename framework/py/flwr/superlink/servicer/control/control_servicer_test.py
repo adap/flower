@@ -59,6 +59,7 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     StreamLogsResponse,
     UnregisterNodeRequest,
 )
+from flwr.proto.federation_pb2 import Account, Member  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkStateFactory
 from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME, NOOP_FEDERATION
 from flwr.supercore.ffs import FfsFactory
@@ -108,7 +109,8 @@ class TestControlServicer(unittest.TestCase):
         )
         account_info = authn_plugin.validate_tokens_in_metadata([])[1]
         assert account_info is not None
-        self.aid = account_info.flwr_aid
+        assert account_info.flwr_aid is not None
+        self.aid: str = account_info.flwr_aid
         shared_account_info.set(account_info)
         self.state = self.servicer.linkstate_factory.state()
 
@@ -344,7 +346,14 @@ class TestControlServicer(unittest.TestCase):
             name=name,
             description=description,
         )
-        mock_federation = SimpleNamespace(name=expected_name, description=description)
+        mock_members = [
+            Member(account=Account(id=self.aid), role="owner"),
+        ]
+        mock_federation = SimpleNamespace(
+            name=expected_name,
+            description=description,
+            members=mock_members,
+        )
 
         # Execute
         with patch.object(
@@ -362,6 +371,9 @@ class TestControlServicer(unittest.TestCase):
         )
         self.assertEqual(response.federation.name, expected_name)
         self.assertEqual(response.federation.description, description)
+        self.assertEqual(len(response.federation.members), 1)
+        self.assertEqual(response.federation.members[0].account.id, self.aid)
+        self.assertEqual(response.federation.members[0].role, "owner")
 
     def test_create_federation_fails_on_manager_error(self) -> None:
         """Test CreateFederation aborts when federation_manager.create_federation

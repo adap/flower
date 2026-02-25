@@ -24,11 +24,15 @@ message Account {
   string name = 2;
 }
 
+message Member {
+  Account account = 1;
+  string role = 2;
+}
+
 message Federation {
   string name = 1;
-  repeated string member_aids = 2; // Deprecated in v1.26.0
-  repeated NodeInfo nodes = 3;
-  repeated Run runs = 4;
-  string description = 5;        // Added in v1.26.0
-  repeated Account accounts = 6; // Added in v1.26.0
+  repeated NodeInfo nodes = 2;
+  repeated Run runs = 3;
+  string description = 4;      // Added in v1.26.0
+  repeated Member members = 5; // Added in v1.27.0
 }

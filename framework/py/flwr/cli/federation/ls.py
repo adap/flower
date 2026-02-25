@@ -34,7 +34,7 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     ShowFederationResponse,
 )
 from flwr.proto.control_pb2_grpc import ControlStub
-from flwr.proto.federation_pb2 import Federation  # pylint: disable=E0611
+from flwr.proto.federation_pb2 import Federation, Member  # pylint: disable=E0611
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.supercore.utils import humanize_duration
 
@@ -138,7 +138,7 @@ def _to_table(federations: list[Federation]) -> Table:
 
 def _to_json(
     federations: list[Federation] | None = None,
-    members: list[str] | None = None,
+    members: list[Member] | None = None,
     nodes: list[NodeInfo] | None = None,
     runs: list[RunRow] | None = None,
 ) -> list[dict[str, str]] | list[list[dict[str, Any]]]:
@@ -154,7 +154,7 @@ def _to_json(
     runs_list: list[dict[str, Any]] = []
 
     for member in members:
-        members_list.append({"member_id": member, "role": "Member"})
+        members_list.append({"member_id": member.account.name, "role": member.role})
 
     for node in nodes:
         nodes_list.append(
@@ -180,7 +180,7 @@ def _to_json(
 
 def _show_federation(
     stub: ControlStub, federation: str
-) -> tuple[list[str], list[NodeInfo], list[RunRow]]:
+) -> tuple[list[Member], list[NodeInfo], list[RunRow]]:
     """Show federation details.
 
     Parameters
@@ -192,8 +192,8 @@ def _show_federation(
 
     Returns
     -------
-    tuple[list[str], list[NodeInfo], list[RunRow]]
-        A tuple containing (account_names, nodes, runs).
+    tuple[list[Member], list[NodeInfo], list[RunRow]]
+        A tuple containing (members, nodes, runs).
     """
     with flwr_cli_grpc_exc_handler():
         res: ShowFederationResponse = stub.ShowFederation(
@@ -205,19 +205,19 @@ def _show_federation(
     formatted_runs = format_runs(runs, res.now)
 
     return (
-        [account.name for account in fed_proto.accounts],
+        list(fed_proto.members),
         list(fed_proto.nodes),
         formatted_runs,
     )
 
 
-def _to_members_table(account_names: list[str]) -> Table:
+def _to_members_table(members: list[Member]) -> Table:
     """Format the provided list of federation members as a rich Table.
 
     Parameters
     ----------
-    account_names : list[str]
-        List of member account names.
+    members : list[Member]
+        List of Member proto objects.
 
     Returns
     -------
@@ -231,8 +231,8 @@ def _to_members_table(account_names: list[str]) -> Table:
     )
     table.add_column(Text("Role", justify="center"), style="bright_black", no_wrap=True)
 
-    for account_name in account_names:
-        table.add_row(account_name, "Member")
+    for member in members:
+        table.add_row(member.account.name, member.role)
 
     return table
 
