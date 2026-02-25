@@ -96,12 +96,7 @@ def _create_federation(  # pylint: disable=W0613
 
     if response.federation.name:
         if is_json:
-            print_json_to_stdout(
-                {
-                    "success": True,
-                    "name": response.federation.name,
-                }
-            )
+            print_json_to_stdout({"success": True, "name": response.federation.name})
         else:
             click.echo(
                 f"✅ Federation '{response.federation.name}' created successfully."
