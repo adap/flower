@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower Docs\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-02-22 00:10+0000\n"
+"POT-Creation-Date: 2026-02-26 00:10+0000\n"
 "PO-Revision-Date: 2025-02-05 10:02+0000\n"
 "Last-Translator: lco <Leandro.COLLIER@student.umons.ac.be>\n"
 "Language: fr\n"
@@ -13918,12 +13918,20 @@ msgid ""
 "``Simulation Engine``."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:110
+#: ../../source/how-to-run-simulations.rst:109
+msgid ""
+"For local simulation profiles, ``flwr run`` submits the run to a local "
+"SuperLink via the Control API. If the profile has ``options.*`` and no "
+"explicit ``address``, Flower starts a local SuperLink automatically when "
+"needed."
+msgstr ""
+
+#: ../../source/how-to-run-simulations.rst:114
 #, fuzzy
 msgid "Simulation examples"
 msgstr "Exemples de PyTorch"
 
-#: ../../source/how-to-run-simulations.rst:112
+#: ../../source/how-to-run-simulations.rst:116
 msgid ""
 "In addition to the quickstart tutorials in the documentation (e.g., "
 "`quickstart PyTorch Tutorial <tutorial-quickstart-pytorch.html>`_, "
@@ -13931,7 +13939,7 @@ msgid ""
 " in the Flower repository are simulation-ready."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:117
+#: ../../source/how-to-run-simulations.rst:121
 #, fuzzy
 msgid ""
 "`Quickstart TensorFlow/Keras "
@@ -13942,7 +13950,7 @@ msgstr ""
 "<https://github.com/adap/flower/tree/main/examples/quickstart-"
 "tensorflow>`_"
 
-#: ../../source/how-to-run-simulations.rst:119
+#: ../../source/how-to-run-simulations.rst:123
 #, fuzzy
 msgid ""
 "`Quickstart PyTorch <https://github.com/adap/flower/tree/main/examples"
@@ -13951,7 +13959,7 @@ msgstr ""
 "`Quickstart PyTorch (Code) "
 "<https://github.com/adap/flower/tree/main/examples/quickstart-pytorch>`_"
 
-#: ../../source/how-to-run-simulations.rst:121
+#: ../../source/how-to-run-simulations.rst:125
 #, fuzzy
 msgid ""
 "`Advanced PyTorch <https://github.com/adap/flower/tree/main/examples"
@@ -13960,7 +13968,7 @@ msgstr ""
 "`Quickstart PyTorch (Code) "
 "<https://github.com/adap/flower/tree/main/examples/quickstart-pytorch>`_"
 
-#: ../../source/how-to-run-simulations.rst:123
+#: ../../source/how-to-run-simulations.rst:127
 #, fuzzy
 msgid ""
 "`Quickstart MLX <https://github.com/adap/flower/tree/main/examples"
@@ -13969,7 +13977,7 @@ msgstr ""
 "`Quickstart PyTorch (Code) "
 "<https://github.com/adap/flower/tree/main/examples/quickstart-pytorch>`_"
 
-#: ../../source/how-to-run-simulations.rst:124
+#: ../../source/how-to-run-simulations.rst:128
 #, fuzzy
 msgid ""
 "`ViT fine-tuning <https://github.com/adap/flower/tree/main/examples"
@@ -13978,7 +13986,7 @@ msgstr ""
 "`Quickstart PyTorch (Code) "
 "<https://github.com/adap/flower/tree/main/examples/quickstart-pytorch>`_"
 
-#: ../../source/how-to-run-simulations.rst:126
+#: ../../source/how-to-run-simulations.rst:130
 #, fuzzy
 msgid ""
 "The complete list of examples can be found in `the Flower GitHub "
@@ -13988,11 +13996,11 @@ msgstr ""
 "trouvé ici <https://github.com/adap/flower/tree/main/examples/advanced-"
 "tensorflow>`_."
 
-#: ../../source/how-to-run-simulations.rst:133
+#: ../../source/how-to-run-simulations.rst:137
 msgid "Defining ``ClientApp`` resources"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:135
+#: ../../source/how-to-run-simulations.rst:139
 msgid ""
 "By default, the ``Simulation Engine`` assigns two CPU cores to each "
 "backend worker. This means that if your system has 10 CPU cores, five "
@@ -14000,7 +14008,7 @@ msgid ""
 "``ClientApp`` instance."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:139
+#: ../../source/how-to-run-simulations.rst:143
 msgid ""
 "More often than not, you would probably like to adjust the resources your"
 " ``ClientApp`` gets assigned based on the complexity (i.e., compute and "
@@ -14008,7 +14016,7 @@ msgid ""
 "backend resources for your federation."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:145
+#: ../../source/how-to-run-simulations.rst:149
 #, python-format
 msgid ""
 "Note that the resources the backend assigns to each worker (and hence to "
@@ -14021,7 +14029,7 @@ msgid ""
 "``ClientApp`` instances to crash throwing an out-of-memory (OOM) error."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:153
+#: ../../source/how-to-run-simulations.rst:157
 msgid ""
 "Customizing resources can be done directly in the :doc:`Flower "
 "Configuration <ref-flower-configuration>`. Setting the ``options.backend"
@@ -14032,7 +14040,7 @@ msgid ""
 " would set:"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:167
+#: ../../source/how-to-run-simulations.rst:171
 msgid ""
 "With the above backend settings, your simulation will run as many "
 "``ClientApps`` in parallel as CPUs you have in your system. GPU resources"
@@ -14040,7 +14048,7 @@ msgid ""
 "VRAM each should make use of."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:180
+#: ../../source/how-to-run-simulations.rst:184
 msgid ""
 "If you are using TensorFlow, you need to `enable memory growth "
 "<https://www.tensorflow.org/guide/gpu#limiting_gpu_memory_growth>`_ so "
@@ -14049,53 +14057,53 @@ msgid ""
 "``TF_FORCE_GPU_ALLOW_GROWTH=\"1\"``."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:186
+#: ../../source/how-to-run-simulations.rst:190
 msgid ""
 "Let's see how the above configuration results in a different number of "
 "``ClientApps`` running in parallel depending on the resources available "
 "in your system. If your system has:"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:190
+#: ../../source/how-to-run-simulations.rst:194
 #, python-format
 msgid ""
 "10x CPUs and 1x GPU: at most 4 ``ClientApps`` will run in parallel since "
 "each requires 25% of the available VRAM."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:192
+#: ../../source/how-to-run-simulations.rst:196
 msgid ""
 "10x CPUs and 2x GPUs: at most 8 ``ClientApps`` will run in parallel "
 "(VRAM-limited)."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:193
+#: ../../source/how-to-run-simulations.rst:197
 msgid ""
 "6x CPUs and 4x GPUs: at most 6 ``ClientApps`` will run in parallel (CPU-"
 "limited)."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:194
+#: ../../source/how-to-run-simulations.rst:198
 msgid ""
 "10x CPUs but 0x GPUs: you won't be able to run the simulation since not "
 "even the resources for a single ``ClientApp`` can be met."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:197
+#: ../../source/how-to-run-simulations.rst:201
 msgid ""
 "A generalization of this is given by the following equation. It gives the"
 " maximum number of ``ClientApps`` that can be executed in parallel on "
 "available CPU cores (SYS_CPUS) and VRAM (SYS_GPUS)."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:201
+#: ../../source/how-to-run-simulations.rst:205
 msgid ""
 "N = \\min\\left(\\left\\lfloor \\frac{\\text{SYS_CPUS}}{\\text{num_cpus}}"
 " \\right\\rfloor, \\left\\lfloor "
 "\\frac{\\text{SYS_GPUS}}{\\text{num_gpus}} \\right\\rfloor\\right)"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:205
+#: ../../source/how-to-run-simulations.rst:209
 msgid ""
 "Both ``num_cpus`` (an integer higher than 1) and ``num_gpus`` (a non-"
 "negative real number) should be set on a per ``ClientApp`` basis. If, for"
@@ -14104,7 +14112,7 @@ msgid ""
 " two whole GPUs, you'd set ``num_gpus=2``."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:210
+#: ../../source/how-to-run-simulations.rst:214
 msgid ""
 "While the ``options.backend.client-resources`` can be used to control the"
 " degree of concurrency in your simulations, this does not stop you from "
@@ -14116,12 +14124,12 @@ msgid ""
 "them in a resource-aware manner in batches of 8."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:220
+#: ../../source/how-to-run-simulations.rst:224
 #, fuzzy
 msgid "Simulation Engine resources"
 msgstr "Moteur de client virtuel"
 
-#: ../../source/how-to-run-simulations.rst:222
+#: ../../source/how-to-run-simulations.rst:226
 msgid ""
 "By default, the ``Simulation Engine`` has **access to all system "
 "resources** (i.e., all CPUs, all GPUs). However, in some settings, you "
@@ -14131,7 +14139,7 @@ msgid ""
 "variable."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:237
+#: ../../source/how-to-run-simulations.rst:241
 msgid ""
 "With the above setup, the Backend will be initialized with a single CPU "
 "and GPU. Therefore, even if more CPUs and GPUs are available in your "
@@ -14139,23 +14147,23 @@ msgid ""
 "results in a single ``ClientApp`` running at any given point."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:242
+#: ../../source/how-to-run-simulations.rst:246
 msgid ""
 "For a complete list of settings you can configure, check the `ray.init "
 "<https://docs.ray.io/en/latest/ray-core/api/doc/ray.init.html#ray-init>`_"
 " documentation."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:245
+#: ../../source/how-to-run-simulations.rst:249
 msgid "For the highest performance, do not set ``options.backend.init-args``."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:249
+#: ../../source/how-to-run-simulations.rst:253
 #, fuzzy
 msgid "Simulation in Colab/Jupyter"
 msgstr "Simulation de moniteur"
 
-#: ../../source/how-to-run-simulations.rst:251
+#: ../../source/how-to-run-simulations.rst:255
 msgid ""
 "The preferred way of running simulations should always be "
 "|flwr_run_link|_. However, the core functionality of the ``Simulation "
@@ -14164,7 +14172,7 @@ msgid ""
 "flwr.html#flwr.simulation.run_simulation>`_."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:272
+#: ../../source/how-to-run-simulations.rst:276
 msgid ""
 "With ``run_simulation``, you can also control the amount of resources for"
 " your ``ClientApp`` instances. Do so by setting ``backend_config``. If "
@@ -14172,7 +14180,7 @@ msgid ""
 " and no GPU)."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:283
+#: ../../source/how-to-run-simulations.rst:287
 msgid ""
 "Refer to the `30 minutes Federated AI Tutorial "
 "<https://colab.research.google.com/github/adap/flower/blob/main/examples"
@@ -14180,12 +14188,12 @@ msgid ""
 "run Flower Simulations in Colab."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:291
+#: ../../source/how-to-run-simulations.rst:295
 #, fuzzy
 msgid "Multi-node Flower simulations"
 msgstr "Simulation de moniteur"
 
-#: ../../source/how-to-run-simulations.rst:293
+#: ../../source/how-to-run-simulations.rst:297
 msgid ""
 "Flower's ``Simulation Engine`` allows you to run FL simulations across "
 "multiple compute nodes so that you're not restricted to running "
@@ -14193,15 +14201,15 @@ msgid ""
 "simulation, ensure that you:"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:297
+#: ../../source/how-to-run-simulations.rst:301
 msgid "Have the same Python environment on all nodes."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:298
+#: ../../source/how-to-run-simulations.rst:302
 msgid "Have a copy of your code on all nodes."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:299
+#: ../../source/how-to-run-simulations.rst:303
 msgid ""
 "Have a copy of your dataset on all nodes. If you are using partitions "
 "from `Flower Datasets <https://flower.ai/docs/datasets>`_, ensure the "
@@ -14209,14 +14217,14 @@ msgid ""
 "is that the i-th dataset partition is identical in all nodes."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:303
+#: ../../source/how-to-run-simulations.rst:307
 msgid ""
 "Start Ray on your head node: on the terminal, type ``ray start --head``. "
 "This command will print a few lines, one of which indicates how to attach"
 " other nodes to the head node."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:306
+#: ../../source/how-to-run-simulations.rst:310
 msgid ""
 "Attach other nodes to the head node: copy the command shown after "
 "starting the head and execute it on the terminal of a new node (before "
@@ -14225,20 +14233,20 @@ msgid ""
 " the head node they should be discoverable by each other."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:311
+#: ../../source/how-to-run-simulations.rst:315
 msgid ""
 "With all the above done, you can run your code from the head node as you "
 "would if the simulation were running on a single node. In other words:"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:319
+#: ../../source/how-to-run-simulations.rst:323
 msgid ""
 "Once your simulation is finished, if you'd like to dismantle your "
 "cluster, you simply need to run the command ``ray stop`` in each node's "
 "terminal (including the head node)."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:324
+#: ../../source/how-to-run-simulations.rst:328
 msgid ""
 "When attaching a new node to the head, all its resources (i.e., all CPUs,"
 " all GPUs) will be visible by the head node. This means that the "
@@ -14250,7 +14258,7 @@ msgid ""
 "starting the head)."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:334
+#: ../../source/how-to-run-simulations.rst:338
 #, fuzzy
 msgid "FAQ for Simulations"
 msgstr "Simulation de moniteur"
@@ -14259,7 +14267,7 @@ msgstr "Simulation de moniteur"
 msgid "Can I make my ``ClientApp`` instances stateful?"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:338
+#: ../../source/how-to-run-simulations.rst:342
 msgid ""
 "Yes. Use the ``state`` attribute of the |context_link|_ object that is "
 "passed to the ``ClientApp`` to save variables, parameters, or results to "
@@ -14271,7 +14279,7 @@ msgstr ""
 msgid "Can I run multiple simulations on the same machine?"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:342
+#: ../../source/how-to-run-simulations.rst:346
 msgid ""
 "Yes, but bear in mind that each simulation isn't aware of the resource "
 "usage of the other. If your simulations make use of GPUs, consider "
@@ -14286,7 +14294,7 @@ msgid ""
 "compute/memory these make use of?"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:346
+#: ../../source/how-to-run-simulations.rst:350
 msgid ""
 "No. These resources are exclusively used by the simulation backend to "
 "control how many workers can be created on startup. Let's say N backend "
@@ -14300,35 +14308,35 @@ msgstr ""
 msgid "My ``ClientApp`` is triggering OOM on my GPU. What should I do?"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:350
+#: ../../source/how-to-run-simulations.rst:354
 msgid ""
 "It is likely that your `num_gpus` setting, which controls the number of "
 "``ClientApp`` instances that can share a GPU, is too low (meaning too "
 "many ``ClientApps`` share the same GPU). Try the following:"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:352
+#: ../../source/how-to-run-simulations.rst:356
 msgid ""
 "Set your ``num_gpus=1``. This will make a single ``ClientApp`` run on a "
 "GPU."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:353
+#: ../../source/how-to-run-simulations.rst:357
 msgid "Inspect how much VRAM is being used (use ``nvidia-smi`` for this)."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:354
+#: ../../source/how-to-run-simulations.rst:358
 msgid ""
 "Based on the VRAM you see your single ``ClientApp`` using, calculate how "
 "many more would fit within the remaining VRAM. One divided by the total "
 "number of ``ClientApps`` is the ``num_gpus`` value you should set."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:356
+#: ../../source/how-to-run-simulations.rst:360
 msgid "Refer to :ref:`clientappresources` for more details."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:358
+#: ../../source/how-to-run-simulations.rst:362
 msgid ""
 "If your ``ClientApp`` is using TensorFlow, make sure you are exporting "
 "``TF_FORCE_GPU_ALLOW_GROWTH=\"1\"`` before starting your simulation. For "
@@ -14341,7 +14349,7 @@ msgid ""
 "``ClientApp``?"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:362
+#: ../../source/how-to-run-simulations.rst:366
 msgid ""
 "A good practice is to start by running the simulation for a few rounds "
 "with higher ``num_cpus`` and ``num_gpus`` than what is really needed "
@@ -14353,7 +14361,7 @@ msgid ""
 "until you see a satisfactory system resource utilization."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:364
+#: ../../source/how-to-run-simulations.rst:368
 msgid ""
 "Note that if the workload on your ``ClientApp`` instances is not "
 "homogeneous (i.e., some come with a larger compute or memory footprint), "
@@ -14365,7 +14373,7 @@ msgstr ""
 msgid "Can I assign different resources to each ``ClientApp`` instance?"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:368
+#: ../../source/how-to-run-simulations.rst:372
 msgid ""
 "No. All ``ClientApp`` objects are assumed to make use of the same "
 "``num_cpus`` and ``num_gpus``. When setting these values (refer to "
@@ -14380,7 +14388,7 @@ msgid ""
 "servers)?"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:372
+#: ../../source/how-to-run-simulations.rst:376
 msgid ""
 "Yes. If you are using the ``RayBackend`` (the *default* backend) you can "
 "first interconnect your nodes through Ray's cli and then launch the "
@@ -14395,7 +14403,7 @@ msgid ""
 "taken into account by the ``Simulation Engine``?"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:376
+#: ../../source/how-to-run-simulations.rst:380
 msgid ""
 "No. The ``Simulation Engine`` only manages ``ClientApps`` and therefore "
 "is only aware of the system resources they require. If your ``ServerApp``"
@@ -14409,7 +14417,7 @@ msgid ""
 "should run? Can I do resource placement?"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:380
+#: ../../source/how-to-run-simulations.rst:384
 msgid ""
 "Currently, the placement of ``ClientApp`` instances is managed by the "
 "``RayBackend`` (the only backend available as of ``flwr==1.13.0``) and "
@@ -16417,8 +16425,9 @@ msgstr ""
 msgid "Arguments"
 msgstr "Amélioration de la documentation"
 
-#: ../../flwr app archive:1 create:1 federation install:1 list:1 log:1 login:1
-#: new:1 publish:1 pull:1 register:1 run:1 stop:1 supernode unregister:1
+#: ../../flwr add-supernode:1 app archive:1 create:1 federation install:1
+#: list:1 log:1 login:1 new:1 publish:1 pull:1 register:1 remove-supernode:1
+#: run:1 stop:1 supernode unregister:1
 #, fuzzy
 msgid "Optional argument"
 msgstr "Améliorations facultatives"
@@ -16433,8 +16442,8 @@ msgid ""
 "confirmation sign & submit the review to the Platform."
 msgstr ""
 
-#: ../../flwr app archive:1 create:1 federation log:1 pull:1 register:1
-#: review:1 stop:1 supernode unregister:1
+#: ../../flwr add-supernode:1 app archive:1 create:1 federation log:1 pull:1
+#: register:1 remove-supernode:1 review:1 stop:1 supernode unregister:1
 #, fuzzy
 msgid "Required argument"
 msgstr "Amélioration de la documentation"
@@ -16475,19 +16484,19 @@ msgstr "Valeurs de configuration"
 msgid "List all SuperLink connections (alias: ls)."
 msgstr "Démarrer le serveur"
 
-#: ../../flwr archive:1 config create:1 federation list:1 register:1 run:1
-#: stop:1 supernode unregister:1
+#: ../../flwr add-supernode:1 archive:1 config create:1 federation list:1
+#: register:1 remove-supernode:1 run:1 stop:1 supernode unregister:1
 msgid "Format output using 'default' view or 'json'"
 msgstr ""
 
-#: ../../flwr archive config create federation list log register run stop
-#: supernode unregister
+#: ../../flwr add-supernode archive config create federation list log register
+#: remove-supernode run stop supernode unregister
 #, fuzzy
 msgid "default"
 msgstr "Flux de travail"
 
-#: ../../flwr archive:1 config create:1 federation list:1 register:1 run:1
-#: stop:1 supernode unregister:1
+#: ../../flwr add-supernode:1 archive:1 config create:1 federation list:1
+#: register:1 remove-supernode:1 run:1 stop:1 supernode unregister:1
 #, fuzzy
 msgid "``'default'``"
 msgstr "Flux de travail"
@@ -16497,6 +16506,28 @@ msgstr "Flux de travail"
 msgid "Manage Federations"
 msgstr "Simulation de moniteur"
 
+#: ../../flwr add-supernode:1 federation
+#, fuzzy
+msgid "Add a SuperNode to a federation."
+msgstr "flower-superlink"
+
+#: ../../flwr add-supernode:1 federation
+#, fuzzy
+msgid "ID of the SuperNode to add."
+msgstr "Démarrer le serveur"
+
+#: ../../flwr add-supernode:1 federation remove-supernode:1
+#, fuzzy
+msgid "Name of the federation."
+msgstr "flower-superlink"
+
+#: ../../flwr add-supernode:1 archive:1 create:1 federation list:1 log:1
+#: login:1 pull:1 register:1 remove-supernode:1 run:1 stop:1 supernode
+#: unregister:1
+#, fuzzy
+msgid "Name of the SuperLink connection."
+msgstr "flower-superlink"
+
 #: ../../flwr archive:1 federation
 #, fuzzy
 msgid "Archive an existing federation."
@@ -16505,12 +16536,6 @@ msgstr "Utilise une stratégie existante"
 #: ../../flwr archive:1 federation
 #, fuzzy
 msgid "Name of the federation to archive."
-msgstr "flower-superlink"
-
-#: ../../flwr archive:1 create:1 federation list:1 log:1 login:1 pull:1
-#: register:1 run:1 stop:1 supernode unregister:1
-#, fuzzy
-msgid "Name of the SuperLink connection."
 msgstr "flower-superlink"
 
 #: ../../flwr create:1 federation
@@ -16538,6 +16563,16 @@ msgstr ""
 #, fuzzy
 msgid "Name of the federation to display"
 msgstr "flower-superlink"
+
+#: ../../flwr federation remove-supernode:1
+#, fuzzy
+msgid "Remove a SuperNode from a federation."
+msgstr "flower-superlink"
+
+#: ../../flwr federation remove-supernode:1 supernode unregister:1
+#, fuzzy
+msgid "ID of the SuperNode to remove."
+msgstr "Démarrer le serveur"
 
 #: ../../flwr install:1
 #, fuzzy
@@ -16786,11 +16821,6 @@ msgstr ""
 #, fuzzy
 msgid "Unregister a SuperNode from the federation."
 msgstr "flower-superlink"
-
-#: ../../flwr supernode unregister:1
-#, fuzzy
-msgid "ID of the SuperNode to remove."
-msgstr "Démarrer le serveur"
 
 #: ../../source/ref-api-cli.rst:21
 #, fuzzy
@@ -35316,7 +35346,7 @@ msgid "**Basic example**"
 msgstr "Exemples de PyTorch"
 
 #: ../../source/ref-flower-configuration.rst:77
-#: ../../source/ref-flower-configuration.rst:167
+#: ../../source/ref-flower-configuration.rst:171
 #, fuzzy
 msgid "**Explanation**"
 msgstr "Explications"
@@ -35435,30 +35465,38 @@ msgid ""
 "simulation."
 msgstr ""
 
-#: ../../source/ref-flower-configuration.rst:153
+#: ../../source/ref-flower-configuration.rst:151
+msgid ""
+"When you use a local simulation profile (``options.*``), Flower CLI "
+"commands that communicate with SuperLink use the Control API. If the "
+"profile has no explicit ``address``, Flower starts a local SuperLink "
+"automatically when needed."
+msgstr ""
+
+#: ../../source/ref-flower-configuration.rst:157
 #, fuzzy
 msgid "Remote Deployment Example"
 msgstr "serveur"
 
-#: ../../source/ref-flower-configuration.rst:155
+#: ../../source/ref-flower-configuration.rst:159
 msgid ""
 "When you're ready to deploy your federated learning app to real "
 "distributed nodes, you configure connections that point to a remote "
 "SuperLink."
 msgstr ""
 
-#: ../../source/ref-flower-configuration.rst:158
+#: ../../source/ref-flower-configuration.rst:162
 #, fuzzy
 msgid "**Example configuration**"
 msgstr "Valeurs de configuration"
 
-#: ../../source/ref-flower-configuration.rst:169
+#: ../../source/ref-flower-configuration.rst:173
 msgid ""
 "``address`` (required): The address of the SuperLink Control API to "
 "connect to (e.g., ``my-server.example.com:9093``)."
 msgstr ""
 
-#: ../../source/ref-flower-configuration.rst:171
+#: ../../source/ref-flower-configuration.rst:175
 msgid ""
 "``root-certificates``: Path to the root certificate file for TLS "
 "encryption. This secures the communication between your CLI and the "
@@ -35466,91 +35504,91 @@ msgid ""
 "This field is ignored if ``insecure`` is set to ``true``."
 msgstr ""
 
-#: ../../source/ref-flower-configuration.rst:175
+#: ../../source/ref-flower-configuration.rst:179
 msgid ""
 "``insecure``: Set to ``true`` to disable TLS encryption (only use this "
 "for local testing, never in production). Defaults to ``false`` if "
 "omitted, meaning TLS is enabled by default."
 msgstr ""
 
-#: ../../source/ref-flower-configuration.rst:179
+#: ../../source/ref-flower-configuration.rst:183
 msgid "**TLS (Transport Layer Security) explained**"
 msgstr ""
 
-#: ../../source/ref-flower-configuration.rst:181
+#: ../../source/ref-flower-configuration.rst:185
 msgid ""
 "TLS encrypts the communication between your local machine and the remote "
 "SuperLink to prevent eavesdropping and tampering. In production, you "
 "should always use TLS by either:"
 msgstr ""
 
-#: ../../source/ref-flower-configuration.rst:184
+#: ../../source/ref-flower-configuration.rst:188
 msgid ""
 "Providing a ``root-certificates`` file (recommended for custom "
 "certificates)"
 msgstr ""
 
-#: ../../source/ref-flower-configuration.rst:185
+#: ../../source/ref-flower-configuration.rst:189
 msgid ""
 "Omitting both ``root-certificates`` and ``insecure`` to use default "
 "certificates"
 msgstr ""
 
-#: ../../source/ref-flower-configuration.rst:187
+#: ../../source/ref-flower-configuration.rst:191
 msgid "Only set ``insecure = true`` for local testing environments."
 msgstr ""
 
-#: ../../source/ref-flower-configuration.rst:189
+#: ../../source/ref-flower-configuration.rst:193
 msgid ""
 "Refer to the `deployment documentation "
 "<https://flower.ai/docs/framework/deploy.html>`_ for TLS setup and "
 "advanced configurations."
 msgstr ""
 
-#: ../../source/ref-flower-configuration.rst:194
+#: ../../source/ref-flower-configuration.rst:198
 #, fuzzy
 msgid "Upgrading from previous versions of Flower"
 msgstr "Installe les versions de développement de Flower"
 
-#: ../../source/ref-flower-configuration.rst:196
+#: ../../source/ref-flower-configuration.rst:200
 msgid "**If you're new to Flower 1.26.0+, you can skip this section.**"
 msgstr ""
 
-#: ../../source/ref-flower-configuration.rst:198
+#: ../../source/ref-flower-configuration.rst:202
 msgid ""
 "For users upgrading from versions before 1.26.0: The ``federations`` "
 "section in your ``pyproject.toml`` file will be automatically migrated to"
 " the Flower Configuration the first time you run a ``flwr`` command."
 msgstr ""
 
-#: ../../source/ref-flower-configuration.rst:202
+#: ../../source/ref-flower-configuration.rst:206
 msgid "**What happens during migration**"
 msgstr ""
 
-#: ../../source/ref-flower-configuration.rst:204
+#: ../../source/ref-flower-configuration.rst:208
 msgid ""
 "The Flower Configuration file will be created at "
 "``$HOME/.flwr/config.toml`` if not already existing"
 msgstr ""
 
-#: ../../source/ref-flower-configuration.rst:206
+#: ../../source/ref-flower-configuration.rst:210
 msgid ""
 "Your federation definitions are copied and renamed (``federations`` → "
 "``superlink``)"
 msgstr ""
 
-#: ../../source/ref-flower-configuration.rst:207
+#: ../../source/ref-flower-configuration.rst:211
 msgid ""
 "The old ``[tool.flwr.federations]`` section in ``pyproject.toml`` is "
 "commented out for your reference"
 msgstr ""
 
-#: ../../source/ref-flower-configuration.rst:210
+#: ../../source/ref-flower-configuration.rst:214
 #, fuzzy
 msgid "**After migration**"
 msgstr "Dépréciations"
 
-#: ../../source/ref-flower-configuration.rst:212
+#: ../../source/ref-flower-configuration.rst:216
 msgid ""
 "You can safely delete the commented-out ``federations`` section from your"
 " ``pyproject.toml`` file. All connection configurations now live in the "

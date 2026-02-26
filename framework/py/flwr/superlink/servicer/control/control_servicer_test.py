@@ -343,7 +343,7 @@ class TestControlServicer(unittest.TestCase):
         description = "A test federation"
         expected_name = f"@{NOOP_ACCOUNT_NAME}/{name}"
         request = CreateFederationRequest(
-            name=name,
+            federation_name=name,
             description=description,
         )
         mock_members = [
@@ -382,7 +382,7 @@ class TestControlServicer(unittest.TestCase):
         name = "test-federation"
         description = "A test federation"
         request = CreateFederationRequest(
-            name=name,
+            federation_name=name,
             description=description,
         )
         mock_context = Mock()
