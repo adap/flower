@@ -581,8 +581,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         # Build Federation proto object
         federation_proto = Federation(
             name=federation,
-            member_aids=[acc.id for acc in details.accounts],  # Deprecated in v1.26.0
-            accounts=details.accounts,
+            members=details.members,
             nodes=details.nodes,
             runs=[run_to_proto(run) for run in details.runs],
         )
@@ -597,7 +596,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         log(INFO, "ControlServicer.CreateFederation")
 
         # Check that a federation is specified
-        if not request.name:
+        if not request.federation_name:
             context.abort(
                 grpc.StatusCode.FAILED_PRECONDITION,
                 FEDERATION_NOT_SPECIFIED_MESSAGE,
@@ -610,7 +609,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         flwr_aid = _check_flwr_aid_exists(account_info.flwr_aid, context)
 
         # Construct federation name
-        federation_name = f"@{account_info.account_name}/{request.name}"
+        federation_name = f"@{account_info.account_name}/{request.federation_name}"
 
         # Create federation
         try:
@@ -630,6 +629,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             federation=Federation(
                 name=federation.name,
                 description=federation.description,
+                members=federation.members,
             )
         )
 
