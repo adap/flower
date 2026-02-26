@@ -624,6 +624,9 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 grpc.StatusCode.FAILED_PRECONDITION,
                 SUPERLINK_DOES_NOT_SUPPORT_FED_MANAGEMENT_MESSAGE,
             )
+        except ValueError as e:
+            log(ERROR, "Could not create federation: %s", str(e))
+            context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(e))
 
         return CreateFederationResponse(
             federation=Federation(
@@ -664,6 +667,9 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 grpc.StatusCode.FAILED_PRECONDITION,
                 SUPERLINK_DOES_NOT_SUPPORT_FED_MANAGEMENT_MESSAGE,
             )
+        except ValueError as e:
+            log(ERROR, "Could not archive federation: %s", str(e))
+            context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(e))
 
         return ArchiveFederationResponse()
 
