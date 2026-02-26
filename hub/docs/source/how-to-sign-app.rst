@@ -17,7 +17,7 @@ At a high level:
    Flower account profile.
 3. A reviewer downloads the FAB and signs it with the matching Ed25519 private key via
    :code:`flwr app review`.
-4. The signature is attached to app verification metadata in the platform.
+4. The signature is attached to app verification metadata in the hub.
 5. Users can inspect the app's verification metadata on the app page and decide which
    signers they trust.
 
@@ -25,13 +25,13 @@ At a high level:
 Prerequisites
 -------------
 
-- Flower CLI installed
+- Ensure :code:`flwr` is installed
 - A Flower account and active login
 - An Ed25519 OpenSSH key pair for signing
 - The corresponding public key added to your Flower account profile
 - An app on Flower Hub to review/sign
 
-Log in:
+Log in your Flower account:
 
 .. code-block:: bash
 
@@ -109,31 +109,37 @@ The CLI will:
 2. Unpack it for manual inspection.
 3. Ask you to type :code:`SIGN`.
 4. Ask for the path to your Ed25519 OpenSSH private key.
-5. Submit the signature to Flower Platform.
+5. Submit the signature to Flower Hub.
 
 .. note::
 
    :code:`flwr app review` signs the FAB digest plus timestamp. The resulting
-   signature is submitted with app id and version.
+   signature is submitted with app ID and version.
 
 
 Check Verifications on the App Page
 -----------------------------------
 
 If you want to run an app and evaluate trust, open the app page on Flower Hub and check
-the :code:`Verifications` section.
-
+the :code:`Verifications` section. 
 Use this section to see who signed the app and decide whether you trust those signers.
 
 
 Troubleshooting
 ---------------
 
-- Private key errors in review:
-  ensure the key is an Ed25519 OpenSSH private key.
-- Signature not shown on app page:
-  confirm you completed :code:`flwr app review` and submitted with a private key that
-  matches a public key registered in your Flower account profile.
+- **Private key errors during review**
+
+  Ensure that your private key is an **Ed25519 OpenSSH** key. Other key types or formats are not supported.
+
+- **Signature not displayed on the app page**
+
+  Verify that you:
+
+  1. Successfully completed :code:`flwr app review`
+  2. Signed the app using a private key that corresponds to a public key registered in your Flower account profile
+
+  If the public key is not registered (or does not match the private key used for signing), the signature will not be displayed.
 
 
 See Also
