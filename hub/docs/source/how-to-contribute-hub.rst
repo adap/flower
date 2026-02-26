@@ -67,7 +67,35 @@ Example:
 Update App Metadata
 ~~~~~~~~~~~~~~~~~~~
 
-Before publishing, ensure that your app's metadata is complete and accurate. This includes app name, version, description and license defined under :code:`[project]` in :code:`pyproject.toml`, as well as the publisher name under :code:`[tool.flwr.app]`.
+Before publishing your app, ensure that its metadata is complete and accurate. This information is defined in :code:`pyproject.toml` and is used by Flower Hub to display and identify your application.
+
+Under :code:`[project]`, provide:
+
+- :code:`name` — the app's unique name
+- :code:`version` — the current release version
+- :code:`description` — a short summary of the app
+- :code:`license` — the applicable software license
+
+Under :code:`[tool.flwr.app]`, specify:
+
+- :code:`publisher` — your Flower account username
+
+Example:
+
+.. code-block:: toml
+
+    [project]
+    name = "my-federated-app"
+    version = "0.1.0"
+    description = "Federated training for medical image classification."
+    license = "Apache-2.0"
+
+    [tool.flwr.app]
+    publisher = "your-username"  # Must match your Flower account username
+
+.. note::
+   The :code:`name` and :code:`description` are publicly visible on Flower Hub.
+   Choose them carefully to ensure your app is easy to understand and discover.
 
 
 Create a Flower Account
