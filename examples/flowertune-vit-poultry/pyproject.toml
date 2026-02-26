@@ -18,7 +18,7 @@ dependencies = [
 packages = ["."]
 
 [tool.flwr.app]
-publisher = "flwrlabs"
+publisher = "dianyo"
 
 [tool.flwr.app.components]
 serverapp = "vitpoultry.server_app:app"
@@ -31,13 +31,3 @@ learning-rate = 0.01
 dataset-name = "Dianyo/poultry-health"
 num-classes = 2
 
-[tool.flwr.federations]
-default = "local-simulation"
-
-[tool.flwr.federations.local-simulation]
-options.num-supernodes = 10
-
-[tool.flwr.federations.local-simulation-gpu]
-options.num-supernodes = 10
-options.backend.client-resources.num-cpus = 2
-options.backend.client-resources.num-gpus = 0.2

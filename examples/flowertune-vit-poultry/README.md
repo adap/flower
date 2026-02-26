@@ -61,7 +61,7 @@ flwr run . --run-config "num-server-rounds=5 batch-size=64"
 If your system has a GPU you can make use of it:
 
 ```bash
-flwr run . local-simulation-gpu
+flwr run .
 ```
 
 ### Run with the Deployment Engine
