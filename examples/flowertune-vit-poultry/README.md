@@ -17,7 +17,10 @@ git clone --depth=1 https://github.com/adap/flower.git _tmp \
         && mv _tmp/examples/flowertune-vit-poultry . \
         && rm -rf _tmp \
         && cd flowertune-vit-poultry
-```
+### Fetch the app
+
+```shell
+flwr new @dianyo/vitpoultry
 
 This will create a new directory called `flowertune-vit-poultry` with the following structure:
 
