@@ -11,7 +11,7 @@ cd ts && \
 
 # Build Swift docs
 cd .. && \
-  sourcedocs generate --module-name FlowerIntelligence -- -scheme flower -destination 'platform=macOS' && \
+  sourcedocs generate --module-name FlowerIntelligence -- -project FlowerIntelligenceExamples.xcodeproj -scheme hello-world-cli -destination 'generic/platform=macOS' && \
   mkdir -p intelligence/docs/source/swift-api-ref && \
   cp -r Documentation/Reference/* intelligence/docs/source/swift-api-ref/ && \
   cd intelligence/docs && \

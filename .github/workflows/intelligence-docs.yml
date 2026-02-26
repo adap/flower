@@ -87,7 +87,9 @@ jobs:
         run: brew install sourcedocs
       - name: Build Swift docs
         run: |
-          sourcedocs generate --module-name FlowerIntelligence -- -scheme Flwr -destination 'platform=macOS'
+          SWIFT_DOCS_DERIVED_DATA="$RUNNER_TEMP/swift-docs-derived-data"
+          rm -rf "$SWIFT_DOCS_DERIVED_DATA"
+          sourcedocs generate --module-name FlowerIntelligence -- -project FlowerIntelligenceExamples.xcodeproj -scheme hello-world-cli -destination 'generic/platform=macOS' -derivedDataPath "$SWIFT_DOCS_DERIVED_DATA"
           mkdir -p intelligence/docs/source/swift-api-ref
           cp -r Documentation/Reference/* intelligence/docs/source/swift-api-ref/
           mv intelligence/docs/source/swift-api-ref/README.md intelligence/docs/source/swift-api-ref/index.md
