@@ -114,5 +114,3 @@ def apply_train_transforms(batch):
     )
     batch["image"] = [transforms(img) for img in batch["image"]]
     return batch
-
-
