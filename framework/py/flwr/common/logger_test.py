@@ -15,10 +15,13 @@
 """Flower Logger tests."""
 
 
+import logging
 import sys
 from queue import Queue
+from typing import Any
 
-from .logger import mirror_output_to_queue, restore_output
+from . import logger as logger_module
+from .logger import ConsoleHandler, mirror_output_to_queue, restore_output
 
 
 def test_mirror_output_to_queue() -> None:
@@ -54,3 +57,30 @@ def test_restore_output() -> None:
     assert log_queue.get() == "Test message before restore"
     assert log_queue.get() == "\n"
     assert log_queue.empty()
+
+
+def test_console_handler_rebuilds_console_for_streamed_colored_logs(
+    monkeypatch: Any,
+) -> None:
+    """Test that streamed logs keep color by recreating Console on stream change."""
+    inits: list[dict[str, Any]] = []
+
+    class DummyConsole:
+        """Capture Console init kwargs and ignore writes."""
+
+        def __init__(self, **kwargs: Any) -> None:
+            inits.append(kwargs)
+
+        def print(self, *args: Any, **kwargs: Any) -> None:
+            pass
+
+    monkeypatch.setattr(logger_module, "Console", DummyConsole)
+    handler = ConsoleHandler(colored=True)
+
+    handler.emit(logging.LogRecord("flwr", logging.INFO, "", 0, "first", (), None))
+    handler.stream = sys.stdout
+    handler.emit(logging.LogRecord("flwr", logging.INFO, "", 0, "second", (), None))
+
+    assert len(inits) == 2
+    assert all(kwargs["force_terminal"] is True for kwargs in inits)
+    assert all(kwargs["no_color"] is False for kwargs in inits)

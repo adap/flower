@@ -15,6 +15,7 @@
 """Flower command line interface `log` command."""
 
 
+import re
 import time
 from logging import DEBUG, ERROR, INFO
 from typing import Annotated, cast
@@ -22,6 +23,8 @@ from typing import Annotated, cast
 import click
 import grpc
 import typer
+from rich.console import Console
+from rich.text import Text
 
 from flwr.cli.config_migration import migrate, warn_if_federation_config_overrides
 from flwr.cli.constant import FEDERATION_CONFIG_HELP_MESSAGE
@@ -34,6 +37,16 @@ from flwr.proto.control_pb2_grpc import ControlStub
 
 from .utils import flwr_cli_grpc_exc_handler, init_channel_from_connection
 
+CONSOLE = Console(highlight=False, markup=False)
+LOG_STYLES = {
+    "DEBUG": "blue",
+    "INFO": "green",
+    "WARNING": "yellow",
+    "ERROR": "red",
+    "CRITICAL": "magenta",
+}
+LOG_LEVEL_RE = re.compile(r"^(DEBUG|INFO|WARNING|ERROR|CRITICAL)(?=[:\s])")
+
 
 class AllLogsRetrieved(BaseException):
     """Exception raised when all available logs have been retrieved.
@@ -41,6 +54,29 @@ class AllLogsRetrieved(BaseException):
     This exception is used internally to signal that the log stream has reached the end
     and all logs have been successfully retrieved.
     """
+
+
+def _print_log_output(log_output: str, end: str = "\n") -> None:
+    """Render streamed log output, including ANSI colors."""
+    CONSOLE.print(_render_log_output(log_output), end=end)
+
+
+def _render_log_output(log_output: str) -> Text:
+    """Render streamed output from ANSI or plain log lines."""
+    if "\x1b[" in log_output:
+        return Text.from_ansi(log_output)
+
+    text = Text()
+    for line in log_output.splitlines(keepends=True):
+        level_match = LOG_LEVEL_RE.match(line)
+        head_end = line.find(":")
+        if level_match and head_end >= level_match.end():
+            level = level_match.group(1)
+            text.append(line[:head_end], style=LOG_STYLES[level])
+            text.append(line[head_end:])
+        else:
+            text.append(line)
+    return text
 
 
 def start_stream(
@@ -108,7 +144,7 @@ def stream_logs(
     try:
         with flwr_cli_grpc_exc_handler():
             for res in stub.StreamLogs(req, timeout=duration):
-                print(res.log_output, end="")
+                _print_log_output(res.log_output, end="")
         raise AllLogsRetrieved()
     except grpc.RpcError as e:
         # pylint: disable=E1101
@@ -140,7 +176,7 @@ def print_logs(run_id: int, channel: grpc.Channel, timeout: int) -> None:
         with flwr_cli_grpc_exc_handler():
             # Enforce timeout for graceful exit
             for res in stub.StreamLogs(req, timeout=timeout):
-                print(res.log_output)
+                _print_log_output(res.log_output)
                 break
     except grpc.RpcError as e:
         if e.code() == grpc.StatusCode.NOT_FOUND:  # pylint: disable=E1101

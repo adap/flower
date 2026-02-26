@@ -26,11 +26,12 @@ from io import StringIO
 from logging import ERROR, WARN, LogRecord
 from logging.handlers import HTTPHandler
 from queue import Empty, Queue
-from typing import TYPE_CHECKING, Any, TextIO
+from typing import Any, TextIO
 
 import grpc
 import typer
 from rich.console import Console
+from rich.text import Text
 
 from flwr.proto.log_pb2 import PushLogsRequest  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
@@ -45,22 +46,18 @@ FLOWER_LOGGER = logging.getLogger(LOGGER_NAME)
 FLOWER_LOGGER.setLevel(logging.DEBUG)
 log = FLOWER_LOGGER.log  # pylint: disable=invalid-name
 
-LOG_COLORS = {
-    "DEBUG": "\033[94m",  # Blue
-    "INFO": "\033[92m",  # Green
-    "WARNING": "\033[93m",  # Yellow
-    "ERROR": "\033[91m",  # Red
-    "CRITICAL": "\033[95m",  # Magenta
-    "RESET": "\033[0m",  # Reset to default
+LOG_STYLES = {
+    "DEBUG": "blue",
+    "INFO": "green",
+    "WARNING": "yellow",
+    "ERROR": "red",
+    "CRITICAL": "magenta",
 }
-
-if TYPE_CHECKING:
-    StreamHandler = logging.StreamHandler[Any]
-else:
-    StreamHandler = logging.StreamHandler
+MESSAGE_FORMATTER = logging.Formatter("%(message)s")
+TIME_FORMATTER = logging.Formatter()
 
 
-class ConsoleHandler(StreamHandler):
+class ConsoleHandler(logging.StreamHandler):  # type: ignore[type-arg]
     """Console handler that allows configurable formatting."""
 
     def __init__(
@@ -74,32 +71,52 @@ class ConsoleHandler(StreamHandler):
         self.timestamps = timestamps
         self.json = json
         self.colored = colored
+        self.console: Console | None = None
+        self._console_stream: TextIO | None = None
+        self._console_colored: bool | None = None
+
+    def _get_console(self) -> Console:
+        if (
+            self.console is None
+            or self._console_stream is not self.stream
+            or self._console_colored != self.colored
+        ):
+            self.console = Console(
+                file=self.stream,
+                highlight=False,
+                markup=False,
+                no_color=not self.colored,
+                force_terminal=self.colored,
+            )
+            self._console_stream = self.stream
+            self._console_colored = self.colored
+        return self.console
 
     def emit(self, record: LogRecord) -> None:
         """Emit a record."""
+        console = self._get_console()
+        message = MESSAGE_FORMATTER.format(record)
+        formatted_time = TIME_FORMATTER.formatTime(record)
         if self.json:
-            record.message = record.getMessage().replace("\t", "").strip()
-
-            # Check if the message is empty
-            if not record.message:
+            message = message.replace("\t", "").strip()
+            if not message:
                 return
-
-        super().emit(record)
-
-    def format(self, record: LogRecord) -> str:
-        """Format function that adds colors to log level."""
-        seperator = " " * (8 - len(record.levelname))
-        if self.json:
-            log_fmt = "{lvl='%(levelname)s', time='%(asctime)s', msg='%(message)s'}"
+            renderable: str | Text = f"{{lvl='{record.levelname}', "
+            renderable += f"time='{formatted_time}', msg='{message}'}}"
         else:
-            log_fmt = (
-                f"{LOG_COLORS[record.levelname] if self.colored else ''}"
-                f"%(levelname)s {'%(asctime)s' if self.timestamps else ''}"
-                f"{LOG_COLORS['RESET'] if self.colored else ''}"
-                f": {seperator} %(message)s"
-            )
-        formatter = logging.Formatter(log_fmt)
-        return formatter.format(record)
+            separator = " " * (8 - len(record.levelname))
+            timestamp = f" {formatted_time}" if self.timestamps else ""
+            head = f"{record.levelname}{timestamp}"
+            tail = f": {separator} {message}"
+            if self.colored:
+                renderable = Text.assemble(
+                    (head, LOG_STYLES.get(record.levelname)),
+                    tail,
+                )
+            else:
+                renderable = f"{head}{tail}"
+
+        console.print(renderable, soft_wrap=True, overflow="ignore", crop=False)
 
 
 def update_console_handler(
@@ -108,22 +125,16 @@ def update_console_handler(
     colored: bool | None = None,
 ) -> None:
     """Update the logging handler."""
-    for handler in logging.getLogger(LOGGER_NAME).handlers:
-        if isinstance(handler, ConsoleHandler):
-            if level is not None:
-                handler.setLevel(level)
-            if timestamps is not None:
-                handler.timestamps = timestamps
-            if colored is not None:
-                handler.colored = colored
+    if level is not None:
+        console_handler.setLevel(level)
+    if timestamps is not None:
+        console_handler.timestamps = timestamps
+    if colored is not None:
+        console_handler.colored = colored
 
 
 # Configure console logger
-console_handler = ConsoleHandler(
-    timestamps=False,
-    json=False,
-    colored=True,
-)
+console_handler = ConsoleHandler(timestamps=False, json=False, colored=True)
 console_handler.setLevel(logging.INFO)
 FLOWER_LOGGER.addHandler(console_handler)
 
