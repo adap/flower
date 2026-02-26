@@ -39,10 +39,17 @@ def train(msg: Message, context: Context):
             num_partitions, partition_id, dataset_name
         )
         trainset = trainpartition.with_transform(apply_train_transforms)
-    else:
+    elif "data-path" in context.node_config:
         # Deployment Engine: load data from a local path on the SuperNode
         data_path = context.node_config["data-path"]
         trainset = load_local_data(data_path, apply_train_transforms)
+    else:
+        raise ValueError(
+            "Could not determine data loading mode. Expected either "
+            "'partition-id'/'num-partitions' (Simulation) or "
+            "'data-path' (Deployment) in node_config, but got: "
+            f"{list(context.node_config.keys())}"
+        )
 
     trainloader = DataLoader(
         trainset, batch_size=batch_size, num_workers=2, shuffle=True

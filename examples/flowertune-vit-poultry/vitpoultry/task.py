@@ -28,25 +28,27 @@ def get_model(num_classes: int):
     return model
 
 
-def trainer(net, trainloader, optimizer, epochs, device):
+def trainer(net, trainloader, optimizer, epochs, device: torch.device | str):
     """Train the model on the training set."""
     criterion = torch.nn.CrossEntropyLoss()
     net.train()
     net.to(device)
-    avg_loss = 0
+    total_loss = 0.0
+    total_samples = 0
     for _ in range(epochs):
         for batch in trainloader:
             images, labels = batch["image"].to(device), batch["label"].to(device)
             optimizer.zero_grad()
             loss = criterion(net(images), labels)
-            avg_loss += loss.item() / labels.shape[0]
+            total_loss += loss.item() * labels.shape[0]
+            total_samples += labels.shape[0]
             loss.backward()
             optimizer.step()
 
-    return avg_loss / len(trainloader)
+    return total_loss / total_samples
 
 
-def test(net, testloader, device: str):
+def test(net, testloader, device: torch.device | str):
     """Validate the network on the entire test set."""
     criterion = torch.nn.CrossEntropyLoss()
     correct, loss = 0, 0.0

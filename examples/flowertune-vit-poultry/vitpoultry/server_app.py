@@ -17,7 +17,15 @@ def main(grid: Grid, context: Context) -> None:
     """Main entry point for the ServerApp."""
     dataset_name = context.run_config["dataset-name"]
     dataset = load_dataset(dataset_name)
-    test_set = dataset["test"] if "test" in dataset else dataset["validation"]
+    if "test" in dataset:
+        test_set = dataset["test"]
+    elif "validation" in dataset:
+        test_set = dataset["validation"]
+    else:
+        raise ValueError(
+            f"Dataset '{dataset_name}' has no 'test' or 'validation' split. "
+            f"Available splits: {list(dataset.keys())}"
+        )
     num_rounds = context.run_config["num-server-rounds"]
 
     num_classes = context.run_config["num-classes"]
