@@ -630,9 +630,7 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
             if run_ids is not None:
                 if not run_ids:
                     return []
-                matched_run_ids &= {
-                    run_id for run_id in run_ids if run_id in self.run_ids
-                }
+                matched_run_ids &= set(run_ids)
 
             # Filter by statuses
             if statuses is not None:
