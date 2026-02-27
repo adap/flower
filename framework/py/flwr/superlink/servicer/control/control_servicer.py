@@ -282,12 +282,16 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             # return run IDs for the authenticated account
             flwr_aid = get_current_account_info().flwr_aid
             _check_flwr_aid_exists(flwr_aid, context)
+            kwargs = {}
+            if flwr_aid is not None:
+                kwargs["flwr_aids"] = [flwr_aid]
+
             limit = request.limit if request.HasField("limit") else None
             runs = state.get_run_info(
-                flwr_aids=[flwr_aid],
                 order_by="pending_at",
                 ascending=False,
                 limit=limit,
+                **kwargs,  # type: ignore
             )
         # Build a set of run IDs for `flwr ls --run-id <run_id>`
         else:
