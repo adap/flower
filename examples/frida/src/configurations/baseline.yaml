@@ -1,0 +1,121 @@
+defaults:  
+  - _self_  
+  - override hydra/hydra_logging: disabled  
+  - override hydra/job_logging: disabled 
+
+# global settings
+store: True
+plot: True
+csv: True
+num_clients: 8
+num_rounds: 5
+wandb_mode: offline # online, offline, disabled
+wandb_project: MIA
+
+# mitigation settings
+mitigation: False
+
+# differential privacy config
+dp: False
+laplace: False
+epsilon: 5
+delta: 1e-4
+clip_threshold: 0.5
+sigma: 1
+
+# LSTM hyperparameters
+embedding_dim: 8
+hidden_dim: 100
+num_layers: 2
+seq_length: 80
+vocab_size: 80  # Will be determined from data
+text_label: "target"
+text_input: "input"
+
+# cnn settings
+n_convlayers: [64, 64, 128]
+kernel_sizes: [3, 3, 5]
+n_linearlayers: [100, 10]
+momentum: 0.9
+w_decay:  1e-5
+pool_size: 2
+
+# data settings
+dataset: 'cifar10'
+image_name: 'img'
+image_label: 'label' # fine_label if CIFAR100
+num_classes: 10
+local_dataset: True
+path_to_local_dataset: "../data/cifar10/"
+input_size: 32
+experiments_track_folder: "./experiments_ids/"
+
+# fedprox
+use_fedprox: False  # Set to true to enable FedProx
+proximal_mu: 0.1 
+
+# learning settings
+lr: 0.01
+lr_epochs: [150, 225]
+batch_size: 64
+batch_size_subset: 4
+zscore_threshold: 1
+architecture: 'AlexNet'
+local_epochs: 1
+power: 1
+multiplicator: 1
+iid: True
+dirichlet_alpha: 0.5
+
+# average detection
+average_detection: 1
+
+# advanced attack
+"initial_l": 1.0
+"attack_constant": 0.1
+"noise_fraction": 0.2
+
+# canary settings
+canary: False
+canary_epochs: 5
+dynamic_canary: True
+single_training: False
+noise: False
+canary_batch_size: 16
+freerider_canary: False
+
+# yeom settings
+yeom_type: "serverside" # clientside, serverside
+server_epochs: 2    
+
+# orthogonality settings
+orthogonality_th: 0.0005
+
+# cosine settings
+average_rounds: 10
+
+# free-rider
+num_freeriders: 1
+freerider_type: "advanced_disguised"  # plain, advanced_disguised, disguised, parameter_disguised, gradient_noiser
+subset_samples: 32
+train_samples: 4000
+test_samples: 1000
+metric: "loss"
+attack_types: ["dagmm"] # cosine, yeom, orthogonality
+pia_type: "old" # decaf, old
+gamma: 0.5
+name_layer_grads: None
+std: 0.0001
+
+#dagmm settings
+
+n_encoder_layers: [128, 64, 32]
+n_gmm_layers: [10, 10, 2]
+
+dagmm_batch_size: 16
+dagmm_epochs: 100
+
+# pia settings
+enable_offsets: False
+sample_per_label: 20
+decaf_batch_size: 32

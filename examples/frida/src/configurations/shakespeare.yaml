@@ -1,0 +1,50 @@
+# Shakespeare LSTM Configuration
+architecture: "LSTM"
+dataset: "shakespeare"
+num_clients: 5
+num_rounds: 50
+num_freeriders: 1
+freerider_type: "plain"  # or "disguised"
+
+# LSTM hyperparameters
+embedding_dim: 8
+hidden_dim: 100
+num_layers: 2
+seq_length: 80
+vocab_size: 80  # Will be determined from data
+
+# Training parameters
+lr: 0.5
+batch_size: 32
+local_epochs: 5
+
+# Attack parameters
+attack_types: ["yeom"]  # or ["cosine"], ["l2norm"], etc.
+canary: true
+dynamic_canary: true
+noise: false
+subset_samples: 1000
+
+# Yeom attack specific
+yeom_type: "clientside"  # or "serverside"
+server_epochs: 5
+zscore_threshold: 2.0
+
+# Cosine attack specific (if using)
+gamma: 0.1
+name_layer_grads: null
+average_rounds: 3
+canary_batch_size: 32
+canary_epochs: 10
+
+# Data partitioning
+iid: false
+dirichlet_alpha: 0.5
+
+# Wandb
+wandb_mode: "online"
+wandb_project: "federated-freerider-shakespeare"
+
+# Paths
+local_dataset: false
+experiments_track_folder: "./experiments"
