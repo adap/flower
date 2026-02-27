@@ -48,8 +48,13 @@ runs:
       shell: bash
     - id: versions
       shell: bash
+      env:
+        PYTHON_VERSION: ${{ inputs.python-version }}
+        PIP_VERSION: ${{ inputs.pip-version }}
+        SETUPTOOLS_VERSION: ${{ inputs.setuptools-version }}
+        POETRY_VERSION: ${{ inputs.poetry-version }}
       run: |
-        echo "python-version=$(echo ${{ inputs.python-version }})" >> $GITHUB_OUTPUT
-        echo "pip-version=$(echo ${{ inputs.pip-version }})" >> $GITHUB_OUTPUT
-        echo "setuptools-version=$(echo ${{ inputs.setuptools-version }})" >> $GITHUB_OUTPUT
-        echo "poetry-version=$(echo ${{ inputs.poetry-version }})" >> $GITHUB_OUTPUT
+        echo "python-version=$(echo "$PYTHON_VERSION")" >> $GITHUB_OUTPUT
+        echo "pip-version=$(echo "$PIP_VERSION")" >> $GITHUB_OUTPUT
+        echo "setuptools-version=$(echo "$SETUPTOOLS_VERSION")" >> $GITHUB_OUTPUT
+        echo "poetry-version=$(echo "$POETRY_VERSION")" >> $GITHUB_OUTPUT
