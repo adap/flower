@@ -276,22 +276,17 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         log(INFO, "ControlServicer.List")
         state = self.linkstate_factory.state()
 
+        flwr_aid = _check_flwr_aid_exists(get_current_account_info().flwr_aid, context)
         # Build a set of run IDs for `flwr ls --runs`
         if not request.HasField("run_id"):
             # If no `run_id` is specified and account auth is enabled,
             # return run IDs for the authenticated account
-            flwr_aid = get_current_account_info().flwr_aid
-            _check_flwr_aid_exists(flwr_aid, context)
-            kwargs = {}
-            if flwr_aid is not None:
-                kwargs["flwr_aids"] = [flwr_aid]
-
             limit = request.limit if request.HasField("limit") else None
             runs = state.get_run_info(
+                flwr_aids=[flwr_aid],
                 order_by="pending_at",
                 ascending=False,
                 limit=limit,
-                **kwargs,  # type: ignore
             )
         # Build a set of run IDs for `flwr ls --run-id <run_id>`
         else:
@@ -304,7 +299,6 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 raise grpc.RpcError()  # This line is unreachable
 
             # Check if `flwr_aid` matches the run's `flwr_aid`
-            flwr_aid = get_current_account_info().flwr_aid
             _check_flwr_aid_in_run(flwr_aid=flwr_aid, run=runs[0], context=context)
 
         # Clear objects of finished runs
