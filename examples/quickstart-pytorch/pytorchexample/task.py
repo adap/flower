@@ -3,11 +3,12 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from datasets import load_dataset
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import IidPartitioner
 from torch.utils.data import DataLoader
 from torchvision.transforms import Compose, Normalize, ToTensor
+
+from datasets import load_dataset
 
 
 class Net(nn.Module):
@@ -96,14 +97,42 @@ def test(net, testloader, device):
     """Validate the model on the test set."""
     net.to(device)
     criterion = torch.nn.CrossEntropyLoss()
-    correct, loss = 0, 0.0
+    top1_correct, top3_correct, loss = 0, 0, 0.0
+    num_classes = 10
+    class_correct = [0 for _ in range(num_classes)]
+    class_total = [0 for _ in range(num_classes)]
     with torch.no_grad():
         for batch in testloader:
             images = batch["img"].to(device)
             labels = batch["label"].to(device)
             outputs = net(images)
             loss += criterion(outputs, labels).item()
-            correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
-    accuracy = correct / len(testloader.dataset)
+            top1_preds = torch.max(outputs.data, 1)[1]
+            top1_correct += (top1_preds == labels).sum().item()
+
+            top3_preds = torch.topk(outputs.data, k=3, dim=1).indices
+            top3_correct += (top3_preds == labels.unsqueeze(1)).any(dim=1).sum().item()
+
+            labels_cpu = labels.cpu()
+            top1_preds_cpu = top1_preds.cpu()
+            for class_idx in range(num_classes):
+                class_mask = labels_cpu == class_idx
+                class_total[class_idx] += int(class_mask.sum().item())
+                class_correct[class_idx] += int(
+                    (top1_preds_cpu[class_mask] == class_idx).sum().item()
+                )
+
+    top1_accuracy = top1_correct / len(testloader.dataset)
+    top3_accuracy = top3_correct / len(testloader.dataset)
     loss = loss / len(testloader)
-    return loss, accuracy
+    class_accuracies = {
+        f"class_accuracy_{class_idx}": (
+            class_correct[class_idx] / class_total[class_idx]
+            if class_total[class_idx] > 0
+            else 0.0
+        )
+        for class_idx in range(num_classes)
+    }
+    metrics = {"accuracy": top1_accuracy, "top3_accuracy": top3_accuracy}
+    metrics.update(class_accuracies)
+    return loss, metrics

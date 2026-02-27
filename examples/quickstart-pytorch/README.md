@@ -1,8 +1,6 @@
----
-tags: [quickstart, vision, fds]
-dataset: [CIFAR-10]
-framework: [torch, torchvision]
----
+______________________________________________________________________
+
+## tags: [quickstart, vision, fds] dataset: [CIFAR-10] framework: [torch, torchvision]
 
 # Federated Learning with PyTorch and Flower (Quickstart Example)
 
@@ -64,6 +62,18 @@ You can also override some of the settings for your `ClientApp` and `ServerApp` 
 ```bash
 flwr run . --run-config "num-server-rounds=5 learning-rate=0.05"
 ```
+
+### Reported metrics
+
+This quickstart reports the following evaluation metrics:
+
+- `eval_loss`: average client-side cross-entropy loss
+- `eval_acc`: client-side top-1 accuracy
+- `eval_acc_top3`: client-side top-3 accuracy
+- `eval_acc_class_0` to `eval_acc_class_9`: client-side per-class top-1 accuracy
+- `accuracy`: centralized top-1 accuracy on the full test set
+- `accuracy_top3`: centralized top-3 accuracy on the full test set
+- `accuracy_class_0` to `accuracy_class_9`: centralized per-class top-1 accuracy
 
 > [!TIP]
 > For a more detailed walk-through check our [quickstart PyTorch tutorial](https://flower.ai/docs/framework/tutorial-quickstart-pytorch.html)
