@@ -350,7 +350,7 @@ jobs:
         if: ${{ needs.changes.outputs.framework == 'true' }}
         working-directory: examples/${{ matrix.example }}
         run: |
-          flwr run --run-config num-server-rounds=1 2>&1 | tee flwr_output.log 
+          flwr run --run-config num-server-rounds=1 --stream 2>&1 | tee flwr_output.log 
           if grep -q "ERROR" flwr_output.log; then
             exit 1
           fi
@@ -390,7 +390,7 @@ jobs:
         if: ${{ needs.changes.outputs.framework == 'true' }}
         run: |
           cd $APP_NAME
-          flwr run . --run-config num-server-rounds=1 2>&1 | tee flwr_output.log 
+          flwr run . --run-config num-server-rounds=1 --stream 2>&1 | tee flwr_output.log 
           if grep -q "ERROR" flwr_output.log; then
             exit 1
           fi
