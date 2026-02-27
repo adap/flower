@@ -19,6 +19,7 @@ import hashlib
 import json
 import os
 import tempfile
+import time
 import unittest
 from datetime import datetime
 from types import SimpleNamespace
@@ -159,7 +160,10 @@ class TestControlServicer(unittest.TestCase):
     def test_list_runs(self, limit: int | None) -> None:
         """Test List method of ControlServicer with --runs option."""
         # Prepare
-        run_ids = [self._create_dummy_run(self.aid) for _ in range(3)]
+        run_ids: list[int] = []
+        for _ in range(3):
+            run_ids.append(self._create_dummy_run(self.aid))
+            time.sleep(1e-6)  # Ensure different timestamps for sorting
 
         # Execute
         response = self.servicer.ListRuns(ListRunsRequest(limit=limit), Mock())
