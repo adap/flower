@@ -100,8 +100,8 @@ def test(net, testloader, device):
     net.to(device)
     criterion = torch.nn.CrossEntropyLoss()
     top1_correct, top3_correct, loss = 0, 0, 0.0
-    class_correct = [0 for _ in range(NUM_CLASSES)]
-    class_total = [0 for _ in range(NUM_CLASSES)]
+    class_correct = torch.zeros(NUM_CLASSES, device=device, dtype=torch.long)
+    class_total = torch.zeros(NUM_CLASSES, device=device, dtype=torch.long)
     with torch.no_grad():
         for batch in testloader:
             images = batch["img"].to(device)
@@ -114,22 +114,20 @@ def test(net, testloader, device):
             top3_preds = torch.topk(outputs, k=3, dim=1).indices
             top3_correct += (top3_preds == labels.unsqueeze(1)).any(dim=1).sum().item()
 
-            labels_cpu = labels.cpu()
-            top1_preds_cpu = top1_preds.cpu()
-            for class_idx in range(NUM_CLASSES):
-                class_mask = labels_cpu == class_idx
-                class_total[class_idx] += int(class_mask.sum().item())
-                class_correct[class_idx] += int(
-                    (top1_preds_cpu[class_mask] == class_idx).sum().item()
-                )
+            class_total += torch.bincount(labels, minlength=NUM_CLASSES)
+            class_correct += torch.bincount(
+                labels[top1_preds == labels], minlength=NUM_CLASSES
+            )
 
     top1_accuracy = top1_correct / len(testloader.dataset)
     top3_accuracy = top3_correct / len(testloader.dataset)
     loss = loss / len(testloader)
+    class_correct_cpu = class_correct.cpu().tolist()
+    class_total_cpu = class_total.cpu().tolist()
     class_accuracies = {
         f"class_accuracy_{class_idx}": (
-            class_correct[class_idx] / class_total[class_idx]
-            if class_total[class_idx] > 0
+            class_correct_cpu[class_idx] / class_total_cpu[class_idx]
+            if class_total_cpu[class_idx] > 0
             else 0.0
         )
         for class_idx in range(NUM_CLASSES)
