@@ -258,6 +258,7 @@ class StateTest(CoreStateTest):
 
         runs_run_ids_empty = state.get_run_info(run_ids=[])
         self.assertEqual(list(runs_run_ids_empty), [])
+
     def test_get_pending_run_id(self) -> None:
         """Test if get_pending_run_id works correctly."""
         # Prepare
