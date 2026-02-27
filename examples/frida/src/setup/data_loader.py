@@ -1,16 +1,14 @@
-import torchvision.transforms as transforms
-from torch.utils.data import DataLoader
-from flwr_datasets import FederatedDataset
-import matplotlib as plt
-from datasets import load_dataset
-import datasets
-from PIL import Image
-import torch
 import pickle
-from torch.utils.data import DataLoader, Dataset, Subset
-from flwr_datasets.partitioner import IidPartitioner, DirichletPartitioner
+
 import numpy as np
-import pandas as pd
+import torch
+import torchvision.transforms as transforms
+from flwr_datasets import FederatedDataset
+from flwr_datasets.partitioner import DirichletPartitioner, IidPartitioner
+from PIL import Image
+from torch.utils.data import DataLoader, Dataset
+
+import datasets
 
 
 def create_apply_transforms(cfg):
@@ -40,7 +38,9 @@ def create_apply_transforms(cfg):
                     transforms.ToTensor(),
                     transforms.RandomCrop(32, padding=4),
                     transforms.RandomHorizontalFlip(),
-                    transforms.Normalize((0.5071, 0.4867, 0.4408), (0.2675, 0.2565, 0.2761)),
+                    transforms.Normalize(
+                        (0.5071, 0.4867, 0.4408), (0.2675, 0.2565, 0.2761)
+                    ),
                 ]
             )
 
@@ -55,7 +55,10 @@ def load_datasets_offline(cfg):
         partitioner = IidPartitioner(cfg.num_clients)
     else:
         partitioner = DirichletPartitioner(
-            cfg.num_clients, partition_by=cfg.image_label, alpha=cfg.dirichlet_alpha, min_partition_size=0
+            cfg.num_clients,
+            partition_by=cfg.image_label,
+            alpha=cfg.dirichlet_alpha,
+            min_partition_size=0,
         )
 
     train_x, train_y = load_data("{}train_data.pkl".format(cfg.path_to_local_dataset))
@@ -66,8 +69,10 @@ def load_datasets_offline(cfg):
     test_pil_images = images_to_pil(test_x, cfg.dataset)
 
     train_y = [y[0] if isinstance(y, (list, tuple)) else int(y) for y in train_y]
-    test_y  = [y[0] if isinstance(y, (list, tuple)) else int(y) for y in test_y]
-    partitioner.dataset = datasets.Dataset.from_dict({cfg.image_name: train_pil_images, cfg.image_label: train_y})
+    test_y = [y[0] if isinstance(y, (list, tuple)) else int(y) for y in test_y]
+    partitioner.dataset = datasets.Dataset.from_dict(
+        {cfg.image_name: train_pil_images, cfg.image_label: train_y}
+    )
 
     apply_transforms = create_apply_transforms(cfg)
     trainloaders = []
@@ -80,14 +85,22 @@ def load_datasets_offline(cfg):
         partition_train = partition_client["train"].select(range(train_samples))
         test_samples = min(cfg.test_samples, len(partition_client["test"]))
         partition_val = partition_client["test"].select(range(test_samples))
-        print("Client {}: {} train samples, {} test samples".format(partition_id, len(partition_train), len(partition_val)))
+        print(
+            "Client {}: {} train samples, {} test samples".format(
+                partition_id, len(partition_train), len(partition_val)
+            )
+        )
 
-        trainloaders.append(DataLoader(partition_train, batch_size=cfg.batch_size, shuffle=True))
-        valloaders.append(DataLoader(partition_val, batch_size=cfg.batch_size, shuffle=True))
+        trainloaders.append(
+            DataLoader(partition_train, batch_size=cfg.batch_size, shuffle=True)
+        )
+        valloaders.append(
+            DataLoader(partition_val, batch_size=cfg.batch_size, shuffle=True)
+        )
 
-    testset = datasets.Dataset.from_dict({cfg.image_name: test_pil_images, cfg.image_label: test_y}).with_transform(
-        apply_transforms
-    )
+    testset = datasets.Dataset.from_dict(
+        {cfg.image_name: test_pil_images, cfg.image_label: test_y}
+    ).with_transform(apply_transforms)
     testloader = DataLoader(testset, batch_size=cfg.batch_size, shuffle=True)
 
     return trainloaders, valloaders, testloader
@@ -98,7 +111,10 @@ def load_datasets(cfg):
         partitioner = IidPartitioner(cfg.num_clients)
     else:
         partitioner = DirichletPartitioner(
-            cfg.num_clients, partition_by=cfg.image_label, alpha=cfg.dirichlet_alpha, min_partition_size=0
+            cfg.num_clients,
+            partition_by=cfg.image_label,
+            alpha=cfg.dirichlet_alpha,
+            min_partition_size=0,
         )
 
     fds = FederatedDataset(dataset=cfg.dataset, partitioners={"train": partitioner})
@@ -124,12 +140,14 @@ def load_subsets(cfg):
     num_rounds = cfg.num_rounds
     dataset = cfg.dataset
     batch_size = cfg.batch_size
-    batch_size_subset = cfg.batch_size_subset
     if cfg.iid:
         partitioner = IidPartitioner(num_clients)
     else:
         partitioner = DirichletPartitioner(
-            num_clients, partition_by=cfg.image_label, alpha=cfg.dirichlet_alpha, min_partition_size=0
+            num_clients,
+            partition_by=cfg.image_label,
+            alpha=cfg.dirichlet_alpha,
+            min_partition_size=0,
         )
 
     fds = FederatedDataset(dataset=dataset, partitioners={"train": partitioner})
@@ -146,9 +164,17 @@ def load_subsets(cfg):
         partition_train = partition["train"].select(range(train_samples))
         test_samples = min(cfg.test_samples, len(partition["test"]))
         partition_test = partition["test"].select(range(test_samples))
-        print("Client {}: {} train samples, {} test samples".format(partition_id, len(partition_train), len(partition_test)))
-        trainloaders.append(DataLoader(partition_train, batch_size=batch_size, shuffle=True))
-        valloaders.append(DataLoader(partition_test, batch_size=batch_size, shuffle=True))
+        print(
+            "Client {}: {} train samples, {} test samples".format(
+                partition_id, len(partition_train), len(partition_test)
+            )
+        )
+        trainloaders.append(
+            DataLoader(partition_train, batch_size=batch_size, shuffle=True)
+        )
+        valloaders.append(
+            DataLoader(partition_test, batch_size=batch_size, shuffle=True)
+        )
 
     subset = fds.load_split("test").with_transform(apply_transforms)
     subset_samples = min(cfg.subset_samples, len(subset))
@@ -161,25 +187,24 @@ def load_subsets(cfg):
                 x = 0
             subsetloader.append(
                 DataLoader(
-                    subset.select(range(x * subset_samples, x * subset_samples + subset_samples)),
+                    subset.select(
+                        range(x * subset_samples, x * subset_samples + subset_samples)
+                    ),
                     batch_size=batch_size,
                     shuffle=True,
                 )
             )
 
     else:
-        subsetloader = DataLoader(subset.select(range(subset_samples)), batch_size=batch_size, shuffle=True)
+        subsetloader = DataLoader(
+            subset.select(range(subset_samples)), batch_size=batch_size, shuffle=True
+        )
 
     if cfg.noise:
         noise_dataset = RandomNoiseDataset(subset_samples, (3, 32, 32), cfg)
         subsetloader = DataLoader(noise_dataset, batch_size=batch_size, shuffle=False)
 
     return trainloaders, valloaders, subsetloader
-
-
-def load_data(filename):
-    with open(filename, "rb") as f:
-        return pickle.load(f)
 
 
 def images_to_pil(x, dataset_name: str):
@@ -198,7 +223,9 @@ def images_to_pil(x, dataset_name: str):
                 continue
             if arr.ndim == 1:
                 arr = arr.reshape(28, 28, 1)
-            elif arr.ndim == 3 and arr.shape[0] in (1, 3) and arr.shape[-1] not in (1, 3):
+            elif (
+                arr.ndim == 3 and arr.shape[0] in (1, 3) and arr.shape[-1] not in (1, 3)
+            ):
                 arr = np.transpose(arr, (1, 2, 0))
 
             if arr.shape[:2] != (28, 28):
@@ -207,7 +234,9 @@ def images_to_pil(x, dataset_name: str):
         else:
             if arr.ndim == 1:
                 arr = arr.reshape(32, 32, 3)
-            elif arr.ndim == 3 and arr.shape[0] in (1, 3) and arr.shape[-1] not in (1, 3):
+            elif (
+                arr.ndim == 3 and arr.shape[0] in (1, 3) and arr.shape[-1] not in (1, 3)
+            ):
                 arr = np.transpose(arr, (1, 2, 0))
             elif arr.ndim == 2:
                 arr = np.stack([arr] * 3, axis=-1)
@@ -228,7 +257,10 @@ def load_subsets_offline(cfg):
         partitioner = IidPartitioner(num_clients)
     else:
         partitioner = DirichletPartitioner(
-            num_clients, partition_by=cfg.image_label, alpha=cfg.dirichlet_alpha, min_partition_size=0
+            num_clients,
+            partition_by=cfg.image_label,
+            alpha=cfg.dirichlet_alpha,
+            min_partition_size=0,
         )
 
     train_x, train_y = load_data("{}train_data.pkl".format(cfg.path_to_local_dataset))
@@ -238,8 +270,10 @@ def load_subsets_offline(cfg):
     test_pil_images = images_to_pil(test_x, cfg.dataset)
 
     train_y = [y[0] if isinstance(y, (list, tuple)) else int(y) for y in train_y]
-    test_y  = [y[0] if isinstance(y, (list, tuple)) else int(y) for y in test_y]
-    partitioner.dataset = datasets.Dataset.from_dict({cfg.image_name: train_pil_images, cfg.image_label: train_y})
+    test_y = [y[0] if isinstance(y, (list, tuple)) else int(y) for y in test_y]
+    partitioner.dataset = datasets.Dataset.from_dict(
+        {cfg.image_name: train_pil_images, cfg.image_label: train_y}
+    )
 
     apply_transforms = create_apply_transforms(cfg)
     trainloaders = []
@@ -253,28 +287,37 @@ def load_subsets_offline(cfg):
         partition_train = partition_client["train"].select(range(train_samples))
         test_samples = min(cfg.test_samples, len(partition_client["test"]))
         partition_val = partition_client["test"].select(range(test_samples))
-        print("Client {}: {} train samples, {} test samples".format(partition_id, len(partition_train), len(partition_val)))
+        print(
+            "Client {}: {} train samples, {} test samples".format(
+                partition_id, len(partition_train), len(partition_val)
+            )
+        )
 
-        trainloaders.append(DataLoader(partition_train, batch_size=batch_size, shuffle=True))
-        valloaders.append(DataLoader(partition_val, batch_size=batch_size, shuffle=True))
+        trainloaders.append(
+            DataLoader(partition_train, batch_size=batch_size, shuffle=True)
+        )
+        valloaders.append(
+            DataLoader(partition_val, batch_size=batch_size, shuffle=True)
+        )
 
-    subset = datasets.Dataset.from_dict({cfg.image_name: test_pil_images, cfg.image_label: test_y}).with_transform(
-        apply_transforms
-    )
+    subset = datasets.Dataset.from_dict(
+        {cfg.image_name: test_pil_images, cfg.image_label: test_y}
+    ).with_transform(apply_transforms)
     subset_samples = min(cfg.subset_samples, len(subset))
-    max_rounds = len(subset) / num_rounds
 
     if cfg.dynamic_canary:
         subsetloader = []
-        for x in range(num_rounds):            
+        for x in range(num_rounds):
             start_idx = (x * subset_samples) % len(subset)
             end_idx = (start_idx + subset_samples) % len(subset)
-            
+
             if start_idx < end_idx:
                 selected_indices = range(start_idx, end_idx)
             else:
-                selected_indices = list(range(start_idx, len(subset))) + list(range(0, end_idx))
-            
+                selected_indices = list(range(start_idx, len(subset))) + list(
+                    range(0, end_idx)
+                )
+
             subsetloader.append(
                 DataLoader(
                     subset.select(selected_indices),
@@ -283,7 +326,9 @@ def load_subsets_offline(cfg):
                 )
             )
     else:
-        subsetloader = DataLoader(subset.select(range(subset_samples)), batch_size=batch_size, shuffle=True)
+        subsetloader = DataLoader(
+            subset.select(range(subset_samples)), batch_size=batch_size, shuffle=True
+        )
 
     if cfg.noise:
         if "fmnist" in cfg.dataset:
@@ -295,11 +340,15 @@ def load_subsets_offline(cfg):
     return trainloaders, valloaders, subsetloader
 
 
-def load_attack_sets_from_noise(input_shape, num_labels, sample_per_label, batch_size, cfg):
+def load_attack_sets_from_noise(
+    input_shape, num_labels, sample_per_label, batch_size, cfg
+):
     attack_loaders = []
     for i in range(num_labels):
         if cfg.dataset == "shakespeare":
-            dataset = RandomTextDataset(sample_per_label, cfg.seq_length, cfg.vocab_size, cfg, label=i)        
+            dataset = RandomTextDataset(
+                sample_per_label, cfg.seq_length, cfg.vocab_size, cfg, label=i
+            )
         else:
             dataset = RandomNoiseDataset(sample_per_label, input_shape, cfg, label=i)
         attack_loaders.append(DataLoader(dataset, batch_size=batch_size))
@@ -327,6 +376,7 @@ class RandomNoiseDataset(Dataset):
 
 class RandomTextDataset(Dataset):
     """Random noise dataset for text (for canary attacks)"""
+
     def __init__(self, size, seq_length, vocab_size, cfg, label=None):
         self.size = size
         self.seq_length = seq_length
@@ -349,7 +399,7 @@ class RandomTextDataset(Dataset):
 def sequences_to_dataset_dict(sequences, targets, cfg):
     return {
         cfg.text_input: sequences,  # List of sequences
-        cfg.text_label: targets      # List of target indices
+        cfg.text_label: targets,  # List of target indices
     }
 
 
@@ -357,12 +407,14 @@ def create_shakespeare_transform(cfg):
     """
     Creates a transform function to convert Shakespeare data to tensors.
     """
+
     def transform_fn(batch):
         batch[cfg.text_input] = torch.tensor(batch[cfg.text_input])
-        
+
         batch[cfg.text_label] = torch.tensor(batch[cfg.text_label])
-        
+
         return batch
+
     return transform_fn
 
 
@@ -370,12 +422,15 @@ def load_shakespeare_subsets_offline(cfg):
     num_clients = cfg.num_clients
     num_rounds = cfg.num_rounds
     batch_size = cfg.batch_size
-    
+
     if cfg.iid:
         partitioner = IidPartitioner(num_clients)
     else:
         partitioner = DirichletPartitioner(
-            num_clients, partition_by=cfg.text_label, alpha=cfg.dirichlet_alpha, min_partition_size=0
+            num_clients,
+            partition_by=cfg.text_label,
+            alpha=cfg.dirichlet_alpha,
+            min_partition_size=0,
         )
 
     train_x, train_y = load_data("{}train_data.pkl".format(cfg.path_to_local_dataset))
@@ -383,9 +438,9 @@ def load_shakespeare_subsets_offline(cfg):
 
     try:
         vocab_path = "{}vocab.pkl".format(cfg.path_to_local_dataset)
-        with open(vocab_path, 'rb') as f:
+        with open(vocab_path, "rb") as f:
             vocab_info = pickle.load(f)
-        cfg.vocab_size = vocab_info['vocab_size']
+        cfg.vocab_size = vocab_info["vocab_size"]
         print(f"  Vocabulary size: {cfg.vocab_size}")
     except FileNotFoundError:
         print("  Warning: vocab.pkl not found, using vocab_size from config")
@@ -397,41 +452,50 @@ def load_shakespeare_subsets_offline(cfg):
 
     trainloaders = []
     valloaders = []
-    
+
     for partition_id in range(num_clients):
         partition_client = partitioner.load_partition(partition_id)
         partition_client = partition_client.with_transform(apply_transforms)
-        
+
         partition_client = partition_client.train_test_split(train_size=0.8)
-        
+
         train_samples = min(cfg.train_samples, len(partition_client["train"]))
         partition_train = partition_client["train"].select(range(train_samples))
         test_samples = min(cfg.test_samples, len(partition_client["test"]))
         partition_val = partition_client["test"].select(range(test_samples))
-        
-        print("Client {}: {} train samples, {} test samples".format(
-            partition_id, len(partition_train), len(partition_val)))
 
-        trainloaders.append(DataLoader(partition_train, batch_size=batch_size, shuffle=True))
-        valloaders.append(DataLoader(partition_val, batch_size=batch_size, shuffle=True))
+        print(
+            "Client {}: {} train samples, {} test samples".format(
+                partition_id, len(partition_train), len(partition_val)
+            )
+        )
+
+        trainloaders.append(
+            DataLoader(partition_train, batch_size=batch_size, shuffle=True)
+        )
+        valloaders.append(
+            DataLoader(partition_val, batch_size=batch_size, shuffle=True)
+        )
 
     test_dict = sequences_to_dataset_dict(test_x, test_y, cfg)
     subset = datasets.Dataset.from_dict(test_dict)
     subset = subset.with_transform(apply_transforms)
-    
+
     subset_samples = min(cfg.subset_samples, len(subset))
-    
+
     if cfg.dynamic_canary:
         subsetloader = []
-        for x in range(num_rounds):            
+        for x in range(num_rounds):
             start_idx = (x * subset_samples) % len(subset)
             end_idx = (start_idx + subset_samples) % len(subset)
-            
+
             if start_idx < end_idx:
                 selected_indices = range(start_idx, end_idx)
             else:
-                selected_indices = list(range(start_idx, len(subset))) + list(range(0, end_idx))
-            
+                selected_indices = list(range(start_idx, len(subset))) + list(
+                    range(0, end_idx)
+                )
+
             subsetloader.append(
                 DataLoader(
                     subset.select(selected_indices),
@@ -442,32 +506,30 @@ def load_shakespeare_subsets_offline(cfg):
         print(f"Created {len(subsetloader)} dynamic canary loaders")
     else:
         subsetloader = DataLoader(
-            subset.select(range(subset_samples)), 
-            batch_size=batch_size, 
-            shuffle=True
+            subset.select(range(subset_samples)), batch_size=batch_size, shuffle=True
         )
-        print(f"Created static canary loader")
+        print("Created static canary loader")
 
     if cfg.noise:
-        print(f"Replacing canary with random noise (vocab_size={cfg.vocab_size}, seq_length={cfg.seq_length})")
+        print(
+            f"Replacing canary with random noise (vocab_size={cfg.vocab_size}, seq_length={cfg.seq_length})"
+        )
         if cfg.dynamic_canary:
             subsetloader = []
             for x in range(num_rounds):
                 noise_dataset = RandomTextDataset(
-                    subset_samples, 
-                    cfg.seq_length, 
-                    cfg.vocab_size, 
-                    cfg
+                    subset_samples, cfg.seq_length, cfg.vocab_size, cfg
                 )
-                subsetloader.append(DataLoader(noise_dataset, batch_size=batch_size, shuffle=False))
+                subsetloader.append(
+                    DataLoader(noise_dataset, batch_size=batch_size, shuffle=False)
+                )
         else:
             noise_dataset = RandomTextDataset(
-                subset_samples, 
-                cfg.seq_length, 
-                cfg.vocab_size, 
-                cfg
+                subset_samples, cfg.seq_length, cfg.vocab_size, cfg
             )
-            subsetloader = DataLoader(noise_dataset, batch_size=batch_size, shuffle=False)
+            subsetloader = DataLoader(
+                noise_dataset, batch_size=batch_size, shuffle=False
+            )
 
     return trainloaders, valloaders, subsetloader
 
@@ -478,9 +540,7 @@ def load_data(filename):
         return pickle.load(f)
 
 
-# near top-level in data_loader.py
 _SUBSET_CACHE = None
-_SHAKES_SUBSET_CACHE = None
 
 
 def load_partition_offline(cfg, partition_id: int):
@@ -505,7 +565,7 @@ def load_partition_offline(cfg, partition_id: int):
     train_pil_images = images_to_pil(train_x, cfg.dataset)
 
     train_y = [y[0] if isinstance(y, (list, tuple)) else int(y) for y in train_y]
-    test_y  = [y[0] if isinstance(y, (list, tuple)) else int(y) for y in test_y]
+    test_y = [y[0] if isinstance(y, (list, tuple)) else int(y) for y in test_y]
 
     partitioner.dataset = datasets.Dataset.from_dict(
         {cfg.image_name: train_pil_images, cfg.image_label: train_y}
@@ -518,14 +578,14 @@ def load_partition_offline(cfg, partition_id: int):
     part = part.train_test_split(train_size=0.8)
 
     train_samples = min(int(cfg.train_samples), len(part["train"]))
-    test_samples  = min(int(cfg.test_samples),  len(part["test"]))
+    test_samples = min(int(cfg.test_samples), len(part["test"]))
 
     trainset = part["train"].select(range(train_samples))
     valset = part["test"].select(range(test_samples))
 
     trainloader = DataLoader(trainset, batch_size=batch_size, shuffle=True)
-    valloader   = DataLoader(valset,   batch_size=batch_size, shuffle=True)
-    
+    valloader = DataLoader(valset, batch_size=batch_size, shuffle=True)
+
     return trainloader, valloader
 
 
@@ -540,24 +600,23 @@ def load_local_data_offline(cfg, data_path: str):
     test_x, test_y = load_data(f"{data_path}test_data.pkl")
 
     train_pil = images_to_pil(train_x, cfg.dataset)
-    test_pil = images_to_pil(test_x, cfg.dataset)
 
     train_y = [y[0] if isinstance(y, (list, tuple)) else int(y) for y in train_y]
-    test_y  = [y[0] if isinstance(y, (list, tuple)) else int(y) for y in test_y]
+    test_y = [y[0] if isinstance(y, (list, tuple)) else int(y) for y in test_y]
 
     apply_transforms = create_apply_transforms(cfg)
 
-    ds_train = datasets.Dataset.from_dict({cfg.image_name: train_pil, cfg.image_label: train_y}).with_transform(apply_transforms)
-    ds_test  = datasets.Dataset.from_dict({cfg.image_name: test_pil,  cfg.image_label: test_y }).with_transform(apply_transforms)
-
+    ds_train = datasets.Dataset.from_dict(
+        {cfg.image_name: train_pil, cfg.image_label: train_y}
+    ).with_transform(apply_transforms)
     split = ds_train.train_test_split(train_size=0.8)
     train_samples = min(int(cfg.train_samples), len(split["train"]))
-    val_samples   = min(int(cfg.test_samples),  len(split["test"]))
+    val_samples = min(int(cfg.test_samples), len(split["test"]))
     trainset = split["train"].select(range(train_samples))
-    valset   = split["test"].select(range(val_samples))
+    valset = split["test"].select(range(val_samples))
 
     trainloader = DataLoader(trainset, batch_size=batch_size, shuffle=True)
-    valloader   = DataLoader(valset,   batch_size=batch_size, shuffle=True)
+    valloader = DataLoader(valset, batch_size=batch_size, shuffle=True)
     return trainloader, valloader
 
 
@@ -571,7 +630,7 @@ def get_subsetloaders_offline(cfg):
 
     test_x, test_y = load_data(f"{cfg.path_to_local_dataset}test_data.pkl")
     test_pil_images = images_to_pil(test_x, cfg.dataset)
-    test_y  = [y[0] if isinstance(y, (list, tuple)) else int(y) for y in test_y]
+    test_y = [y[0] if isinstance(y, (list, tuple)) else int(y) for y in test_y]
 
     apply_transforms = create_apply_transforms(cfg)
     subset = datasets.Dataset.from_dict(

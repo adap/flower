@@ -1,7 +1,8 @@
-import matplotlib.pyplot as plt
-import wandb
 import os
+
+import matplotlib.pyplot as plt
 import numpy as np
+import wandb
 
 
 def cosine_plots(num_clients, num_freeriders, metrics_distributed_fit, dataset):
@@ -10,7 +11,9 @@ def cosine_plots(num_clients, num_freeriders, metrics_distributed_fit, dataset):
     nonmember_data = {client_id: [] for client_id in range(num_clients)}
     epochs = len(metrics_distributed_fit["cosine_metrics"])
     print(metrics_distributed_fit["cosine_metrics"])
-    for round, (dist_member, dist_nonmember) in metrics_distributed_fit["cosine_metrics"]:
+    for round, (dist_member, dist_nonmember) in metrics_distributed_fit[
+        "cosine_metrics"
+    ]:
         for client_id in range(num_clients):
             member_epoch_data = np.array(dist_member[client_id])
             nonmember_epoch_data = np.array(dist_nonmember[client_id])
@@ -18,15 +21,31 @@ def cosine_plots(num_clients, num_freeriders, metrics_distributed_fit, dataset):
             nonmember_data[client_id].append(nonmember_epoch_data)
 
         if round % 15 == 0 and distribution:
-            fig, axes = plt.subplots(nrows=1, ncols=num_clients, figsize=(5 * ((num_clients + 1)), 7))
-            fig.suptitle(f"Round {round} - Cosine distribution of Member and Non-member subsets")
+            fig, axes = plt.subplots(
+                nrows=1, ncols=num_clients, figsize=(5 * ((num_clients + 1)), 7)
+            )
+            fig.suptitle(
+                f"Round {round} - Cosine distribution of Member and Non-member subsets"
+            )
 
             for client_id in range(num_clients):
                 col = client_id
                 ax = axes[col] if num_clients > 1 else axes
 
-                ax.hist(dist_member[client_id], bins=25, alpha=0.5, label="Member", color="blue")
-                ax.hist(dist_nonmember[client_id], bins=25, alpha=0.5, label="Non-member", color="red")
+                ax.hist(
+                    dist_member[client_id],
+                    bins=25,
+                    alpha=0.5,
+                    label="Member",
+                    color="blue",
+                )
+                ax.hist(
+                    dist_nonmember[client_id],
+                    bins=25,
+                    alpha=0.5,
+                    label="Non-member",
+                    color="red",
+                )
                 ax.set_xlabel("Value")
                 ax.set_ylabel("Frequency")
                 if client_id < num_freeriders:
@@ -56,8 +75,12 @@ def cosine_plots(num_clients, num_freeriders, metrics_distributed_fit, dataset):
         member_stds = np.std(member_data_client, axis=1)
         nonmember_stds = np.std(nonmember_data_client, axis=1)
 
-        dist_min = min(np.min(member_means - member_stds), np.min(nonmember_means - nonmember_stds))
-        dist_max = max(np.max(member_means + member_stds), np.max(nonmember_means + nonmember_stds))
+        dist_min = min(
+            np.min(member_means - member_stds), np.min(nonmember_means - nonmember_stds)
+        )
+        dist_max = max(
+            np.max(member_means + member_stds), np.max(nonmember_means + nonmember_stds)
+        )
         global_min_dist = min(global_min_dist, dist_min)
         global_max_dist = max(global_max_dist, dist_max)
 
@@ -86,27 +109,53 @@ def cosine_plots(num_clients, num_freeriders, metrics_distributed_fit, dataset):
 
         # Distribution plot
         for epoch in range(epochs):
-            axs[client_id, 0].errorbar(epoch, member_means[epoch], yerr=member_stds[epoch], fmt="-", color="blue", alpha=0.5)
             axs[client_id, 0].errorbar(
-                epoch, nonmember_means[epoch], yerr=nonmember_stds[epoch], fmt="-", color="red", alpha=0.5
+                epoch,
+                member_means[epoch],
+                yerr=member_stds[epoch],
+                fmt="-",
+                color="blue",
+                alpha=0.5,
+            )
+            axs[client_id, 0].errorbar(
+                epoch,
+                nonmember_means[epoch],
+                yerr=nonmember_stds[epoch],
+                fmt="-",
+                color="red",
+                alpha=0.5,
             )
 
-        axs[client_id, 0].set_title("Cosine similarity distribution - {} - {}".format(dataset, name))
+        axs[client_id, 0].set_title(
+            "Cosine similarity distribution - {} - {}".format(dataset, name)
+        )
         axs[client_id, 0].set_xlabel("epochs")
         axs[client_id, 0].set_ylabel("cosine similarity")
         axs[client_id, 0].legend(["members", "nonmembers"])
         axs[client_id, 0].set_ylim(global_min_dist, global_max_dist)
 
-        axs[client_id, 1].plot(list(range(epochs)), member_means, label="member", color="blue")
-        axs[client_id, 1].plot(list(range(epochs)), nonmember_means, label="nonmember", color="red")
-        axs[client_id, 1].set_title("Cosine similarity avg - {} - {}".format(dataset, name))
+        axs[client_id, 1].plot(
+            list(range(epochs)), member_means, label="member", color="blue"
+        )
+        axs[client_id, 1].plot(
+            list(range(epochs)), nonmember_means, label="nonmember", color="red"
+        )
+        axs[client_id, 1].set_title(
+            "Cosine similarity avg - {} - {}".format(dataset, name)
+        )
         axs[client_id, 1].set_xlabel("epochs")
         axs[client_id, 1].legend()
         axs[client_id, 1].set_ylim(global_min_avg, global_max_avg)
 
-        axs[client_id, 2].plot(list(range(epochs)), member_stds, label="member", color="blue")
-        axs[client_id, 2].plot(list(range(epochs)), nonmember_stds, label="nonmember", color="red")
-        axs[client_id, 2].set_title("Cosine similarity std - {} - {}".format(dataset, name))
+        axs[client_id, 2].plot(
+            list(range(epochs)), member_stds, label="member", color="blue"
+        )
+        axs[client_id, 2].plot(
+            list(range(epochs)), nonmember_stds, label="nonmember", color="red"
+        )
+        axs[client_id, 2].set_title(
+            "Cosine similarity std - {} - {}".format(dataset, name)
+        )
         axs[client_id, 2].set_xlabel("epochs")
         axs[client_id, 2].legend()
         axs[client_id, 2].set_ylim(global_min_std, global_max_std)
@@ -135,7 +184,7 @@ def yeom_plots(num_clients, num_freeriders, num_rounds, metrics_distributed_fit)
     plt.xlabel("Round")
     plt.legend()
     plt.tight_layout()
-    plt.savefig(os.path.join(wandb.run.dir,'canary_loss.pdf'))
+    plt.savefig(os.path.join(wandb.run.dir, "canary_loss.pdf"))
 
 
 def l2_plots(num_clients, num_freeriders, num_rounds, metrics_distributed_fit, dataset):
@@ -159,10 +208,12 @@ def l2_plots(num_clients, num_freeriders, num_rounds, metrics_distributed_fit, d
     plt.xlabel("Round")
     plt.legend()
     plt.tight_layout()
-    plt.savefig(os.path.join(wandb.run.dir,'l2_norm.pdf'))
+    plt.savefig(os.path.join(wandb.run.dir, "l2_norm.pdf"))
 
 
-def std_plots(num_clients, num_freeriders, num_rounds, metrics_distributed_fit, dataset):
+def std_plots(
+    num_clients, num_freeriders, num_rounds, metrics_distributed_fit, dataset
+):
     plt.figure(figsize=(15, 6))
     detection_l2_clients = {client: [] for client in range(num_clients)}
 
@@ -183,23 +234,25 @@ def std_plots(num_clients, num_freeriders, num_rounds, metrics_distributed_fit, 
     plt.xlabel("Round")
     plt.legend()
     plt.tight_layout()
-    plt.savefig(os.path.join(wandb.run.dir,'std.pdf'))
+    plt.savefig(os.path.join(wandb.run.dir, "std.pdf"))
 
 
-def cosim_plots(num_clients, num_freeriders, num_rounds, metrics_distributed_fit, dataset):
+def cosim_plots(
+    num_clients, num_freeriders, num_rounds, metrics_distributed_fit, dataset
+):
     plt.figure(figsize=(15, 6))
     detection_cosim_clients = {client: [] for client in range(num_clients)}
 
     for round, (cosims, zscore) in metrics_distributed_fit["cosim_metrics"]:
         for i, cosim in enumerate(cosims):
             detection_cosim_clients[i].append(cosim)
-    
+
     for client_id in range(num_clients):
         if client_id < num_freeriders:
             fr = "Free-Rider"
         else:
             fr = "Honest client"
-        
+
         cosim_values = np.array(detection_cosim_clients[client_id][1:])
         rounds = np.arange(num_rounds - 1)
         valid_mask = ~np.isnan(cosim_values)
@@ -211,10 +264,12 @@ def cosim_plots(num_clients, num_freeriders, num_rounds, metrics_distributed_fit
     plt.xlabel("Round")
     plt.legend()
     plt.tight_layout()
-    plt.savefig(os.path.join(wandb.run.dir, 'cosim.pdf'))
+    plt.savefig(os.path.join(wandb.run.dir, "cosim.pdf"))
 
 
-def plot_metrics(history, num_clients, num_rounds, attack_types, num_freeriders, dataset="cifar10"):
+def plot_metrics(
+    history, num_clients, num_rounds, attack_types, num_freeriders, dataset="cifar10"
+):
     num_metrics = len(history.metrics_distributed_fit)
     plt.figure(figsize=(15, 6))
 
@@ -241,8 +296,19 @@ def plot_metrics(history, num_clients, num_rounds, attack_types, num_freeriders,
     plt.title("Global Loss")
 
     metrics_distributed_fit = history.metrics_distributed_fit
-    for m, (metric_name, metric_data) in enumerate(metrics_distributed_fit.items(), start=1):
-        if metric_name not in ("detection_loss", "cosine_metrics", "pia", "orthogonality_metrics", "historical_detection_results", "l2_metrics", "std_metrics", "cosim_metrics"):
+    for m, (metric_name, metric_data) in enumerate(
+        metrics_distributed_fit.items(), start=1
+    ):
+        if metric_name not in (
+            "detection_loss",
+            "cosine_metrics",
+            "pia",
+            "orthogonality_metrics",
+            "historical_detection_results",
+            "l2_metrics",
+            "std_metrics",
+            "cosim_metrics",
+        ):
             print(metric_name)
             round_metric = [data[0] for data in metric_data]
             metric_values = [data[1] for data in metric_data]
@@ -253,7 +319,7 @@ def plot_metrics(history, num_clients, num_rounds, attack_types, num_freeriders,
             plt.xlabel("Round")
             plt.title(metric_name)
     plt.tight_layout()
-    plt.savefig(os.path.join(wandb.run.dir,'attack_metrics.pdf'))
+    plt.savefig(os.path.join(wandb.run.dir, "attack_metrics.pdf"))
 
     if "yeom" in attack_types:
         yeom_plots(num_clients, num_freeriders, num_rounds, metrics_distributed_fit)
@@ -262,11 +328,16 @@ def plot_metrics(history, num_clients, num_rounds, attack_types, num_freeriders,
         cosine_plots(num_clients, num_freeriders, metrics_distributed_fit, dataset)
 
     if "l2" in attack_types:
-        l2_plots(num_clients, num_freeriders, num_rounds, metrics_distributed_fit, dataset)
+        l2_plots(
+            num_clients, num_freeriders, num_rounds, metrics_distributed_fit, dataset
+        )
 
     if "std" in attack_types:
-        std_plots(num_clients, num_freeriders, num_rounds, metrics_distributed_fit, dataset)
-    
-    if "cosine_similarity" in attack_types:
-        cosim_plots(num_clients, num_freeriders, num_rounds, metrics_distributed_fit, dataset)
+        std_plots(
+            num_clients, num_freeriders, num_rounds, metrics_distributed_fit, dataset
+        )
 
+    if "cosine_similarity" in attack_types:
+        cosim_plots(
+            num_clients, num_freeriders, num_rounds, metrics_distributed_fit, dataset
+        )

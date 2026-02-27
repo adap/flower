@@ -1,7 +1,9 @@
 import numpy as np
 
 
-def generate_random_indices(num_training_rounds, num_data_samples, len_loader, batch_size):
+def generate_random_indices(
+    num_training_rounds, num_data_samples, len_loader, batch_size
+):
     random_indices = []
     for _ in range(num_training_rounds):
         random_indices_batches = []

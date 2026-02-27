@@ -1,6 +1,7 @@
 import numpy as np
+
+from .model import get_parameters, set_parameters
 from .train import train
-from .model import set_parameters, get_parameters
 
 
 def property_inference(gradients, impact, offsets, num_of_samples, num_of_labels):
@@ -82,7 +83,9 @@ def get_offsets(net, parameters, attackloaders, cfg, device):
     return offsets
 
 
-def old_pia(net, prev_params, weight_results, num_examples, attack_loaders, cfg, device):
+def old_pia(
+    net, prev_params, weight_results, num_examples, attack_loaders, cfg, device
+):
     impact = get_impact(net, prev_params, attack_loaders, cfg, device)
     impact = -abs(impact)
 
@@ -104,4 +107,3 @@ def old_pia(net, prev_params, weight_results, num_examples, attack_loaders, cfg,
         )
         pia_results[client] = attack
     return pia_results
-

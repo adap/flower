@@ -1,21 +1,16 @@
-import torch.nn as nn
-import torch
-import numpy as np
-import torch.nn.functional as F
 import math
 from collections import OrderedDict
-from typing import List, Tuple
+from typing import List
 
-import re
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.checkpoint as cp
-from collections import OrderedDict
 
 
 def set_parameters(net, parameters: List[np.ndarray]):
-    keys = [k for k in net.state_dict().keys() if 'norm' not in k]
+    keys = [k for k in net.state_dict().keys() if "norm" not in k]
     params_dict = zip(keys, parameters)
     state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
     net.load_state_dict(state_dict, strict=False)
@@ -23,7 +18,11 @@ def set_parameters(net, parameters: List[np.ndarray]):
 
 def get_parameters(net) -> List[np.ndarray]:
     # Return model parameters as a list of NumPy ndarrays, excluding parameters of BN layers when using FedBN
-    return [val.cpu().numpy() for name, val in net.state_dict().items() if 'norm' not in name]
+    return [
+        val.cpu().numpy()
+        for name, val in net.state_dict().items()
+        if "norm" not in name
+    ]
 
 
 class CNN(nn.Module):
@@ -43,7 +42,10 @@ class CNN(nn.Module):
         for i in range(len(self.n_convlayers)):
             self.conv_layers.append(
                 nn.Conv2d(
-                    input_channels, self.n_convlayers[i], kernel_size=(self.kernel_sizes[i], self.kernel_sizes[i]), padding="same"
+                    input_channels,
+                    self.n_convlayers[i],
+                    kernel_size=(self.kernel_sizes[i], self.kernel_sizes[i]),
+                    padding="same",
                 )
             )
             input_channels = self.n_convlayers[i]
@@ -131,8 +133,16 @@ class AlexNetImageNet(nn.Module):
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=3, stride=2),
         )
-        self.layer3 = nn.Sequential(nn.Conv2d(256, 384, kernel_size=3, stride=1, padding=1), nn.BatchNorm2d(384), nn.ReLU())
-        self.layer4 = nn.Sequential(nn.Conv2d(384, 384, kernel_size=3, stride=1, padding=1), nn.BatchNorm2d(384), nn.ReLU())
+        self.layer3 = nn.Sequential(
+            nn.Conv2d(256, 384, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(384),
+            nn.ReLU(),
+        )
+        self.layer4 = nn.Sequential(
+            nn.Conv2d(384, 384, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(384),
+            nn.ReLU(),
+        )
         self.layer5 = nn.Sequential(
             nn.Conv2d(384, 256, kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(256),
@@ -157,41 +167,49 @@ class AlexNetImageNet(nn.Module):
 
 
 class LSTMShakespeare(nn.Module):
-    def __init__(self, vocab_size, embedding_dim=8, hidden_dim=100, num_layers=2, num_classes=None, device="cpu"):
+    def __init__(
+        self,
+        vocab_size,
+        embedding_dim=8,
+        hidden_dim=100,
+        num_layers=2,
+        num_classes=None,
+        device="cpu",
+    ):
         super(LSTMShakespeare, self).__init__()
         self.hidden_dim = hidden_dim
         self.num_layers = num_layers
         self.device = device
-        
+
         # If num_classes not specified, use vocab_size (for character prediction)
         if num_classes is None:
             num_classes = vocab_size
-            
+
         self.embedding = nn.Embedding(vocab_size, embedding_dim)
         self.lstm = nn.LSTM(embedding_dim, hidden_dim, num_layers, batch_first=True)
         self.fc = nn.Linear(hidden_dim, num_classes)
-        
+
     def forward(self, x, hidden=None):
         # x shape: (batch_size, seq_length)
         embedded = self.embedding(x)  # (batch_size, seq_length, embedding_dim)
-        
+
         if hidden is None:
             lstm_out, hidden = self.lstm(embedded)
         else:
             lstm_out, hidden = self.lstm(embedded, hidden)
-            
+
         # Use only the last output for prediction
         lstm_out = lstm_out[:, -1, :]  # (batch_size, hidden_dim)
         out = self.fc(lstm_out)  # (batch_size, num_classes)
         return out
-    
+
     def init_hidden(self, batch_size):
         # Initialize hidden state and cell state
         h0 = torch.zeros(self.num_layers, batch_size, self.hidden_dim).to(self.device)
         c0 = torch.zeros(self.num_layers, batch_size, self.hidden_dim).to(self.device)
         return (h0, c0)
 
-        
+
 class AlexNetCIFAR(nn.Module):
     def __init__(self, num_classes=10, device="cpu"):
         super(AlexNetCIFAR, self).__init__()
@@ -231,10 +249,16 @@ class AlexNetFMNIST(nn.Module):
     def __init__(self, num_classes=10, device="cpu"):
         super(AlexNetFMNIST, self).__init__()
         self.features = nn.Sequential(
-            nn.Conv2d(1, 64, kernel_size=3, stride=1, padding=1),  # Changed: 1 input channel, stride=1
+            nn.Conv2d(
+                1, 64, kernel_size=3, stride=1, padding=1
+            ),  # Changed: 1 input channel, stride=1
             nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=2, stride=2),  # Changed: smaller kernel/stride for 28x28
-            nn.Conv2d(64, 192, stride=1, kernel_size=3, padding=1),  # Changed: padding=1
+            nn.MaxPool2d(
+                kernel_size=2, stride=2
+            ),  # Changed: smaller kernel/stride for 28x28
+            nn.Conv2d(
+                64, 192, stride=1, kernel_size=3, padding=1
+            ),  # Changed: padding=1
             nn.ReLU(inplace=True),
             nn.MaxPool2d(kernel_size=2, stride=2),  # Changed: smaller kernel/stride
             nn.Conv2d(192, 384, stride=1, kernel_size=3, padding=1),
@@ -272,36 +296,69 @@ def _bn_function_factory(norm, relu, conv):
 
 
 class _DenseLayer(nn.Sequential):
-    def __init__(self, num_input_features, growth_rate, bn_size, drop_rate, memory_efficient=False):
+    def __init__(
+        self,
+        num_input_features,
+        growth_rate,
+        bn_size,
+        drop_rate,
+        memory_efficient=False,
+    ):
         super(_DenseLayer, self).__init__()
-        self.add_module('norm1', nn.BatchNorm2d(num_input_features)),
-        self.add_module('relu1', nn.ReLU(inplace=True)),
-        self.add_module('conv1', nn.Conv2d(num_input_features, bn_size *
-                                           growth_rate, kernel_size=1, stride=1,
-                                           bias=False)),
-        self.add_module('norm2', nn.BatchNorm2d(bn_size * growth_rate)),
-        self.add_module('relu2', nn.ReLU(inplace=True)),
-        self.add_module('conv2', nn.Conv2d(bn_size * growth_rate, growth_rate,
-                                           kernel_size=3, stride=1, padding=1,
-                                           bias=False)),
+        self.add_module("norm1", nn.BatchNorm2d(num_input_features)),
+        self.add_module("relu1", nn.ReLU(inplace=True)),
+        self.add_module(
+            "conv1",
+            nn.Conv2d(
+                num_input_features,
+                bn_size * growth_rate,
+                kernel_size=1,
+                stride=1,
+                bias=False,
+            ),
+        ),
+        self.add_module("norm2", nn.BatchNorm2d(bn_size * growth_rate)),
+        self.add_module("relu2", nn.ReLU(inplace=True)),
+        self.add_module(
+            "conv2",
+            nn.Conv2d(
+                bn_size * growth_rate,
+                growth_rate,
+                kernel_size=3,
+                stride=1,
+                padding=1,
+                bias=False,
+            ),
+        ),
         self.drop_rate = drop_rate
         self.memory_efficient = memory_efficient
 
     def forward(self, *prev_features):
         bn_function = _bn_function_factory(self.norm1, self.relu1, self.conv1)
-        if self.memory_efficient and any(prev_feature.requires_grad for prev_feature in prev_features):
+        if self.memory_efficient and any(
+            prev_feature.requires_grad for prev_feature in prev_features
+        ):
             bottleneck_output = cp.checkpoint(bn_function, *prev_features)
         else:
             bottleneck_output = bn_function(*prev_features)
         new_features = self.conv2(self.relu2(self.norm2(bottleneck_output)))
         if self.drop_rate > 0:
-            new_features = F.dropout(new_features, p=self.drop_rate,
-                                     training=self.training)
+            new_features = F.dropout(
+                new_features, p=self.drop_rate, training=self.training
+            )
         return new_features
 
 
 class _DenseBlock(nn.Module):
-    def __init__(self, num_layers, num_input_features, bn_size, growth_rate, drop_rate, memory_efficient=False):
+    def __init__(
+        self,
+        num_layers,
+        num_input_features,
+        bn_size,
+        growth_rate,
+        drop_rate,
+        memory_efficient=False,
+    ):
         super(_DenseBlock, self).__init__()
         for i in range(num_layers):
             layer = _DenseLayer(
@@ -311,7 +368,7 @@ class _DenseBlock(nn.Module):
                 drop_rate=drop_rate,
                 memory_efficient=memory_efficient,
             )
-            self.add_module('denselayer%d' % (i + 1), layer)
+            self.add_module("denselayer%d" % (i + 1), layer)
 
     def forward(self, init_features):
         features = [init_features]
@@ -324,34 +381,62 @@ class _DenseBlock(nn.Module):
 class _Transition(nn.Sequential):
     def __init__(self, num_input_features, num_output_features):
         super(_Transition, self).__init__()
-        self.add_module('norm', nn.BatchNorm2d(num_input_features))
-        self.add_module('relu', nn.ReLU(inplace=True))
-        self.add_module('conv', nn.Conv2d(num_input_features, num_output_features,
-                                          kernel_size=1, stride=1, bias=False))
-        self.add_module('pool', nn.AvgPool2d(kernel_size=2, stride=2))
+        self.add_module("norm", nn.BatchNorm2d(num_input_features))
+        self.add_module("relu", nn.ReLU(inplace=True))
+        self.add_module(
+            "conv",
+            nn.Conv2d(
+                num_input_features,
+                num_output_features,
+                kernel_size=1,
+                stride=1,
+                bias=False,
+            ),
+        )
+        self.add_module("pool", nn.AvgPool2d(kernel_size=2, stride=2))
 
 
 class DenseNet121(nn.Module):
-    def __init__(self, growth_rate=32, block_config=(6, 12, 24, 16),
-                 num_init_featuremaps=64, bn_size=4, drop_rate=0, num_classes=1000, memory_efficient=False,
-                 grayscale=False):
+    def __init__(
+        self,
+        growth_rate=32,
+        block_config=(6, 12, 24, 16),
+        num_init_featuremaps=64,
+        bn_size=4,
+        drop_rate=0,
+        num_classes=1000,
+        memory_efficient=False,
+        grayscale=False,
+    ):
 
         super(DenseNet121, self).__init__()
 
         # First convolution
         if grayscale:
-            in_channels=1
+            in_channels = 1
         else:
-            in_channels=3
-        
-        self.features = nn.Sequential(OrderedDict([
-            ('conv0', nn.Conv2d(in_channels=in_channels, out_channels=num_init_featuremaps,
-                                kernel_size=7, stride=2,
-                                padding=3, bias=False)), # bias is redundant when using batchnorm
-            ('norm0', nn.BatchNorm2d(num_features=num_init_featuremaps)),
-            ('relu0', nn.ReLU(inplace=True)),
-            ('pool0', nn.MaxPool2d(kernel_size=3, stride=2, padding=1)),
-        ]))
+            in_channels = 3
+
+        self.features = nn.Sequential(
+            OrderedDict(
+                [
+                    (
+                        "conv0",
+                        nn.Conv2d(
+                            in_channels=in_channels,
+                            out_channels=num_init_featuremaps,
+                            kernel_size=7,
+                            stride=2,
+                            padding=3,
+                            bias=False,
+                        ),
+                    ),  # bias is redundant when using batchnorm
+                    ("norm0", nn.BatchNorm2d(num_features=num_init_featuremaps)),
+                    ("relu0", nn.ReLU(inplace=True)),
+                    ("pool0", nn.MaxPool2d(kernel_size=3, stride=2, padding=1)),
+                ]
+            )
+        )
 
         # Each denseblock
         num_features = num_init_featuremaps
@@ -362,18 +447,20 @@ class DenseNet121(nn.Module):
                 bn_size=bn_size,
                 growth_rate=growth_rate,
                 drop_rate=drop_rate,
-                memory_efficient=memory_efficient
+                memory_efficient=memory_efficient,
             )
-            self.features.add_module('denseblock%d' % (i + 1), block)
+            self.features.add_module("denseblock%d" % (i + 1), block)
             num_features = num_features + num_layers * growth_rate
             if i != len(block_config) - 1:
-                trans = _Transition(num_input_features=num_features,
-                                    num_output_features=num_features // 2)
-                self.features.add_module('transition%d' % (i + 1), trans)
+                trans = _Transition(
+                    num_input_features=num_features,
+                    num_output_features=num_features // 2,
+                )
+                self.features.add_module("transition%d" % (i + 1), trans)
                 num_features = num_features // 2
 
         # Final batch norm
-        self.features.add_module('norm5', nn.BatchNorm2d(num_features))
+        self.features.add_module("norm5", nn.BatchNorm2d(num_features))
 
         # Linear layer
         self.classifier = nn.Linear(num_features, num_classes)
@@ -394,14 +481,14 @@ class DenseNet121(nn.Module):
         out = F.adaptive_avg_pool2d(out, (1, 1))
         out = torch.flatten(out, 1)
         logits = self.classifier(out)
-        probas = F.softmax(logits, dim=1)
         return logits
-    
+
 
 class VGG(nn.Module):
-    '''
-    VGG model 
-    '''
+    """
+    VGG model
+    """
+
     def __init__(self, features):
         super(VGG, self).__init__()
         self.features = features
@@ -414,13 +501,12 @@ class VGG(nn.Module):
             nn.ReLU(True),
             nn.Linear(512, 10),
         )
-         # Initialize weights
+        # Initialize weights
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
                 n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
-                m.weight.data.normal_(0, math.sqrt(2. / n))
+                m.weight.data.normal_(0, math.sqrt(2.0 / n))
                 m.bias.data.zero_()
-
 
     def forward(self, x):
         x = self.features(x)
@@ -433,7 +519,7 @@ def make_layers(cfg, batch_norm=False):
     layers = []
     in_channels = 3
     for v in cfg:
-        if v == 'M':
+        if v == "M":
             layers += [nn.MaxPool2d(kernel_size=2, stride=2)]
         else:
             conv2d = nn.Conv2d(in_channels, v, kernel_size=3, padding=1)
@@ -446,49 +532,89 @@ def make_layers(cfg, batch_norm=False):
 
 
 cfg = {
-    'A': [64, 'M', 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M'],
-    'B': [64, 64, 'M', 128, 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M'],
-    'D': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M'],
-    'E': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 256, 'M', 512, 512, 512, 512, 'M', 
-          512, 512, 512, 512, 'M'],
+    "A": [64, "M", 128, "M", 256, 256, "M", 512, 512, "M", 512, 512, "M"],
+    "B": [64, 64, "M", 128, 128, "M", 256, 256, "M", 512, 512, "M", 512, 512, "M"],
+    "D": [
+        64,
+        64,
+        "M",
+        128,
+        128,
+        "M",
+        256,
+        256,
+        256,
+        "M",
+        512,
+        512,
+        512,
+        "M",
+        512,
+        512,
+        512,
+        "M",
+    ],
+    "E": [
+        64,
+        64,
+        "M",
+        128,
+        128,
+        "M",
+        256,
+        256,
+        256,
+        256,
+        "M",
+        512,
+        512,
+        512,
+        512,
+        "M",
+        512,
+        512,
+        512,
+        512,
+        "M",
+    ],
 }
 
 
 def vgg11():
     """VGG 11-layer model (configuration "A")"""
-    return VGG(make_layers(cfg['A']))
+    return VGG(make_layers(cfg["A"]))
 
 
 def vgg11_bn():
     """VGG 11-layer model (configuration "A") with batch normalization"""
-    return VGG(make_layers(cfg['A'], batch_norm=True))
+    return VGG(make_layers(cfg["A"], batch_norm=True))
 
 
 def vgg13():
     """VGG 13-layer model (configuration "B")"""
-    return VGG(make_layers(cfg['B']))
+    return VGG(make_layers(cfg["B"]))
 
 
 def vgg13_bn():
     """VGG 13-layer model (configuration "B") with batch normalization"""
-    return VGG(make_layers(cfg['B'], batch_norm=True))
+    return VGG(make_layers(cfg["B"], batch_norm=True))
 
 
 def vgg16():
     """VGG 16-layer model (configuration "D")"""
-    return VGG(make_layers(cfg['D']))
+    return VGG(make_layers(cfg["D"]))
 
 
 def vgg16_bn():
     """VGG 16-layer model (configuration "D") with batch normalization"""
-    return VGG(make_layers(cfg['D'], batch_norm=True))
+    return VGG(make_layers(cfg["D"], batch_norm=True))
 
 
 def vgg19():
     """VGG 19-layer model (configuration "E")"""
-    return VGG(make_layers(cfg['E']))
+    return VGG(make_layers(cfg["E"]))
 
 
 def vgg19_bn():
     """VGG 19-layer model (configuration 'E') with batch normalization"""
-    return VGG(make_layers(cfg['E'], batch_norm=True))
+    return VGG(make_layers(cfg["E"], batch_norm=True))

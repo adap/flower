@@ -1,12 +1,12 @@
-import torch
 import flwr as fl
-from flwr.server import ServerApp, ServerAppComponents, ServerConfig
+import torch
 from flwr.common import Context
+from flwr.server import ServerApp, ServerAppComponents, ServerConfig
 
 from .app_common import check_config, get_model
+from .data_loader import get_subsetloaders_offline, load_partition_offline
 from .model import get_parameters
 from .server import PrivacyAttacksForDefense, PrivacyAttacksForDefenseFedProx
-from .data_loader import load_partition_offline, get_subsetloaders_offline
 
 
 def server_fn(context: Context):
@@ -29,7 +29,9 @@ def server_fn(context: Context):
     subsets = get_subsetloaders_offline(cfg) if cfg.canary else None
 
     use_fedprox = bool(cfg.get("use_fedprox", False))
-    StrategyClass = PrivacyAttacksForDefenseFedProx if use_fedprox else PrivacyAttacksForDefense
+    StrategyClass = (
+        PrivacyAttacksForDefenseFedProx if use_fedprox else PrivacyAttacksForDefense
+    )
 
     kwargs = dict(
         fraction_fit=1.0,
@@ -38,7 +40,7 @@ def server_fn(context: Context):
         min_evaluate_clients=0,
         min_available_clients=cfg.num_clients,
         initial_parameters=params,
-        evaluate_fn=None,       
+        evaluate_fn=None,
         training_datasets=training_datasets,
         validation_datasets=validation_datasets,
         subsets=subsets,
@@ -62,20 +64,21 @@ def _make_cfg(run_config: dict):
     class Cfg(dict):
         __getattr__ = dict.get
         __setattr__ = dict.__setitem__
+
         def get(self, key, default=None):
             return super().get(key, default)
-    
+
     cfg = Cfg(run_config)
-    
+
     if isinstance(cfg.attack_types, str):
         cfg.attack_types = [x.strip() for x in cfg.attack_types.split(",")]
-    
+
     if isinstance(cfg.n_encoder_layers, str):
         cfg.n_encoder_layers = [int(x.strip()) for x in cfg.n_encoder_layers.split(",")]
-    
+
     if isinstance(cfg.n_gmm_layers, str):
         cfg.n_gmm_layers = [int(x.strip()) for x in cfg.n_gmm_layers.split(",")]
-    
+
     if cfg.name_layer_grads == "None":
         cfg.name_layer_grads = None
 

@@ -1,5 +1,12 @@
-import torch
-from .model import CNN, vgg19, AlexNetCIFAR, AlexNetImageNet, LeNet5, DenseNet121, AlexNetFMNIST, LSTMShakespeare
+from .model import (
+    AlexNetCIFAR,
+    AlexNetFMNIST,
+    AlexNetImageNet,
+    DenseNet121,
+    LeNet5,
+    LSTMShakespeare,
+    vgg19,
+)
 
 
 def check_config(cfg, attack_types):

@@ -1,26 +1,35 @@
-import flwr as fl
-import torch
-from setup.data_loader import load_datasets, load_subsets, load_subsets_offline, load_datasets_offline
-from setup.server import (
-    get_evaluate_fn,
-    PrivacyAttacksForDefense,
-    PrivacyAttacksForDefenseFedProx
-)
-from setup.data_loader import load_shakespeare_subsets_offline
-from setup.client import generate_client_fn, generate_client_fn_subset
-from setup.model import get_parameters, CNN, vgg19, AlexNetCIFAR, AlexNetImageNet, LeNet5, DenseNet121, AlexNetFMNIST, LSTMShakespeare
-import pickle
-import hydra
-import numpy as np
-import wandb
 import os
-import matplotlib.pyplot as plt
-from time import time
-import pandas as pd
-from setup.plotter import plot_metrics
-from filelock import FileLock, Timeout
 import pickle
 import time
+from time import time
+
+import flwr as fl
+import hydra
+import numpy as np
+import pandas as pd
+import torch
+import wandb
+from setup.client import generate_client_fn, generate_client_fn_subset
+from setup.data_loader import (
+    load_shakespeare_subsets_offline,
+    load_subsets_offline,
+)
+from setup.model import (
+    CNN,
+    AlexNetCIFAR,
+    AlexNetFMNIST,
+    AlexNetImageNet,
+    DenseNet121,
+    LeNet5,
+    LSTMShakespeare,
+    get_parameters,
+    vgg19,
+)
+from setup.server import (
+    PrivacyAttacksForDefense,
+    PrivacyAttacksForDefenseFedProx,
+    get_evaluate_fn,
+)
 
 
 def check_config(cfg, attack_types):
@@ -53,31 +62,35 @@ def check_config(cfg, attack_types):
         cfg.image_label = "label"
         cfg.image_name = "img"
         cfg.input_size = 28
-        
+
     elif cfg.dataset == "shakespeare":
         # Load vocabulary to get exact vocab size
         try:
             vocab_path = f"{cfg.path_to_local_dataset}vocab.pkl"
-            with open(vocab_path, 'rb') as f:
+            with open(vocab_path, "rb") as f:
                 vocab_info = pickle.load(f)
-            cfg.vocab_size = vocab_info['vocab_size']
+            cfg.vocab_size = vocab_info["vocab_size"]
             print(f"Loaded vocabulary: {cfg.vocab_size} characters")
         except:
             # Fallback to config value
             cfg.vocab_size = cfg.get("vocab_size", 65)
             print(f"Using vocab_size from config: {cfg.vocab_size}")
-        
+
         cfg.num_classes = cfg.vocab_size  # For character prediction
         cfg.text_label = "target"
         cfg.text_input = "input"
         cfg.seq_length = cfg.get("seq_length", 80)
-        print(f"Shakespeare config: vocab_size={cfg.vocab_size}, seq_length={cfg.seq_length}")
+        print(
+            f"Shakespeare config: vocab_size={cfg.vocab_size}, seq_length={cfg.seq_length}"
+        )
 
     return cfg
 
 
 def get_model(cfg, device):
-    print(f"Architecture: {cfg.architecture}, Dataset: {cfg.dataset}, Num classes: {cfg.num_classes}")
+    print(
+        f"Architecture: {cfg.architecture}, Dataset: {cfg.dataset}, Num classes: {cfg.num_classes}"
+    )
     if cfg.architecture == "AlexNet" and cfg.dataset in ["cifar10", "cifar100"]:
         return AlexNetCIFAR(cfg.num_classes, device)
 
@@ -96,7 +109,7 @@ def get_model(cfg, device):
     elif cfg.architecture == "VGG":
         return vgg19()
 
-    elif cfg.architecture == 'DenseNet':
+    elif cfg.architecture == "DenseNet":
         return DenseNet121(num_classes=cfg.num_classes, grayscale=False)
 
     elif cfg.architecture == "LSTM" and cfg.dataset == "shakespeare":
@@ -106,7 +119,7 @@ def get_model(cfg, device):
             hidden_dim=cfg.get("hidden_dim", 100),
             num_layers=cfg.get("num_layers", 2),
             num_classes=cfg.num_classes,
-            device=device
+            device=device,
         )
     else:
         raise ValueError(f"Unknown architecture: {cfg.architecture}")
@@ -115,13 +128,15 @@ def get_model(cfg, device):
 def setup_simulation(cfg, subset_loader_fn, strategy_class=PrivacyAttacksForDefense):
     DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     time.sleep(0.1)
-    
+
     cfg = check_config(cfg, cfg.attack_types)
     model = get_model(cfg, DEVICE).to(DEVICE)
-    
+
     params = get_parameters(model)
     print("Params: {}".format(np.concatenate([arr.flatten() for arr in params]).shape))
-    freeriders = [num_client < cfg.num_freeriders for num_client in range(cfg.num_clients)]
+    freeriders = [
+        num_client < cfg.num_freeriders for num_client in range(cfg.num_clients)
+    ]
     print("Free-riders: {}".format(freeriders))
 
     wandb.init(
@@ -151,11 +166,15 @@ def setup_simulation(cfg, subset_loader_fn, strategy_class=PrivacyAttacksForDefe
 
     if cfg.canary:
         trainloaders, valloaders, subsetloaders = subset_loader_fn(cfg)
-        client_fn = generate_client_fn_subset(model, trainloaders, valloaders, freeriders, subsetloaders, cfg, DEVICE)
+        client_fn = generate_client_fn_subset(
+            model, trainloaders, valloaders, freeriders, subsetloaders, cfg, DEVICE
+        )
     else:
         trainloaders, valloaders, _ = subset_loader_fn(cfg)
-        client_fn = generate_client_fn(model, trainloaders, valloaders, freeriders, cfg, DEVICE)
-    
+        client_fn = generate_client_fn(
+            model, trainloaders, valloaders, freeriders, cfg, DEVICE
+        )
+
     # FedProx: Add proximal_mu parameter if using FedProx strategy
     strategy_kwargs = {
         "fraction_fit": 0.00001,
@@ -172,13 +191,13 @@ def setup_simulation(cfg, subset_loader_fn, strategy_class=PrivacyAttacksForDefe
         "subsets": subsetloaders if cfg.canary else None,
         "cfg": cfg,
     }
-    
+
     # Add proximal_mu if using FedProx strategy
     if strategy_class == PrivacyAttacksForDefenseFedProx:
         strategy_kwargs["proximal_mu"] = cfg.get("proximal_mu", 0.1)
-    
+
     strategy = strategy_class(**strategy_kwargs)
-    
+
     return client_fn, strategy
 
 
@@ -202,9 +221,9 @@ def format_line(wandb_dir, cfg, extra_params=None):
         "architecture": cfg["architecture"],
         "local_epochs": cfg["local_epochs"],
         "dp": cfg["dp"],
-        "epsilon": cfg["epsilon"],  
-        "sigma": cfg["sigma"],  
-        "zscore_threshold": cfg["zscore_threshold"],  
+        "epsilon": cfg["epsilon"],
+        "sigma": cfg["sigma"],
+        "zscore_threshold": cfg["zscore_threshold"],
     }
     if extra_params:
         base_params.update(extra_params)
@@ -225,7 +244,11 @@ def get_results_path(base_folder, attack_type, cfg, suffix="experiment"):
 
 def save_experiment_results(cfg, history, wandb_dir):
     """Saves the experimental results based on the configuration."""
-    attack_type = "".join(cfg["attack_types"]) if len(cfg["attack_types"]) > 1 else cfg["attack_types"][0]
+    attack_type = (
+        "".join(cfg["attack_types"])
+        if len(cfg["attack_types"]) > 1
+        else cfg["attack_types"][0]
+    )
     results_path = get_results_path(cfg["experiments_track_folder"], attack_type, cfg)
 
     # Prepare parameters specific to the attack type
@@ -235,12 +258,14 @@ def save_experiment_results(cfg, history, wandb_dir):
         extra_params["subset_samples"] = cfg["subset_samples"]
 
     elif attack_type == "yeom":
-        extra_params.update({
-            "canary_epochs": cfg["canary_epochs"],
-            "server_epochs": cfg["server_epochs"],
-            "yeom_type": cfg["yeom_type"],
-            "subset_samples": cfg["subset_samples"]
-        })
+        extra_params.update(
+            {
+                "canary_epochs": cfg["canary_epochs"],
+                "server_epochs": cfg["server_epochs"],
+                "yeom_type": cfg["yeom_type"],
+                "subset_samples": cfg["subset_samples"],
+            }
+        )
     elif attack_type in ["dist_score", "inconsistency"]:
         extra_params["pia_type"] = cfg["pia_type"]
 
@@ -250,7 +275,9 @@ def save_experiment_results(cfg, history, wandb_dir):
         file.write(line_to_append)
 
     # Optional CSV saving
-    if attack_type in ["pia_csv", "dist_score", "inconsistency"] and cfg.get("csv", False):
+    if attack_type in ["pia_csv", "dist_score", "inconsistency"] and cfg.get(
+        "csv", False
+    ):
         save_csv(history, cfg)
 
 
@@ -279,7 +306,7 @@ def run_simulation(cfg, subset_loader_fn=None, strategy_class=PrivacyAttacksForD
     with open(metadata_path, "a") as file:
         file.write(line_to_append)
 
-    
+
 def save_results(history):
     results_path = os.path.join(wandb.run.dir, "results.pkl")
     results = {"history": history}
@@ -293,7 +320,9 @@ def save_csv(history, cfg):
     for round, data in history.metrics_distributed_fit["pia"]:
         for attack_type, labels in data.items():
             for id, client in enumerate(labels):
-                result = {f"L{i}": [label_count] for i, label_count in enumerate(client)}
+                result = {
+                    f"L{i}": [label_count] for i, label_count in enumerate(client)
+                }
                 result["Pia"] = attack_type
                 result["FreeRider"] = cfg.num_freeriders > id
                 result["Round"] = round
@@ -313,25 +342,28 @@ def save_csv(history, cfg):
                     df = result
                 else:
                     df = pd.concat([df, result], ignore_index=True)
-    results_path = os.path.join(wandb.run.dir, "results_pia.csv")
-    mode = "w"
-    header = True
 
 
-@hydra.main(config_path="./configurations", config_name="baseline.yaml", version_base=None)
+@hydra.main(
+    config_path="./configurations", config_name="baseline.yaml", version_base=None
+)
 def simulation(cfg):
     """Main simulation function"""
     print("Start simulation")
     cfg = check_config(cfg, cfg.attack_types)
-    
+
     if cfg.dataset == "shakespeare":
         subset_loader = load_shakespeare_subsets_offline
     else:
         subset_loader = load_subsets_offline
 
     # Choose strategy based on config
-    strategy_class = PrivacyAttacksForDefenseFedProx if cfg.get("use_fedprox", False) else PrivacyAttacksForDefense
-    
+    strategy_class = (
+        PrivacyAttacksForDefenseFedProx
+        if cfg.get("use_fedprox", False)
+        else PrivacyAttacksForDefense
+    )
+
     run_simulation(cfg, subset_loader_fn=subset_loader, strategy_class=strategy_class)
 
 

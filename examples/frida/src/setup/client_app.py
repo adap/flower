@@ -1,11 +1,16 @@
-import torch
 from copy import deepcopy
-from flwr.client import ClientApp, NumPyClient
+
+import torch
+from flwr.client import ClientApp
 from flwr.common import Context
 
 from .app_common import check_config, get_model
-from .data_loader import load_partition_offline, get_subsetloaders_offline, load_local_data_offline
 from .client import Client, ClientSubset, FreeRider, FreeRiderSubset
+from .data_loader import (
+    get_subsetloaders_offline,
+    load_local_data_offline,
+    load_partition_offline,
+)
 
 
 def client_fn(context: Context):
@@ -30,19 +35,33 @@ def client_fn(context: Context):
         is_freerider = partition_id < cfg.num_freeriders
     else:
         cid = str(context.node_id)
-        is_freerider = False 
+        is_freerider = False
 
     if cfg.canary:
         subsetloaders = get_subsetloaders_offline(cfg)
         if is_freerider and cfg.freerider_canary:
-            client = FreeRiderSubset(cid, net, len(trainloader.dataset), cfg.freerider_type, subsetloaders, device, cfg)
+            client = FreeRiderSubset(
+                cid,
+                net,
+                len(trainloader.dataset),
+                cfg.freerider_type,
+                subsetloaders,
+                device,
+                cfg,
+            )
         elif is_freerider:
-            client = FreeRider(cid, net, len(trainloader.dataset), cfg.freerider_type, device, cfg)
+            client = FreeRider(
+                cid, net, len(trainloader.dataset), cfg.freerider_type, device, cfg
+            )
         else:
-            client = ClientSubset(cid, net, trainloader, valloader, subsetloaders, device, cfg)
+            client = ClientSubset(
+                cid, net, trainloader, valloader, subsetloaders, device, cfg
+            )
     else:
         if is_freerider:
-            client = FreeRider(cid, net, len(trainloader.dataset), cfg.freerider_type, device, cfg)
+            client = FreeRider(
+                cid, net, len(trainloader.dataset), cfg.freerider_type, device, cfg
+            )
         else:
             client = Client(cid, net, trainloader, valloader, device, cfg)
 
@@ -53,20 +72,21 @@ def _make_cfg(run_config: dict):
     class Cfg(dict):
         __getattr__ = dict.get
         __setattr__ = dict.__setitem__
+
         def get(self, key, default=None):
             return super().get(key, default)
-    
+
     cfg = Cfg(run_config)
-    
+
     if isinstance(cfg.attack_types, str):
         cfg.attack_types = [x.strip() for x in cfg.attack_types.split(",")]
-    
+
     if isinstance(cfg.n_encoder_layers, str):
         cfg.n_encoder_layers = [int(x.strip()) for x in cfg.n_encoder_layers.split(",")]
-    
+
     if isinstance(cfg.n_gmm_layers, str):
         cfg.n_gmm_layers = [int(x.strip()) for x in cfg.n_gmm_layers.split(",")]
-    
+
     if cfg.name_layer_grads == "None":
         cfg.name_layer_grads = None
 
