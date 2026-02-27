@@ -93,9 +93,11 @@ Example:
     [tool.flwr.app]
     publisher = "your-username"  # Must match your Flower account username
 
-.. note::
+
+.. warning::
    The :code:`name` and :code:`description` are publicly visible on Flower Hub.
-   Choose them carefully to ensure your app is easy to understand and discover.
+   Choose them carefully to ensure your app is clear, descriptive, and easy to discover.
+   The :code:`name` **cannot be changed** after the first publication, so make sure it is final before releasing your app.
 
 
 Create a Flower Account
