@@ -72,6 +72,13 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches, R0913, R0917
             help="Specific run ID to display",
         ),
     ] = None,
+    limit: Annotated[
+        int | None,
+        typer.Option(
+            "--limit",
+            help="Maximum number of runs to display",
+        ),
+    ] = None,
     output_format: Annotated[
         str,
         typer.Option(
@@ -110,6 +117,10 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches, R0913, R0917
                 raise ValueError(
                     "The options '--runs' and '--run-id' are mutually exclusive."
                 )
+            if limit is not None and limit <= 0:
+                raise ValueError(
+                    "The option '--limit' must be an integer greater than 0."
+                )
             channel = init_channel_from_connection(superlink_connection)
             stub = ControlStub(channel)
 
@@ -120,7 +131,7 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches, R0913, R0917
             # By default, list all runs
             else:
                 typer.echo("📄 Listing all runs...")
-                formatted_runs = _list_runs(stub)
+                formatted_runs = _list_runs(stub, limit)
 
             if is_json:
                 print_json_to_stdout(_to_json(formatted_runs))
@@ -320,7 +331,7 @@ def _to_json(run_list: list[RunRow]) -> str:
     return json.dumps({"success": True, "runs": runs_list})
 
 
-def _list_runs(stub: ControlStub) -> list[RunRow]:
+def _list_runs(stub: ControlStub, limit: int | None = None) -> list[RunRow]:
     """List all runs.
 
     Parameters
@@ -334,7 +345,7 @@ def _list_runs(stub: ControlStub) -> list[RunRow]:
         List of formatted run information for all runs.
     """
     with flwr_cli_grpc_exc_handler():
-        res: ListRunsResponse = stub.ListRuns(ListRunsRequest())
+        res: ListRunsResponse = stub.ListRuns(ListRunsRequest(limit=limit))
     runs = [run_from_proto(proto) for proto in res.run_dict.values()]
 
     return format_runs(runs, res.now)

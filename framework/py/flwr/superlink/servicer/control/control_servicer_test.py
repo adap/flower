@@ -19,6 +19,7 @@ import hashlib
 import json
 import os
 import tempfile
+import time
 import unittest
 from datetime import datetime
 from types import SimpleNamespace
@@ -155,21 +156,23 @@ class TestControlServicer(unittest.TestCase):
         self.assertEqual(run_info.fab_id, fab_id)
         self.assertEqual(run_info.fab_version, fab_version)
 
-    def test_list_runs(self) -> None:
+    @parameterized.expand([(None,), (1,), (2,), (3,), (9,)])  # type: ignore
+    def test_list_runs(self, limit: int | None) -> None:
         """Test List method of ControlServicer with --runs option."""
         # Prepare
-        run_ids = set()
+        run_ids: list[int] = []
         for _ in range(3):
-            run_id = self._create_dummy_run(self.aid)
-            run_ids.add(run_id)
+            run_ids.append(self._create_dummy_run(self.aid))
+            time.sleep(1e-6)  # Ensure different timestamps for sorting
 
         # Execute
-        response = self.servicer.ListRuns(ListRunsRequest(), Mock())
+        response = self.servicer.ListRuns(ListRunsRequest(limit=limit), Mock())
         retrieved_timestamp = datetime.fromisoformat(response.now).timestamp()
 
         # Assert
+        limit = limit or 999
         self.assertLess(abs(retrieved_timestamp - now().timestamp()), 1e-3)
-        self.assertEqual(set(response.run_dict.keys()), run_ids)
+        self.assertEqual(set(response.run_dict.keys()), set(run_ids[-limit:]))
 
     def test_list_run_id(self) -> None:
         """Test List method of ControlServicer with --run-id option."""
