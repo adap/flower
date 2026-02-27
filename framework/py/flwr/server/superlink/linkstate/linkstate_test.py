@@ -103,68 +103,6 @@ class StateTest(CoreStateTest):
         assert run.override_config["test_key"] == "test_value"
         assert run.flwr_aid == "i1r9f"
 
-    def test_get_all_run_ids(self) -> None:
-        """Test if get_run_ids works correctly."""
-        # Prepare
-        state = self.state_factory()
-        run_id1 = create_dummy_run(state)
-        run_id2 = create_dummy_run(state)
-
-        # Execute
-        run_ids = state.get_run_ids(None)
-
-        # Assert
-        assert run_id1 in run_ids
-        assert run_id2 in run_ids
-
-    def test_get_all_run_ids_empty(self) -> None:
-        """Test if get_run_ids works correctly when no runs are present."""
-        # Prepare
-        state = self.state_factory()
-
-        # Execute
-        run_ids = state.get_run_ids(None)
-
-        # Assert
-        assert len(run_ids) == 0
-
-    def test_get_run_ids_with_flwr_aid(self) -> None:
-        """When a specific flwr_aid is passed, only its run_ids are returned."""
-        state = self.state_factory()
-
-        # Prepare - Create three runs with different flwr_aid values
-        run_id1 = create_dummy_run(state, flwr_aid="userA")
-        run_id2 = create_dummy_run(state, flwr_aid="userB")
-        run_id3 = create_dummy_run(state, flwr_aid="userA")
-
-        # Execute - Only the runs for "userA" should be returned
-        result_userA = state.get_run_ids("userA")
-
-        # Assert
-        assert result_userA == {run_id1, run_id3}
-
-        # Execute - Only the run for "userB" should be returned
-        result_userB = state.get_run_ids("userB")
-
-        # Assert
-        assert result_userB == {run_id2}
-
-    def test_get_run_ids_with_unknown_flwr_aid(self) -> None:
-        """If an unknown flwr_aid is passed, get_run_ids returns an empty set."""
-        state = self.state_factory()
-
-        # Prepare - Seed with one run under "existing"
-        existing_id = create_dummy_run(state, flwr_aid="existing")
-
-        # Execute - Query with a flwr_aid that has no runs
-        result = state.get_run_ids("nonexistent")
-
-        # Assert
-        assert result == set()
-
-        # Sanity check that the existing run is still retrievable by its own aid
-        assert state.get_run_ids("existing") == {existing_id}
-
     def test_get_run_info_without_filters_returns_all_runs(self) -> None:
         """Test get_run_info returns all runs when no filter is provided."""
         # Prepare

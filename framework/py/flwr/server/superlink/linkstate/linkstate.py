@@ -290,13 +290,6 @@ class LinkState(CoreState):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
-    def get_run_ids(self, flwr_aid: str | None) -> set[int]:
-        """Retrieve all run IDs if `flwr_aid` is not specified.
-
-        Otherwise, retrieve all run IDs for the specified `flwr_aid`.
-        """
-
-    @abc.abstractmethod
     def get_run(self, run_id: int) -> Run | None:
         """Retrieve information about the run with the specified `run_id`.
 

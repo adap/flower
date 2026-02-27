@@ -92,11 +92,8 @@ def test_get_details_with_valid_federation() -> None:
     )
 
     # Configure mocks
-    mock_linkstate.get_run_ids.return_value = {run_id_1, run_id_2}
+    mock_linkstate.get_run_info.return_value = [mock_run_1, mock_run_2]
     mock_linkstate.get_node_info.return_value = [mock_node_1, mock_node_2]
-    mock_linkstate.get_run.side_effect = lambda run_id: (
-        mock_run_1 if run_id == run_id_1 else mock_run_2
-    )
 
     # Execute
     result = manager.get_details(NOOP_FEDERATION)
@@ -137,7 +134,7 @@ def test_get_details_with_no_runs() -> None:
     manager.linkstate = mock_linkstate
 
     # Configure mocks for empty runs
-    mock_linkstate.get_run_ids.return_value = set()
+    mock_linkstate.get_run_info.return_value = []
     mock_linkstate.get_node_info.return_value = []
 
     # Execute
