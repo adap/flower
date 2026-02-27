@@ -239,6 +239,25 @@ class StateTest(CoreStateTest):
         self.assertEqual([run.run_id for run in descending_runs], run_ids[::-1])
         self.assertEqual([run.run_id for run in limited_runs], run_ids[:2])
 
+    def test_get_run_info_empty_filters(self) -> None:
+        """Test get_run_info returns empty when any filter list is empty."""
+        # Prepare
+        state = self.state_factory()
+        _ = create_dummy_run(state, flwr_aid="aid-1", federation="federation-a")
+        _ = create_dummy_run(state, flwr_aid="aid-2", federation="federation-b")
+
+        # Execute & Assert
+        runs_statuses_empty = state.get_run_info(statuses=[])
+        self.assertEqual(list(runs_statuses_empty), [])
+
+        runs_flwr_aids_empty = state.get_run_info(flwr_aids=[])
+        self.assertEqual(list(runs_flwr_aids_empty), [])
+
+        runs_federations_empty = state.get_run_info(federations=[])
+        self.assertEqual(list(runs_federations_empty), [])
+
+        runs_run_ids_empty = state.get_run_info(run_ids=[])
+        self.assertEqual(list(runs_run_ids_empty), [])
     def test_get_pending_run_id(self) -> None:
         """Test if get_pending_run_id works correctly."""
         # Prepare
