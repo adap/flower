@@ -1,0 +1,78 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"    
+
+[project]
+name = "frida"
+version = "0.1.0"
+requires-python = ">=3.9"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["setup*"]
+
+[tool.flwr.federations.local-simulation]
+options.num-supernodes = 2
+
+[tool.flwr.app]
+publisher = "pol-garcia-recasens"
+default-federation = "local-simulation"
+
+[tool.flwr.app.components]
+serverapp = "setup.server_app:app"
+clientapp = "setup.client_app:app"
+
+[tool.flwr.app.config]
+num_clients = 2
+num_rounds = 5
+batch_size = 32
+local_epochs = 1
+average_detection = 1
+lr = 0.01
+dataset = "cifar10"
+architecture = "AlexNet"
+iid = true
+dirichlet_alpha = 0.5
+num_freeriders = 0
+freerider_type = "none"
+attack_types = "inconsistency"
+path_to_local_dataset = "./data/cifar10/"
+canary = true
+dynamic_canary = true
+noise = false
+subset_samples = 128
+train_samples = 100
+test_samples = 200
+use_fedprox = false
+proximal_mu = 0.1
+std = 0.01
+gamma = 0.5
+name_layer_grads = "all"
+average_rounds = 1
+zscore_threshold = 1.0
+mitigation = false
+canary_epochs = 1
+server_epochs = 1
+yeom_type = "clientside"
+canary_batch_size = 32
+freerider_canary = false
+dp = false
+clip_threshold = 1.0
+sigma = 0.01
+
+# required for inconsistency/dist_score attacks
+pia_type = "old"
+sample_per_label = 20
+decaf_batch_size = 32
+num_classes = 10
+input_size = 32
+image_name = "img"
+image_label = "label"
+power = 1
+multiplicator = 1
+
+# required by server for freerider logic
+n_encoder_layers = "128,64,32"
+n_gmm_layers = "10,10,2"
+dagmm_batch_size = 16
+dagmm_epochs = 100

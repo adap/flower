@@ -1,0 +1,12 @@
+flwr==1.7.0
+matplotlib
+numpy
+seaborn
+aiohttp
+hydra-core
+torch
+torchvision
+flwr_datasets
+scipy
+wandb
+ray
