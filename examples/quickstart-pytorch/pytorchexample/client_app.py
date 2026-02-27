@@ -3,7 +3,7 @@
 import torch
 from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
 from flwr.clientapp import ClientApp
-from pytorchexample.task import Net, load_data
+from pytorchexample.task import NUM_CLASSES, Net, load_data
 from pytorchexample.task import test as test_fn
 from pytorchexample.task import train as train_fn
 
@@ -77,7 +77,7 @@ def evaluate(msg: Message, context: Context):
         "eval_acc_top3": eval_results["top3_accuracy"],
         "num-examples": len(valloader.dataset),
     }
-    for class_idx in range(10):
+    for class_idx in range(NUM_CLASSES):
         metrics[f"eval_acc_class_{class_idx}"] = eval_results[
             f"class_accuracy_{class_idx}"
         ]

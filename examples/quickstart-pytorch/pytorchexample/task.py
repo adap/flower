@@ -10,6 +10,8 @@ from torchvision.transforms import Compose, Normalize, ToTensor
 
 from datasets import load_dataset
 
+NUM_CLASSES = 10
+
 
 class Net(nn.Module):
     """Model (simple CNN adapted from 'PyTorch: A 60 Minute Blitz')"""
@@ -98,24 +100,23 @@ def test(net, testloader, device):
     net.to(device)
     criterion = torch.nn.CrossEntropyLoss()
     top1_correct, top3_correct, loss = 0, 0, 0.0
-    num_classes = 10
-    class_correct = [0 for _ in range(num_classes)]
-    class_total = [0 for _ in range(num_classes)]
+    class_correct = [0 for _ in range(NUM_CLASSES)]
+    class_total = [0 for _ in range(NUM_CLASSES)]
     with torch.no_grad():
         for batch in testloader:
             images = batch["img"].to(device)
             labels = batch["label"].to(device)
             outputs = net(images)
             loss += criterion(outputs, labels).item()
-            top1_preds = torch.max(outputs.data, 1)[1]
+            top1_preds = torch.max(outputs, 1)[1]
             top1_correct += (top1_preds == labels).sum().item()
 
-            top3_preds = torch.topk(outputs.data, k=3, dim=1).indices
+            top3_preds = torch.topk(outputs, k=3, dim=1).indices
             top3_correct += (top3_preds == labels.unsqueeze(1)).any(dim=1).sum().item()
 
             labels_cpu = labels.cpu()
             top1_preds_cpu = top1_preds.cpu()
-            for class_idx in range(num_classes):
+            for class_idx in range(NUM_CLASSES):
                 class_mask = labels_cpu == class_idx
                 class_total[class_idx] += int(class_mask.sum().item())
                 class_correct[class_idx] += int(
@@ -131,7 +132,7 @@ def test(net, testloader, device):
             if class_total[class_idx] > 0
             else 0.0
         )
-        for class_idx in range(num_classes)
+        for class_idx in range(NUM_CLASSES)
     }
     metrics = {"accuracy": top1_accuracy, "top3_accuracy": top3_accuracy}
     metrics.update(class_accuracies)

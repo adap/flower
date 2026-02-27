@@ -4,7 +4,7 @@ import torch
 from flwr.app import ArrayRecord, ConfigRecord, Context, MetricRecord
 from flwr.serverapp import Grid, ServerApp
 from flwr.serverapp.strategy import FedAvg
-from pytorchexample.task import Net, load_centralized_dataset, test
+from pytorchexample.task import NUM_CLASSES, Net, load_centralized_dataset, test
 
 # Create ServerApp
 app = ServerApp()
@@ -62,7 +62,7 @@ def global_evaluate(server_round: int, arrays: ArrayRecord) -> MetricRecord:
         "accuracy_top3": test_results["top3_accuracy"],
         "loss": test_loss,
     }
-    for class_idx in range(10):
+    for class_idx in range(NUM_CLASSES):
         metrics[f"accuracy_class_{class_idx}"] = test_results[
             f"class_accuracy_{class_idx}"
         ]
