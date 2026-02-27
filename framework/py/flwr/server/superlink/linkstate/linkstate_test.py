@@ -290,7 +290,9 @@ class StateTest(CoreStateTest):
         # Prepare
         state = self.state_factory()
         run_id1 = create_dummy_run(state)
+        time.sleep(1e-6)
         run_id2 = create_dummy_run(state)
+        time.sleep(1e-6)
         run_id3 = create_dummy_run(state)
         run_ids = [run_id1, run_id2, run_id3]
 
