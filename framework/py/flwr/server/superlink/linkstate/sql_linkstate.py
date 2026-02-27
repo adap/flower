@@ -21,7 +21,7 @@ import json
 from collections.abc import Sequence
 from datetime import datetime, timezone
 from logging import ERROR, WARNING
-from typing import Any
+from typing import Any, Literal
 
 from sqlalchemy import MetaData
 from sqlalchemy.exc import IntegrityError
@@ -886,6 +886,20 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
             )
         log(ERROR, "`run_id` does not exist.")
         return None
+
+    def get_run_info(  # pylint: disable=too-many-arguments
+        self,
+        *,
+        run_ids: Sequence[int] | None = None,
+        statuses: Sequence[str] | None = None,
+        flwr_aids: Sequence[str] | None = None,
+        federations: Sequence[str] | None = None,
+        order_by: Literal["pending_at"] | None = None,
+        ascending: bool = True,
+        limit: int | None = None,
+    ) -> Sequence[Run]:
+        """Retrieve information about runs based on the specified filters."""
+        raise NotImplementedError
 
     def get_run_status(self, run_ids: set[int]) -> dict[int, RunStatus]:
         """Retrieve the statuses for the specified runs."""
