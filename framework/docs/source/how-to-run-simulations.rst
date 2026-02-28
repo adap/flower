@@ -44,6 +44,11 @@ workloads makes sense.
     <https://learn.microsoft.com/en-us/powershell/scripting/overview?view=powershell-7.5>`_,
     we recommend using `WSL2 <https://learn.microsoft.com/en-us/windows/wsl/about>`_.
 
+.. note::
+
+    If you're on Windows and see unexpected terminal output (e.g.: ``� □[32m□[1m``),
+    check :ref:`this FAQ entry <faq-windows-unexpected-output>`.
+
 Flower's ``Simulation Engine`` schedules, launches, and manages |clientapp_link|_
 instances. It does so through a ``Backend``, which contains several workers (i.e.,
 Python processes) that can execute a ``ClientApp`` by passing it a |context_link|_ and a
@@ -105,6 +110,10 @@ multiple apps to choose from. The example below uses the ``PyTorch`` quickstart 
 
 Then, follow the instructions shown after completing the |flwr_new_link|_ command. When
 you execute |flwr_run_link|_, you'll be using the ``Simulation Engine``.
+
+For local simulation profiles, ``flwr run`` submits the run to a local SuperLink via the
+Control API. If the profile has ``options.*`` and no explicit ``address``, Flower starts
+a local SuperLink automatically when needed.
 
 Simulation examples
 ===================
