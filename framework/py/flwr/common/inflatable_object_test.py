@@ -23,7 +23,7 @@ from unittest.mock import patch
 import pytest
 
 from .constant import HEAD_BODY_DIVIDER, HEAD_VALUE_DIVIDER
-from .inflatable import (
+from .inflatable_object import (
     InflatableObject,
     UnexpectedObjectContentError,
     _get_object_body,
@@ -295,7 +295,7 @@ def test_no_object_id_recompute() -> None:
     original_object_id = obj.object_id
 
     with patch(
-        "flwr.common.inflatable.get_object_id", side_effect=get_object_id
+        "flwr.common.inflatable_object.get_object_id", side_effect=get_object_id
     ) as mock_get_object_id:
         # Execute: Access object_id multiple times within the context manager
         with no_object_id_recompute():
@@ -307,7 +307,7 @@ def test_no_object_id_recompute() -> None:
         assert obj_id == original_object_id
 
     with patch(
-        "flwr.common.inflatable.get_object_id", side_effect=get_object_id
+        "flwr.common.inflatable_object.get_object_id", side_effect=get_object_id
     ) as mock_get_object_id:
         # Execute: Access object_id outside the context manager
         for _ in range(5):

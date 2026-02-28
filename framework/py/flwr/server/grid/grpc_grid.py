@@ -30,7 +30,7 @@ from flwr.common.constant import (
     ErrorCode,
 )
 from flwr.common.grpc import create_channel, on_channel_state_change
-from flwr.common.inflatable import (
+from flwr.common.inflatable_object import (
     InflatableObject,
     get_all_nested_objects,
     get_object_tree,

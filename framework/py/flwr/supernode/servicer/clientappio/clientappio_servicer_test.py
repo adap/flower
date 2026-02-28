@@ -21,7 +21,7 @@ from unittest.mock import Mock
 from parameterized import parameterized
 
 from flwr.common import Context, typing
-from flwr.common.inflatable import (
+from flwr.common.inflatable_object import (
     get_all_nested_objects,
     get_object_tree,
     iterate_object_tree,

@@ -27,7 +27,7 @@ import numpy as np
 from parameterized import parameterized
 
 from ..constant import FLWR_PRIVATE_MAX_ARRAY_CHUNK_SIZE, SType
-from ..inflatable import get_object_body, get_object_type_from_object_content
+from ..inflatable_object import get_object_body, get_object_type_from_object_content
 from ..typing import NDArray
 from .array import Array
 from .arraychunk import ArrayChunk
