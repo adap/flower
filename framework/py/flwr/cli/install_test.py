@@ -40,7 +40,7 @@ def test_safe_extract_zip_extracts_regular_files(tmp_path: Path) -> None:
     zip_bytes = _zip_bytes([("dir/file.txt", b"hello")])
 
     with zipfile.ZipFile(io.BytesIO(zip_bytes), "r") as zf:
-        safe_extract_zip(zf, tmp_path, archive_name="FAB archive")
+        safe_extract_zip(zf, tmp_path)
 
     assert (tmp_path / "dir" / "file.txt").read_bytes() == b"hello"
 
@@ -51,7 +51,7 @@ def test_safe_extract_zip_rejects_parent_traversal(tmp_path: Path) -> None:
 
     with zipfile.ZipFile(io.BytesIO(zip_bytes), "r") as zf:
         with pytest.raises(click.ClickException, match="Unsafe path in FAB archive"):
-            safe_extract_zip(zf, tmp_path, archive_name="FAB archive")
+            safe_extract_zip(zf, tmp_path)
 
     assert not (tmp_path.parent / "evil.txt").exists()
 
@@ -62,7 +62,7 @@ def test_safe_extract_zip_rejects_absolute_paths(tmp_path: Path) -> None:
 
     with zipfile.ZipFile(io.BytesIO(zip_bytes), "r") as zf:
         with pytest.raises(click.ClickException, match="Unsafe path in FAB archive"):
-            safe_extract_zip(zf, tmp_path, archive_name="FAB archive")
+            safe_extract_zip(zf, tmp_path)
 
 
 def test_install_from_fab_rejects_zip_slip(tmp_path: Path) -> None:
