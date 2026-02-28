@@ -343,7 +343,7 @@ jobs:
           sed -i 's/"flwr\[[^]]*\][^"]*", *//g' pyproject.toml
           # Replace tensorflow with tensorflow-cpu to avoid GPU warnings in CI
           sed -i 's/"tensorflow\([^"]*\)"/"tensorflow-cpu\1"/g' pyproject.toml
-          python -m pip install flwr[simulation]
+          python -m pip install "flwr[simulation]"
           python -m pip install . --extra-index-url https://download.pytorch.org/whl/cpu
       - name: Run project
         if: ${{ needs.changes.outputs.framework == 'true' }}
