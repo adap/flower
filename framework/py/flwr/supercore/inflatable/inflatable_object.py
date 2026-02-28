@@ -25,7 +25,7 @@ from typing import TypeVar, cast
 
 from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
 
-from .constant import HEAD_BODY_DIVIDER, HEAD_VALUE_DIVIDER
+from ..constant import HEAD_BODY_DIVIDER, HEAD_VALUE_DIVIDER
 
 
 class UnexpectedObjectContentError(Exception):
