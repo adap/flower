@@ -41,7 +41,6 @@ runs:
       run: |
         python -m pip install -U pip==${{ inputs.pip-version }}
         python -m pip install -U setuptools==${{ inputs.setuptools-version }}
-
         if ${{ inputs.poetry-skip == 'false' }}; then
           python -m pip install -U pipx
           python -m pipx install --force poetry==${{ inputs.poetry-version }}

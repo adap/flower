@@ -29,7 +29,7 @@ from flwr.supercore.date import now
 from ..app.error import Error
 from ..app.metadata import Metadata
 from .constant import MESSAGE_TTL_TOLERANCE
-from .inflatable import (
+from .inflatable_object import (
     InflatableObject,
     add_header_to_object_body,
     get_descendant_object_ids,

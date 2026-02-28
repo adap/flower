@@ -19,8 +19,8 @@ from unittest.mock import Mock
 
 import pytest
 
-from .inflatable import get_object_tree
-from .inflatable_test import CustomDataClass
+from .inflatable_object import get_object_tree
+from .inflatable_object_test import CustomDataClass
 from .inflatable_utils import (
     inflatable_class_registry,
     pull_and_inflate_object_from_tree,

@@ -21,7 +21,7 @@ from typing import cast
 import grpc
 
 from flwr.common import Context
-from flwr.common.inflatable import UnexpectedObjectContentError
+from flwr.common.inflatable_object import UnexpectedObjectContentError
 from flwr.common.logger import log
 from flwr.common.serde import (
     context_from_proto,

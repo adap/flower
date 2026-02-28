@@ -21,7 +21,7 @@ from threading import Lock, RLock
 
 from flwr.common import Context, Error, Message, now
 from flwr.common.constant import ErrorCode
-from flwr.common.inflatable import (
+from flwr.common.inflatable_object import (
     get_all_nested_objects,
     get_object_tree,
     no_object_id_recompute,

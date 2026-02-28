@@ -30,7 +30,7 @@ from ..app.metadata import Metadata
 from ..supercore.date import now
 from . import ConfigRecord, RecordDict
 from .constant import MESSAGE_TTL_TOLERANCE
-from .inflatable import (
+from .inflatable_object import (
     get_object_body,
     get_object_children_ids_from_object_content,
     get_object_type_from_object_content,

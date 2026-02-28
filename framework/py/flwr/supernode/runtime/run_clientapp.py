@@ -28,7 +28,7 @@ from flwr.common.config import get_flwr_dir
 from flwr.common.constant import ErrorCode
 from flwr.common.exit import ExitCode, flwr_exit, register_signal_handlers
 from flwr.common.grpc import create_channel, on_channel_state_change
-from flwr.common.inflatable import (
+from flwr.common.inflatable_object import (
     get_all_nested_objects,
     get_object_tree,
     no_object_id_recompute,
