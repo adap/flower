@@ -10,8 +10,9 @@ cd ts && \
   cd ..
 
 # Build Swift docs
+SWIFT_ARCH="$(uname -m)"
 cd .. && \
-  sourcedocs generate --module-name FlowerIntelligence -- -scheme flower -destination 'platform=macOS' && \
+  sourcedocs generate --module-name FlowerIntelligence -- -scheme Flwr -destination "platform=macOS,arch=${SWIFT_ARCH}" && \
   mkdir -p intelligence/docs/source/swift-api-ref && \
   cp -r Documentation/Reference/* intelligence/docs/source/swift-api-ref/ && \
   cd intelligence/docs && \

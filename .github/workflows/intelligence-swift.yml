@@ -52,4 +52,6 @@ jobs:
             xcode-version: "16.2"
 
       - name: Run tests
-        run: xcodebuild test -scheme FlowerIntelligenceTests -destination 'platform=macOS'
+        run: |
+          SWIFT_ARCH="$(uname -m)"
+          xcodebuild test -scheme FlowerIntelligenceTests -destination "platform=macOS,arch=${SWIFT_ARCH}"
