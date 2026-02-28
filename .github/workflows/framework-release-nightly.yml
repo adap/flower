@@ -36,8 +36,8 @@ jobs:
           echo "pip-version=${{ steps.bootstrap.outputs.pip-version }}" >> "$GITHUB_OUTPUT"
           echo "setuptools-version=${{ steps.bootstrap.outputs.setuptools-version }}" >> "$GITHUB_OUTPUT"
 
-          NAME=$(poetry version | awk {'print $1'})
-          VERSION=$(poetry version -s)
+          NAME=$(python dev/pyproject_meta.py get-name pyproject.toml)
+          VERSION=$(python dev/pyproject_meta.py get-version pyproject.toml)
           python dev/build-docker-image-matrix.py --flwr-version "${VERSION}" --matrix nightly --flwr-package "${NAME}" > matrix.json
           echo "matrix=$(cat matrix.json)" >> $GITHUB_OUTPUT
 

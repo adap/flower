@@ -83,7 +83,7 @@ Create Flower Dev Environment
        ::
 
            (your-env-name) $ cd framework
-           (your-env-name) $ python -m poetry install --all-extras
+           (your-env-name) $ python -m poetry install --with dev --all-extras
 
 *********************
  Convenience Scripts
