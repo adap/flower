@@ -59,7 +59,7 @@ jobs:
       - name: Install dependencies (mandatory only)
         run: |
           cd datasets
-          python -m poetry install --all-extras
+          poetry install --all-extras
       - name: Cache Hugging Face datasets
         uses: actions/cache@v3
         with:

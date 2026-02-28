@@ -1,15 +1,17 @@
 [build-system]
-requires = ["poetry-core>=2.1.3"]
+requires = ["poetry-core>=2.3.1,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
-[tool.poetry]
+[project]
 name = "quickstart_tensorflow"
 version = "0.1.0"
 description = "Keras Federated Learning Quickstart with Flower"
-authors = ["The Flower Authors <hello@flower.ai>"]
+authors = [{ name = "The Flower Authors", email = "hello@flower.ai" }]
+requires-python = ">=3.10,<3.11"
+dependencies = ["tensorflow-cpu>=2.18.0"]
+
+[tool.poetry]
 package-mode = false
 
 [tool.poetry.dependencies]
-python = ">=3.10,<3.11"
 flwr = { path = "../../", develop = true, extras = ["simulation"] }
-tensorflow-cpu = ">=2.18.0"

@@ -7,7 +7,7 @@
 ***************
 
 - `Python 3.10 <https://docs.python.org/3.10/>`_ or above
-- `Poetry 1.3 <https://python-poetry.org/>`_ or above
+- `Poetry 2.3 <https://python-poetry.org/>`_ or above
 - (Optional) `pyenv <https://github.com/pyenv/pyenv>`_
 - (Optional) `pyenv-virtualenv <https://github.com/pyenv/pyenv-virtualenv>`_
 
@@ -75,7 +75,7 @@ Create Flower Dev Environment
 
        ::
 
-           (your-env-name) $ pip install poetry==2.1.3
+           (your-env-name) $ pip install poetry==2.3.2
 
 4. Navigate to the ``framework`` directory and install the Flower project in development
    mode, including all optional dependencies:
@@ -83,7 +83,7 @@ Create Flower Dev Environment
        ::
 
            (your-env-name) $ cd framework
-           (your-env-name) $ python -m poetry install --all-extras
+           (your-env-name) $ poetry install --all-extras
 
 *********************
  Convenience Scripts
