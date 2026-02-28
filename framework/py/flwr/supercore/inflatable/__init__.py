@@ -12,4 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Inflatable object."""
+"""Inflatable objects and related utilities, including core types, helpers, and protobuf integration."""
