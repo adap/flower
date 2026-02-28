@@ -44,8 +44,10 @@ runs:
         if ${{ inputs.poetry-skip == 'false' }}; then
           python -m pip install -U pipx
           python -m pipx install --force poetry==${{ inputs.poetry-version }}
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-          "$HOME/.local/bin/poetry" config virtualenvs.create false
+          PIPX_BIN_DIR="$(python -m pipx environment --value PIPX_BIN_DIR)"
+          echo "$PIPX_BIN_DIR" >> "$GITHUB_PATH"
+          PATH="$PIPX_BIN_DIR:$PATH"
+          poetry config virtualenvs.create false
         fi
       shell: bash
     - id: versions
