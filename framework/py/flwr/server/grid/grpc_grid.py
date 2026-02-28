@@ -30,23 +30,6 @@ from flwr.common.constant import (
     ErrorCode,
 )
 from flwr.common.grpc import create_channel, on_channel_state_change
-from flwr.common.inflatable import (
-    InflatableObject,
-    get_all_nested_objects,
-    get_object_tree,
-    iterate_object_tree,
-    no_object_id_recompute,
-)
-from flwr.common.inflatable_protobuf_utils import (
-    make_pull_object_fn_protobuf,
-    make_push_object_fn_protobuf,
-)
-from flwr.common.inflatable_utils import (
-    ObjectUnavailableError,
-    inflate_object_from_contents,
-    pull_objects,
-    push_objects,
-)
 from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.message import make_message, remove_content_from_message
 from flwr.common.retry_invoker import make_simple_grpc_retry_invoker, wrap_stub
@@ -69,6 +52,23 @@ from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub  # pylint: disable=E0611
 from flwr.supercore.constant import SYSTEM_MESSAGE_TYPE
+from flwr.supercore.inflatable.inflatable_object import (
+    InflatableObject,
+    get_all_nested_objects,
+    get_object_tree,
+    iterate_object_tree,
+    no_object_id_recompute,
+)
+from flwr.supercore.inflatable.inflatable_protobuf_utils import (
+    make_pull_object_fn_protobuf,
+    make_push_object_fn_protobuf,
+)
+from flwr.supercore.inflatable.inflatable_utils import (
+    ObjectUnavailableError,
+    inflate_object_from_contents,
+    pull_objects,
+    push_objects,
+)
 
 from .grid import Grid
 

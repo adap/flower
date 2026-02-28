@@ -24,9 +24,19 @@ from collections.abc import Callable, Iterable, Iterator
 from queue import Queue
 from typing import TypeVar
 
+from flwr.common.exit import add_exit_handler
+from flwr.common.message import Message
+from flwr.common.record import (
+    Array,
+    ArrayRecord,
+    ConfigRecord,
+    MetricRecord,
+    RecordDict,
+)
+from flwr.common.record.arraychunk import ArrayChunk
 from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
 
-from .constant import (
+from ..constant import (
     FLWR_PRIVATE_MAX_CONCURRENT_OBJ_PULLS,
     FLWR_PRIVATE_MAX_CONCURRENT_OBJ_PUSHES,
     HEAD_BODY_DIVIDER,
@@ -36,8 +46,7 @@ from .constant import (
     PULL_MAX_TIME,
     PULL_MAX_TRIES_PER_OBJECT,
 )
-from .exit import add_exit_handler
-from .inflatable import (
+from .inflatable_object import (
     InflatableObject,
     UnexpectedObjectContentError,
     _get_object_head,
@@ -46,9 +55,6 @@ from .inflatable import (
     is_valid_sha256_hash,
     iterate_object_tree,
 )
-from .message import Message
-from .record import Array, ArrayRecord, ConfigRecord, MetricRecord, RecordDict
-from .record.arraychunk import ArrayChunk
 
 # Helper registry that maps names of classes to their type
 inflatable_class_registry: dict[str, type[InflatableObject]] = {

@@ -30,12 +30,6 @@ from flwr.common.constant import (
     SUPERLINK_NODE_ID,
     Status,
 )
-from flwr.common.inflatable import (
-    get_all_nested_objects,
-    get_object_id,
-    get_object_tree,
-    iterate_object_tree,
-)
 from flwr.common.message import get_message_to_descendant_id_mapping
 from flwr.common.serde import message_from_proto
 from flwr.common.typing import RunStatus
@@ -74,6 +68,12 @@ from flwr.server.superlink.linkstate.linkstate_test import (
 from flwr.server.superlink.utils import _STATUS_TO_MSG
 from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME, NOOP_FEDERATION, NodeStatus
 from flwr.supercore.ffs import FfsFactory
+from flwr.supercore.inflatable.inflatable_object import (
+    get_all_nested_objects,
+    get_object_id,
+    get_object_tree,
+    iterate_object_tree,
+)
 from flwr.supercore.object_store import ObjectStoreFactory
 from flwr.superlink.federation import NoOpFederationManager
 

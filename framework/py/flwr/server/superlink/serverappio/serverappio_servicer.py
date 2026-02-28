@@ -22,12 +22,6 @@ import grpc
 
 from flwr.common import Message
 from flwr.common.constant import SUPERLINK_NODE_ID, Status
-from flwr.common.inflatable import (
-    UnexpectedObjectContentError,
-    get_all_nested_objects,
-    get_object_tree,
-    no_object_id_recompute,
-)
 from flwr.common.logger import log
 from flwr.common.serde import (
     context_from_proto,
@@ -85,6 +79,12 @@ from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
 from flwr.server.superlink.utils import abort_if
 from flwr.server.utils.validator import validate_message
 from flwr.supercore.ffs import FfsFactory
+from flwr.supercore.inflatable.inflatable_object import (
+    UnexpectedObjectContentError,
+    get_all_nested_objects,
+    get_object_tree,
+    no_object_id_recompute,
+)
 from flwr.supercore.object_store import NoObjectInStoreError, ObjectStoreFactory
 
 

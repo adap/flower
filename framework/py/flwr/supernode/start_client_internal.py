@@ -49,16 +49,6 @@ from flwr.common.constant import (
 )
 from flwr.common.exit import ExitCode, flwr_exit, register_signal_handlers
 from flwr.common.grpc import generic_create_grpc_server
-from flwr.common.inflatable import (
-    get_all_nested_objects,
-    get_object_tree,
-    iterate_object_tree,
-    no_object_id_recompute,
-)
-from flwr.common.inflatable_utils import (
-    pull_objects,
-    push_object_contents_from_iterable,
-)
 from flwr.common.logger import log
 from flwr.common.retry_invoker import RetryInvoker, make_simple_grpc_retry_invoker
 from flwr.common.telemetry import EventType
@@ -68,6 +58,16 @@ from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
 from flwr.supercore.address import parse_address, resolve_bind_address
 from flwr.supercore.ffs import Ffs, FfsFactory
 from flwr.supercore.grpc_health import run_health_server_grpc_no_tls
+from flwr.supercore.inflatable.inflatable_object import (
+    get_all_nested_objects,
+    get_object_tree,
+    iterate_object_tree,
+    no_object_id_recompute,
+)
+from flwr.supercore.inflatable.inflatable_utils import (
+    pull_objects,
+    push_object_contents_from_iterable,
+)
 from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
 from flwr.supercore.primitives.asymmetric_ed25519 import (
     create_message_to_sign,
