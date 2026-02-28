@@ -8,6 +8,7 @@ import re
 import warnings
 from time import perf_counter
 
+import torch
 from flwr.app import ArrayRecord, ConfigRecord, Context, Message, MetricRecord, RecordDict
 from flwr.clientapp import ClientApp
 from flwr.common.config import unflatten_dict
@@ -35,12 +36,103 @@ def _sanitize_layer_name(name: str) -> str:
     return re.sub(r"[^a-zA-Z0-9_.-]", "_", name)
 
 
+def _layer_dir(context: Context) -> str:
+    layer_dir = os.path.join(
+        os.getcwd(), "layers", str(context.run_id), str(context.node_id)
+    )
+    os.makedirs(layer_dir, exist_ok=True)
+    return layer_dir
+
+
+@app.train("layer_wise_download")
+def train_download(msg: Message, context: Context):
+    """Receive layer chunks from the server and persist to disk."""
+    t0 = perf_counter()
+    if msg.content is None or "arrays" not in msg.content or "config" not in msg.content:
+        return Message(content=RecordDict({"metrics": MetricRecord()}), reply_to=msg)
+
+    config = msg.content["config"]
+    layer_name = str(config.get("layer_name", ""))
+    if not layer_name:
+        return Message(content=RecordDict({"metrics": MetricRecord()}), reply_to=msg)
+
+    layer_shape = list(config.get("layer_shape", []))
+    chunk_start = int(config.get("chunk_start", 0))
+    chunk_end = int(config.get("chunk_end", 0))
+
+    layer_dir = _layer_dir(context)
+    file_name = f"{_sanitize_layer_name(layer_name)}.pt"
+    file_path = os.path.join(layer_dir, file_name)
+
+    incoming = msg.content["arrays"].to_torch_state_dict()[layer_name].detach().cpu()
+
+    if incoming.ndim == 0 or chunk_end <= chunk_start:
+        layer_tensor = incoming
+    else:
+        if os.path.exists(file_path):
+            with open(file_path, "rb") as file:
+                layer_tensor = pickle.load(file)[layer_name]
+        else:
+            layer_tensor = torch.zeros(
+                tuple(int(x) for x in layer_shape),
+                dtype=incoming.dtype,
+            )
+        layer_tensor[chunk_start:chunk_end] = incoming
+
+    with open(file_path, "wb") as file:
+        pickle.dump({layer_name: layer_tensor}, file)
+
+    # Keep context state aligned for subsequent train/train_comms calls.
+    layer_paths = []
+    if STATE_LAYER_PATHS in context.state:
+        layer_paths = list(context.state[STATE_LAYER_PATHS]["paths"])
+    if file_path not in layer_paths:
+        layer_paths.append(file_path)
+    context.state[STATE_LAYER_PATHS] = ConfigRecord({"paths": layer_paths})
+
+    layer_names = []
+    if STATE_LAYER_NAMES in context.state:
+        layer_names = list(context.state[STATE_LAYER_NAMES]["names"])
+    if layer_name not in layer_names:
+        layer_names.append(layer_name)
+    context.state[STATE_LAYER_NAMES] = ConfigRecord({"names": layer_names})
+
+    t1 = perf_counter()
+    metrics = MetricRecord({"profile.client.train_download.ms": (t1 - t0) * 1000.0})
+    return Message(content=RecordDict({"metrics": metrics}), reply_to=msg)
+
+
 @app.train()
 def train(msg: Message, context: Context):
     """Prepare model state for layer-wise sending (training disabled)."""
     t0 = perf_counter()
     cfg = DictConfig(replace_keys(unflatten_dict(context.run_config)))
     aggregation_mode = getattr(cfg, "aggregation", {}).get("mode", "layerwise")
+    model_preloaded = bool(
+        msg.content
+        and "config" in msg.content
+        and msg.content["config"].get("model_preloaded", False)
+    )
+
+    # If layerwise model was streamed from server already, skip full model load.
+    if aggregation_mode != "all_at_once" and model_preloaded and STATE_LAYER_PATHS in context.state:
+        layer_paths = list(context.state[STATE_LAYER_PATHS]["paths"])
+        if STATE_LAYER_NAMES not in context.state:
+            layer_names = [
+                os.path.splitext(os.path.basename(path))[0] for path in layer_paths
+            ]
+            context.state[STATE_LAYER_NAMES] = ConfigRecord({"names": layer_names})
+        context.state[STATE_LAYER_IDX] = ConfigRecord({"idx": 0})
+        context.state[STATE_NUM_EXAMPLES] = ConfigRecord({"num_examples": 1})
+        t1 = perf_counter()
+        metrics = MetricRecord(
+            {
+                "train_loss": 0.0,
+                "num-examples": 1,
+                "profile.client.train.ms": (t1 - t0) * 1000.0,
+            }
+        )
+        return Message(content=RecordDict({"arrays": ArrayRecord(), "metrics": metrics}), reply_to=msg)
 
     # Load model (no training)
     model = get_model(cfg.model)
@@ -59,8 +151,7 @@ def train(msg: Message, context: Context):
     context.state[STATE_LAYER_NAMES] = ConfigRecord({"names": layer_names})
 
     # Persist layers to disk for per-layer sending
-    layer_dir = os.path.join(os.getcwd(), "layers", str(context.run_id), str(context.node_id))
-    os.makedirs(layer_dir, exist_ok=True)
+    layer_dir = _layer_dir(context)
 
     serialized_layer_paths: list[str] = []
     for layer_name in layer_names:

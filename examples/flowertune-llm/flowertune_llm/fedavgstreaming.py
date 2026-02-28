@@ -139,6 +139,69 @@ class FedAvgStreaming(FedAvg):
         self._layer_names: list[str] | None = None
         self._max_chunk_bytes = max_chunk_bytes
 
+    def _download_layers_to_clients(
+        self,
+        *,
+        grid: Grid,
+        node_ids: list[int],
+        state_dict: dict[str, Any],
+        timeout: float,
+    ) -> None:
+        """Stream current model layers/chunks from server to selected clients."""
+        if not node_ids:
+            return
+
+        num_layers = len(self._layer_names or [])
+        for layer_idx, layer_name in enumerate(self._layer_names or []):
+            tensor = state_dict[layer_name]
+            cpu_tensor = tensor.detach().cpu() if hasattr(tensor, "cpu") else tensor
+            chunk_slices = _chunk_slices(cpu_tensor, self._max_chunk_bytes)
+            for chunk_idx, (start, end) in enumerate(chunk_slices):
+                chunk_tensor = cpu_tensor if cpu_tensor.ndim == 0 else cpu_tensor[start:end]
+                arrays = ArrayRecord({layer_name: chunk_tensor})
+                config = ConfigRecord(
+                    {
+                        "layer_idx": layer_idx,
+                        "layer_name": layer_name,
+                        "layer_shape": list(cpu_tensor.shape),
+                        "chunk_idx": chunk_idx,
+                        "chunk_start": start,
+                        "chunk_end": end,
+                        "chunk_count": len(chunk_slices),
+                    }
+                )
+                record = RecordDict(
+                    {self.arrayrecord_key: arrays, self.configrecord_key: config}
+                )
+                replies = grid.send_and_receive(
+                    messages=self._construct_messages(
+                        record,
+                        node_ids,
+                        message_type="train.layer_wise_download",
+                    ),
+                    timeout=timeout,
+                )
+                valid_replies, _ = self._check_and_log_replies(
+                    replies, is_train=True, validate=False
+                )
+                if len(valid_replies) < len(node_ids):
+                    log(
+                        WARNING,
+                        "Layer download ack mismatch for %s chunk %s/%s: %s/%s",
+                        layer_name,
+                        chunk_idx + 1,
+                        len(chunk_slices),
+                        len(valid_replies),
+                        len(node_ids),
+                    )
+            log(
+                INFO,
+                "[Layer download %s/%s] sent to %s clients",
+                layer_idx + 1,
+                num_layers,
+                len(node_ids),
+            )
+
     def configure_train(
         self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
     ) -> Iterable[Message]:
@@ -156,6 +219,7 @@ class FedAvgStreaming(FedAvg):
             len(num_total),
         )
         config["server-round"] = server_round
+        config["model_preloaded"] = aggregation_mode != "all_at_once"
         if self._layer_names is not None:
             config["layer_names"] = self._layer_names
             config["num_layers"] = len(self._layer_names)
@@ -250,13 +314,30 @@ class FedAvgStreaming(FedAvg):
             # -----------------------------------------------------------------
             # --- TRAINING (CLIENTAPP-SIDE) -----------------------------------
             # -----------------------------------------------------------------
-            train_replies = grid.send_and_receive(
-                messages=self.configure_train(
+            train_messages = list(
+                self.configure_train(
                     current_round,
                     initial_arrays,
                     train_config,
                     grid,
-                ),
+                )
+            )
+            if not train_messages:
+                log(WARNING, "No train messages configured for round %s", current_round)
+                continue
+
+            aggregation_mode = train_config.get("aggregation.mode", "layerwise")
+            selected_node_ids = [msg.metadata.dst_node_id for msg in train_messages]
+            if aggregation_mode != "all_at_once":
+                self._download_layers_to_clients(
+                    grid=grid,
+                    node_ids=selected_node_ids,
+                    state_dict=state_dict,
+                    timeout=timeout,
+                )
+
+            train_replies = grid.send_and_receive(
+                messages=train_messages,
                 timeout=timeout,
             )
 
@@ -276,7 +357,6 @@ class FedAvgStreaming(FedAvg):
             # -----------------------------------------------------------------
             # --- LAYER-WISE COMMUNICATION -----------------------------------
             # -----------------------------------------------------------------
-            aggregation_mode = train_config.get("aggregation.mode", "layerwise")
             if aggregation_mode == "all_at_once":
                 before_mb = process.memory_info().rss / (1024**2)
                 log(
