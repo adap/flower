@@ -57,14 +57,15 @@ with:
 
 .. code-block:: shell
 
-    poetry shell
+    python -m poetry install --with dev --all-extras
+    eval "$(python -m poetry env activate)"
 
 If you open a new terminal you can activate the previously created virtual environment
 with the following command:
 
 .. code-block:: shell
 
-    source $(poetry env info --path)/bin/activate
+    eval "$(python -m poetry env activate)"
 
 **************************
  Virtualenv with Anaconda

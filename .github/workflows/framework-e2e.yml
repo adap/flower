@@ -47,7 +47,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd framework
-          python -m poetry install --all-extras
+          python -m poetry install --with dev --all-extras
       - name: Build wheel
         run: ./framework/dev/build.sh
       - name: Test wheel
