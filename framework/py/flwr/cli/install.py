@@ -29,6 +29,7 @@ import typer
 from flwr.common.config import get_flwr_dir, get_metadata_from_config
 from flwr.common.constant import FAB_HASH_TRUNCATION
 
+from .archive_utils import safe_extract_zip
 from .config_utils import load_and_validate
 from .utils import get_sha256_hash
 
@@ -119,8 +120,8 @@ def install_from_fab(
 
     with tempfile.TemporaryDirectory() as tmpdir:
         with zipfile.ZipFile(fab_file_archive, "r") as zipf:
-            zipf.extractall(tmpdir)
             tmpdir_path = Path(tmpdir)
+            safe_extract_zip(zipf, tmpdir_path)
             info_dir = tmpdir_path / ".info"
             if not info_dir.exists():
                 raise click.ClickException("FAB file has incorrect format.")
