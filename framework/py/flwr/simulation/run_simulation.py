@@ -82,7 +82,6 @@ def run_simulation(
     server_app: ServerApp,
     client_app: ClientApp,
     num_supernodes: int,
-    backend_name: str = "ray",
     backend_config: BackendConfig | None = None,
     enable_tf_gpu_growth: bool = False,
     verbose_logging: bool = False,
@@ -103,16 +102,12 @@ def run_simulation(
         Number of nodes that run a ClientApp. They can be sampled by a Grid in the
         ServerApp and receive a Message describing what the ClientApp should perform.
 
-    backend_name : str (default: ray)
-        A simulation backend that runs `ClientApp` objects.
-
     backend_config : Optional[BackendConfig]
-        'A dictionary to configure a backend. Separate dictionaries to configure
-        different elements of backend. Supported top-level keys are `init_args`
-        for values parsed to initialisation of backend, `client_resources`
-        to define the resources for clients, and `actor` to define the actor
-        parameters. Values supported in <value> are those included by
-        `flwr.common.typing.ConfigRecordValues`.
+        'A dictionary to configure a backend. Supported top-level keys are `name`
+        for the backend name (defaults to "ray"), `init_args` for values parsed to
+        initialisation of backend, `client_resources` to define the resources for
+        clients, and `actor` to define the actor parameters. Values supported in
+        <value> are those included by `flwr.common.typing.ConfigRecordValues`.
 
     enable_tf_gpu_growth : bool (default: False)
         A boolean to indicate whether to enable GPU growth on the main thread. This is
@@ -126,6 +121,11 @@ def run_simulation(
         When disabled, only INFO, WARNING and ERROR log messages will be shown. If
         enabled, DEBUG-level logs will be displayed.
     """
+    if backend_config is None:
+        backend_config = {}
+    backend_config.setdefault("name", "ray")
+    backend_name = backend_config["name"]
+
     event(
         EventType.PYTHON_API_RUN_SIMULATION_ENTER,
         event_details={"backend": backend_name, "num-supernodes": num_supernodes},
@@ -146,7 +146,6 @@ def run_simulation(
         num_supernodes=num_supernodes,
         client_app=client_app,
         server_app=server_app,
-        backend_name=backend_name,
         backend_config=backend_config,
         enable_tf_gpu_growth=enable_tf_gpu_growth,
         verbose_logging=verbose_logging,
@@ -339,7 +338,6 @@ def _run_simulation(
     exit_event: EventType,
     client_app: ClientApp | None = None,
     server_app: ServerApp | None = None,
-    backend_name: str = "ray",
     backend_config: BackendConfig | None = None,
     client_app_attr: str | None = None,
     server_app_attr: str | None = None,
@@ -367,6 +365,9 @@ def _run_simulation(
     backend_config.setdefault("client_resources", {"num_cpus": 2, "num_gpus": 0})
     # Initialization of backend config to enable GPU growth globally when set
     backend_config.setdefault("actor", {"tensorflow": 0})
+
+    # Read backend name from config
+    backend_name = backend_config.pop("name", "ray")
 
     # Set logging level
     logger = logging.getLogger("flwr")
