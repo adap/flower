@@ -596,7 +596,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         log(INFO, "ControlServicer.CreateFederation")
 
         # Check that a federation is specified
-        if not request.name:
+        if not request.federation_name:
             context.abort(
                 grpc.StatusCode.FAILED_PRECONDITION,
                 FEDERATION_NOT_SPECIFIED_MESSAGE,
@@ -609,7 +609,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         flwr_aid = _check_flwr_aid_exists(account_info.flwr_aid, context)
 
         # Construct federation name
-        federation_name = f"@{account_info.account_name}/{request.name}"
+        federation_name = f"@{account_info.account_name}/{request.federation_name}"
 
         # Create federation
         try:
@@ -624,6 +624,9 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 grpc.StatusCode.FAILED_PRECONDITION,
                 SUPERLINK_DOES_NOT_SUPPORT_FED_MANAGEMENT_MESSAGE,
             )
+        except ValueError as e:
+            log(ERROR, "Could not create federation: %s", str(e))
+            context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(e))
 
         return CreateFederationResponse(
             federation=Federation(
@@ -664,6 +667,9 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 grpc.StatusCode.FAILED_PRECONDITION,
                 SUPERLINK_DOES_NOT_SUPPORT_FED_MANAGEMENT_MESSAGE,
             )
+        except ValueError as e:
+            log(ERROR, "Could not archive federation: %s", str(e))
+            context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(e))
 
         return ArchiveFederationResponse()
 

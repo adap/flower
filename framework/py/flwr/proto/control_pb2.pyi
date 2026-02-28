@@ -471,17 +471,17 @@ global___ShowFederationResponse = ShowFederationResponse
 class CreateFederationRequest(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
 
-    NAME_FIELD_NUMBER: builtins.int
+    FEDERATION_NAME_FIELD_NUMBER: builtins.int
     DESCRIPTION_FIELD_NUMBER: builtins.int
-    name: builtins.str
+    federation_name: builtins.str
     description: builtins.str
     def __init__(
         self,
         *,
-        name: builtins.str = ...,
+        federation_name: builtins.str = ...,
         description: builtins.str = ...,
     ) -> None: ...
-    def ClearField(self, field_name: typing.Literal["description", b"description", "name", b"name"]) -> None: ...
+    def ClearField(self, field_name: typing.Literal["description", b"description", "federation_name", b"federation_name"]) -> None: ...
 
 global___CreateFederationRequest = CreateFederationRequest
 
