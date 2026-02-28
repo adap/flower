@@ -22,6 +22,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from logging import ERROR, WARNING
+from typing import Literal
 
 from flwr.app.user_config import UserConfig
 from flwr.common import Context, Message, log, now
@@ -605,6 +606,76 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
                 log(ERROR, "`run_id` is invalid")
                 return None
             return self.run_ids[run_id].run
+
+    def get_run_info(
+        self,
+        *,
+        run_ids: Sequence[int] | None = None,
+        statuses: Sequence[str] | None = None,
+        flwr_aids: Sequence[str] | None = None,
+        federations: Sequence[str] | None = None,
+        order_by: Literal["pending_at"] | None = None,
+        ascending: bool = True,
+        limit: int | None = None,
+    ) -> Sequence[Run]:
+        """Retrieve information about runs based on the specified filters."""
+        # Clean up expired tokens; this will flag inactive runs as needed
+        self._cleanup_expired_tokens()
+
+        with self.lock:
+            # Build candidate set and apply each filter as an AND condition.
+            matched_run_ids = set(self.run_ids.keys())
+
+            # Filter by run_ids
+            if run_ids is not None:
+                if not run_ids:
+                    return []
+                matched_run_ids &= set(run_ids)
+
+            # Filter by statuses
+            if statuses is not None:
+                if not statuses:
+                    return []
+                status_set = set(statuses)
+                matched_run_ids &= {
+                    run_id
+                    for run_id in matched_run_ids
+                    if self.run_ids[run_id].run.status.status in status_set
+                }
+
+            # Filter by Flower Account IDs
+            if flwr_aids is not None:
+                if not flwr_aids:
+                    return []
+                aid_matched: set[int] = set()
+                for flwr_aid in flwr_aids:
+                    aid_matched |= self.flwr_aid_to_run_ids.get(flwr_aid, set())
+                matched_run_ids &= aid_matched
+
+            # Filter by federations
+            if federations is not None:
+                if not federations:
+                    return []
+                federation_set = set(federations)
+                matched_run_ids &= {
+                    run_id
+                    for run_id in matched_run_ids
+                    if self.run_ids[run_id].run.federation in federation_set
+                }
+
+            runs = [self.run_ids[run_id].run for run_id in matched_run_ids]
+
+            if order_by is not None:
+                runs = sorted(
+                    runs,
+                    key=lambda run: run.pending_at,
+                    reverse=not ascending,
+                )
+
+            if limit is not None:
+                runs = runs[:limit]
+
+            return runs
 
     def get_run_status(self, run_ids: set[int]) -> dict[int, RunStatus]:
         """Retrieve the statuses for the specified runs."""

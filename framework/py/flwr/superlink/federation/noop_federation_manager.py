@@ -15,14 +15,9 @@
 """NoOp implementation of FederationManager."""
 
 
-from flwr.common.constant import (
-    FEDERATION_COULD_NOT_BE_ARCHIVED_MESSAGE,
-    FEDERATION_COULD_NOT_BE_CREATED_MESSAGE,
-    NOOP_ACCOUNT_NAME,
-    NOOP_FLWR_AID,
-)
+from flwr.common.constant import NOOP_ACCOUNT_NAME, NOOP_FLWR_AID
 from flwr.common.typing import Federation
-from flwr.proto.federation_pb2 import Account  # pylint: disable=E0611
+from flwr.proto.federation_pb2 import Account, Member  # pylint: disable=E0611
 from flwr.supercore.constant import NOOP_FEDERATION, NOOP_FEDERATION_DESCRIPTION
 
 from .federation_manager import FederationManager
@@ -69,10 +64,13 @@ class NoOpFederationManager(FederationManager):
         runs = [
             run for run_id in run_ids if (run := self.linkstate.get_run(run_id=run_id))
         ]
+        only_account = Account(id=NOOP_FLWR_AID, name=NOOP_ACCOUNT_NAME)
         return Federation(
             name=NOOP_FEDERATION,
             description=NOOP_FEDERATION_DESCRIPTION,
-            accounts=[Account(id=NOOP_FLWR_AID, name=NOOP_ACCOUNT_NAME)],
+            members=[
+                Member(account=only_account, role="owner"),
+            ],
             nodes=nodes,
             runs=runs,
         )
@@ -81,16 +79,24 @@ class NoOpFederationManager(FederationManager):
         self, flwr_aid: str, name: str, description: str
     ) -> Federation:
         """Create a new federation."""
-        raise NotImplementedError(FEDERATION_COULD_NOT_BE_CREATED_MESSAGE % name)
+        raise NotImplementedError(
+            "`create_federation` is not supported by NoOpFederationManager."
+        )
 
     def archive_federation(self, flwr_aid: str, name: str) -> None:
         """Archive an existing federation."""
-        raise NotImplementedError(FEDERATION_COULD_NOT_BE_ARCHIVED_MESSAGE % name)
+        raise NotImplementedError(
+            "`archive_federation` is not supported by NoOpFederationManager."
+        )
 
     def add_supernode(self, flwr_aid: str, federation: str, node_id: int) -> None:
-        """Add a supernode to a federation."""
-        raise NotImplementedError()
+        """Add a SuperNode to a federation."""
+        raise NotImplementedError(
+            "`add_supernode` is not supported by NoOpFederationManager."
+        )
 
     def remove_supernode(self, flwr_aid: str, federation: str, node_id: int) -> None:
-        """Remove a supernode from a federation."""
-        raise NotImplementedError()
+        """Remove a SuperNode from a federation."""
+        raise NotImplementedError(
+            "`remove_supernode` is not supported by NoOpFederationManager."
+        )

@@ -9,7 +9,7 @@
     <a href="https://flower.ai/">Website</a> |
     <a href="https://flower.ai/blog">Blog</a> |
     <a href="https://flower.ai/docs/">Docs</a> |
-    <a href="https://flower.ai/events/flower-ai-summit-2026">Summit</a> |
+    <a href="https://flower.ai/events/flower-ai-summit-2026/?utm_source=docs">Summit</a> |
     <a href="https://flower.ai/join-slack">Slack</a>
     <br /><br />
 </p>
@@ -170,4 +170,4 @@ Please also consider adding your publication to the list of Flower-based publica
 
 ## Contributing to Flower
 
-We welcome contributions. Please see [CONTRIBUTING.md](CONTRIBUTING.md) to get started!
+We welcome contributions. Please see [CONTRIBUTING.md](../CONTRIBUTING.md) to get started!

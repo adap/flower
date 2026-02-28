@@ -16,6 +16,7 @@
 
 
 import os
+import re
 import sys
 import threading
 import time
@@ -30,9 +31,14 @@ from ..logger import log
 from .exit_code import EXIT_CODE_HELP
 from .exit_handler import trigger_exit_handlers
 
-HELP_PAGE_URL = (
-    f"https://flower.ai/docs/framework/v{package_version}/en/ref-exit-codes/"
-)
+
+def _get_code_url(code: int) -> str:
+    """Get the help URL for a given exit code."""
+    if not (match := re.match(r"\d+\.\d+", package_version)):
+        doc_pth = f"ref-exit-codes/{code}.html"  # Fallback for non-standard versions
+    else:
+        doc_pth = f"{match.group(0)}/en/ref-exit-codes/{code}.html"
+    return f"https://flower.ai/docs/framework/{doc_pth}"
 
 
 def flwr_exit(
@@ -74,8 +80,7 @@ def flwr_exit(
 
     # Add help URL for non-successful/graceful exits
     if is_error:
-        help_url = f"{HELP_PAGE_URL}{code}.html"
-        exit_message += f"\n\nFor more information, visit: <{help_url}>"
+        exit_message += f"\n\nFor more information, visit: <{_get_code_url(code)}>"
 
     # Telemetry event
     event_type = event_type or _try_obtain_telemetry_event()
@@ -114,6 +119,4 @@ def _try_obtain_telemetry_event() -> EventType | None:
         return None  # Not yet implemented
     if sys.argv[0].endswith("flwr-simulation"):
         return EventType.FLWR_SIMULATION_RUN_LEAVE
-    if sys.argv[0].endswith("flower-simulation"):
-        return EventType.CLI_FLOWER_SIMULATION_LEAVE
     return None
