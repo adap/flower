@@ -190,14 +190,13 @@ def _autoresolve_app_dir(rel_client_app_dir: str = "backend") -> str:
 
 # pylint: disable=too-many-arguments,too-many-positional-arguments
 def start_and_shutdown(
-    backend: str = "ray",
     client_app_attr: str | None = None,
     app_dir: str = "",
     num_supernodes: int | None = None,
     state_factory: LinkStateFactory | None = None,
     nodes_mapping: NodeToPartitionMapping | None = None,
     duration: int = 0,
-    backend_config: str = "{}",
+    backend_config: str = '{"name": "ray"}',
 ) -> None:
     """Start Simulation Engine and terminate after specified number of seconds.
 
@@ -225,7 +224,6 @@ def start_and_shutdown(
         num_supernodes=num_supernodes,
         client_app=None if client_app_attr else dummy_client_app,
         client_app_attr=client_app_attr,
-        backend_name=backend,
         backend_config_json_stream=backend_config,
         state_factory=state_factory,
         app_dir=app_dir,
@@ -270,7 +268,10 @@ class TestFleetSimulationEngineRayBackend(TestCase):
     def test_with_nonexistent_backend(self) -> None:
         """Test specifying a backend that does not exist."""
         with self.assertRaises(KeyError):
-            start_and_shutdown(num_supernodes=50, backend="this-backend-does-not-exist")
+            start_and_shutdown(
+                num_supernodes=50,
+                backend_config='{"name": "this-backend-does-not-exist"}',
+            )
 
     def test_erroneous_arguments_num_supernodes_and_existing_mapping(self) -> None:
         """Test ValueError if a node mapping is passed but also num_supernodes.

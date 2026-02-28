@@ -268,7 +268,6 @@ def run_api(
 # pylint: disable=too-many-arguments,unused-argument,too-many-locals,too-many-branches
 # pylint: disable=too-many-statements,too-many-positional-arguments
 def start_vce(
-    backend_name: str,
     backend_config_json_stream: str,
     app_dir: str,
     is_app: bool,
@@ -336,6 +335,7 @@ def start_vce(
     # Load backend config
     log(DEBUG, "Supported backends: %s", list(supported_backends.keys()))
     backend_config = json.loads(backend_config_json_stream)
+    backend_name = backend_config.pop("name", "ray")
 
     try:
         backend_type = supported_backends[backend_name]

@@ -227,7 +227,6 @@ def run_serverapp_th(
 # pylint: disable=too-many-locals,too-many-positional-arguments
 def _main_loop(
     num_supernodes: int,
-    backend_name: str,
     backend_config_stream: str,
     app_dir: str,
     is_app: bool,
@@ -292,7 +291,6 @@ def _main_loop(
             num_supernodes=num_supernodes,
             client_app_attr=client_app_attr,
             client_app=client_app,
-            backend_name=backend_name,
             backend_config_json_stream=backend_config_stream,
             app_dir=app_dir,
             is_app=is_app,
@@ -366,9 +364,6 @@ def _run_simulation(
     # Initialization of backend config to enable GPU growth globally when set
     backend_config.setdefault("actor", {"tensorflow": 0})
 
-    # Read backend name from config
-    backend_name = backend_config.pop("name", "ray")
-
     # Set logging level
     logger = logging.getLogger("flwr")
     if verbose_logging:
@@ -396,7 +391,6 @@ def _run_simulation(
 
     args = (
         num_supernodes,
-        backend_name,
         backend_config_stream,
         app_dir,
         is_app,
