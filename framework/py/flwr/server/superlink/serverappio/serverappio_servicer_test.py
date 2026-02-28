@@ -29,7 +29,7 @@ from flwr.common.constant import (
     SUPERLINK_NODE_ID,
     Status,
 )
-from flwr.common.inflatable import (
+from flwr.common.inflatable_object import (
     get_all_nested_objects,
     get_object_id,
     get_object_tree,

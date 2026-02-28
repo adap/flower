@@ -23,7 +23,7 @@ from unittest.mock import patch
 import pytest
 
 from .constant import HEAD_BODY_DIVIDER, HEAD_VALUE_DIVIDER
-from .inflatable import (
+from .inflatable_object import (
     InflatableObject,
     UnexpectedObjectContentError,
     _get_object_body,

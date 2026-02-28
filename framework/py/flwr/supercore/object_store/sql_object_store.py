@@ -17,7 +17,7 @@
 
 from sqlalchemy import MetaData
 
-from flwr.common.inflatable import (
+from flwr.common.inflatable_object import (
     get_object_id,
     is_valid_sha256_hash,
     iterate_object_tree,

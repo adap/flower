@@ -49,7 +49,7 @@ from flwr.common.constant import (
 )
 from flwr.common.exit import ExitCode, flwr_exit, register_signal_handlers
 from flwr.common.grpc import generic_create_grpc_server
-from flwr.common.inflatable import (
+from flwr.common.inflatable_object import (
     get_all_nested_objects,
     get_object_tree,
     iterate_object_tree,
