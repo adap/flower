@@ -24,7 +24,7 @@ from flwr.common.constant import (
     NOOP_FLWR_AID,
     Status,
 )
-from flwr.common.inflatable import UnexpectedObjectContentError
+from flwr.common.inflatable_object import UnexpectedObjectContentError
 from flwr.common.serde import (
     fab_to_proto,
     message_from_proto,

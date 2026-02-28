@@ -19,7 +19,7 @@ import unittest
 from unittest.mock import Mock, patch
 
 from flwr.common import ConfigRecord, Context, Message, RecordDict
-from flwr.common.inflatable import get_all_nested_objects, get_object_tree
+from flwr.common.inflatable_object import get_all_nested_objects, get_object_tree
 from flwr.common.message import remove_content_from_message
 from flwr.common.typing import Fab
 
