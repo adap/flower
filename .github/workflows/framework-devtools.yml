@@ -30,6 +30,6 @@ jobs:
       - name: Install dependencies (mandatory + optional)
         run: |
           cd framework
-          python -m poetry install
+          poetry install
       - name: Lint + Test (isort/black/mypy/pylint/pytest)
         run: ./framework/dev/test-tool.sh

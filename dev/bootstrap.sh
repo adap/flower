@@ -14,4 +14,4 @@ python -m pip install -U setuptools==80.9.0
 python -m pip install -U poetry==2.1.3
 
 # Use `poetry` to install project dependencies
-python -m poetry install --all-extras
+poetry install --all-extras
