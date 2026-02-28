@@ -101,7 +101,7 @@ at once, or pull messages individually, for example:
 """
 
 
-class GrpcGrid(Grid):
+class GrpcGrid(Grid):  # pylint: disable=too-many-instance-attributes
     """`GrpcGrid` provides an interface to the ServerAppIo API.
 
     Parameters
@@ -120,9 +120,12 @@ class GrpcGrid(Grid):
         self,
         serverappio_service_address: str = SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
         root_certificates: bytes | None = None,
+        # Default setting required as long as ClientAppIO calls do not include tokens
+        token: str = "",
     ) -> None:
         self._addr = serverappio_service_address
         self._cert = root_certificates
+        self._token = token
         self._run: Run | None = None
         self._grpc_stub: ServerAppIoStub | None = None
         self._channel: grpc.Channel | None = None
@@ -219,7 +222,7 @@ class GrpcGrid(Grid):
         """Get node IDs."""
         # Call GrpcServerAppIoStub method
         res: GetNodesResponse = self._stub.GetNodes(
-            GetNodesRequest(run_id=cast(Run, self._run).run_id)
+            GetNodesRequest(run_id=cast(Run, self._run).run_id, token=self._token)
         )
         return [node.node_id for node in res.nodes]
 
@@ -238,6 +241,7 @@ class GrpcGrid(Grid):
         # Call GrpcServerAppIoStub method
         res: PushAppMessagesResponse = self._stub.PushMessages(
             PushAppMessagesRequest(
+                token=self._token,
                 messages_list=proto_messages,
                 run_id=run_id,
                 message_object_trees=object_trees,
@@ -251,6 +255,7 @@ class GrpcGrid(Grid):
                 push_object_protobuf=self._stub.PushObject,
                 node=self.node,
                 run_id=run_id,
+                token=self._token,
             ),
             object_ids_to_push=set(res.objects_to_push),
         )
@@ -307,6 +312,7 @@ class GrpcGrid(Grid):
             # Pull Messages
             res: PullAppMessagesResponse = self._stub.PullMessages(
                 PullAppMessagesRequest(
+                    token=self._token,
                     message_ids=message_ids,
                     run_id=run_id,
                 )
@@ -326,6 +332,7 @@ class GrpcGrid(Grid):
                             pull_object_protobuf=self._stub.PullObject,
                             node=self.node,
                             run_id=run_id,
+                            token=self._token,
                         ),
                     )
                 except ObjectUnavailableError as e:
@@ -357,7 +364,10 @@ class GrpcGrid(Grid):
                 # Confirm that the message has been received
                 self._stub.ConfirmMessageReceived(
                     ConfirmMessageReceivedRequest(
-                        node=self.node, run_id=run_id, message_object_id=msg_id
+                        node=self.node,
+                        run_id=run_id,
+                        message_object_id=msg_id,
+                        token=self._token,
                     )
                 )
                 message = cast(

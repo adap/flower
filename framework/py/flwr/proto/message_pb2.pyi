@@ -206,9 +206,11 @@ class PushObjectRequest(google.protobuf.message.Message):
     RUN_ID_FIELD_NUMBER: builtins.int
     OBJECT_ID_FIELD_NUMBER: builtins.int
     OBJECT_CONTENT_FIELD_NUMBER: builtins.int
+    TOKEN_FIELD_NUMBER: builtins.int
     run_id: builtins.int
     object_id: builtins.str
     object_content: builtins.bytes
+    token: builtins.str
     @property
     def node(self) -> flwr.proto.node_pb2.Node: ...
     def __init__(
@@ -218,9 +220,10 @@ class PushObjectRequest(google.protobuf.message.Message):
         run_id: builtins.int = ...,
         object_id: builtins.str = ...,
         object_content: builtins.bytes = ...,
+        token: builtins.str = ...,
     ) -> None: ...
     def HasField(self, field_name: typing.Literal["node", b"node"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["node", b"node", "object_content", b"object_content", "object_id", b"object_id", "run_id", b"run_id"]) -> None: ...
+    def ClearField(self, field_name: typing.Literal["node", b"node", "object_content", b"object_content", "object_id", b"object_id", "run_id", b"run_id", "token", b"token"]) -> None: ...
 
 global___PushObjectRequest = PushObjectRequest
 
@@ -248,8 +251,10 @@ class PullObjectRequest(google.protobuf.message.Message):
     NODE_FIELD_NUMBER: builtins.int
     RUN_ID_FIELD_NUMBER: builtins.int
     OBJECT_ID_FIELD_NUMBER: builtins.int
+    TOKEN_FIELD_NUMBER: builtins.int
     run_id: builtins.int
     object_id: builtins.str
+    token: builtins.str
     @property
     def node(self) -> flwr.proto.node_pb2.Node: ...
     def __init__(
@@ -258,9 +263,10 @@ class PullObjectRequest(google.protobuf.message.Message):
         node: flwr.proto.node_pb2.Node | None = ...,
         run_id: builtins.int = ...,
         object_id: builtins.str = ...,
+        token: builtins.str = ...,
     ) -> None: ...
     def HasField(self, field_name: typing.Literal["node", b"node"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["node", b"node", "object_id", b"object_id", "run_id", b"run_id"]) -> None: ...
+    def ClearField(self, field_name: typing.Literal["node", b"node", "object_id", b"object_id", "run_id", b"run_id", "token", b"token"]) -> None: ...
 
 global___PullObjectRequest = PullObjectRequest
 
@@ -294,8 +300,10 @@ class ConfirmMessageReceivedRequest(google.protobuf.message.Message):
     NODE_FIELD_NUMBER: builtins.int
     RUN_ID_FIELD_NUMBER: builtins.int
     MESSAGE_OBJECT_ID_FIELD_NUMBER: builtins.int
+    TOKEN_FIELD_NUMBER: builtins.int
     run_id: builtins.int
     message_object_id: builtins.str
+    token: builtins.str
     @property
     def node(self) -> flwr.proto.node_pb2.Node: ...
     def __init__(
@@ -304,9 +312,10 @@ class ConfirmMessageReceivedRequest(google.protobuf.message.Message):
         node: flwr.proto.node_pb2.Node | None = ...,
         run_id: builtins.int = ...,
         message_object_id: builtins.str = ...,
+        token: builtins.str = ...,
     ) -> None: ...
     def HasField(self, field_name: typing.Literal["node", b"node"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["message_object_id", b"message_object_id", "node", b"node", "run_id", b"run_id"]) -> None: ...
+    def ClearField(self, field_name: typing.Literal["message_object_id", b"message_object_id", "node", b"node", "run_id", b"run_id", "token", b"token"]) -> None: ...
 
 global___ConfirmMessageReceivedRequest = ConfirmMessageReceivedRequest
 

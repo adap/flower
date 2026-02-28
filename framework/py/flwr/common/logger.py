@@ -338,7 +338,12 @@ def redirect_output(output_buffer: StringIO) -> None:
 
 
 def _log_uploader(
-    log_queue: Queue[str | None], node_id: int, run_id: int, stub: ServerAppIoStub
+    log_queue: Queue[str | None],
+    node_id: int,
+    run_id: int,
+    stub: ServerAppIoStub | SimulationIoStub,
+    # Default setting required as long as ClientAppIO calls do not include tokens
+    token: str = "",
 ) -> None:
     """Upload logs to the SuperLink."""
     exit_flag = False
@@ -364,6 +369,7 @@ def _log_uploader(
                 node=node,
                 run_id=run_id,
                 logs=msgs,
+                token=token,
             )
             try:
                 stub.PushLogs(req)
@@ -385,10 +391,14 @@ def start_log_uploader(
     node_id: int,
     run_id: int,
     stub: ServerAppIoStub | SimulationIoStub,
+    # Default setting required as long as ClientAppIO calls do not include tokens
+    token: str = "",
 ) -> threading.Thread:
     """Start the log uploader thread and return it."""
     thread = threading.Thread(
-        target=_log_uploader, args=(log_queue, node_id, run_id, stub), daemon=True
+        target=_log_uploader,
+        args=(log_queue, node_id, run_id, stub, token),
+        daemon=True,
     )
     thread.start()
     return thread

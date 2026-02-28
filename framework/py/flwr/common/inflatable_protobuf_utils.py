@@ -38,6 +38,8 @@ def make_pull_object_fn_protobuf(
     pull_object_protobuf: Callable[[PullObjectRequest], PullObjectResponse],
     node: Node,
     run_id: int,
+    # Default setting required as long as ClientAppIO calls do not include tokens
+    token: str = "",
 ) -> Callable[[str], bytes]:
     """Create a pull object function that uses gRPC to pull objects.
 
@@ -50,6 +52,8 @@ def make_pull_object_fn_protobuf(
         The node making the request.
     run_id : int
         The run ID for the current operation.
+    token : str, default=""
+        Authentication token included in the protobuf request.
 
     Returns
     -------
@@ -60,7 +64,9 @@ def make_pull_object_fn_protobuf(
     """
 
     def pull_object_fn(object_id: str) -> bytes:
-        request = PullObjectRequest(node=node, run_id=run_id, object_id=object_id)
+        request = PullObjectRequest(
+            node=node, run_id=run_id, object_id=object_id, token=token
+        )
         response: PullObjectResponse = pull_object_protobuf(request)
         if not response.object_found:
             raise ObjectIdNotPreregisteredError(object_id)
@@ -75,6 +81,8 @@ def make_push_object_fn_protobuf(
     push_object_protobuf: Callable[[PushObjectRequest], PushObjectResponse],
     node: Node,
     run_id: int,
+    # Default setting required as long as ClientAppIO calls do not include tokens
+    token: str = "",
 ) -> Callable[[str, bytes], None]:
     """Create a push object function that uses gRPC to push objects.
 
@@ -87,6 +95,8 @@ def make_push_object_fn_protobuf(
         The node making the request.
     run_id : int
         The run ID for the current operation.
+    token : str, default=""
+        Authentication token included in the protobuf request.
 
     Returns
     -------
@@ -98,7 +108,11 @@ def make_push_object_fn_protobuf(
 
     def push_object_fn(object_id: str, object_content: bytes) -> None:
         request = PushObjectRequest(
-            node=node, run_id=run_id, object_id=object_id, object_content=object_content
+            node=node,
+            run_id=run_id,
+            object_id=object_id,
+            object_content=object_content,
+            token=token,
         )
         response: PushObjectResponse = push_object_protobuf(request)
         if not response.stored:
@@ -111,6 +125,8 @@ def make_confirm_message_received_fn_protobuf(
     confirm_message_received_protobuf: ConfirmMessageReceivedProtobuf,
     node: Node,
     run_id: int,
+    # Default setting required as long as ClientAppIO calls do not include tokens
+    token: str = "",
 ) -> Callable[[str], None]:
     """Create a confirm message received function that uses protobuf.
 
@@ -124,6 +140,8 @@ def make_confirm_message_received_fn_protobuf(
         The node making the request.
     run_id : int
         The run ID for the current message.
+    token : str, default=""
+        Authentication token included in the protobuf request.
 
     Returns
     -------
@@ -134,7 +152,7 @@ def make_confirm_message_received_fn_protobuf(
 
     def confirm_message_received_fn(object_id: str) -> None:
         request = ConfirmMessageReceivedRequest(
-            node=node, run_id=run_id, message_object_id=object_id
+            node=node, run_id=run_id, message_object_id=object_id, token=token
         )
         confirm_message_received_protobuf(request)
 
