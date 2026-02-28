@@ -26,7 +26,7 @@ from typing import TYPE_CHECKING, Any, cast, overload
 import numpy as np
 
 from ..constant import FLWR_PRIVATE_MAX_ARRAY_CHUNK_SIZE, SType
-from ..inflatable import (
+from ..inflatable_object import (
     InflatableObject,
     add_header_to_object_body,
     get_object_body,

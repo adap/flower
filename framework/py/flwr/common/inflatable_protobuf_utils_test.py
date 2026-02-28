@@ -37,7 +37,7 @@ from flwr.proto.message_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 
-from .inflatable import get_all_nested_objects
+from .inflatable_object import get_all_nested_objects
 from .inflatable_protobuf_utils import (
     make_pull_object_fn_protobuf,
     make_push_object_fn_protobuf,

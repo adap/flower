@@ -31,7 +31,7 @@ from parameterized import parameterized
 from flwr.common import ndarray_to_bytes
 
 from ..constant import SType
-from ..inflatable import get_object_body, get_object_type_from_object_content
+from ..inflatable_object import get_object_body, get_object_type_from_object_content
 from ..typing import NDArray
 from .array import Array
 from .arrayrecord import ArrayRecord
