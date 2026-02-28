@@ -247,7 +247,6 @@ def _main_loop(
     state_factory = LinkStateFactory(
         FLWR_IN_MEMORY_DB_NAME, NoOpFederationManager(), ObjectStoreFactory()
     )
-
     f_stop = threading.Event()
     # A Threading event to indicate if an exception was raised in the ServerApp thread
     server_app_thread_has_exception = threading.Event()

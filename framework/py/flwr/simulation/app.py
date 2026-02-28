@@ -18,6 +18,7 @@
 import argparse
 from logging import DEBUG, ERROR, INFO
 from queue import Queue
+from typing import cast
 
 from flwr.cli.config_utils import get_fab_metadata
 from flwr.cli.install import install_from_fab
@@ -232,12 +233,12 @@ def run_simulation_process(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
         backend_config: BackendConfig = fed_opt.get("backend", {})
         verbose: bool = fed_opt.get("verbose", False)
         enable_tf_gpu_growth: bool = fed_opt.get("enable_tf_gpu_growth", False)
-
+        backend_name: str = cast(str, backend_config["name"])
         run_id_hash = get_sha256_hash(run.run_id)
         event(
             EventType.FLWR_SIMULATION_RUN_ENTER,
             event_details={
-                "backend": "ray",
+                "backend": backend_name,
                 "num-supernodes": num_supernodes,
                 "run-id-hash": run_id_hash,
             },
@@ -254,6 +255,7 @@ def run_simulation_process(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
             server_app_attr=server_app_attr,
             client_app_attr=client_app_attr,
             num_supernodes=num_supernodes,
+            backend_name=backend_name,
             backend_config=backend_config,
             app_dir=str(app_path),
             run=run,
