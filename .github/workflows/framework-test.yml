@@ -65,7 +65,7 @@ jobs:
         if: ${{ needs.changes.outputs.framework == 'true' || needs.changes.outputs.ex_bench == 'true' }}
         run: |
           cd framework 
-          python -m poetry install --all-extras
+          python -m poetry install --with dev --all-extras
       - name: Check if protos need recompilation
         if: ${{ needs.changes.outputs.framework == 'true' }}
         run: ./framework/dev/check-protos.sh
