@@ -6,6 +6,11 @@ This guide explains how app signing works in Flower Hub and how to use it in pra
 Before an app can be reviewed and signed, it must already be published to Flower Hub.
 The app does not need to be published by the same account that reviews/signs it.
 
+.. note::
+
+   App signing and app-page verification metadata are preview features. They may
+   change over time.
+
 
 How App Signing Works
 ---------------------
