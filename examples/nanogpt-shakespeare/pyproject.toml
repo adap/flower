@@ -1,0 +1,38 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "nanogpt-shakespeare"
+version = "1.0.0"
+description = "Federated NanoGPT on Tiny Shakespeare with Flower"
+license = "Apache-2.0"
+dependencies = [
+    "flwr[simulation]>=1.26.1",
+    "torch>=2.0.0",
+    "numpy",
+    "requests",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[tool.flwr.app]
+publisher = "kungfuai"
+
+[tool.flwr.app.components]
+serverapp = "nanogpt_shakespeare.server_app:app"
+clientapp = "nanogpt_shakespeare.client_app:app"
+
+[tool.flwr.app.config]
+num-server-rounds = 5
+fraction-evaluate = 0.5
+local-epochs = 1
+learning-rate = 1e-3
+batch-size = 64
+block-size = 256
+n-layer = 6
+n-head = 6
+n-embd = 384
+dropout = 0.2
+max-steps = 50
