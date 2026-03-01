@@ -121,6 +121,9 @@ def get_model(model_name: str, num_classes=10, pretrained=True):
         return TinyCNN()
     elif model_name == "resnet18":
         model = resnet18(pretrained=True)
+        # 🔧 adattamento per CIFAR (32x32)
+        model.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
+        model.maxpool = nn.Identity()  # rimuove maxpool iniziale
         model.fc = nn.Linear(model.fc.in_features, num_classes)
         return model
     elif model_name == "resnet34":

@@ -66,11 +66,22 @@ def parse_and_run(command: str, chat_id: int):
         send_message(chat_id, "✅ Training completato!")
 
         # invia CSV finale (nome dinamico)
-        csv_files = [f for f in os.listdir(PROJECT_DIR) if f.startswith("serialization_times") and f.endswith(".csv")]
+        csv_files = [
+            f
+            for f in os.listdir(PROJECT_DIR)
+            if f.startswith("serialization_times") and f.endswith(".csv")
+        ]
         if csv_files:
             send_file(chat_id, os.path.join(PROJECT_DIR, csv_files[-1]))
         else:
             send_message(chat_id, "⚠️ CSV finale non trovato")
+
+        # invia anche CSV con metriche client per round
+        client_metrics_file = os.path.join(PROJECT_DIR, "logs", "client_metriche_round.csv")
+        if os.path.exists(client_metrics_file):
+            send_file(chat_id, client_metrics_file)
+        else:
+            send_message(chat_id, "⚠️ File client_metriche_round.csv non trovato")
 
     except subprocess.CalledProcessError as e:
         send_message(chat_id, f"❌ Errore nel run: {e}")
