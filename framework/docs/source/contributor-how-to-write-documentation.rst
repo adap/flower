@@ -10,7 +10,7 @@ The Flower documentation lives in the ``doc`` directory. The Sphinx-based docume
 system supports both reStructuredText (``.rst`` files) and Markdown (``.md`` files).
 
 Note that, in order to build the documentation locally (with ``python -m poetry run make
-html``, like described below), `Pandoc <https://pandoc.org/installing.html>`_ needs to
+html``, as described below), `Pandoc <https://pandoc.org/installing.html>`_ needs to
 be installed on the system.
 
 ***********************
