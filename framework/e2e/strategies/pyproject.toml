@@ -8,10 +8,11 @@ version = "0.1.0"
 description = "Keras Federated Learning Quickstart with Flower"
 authors = [{ name = "The Flower Authors", email = "hello@flower.ai" }]
 requires-python = ">=3.10,<3.11"
-dependencies = ["flwr[simulation]>=1.27.0", "tensorflow-cpu>=2.18.0"]
+dependencies = ["tensorflow-cpu>=2.18.0"]
 
 [tool.poetry]
 package-mode = false
 
+# Local editable Flower is used for PR/fork runs; artifact wheel step may replace it in main-repo CI.
 [tool.poetry.dependencies]
 flwr = { path = "../../", develop = true, extras = ["simulation"] }
