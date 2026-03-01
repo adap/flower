@@ -20,8 +20,8 @@ import shutil
 import subprocess
 from pathlib import Path
 
-ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-INDEX = os.path.join(ROOT, "examples", "docs", "source", "index.rst")
+ROOT = Path(__file__).resolve().parents[2]
+INDEX = ROOT / "examples" / "docs" / "source" / "index.rst"
 
 initial_text = """
 Flower Examples Documentation
@@ -179,14 +179,14 @@ def _copy_markdown_files(example):
         if file.endswith(".md"):
             src = os.path.join(example, file)
             dest = os.path.join(
-                ROOT, "examples", "docs", "source", os.path.basename(example) + ".md"
+                str(ROOT), "examples", "docs", "source", os.path.basename(example) + ".md"
             )
             shutil.copyfile(src, dest)
 
 
 def _add_gh_button(example):
     gh_text = f'[<img src="_static/view-gh.png" alt="View on GitHub" width="200"/>](https://github.com/adap/flower/blob/main/examples/{example})'
-    readme_file = os.path.join(ROOT, "examples", "docs", "source", example + ".md")
+    readme_file = os.path.join(str(ROOT), "examples", "docs", "source", example + ".md")
     with open(readme_file, "r+") as f:
         content = f.read()
         if gh_text not in content:
@@ -200,7 +200,7 @@ def _add_gh_button(example):
 
 def _copy_images(example):
     static_dir = os.path.join(example, "_static")
-    dest_dir = os.path.join(ROOT, "examples", "docs", "source", "_static")
+    dest_dir = os.path.join(str(ROOT), "examples", "docs", "source", "_static")
     if os.path.isdir(static_dir):
         for file in os.listdir(static_dir):
             if file.endswith((".jpg", ".png", ".jpeg")):
@@ -220,10 +220,10 @@ def _add_all_entries():
 
 
 def _main():
-    if os.path.exists(INDEX):
-        os.remove(INDEX)
+    if INDEX.exists():
+        INDEX.unlink()
 
-    with open(INDEX, "w") as index_file:
+    with INDEX.open("w", encoding="utf-8") as index_file:
         index_file.write(initial_text)
 
     examples_dir = os.path.join(ROOT, "examples")
@@ -238,7 +238,7 @@ def _main():
                     if not _add_table_entry(example_path, "advanced", "advanced"):
                         _add_table_entry(example_path, "", "other")
 
-    with open(INDEX, "a") as index_file:
+    with INDEX.open("a", encoding="utf-8") as index_file:
         index_file.write(categories["quickstart"]["table"])
 
         index_file.write("\nAdvanced Examples\n-----------------\n")

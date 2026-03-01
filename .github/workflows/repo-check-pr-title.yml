@@ -24,4 +24,4 @@ jobs:
       - name: Check PR title format 
         env:
           PR_TITLE: ${{ github.event.pull_request.title }}
-        run: python ./dev/check_pr_title.py "$PR_TITLE"
+        run: PYTHONPATH=dev python -m devtool.check_pr_title "$PR_TITLE"
