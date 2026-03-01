@@ -57,7 +57,7 @@ with:
 
 .. code-block:: shell
 
-    python -m poetry install --with dev --all-extras
+    python -m poetry install --all-extras
     eval "$(python -m poetry env activate)"
 
 If you open a new terminal you can activate the previously created virtual environment
