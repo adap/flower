@@ -14,21 +14,20 @@
 # ==============================================================================
 """Used to check a given PR title format."""
 
-import pathlib
 import re
 import sys
 import tomllib
+from pathlib import Path
+from typing import Any
 
-if __name__ == "__main__":
 
-    pr_title = sys.argv[1]
+def _load_config() -> dict[str, Any]:
+    config_path = Path(__file__).resolve().parent.parent / "changelog_config.toml"
+    with config_path.open("rb") as file:
+        return tomllib.load(file)
 
-    # Load the YAML configuration
-    with (pathlib.Path(__file__).parent.resolve() / "changelog_config.toml").open(
-        "rb"
-    ) as file:
-        config = tomllib.load(file)
 
+def _validate_title(pr_title: str, config: dict[str, Any]) -> tuple[bool, str]:
     # Extract types, project, and scope from the config
     types = "|".join(config["type"])
     projects = "|".join(config["project"]) + "|\\*"
@@ -39,7 +38,7 @@ if __name__ == "__main__":
     pattern_template = config["pattern_template"]
     pattern = pattern_template.format(types=types, projects=projects, scope=scope)
 
-    # Check for the pattern in the first argument given to the script
+    # Check title against pattern.
     match = re.search(pattern, pr_title)
 
     valid = True
@@ -47,7 +46,7 @@ if __name__ == "__main__":
 
     # This check is there to ignore dependabot PRs from title checks
     if pr_title.startswith("build"):
-        sys.exit(0)
+        return True, ""
     elif not match:
         valid = False
     else:
@@ -57,8 +56,19 @@ if __name__ == "__main__":
         elif match.group(2) == "*" and match.group(3) is None:
             valid = False
             error = "the <PR_PROJECT> cannot be '*' without using the ':skip' flag"
+    return valid, error
+
+
+def main() -> None:
+    if len(sys.argv) < 2:
+        raise ValueError("Usage: python -m devtool.check_pr_title '<title>'")
+
+    pr_title = sys.argv[1]
+    config = _load_config()
+    valid, error = _validate_title(pr_title, config)
 
     if not valid:
+        types = "|".join(config["type"])
         print(
             f"PR title `{pr_title}` is invalid, {error}.\n\nA PR title should "
             "be of the form:\n\n\t<PR_TYPE>(<PR_PROJECT>): <PR_SUBJECT>\n\n"
@@ -73,3 +83,7 @@ if __name__ == "__main__":
             "the changelog:\n\n\t`feat(framework:skip): Add new option to build CLI`\n"
         )
         sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()

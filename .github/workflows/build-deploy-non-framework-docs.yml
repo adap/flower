@@ -35,11 +35,11 @@ jobs:
           python -m poetry install
           python -m pip install -e ../datasets
       - name: Update HTML theme options
-        run: python dev/update-html-themes.py
+        run: PYTHONPATH=dev python -m devtool.update_html_themes
       - name: Build baselines docs
         run: ./dev/build-baseline-docs.sh
       - name: Build examples docs
-        run: python dev/build-example-docs.py
+        run: PYTHONPATH=dev python -m devtool.build_example_docs
       - name: Build datasets docs
         run: ./datasets/dev/build-flwr-datasets-docs.sh
       - name: Deploy docs
