@@ -31,7 +31,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd framework
-          python -m poetry install --with dev
+          python -m poetry install
 
       - name: Install pandoc
         uses: nikeee/setup-pandoc@v1
