@@ -1,0 +1,46 @@
+{
+  "schema_version": "1.0",
+  "mode": "simulation",
+  "domains": ["downstream_rxmer", "upstream_return"],
+  "seed": 42,
+  "federation": {
+    "num_clients": 4,
+    "num_rounds": 2,
+    "fraction_train": 1.0,
+    "fraction_evaluate": 1.0,
+    "min_train_nodes": 2,
+    "min_evaluate_nodes": 2
+  },
+  "local_training": {
+    "local_epochs": 1,
+    "batch_size": 64,
+    "lr": 0.001,
+    "weight_decay": 0.0001
+  },
+  "data": {
+    "samples_per_client_train": 320,
+    "samples_per_client_val": 120,
+    "samples_per_client_test": 120
+  },
+  "non_iid": {
+    "global": 0.4,
+    "class_skew": null,
+    "regime_skew": null,
+    "context_skew": null,
+    "template_skew": null
+  },
+  "unknown_gate": {
+    "enabled": true,
+    "threshold_grid_size": 201,
+    "unknown_class_index": 6
+  },
+  "artifacts": {
+    "root_dir": "artifacts/fl",
+    "run_name": "smoke_json"
+  },
+  "deployment": {
+    "superlink": null,
+    "federation": null,
+    "stream_logs": true
+  }
+}

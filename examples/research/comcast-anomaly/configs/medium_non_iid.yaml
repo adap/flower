@@ -1,0 +1,46 @@
+schema_version: "1.0"
+mode: simulation
+domains:
+  - downstream_rxmer
+  - upstream_return
+seed: 123
+
+federation:
+  num_clients: 12
+  num_rounds: 5
+  fraction_train: 0.5
+  fraction_evaluate: 0.5
+  min_train_nodes: 4
+  min_evaluate_nodes: 4
+
+local_training:
+  local_epochs: 1
+  batch_size: 128
+  lr: 0.001
+  weight_decay: 0.0001
+
+data:
+  samples_per_client_train: 1200
+  samples_per_client_val: 300
+  samples_per_client_test: 300
+
+non_iid:
+  global: 0.5
+  class_skew: 0.6
+  regime_skew: 0.4
+  context_skew: 0.5
+  template_skew: 0.5
+
+unknown_gate:
+  enabled: true
+  threshold_grid_size: 201
+  unknown_class_index: 6
+
+artifacts:
+  root_dir: artifacts/fl
+  run_name: medium_non_iid
+
+deployment:
+  superlink: null
+  federation: null
+  stream_logs: true
