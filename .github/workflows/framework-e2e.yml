@@ -288,7 +288,7 @@ jobs:
       - name: Install Flower wheel from artifact store
         if: ${{ needs.changes.outputs.framework == 'true' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
         run: |
-          python -m pip install https://${{ env.ARTIFACT_BUCKET }}/py/${{ needs.wheel.outputs.dir }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}
+          python -m pip install "flwr[simulation] @ https://${{ env.ARTIFACT_BUCKET }}/py/${{ needs.wheel.outputs.dir }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}"
       - name: Cache Datasets
         if: ${{ needs.changes.outputs.framework == 'true' }}
         uses: actions/cache@v4
