@@ -39,7 +39,7 @@ jobs:
       - name: Build baselines docs
         run: ./dev/build-baseline-docs.sh
       - name: Build examples docs
-        run: PYTHONPATH=dev python -m devtool.build_example_docs
+        run: python -m devtool.build_example_docs
       - name: Build datasets docs
         run: ./datasets/dev/build-flwr-datasets-docs.sh
       - name: Deploy docs
