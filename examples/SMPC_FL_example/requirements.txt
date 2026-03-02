@@ -1,0 +1,13 @@
+# Core dependencies
+flwr[simulation]>=1.15.2
+flwr-datasets>=0.4.0
+tensorflow>=2.18.1
+numpy>=1.26.4
+
+# For legacy P2P mode (optional)
+grpcio>=1.64.0
+grpcio-tools>=1.54.0
+protobuf>=4.25.3
+
+# Utilities
+matplotlib>=3.10.1

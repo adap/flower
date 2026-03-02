@@ -1,0 +1,7 @@
+[FORMAT]
+# Maximum number of characters on a single line.
+max-line-length = 120
+
+[MESSAGES CONTROL]
+# Disable specific Pylint checks (use their symbolic names or codes).
+disable = W1203, W0718

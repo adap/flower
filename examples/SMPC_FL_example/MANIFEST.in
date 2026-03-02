@@ -1,0 +1,4 @@
+include smpc_fl/smpc_pb2.py
+include smpc_fl/smpc_pb2_grpc.py
+include smpc_fl/smpc.proto
+include smpc_fl/*.py

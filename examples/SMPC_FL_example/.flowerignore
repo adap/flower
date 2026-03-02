@@ -1,0 +1,9 @@
+*.pyc
+__pycache__/
+*.egg-info/
+.git/
+.gitignore
+*.sh
+metrics*.jpg
+normal_fl/
+.pylintrc

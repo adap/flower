@@ -1,0 +1,47 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "smpc-fl"
+version = "1.0.0"
+description = "P2P SMPC Protocol for Federated Learning using Flower"
+license = {text = "MIT"}
+authors = [
+    { name = "SYNTHEMA Project", email = "info@synthema.eu" },
+]
+dependencies = [
+    "flwr[simulation]>=1.15.0,<2.0",
+    "flwr-datasets==0.6.0",
+    "tensorflow>=2.18.0,<3.0",
+    "numpy>=1.26.0,<2.0",
+    "grpcio>=1.64.0,<2.0",
+    "grpcio-tools>=1.54.0,<2.0",
+    "protobuf>=4.25.3,<5.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["smpc_fl"]
+
+[tool.hatch.build]
+include = [
+    "smpc_fl/*.py",
+    "smpc_fl/smpc.proto",
+]
+
+[tool.flwr.app]
+publisher = "synthema"
+
+[tool.flwr.app.components]
+serverapp = "smpc_fl.server_app:app"
+clientapp = "smpc_fl.client_app:app"
+
+[tool.flwr.app.config]
+num-server-rounds = 10
+fraction-fit = 1.0
+
+[tool.flwr.federations]
+default = "local-simulation"
+
+[tool.flwr.federations.local-simulation]
+options.num-supernodes = 3
