@@ -35,7 +35,7 @@ jobs:
           python -m poetry install
           python -m pip install -e ../datasets
       - name: Update HTML theme options
-        run: PYTHONPATH=dev python -m devtool.update_html_themes
+        run: python -m devtool.update_html_themes
       - name: Build baselines docs
         run: ./dev/build-baseline-docs.sh
       - name: Build examples docs
