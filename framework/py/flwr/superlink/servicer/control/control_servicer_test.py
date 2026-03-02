@@ -170,7 +170,8 @@ class TestControlServicer(unittest.TestCase):
         retrieved_timestamp = datetime.fromisoformat(response.now).timestamp()
 
         # Assert
-        limit = limit or 999
+        if limit is None:
+            limit = 999
         self.assertLess(abs(retrieved_timestamp - now().timestamp()), 1e-3)
         self.assertEqual(set(response.run_dict.keys()), set(run_ids[-limit:]))
 
