@@ -25,6 +25,7 @@ import typer
 from requests import Response
 
 from flwr.supercore.constant import (
+    APP_PUBLISH_ALLOWED_LICENSE_FILES,
     APP_PUBLISH_EXCLUDE_PATTERNS,
     APP_PUBLISH_INCLUDE_PATTERNS,
     MAX_DIR_DEPTH,
@@ -45,8 +46,6 @@ from ..utils import (
     load_cli_auth_plugin_from_connection,
     load_gitignore_patterns,
 )
-
-ALLOWED_LICENSE_FILES = ("LICENSE", "LICENSE.md")
 
 
 # pylint: disable=too-many-locals
@@ -137,7 +136,7 @@ def _get_declared_license_file(root: Path) -> str | None:
             "Invalid [project].license.file: expected a string path."
         )
 
-    if license_file not in ALLOWED_LICENSE_FILES:
+    if license_file not in APP_PUBLISH_ALLOWED_LICENSE_FILES:
         raise click.ClickException(
             "Invalid [project].license.file: only `LICENSE` or `LICENSE.md` "
             "are supported."
