@@ -59,11 +59,7 @@ class FederationManager(ABC):
     def get_federations(self, flwr_aid: str) -> list[Federation]:
         """Get federations of which the account is a member.
 
-        Returns
-        -------
-        list[Federation]
-            A list of Federation objects representing federations in which the
-            account is a member. Includes both archived and active federations.
+        Both active and archived federations are returned.
         """
 
     @abstractmethod
