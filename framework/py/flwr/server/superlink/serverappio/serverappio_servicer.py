@@ -363,7 +363,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     ) -> PushAppOutputsResponse:
         """Push ServerApp process outputs."""
         log(DEBUG, "ServerAppIoServicer.PushAppOutputs")
-        run_id = verify_authenticated_run_matches_request_run_id(
+        verify_authenticated_run_matches_request_run_id(
             context, request.run_id
         )
 
@@ -382,8 +382,6 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
 
         state.set_serverapp_context(request.run_id, context_from_proto(request.context))
 
-        # Remove the token
-        state.delete_token(run_id)
         return PushAppOutputsResponse()
 
     def UpdateRunStatus(
@@ -407,6 +405,8 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
 
         # If the run is finished, delete the run from ObjectStore
         if request.run_status.status == Status.FINISHED:
+            # Revoke token once final run state is persisted.
+            state.delete_token(request.run_id)
             # Delete all objects related to the run
             store.delete_objects_in_run(request.run_id)
 
