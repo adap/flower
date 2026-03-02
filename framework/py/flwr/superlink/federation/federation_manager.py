@@ -144,15 +144,13 @@ class FederationManager(ABC):
         """
 
     @abstractmethod
-    def list_invitations(self, flwr_aid: str, federation: str) -> list[dict[str, str]]:
+    def list_invitations(self, flwr_aid: str) -> list[dict[str, str]]:
         """List invitations for a federation visible to the given account.
 
         Parameters
         ----------
         flwr_aid : str
             The ID of the account listing invitations.
-        federation : str
-            The name of the federation.
 
         Returns
         -------

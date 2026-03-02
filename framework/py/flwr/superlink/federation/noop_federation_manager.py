@@ -119,7 +119,7 @@ class NoOpFederationManager(FederationManager):
             "`create_invitation` is not supported by NoOpFederationManager."
         )
 
-    def list_invitations(self, flwr_aid: str, federation: str) -> list[dict[str, str]]:
+    def list_invitations(self, flwr_aid: str) -> list[dict[str, str]]:
         """List invitations for a federation visible to the given account."""
         raise NotImplementedError(
             "`list_invitations` is not supported by NoOpFederationManager."

@@ -194,7 +194,7 @@ message CreateInvitationRequest {
 }
 message CreateInvitationResponse {}
 
-message ListInvitationsRequest { string federation_name = 1; }
+message ListInvitationsRequest {}
 message ListInvitationsResponse { repeated Invitation invitations = 1; }
 
 message AcceptInvitationRequest { string federation_name = 1; }
