@@ -35,10 +35,10 @@ outputs:
     description: "Installed version of setuptools"
     value: ${{ steps.versions.outputs.setuptools-version }}
   poetry-version:
-    description: "Installed version of poetry"
+    description: "Requested version of poetry"
     value: ${{ steps.versions.outputs.poetry-version }}
   uv-version:
-    description: "Installed version of uv"
+    description: "Requested version of uv"
     value: ${{ steps.versions.outputs.uv-version }}
 runs:
   using: "composite"
