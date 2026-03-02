@@ -114,6 +114,7 @@ def ls(  # pylint: disable=R0914, R0913, R0917, R0912
                 if is_json:
                     print_json_to_stdout(_to_json(federations=federations))
                 else:
+                    # If verbose, show archived federations after active ones
                     shown = active + archived if verbose else active
                     Console().print(_to_table(shown))
         finally:
