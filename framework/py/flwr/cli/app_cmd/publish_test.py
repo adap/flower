@@ -135,7 +135,10 @@ def test_collect_files_rejects_invalid_license_path_in_pyproject(
     write(
         tmp_path,
         "pyproject.toml",
-        b'[project]\nname = "app"\nversion = "1.0.0"\nlicense = { file = "legal/LICENSE.txt" }\n',
+        (
+            b'[project]\nname = "app"\nversion = "1.0.0"\n'
+            b'license = { file = "legal/LICENSE.txt" }\n'
+        ),
     )
     write(tmp_path, f"ok{TEXT_EXT}", b"print('ok')")
 
@@ -182,7 +185,10 @@ def test_collect_files_rejects_license_file_with_text_in_pyproject(
     write(
         tmp_path,
         "pyproject.toml",
-        b'[project]\nname = "app"\nversion = "1.0.0"\nlicense = { file = "LICENSE", text = "Apache-2.0" }\n',
+        (
+            b'[project]\nname = "app"\nversion = "1.0.0"\n'
+            b'license = { file = "LICENSE", text = "Apache-2.0" }\n'
+        ),
     )
     write(tmp_path, "LICENSE", b"Apache-2.0")
     write(tmp_path, f"ok{TEXT_EXT}", b"print('ok')")
