@@ -69,6 +69,13 @@ def ls(  # pylint: disable=R0914, R0913, R0917, R0912
             help="Name of the federation to display",
         ),
     ] = None,
+    verbose: Annotated[
+        bool,
+        typer.Option(
+            "--verbose",
+            help="Show additional details, including archived federations.",
+        ),
+    ] = False,
 ) -> None:
     """List available federations or details of a specific federation (alias: ls)."""
     with cli_output_handler(output_format=output_format) as is_json:
@@ -101,10 +108,14 @@ def ls(  # pylint: disable=R0914, R0913, R0917, R0912
                 typer.echo("📄 Listing federations...")
                 federations = _list_federations(stub)
 
+                active = [f for f in federations if not f.archived]
+                archived = [f for f in federations if f.archived]
+
                 if is_json:
                     print_json_to_stdout(_to_json(federations=federations))
                 else:
-                    Console().print(_to_table(federations))
+                    shown = active + archived if verbose else active
+                    Console().print(_to_table(shown))
         finally:
             if channel:
                 channel.close()
@@ -129,9 +140,15 @@ def _to_table(federations: list[Federation]) -> Table:
     table.add_column(
         Text("Description", justify="center"), style="bright_black", no_wrap=True
     )
+    table.add_column(
+        Text("Status", justify="center"), style="bright_black", no_wrap=True
+    )
 
     for federation in federations:
-        table.add_row(federation.name, federation.description)
+        status = (
+            "[dim]archived[/dim]" if federation.archived else "[green]active[/green]"
+        )
+        table.add_row(federation.name, federation.description, status)
 
     return table
 
@@ -144,7 +161,14 @@ def _to_json(
 ) -> list[dict[str, str]] | list[list[dict[str, Any]]]:
     """Format the provided federations list to JSON serializable format."""
     if federations is not None:
-        return [{"name": federation.name} for federation in federations]
+        return [
+            {
+                "name": federation.name,
+                "description": federation.description,
+                "archived": federation.archived,
+            }
+            for federation in federations
+        ]
 
     if members is None or nodes is None or runs is None:
         return []
