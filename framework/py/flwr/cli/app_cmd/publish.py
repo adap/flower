@@ -109,7 +109,7 @@ def _detect_mime(path: Path) -> str:
 
 
 def _get_declared_license_file(root: Path) -> Path | None:
-    """Return validated absolute path from `[project].license.file`, else `None`."""
+    """Return validated path from `[project].license.file` if declared, else None."""
     # Read optional [project].license.file from pyproject.toml
     config = load_toml(root / "pyproject.toml")
     if config is None:
