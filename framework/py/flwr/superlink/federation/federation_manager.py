@@ -57,8 +57,14 @@ class FederationManager(ABC):
 
     @abstractmethod
     def get_federations(self, flwr_aid: str) -> list[Federation]:
-        """Get federations (name, description) of which the account is a member."""
+        """Get federations of which the account is a member.
 
+        Returns
+        -------
+        list[Federation]
+            A list of Federation objects representing federations in which the
+            account is a member. Archived federations are not included.
+        """
     @abstractmethod
     def get_details(self, federation: str) -> Federation:
         """Get details of the federation."""
