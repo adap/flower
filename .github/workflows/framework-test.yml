@@ -33,6 +33,7 @@ jobs:
           filters: |
             framework:
               - 'framework/**/*'
+              - 'dev/devtool/**'
               - '.github/workflows/framework-test.yml'
             ex_bench:
               - 'examples/**/*'
