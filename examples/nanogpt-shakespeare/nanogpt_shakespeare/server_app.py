@@ -4,6 +4,7 @@ import torch
 from flwr.app import ArrayRecord, ConfigRecord, Context, MetricRecord
 from flwr.serverapp import Grid, ServerApp
 from flwr.serverapp.strategy import FedAvg
+
 from nanogpt_shakespeare.task import _get_meta, build_model, load_centralized_data, test
 
 app = ServerApp()

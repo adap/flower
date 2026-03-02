@@ -306,7 +306,10 @@ def train(
     device: str,
     max_steps: int = 0,
 ):
-    """Train the model and return average loss. max_steps=0 means unlimited."""
+    """Train the model and return average loss.
+
+    max_steps=0 means unlimited.
+    """
     model.to(device)
     model.train()
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr)
