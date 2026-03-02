@@ -192,8 +192,7 @@ class TestClientAppIoServicer(unittest.TestCase):
         # Prepare
         token = "test-token"
         request = SendAppHeartbeatRequest(token=token)
-        context = Mock()
-        context._flwr_appio_authenticated_token = token
+        context = Mock(**{"_flwr_appio_authenticated_token": token})
         self.mock_state.acknowledge_app_heartbeat.return_value = success
 
         # Execute
@@ -205,7 +204,9 @@ class TestClientAppIoServicer(unittest.TestCase):
         self.mock_state.acknowledge_app_heartbeat.assert_called_once_with(token)
 
 
-class TestClientAppIoGrpcTokenAuth(unittest.TestCase):
+class TestClientAppIoGrpcTokenAuth(  # pylint: disable=too-many-instance-attributes
+    unittest.TestCase
+):
     """Integration tests for ClientAppIo token interceptor wiring."""
 
     def setUp(self) -> None:

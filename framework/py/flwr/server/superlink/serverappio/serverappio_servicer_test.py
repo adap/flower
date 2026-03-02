@@ -92,7 +92,7 @@ from flwr.supercore.inflatable.inflatable_object import (
 from flwr.supercore.object_store import ObjectStoreFactory
 from flwr.superlink.federation import NoOpFederationManager
 
-# pylint: disable=broad-except
+# pylint: disable=broad-except,too-many-lines
 SERVERAPPIO_TEST_ADDRESS = "127.0.0.1:19091"
 
 
@@ -116,7 +116,7 @@ class _AuthenticatedUnaryUnary:
         combined.append((APP_TOKEN_HEADER, self._token_fn(request)))
         return combined
 
-    def with_call(
+    def with_call(  # pylint: disable=too-many-arguments,too-many-positional-arguments
         self,
         request: object,
         timeout: float | None = None,
@@ -138,7 +138,7 @@ class _AuthenticatedUnaryUnary:
             ),
         )
 
-    def __call__(
+    def __call__(  # pylint: disable=too-many-arguments,too-many-positional-arguments
         self,
         request: object,
         timeout: float | None = None,

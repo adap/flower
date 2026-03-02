@@ -64,7 +64,7 @@ class TestAppIoTokenAuthClientInterceptor(TestCase):
 
         def continuation(
             client_call_details: grpc.ClientCallDetails,
-            request: GrpcMessage,
+            _request: GrpcMessage,
         ) -> str:
             captured["metadata"] = list(client_call_details.metadata or [])
             return "ok"
@@ -93,7 +93,7 @@ class TestAppIoTokenAuthClientInterceptor(TestCase):
 
         def continuation(
             client_call_details: grpc.ClientCallDetails,
-            request: GrpcMessage,
+            _request: GrpcMessage,
         ) -> str:
             captured["metadata"] = list(client_call_details.metadata or [])
             return "ok"
