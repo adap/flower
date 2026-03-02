@@ -154,6 +154,9 @@ def test_get_details_with_no_runs() -> None:
     assert len(result.nodes) == 0
     assert len(result.runs) == 0
     assert result.archived is False
+
+
+def test_exists() -> None:
     """Test exists method returns True only for NOOP_FEDERATION."""
     # Prepare
     manager = NoOpFederationManager()
