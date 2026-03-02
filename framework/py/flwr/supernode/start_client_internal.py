@@ -35,7 +35,10 @@ from flwr.app.user_config import UserConfig
 from flwr.client.grpc_adapter_client.connection import grpc_adapter
 from flwr.client.grpc_rere_client.connection import grpc_request_response
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, Context, Error, Message, RecordDict
-from flwr.common.appio_token_auth_interceptor import AppIoTokenAuthServerInterceptor
+from flwr.common.appio_token_auth_interceptor import (
+    AppIoTokenAuthServerInterceptor,
+    validate_method_requires_token_map,
+)
 from flwr.common.config import get_flwr_dir, get_fused_config_from_fab
 from flwr.common.constant import (
     CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
@@ -53,6 +56,7 @@ from flwr.common.logger import log
 from flwr.common.retry_invoker import RetryInvoker, make_simple_grpc_retry_invoker
 from flwr.common.telemetry import EventType
 from flwr.common.typing import Fab, Run, RunNotRunningException
+from flwr.proto import clientappio_pb2  # pylint: disable=E0611
 from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server
 from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
 from flwr.supercore.address import parse_address, resolve_bind_address
@@ -83,6 +87,9 @@ DEFAULT_FFS_DIR = get_flwr_dir() / "supernode" / "ffs"
 FAB_VERIFICATION_ERROR = Error(ErrorCode.INVALID_FAB, "The FAB could not be verified.")
 
 CLIENTAPPIO_METHOD_REQUIRES_TOKEN = {
+    # Keep this table in sync with the proto service. Startup validation below
+    # fails fast with a targeted error message if an RPC is added/renamed and no
+    # explicit auth decision is recorded here.
     # SuperExec path (intentionally unauthenticated in this PR)
     "/flwr.proto.ClientAppIo/ListAppsToLaunch": False,
     "/flwr.proto.ClientAppIo/RequestToken": False,
@@ -97,6 +104,18 @@ CLIENTAPPIO_METHOD_REQUIRES_TOKEN = {
     "/flwr.proto.ClientAppIo/PullObject": True,
     "/flwr.proto.ClientAppIo/ConfirmMessageReceived": True,
 }
+
+validate_method_requires_token_map(
+    service_name="ClientAppIo",
+    package_name=clientappio_pb2.DESCRIPTOR.package,
+    rpc_method_names=[
+        method.name
+        for method in clientappio_pb2.DESCRIPTOR.services_by_name["ClientAppIo"].methods
+    ],
+    method_requires_token=CLIENTAPPIO_METHOD_REQUIRES_TOKEN,
+    table_name="CLIENTAPPIO_METHOD_REQUIRES_TOKEN",
+    table_location="py/flwr/supernode/start_client_internal.py",
+)
 
 
 # pylint: disable=import-outside-toplevel

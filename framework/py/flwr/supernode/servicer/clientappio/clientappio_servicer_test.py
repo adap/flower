@@ -26,6 +26,7 @@ from flwr.common.constant import APP_TOKEN_HEADER
 from flwr.common.message import make_message
 from flwr.common.serde import fab_to_proto, message_to_proto
 from flwr.common.serde_test import RecordMaker
+from flwr.proto import clientappio_pb2  # pylint:disable=E0611
 from flwr.proto.appio_pb2 import (  # pylint:disable=E0611
     ListAppsToLaunchRequest,
     ListAppsToLaunchResponse,
@@ -58,11 +59,36 @@ from flwr.supercore.inflatable.inflatable_object import (
 from flwr.supercore.object_store import ObjectStoreFactory
 from flwr.supernode.nodestate import NodeStateFactory
 from flwr.supernode.runtime.run_clientapp import pull_appinputs, push_appoutputs
-from flwr.supernode.start_client_internal import run_clientappio_api_grpc
+from flwr.supernode.start_client_internal import (
+    CLIENTAPPIO_METHOD_REQUIRES_TOKEN,
+    run_clientappio_api_grpc,
+)
 
 from .clientappio_servicer import ClientAppIoServicer
 
 CLIENTAPPIO_TEST_ADDRESS = "127.0.0.1:19094"
+
+
+def test_clientappio_token_policy_covers_all_proto_rpcs() -> None:
+    """Ensure every ClientAppIo RPC has an explicit token policy decision."""
+    # Reason: avoid auth gaps if a new RPC is added to ClientAppIo.
+    # If this fails, update CLIENTAPPIO_METHOD_REQUIRES_TOKEN in
+    # `py/flwr/supernode/start_client_internal.py`.
+    service_name = "ClientAppIo"
+    package_name = clientappio_pb2.DESCRIPTOR.package
+    rpc_names = [
+        method.name
+        for method in clientappio_pb2.DESCRIPTOR.services_by_name[service_name].methods
+    ]
+    expected_methods = {
+        f"/{package_name}.{service_name}/{rpc_name}" for rpc_name in rpc_names
+    }
+    configured_methods = set(CLIENTAPPIO_METHOD_REQUIRES_TOKEN)
+    assert configured_methods == expected_methods, (
+        "ClientAppIo token policy table is out of sync with proto RPCs. "
+        "Update CLIENTAPPIO_METHOD_REQUIRES_TOKEN in "
+        "`py/flwr/supernode/start_client_internal.py`."
+    )
 
 
 class TestClientAppIoServicer(unittest.TestCase):

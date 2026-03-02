@@ -19,9 +19,13 @@ from logging import INFO
 import grpc
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
-from flwr.common.appio_token_auth_interceptor import AppIoTokenAuthServerInterceptor
+from flwr.common.appio_token_auth_interceptor import (
+    AppIoTokenAuthServerInterceptor,
+    validate_method_requires_token_map,
+)
 from flwr.common.grpc import generic_create_grpc_server
 from flwr.common.logger import log
+from flwr.proto import serverappio_pb2  # pylint: disable=E0611
 from flwr.proto.serverappio_pb2_grpc import (  # pylint: disable=E0611
     add_ServerAppIoServicer_to_server,
 )
@@ -32,6 +36,9 @@ from flwr.supercore.object_store import ObjectStoreFactory
 from .serverappio_servicer import ServerAppIoServicer
 
 SERVERAPPIO_METHOD_REQUIRES_TOKEN = {
+    # Keep this table in sync with the proto service. Startup validation below
+    # fails fast with a targeted error message if an RPC is added/renamed and no
+    # explicit auth decision is recorded here.
     # SuperExec path (intentionally unauthenticated in this PR)
     "/flwr.proto.ServerAppIo/ListAppsToLaunch": False,
     "/flwr.proto.ServerAppIo/RequestToken": False,
@@ -49,6 +56,18 @@ SERVERAPPIO_METHOD_REQUIRES_TOKEN = {
     "/flwr.proto.ServerAppIo/UpdateRunStatus": True,
     "/flwr.proto.ServerAppIo/PushLogs": True,
 }
+
+validate_method_requires_token_map(
+    service_name="ServerAppIo",
+    package_name=serverappio_pb2.DESCRIPTOR.package,
+    rpc_method_names=[
+        method.name
+        for method in serverappio_pb2.DESCRIPTOR.services_by_name["ServerAppIo"].methods
+    ],
+    method_requires_token=SERVERAPPIO_METHOD_REQUIRES_TOKEN,
+    table_name="SERVERAPPIO_METHOD_REQUIRES_TOKEN",
+    table_location="py/flwr/server/superlink/serverappio/serverappio_grpc.py",
+)
 
 
 def run_serverappio_api_grpc(

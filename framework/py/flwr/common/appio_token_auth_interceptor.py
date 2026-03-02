@@ -22,9 +22,52 @@ from google.protobuf.message import Message as GrpcMessage
 
 from flwr.common.constant import APP_TOKEN_HEADER
 
+# Keep a single canonical auth failure message.
+# Do not vary details by failure mode (missing token, unknown token, run mismatch,
+# malformed metadata, etc.), or callers could use error differences as an auth
+# oracle.
 _INVALID_TOKEN_DETAILS = "Invalid token."
 _AUTH_RUN_ID_CTX_ATTR = "_flwr_appio_authenticated_run_id"
 _AUTH_TOKEN_CTX_ATTR = "_flwr_appio_authenticated_token"
+
+
+def validate_method_requires_token_map(  # pylint: disable=too-many-arguments
+    *,
+    service_name: str,
+    package_name: str,
+    rpc_method_names: Sequence[str],
+    method_requires_token: Mapping[str, bool],
+    table_name: str,
+    table_location: str,
+) -> None:
+    """Validate that token policy table exactly matches service RPCs.
+
+    The table must provide an explicit bool policy (`True` or `False`) for every
+    unary RPC in the service. Failing fast at import/startup prevents silently
+    exposing newly added RPCs without an auth decision.
+    """
+    service_fqn = f"{package_name}.{service_name}"
+    expected = {f"/{service_fqn}/{rpc_name}" for rpc_name in rpc_method_names}
+    configured = set(method_requires_token)
+    missing = sorted(expected - configured)
+    extra = sorted(configured - expected)
+    non_bool_values = sorted(
+        method_name
+        for method_name, requires_token in method_requires_token.items()
+        if not isinstance(requires_token, bool)
+    )
+    if missing or extra or non_bool_values:
+        raise ValueError(
+            "Invalid AppIo token policy table.\n"
+            f"Table: {table_name}\n"
+            f"Location: {table_location}\n"
+            f"Service: {service_fqn}\n"
+            f"Missing RPC entries: {missing or 'None'}\n"
+            f"Unexpected RPC entries: {extra or 'None'}\n"
+            f"Entries with non-bool values: {non_bool_values or 'None'}\n"
+            "How to fix: update the policy table to include exactly one explicit "
+            "bool decision for each RPC exposed by the service."
+        )
 
 
 class _AppTokenState(Protocol):
@@ -38,12 +81,18 @@ class _AppTokenState(Protocol):
 
 
 def _abort_invalid_token(context: grpc.ServicerContext) -> None:
+    # Use this only when we already have a live ServicerContext inside an
+    # executing RPC. This complements `_permission_denied_terminator`, which is
+    # used while building the handler in `intercept_service`.
     """Abort current RPC with the canonical invalid token status/details."""
     context.abort(grpc.StatusCode.PERMISSION_DENIED, _INVALID_TOKEN_DETAILS)
     raise grpc.RpcError()
 
 
 def _permission_denied_terminator(message: str) -> grpc.RpcMethodHandler:
+    # `intercept_service` must return an RpcMethodHandler. When auth fails before
+    # we can safely invoke the real handler, return a tiny handler that aborts
+    # with PERMISSION_DENIED at call execution time.
     """Return a unary-unary handler that immediately aborts the RPC."""
 
     def terminate(_request: GrpcMessage, context: grpc.ServicerContext) -> GrpcMessage:
@@ -56,6 +105,9 @@ def _permission_denied_terminator(message: str) -> grpc.RpcMethodHandler:
 def _extract_token_from_metadata(
     metadata: Sequence[tuple[str, str | bytes]] | None,
 ) -> str | None:
+    # Metadata parsing is intentionally conservative: if the expected header is
+    # missing/unusable, treat it as invalid token. Do not expose a distinct
+    # "malformed token metadata" error (oracle risk).
     """Read App token from invocation metadata."""
     if metadata is None:
         return None
@@ -87,6 +139,9 @@ def get_authenticated_token(context: grpc.ServicerContext) -> str:
 def verify_authenticated_run_matches_request_run_id(
     context: grpc.ServicerContext, request_run_id: int
 ) -> int:
+    # Treat run/token binding mismatches as generic invalid-token auth failures.
+    # Do not return "wrong run_id" details, which would leak run
+    # existence/binding info.
     """Verify request.run_id matches interceptor-authenticated run_id."""
     authenticated_run_id = get_authenticated_run_id(context)
     if authenticated_run_id != request_run_id:
@@ -137,6 +192,9 @@ class AppIoTokenAuthServerInterceptor(grpc.ServerInterceptor):  # type: ignore
         if not requires_token:
             return method_handler
         if method_handler.unary_unary is None:
+            # This interceptor currently protects unary-unary AppIo RPCs only.
+            # If method shape is unexpected, fail closed with the same auth
+            # error.
             return _permission_denied_terminator(_INVALID_TOKEN_DETAILS)
         unary_unary_handler = cast(
             Callable[[GrpcMessage, grpc.ServicerContext], GrpcMessage],
@@ -156,6 +214,9 @@ class AppIoTokenAuthServerInterceptor(grpc.ServerInterceptor):  # type: ignore
             request: GrpcMessage,
             context: grpc.ServicerContext,
         ) -> GrpcMessage:
+            # Store validated auth context for downstream servicer helpers.
+            # These attributes are internal-only and must be set exclusively by
+            # this interceptor.
             setattr(context, _AUTH_RUN_ID_CTX_ATTR, run_id)
             setattr(context, _AUTH_TOKEN_CTX_ATTR, token)
             return unary_unary_handler(request, context)

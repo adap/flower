@@ -30,6 +30,7 @@ from flwr.common.message import get_message_to_descendant_id_mapping
 from flwr.common.serde import context_to_proto, message_from_proto, run_status_to_proto
 from flwr.common.serde_test import RecordMaker
 from flwr.common.typing import RunStatus
+from flwr.proto import serverappio_pb2  # pylint: disable=E0611
 from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
     ListAppsToLaunchRequest,
     ListAppsToLaunchResponse,
@@ -77,7 +78,10 @@ from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
 )
 from flwr.server.superlink.linkstate.linkstate_factory import LinkStateFactory
 from flwr.server.superlink.linkstate.linkstate_test import create_ins_message
-from flwr.server.superlink.serverappio.serverappio_grpc import run_serverappio_api_grpc
+from flwr.server.superlink.serverappio.serverappio_grpc import (
+    SERVERAPPIO_METHOD_REQUIRES_TOKEN,
+    run_serverappio_api_grpc,
+)
 from flwr.server.superlink.serverappio.serverappio_servicer import _raise_if
 from flwr.server.superlink.utils import _STATUS_TO_MSG
 from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME, NOOP_FEDERATION
@@ -200,6 +204,28 @@ def test_raise_if_true() -> None:
         assert str(err) == "Malformed DummyRequest: test"
     except Exception as err:
         raise AssertionError() from err
+
+
+def test_serverappio_token_policy_covers_all_proto_rpcs() -> None:
+    """Ensure every ServerAppIo RPC has an explicit token policy decision."""
+    # Reason: avoid auth gaps if a new RPC is added to ServerAppIo.
+    # If this fails, update SERVERAPPIO_METHOD_REQUIRES_TOKEN in
+    # `py/flwr/server/superlink/serverappio/serverappio_grpc.py`.
+    service_name = "ServerAppIo"
+    package_name = serverappio_pb2.DESCRIPTOR.package
+    rpc_names = [
+        method.name
+        for method in serverappio_pb2.DESCRIPTOR.services_by_name[service_name].methods
+    ]
+    expected_methods = {
+        f"/{package_name}.{service_name}/{rpc_name}" for rpc_name in rpc_names
+    }
+    configured_methods = set(SERVERAPPIO_METHOD_REQUIRES_TOKEN)
+    assert configured_methods == expected_methods, (
+        "ServerAppIo token policy table is out of sync with proto RPCs. "
+        "Update SERVERAPPIO_METHOD_REQUIRES_TOKEN in "
+        "`py/flwr/server/superlink/serverappio/serverappio_grpc.py`."
+    )
 
 
 class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R0904
