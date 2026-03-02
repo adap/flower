@@ -138,6 +138,10 @@ class AppIoTokenAuthServerInterceptor(grpc.ServerInterceptor):  # type: ignore
             return method_handler
         if method_handler.unary_unary is None:
             return _permission_denied_terminator(_INVALID_TOKEN_DETAILS)
+        unary_unary_handler = cast(
+            Callable[[GrpcMessage, grpc.ServicerContext], GrpcMessage],
+            method_handler.unary_unary,
+        )
 
         token = _extract_token_from_metadata(handler_call_details.invocation_metadata)
         if token is None:
@@ -154,7 +158,7 @@ class AppIoTokenAuthServerInterceptor(grpc.ServerInterceptor):  # type: ignore
         ) -> GrpcMessage:
             setattr(context, _AUTH_RUN_ID_CTX_ATTR, run_id)
             setattr(context, _AUTH_TOKEN_CTX_ATTR, token)
-            return method_handler.unary_unary(request, context)
+            return unary_unary_handler(request, context)
 
         return grpc.unary_unary_rpc_method_handler(
             authenticated_handler,

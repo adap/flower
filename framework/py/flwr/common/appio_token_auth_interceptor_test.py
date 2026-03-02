@@ -19,6 +19,7 @@ from unittest import TestCase
 from unittest.mock import Mock
 
 import grpc
+from google.protobuf.message import Message as GrpcMessage
 
 from flwr.common.appio_token_auth_interceptor import (
     AppIoTokenAuthClientInterceptor,
@@ -61,9 +62,11 @@ class TestAppIoTokenAuthClientInterceptor(TestCase):
         )
         captured = {}
 
-        def continuation(client_call_details, request):
+        def continuation(
+            client_call_details: grpc.ClientCallDetails,
+            request: GrpcMessage,
+        ) -> str:
             captured["metadata"] = list(client_call_details.metadata or [])
-            captured["request"] = request
             return "ok"
 
         response = interceptor.intercept_unary_unary(
@@ -88,7 +91,10 @@ class TestAppIoTokenAuthClientInterceptor(TestCase):
         )
         captured = {}
 
-        def continuation(client_call_details, request):
+        def continuation(
+            client_call_details: grpc.ClientCallDetails,
+            request: GrpcMessage,
+        ) -> str:
             captured["metadata"] = list(client_call_details.metadata or [])
             return "ok"
 

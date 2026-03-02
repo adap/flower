@@ -193,7 +193,7 @@ class TestClientAppIoServicer(unittest.TestCase):
         token = "test-token"
         request = SendAppHeartbeatRequest(token=token)
         context = Mock()
-        context._flwr_appio_authenticated_token = token  # type: ignore[attr-defined]
+        context._flwr_appio_authenticated_token = token
         self.mock_state.acknowledge_app_heartbeat.return_value = success
 
         # Execute

@@ -363,9 +363,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     ) -> PushAppOutputsResponse:
         """Push ServerApp process outputs."""
         log(DEBUG, "ServerAppIoServicer.PushAppOutputs")
-        verify_authenticated_run_matches_request_run_id(
-            context, request.run_id
-        )
+        verify_authenticated_run_matches_request_run_id(context, request.run_id)
 
         # Init state and store
         state = self.state_factory.state()

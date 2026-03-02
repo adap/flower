@@ -16,18 +16,16 @@
 
 import tempfile
 import unittest
+from collections.abc import Callable
 from datetime import timedelta
+from typing import cast
 from unittest.mock import Mock, patch
 
 import grpc
 from parameterized import parameterized
 
 from flwr.common import ConfigRecord, Context, Error, Message, RecordDict
-from flwr.common.constant import (
-    APP_TOKEN_HEADER,
-    SUPERLINK_NODE_ID,
-    Status,
-)
+from flwr.common.constant import APP_TOKEN_HEADER, SUPERLINK_NODE_ID, Status
 from flwr.common.message import get_message_to_descendant_id_mapping
 from flwr.common.serde import context_to_proto, message_from_proto, run_status_to_proto
 from flwr.common.serde_test import RecordMaker
@@ -50,7 +48,10 @@ from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
     SendAppHeartbeatRequest,
     SendAppHeartbeatResponse,
 )
-from flwr.proto.log_pb2 import PushLogsRequest, PushLogsResponse  # pylint: disable=E0611
+from flwr.proto.log_pb2 import (  # pylint: disable=E0611
+    PushLogsRequest,
+    PushLogsResponse,
+)
 from flwr.proto.message_pb2 import (  # pylint: disable=E0611
     ConfirmMessageReceivedRequest,
     ConfirmMessageReceivedResponse,
@@ -98,7 +99,11 @@ SERVERAPPIO_TEST_ADDRESS = "127.0.0.1:19091"
 class _AuthenticatedUnaryUnary:
     """Attach AppIo token metadata for unary-unary test RPC calls."""
 
-    def __init__(self, rpc_callable: grpc.UnaryUnaryMultiCallable, token_fn) -> None:
+    def __init__(
+        self,
+        rpc_callable: grpc.UnaryUnaryMultiCallable,
+        token_fn: Callable[[object], str],
+    ) -> None:
         self._rpc_callable = rpc_callable
         self._token_fn = token_fn
 
@@ -119,15 +124,18 @@ class _AuthenticatedUnaryUnary:
         credentials: grpc.CallCredentials | None = None,
         wait_for_ready: bool | None = None,
         compression: grpc.Compression | None = None,
-    ):
+    ) -> tuple[object, grpc.Call]:
         """Call wrapped RPC with authentication metadata and call details."""
-        return self._rpc_callable.with_call(
-            request=request,
-            timeout=timeout,
-            metadata=self._add_metadata(request, metadata),
-            credentials=credentials,
-            wait_for_ready=wait_for_ready,
-            compression=compression,
+        return cast(
+            tuple[object, grpc.Call],
+            self._rpc_callable.with_call(
+                request=request,
+                timeout=timeout,
+                metadata=self._add_metadata(request, metadata),
+                credentials=credentials,
+                wait_for_ready=wait_for_ready,
+                compression=compression,
+            ),
         )
 
     def __call__(
@@ -138,7 +146,7 @@ class _AuthenticatedUnaryUnary:
         credentials: grpc.CallCredentials | None = None,
         wait_for_ready: bool | None = None,
         compression: grpc.Compression | None = None,
-    ):
+    ) -> object:
         """Call wrapped RPC with authentication metadata."""
         return self._rpc_callable(
             request=request,

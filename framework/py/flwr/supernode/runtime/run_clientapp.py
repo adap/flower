@@ -23,10 +23,10 @@ from flwr.cli.install import install_from_fab
 from flwr.clientapp.client_app import ClientApp, LoadClientAppError
 from flwr.clientapp.utils import get_load_client_app_fn
 from flwr.common import Context, Message
+from flwr.common.appio_token_auth_interceptor import AppIoTokenAuthClientInterceptor
 from flwr.common.config import get_flwr_dir
 from flwr.common.constant import ErrorCode
 from flwr.common.exit import ExitCode, flwr_exit, register_signal_handlers
-from flwr.common.appio_token_auth_interceptor import AppIoTokenAuthClientInterceptor
 from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.logger import log
 from flwr.common.message import remove_content_from_message
