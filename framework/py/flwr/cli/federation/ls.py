@@ -152,10 +152,13 @@ def _to_table(federations: list[Federation]) -> Table:
     )
 
     for federation in federations:
-        status = (
-            "[dim]archived[/dim]" if federation.archived else "[green]active[/green]"
-        )
-        table.add_row(federation.name, federation.description, status)
+        if federation.archived:
+            style = "dim"
+            status = "archived"
+        else:
+            style = ""
+            status = "[green]active[/green]"
+        table.add_row(federation.name, federation.description, status, style=style)
 
     return table
 
