@@ -63,8 +63,9 @@ class FederationManager(ABC):
         -------
         list[Federation]
             A list of Federation objects representing federations in which the
-            account is a member. Archived federations are not included.
+            account is a member. Includes both archived and active federations.
         """
+
     @abstractmethod
     def get_details(self, federation: str) -> Federation:
         """Get details of the federation."""
