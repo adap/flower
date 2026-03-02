@@ -201,7 +201,7 @@ class FileCredentialStoreTest(CredentialStoreTest):
     def test_get_with_invalid_base64_removes_file(self) -> None:
         """Test malformed encoded values are treated as corruption."""
         with Path(self.temp_file.name).open("w", encoding="utf-8") as f:
-            f.write("test_key: !not_base64!")
+            f.write('test_key: "not_base64_encoded_value"')
 
         store = self.credential_store_factory()
         self.assertIsNone(store.get("test_key"))

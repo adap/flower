@@ -99,7 +99,7 @@ class FileCredentialStore(CredentialStore):
         if encoded_value is None:
             return None
         try:
-            return base64.b64decode(encoded_value)
+            return base64.b64decode(encoded_value, validate=True)
         except (binascii.Error, ValueError):
             self.file_path.unlink(missing_ok=True)
             return None
