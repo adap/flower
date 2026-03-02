@@ -190,7 +190,7 @@ message RemoveNodeFromFederationResponse {}
 
 message CreateInvitationRequest {
   string federation_name = 1;
-  string invitee_account = 2;
+  string invitee_account_name = 2;
 }
 message CreateInvitationResponse {}
 
@@ -205,6 +205,6 @@ message RejectInvitationResponse {}
 
 message WithdrawInvitationRequest {
   string federation_name = 1;
-  string invitee_account = 2;
+  string invitee_account_name = 2;
 }
 message WithdrawInvitationResponse {}

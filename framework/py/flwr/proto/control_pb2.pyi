@@ -594,16 +594,16 @@ class CreateInvitationRequest(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
 
     FEDERATION_NAME_FIELD_NUMBER: builtins.int
-    INVITEE_ACCOUNT_FIELD_NUMBER: builtins.int
+    INVITEE_ACCOUNT_NAME_FIELD_NUMBER: builtins.int
     federation_name: builtins.str
-    invitee_account: builtins.str
+    invitee_account_name: builtins.str
     def __init__(
         self,
         *,
         federation_name: builtins.str = ...,
-        invitee_account: builtins.str = ...,
+        invitee_account_name: builtins.str = ...,
     ) -> None: ...
-    def ClearField(self, field_name: typing.Literal["federation_name", b"federation_name", "invitee_account", b"invitee_account"]) -> None: ...
+    def ClearField(self, field_name: typing.Literal["federation_name", b"federation_name", "invitee_account_name", b"invitee_account_name"]) -> None: ...
 
 global___CreateInvitationRequest = CreateInvitationRequest
 
@@ -703,16 +703,16 @@ class WithdrawInvitationRequest(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
 
     FEDERATION_NAME_FIELD_NUMBER: builtins.int
-    INVITEE_ACCOUNT_FIELD_NUMBER: builtins.int
+    INVITEE_ACCOUNT_NAME_FIELD_NUMBER: builtins.int
     federation_name: builtins.str
-    invitee_account: builtins.str
+    invitee_account_name: builtins.str
     def __init__(
         self,
         *,
         federation_name: builtins.str = ...,
-        invitee_account: builtins.str = ...,
+        invitee_account_name: builtins.str = ...,
     ) -> None: ...
-    def ClearField(self, field_name: typing.Literal["federation_name", b"federation_name", "invitee_account", b"invitee_account"]) -> None: ...
+    def ClearField(self, field_name: typing.Literal["federation_name", b"federation_name", "invitee_account_name", b"invitee_account_name"]) -> None: ...
 
 global___WithdrawInvitationRequest = WithdrawInvitationRequest
 
