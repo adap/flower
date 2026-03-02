@@ -19,10 +19,11 @@ import json
 import re
 from pathlib import Path
 from typing import Optional, Union
+
 import yaml
 
-# Change this if you want to search a different directory.
-ROOT_DIR = Path(".")
+REPO_ROOT = Path(__file__).resolve().parents[2]
+ROOT_DIR = REPO_ROOT
 
 # Define new fields to be added to the `html_theme_options` dictionary in `conf.py`.
 # If no fields are needed, set to an empty dictionary.
@@ -37,7 +38,7 @@ NEW_FIELDS: dict[str, Optional[Union[dict[str, str], str]]] = {
     },
 }
 
-with (ROOT_DIR / "dev" / "docs-ui-config.yml").open() as f:
+with (REPO_ROOT / "dev" / "docs-ui-config.yml").open(encoding="utf-8") as f:
     announcement = yaml.safe_load(f)["announcement"]
     if announcement["enabled"]:
         NEW_FIELDS["announcement"] = announcement["html"]

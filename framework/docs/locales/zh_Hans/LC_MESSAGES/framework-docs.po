@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-22 00:10+0000\n"
+"POT-Creation-Date: 2026-02-27 00:12+0000\n"
 "PO-Revision-Date: 2024-06-12 10:09+0000\n"
 "Last-Translator: Yan Gao <y.gaogy@gmail.com>\n"
 "Language: zh_Hans\n"
@@ -2217,7 +2217,7 @@ msgstr "祝贺你 🥳 您现在正式成为 \"Flower \"贡献者！"
 #: ../../source/contributor-tutorial-contribute-on-github.rst:353
 #: ../../source/tutorial-series-build-a-strategy-from-scratch-pytorch.rst:399
 #: ../../source/tutorial-series-customize-the-client-pytorch.rst:336
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:703
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:708
 #: ../../source/tutorial-series-use-a-federated-learning-strategy-pytorch.rst:434
 #: ../../source/tutorial-series-what-is-federated-learning.rst:367
 msgid "Next steps"
@@ -10906,7 +10906,7 @@ msgstr ""
 "federated.html>`_ 做少量改动。"
 
 #: ../../source/how-to-implement-fedbn.rst:18
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:196
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:201
 #, fuzzy
 msgid "Model"
 msgstr "模块"
@@ -11063,26 +11063,35 @@ msgid ""
 msgstr "可以使用以下命令来验证 Flower 是否安装成功。如果一切正常，它将在命令行中打印 Flower 的版本：："
 
 #: ../../source/how-to-install-flower.rst:76
+#: ../../source/how-to-run-simulations.rst:49
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:94
+msgid ""
+"If you're on Windows and see unexpected terminal output (e.g.: ``� "
+"□[32m□[1m``), check :ref:`this FAQ entry <faq-windows-unexpected-"
+"output>`."
+msgstr ""
+
+#: ../../source/how-to-install-flower.rst:81
 msgid "Advanced installation options"
 msgstr "高级安装选项"
 
-#: ../../source/how-to-install-flower.rst:79
+#: ../../source/how-to-install-flower.rst:84
 #, fuzzy
 msgid "Install via Docker"
 msgstr "安装Flower"
 
-#: ../../source/how-to-install-flower.rst:81
+#: ../../source/how-to-install-flower.rst:86
 #, fuzzy
 msgid ":doc:`Run Flower using Docker <docker/index>`"
 msgstr ""
 "`TensorFlow快速入门 (教程) <https://flower.ai/docs/framework/tutorial-"
 "quickstart-tensorflow.html>`_"
 
-#: ../../source/how-to-install-flower.rst:84
+#: ../../source/how-to-install-flower.rst:89
 msgid "Install pre-release"
 msgstr "安装预发布版本"
 
-#: ../../source/how-to-install-flower.rst:86
+#: ../../source/how-to-install-flower.rst:91
 #, fuzzy
 msgid ""
 "New (possibly unstable) versions of Flower are sometimes available as "
@@ -11090,25 +11099,25 @@ msgid ""
 "release happens:"
 msgstr "在稳定版发布之前，Flower 的新版本（可能是不稳定版）有时会作为预发布版本（alpha、beta、候选发布版本）提供：："
 
-#: ../../source/how-to-install-flower.rst:93
+#: ../../source/how-to-install-flower.rst:98
 #, fuzzy
 msgid ""
 "For simulations that use the Virtual Client Engine, ``flwr`` pre-releases"
 " should be installed with the ``simulation`` extra:"
 msgstr "对于使用虚拟客户端引擎的模拟，`flwr``预发行版应与`simulation``一起安装："
 
-#: ../../source/how-to-install-flower.rst:101
+#: ../../source/how-to-install-flower.rst:106
 msgid "Install nightly release"
 msgstr "安装隔夜版本"
 
-#: ../../source/how-to-install-flower.rst:103
+#: ../../source/how-to-install-flower.rst:108
 #, fuzzy
 msgid ""
 "The latest (potentially unstable) changes in Flower are available as "
 "nightly releases:"
 msgstr "Flower 中最新（可能不稳定）的更改以隔夜发布的形式提供：："
 
-#: ../../source/how-to-install-flower.rst:109
+#: ../../source/how-to-install-flower.rst:114
 #, fuzzy
 msgid ""
 "For simulations that use the Virtual Client Engine, ``flwr-nightly`` "
@@ -13699,7 +13708,7 @@ msgid ""
 "using `WSL2 <https://learn.microsoft.com/en-us/windows/wsl/about>`_."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:47
+#: ../../source/how-to-run-simulations.rst:52
 msgid ""
 "Flower's ``Simulation Engine`` schedules, launches, and manages "
 "|clientapp_link|_ instances. It does so through a ``Backend``, which "
@@ -13712,7 +13721,7 @@ msgid ""
 "Engine`` is:"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:55
+#: ../../source/how-to-run-simulations.rst:60
 #, fuzzy
 msgid ""
 "**Resource-aware**: Each backend worker executing ``ClientApp``\\s gets "
@@ -13725,7 +13734,7 @@ msgstr ""
 "资源感知：这意味着每个客户端都会分配到系统中的一部分计算和内存。作为用户，您可以在模拟开始时对其进行控制，从而控制 Flower FL "
 "模拟的并行程度。每个客户端的资源越少，在同一硬件上并发运行的客户端就越多。"
 
-#: ../../source/how-to-run-simulations.rst:60
+#: ../../source/how-to-run-simulations.rst:65
 msgid ""
 "**Batchable**: When there are more ``ClientApps`` to execute than backend"
 " workers, ``ClientApps`` are queued and executed as soon as resources are"
@@ -13733,7 +13742,7 @@ msgid ""
 "of N, where N is the number of backend workers."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:64
+#: ../../source/how-to-run-simulations.rst:69
 #, fuzzy
 msgid ""
 "**Self-managed**: This means that you, as a user, do not need to launch "
@@ -13741,7 +13750,7 @@ msgid ""
 "orchestrates the execution of all ``ClientApp``\\s."
 msgstr "自管理：这意味着用户无需手动启动客户端，而是由 :code:`VirtualClientEngine` 负责。"
 
-#: ../../source/how-to-run-simulations.rst:67
+#: ../../source/how-to-run-simulations.rst:72
 #, fuzzy
 msgid ""
 "**Ephemeral**: This means that a ``ClientApp`` is only materialized when "
@@ -13754,7 +13763,7 @@ msgstr ""
 "flwr.html#flwr.client.Client.fit>`_ "
 "）。之后该对象将被销毁，释放分配给它的资源，并允许其他客户端以这种方式参与。"
 
-#: ../../source/how-to-run-simulations.rst:74
+#: ../../source/how-to-run-simulations.rst:79
 msgid ""
 "You can preserve the state (e.g., internal variables, parts of an ML "
 "model, intermediate results) of a ``ClientApp`` by saving it to its "
@@ -13762,7 +13771,7 @@ msgid ""
 "stateful-clients.rst>`_ guide for a complete walkthrough."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:79
+#: ../../source/how-to-run-simulations.rst:84
 #, fuzzy
 msgid ""
 "The ``Simulation Engine`` delegates to a ``Backend`` the role of spawning"
@@ -13778,11 +13787,11 @@ msgstr ""
 " :code:`VirtualClientEngine` 使用 `Actors <https://docs.ray.io/en/latest"
 "/ray-core/actors.html>`_ 来生成 `virtual` 客户端并运行它们的工作负载。"
 
-#: ../../source/how-to-run-simulations.rst:88
+#: ../../source/how-to-run-simulations.rst:93
 msgid "Launch your Flower simulation"
 msgstr "启动 Flower 模拟"
 
-#: ../../source/how-to-run-simulations.rst:90
+#: ../../source/how-to-run-simulations.rst:95
 msgid ""
 "Running a simulation is straightforward; in fact, it is the default mode "
 "of operation for |flwr_run_link|_. Therefore, running Flower simulations "
@@ -13793,24 +13802,32 @@ msgid ""
 "quickstart app."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:98
+#: ../../source/how-to-run-simulations.rst:103
 msgid ""
 "If you haven't already, install Flower via ``pip install -U flwr`` in a "
 "Python environment."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:106
+#: ../../source/how-to-run-simulations.rst:111
 msgid ""
 "Then, follow the instructions shown after completing the |flwr_new_link|_"
 " command. When you execute |flwr_run_link|_, you'll be using the "
 "``Simulation Engine``."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:110
+#: ../../source/how-to-run-simulations.rst:114
+msgid ""
+"For local simulation profiles, ``flwr run`` submits the run to a local "
+"SuperLink via the Control API. If the profile has ``options.*`` and no "
+"explicit ``address``, Flower starts a local SuperLink automatically when "
+"needed."
+msgstr ""
+
+#: ../../source/how-to-run-simulations.rst:119
 msgid "Simulation examples"
 msgstr "模拟示例"
 
-#: ../../source/how-to-run-simulations.rst:112
+#: ../../source/how-to-run-simulations.rst:121
 msgid ""
 "In addition to the quickstart tutorials in the documentation (e.g., "
 "`quickstart PyTorch Tutorial <tutorial-quickstart-pytorch.html>`_, "
@@ -13818,7 +13835,7 @@ msgid ""
 " in the Flower repository are simulation-ready."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:117
+#: ../../source/how-to-run-simulations.rst:126
 #, fuzzy
 msgid ""
 "`Quickstart TensorFlow/Keras "
@@ -13828,7 +13845,7 @@ msgstr ""
 "`TensorFlow快速入门 (代码) <https://github.com/adap/flower/tree/main/examples"
 "/quickstart-tensorflow>`_"
 
-#: ../../source/how-to-run-simulations.rst:119
+#: ../../source/how-to-run-simulations.rst:128
 #, fuzzy
 msgid ""
 "`Quickstart PyTorch <https://github.com/adap/flower/tree/main/examples"
@@ -13837,7 +13854,7 @@ msgstr ""
 "`PyTorch快速入门 (代码) <https://github.com/adap/flower/tree/main/examples"
 "/quickstart-pytorch>`_"
 
-#: ../../source/how-to-run-simulations.rst:121
+#: ../../source/how-to-run-simulations.rst:130
 #, fuzzy
 msgid ""
 "`Advanced PyTorch <https://github.com/adap/flower/tree/main/examples"
@@ -13846,7 +13863,7 @@ msgstr ""
 "`PyTorch快速入门 (代码) <https://github.com/adap/flower/tree/main/examples"
 "/quickstart-pytorch>`_"
 
-#: ../../source/how-to-run-simulations.rst:123
+#: ../../source/how-to-run-simulations.rst:132
 #, fuzzy
 msgid ""
 "`Quickstart MLX <https://github.com/adap/flower/tree/main/examples"
@@ -13855,7 +13872,7 @@ msgstr ""
 "`PyTorch快速入门 (代码) <https://github.com/adap/flower/tree/main/examples"
 "/quickstart-pytorch>`_"
 
-#: ../../source/how-to-run-simulations.rst:124
+#: ../../source/how-to-run-simulations.rst:133
 #, fuzzy
 msgid ""
 "`ViT fine-tuning <https://github.com/adap/flower/tree/main/examples"
@@ -13864,7 +13881,7 @@ msgstr ""
 "`PyTorch快速入门 (代码) <https://github.com/adap/flower/tree/main/examples"
 "/quickstart-pytorch>`_"
 
-#: ../../source/how-to-run-simulations.rst:126
+#: ../../source/how-to-run-simulations.rst:135
 #, fuzzy
 msgid ""
 "The complete list of examples can be found in `the Flower GitHub "
@@ -13873,12 +13890,12 @@ msgstr ""
 "有关安全连接的完整代码示例，请参见 <https://github.com/adap/flower/tree/main/examples"
 "/advanced-tensorflow>`_ 。"
 
-#: ../../source/how-to-run-simulations.rst:133
+#: ../../source/how-to-run-simulations.rst:142
 #, fuzzy
 msgid "Defining ``ClientApp`` resources"
 msgstr "分配客户端资源"
 
-#: ../../source/how-to-run-simulations.rst:135
+#: ../../source/how-to-run-simulations.rst:144
 msgid ""
 "By default, the ``Simulation Engine`` assigns two CPU cores to each "
 "backend worker. This means that if your system has 10 CPU cores, five "
@@ -13886,7 +13903,7 @@ msgid ""
 "``ClientApp`` instance."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:139
+#: ../../source/how-to-run-simulations.rst:148
 #, fuzzy
 msgid ""
 "More often than not, you would probably like to adjust the resources your"
@@ -13899,7 +13916,7 @@ msgstr ""
 "flwr.html#flwr.simulation.start_simulation>`_ 。Ray "
 "内部使用两个键来调度和生成工作负载（在我们的例子中是 Flower 客户端）："
 
-#: ../../source/how-to-run-simulations.rst:145
+#: ../../source/how-to-run-simulations.rst:154
 #, python-format
 msgid ""
 "Note that the resources the backend assigns to each worker (and hence to "
@@ -13912,7 +13929,7 @@ msgid ""
 "``ClientApp`` instances to crash throwing an out-of-memory (OOM) error."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:153
+#: ../../source/how-to-run-simulations.rst:162
 msgid ""
 "Customizing resources can be done directly in the :doc:`Flower "
 "Configuration <ref-flower-configuration>`. Setting the ``options.backend"
@@ -13923,7 +13940,7 @@ msgid ""
 " would set:"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:167
+#: ../../source/how-to-run-simulations.rst:176
 msgid ""
 "With the above backend settings, your simulation will run as many "
 "``ClientApps`` in parallel as CPUs you have in your system. GPU resources"
@@ -13931,7 +13948,7 @@ msgid ""
 "VRAM each should make use of."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:180
+#: ../../source/how-to-run-simulations.rst:189
 msgid ""
 "If you are using TensorFlow, you need to `enable memory growth "
 "<https://www.tensorflow.org/guide/gpu#limiting_gpu_memory_growth>`_ so "
@@ -13940,53 +13957,53 @@ msgid ""
 "``TF_FORCE_GPU_ALLOW_GROWTH=\"1\"``."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:186
+#: ../../source/how-to-run-simulations.rst:195
 msgid ""
 "Let's see how the above configuration results in a different number of "
 "``ClientApps`` running in parallel depending on the resources available "
 "in your system. If your system has:"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:190
+#: ../../source/how-to-run-simulations.rst:199
 #, python-format
 msgid ""
 "10x CPUs and 1x GPU: at most 4 ``ClientApps`` will run in parallel since "
 "each requires 25% of the available VRAM."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:192
+#: ../../source/how-to-run-simulations.rst:201
 msgid ""
 "10x CPUs and 2x GPUs: at most 8 ``ClientApps`` will run in parallel "
 "(VRAM-limited)."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:193
+#: ../../source/how-to-run-simulations.rst:202
 msgid ""
 "6x CPUs and 4x GPUs: at most 6 ``ClientApps`` will run in parallel (CPU-"
 "limited)."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:194
+#: ../../source/how-to-run-simulations.rst:203
 msgid ""
 "10x CPUs but 0x GPUs: you won't be able to run the simulation since not "
 "even the resources for a single ``ClientApp`` can be met."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:197
+#: ../../source/how-to-run-simulations.rst:206
 msgid ""
 "A generalization of this is given by the following equation. It gives the"
 " maximum number of ``ClientApps`` that can be executed in parallel on "
 "available CPU cores (SYS_CPUS) and VRAM (SYS_GPUS)."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:201
+#: ../../source/how-to-run-simulations.rst:210
 msgid ""
 "N = \\min\\left(\\left\\lfloor \\frac{\\text{SYS_CPUS}}{\\text{num_cpus}}"
 " \\right\\rfloor, \\left\\lfloor "
 "\\frac{\\text{SYS_GPUS}}{\\text{num_gpus}} \\right\\rfloor\\right)"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:205
+#: ../../source/how-to-run-simulations.rst:214
 msgid ""
 "Both ``num_cpus`` (an integer higher than 1) and ``num_gpus`` (a non-"
 "negative real number) should be set on a per ``ClientApp`` basis. If, for"
@@ -13995,7 +14012,7 @@ msgid ""
 " two whole GPUs, you'd set ``num_gpus=2``."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:210
+#: ../../source/how-to-run-simulations.rst:219
 #, fuzzy
 msgid ""
 "While the ``options.backend.client-resources`` can be used to control the"
@@ -14013,12 +14030,12 @@ msgstr ""
 "个客户端。:code:`VirtualClientEngine` 将安排运行 100 "
 "个工作（每个工作模拟策略采样的一个客户端），然后以资源感知的方式分批执行。"
 
-#: ../../source/how-to-run-simulations.rst:220
+#: ../../source/how-to-run-simulations.rst:229
 #, fuzzy
 msgid "Simulation Engine resources"
 msgstr "虚拟客户端引擎资源"
 
-#: ../../source/how-to-run-simulations.rst:222
+#: ../../source/how-to-run-simulations.rst:231
 msgid ""
 "By default, the ``Simulation Engine`` has **access to all system "
 "resources** (i.e., all CPUs, all GPUs). However, in some settings, you "
@@ -14028,7 +14045,7 @@ msgid ""
 "variable."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:237
+#: ../../source/how-to-run-simulations.rst:246
 msgid ""
 "With the above setup, the Backend will be initialized with a single CPU "
 "and GPU. Therefore, even if more CPUs and GPUs are available in your "
@@ -14036,23 +14053,23 @@ msgid ""
 "results in a single ``ClientApp`` running at any given point."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:242
+#: ../../source/how-to-run-simulations.rst:251
 msgid ""
 "For a complete list of settings you can configure, check the `ray.init "
 "<https://docs.ray.io/en/latest/ray-core/api/doc/ray.init.html#ray-init>`_"
 " documentation."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:245
+#: ../../source/how-to-run-simulations.rst:254
 msgid "For the highest performance, do not set ``options.backend.init-args``."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:249
+#: ../../source/how-to-run-simulations.rst:258
 #, fuzzy
 msgid "Simulation in Colab/Jupyter"
 msgstr "运行模拟"
 
-#: ../../source/how-to-run-simulations.rst:251
+#: ../../source/how-to-run-simulations.rst:260
 msgid ""
 "The preferred way of running simulations should always be "
 "|flwr_run_link|_. However, the core functionality of the ``Simulation "
@@ -14061,7 +14078,7 @@ msgid ""
 "flwr.html#flwr.simulation.run_simulation>`_."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:272
+#: ../../source/how-to-run-simulations.rst:281
 msgid ""
 "With ``run_simulation``, you can also control the amount of resources for"
 " your ``ClientApp`` instances. Do so by setting ``backend_config``. If "
@@ -14069,7 +14086,7 @@ msgid ""
 " and no GPU)."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:283
+#: ../../source/how-to-run-simulations.rst:292
 msgid ""
 "Refer to the `30 minutes Federated AI Tutorial "
 "<https://colab.research.google.com/github/adap/flower/blob/main/examples"
@@ -14077,11 +14094,11 @@ msgid ""
 "run Flower Simulations in Colab."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:291
+#: ../../source/how-to-run-simulations.rst:300
 msgid "Multi-node Flower simulations"
 msgstr "多节点 Flower 模拟"
 
-#: ../../source/how-to-run-simulations.rst:293
+#: ../../source/how-to-run-simulations.rst:302
 #, fuzzy
 msgid ""
 "Flower's ``Simulation Engine`` allows you to run FL simulations across "
@@ -14090,17 +14107,17 @@ msgid ""
 "simulation, ensure that you:"
 msgstr "Flower 的 :code:`VirtualClientEngine` 允许您在多个计算节点上运行 FL 模拟。在开始多节点模拟之前，请确保："
 
-#: ../../source/how-to-run-simulations.rst:297
+#: ../../source/how-to-run-simulations.rst:306
 #, fuzzy
 msgid "Have the same Python environment on all nodes."
 msgstr "所有节点都有相同的 Python 环境。"
 
-#: ../../source/how-to-run-simulations.rst:298
+#: ../../source/how-to-run-simulations.rst:307
 #, fuzzy
 msgid "Have a copy of your code on all nodes."
 msgstr "在所有节点上都有一份代码副本（例如整个软件包）。"
 
-#: ../../source/how-to-run-simulations.rst:299
+#: ../../source/how-to-run-simulations.rst:308
 msgid ""
 "Have a copy of your dataset on all nodes. If you are using partitions "
 "from `Flower Datasets <https://flower.ai/docs/datasets>`_, ensure the "
@@ -14108,7 +14125,7 @@ msgid ""
 "is that the i-th dataset partition is identical in all nodes."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:303
+#: ../../source/how-to-run-simulations.rst:312
 #, fuzzy
 msgid ""
 "Start Ray on your head node: on the terminal, type ``ray start --head``. "
@@ -14118,7 +14135,7 @@ msgstr ""
 "在头部节点上启动 Ray：在终端上输入 :code:`raystart--"
 "head`。该命令将打印几行输出，其中一行说明如何将其他节点连接到头部节点。"
 
-#: ../../source/how-to-run-simulations.rst:306
+#: ../../source/how-to-run-simulations.rst:315
 #, fuzzy
 msgid ""
 "Attach other nodes to the head node: copy the command shown after "
@@ -14130,14 +14147,14 @@ msgstr ""
 "将其他节点附加到头部节点：复制启动头部后显示的命令，并在新节点的终端上执行：例如 :code:`ray start "
 "--address='192.168.1.132:6379'`"
 
-#: ../../source/how-to-run-simulations.rst:311
+#: ../../source/how-to-run-simulations.rst:320
 #, fuzzy
 msgid ""
 "With all the above done, you can run your code from the head node as you "
 "would if the simulation were running on a single node. In other words:"
 msgstr "完成上述所有操作后，您就可以在头部节点上运行代码了，就像在单个节点上运行模拟一样。"
 
-#: ../../source/how-to-run-simulations.rst:319
+#: ../../source/how-to-run-simulations.rst:328
 #, fuzzy
 msgid ""
 "Once your simulation is finished, if you'd like to dismantle your "
@@ -14145,7 +14162,7 @@ msgid ""
 "terminal (including the head node)."
 msgstr "模拟结束后，如果要拆除集群，只需在每个节点（包括头部节点）的终端运行 :code:`ray stop` 命令即可。"
 
-#: ../../source/how-to-run-simulations.rst:324
+#: ../../source/how-to-run-simulations.rst:333
 #, fuzzy
 msgid ""
 "When attaching a new node to the head, all its resources (i.e., all CPUs,"
@@ -14162,7 +14179,7 @@ msgstr ""
 " start` 命令（包括启动头部时）中添加 `--num-cpus=<NUM_CPUS_FROM_NODE>`和/或 `--num-"
 "gpus=<NUM_GPUS_FROM_NODE>`"
 
-#: ../../source/how-to-run-simulations.rst:334
+#: ../../source/how-to-run-simulations.rst:343
 #, fuzzy
 msgid "FAQ for Simulations"
 msgstr "运行模拟"
@@ -14171,7 +14188,7 @@ msgstr "运行模拟"
 msgid "Can I make my ``ClientApp`` instances stateful?"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:338
+#: ../../source/how-to-run-simulations.rst:347
 msgid ""
 "Yes. Use the ``state`` attribute of the |context_link|_ object that is "
 "passed to the ``ClientApp`` to save variables, parameters, or results to "
@@ -14183,7 +14200,7 @@ msgstr ""
 msgid "Can I run multiple simulations on the same machine?"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:342
+#: ../../source/how-to-run-simulations.rst:351
 msgid ""
 "Yes, but bear in mind that each simulation isn't aware of the resource "
 "usage of the other. If your simulations make use of GPUs, consider "
@@ -14198,7 +14215,7 @@ msgid ""
 "compute/memory these make use of?"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:346
+#: ../../source/how-to-run-simulations.rst:355
 msgid ""
 "No. These resources are exclusively used by the simulation backend to "
 "control how many workers can be created on startup. Let's say N backend "
@@ -14212,35 +14229,35 @@ msgstr ""
 msgid "My ``ClientApp`` is triggering OOM on my GPU. What should I do?"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:350
+#: ../../source/how-to-run-simulations.rst:359
 msgid ""
 "It is likely that your `num_gpus` setting, which controls the number of "
 "``ClientApp`` instances that can share a GPU, is too low (meaning too "
 "many ``ClientApps`` share the same GPU). Try the following:"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:352
+#: ../../source/how-to-run-simulations.rst:361
 msgid ""
 "Set your ``num_gpus=1``. This will make a single ``ClientApp`` run on a "
 "GPU."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:353
+#: ../../source/how-to-run-simulations.rst:362
 msgid "Inspect how much VRAM is being used (use ``nvidia-smi`` for this)."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:354
+#: ../../source/how-to-run-simulations.rst:363
 msgid ""
 "Based on the VRAM you see your single ``ClientApp`` using, calculate how "
 "many more would fit within the remaining VRAM. One divided by the total "
 "number of ``ClientApps`` is the ``num_gpus`` value you should set."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:356
+#: ../../source/how-to-run-simulations.rst:365
 msgid "Refer to :ref:`clientappresources` for more details."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:358
+#: ../../source/how-to-run-simulations.rst:367
 msgid ""
 "If your ``ClientApp`` is using TensorFlow, make sure you are exporting "
 "``TF_FORCE_GPU_ALLOW_GROWTH=\"1\"`` before starting your simulation. For "
@@ -14253,7 +14270,7 @@ msgid ""
 "``ClientApp``?"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:362
+#: ../../source/how-to-run-simulations.rst:371
 msgid ""
 "A good practice is to start by running the simulation for a few rounds "
 "with higher ``num_cpus`` and ``num_gpus`` than what is really needed "
@@ -14265,7 +14282,7 @@ msgid ""
 "until you see a satisfactory system resource utilization."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:364
+#: ../../source/how-to-run-simulations.rst:373
 msgid ""
 "Note that if the workload on your ``ClientApp`` instances is not "
 "homogeneous (i.e., some come with a larger compute or memory footprint), "
@@ -14277,7 +14294,7 @@ msgstr ""
 msgid "Can I assign different resources to each ``ClientApp`` instance?"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:368
+#: ../../source/how-to-run-simulations.rst:377
 msgid ""
 "No. All ``ClientApp`` objects are assumed to make use of the same "
 "``num_cpus`` and ``num_gpus``. When setting these values (refer to "
@@ -14292,7 +14309,7 @@ msgid ""
 "servers)?"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:372
+#: ../../source/how-to-run-simulations.rst:381
 msgid ""
 "Yes. If you are using the ``RayBackend`` (the *default* backend) you can "
 "first interconnect your nodes through Ray's cli and then launch the "
@@ -14307,7 +14324,7 @@ msgid ""
 "taken into account by the ``Simulation Engine``?"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:376
+#: ../../source/how-to-run-simulations.rst:385
 msgid ""
 "No. The ``Simulation Engine`` only manages ``ClientApps`` and therefore "
 "is only aware of the system resources they require. If your ``ServerApp``"
@@ -14321,7 +14338,7 @@ msgid ""
 "should run? Can I do resource placement?"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:380
+#: ../../source/how-to-run-simulations.rst:389
 msgid ""
 "Currently, the placement of ``ClientApp`` instances is managed by the "
 "``RayBackend`` (the only backend available as of ``flwr==1.13.0``) and "
@@ -16381,8 +16398,9 @@ msgstr ""
 msgid "Arguments"
 msgstr "构建文档"
 
-#: ../../flwr app archive:1 create:1 federation install:1 list:1 log:1 login:1
-#: new:1 publish:1 pull:1 register:1 run:1 stop:1 supernode unregister:1
+#: ../../flwr add-supernode:1 app archive:1 create:1 federation install:1
+#: list:1 log:1 login:1 new:1 publish:1 pull:1 register:1 remove-supernode:1
+#: run:1 stop:1 supernode unregister:1
 #, fuzzy
 msgid "Optional argument"
 msgstr "可选的改进措施"
@@ -16397,8 +16415,8 @@ msgid ""
 "confirmation sign & submit the review to the Platform."
 msgstr ""
 
-#: ../../flwr app archive:1 create:1 federation log:1 pull:1 register:1
-#: review:1 stop:1 supernode unregister:1
+#: ../../flwr add-supernode:1 app archive:1 create:1 federation log:1 pull:1
+#: register:1 remove-supernode:1 review:1 stop:1 supernode unregister:1
 #, fuzzy
 msgid "Required argument"
 msgstr "构建文档"
@@ -16439,19 +16457,19 @@ msgstr "配置值"
 msgid "List all SuperLink connections (alias: ls)."
 msgstr "然后，我们启动服务器："
 
-#: ../../flwr archive:1 config create:1 federation list:1 register:1 run:1
-#: stop:1 supernode unregister:1
+#: ../../flwr add-supernode:1 archive:1 config create:1 federation list:1
+#: register:1 remove-supernode:1 run:1 stop:1 supernode unregister:1
 msgid "Format output using 'default' view or 'json'"
 msgstr ""
 
-#: ../../flwr archive config create federation list log register run stop
-#: supernode unregister
+#: ../../flwr add-supernode archive config create federation list log register
+#: remove-supernode run stop supernode unregister
 #, fuzzy
 msgid "default"
 msgstr "工作流程"
 
-#: ../../flwr archive:1 config create:1 federation list:1 register:1 run:1
-#: stop:1 supernode unregister:1
+#: ../../flwr add-supernode:1 archive:1 config create:1 federation list:1
+#: register:1 remove-supernode:1 run:1 stop:1 supernode unregister:1
 #, fuzzy
 msgid "``'default'``"
 msgstr "工作流程"
@@ -16461,6 +16479,28 @@ msgstr "工作流程"
 msgid "Manage Federations"
 msgstr "运行模拟"
 
+#: ../../flwr add-supernode:1 federation
+#, fuzzy
+msgid "Add a SuperNode to a federation."
+msgstr "flower-superlink"
+
+#: ../../flwr add-supernode:1 federation
+#, fuzzy
+msgid "ID of the SuperNode to add."
+msgstr "然后，我们启动服务器："
+
+#: ../../flwr add-supernode:1 federation remove-supernode:1
+#, fuzzy
+msgid "Name of the federation."
+msgstr "flower-superlink"
+
+#: ../../flwr add-supernode:1 archive:1 create:1 federation list:1 log:1
+#: login:1 pull:1 register:1 remove-supernode:1 run:1 stop:1 supernode
+#: unregister:1
+#, fuzzy
+msgid "Name of the SuperLink connection."
+msgstr "flower-superlink"
+
 #: ../../flwr archive:1 federation
 #, fuzzy
 msgid "Archive an existing federation."
@@ -16469,12 +16509,6 @@ msgstr "使用现有策略"
 #: ../../flwr archive:1 federation
 #, fuzzy
 msgid "Name of the federation to archive."
-msgstr "flower-superlink"
-
-#: ../../flwr archive:1 create:1 federation list:1 log:1 login:1 pull:1
-#: register:1 run:1 stop:1 supernode unregister:1
-#, fuzzy
-msgid "Name of the SuperLink connection."
 msgstr "flower-superlink"
 
 #: ../../flwr create:1 federation
@@ -16502,6 +16536,16 @@ msgstr ""
 #, fuzzy
 msgid "Name of the federation to display"
 msgstr "flower-superlink"
+
+#: ../../flwr federation remove-supernode:1
+#, fuzzy
+msgid "Remove a SuperNode from a federation."
+msgstr "flower-superlink"
+
+#: ../../flwr federation remove-supernode:1 supernode unregister:1
+#, fuzzy
+msgid "ID of the SuperNode to remove."
+msgstr "然后，我们启动服务器："
 
 #: ../../flwr install:1
 #, fuzzy
@@ -16753,11 +16797,6 @@ msgstr ""
 #, fuzzy
 msgid "Unregister a SuperNode from the federation."
 msgstr "flower-superlink"
-
-#: ../../flwr supernode unregister:1
-#, fuzzy
-msgid "ID of the SuperNode to remove."
-msgstr "然后，我们启动服务器："
 
 #: ../../source/ref-api-cli.rst:21
 #, fuzzy
@@ -35475,6 +35514,50 @@ msgstr ""
 "`Flower meets Talan GitHub Repository "
 "<https://gitlab.com/Talan_Innovation_Factory/food-waste-prevention>`_ ."
 
+#: ../../source/ref-faq.rst
+msgid ""
+":fa:`eye,mr-1` I see unexpected terminal output (e.g.: ``� □[32m□[1m``) "
+"on Windows. How do I fix this?"
+msgstr ""
+
+#: ../../source/ref-faq.rst:42
+msgid "If you see output (ANSI escape sequences or broken emojis) like this:"
+msgstr ""
+
+#: ../../source/ref-faq.rst:44
+msgid "``� □[32m□[1m``"
+msgstr ""
+
+#: ../../source/ref-faq.rst:45
+msgid "``□[0m□[96m□[1m``"
+msgstr ""
+
+#: ../../source/ref-faq.rst:46
+#, fuzzy
+msgid "``�``"
+msgstr "配置日志记录"
+
+#: ../../source/ref-faq.rst:48
+msgid ""
+"this is usually a terminal host issue. Make sure you have installed the "
+"latest `Windows Terminal <https://aka.ms/terminal>`_ **application** "
+"(Microsoft's terminal app), and then run Flower commands there."
+msgstr ""
+
+#: ../../source/ref-faq.rst:50
+msgid ""
+"To quickly check whether your current PowerShell session is running in "
+"Windows Terminal:"
+msgstr ""
+
+#: ../../source/ref-faq.rst:56
+msgid ""
+"If this prints a value (for example, ``b4c5f2c8-...``), you are in "
+"Windows Terminal. If it prints nothing, you are likely running in a non-"
+"Windows-Terminal host (for example, conhost), which can show raw ANSI "
+"escape codes or incorrect emoji rendering."
+msgstr ""
+
 #: ../../source/ref-flower-configuration.rst:-1
 msgid ""
 "Learn how to setup the Flower Configuration and how to use it to run your"
@@ -35578,7 +35661,7 @@ msgid "**Basic example**"
 msgstr "实例"
 
 #: ../../source/ref-flower-configuration.rst:77
-#: ../../source/ref-flower-configuration.rst:167
+#: ../../source/ref-flower-configuration.rst:171
 #, fuzzy
 msgid "**Explanation**"
 msgstr "说明"
@@ -35700,30 +35783,38 @@ msgstr ""
 "`TensorFlow快速入门 (教程) <https://flower.ai/docs/framework/tutorial-"
 "quickstart-tensorflow.html>`_"
 
-#: ../../source/ref-flower-configuration.rst:153
+#: ../../source/ref-flower-configuration.rst:151
+msgid ""
+"When you use a local simulation profile (``options.*``), Flower CLI "
+"commands that communicate with SuperLink use the Control API. If the "
+"profile has no explicit ``address``, Flower starts a local SuperLink "
+"automatically when needed."
+msgstr ""
+
+#: ../../source/ref-flower-configuration.rst:157
 #, fuzzy
 msgid "Remote Deployment Example"
 msgstr "调配"
 
-#: ../../source/ref-flower-configuration.rst:155
+#: ../../source/ref-flower-configuration.rst:159
 msgid ""
 "When you're ready to deploy your federated learning app to real "
 "distributed nodes, you configure connections that point to a remote "
 "SuperLink."
 msgstr ""
 
-#: ../../source/ref-flower-configuration.rst:158
+#: ../../source/ref-flower-configuration.rst:162
 #, fuzzy
 msgid "**Example configuration**"
 msgstr "配置值"
 
-#: ../../source/ref-flower-configuration.rst:169
+#: ../../source/ref-flower-configuration.rst:173
 msgid ""
 "``address`` (required): The address of the SuperLink Control API to "
 "connect to (e.g., ``my-server.example.com:9093``)."
 msgstr ""
 
-#: ../../source/ref-flower-configuration.rst:171
+#: ../../source/ref-flower-configuration.rst:175
 msgid ""
 "``root-certificates``: Path to the root certificate file for TLS "
 "encryption. This secures the communication between your CLI and the "
@@ -35731,91 +35822,91 @@ msgid ""
 "This field is ignored if ``insecure`` is set to ``true``."
 msgstr ""
 
-#: ../../source/ref-flower-configuration.rst:175
+#: ../../source/ref-flower-configuration.rst:179
 msgid ""
 "``insecure``: Set to ``true`` to disable TLS encryption (only use this "
 "for local testing, never in production). Defaults to ``false`` if "
 "omitted, meaning TLS is enabled by default."
 msgstr ""
 
-#: ../../source/ref-flower-configuration.rst:179
+#: ../../source/ref-flower-configuration.rst:183
 msgid "**TLS (Transport Layer Security) explained**"
 msgstr ""
 
-#: ../../source/ref-flower-configuration.rst:181
+#: ../../source/ref-flower-configuration.rst:185
 msgid ""
 "TLS encrypts the communication between your local machine and the remote "
 "SuperLink to prevent eavesdropping and tampering. In production, you "
 "should always use TLS by either:"
 msgstr ""
 
-#: ../../source/ref-flower-configuration.rst:184
+#: ../../source/ref-flower-configuration.rst:188
 msgid ""
 "Providing a ``root-certificates`` file (recommended for custom "
 "certificates)"
 msgstr ""
 
-#: ../../source/ref-flower-configuration.rst:185
+#: ../../source/ref-flower-configuration.rst:189
 msgid ""
 "Omitting both ``root-certificates`` and ``insecure`` to use default "
 "certificates"
 msgstr ""
 
-#: ../../source/ref-flower-configuration.rst:187
+#: ../../source/ref-flower-configuration.rst:191
 msgid "Only set ``insecure = true`` for local testing environments."
 msgstr ""
 
-#: ../../source/ref-flower-configuration.rst:189
+#: ../../source/ref-flower-configuration.rst:193
 msgid ""
 "Refer to the `deployment documentation "
 "<https://flower.ai/docs/framework/deploy.html>`_ for TLS setup and "
 "advanced configurations."
 msgstr ""
 
-#: ../../source/ref-flower-configuration.rst:194
+#: ../../source/ref-flower-configuration.rst:198
 #, fuzzy
 msgid "Upgrading from previous versions of Flower"
 msgstr "安装 Flower 的开发版本"
 
-#: ../../source/ref-flower-configuration.rst:196
+#: ../../source/ref-flower-configuration.rst:200
 msgid "**If you're new to Flower 1.26.0+, you can skip this section.**"
 msgstr ""
 
-#: ../../source/ref-flower-configuration.rst:198
+#: ../../source/ref-flower-configuration.rst:202
 msgid ""
 "For users upgrading from versions before 1.26.0: The ``federations`` "
 "section in your ``pyproject.toml`` file will be automatically migrated to"
 " the Flower Configuration the first time you run a ``flwr`` command."
 msgstr ""
 
-#: ../../source/ref-flower-configuration.rst:202
+#: ../../source/ref-flower-configuration.rst:206
 msgid "**What happens during migration**"
 msgstr ""
 
-#: ../../source/ref-flower-configuration.rst:204
+#: ../../source/ref-flower-configuration.rst:208
 msgid ""
 "The Flower Configuration file will be created at "
 "``$HOME/.flwr/config.toml`` if not already existing"
 msgstr ""
 
-#: ../../source/ref-flower-configuration.rst:206
+#: ../../source/ref-flower-configuration.rst:210
 msgid ""
 "Your federation definitions are copied and renamed (``federations`` → "
 "``superlink``)"
 msgstr ""
 
-#: ../../source/ref-flower-configuration.rst:207
+#: ../../source/ref-flower-configuration.rst:211
 msgid ""
 "The old ``[tool.flwr.federations]`` section in ``pyproject.toml`` is "
 "commented out for your reference"
 msgstr ""
 
-#: ../../source/ref-flower-configuration.rst:210
+#: ../../source/ref-flower-configuration.rst:214
 #, fuzzy
 msgid "**After migration**"
 msgstr "停用"
 
-#: ../../source/ref-flower-configuration.rst:212
+#: ../../source/ref-flower-configuration.rst:216
 msgid ""
 "You can safely delete the commented-out ``federations`` section from your"
 " ``pyproject.toml`` file. All connection configurations now live in the "
@@ -36753,7 +36844,7 @@ msgstr ""
 #: ../../source/tutorial-quickstart-pytorch.rst:168
 #: ../../source/tutorial-quickstart-scikitlearn.rst:171
 #: ../../source/tutorial-quickstart-tensorflow.rst:159
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:629
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:634
 msgid ""
 "You can also override the parameters defined in the "
 "``[tool.flwr.app.config]`` section in ``pyproject.toml`` like this:"
@@ -37068,7 +37159,7 @@ msgstr ""
 #: ../../source/tutorial-quickstart-scikitlearn.rst:341
 #: ../../source/tutorial-quickstart-tensorflow.rst:336
 #: ../../source/tutorial-quickstart-xgboost.rst:404
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:493
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:498
 msgid ""
 "a ``Grid`` object that will be used to interface with the nodes running "
 "the ``ClientApp`` to involve them in a round of train/evaluate/query or "
@@ -37642,7 +37733,7 @@ msgstr ""
 
 #: ../../source/tutorial-quickstart-mlx.rst:432
 #: ../../source/tutorial-quickstart-xgboost.rst:401
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:490
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:495
 msgid ""
 "To construct a |serverapp_link|_, we define its ``@app.main()`` method. "
 "This method receives as input arguments:"
@@ -37746,7 +37837,7 @@ msgstr ""
 #: ../../source/tutorial-quickstart-pytorch.rst:72
 #: ../../source/tutorial-series-build-a-strategy-from-scratch-pytorch.rst:72
 #: ../../source/tutorial-series-customize-the-client-pytorch.rst:76
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:92
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:97
 #: ../../source/tutorial-series-use-a-federated-learning-strategy-pytorch.rst:81
 msgid ""
 "After running it you'll notice a new directory named ``quickstart-"
@@ -38515,7 +38606,7 @@ msgstr ""
 
 #: ../../source/tutorial-series-build-a-strategy-from-scratch-pytorch.rst:401
 #: ../../source/tutorial-series-customize-the-client-pytorch.rst:338
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:705
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:710
 #: ../../source/tutorial-series-use-a-federated-learning-strategy-pytorch.rst:436
 #: ../../source/tutorial-series-what-is-federated-learning.rst:369
 #, fuzzy
@@ -38529,7 +38620,7 @@ msgstr ""
 
 #: ../../source/tutorial-series-build-a-strategy-from-scratch-pytorch.rst:405
 #: ../../source/tutorial-series-customize-the-client-pytorch.rst:342
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:709
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:714
 #: ../../source/tutorial-series-use-a-federated-learning-strategy-pytorch.rst:440
 #: ../../source/tutorial-series-what-is-federated-learning.rst:373
 #, fuzzy
@@ -38792,13 +38883,13 @@ msgid ""
 "everything we need."
 msgstr "在开始编写实际代码之前，让我们先确保我们已经准备好了所需的一切。"
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:106
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:111
 msgid ""
 "Next, we install the project and its dependencies, which are specified in"
 " the ``pyproject.toml`` file."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:114
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:119
 msgid ""
 "Before we dive into federated learning, we'll take a look at the dataset "
 "that we'll be using for this tutorial, which is the `CIFAR-10 "
@@ -38806,11 +38897,11 @@ msgid ""
 " centralized training pipeline using PyTorch."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:120
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:125
 msgid "The ``CIFAR-10`` dataset"
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:122
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:127
 #, fuzzy
 msgid ""
 "Federated learning can be applied to many different types of tasks across"
@@ -38824,7 +38915,7 @@ msgstr ""
 "联邦学习可应用于不同领域的多种不同类型任务。在本教程中，我们将通过在流行的 CIFAR-10 数据集上训练一个简单的卷积神经网络 (CNN) "
 "来介绍联合学习。CIFAR-10 可用于训练图像分类器，以区分来自十个不同类别的图像："
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:129
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:134
 #, fuzzy
 msgid ""
 "We simulate having multiple datasets from multiple organizations (also "
@@ -38838,7 +38929,7 @@ msgstr ""
 "我们通过将原始 CIFAR-10 数据集拆分成多个分区来模拟来自多个组织的多个数据集（也称为联邦学习中的 \"跨分区 "
 "\"设置）。每个分区代表一个组织的数据。我们这样做纯粹是为了实验目的，在现实世界中不需要拆分数据，因为每个组织都已经有了自己的数据（所以数据是自然分区的）。"
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:136
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:141
 #, fuzzy
 msgid ""
 "Each organization will act as a client in the federated learning system. "
@@ -38846,7 +38937,7 @@ msgid ""
 "clients connected to the federated learning server."
 msgstr "每个组织都将充当联邦学习系统中的客户端。因此，有十个组织参与联邦学习，就意味着有十个客户端连接到联邦学习服务器："
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:140
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:145
 #, fuzzy
 msgid ""
 "We use the `Flower Datasets <https://flower.ai/docs/datasets/>`_ library "
@@ -38858,7 +38949,7 @@ msgstr ""
 "现在，让我们从 ``flwr-datasets`` 中创建 Federated Dataset 抽象，以分割 "
 "CIFAR-10。我们将为每个边缘设备创建小型训练集和测试集，并将它们分别封装到 PyTorch ``DataLoader`` 中："
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:177
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:182
 #, fuzzy
 msgid ""
 "We now have a function that can return a training set and validation set "
@@ -38874,12 +38965,12 @@ msgstr ""
 "``trainloader``/``valloader`` 都包含 4500 个训练示例和 500 个验证数据。还有一个单独的 "
 "``测试加载器``（我们没有拆分测试集）。同样，这只有在构建研究或教育系统时才有必要，实际的联邦学习系统的数据自然分布在多个分区中。"
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:187
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:192
 #, fuzzy
 msgid "The model, training, and test functions"
 msgstr "让我们继续进行常规的训练和测试功能："
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:189
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:194
 #, fuzzy
 msgid ""
 "Next, we're going to use PyTorch to define a simple convolutional neural "
@@ -38893,30 +38984,30 @@ msgstr ""
 "minute blitz "
 "<https://pytorch.org/tutorials/beginner/deep_learning_60min_blitz.html>`__。"
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:198
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:203
 msgid ""
 "We will use the simple CNN described in the aforementioned PyTorch "
 "tutorial (The following code is already defined in ``task.py``):"
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:224
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:229
 #, fuzzy
 msgid "Training and test functions"
 msgstr "使用评估函数评估模型参数。"
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:226
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:231
 #, fuzzy
 msgid ""
 "The PyTorch quickstart also provides the usual training and test "
 "functions:"
 msgstr "让我们继续进行常规的训练和测试功能："
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:268
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:273
 #, fuzzy
 msgid "Federated Learning with Flower"
 msgstr "步骤 2：使用 Flower 联邦学习"
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:270
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:275
 #, fuzzy
 msgid ""
 "In federated learning, the server sends global model parameters to the "
@@ -38927,11 +39018,11 @@ msgid ""
 "gradients back to the server, not the full model parameters)."
 msgstr "在联邦学习中，服务器将全局模型参数发送给客户端，客户端根据从服务器接收到的参数更新本地模型。然后，客户端根据本地数据对模型进行训练（在本地更改模型参数），并将更新/更改后的模型参数发回服务器（或者，客户端只将梯度参数发回服务器，而不是全部模型参数）。"
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:277
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:282
 msgid "Constructing Messages"
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:279
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:284
 msgid ""
 "In Flower, the server and clients communicate by sending and receiving "
 "|message_link|_ objects. A ``Message`` carries a ``RecordDict`` as its "
@@ -38940,39 +39031,39 @@ msgid ""
 "of records:"
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:284
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:289
 #, fuzzy
 msgid ""
 "|arrayrecord_link|_: Contains model parameters as a dictionary of NumPy "
 "arrays"
 msgstr "**parameters** -- NumPy ndarrays 的本地模型参数列表。"
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:285
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:290
 msgid ""
 "|metricrecord_link|_: Contains training or evaluation metrics as a "
 "dictionary of integers, floats, lists of integers, or lists of floats."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:287
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:292
 msgid ""
 "|configrecord_link|_: Contains configuration parameters as a dictionary "
 "of integers, floats, strings, booleans, or bytes. Lists of these types "
 "are also supported."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:290
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:295
 msgid ""
 "Let's see a few examples of how to work with these types of records and, "
 "ultimately, construct a ``RecordDict`` that can be sent over a "
 "``Message``."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:316
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:321
 #, fuzzy
 msgid "Define the Flower ClientApp"
 msgstr "Flower 客户端。"
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:318
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:323
 #, fuzzy
 msgid ""
 "Federated learning systems consist of a server and multiple nodes or "
@@ -38983,7 +39074,7 @@ msgstr ""
 "``flwr.client.Client`` 或 ``flwr.client.NumPyClient`` "
 "的子类来创建客户端。在本教程中，我们使用``NumPyClient``，因为它更容易实现，需要我们编写的模板也更少。"
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:322
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:327
 msgid ""
 "The core functionality of the ``ClientApp`` is to perform some action "
 "with the local data that the node it runs from (e.g. an edge device, a "
@@ -38992,12 +39083,12 @@ msgid ""
 "using the local training and validation data."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:328
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:333
 #, fuzzy
 msgid "Training"
 msgstr "集中式训练"
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:330
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:335
 msgid ""
 "We can define how the ``ClientApp`` performs training by wrapping a "
 "function with the ``@app.train()`` decorator. In this case we name this "
@@ -39005,20 +39096,20 @@ msgid ""
 "data. The function always expects two arguments:"
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:334
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:339
 msgid ""
 "A |message_link|_: The message received from the server. It contains the "
 "model parameters and any other configuration information sent by the "
 "server."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:336
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:341
 msgid ""
 "A |context_link|_: The context object that contains information about the"
 " node executing the ``ClientApp`` and about the current run."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:339
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:344
 msgid ""
 "Through the context you can retrieve the config settings defined in the "
 "``pyproject.toml`` of your app. The context can be used to persist the "
@@ -39028,7 +39119,7 @@ msgid ""
 "communicated back to the server."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:345
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:350
 msgid ""
 "Let's see an implementation of ``ClientApp`` that uses the previously "
 "defined PyTorch CNN model, applies the parameters received from the "
@@ -39038,7 +39129,7 @@ msgid ""
 "metrics of interest."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:394
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:399
 msgid ""
 "Note that the ``train_fn`` is simply an alias name pointing to the train "
 "function defined earlier in this tutorial (where we defined the PyTorch "
@@ -39052,25 +39143,25 @@ msgid ""
 "``lr`` from the run config via the ``Context`` is also perfectly valid."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:404
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:409
 msgid ""
 "Once training is completed, the ``ClientApp`` constructs a reply "
 "``Message``. This reply typically includes a ``RecordDict`` with two "
 "records:"
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:407
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:412
 #, fuzzy
 msgid "An ``ArrayRecord`` containing the updated model parameters"
 msgstr "``get_parameters``： 返回当前本地模型参数"
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:408
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:413
 msgid ""
 "A ``MetricRecord`` with relevant metrics (in this case, the training loss"
 " and the number of examples used for training)"
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:413
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:418
 msgid ""
 "Returning the number of examples under the ``\"num-examples\"`` key is "
 "**required**, because strategies such as |fedavg_link|_ used by the "
@@ -39079,18 +39170,18 @@ msgid ""
 "example: ``FedAvg(weighted_by=\"my-different-key\")``)."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:419
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:424
 msgid ""
 "After constructing the reply ``Message``, the ``ClientApp`` returns it. "
 "Flower then handles sending the reply back to the server automatically."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:423
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:428
 #, fuzzy
 msgid "Evaluation"
 msgstr "说明"
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:425
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:430
 msgid ""
 "In a typical federated learning setup, the ``ClientApp`` would also "
 "implement an ``@app.evaluate()`` function to evaluate the model received "
@@ -39105,7 +39196,7 @@ msgid ""
 "``evaluate`` function looks like:"
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:473
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:478
 msgid ""
 "As you can see the ``evaluate`` implementation is near identical to the "
 "``train`` implementation, except that it calls the ``test_fn`` function "
@@ -39116,12 +39207,12 @@ msgid ""
 "evaluation metrics correctly."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:481
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:486
 #, fuzzy
 msgid "Define the Flower ServerApp"
 msgstr "Flower 服务器。"
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:483
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:488
 #, fuzzy
 msgid ""
 "On the server side, we need to configure a strategy which encapsulates "
@@ -39136,11 +39227,11 @@ msgstr ""
 "Flower 有许多内置策略，但我们也可以使用自己的策略实现来定制联邦学习方法的几乎所有方面。在本例中，我们使用内置的 ``FedAvg`` "
 "实现，并使用一些基本参数对其进行定制。最后一步是实际调用 ``start_simulation``开始模拟："
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:495
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:500
 msgid "a |context_link|_ object that provides access to the run configuration."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:497
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:502
 msgid ""
 "Before launching the strategy via the |strategy_start_link|_ method, we "
 "want to initialize the global model. This will be the model that gets "
@@ -39152,7 +39243,7 @@ msgid ""
 "method."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:504
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:509
 msgid ""
 "We can also optionally pass to the ``start()`` method a ``ConfigRecord`` "
 "containing settings that we would like to communicate to the clients. "
@@ -39160,7 +39251,7 @@ msgid ""
 " parameters."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:543
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:548
 msgid ""
 "Most of the execution of the ``ServerApp`` happens inside the "
 "``strategy.start()`` method. After the specified number of rounds "
@@ -39170,92 +39261,92 @@ msgid ""
 "model to disk for later use."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:550
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:555
 #, fuzzy
 msgid "Run the training"
 msgstr "开始训练"
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:552
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:557
 msgid ""
 "With all of these components in place, we can now run the federated "
 "learning simulation with Flower! The last step is to run our simulation "
 "in the command line, as follows:"
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:559
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:564
 msgid ""
 "This will execute the federated learning simulation with 10 clients, or "
 "SuperNodes, defined in the ``[superlink.local]`` section in your Flower "
 "Configuration file. You should expect an output log similar to this:"
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:639
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:644
 msgid ""
 "Learn more about how to configure the execution of your Flower App by "
 "checking the `pyproject.toml <how-to-configure-pyproject-toml.html>`_ "
 "guide."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:643
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:648
 msgid "Behind the scenes"
 msgstr "幕后"
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:645
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:650
 msgid "So how does this work? How does Flower execute this simulation?"
 msgstr "那么它是如何工作的呢？Flower 如何进行模拟？"
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:647
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:652
 msgid ""
 "When we execute ``flwr run``, we tell Flower that there are 10 clients "
 "(``options.num-supernodes = 10``, where each SuperNode launches one "
 "``ClientApp``)."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:650
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:655
 msgid ""
 "Flower then asks the ``ServerApp`` to issue instructions to those nodes "
 "using the ``FedAvg`` strategy. In this example, ``FedAvg`` is configured "
 "with two key parameters:"
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:653
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:658
 #, python-format
 msgid "``fraction-train=0.5`` → select 50% of the available clients for training"
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:654
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:659
 #, fuzzy, python-format
 msgid ""
 "``fraction-evaluate=1.0`` → select 100% of the available clients for "
 "evaluation"
 msgstr "使用部分可用客户进行评估。"
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:656
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:661
 msgid ""
 "This means in our example, 5 out of 10 clients will be selected for "
 "training, and all 10 clients will later participate in evaluation."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:659
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:664
 #, fuzzy
 msgid "A typical round looks like this:"
 msgstr "一个典型的修改函数可能是这样的："
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:661
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:666
 #, fuzzy
 msgid "**Training**"
 msgstr "停用"
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:663
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:668
 #, python-format
 msgid "``FedAvg`` randomly selects 5 clients (50% of 10)."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:664
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:669
 msgid "Flower sends a ``TRAIN`` message to each selected ``ClientApp``."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:665
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:670
 msgid ""
 "Each ``ClientApp`` calls the function decorated with ``@app.train()``, "
 "then returns a ``Message`` containing an ``ArrayRecord`` (the updated "
@@ -39263,53 +39354,53 @@ msgid ""
 " examples)."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:668
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:679
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:673
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:684
 msgid "The ``ServerApp`` receives all replies."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:669
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:674
 msgid ""
 "``FedAvg`` aggregates all ``ArrayRecord`` into a new ``ArrayRecord`` "
 "representing the new global model and combines all ``MetricRecord``."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:672
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:677
 #, fuzzy
 msgid "**Evaluation**"
 msgstr "说明"
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:674
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:679
 msgid "``FedAvg`` selects all 10 clients (100%)."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:675
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:680
 msgid "Flower sends an ``EVALUATE`` message to each ``ClientApp``."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:676
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:681
 msgid ""
 "Each ``ClientApp`` calls the function decorated with ``@app.evaluate()`` "
 "and returns a ``Message`` containing a ``MetricRecord`` (the evaluation "
 "loss, accuracy, and number of examples)."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:680
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:685
 msgid "``FedAvg`` aggregates all ``MetricRecord``."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:682
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:687
 msgid ""
 "Once both training and evaluation are done, the next round begins: "
 "another training step, then another evaluation step, and so on, until the"
 " configured number of rounds is reached."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:688
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:693
 msgid "Final remarks"
 msgstr "结束语"
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:690
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:695
 #, fuzzy
 msgid ""
 "Congratulations, you just trained a convolutional neural network, "
@@ -39323,7 +39414,7 @@ msgstr ""
 "进行联邦学习的基础知识。你所看到的方法同样适用于其他机器学习框架（不只是 PyTorch）和任务（不只是 CIFAR-10 图像分类），例如使用 "
 "Hugging Face Transformers 的 NLP 或使用 SpeechBrain 的语音。"
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:696
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:701
 #, fuzzy
 msgid ""
 "In the next tutorial, we're going to cover some more advanced concepts. "
@@ -39332,7 +39423,7 @@ msgid ""
 "the server side? We'll cover all this and more in the next tutorial."
 msgstr "在下一个笔记中，我们将介绍一些更先进的概念。想定制你的策略吗？在服务器端初始化参数？或者在服务器端评估聚合模型？我们将在下一个教程中介绍所有这些内容以及更多。"
 
-#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:712
+#: ../../source/tutorial-series-get-started-with-flower-pytorch.rst:717
 #, fuzzy
 msgid ""
 "The :doc:`Flower Federated Learning Tutorial - Part 2 <tutorial-series-"

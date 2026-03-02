@@ -119,6 +119,4 @@ def _try_obtain_telemetry_event() -> EventType | None:
         return None  # Not yet implemented
     if sys.argv[0].endswith("flwr-simulation"):
         return EventType.FLWR_SIMULATION_RUN_LEAVE
-    if sys.argv[0].endswith("flower-simulation"):
-        return EventType.CLI_FLOWER_SIMULATION_LEAVE
     return None
