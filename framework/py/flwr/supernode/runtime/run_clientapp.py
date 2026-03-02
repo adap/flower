@@ -14,7 +14,6 @@
 # ==============================================================================
 """Flower ClientApp process."""
 
-
 from logging import DEBUG, ERROR, INFO
 
 import grpc
@@ -27,6 +26,7 @@ from flwr.common import Context, Message
 from flwr.common.config import get_flwr_dir
 from flwr.common.constant import ErrorCode
 from flwr.common.exit import ExitCode, flwr_exit, register_signal_handlers
+from flwr.common.appio_token_auth_interceptor import AppIoTokenAuthClientInterceptor
 from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.logger import log
 from flwr.common.message import remove_content_from_message
@@ -88,6 +88,7 @@ def run_clientapp(  # pylint: disable=R0913, R0914, R0917
         server_address=clientappio_api_address,
         insecure=(certificates is None),
         root_certificates=certificates,
+        interceptors=[AppIoTokenAuthClientInterceptor(token)],
     )
     channel.subscribe(on_channel_state_change)
     heartbeat_sender = None
@@ -116,7 +117,6 @@ def run_clientapp(  # pylint: disable=R0913, R0914, R0917
         message, context, run, fab = pull_appinputs(stub=stub, token=token)
 
         try:
-
             # Install FAB, if provided
             if fab:
                 log(DEBUG, "[flwr-clientapp] Start FAB installation.")
@@ -176,16 +176,14 @@ def pull_appinputs(
     log(INFO, "[flwr-clientapp] Pull `AppInputs` for token %s", masked_token)
     try:
         # Pull Context, Run and (optional) FAB
-        res: PullAppInputsResponse = stub.PullAppInputs(
-            PullAppInputsRequest(token=token)
-        )
+        res: PullAppInputsResponse = stub.PullAppInputs(PullAppInputsRequest())
         context = context_from_proto(res.context)
         run = run_from_proto(res.run)
         fab = fab_from_proto(res.fab) if res.fab else None
 
         # Pull and inflate the message
         pull_msg_res: PullAppMessagesResponse = stub.PullMessage(
-            PullAppMessagesRequest(token=token)
+            PullAppMessagesRequest(run_id=context.run_id)
         )
         run_id = context.run_id
         node = Node(node_id=context.node_id)
@@ -220,7 +218,6 @@ def push_appoutputs(
     proto_context = context_to_proto(context)
 
     try:
-
         with no_object_id_recompute():
             # Get object tree and all objects to push
             object_tree = get_object_tree(message)
@@ -229,7 +226,7 @@ def push_appoutputs(
             # This is temporary. The message should not contain its content
             push_msg_res = stub.PushMessage(
                 PushAppMessagesRequest(
-                    token=token,
+                    run_id=context.run_id,
                     messages_list=[proto_message],
                     message_object_trees=[object_tree],
                 )
@@ -254,7 +251,7 @@ def push_appoutputs(
 
         # Push Context
         res: PushAppOutputsResponse = stub.PushAppOutputs(
-            PushAppOutputsRequest(token=token, context=proto_context)
+            PushAppOutputsRequest(run_id=context.run_id, context=proto_context)
         )
         return res
     except grpc.RpcError as e:

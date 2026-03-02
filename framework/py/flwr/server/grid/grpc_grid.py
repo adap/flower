@@ -14,7 +14,6 @@
 # ==============================================================================
 """Flower gRPC Grid."""
 
-
 import time
 from collections.abc import Iterable
 from logging import DEBUG, ERROR, WARNING
@@ -24,6 +23,7 @@ import grpc
 
 from flwr.app.error import Error
 from flwr.common import Message, Metadata, RecordDict, now
+from flwr.common.appio_token_auth_interceptor import AppIoTokenAuthClientInterceptor
 from flwr.common.constant import (
     SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
     SUPERLINK_NODE_ID,
@@ -112,6 +112,8 @@ class GrpcGrid(Grid):
         The PEM-encoded root certificates as a byte string.
         If provided, a secure connection using the certificates will be
         established to an SSL-enabled Flower server.
+    token : Optional[str] (default: None)
+        App execution token propagated through gRPC metadata.
     """
 
     _deprecation_warning_logged = False
@@ -120,9 +122,11 @@ class GrpcGrid(Grid):
         self,
         serverappio_service_address: str = SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
         root_certificates: bytes | None = None,
+        token: str | None = None,
     ) -> None:
         self._addr = serverappio_service_address
         self._cert = root_certificates
+        self._token = token
         self._run: Run | None = None
         self._grpc_stub: ServerAppIoStub | None = None
         self._channel: grpc.Channel | None = None
@@ -143,10 +147,16 @@ class GrpcGrid(Grid):
         if self._is_connected:
             log(WARNING, "Already connected")
             return
+        interceptors = (
+            [AppIoTokenAuthClientInterceptor(self._token)]
+            if self._token is not None
+            else None
+        )
         self._channel = create_channel(
             server_address=self._addr,
             insecure=(self._cert is None),
             root_certificates=self._cert,
+            interceptors=interceptors,
         )
         self._channel.subscribe(on_channel_state_change)
         self._grpc_stub = ServerAppIoStub(self._channel)

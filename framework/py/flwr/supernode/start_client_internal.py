@@ -14,7 +14,6 @@
 # ==============================================================================
 """Main loop for Flower SuperNode."""
 
-
 import hashlib
 import json
 import os
@@ -36,6 +35,7 @@ from flwr.app.user_config import UserConfig
 from flwr.client.grpc_adapter_client.connection import grpc_adapter
 from flwr.client.grpc_rere_client.connection import grpc_request_response
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, Context, Error, Message, RecordDict
+from flwr.common.appio_token_auth_interceptor import AppIoTokenAuthServerInterceptor
 from flwr.common.config import get_flwr_dir, get_fused_config_from_fab
 from flwr.common.constant import (
     CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
@@ -81,6 +81,22 @@ from flwr.supernode.servicer.clientappio import ClientAppIoServicer
 DEFAULT_FFS_DIR = get_flwr_dir() / "supernode" / "ffs"
 
 FAB_VERIFICATION_ERROR = Error(ErrorCode.INVALID_FAB, "The FAB could not be verified.")
+
+CLIENTAPPIO_METHOD_REQUIRES_TOKEN = {
+    # SuperExec path (intentionally unauthenticated in this PR)
+    "/flwr.proto.ClientAppIo/ListAppsToLaunch": False,
+    "/flwr.proto.ClientAppIo/RequestToken": False,
+    "/flwr.proto.ClientAppIo/GetRun": False,
+    # App executor path (token required)
+    "/flwr.proto.ClientAppIo/SendAppHeartbeat": True,
+    "/flwr.proto.ClientAppIo/PullAppInputs": True,
+    "/flwr.proto.ClientAppIo/PushAppOutputs": True,
+    "/flwr.proto.ClientAppIo/PullMessage": True,
+    "/flwr.proto.ClientAppIo/PushMessage": True,
+    "/flwr.proto.ClientAppIo/PushObject": True,
+    "/flwr.proto.ClientAppIo/PullObject": True,
+    "/flwr.proto.ClientAppIo/ConfirmMessageReceived": True,
+}
 
 
 # pylint: disable=import-outside-toplevel
@@ -634,6 +650,12 @@ def run_clientappio_api_grpc(
         objectstore_factory=objectstore_factory,
     )
     clientappio_add_servicer_to_server_fn = add_ClientAppIoServicer_to_server
+    interceptors = [
+        AppIoTokenAuthServerInterceptor(
+            state_provider=state_factory.state,
+            method_requires_token=CLIENTAPPIO_METHOD_REQUIRES_TOKEN,
+        )
+    ]
     clientappio_grpc_server = generic_create_grpc_server(
         servicer_and_add_fn=(
             clientappio_servicer,
@@ -642,6 +664,7 @@ def run_clientappio_api_grpc(
         server_address=address,
         max_message_length=GRPC_MAX_MESSAGE_LENGTH,
         certificates=certificates,
+        interceptors=interceptors,
     )
     log(INFO, "Flower Deployment Runtime: Starting ClientAppIo API on %s", address)
     clientappio_grpc_server.start()

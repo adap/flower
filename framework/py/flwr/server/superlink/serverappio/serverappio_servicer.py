@@ -14,13 +14,17 @@
 # ==============================================================================
 """ServerAppIo API servicer."""
 
-
 import threading
 from logging import DEBUG, ERROR, INFO
 
 import grpc
 
 from flwr.common import Message
+from flwr.common.appio_token_auth_interceptor import (
+    get_authenticated_run_id,
+    get_authenticated_token,
+    verify_authenticated_run_matches_request_run_id,
+)
 from flwr.common.constant import SUPERLINK_NODE_ID, Status
 from flwr.common.logger import log
 from flwr.common.serde import (
@@ -150,6 +154,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     ) -> GetNodesResponse:
         """Get available nodes."""
         log(DEBUG, "ServerAppIoServicer.GetNodes")
+        verify_authenticated_run_matches_request_run_id(context, request.run_id)
 
         # Init state and store
         state = self.state_factory.state()
@@ -173,6 +178,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     ) -> PushAppMessagesResponse:
         """Push a set of Messages."""
         log(DEBUG, "ServerAppIoServicer.PushMessages")
+        verify_authenticated_run_matches_request_run_id(context, request.run_id)
 
         # Init state and store
         state = self.state_factory.state()
@@ -228,6 +234,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     ) -> PullAppMessagesResponse:
         """Pull a set of Messages."""
         log(DEBUG, "ServerAppIoServicer.PullMessages")
+        verify_authenticated_run_matches_request_run_id(context, request.run_id)
 
         # Init state and store
         state = self.state_factory.state()
@@ -312,15 +319,14 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         return GetRunResponse(run=run_to_proto(run))
 
     def PullAppInputs(
-        self, request: PullAppInputsRequest, context: grpc.ServicerContext
+        self, _request: PullAppInputsRequest, context: grpc.ServicerContext
     ) -> PullAppInputsResponse:
         """Pull ServerApp process inputs."""
         log(DEBUG, "ServerAppIoServicer.PullAppInputs")
         # Init access to LinkState
         state = self.state_factory.state()
 
-        # Validate the token
-        run_id = self._verify_token(request.token, context)
+        run_id = get_authenticated_run_id(context)
 
         # Lock access to LinkState, preventing obtaining the same pending run_id
         with self.lock:
@@ -357,9 +363,9 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     ) -> PushAppOutputsResponse:
         """Push ServerApp process outputs."""
         log(DEBUG, "ServerAppIoServicer.PushAppOutputs")
-
-        # Validate the token
-        run_id = self._verify_token(request.token, context)
+        run_id = verify_authenticated_run_matches_request_run_id(
+            context, request.run_id
+        )
 
         # Init state and store
         state = self.state_factory.state()
@@ -385,6 +391,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     ) -> UpdateRunStatusResponse:
         """Update the status of a run."""
         log(DEBUG, "ServerAppIoServicer.UpdateRunStatus")
+        verify_authenticated_run_matches_request_run_id(context, request.run_id)
 
         # Init state and store
         state = self.state_factory.state()
@@ -410,6 +417,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     ) -> PushLogsResponse:
         """Push logs."""
         log(DEBUG, "ServerAppIoServicer.PushLogs")
+        verify_authenticated_run_matches_request_run_id(context, request.run_id)
         state = self.state_factory.state()
 
         # Add logs to LinkState
@@ -418,7 +426,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         return PushLogsResponse()
 
     def SendAppHeartbeat(
-        self, request: SendAppHeartbeatRequest, context: grpc.ServicerContext
+        self, _request: SendAppHeartbeatRequest, context: grpc.ServicerContext
     ) -> SendAppHeartbeatResponse:
         """Handle a heartbeat from an app process."""
         log(DEBUG, "ServerAppIoServicer.SendAppHeartbeat")
@@ -426,8 +434,9 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         # Init state
         state = self.state_factory.state()
 
-        # Acknowledge the heartbeat
-        success = state.acknowledge_app_heartbeat(request.token)
+        # Acknowledge the heartbeat for the authenticated token.
+        token = get_authenticated_token(context)
+        success = state.acknowledge_app_heartbeat(token)
         return SendAppHeartbeatResponse(success=success)
 
     def PushObject(
@@ -435,6 +444,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     ) -> PushObjectResponse:
         """Push an object to the ObjectStore."""
         log(DEBUG, "ServerAppIoServicer.PushObject")
+        verify_authenticated_run_matches_request_run_id(context, request.run_id)
 
         # Init state and store
         state = self.state_factory.state()
@@ -471,6 +481,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     ) -> PullObjectResponse:
         """Pull an object from the ObjectStore."""
         log(DEBUG, "ServerAppIoServicer.PullObject")
+        verify_authenticated_run_matches_request_run_id(context, request.run_id)
 
         # Init state and store
         state = self.state_factory.state()
@@ -505,6 +516,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     ) -> ConfirmMessageReceivedResponse:
         """Confirm message received."""
         log(DEBUG, "ServerAppIoServicer.ConfirmMessageReceived")
+        verify_authenticated_run_matches_request_run_id(context, request.run_id)
 
         # Init state and store
         state = self.state_factory.state()
@@ -523,18 +535,6 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         store.delete(request.message_object_id)
 
         return ConfirmMessageReceivedResponse()
-
-    def _verify_token(self, token: str, context: grpc.ServicerContext) -> int:
-        """Verify the token and return the associated run ID."""
-        state = self.state_factory.state()
-        run_id = state.get_run_id_by_token(token)
-        if run_id is None or not state.verify_token(run_id, token):
-            context.abort(
-                grpc.StatusCode.PERMISSION_DENIED,
-                "Invalid token.",
-            )
-            raise RuntimeError("This line should never be reached.")
-        return run_id
 
 
 def _raise_if(validation_error: bool, request_name: str, detail: str) -> None:

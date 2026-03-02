@@ -14,13 +14,17 @@
 # ==============================================================================
 """ClientAppIo API servicer."""
 
-
 from logging import DEBUG, ERROR
 from typing import cast
 
 import grpc
 
 from flwr.common import Context
+from flwr.common.appio_token_auth_interceptor import (
+    get_authenticated_run_id,
+    get_authenticated_token,
+    verify_authenticated_run_matches_request_run_id,
+)
 from flwr.common.logger import log
 from flwr.common.serde import (
     context_from_proto,
@@ -130,7 +134,7 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         return GetRunResponse(run=run_to_proto(run))
 
     def PullAppInputs(
-        self, request: PullAppInputsRequest, context: grpc.ServicerContext
+        self, _request: PullAppInputsRequest, context: grpc.ServicerContext
     ) -> PullAppInputsResponse:
         """Pull Message, Context, and Run."""
         log(DEBUG, "ClientAppIo.PullAppInputs")
@@ -139,14 +143,7 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         state = self.state_factory.state()
         ffs = self.ffs_factory.ffs()
 
-        # Validate the token
-        run_id = state.get_run_id_by_token(request.token)
-        if run_id is None or not state.verify_token(run_id, request.token):
-            context.abort(
-                grpc.StatusCode.PERMISSION_DENIED,
-                "Invalid token.",
-            )
-            raise RuntimeError("This line should never be reached.")
+        run_id = get_authenticated_run_id(context)
 
         # Retrieve context, run and fab for this run
         context = cast(Context, state.get_context(run_id))
@@ -185,14 +182,9 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         # Initialize state connection
         state = self.state_factory.state()
 
-        # Validate the token
-        run_id = state.get_run_id_by_token(request.token)
-        if run_id is None or not state.verify_token(run_id, request.token):
-            context.abort(
-                grpc.StatusCode.PERMISSION_DENIED,
-                "Invalid token.",
-            )
-            raise RuntimeError("This line should never be reached.")
+        run_id = verify_authenticated_run_matches_request_run_id(
+            context, request.run_id
+        )
 
         # Save the context to the state
         state.store_context(context_from_proto(request.context))
@@ -211,14 +203,9 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         state = self.state_factory.state()
         store = self.objectstore_factory.store()
 
-        # Validate the token
-        run_id = state.get_run_id_by_token(request.token)
-        if run_id is None or not state.verify_token(run_id, request.token):
-            context.abort(
-                grpc.StatusCode.PERMISSION_DENIED,
-                "Invalid token.",
-            )
-            raise RuntimeError("This line should never be reached.")
+        run_id = verify_authenticated_run_matches_request_run_id(
+            context, request.run_id
+        )
 
         # Retrieve message for this run
         message = state.get_messages(run_ids=[run_id], is_reply=False)[0]
@@ -242,14 +229,9 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         state = self.state_factory.state()
         store = self.objectstore_factory.store()
 
-        # Validate the token
-        run_id = state.get_run_id_by_token(request.token)
-        if run_id is None or not state.verify_token(run_id, request.token):
-            context.abort(
-                grpc.StatusCode.PERMISSION_DENIED,
-                "Invalid token.",
-            )
-            raise RuntimeError("This line should never be reached.")
+        run_id = verify_authenticated_run_matches_request_run_id(
+            context, request.run_id
+        )
 
         # Record message processing end time
         state.record_message_processing_end(
@@ -266,15 +248,16 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
         return PushAppMessagesResponse(objects_to_push=objects_to_push)
 
     def SendAppHeartbeat(
-        self, request: SendAppHeartbeatRequest, context: grpc.ServicerContext
+        self, _request: SendAppHeartbeatRequest, context: grpc.ServicerContext
     ) -> SendAppHeartbeatResponse:
         """Handle a heartbeat from an app process."""
         log(DEBUG, "ClientAppIoServicer.SendAppHeartbeat")
         # Initialize state
         state = self.state_factory.state()
 
-        # Acknowledge the heartbeat
-        success = state.acknowledge_app_heartbeat(request.token)
+        # Acknowledge the heartbeat for the authenticated token.
+        token = get_authenticated_token(context)
+        success = state.acknowledge_app_heartbeat(token)
         return SendAppHeartbeatResponse(success=success)
 
     def PushObject(
@@ -282,8 +265,9 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
     ) -> PushObjectResponse:
         """Push an object to the ObjectStore."""
         log(DEBUG, "ClientAppIoServicer.PushObject")
+        verify_authenticated_run_matches_request_run_id(context, request.run_id)
 
-        # Init state and store
+        # Init store
         store = self.objectstore_factory.store()
 
         # Insert in store
@@ -304,8 +288,9 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
     ) -> PullObjectResponse:
         """Pull an object from the ObjectStore."""
         log(DEBUG, "ClientAppIoServicer.PullObject")
+        verify_authenticated_run_matches_request_run_id(context, request.run_id)
 
-        # Init state and store
+        # Init store
         store = self.objectstore_factory.store()
 
         # Fetch from store
@@ -324,8 +309,9 @@ class ClientAppIoServicer(clientappio_pb2_grpc.ClientAppIoServicer):
     ) -> ConfirmMessageReceivedResponse:
         """Confirm message received."""
         log(DEBUG, "ClientAppIoServicer.ConfirmMessageReceived")
+        verify_authenticated_run_matches_request_run_id(context, request.run_id)
 
-        # Init state and store
+        # Init store
         store = self.objectstore_factory.store()
 
         # Delete the message object

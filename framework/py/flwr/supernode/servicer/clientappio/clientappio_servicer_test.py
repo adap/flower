@@ -14,21 +14,27 @@
 # ==============================================================================
 """Test the ClientAppIo API servicer."""
 
-
+import tempfile
 import unittest
 from unittest.mock import Mock
 
+import grpc
 from parameterized import parameterized
 
 from flwr.common import Context, typing
+from flwr.common.constant import APP_TOKEN_HEADER
 from flwr.common.message import make_message
 from flwr.common.serde import fab_to_proto, message_to_proto
 from flwr.common.serde_test import RecordMaker
 from flwr.proto.appio_pb2 import (  # pylint:disable=E0611
+    ListAppsToLaunchRequest,
+    ListAppsToLaunchResponse,
     PullAppInputsResponse,
     PullAppMessagesResponse,
     PushAppMessagesResponse,
     PushAppOutputsResponse,
+    RequestTokenRequest,
+    RequestTokenResponse,
 )
 from flwr.proto.heartbeat_pb2 import (  # pylint:disable=E0611
     SendAppHeartbeatRequest,
@@ -41,15 +47,22 @@ from flwr.proto.message_pb2 import (  # pylint:disable=E0611
     PushObjectRequest,
     PushObjectResponse,
 )
+from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint:disable=E0611
 from flwr.proto.run_pb2 import Run as ProtoRun  # pylint:disable=E0611
+from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.inflatable.inflatable_object import (
     get_all_nested_objects,
     get_object_tree,
     iterate_object_tree,
 )
+from flwr.supercore.object_store import ObjectStoreFactory
+from flwr.supernode.nodestate import NodeStateFactory
 from flwr.supernode.runtime.run_clientapp import pull_appinputs, push_appoutputs
+from flwr.supernode.start_client_internal import run_clientappio_api_grpc
 
 from .clientappio_servicer import ClientAppIoServicer
+
+CLIENTAPPIO_TEST_ADDRESS = "127.0.0.1:19094"
 
 
 class TestClientAppIoServicer(unittest.TestCase):
@@ -107,6 +120,8 @@ class TestClientAppIoServicer(unittest.TestCase):
 
         # Assert
         self.mock_stub.PullAppInputs.assert_called_once()
+        req = self.mock_stub.PullAppInputs.call_args.args[0]
+        self.assertEqual(req.token, "")
         self.assertEqual(len(message.content.array_records), 3)
         self.assertEqual(len(message.content.metric_records), 2)
         self.assertEqual(len(message.content.config_records), 1)
@@ -163,6 +178,12 @@ class TestClientAppIoServicer(unittest.TestCase):
         # Assert
         self.mock_stub.PushAppOutputs.assert_called_once()
         self.mock_stub.PushMessage.assert_called_once()
+        push_msg_req = self.mock_stub.PushMessage.call_args.args[0]
+        push_out_req = self.mock_stub.PushAppOutputs.call_args.args[0]
+        self.assertEqual(push_msg_req.run_id, context.run_id)
+        self.assertEqual(push_msg_req.token, "")
+        self.assertEqual(push_out_req.run_id, context.run_id)
+        self.assertEqual(push_out_req.token, "")
         self.assertSetEqual(pushed_obj_ids, set(all_obj_ids))
 
     @parameterized.expand([(True,), (False,)])  # type: ignore
@@ -171,12 +192,117 @@ class TestClientAppIoServicer(unittest.TestCase):
         # Prepare
         token = "test-token"
         request = SendAppHeartbeatRequest(token=token)
+        context = Mock()
+        context._flwr_appio_authenticated_token = token  # type: ignore[attr-defined]
         self.mock_state.acknowledge_app_heartbeat.return_value = success
 
         # Execute
-        response = self.servicer.SendAppHeartbeat(request, Mock())
+        response = self.servicer.SendAppHeartbeat(request, context)
 
         # Assert
         self.assertIsInstance(response, SendAppHeartbeatResponse)
         self.assertEqual(response.success, success)
         self.mock_state.acknowledge_app_heartbeat.assert_called_once_with(token)
+
+
+class TestClientAppIoGrpcTokenAuth(unittest.TestCase):
+    """Integration tests for ClientAppIo token interceptor wiring."""
+
+    def setUp(self) -> None:
+        """Start ClientAppIo gRPC server and create stubs for test RPCs."""
+        self.temp_dir = tempfile.TemporaryDirectory()  # pylint: disable=R1732
+        self.addCleanup(self.temp_dir.cleanup)
+
+        self.objectstore_factory = ObjectStoreFactory()
+        self.state_factory = NodeStateFactory(
+            objectstore_factory=self.objectstore_factory
+        )
+        self.state = self.state_factory.state()
+        self.ffs_factory = FfsFactory(self.temp_dir.name)
+
+        self._server: grpc.Server = run_clientappio_api_grpc(
+            CLIENTAPPIO_TEST_ADDRESS,
+            self.state_factory,
+            self.ffs_factory,
+            self.objectstore_factory,
+            None,
+        )
+        self._channel = grpc.insecure_channel(CLIENTAPPIO_TEST_ADDRESS)
+        self._list_apps_to_launch = self._channel.unary_unary(
+            "/flwr.proto.ClientAppIo/ListAppsToLaunch",
+            request_serializer=ListAppsToLaunchRequest.SerializeToString,
+            response_deserializer=ListAppsToLaunchResponse.FromString,
+        )
+        self._request_token = self._channel.unary_unary(
+            "/flwr.proto.ClientAppIo/RequestToken",
+            request_serializer=RequestTokenRequest.SerializeToString,
+            response_deserializer=RequestTokenResponse.FromString,
+        )
+        self._get_run = self._channel.unary_unary(
+            "/flwr.proto.ClientAppIo/GetRun",
+            request_serializer=GetRunRequest.SerializeToString,
+            response_deserializer=GetRunResponse.FromString,
+        )
+        self._send_app_heartbeat = self._channel.unary_unary(
+            "/flwr.proto.ClientAppIo/SendAppHeartbeat",
+            request_serializer=SendAppHeartbeatRequest.SerializeToString,
+            response_deserializer=SendAppHeartbeatResponse.FromString,
+        )
+        self._push_object = self._channel.unary_unary(
+            "/flwr.proto.ClientAppIo/PushObject",
+            request_serializer=PushObjectRequest.SerializeToString,
+            response_deserializer=PushObjectResponse.FromString,
+        )
+
+    def tearDown(self) -> None:
+        """Stop ClientAppIo gRPC server."""
+        self._server.stop(None)
+
+    def test_superexec_methods_still_allow_unauthenticated_calls(self) -> None:
+        """ListAppsToLaunch/RequestToken/GetRun remain callable without metadata."""
+        list_res, list_call = self._list_apps_to_launch.with_call(
+            ListAppsToLaunchRequest()
+        )
+        token_res, token_call = self._request_token.with_call(
+            RequestTokenRequest(run_id=1)
+        )
+        run_res, run_call = self._get_run.with_call(GetRunRequest(run_id=1))
+
+        self.assertIsInstance(list_res, ListAppsToLaunchResponse)
+        self.assertEqual(list_call.code(), grpc.StatusCode.OK)
+        self.assertIsInstance(token_res, RequestTokenResponse)
+        self.assertTrue(token_res.token)
+        self.assertEqual(token_call.code(), grpc.StatusCode.OK)
+        self.assertIsInstance(run_res, GetRunResponse)
+        self.assertEqual(run_call.code(), grpc.StatusCode.OK)
+
+    def test_send_app_heartbeat_requires_token_metadata(self) -> None:
+        """Token-protected methods reject calls without App token metadata."""
+        with self.assertRaises(grpc.RpcError) as err:
+            self._send_app_heartbeat.with_call(SendAppHeartbeatRequest(token="unused"))
+        self.assertEqual(err.exception.code(), grpc.StatusCode.PERMISSION_DENIED)
+        self.assertEqual(err.exception.details(), "Invalid token.")
+
+    def test_send_app_heartbeat_accepts_valid_metadata_token(self) -> None:
+        """Token-protected methods accept valid metadata token."""
+        token = self.state.create_token(11)
+        assert token is not None
+        response, call = self._send_app_heartbeat.with_call(
+            SendAppHeartbeatRequest(token="different-value"),
+            metadata=((APP_TOKEN_HEADER, token),),
+        )
+
+        self.assertTrue(response.success)
+        self.assertEqual(call.code(), grpc.StatusCode.OK)
+
+    def test_token_metadata_run_id_mismatch_denied(self) -> None:
+        """Token-protected run-scoped methods deny mismatched request.run_id."""
+        token = self.state.create_token(11)
+        assert token is not None
+        with self.assertRaises(grpc.RpcError) as err:
+            self._push_object.with_call(
+                PushObjectRequest(run_id=99),
+                metadata=((APP_TOKEN_HEADER, token),),
+            )
+        self.assertEqual(err.exception.code(), grpc.StatusCode.PERMISSION_DENIED)
+        self.assertEqual(err.exception.details(), "Invalid token.")

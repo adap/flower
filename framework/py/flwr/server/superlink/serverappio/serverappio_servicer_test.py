@@ -14,7 +14,6 @@
 # ==============================================================================
 """ServerAppIoServicer tests."""
 
-
 import tempfile
 import unittest
 from datetime import timedelta
@@ -25,7 +24,7 @@ from parameterized import parameterized
 
 from flwr.common import ConfigRecord, Context, Error, Message, RecordDict
 from flwr.common.constant import (
-    SERVERAPPIO_API_DEFAULT_SERVER_ADDRESS,
+    APP_TOKEN_HEADER,
     SUPERLINK_NODE_ID,
     Status,
 )
@@ -51,6 +50,7 @@ from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
     SendAppHeartbeatRequest,
     SendAppHeartbeatResponse,
 )
+from flwr.proto.log_pb2 import PushLogsRequest, PushLogsResponse  # pylint: disable=E0611
 from flwr.proto.message_pb2 import (  # pylint: disable=E0611
     ConfirmMessageReceivedRequest,
     ConfirmMessageReceivedResponse,
@@ -65,6 +65,8 @@ from flwr.proto.message_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
+    GetRunRequest,
+    GetRunResponse,
     UpdateRunStatusRequest,
     UpdateRunStatusResponse,
 )
@@ -90,6 +92,62 @@ from flwr.supercore.object_store import ObjectStoreFactory
 from flwr.superlink.federation import NoOpFederationManager
 
 # pylint: disable=broad-except
+SERVERAPPIO_TEST_ADDRESS = "127.0.0.1:19091"
+
+
+class _AuthenticatedUnaryUnary:
+    """Attach AppIo token metadata for unary-unary test RPC calls."""
+
+    def __init__(self, rpc_callable: grpc.UnaryUnaryMultiCallable, token_fn) -> None:
+        self._rpc_callable = rpc_callable
+        self._token_fn = token_fn
+
+    def _add_metadata(
+        self,
+        request: object,
+        metadata: list[tuple[str, str]] | tuple[tuple[str, str], ...] | None,
+    ) -> list[tuple[str, str]]:
+        combined = list(metadata or [])
+        combined.append((APP_TOKEN_HEADER, self._token_fn(request)))
+        return combined
+
+    def with_call(
+        self,
+        request: object,
+        timeout: float | None = None,
+        metadata: list[tuple[str, str]] | tuple[tuple[str, str], ...] | None = None,
+        credentials: grpc.CallCredentials | None = None,
+        wait_for_ready: bool | None = None,
+        compression: grpc.Compression | None = None,
+    ):
+        """Call wrapped RPC with authentication metadata and call details."""
+        return self._rpc_callable.with_call(
+            request=request,
+            timeout=timeout,
+            metadata=self._add_metadata(request, metadata),
+            credentials=credentials,
+            wait_for_ready=wait_for_ready,
+            compression=compression,
+        )
+
+    def __call__(
+        self,
+        request: object,
+        timeout: float | None = None,
+        metadata: list[tuple[str, str]] | tuple[tuple[str, str], ...] | None = None,
+        credentials: grpc.CallCredentials | None = None,
+        wait_for_ready: bool | None = None,
+        compression: grpc.Compression | None = None,
+    ):
+        """Call wrapped RPC with authentication metadata."""
+        return self._rpc_callable(
+            request=request,
+            timeout=timeout,
+            metadata=self._add_metadata(request, metadata),
+            credentials=credentials,
+            wait_for_ready=wait_for_ready,
+            compression=compression,
+        )
 
 
 def test_raise_if_false() -> None:
@@ -162,14 +220,14 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         self.status_to_msg = _STATUS_TO_MSG
 
         self._server: grpc.Server = run_serverappio_api_grpc(
-            SERVERAPPIO_API_DEFAULT_SERVER_ADDRESS,
+            SERVERAPPIO_TEST_ADDRESS,
             state_factory,
             ffs_factory,
             objectstore_factory,
             None,
         )
 
-        self._channel = grpc.insecure_channel("localhost:9091")
+        self._channel = grpc.insecure_channel(SERVERAPPIO_TEST_ADDRESS)
         self._get_nodes = self._channel.unary_unary(
             "/flwr.proto.ServerAppIo/GetNodes",
             request_serializer=GetNodesRequest.SerializeToString,
@@ -194,6 +252,11 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
             "/flwr.proto.ServerAppIo/UpdateRunStatus",
             request_serializer=UpdateRunStatusRequest.SerializeToString,
             response_deserializer=UpdateRunStatusResponse.FromString,
+        )
+        self._push_logs = self._channel.unary_unary(
+            "/flwr.proto.ServerAppIo/PushLogs",
+            request_serializer=PushLogsRequest.SerializeToString,
+            response_deserializer=PushLogsResponse.FromString,
         )
         self._send_app_heartbeat = self._channel.unary_unary(
             "/flwr.proto.ServerAppIo/SendAppHeartbeat",
@@ -225,11 +288,17 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
             request_serializer=RequestTokenRequest.SerializeToString,
             response_deserializer=RequestTokenResponse.FromString,
         )
+        self._get_run = self._channel.unary_unary(
+            "/flwr.proto.ServerAppIo/GetRun",
+            request_serializer=GetRunRequest.SerializeToString,
+            response_deserializer=GetRunResponse.FromString,
+        )
         self._pull_app_inputs = self._channel.unary_unary(
             "/flwr.proto.ServerAppIo/PullAppInputs",
             request_serializer=PullAppInputsRequest.SerializeToString,
             response_deserializer=PullAppInputsResponse.FromString,
         )
+        self._add_auth_wrapper()
 
     def tearDown(self) -> None:
         """Clean up grpc server."""
@@ -250,6 +319,51 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         if running:
             self._transition_run_status(run_id, 2)
         return run_id
+
+    def _token_for_request(self, request: object) -> str:
+        token = getattr(request, "token", "")
+        if token:
+            return token
+        run_id = int(request.run_id)  # type: ignore[attr-defined]
+        self.state.delete_token(run_id)
+        created_token = self.state.create_token(run_id)
+        assert created_token is not None
+        return created_token
+
+    def _add_auth_wrapper(self) -> None:
+        self._get_nodes = _AuthenticatedUnaryUnary(
+            self._get_nodes, self._token_for_request
+        )
+        self._push_messages = _AuthenticatedUnaryUnary(
+            self._push_messages, self._token_for_request
+        )
+        self._pull_messages = _AuthenticatedUnaryUnary(
+            self._pull_messages, self._token_for_request
+        )
+        self._push_serverapp_outputs = _AuthenticatedUnaryUnary(
+            self._push_serverapp_outputs, self._token_for_request
+        )
+        self._update_run_status = _AuthenticatedUnaryUnary(
+            self._update_run_status, self._token_for_request
+        )
+        self._send_app_heartbeat = _AuthenticatedUnaryUnary(
+            self._send_app_heartbeat, self._token_for_request
+        )
+        self._push_logs = _AuthenticatedUnaryUnary(
+            self._push_logs, self._token_for_request
+        )
+        self._push_object = _AuthenticatedUnaryUnary(
+            self._push_object, self._token_for_request
+        )
+        self._pull_object = _AuthenticatedUnaryUnary(
+            self._pull_object, self._token_for_request
+        )
+        self._confirm_message_received = _AuthenticatedUnaryUnary(
+            self._confirm_message_received, self._token_for_request
+        )
+        self._pull_app_inputs = _AuthenticatedUnaryUnary(
+            self._pull_app_inputs, self._token_for_request
+        )
 
     def test_successful_get_node_if_running(self) -> None:
         """Test `GetNode` success."""
@@ -670,11 +784,26 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         assert e.exception.code() == grpc.StatusCode.PERMISSION_DENIED
         assert e.exception.details() == self.status_to_msg[run_status.status]
 
+    def test_push_logs_successful(self) -> None:
+        """Test `PushLogs` success."""
+        run_id = self._create_dummy_run()
+        logs = ["line-1\n", "line-2\n"]
+        request = PushLogsRequest(run_id=run_id, logs=logs)
+
+        response, call = self._push_logs.with_call(request=request)
+        stored_logs, _ = self.state.get_serverapp_log(run_id, after_timestamp=None)
+
+        assert isinstance(response, PushLogsResponse)
+        assert call.code() == grpc.StatusCode.OK
+        assert stored_logs == "".join(logs)
+
     @parameterized.expand([(True,), (False,)])  # type: ignore
     def test_send_app_heartbeat(self, success: bool) -> None:
         """Test sending an app heartbeat."""
         # Prepare
-        token = "test-token"
+        run_id = self._create_dummy_run()
+        token = self.state.create_token(run_id)
+        assert token is not None
         request = SendAppHeartbeatRequest(token=token)
         mock_ack_method = Mock(return_value=success)
         self.state.acknowledge_app_heartbeat = mock_ack_method  # type: ignore
@@ -887,6 +1016,15 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         # Assert: Only one token is issued
         assert response1.token != ""
         assert response2.token == ""
+
+    def test_get_run_is_unauthenticated(self) -> None:
+        """Test `GetRun` is callable without token metadata."""
+        run_id = self._create_dummy_run(running=False)
+        response, call = self._get_run.with_call(GetRunRequest(run_id=run_id))
+
+        assert isinstance(response, GetRunResponse)
+        assert response.run.run_id == run_id
+        assert call.code() == grpc.StatusCode.OK
 
     def test_run_status_transitions(self) -> None:
         """Test `RequestToken` and `PullAppInputs` transitions run status from PENDING
