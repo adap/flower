@@ -108,8 +108,8 @@ def _detect_mime(path: Path) -> str:
     return MIME_MAP.get(path.suffix.lower(), "text/plain; charset=utf-8")
 
 
-def _get_declared_license_file(root: Path) -> str | None:
-    """Return [project].license.file if present after validation."""
+def _get_declared_license_file(root: Path) -> Path | None:
+    """Return absolute path from [project].license.file if present after validation."""
     config = load_toml(root / "pyproject.toml")
     if config is None:
         return None
@@ -148,7 +148,7 @@ def _get_declared_license_file(root: Path) -> str | None:
             "but does not exist."
         )
 
-    return license_file
+    return root / license_file
 
 
 def _collect_file_paths(root: Path) -> list[Path]:
@@ -165,7 +165,6 @@ def _collect_file_paths(root: Path) -> list[Path]:
 
     # Walk the directory tree
     file_paths: list[Path] = []
-    selected_relative_paths: set[str] = set()
     for path in root.rglob("*"):
         if not path.is_file():
             continue
@@ -185,11 +184,10 @@ def _collect_file_paths(root: Path) -> list[Path]:
             )
 
         file_paths.append(path)
-        selected_relative_paths.add(posix)
 
-    if declared_license_file and declared_license_file not in selected_relative_paths:
+    if declared_license_file and declared_license_file not in file_paths:
         raise click.ClickException(
-            f"Invalid [project].license.file: `{declared_license_file}` is "
+            f"Invalid [project].license.file: `{declared_license_file.name}` is "
             "excluded by `.gitignore` or publish exclude rules."
         )
 
