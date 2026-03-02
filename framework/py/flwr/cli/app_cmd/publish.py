@@ -109,45 +109,42 @@ def _detect_mime(path: Path) -> str:
 
 
 def _get_declared_license_file(root: Path) -> Path | None:
-    """Return absolute path from [project].license.file if present after validation."""
+    """Return validated absolute path from `[project].license.file`, else `None`."""
+    # Read optional [project].license.file from pyproject.toml
     config = load_toml(root / "pyproject.toml")
     if config is None:
         return None
-
     project = config.get("project")
     if not isinstance(project, dict):
         return None
-
     license_entry = project.get("license")
     if not isinstance(license_entry, dict):
         return None
+    if "file" not in license_entry:
+        return None
 
+    # Validate [project].license.file:
+    # cannot be combined with `text`, must be a string,
+    # must be an allowed filename, and must exist.
+    license_file = license_entry["file"]
     if "file" in license_entry and "text" in license_entry:
         raise click.ClickException(
             "Invalid [project].license: `file` and `text` cannot be set together."
         )
-
-    if "file" not in license_entry:
-        return None
-
-    license_file = license_entry["file"]
     if not isinstance(license_file, str):
         raise click.ClickException(
             "Invalid [project].license.file: expected a string path."
         )
-
     if license_file not in APP_PUBLISH_ALLOWED_LICENSE_FILES:
         raise click.ClickException(
             "Invalid [project].license.file: only `LICENSE` or `LICENSE.md` "
             "are supported."
         )
-
     if not (root / license_file).is_file():
         raise click.ClickException(
             f"Invalid [project].license.file: `{license_file}` was declared "
             "but does not exist."
         )
-
     return root / license_file
 
 
