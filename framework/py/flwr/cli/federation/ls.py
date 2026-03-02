@@ -159,10 +159,10 @@ def _to_json(
     members: list[Member] | None = None,
     nodes: list[NodeInfo] | None = None,
     runs: list[RunRow] | None = None,
-) -> list[dict[str, str]] | list[list[dict[str, Any]]]:
+) -> list[dict[str, str | bool]] | list[list[dict[str, Any]]]:
     """Format the provided federations list to JSON serializable format."""
     if federations is not None:
-        return [
+        result: list[dict[str, str | bool]] = [
             {
                 "name": federation.name,
                 "description": federation.description,
@@ -170,6 +170,7 @@ def _to_json(
             }
             for federation in federations
         ]
+        return result
 
     if members is None or nodes is None or runs is None:
         return []
