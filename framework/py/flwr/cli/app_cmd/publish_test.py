@@ -143,7 +143,9 @@ def test_collect_files_rejects_invalid_license_path_in_pyproject(
         _collect_file_paths(tmp_path)
 
 
-def test_collect_files_rejects_missing_license_file_in_pyproject(tmp_path: Path) -> None:
+def test_collect_files_rejects_missing_license_file_in_pyproject(
+    tmp_path: Path,
+) -> None:
     """Test declared [project].license.file must exist."""
     write(
         tmp_path,
@@ -173,7 +175,9 @@ def test_collect_files_rejects_license_file_excluded_by_gitignore(
         _collect_file_paths(tmp_path)
 
 
-def test_collect_files_rejects_license_file_with_text_in_pyproject(tmp_path: Path) -> None:
+def test_collect_files_rejects_license_file_with_text_in_pyproject(
+    tmp_path: Path,
+) -> None:
     """Test [project].license.file and [project].license.text are exclusive."""
     write(
         tmp_path,
