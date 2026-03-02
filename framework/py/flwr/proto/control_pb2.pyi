@@ -699,7 +699,7 @@ class RejectInvitationResponse(google.protobuf.message.Message):
 global___RejectInvitationResponse = RejectInvitationResponse
 
 @typing.final
-class WithdrawInvitationRequest(google.protobuf.message.Message):
+class RevokeInvitationRequest(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
 
     FEDERATION_NAME_FIELD_NUMBER: builtins.int
@@ -714,14 +714,14 @@ class WithdrawInvitationRequest(google.protobuf.message.Message):
     ) -> None: ...
     def ClearField(self, field_name: typing.Literal["federation_name", b"federation_name", "invitee_account_name", b"invitee_account_name"]) -> None: ...
 
-global___WithdrawInvitationRequest = WithdrawInvitationRequest
+global___RevokeInvitationRequest = RevokeInvitationRequest
 
 @typing.final
-class WithdrawInvitationResponse(google.protobuf.message.Message):
+class RevokeInvitationResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
 
     def __init__(
         self,
     ) -> None: ...
 
-global___WithdrawInvitationResponse = WithdrawInvitationResponse
+global___RevokeInvitationResponse = RevokeInvitationResponse

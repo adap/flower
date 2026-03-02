@@ -134,10 +134,10 @@ class ControlStub(object):
                 request_serializer=flwr_dot_proto_dot_control__pb2.RejectInvitationRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_control__pb2.RejectInvitationResponse.FromString,
                 _registered_method=True)
-        self.WithdrawInvitation = channel.unary_unary(
-                '/flwr.proto.Control/WithdrawInvitation',
-                request_serializer=flwr_dot_proto_dot_control__pb2.WithdrawInvitationRequest.SerializeToString,
-                response_deserializer=flwr_dot_proto_dot_control__pb2.WithdrawInvitationResponse.FromString,
+        self.RevokeInvitation = channel.unary_unary(
+                '/flwr.proto.Control/RevokeInvitation',
+                request_serializer=flwr_dot_proto_dot_control__pb2.RevokeInvitationRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_control__pb2.RevokeInvitationResponse.FromString,
                 _registered_method=True)
 
 
@@ -284,8 +284,8 @@ class ControlServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def WithdrawInvitation(self, request, context):
-        """Withdraw Invitation
+    def RevokeInvitation(self, request, context):
+        """Revoke Invitation
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -394,10 +394,10 @@ def add_ControlServicer_to_server(servicer, server):
                     request_deserializer=flwr_dot_proto_dot_control__pb2.RejectInvitationRequest.FromString,
                     response_serializer=flwr_dot_proto_dot_control__pb2.RejectInvitationResponse.SerializeToString,
             ),
-            'WithdrawInvitation': grpc.unary_unary_rpc_method_handler(
-                    servicer.WithdrawInvitation,
-                    request_deserializer=flwr_dot_proto_dot_control__pb2.WithdrawInvitationRequest.FromString,
-                    response_serializer=flwr_dot_proto_dot_control__pb2.WithdrawInvitationResponse.SerializeToString,
+            'RevokeInvitation': grpc.unary_unary_rpc_method_handler(
+                    servicer.RevokeInvitation,
+                    request_deserializer=flwr_dot_proto_dot_control__pb2.RevokeInvitationRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_control__pb2.RevokeInvitationResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -951,7 +951,7 @@ class Control(object):
             _registered_method=True)
 
     @staticmethod
-    def WithdrawInvitation(request,
+    def RevokeInvitation(request,
             target,
             options=(),
             channel_credentials=None,
@@ -964,9 +964,9 @@ class Control(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/flwr.proto.Control/WithdrawInvitation',
-            flwr_dot_proto_dot_control__pb2.WithdrawInvitationRequest.SerializeToString,
-            flwr_dot_proto_dot_control__pb2.WithdrawInvitationResponse.FromString,
+            '/flwr.proto.Control/RevokeInvitation',
+            flwr_dot_proto_dot_control__pb2.RevokeInvitationRequest.SerializeToString,
+            flwr_dot_proto_dot_control__pb2.RevokeInvitationResponse.FromString,
             options,
             channel_credentials,
             insecure,

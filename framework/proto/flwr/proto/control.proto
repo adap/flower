@@ -95,9 +95,9 @@ service Control {
   rpc RejectInvitation(RejectInvitationRequest)
       returns (RejectInvitationResponse) {}
 
-  // Withdraw Invitation
-  rpc WithdrawInvitation(WithdrawInvitationRequest)
-      returns (WithdrawInvitationResponse) {}
+  // Revoke Invitation
+  rpc RevokeInvitation(RevokeInvitationRequest)
+      returns (RevokeInvitationResponse) {}
 }
 
 message StartRunRequest {
@@ -203,8 +203,8 @@ message AcceptInvitationResponse {}
 message RejectInvitationRequest { string federation_name = 1; }
 message RejectInvitationResponse {}
 
-message WithdrawInvitationRequest {
+message RevokeInvitationRequest {
   string federation_name = 1;
   string invitee_account_name = 2;
 }
-message WithdrawInvitationResponse {}
+message RevokeInvitationResponse {}

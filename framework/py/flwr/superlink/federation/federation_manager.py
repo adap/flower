@@ -185,17 +185,17 @@ class FederationManager(ABC):
         """
 
     @abstractmethod
-    def withdraw_invitation(
+    def revoke_invitation(
         self, flwr_aid: str, federation: str, invitee_flwr_aid: str
     ) -> None:
-        """Withdraw a pending invitation.
+        """Revoke a pending invitation.
 
         Parameters
         ----------
         flwr_aid : str
-            The ID of the account withdrawing the invitation (inviter).
+            The ID of the account revoking the invitation (inviter).
         federation : str
             The name of the federation.
         invitee_flwr_aid : str
-            The ID of the account whose invitation is being withdrawn.
+            The ID of the account whose invitation is being revoked.
         """

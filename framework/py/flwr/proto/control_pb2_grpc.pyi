@@ -153,11 +153,11 @@ class ControlStub:
     ]
     """Reject Invitation"""
 
-    WithdrawInvitation: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.control_pb2.WithdrawInvitationRequest,
-        flwr.proto.control_pb2.WithdrawInvitationResponse,
+    RevokeInvitation: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.control_pb2.RevokeInvitationRequest,
+        flwr.proto.control_pb2.RevokeInvitationResponse,
     ]
-    """Withdraw Invitation"""
+    """Revoke Invitation"""
 
 class ControlAsyncStub:
     StartRun: grpc.aio.UnaryUnaryMultiCallable[
@@ -280,11 +280,11 @@ class ControlAsyncStub:
     ]
     """Reject Invitation"""
 
-    WithdrawInvitation: grpc.aio.UnaryUnaryMultiCallable[
-        flwr.proto.control_pb2.WithdrawInvitationRequest,
-        flwr.proto.control_pb2.WithdrawInvitationResponse,
+    RevokeInvitation: grpc.aio.UnaryUnaryMultiCallable[
+        flwr.proto.control_pb2.RevokeInvitationRequest,
+        flwr.proto.control_pb2.RevokeInvitationResponse,
     ]
-    """Withdraw Invitation"""
+    """Revoke Invitation"""
 
 class ControlServicer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
@@ -448,11 +448,11 @@ class ControlServicer(metaclass=abc.ABCMeta):
         """Reject Invitation"""
 
     @abc.abstractmethod
-    def WithdrawInvitation(
+    def RevokeInvitation(
         self,
-        request: flwr.proto.control_pb2.WithdrawInvitationRequest,
+        request: flwr.proto.control_pb2.RevokeInvitationRequest,
         context: _ServicerContext,
-    ) -> typing.Union[flwr.proto.control_pb2.WithdrawInvitationResponse, collections.abc.Awaitable[flwr.proto.control_pb2.WithdrawInvitationResponse]]:
-        """Withdraw Invitation"""
+    ) -> typing.Union[flwr.proto.control_pb2.RevokeInvitationResponse, collections.abc.Awaitable[flwr.proto.control_pb2.RevokeInvitationResponse]]:
+        """Revoke Invitation"""
 
 def add_ControlServicer_to_server(servicer: ControlServicer, server: typing.Union[grpc.Server, grpc.aio.Server]) -> None: ...

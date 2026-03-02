@@ -85,6 +85,8 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     RejectInvitationResponse,
     RemoveNodeFromFederationRequest,
     RemoveNodeFromFederationResponse,
+    RevokeInvitationRequest,
+    RevokeInvitationResponse,
     ShowFederationRequest,
     ShowFederationResponse,
     StartRunRequest,
@@ -95,8 +97,6 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     StreamLogsResponse,
     UnregisterNodeRequest,
     UnregisterNodeResponse,
-    WithdrawInvitationRequest,
-    WithdrawInvitationResponse,
 )
 from flwr.proto.federation_pb2 import Federation  # pylint: disable=E0611
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
@@ -792,12 +792,12 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         log(INFO, "ControlServicer.RejectInvitation")
         raise NotImplementedError("RejectInvitation is not implemented.")
 
-    def WithdrawInvitation(
-        self, request: WithdrawInvitationRequest, context: grpc.ServicerContext
-    ) -> WithdrawInvitationResponse:
-        """Withdraw an invitation."""
-        log(INFO, "ControlServicer.WithdrawInvitation")
-        raise NotImplementedError("WithdrawInvitation is not implemented.")
+    def RevokeInvitation(
+        self, request: RevokeInvitationRequest, context: grpc.ServicerContext
+    ) -> RevokeInvitationResponse:
+        """Revoke an invitation."""
+        log(INFO, "ControlServicer.RevokeInvitation")
+        raise NotImplementedError("RevokeInvitation is not implemented.")
 
 
 def _validate_federation_and_node_in_request(

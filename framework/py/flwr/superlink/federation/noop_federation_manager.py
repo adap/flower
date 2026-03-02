@@ -137,10 +137,10 @@ class NoOpFederationManager(FederationManager):
             "`reject_invitation` is not supported by NoOpFederationManager."
         )
 
-    def withdraw_invitation(
+    def revoke_invitation(
         self, flwr_aid: str, federation: str, invitee_flwr_aid: str
     ) -> None:
-        """Withdraw a pending invitation."""
+        """Revoke a pending invitation."""
         raise NotImplementedError(
-            "`withdraw_invitation` is not supported by NoOpFederationManager."
+            "`revoke_invitation` is not supported by NoOpFederationManager."
         )
