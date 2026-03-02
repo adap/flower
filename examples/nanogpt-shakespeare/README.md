@@ -1,6 +1,8 @@
-______________________________________________________________________
-
-## tags: [basic, nlp, gpu] dataset: [Tiny Shakespeare] framework: [torch]
+---
+tags: [basic, nlp, gpu]
+dataset: [Tiny Shakespeare]
+framework: [torch]
+---
 
 # Federated Learning with NanoGPT and Flower
 
@@ -19,7 +21,7 @@ Install Flower and clone the app:
 
 ```shell
 pip install "flwr[simulation]>=1.26.1"
-flwr new @kungfuai/nanogpt-shakespeare --framework PyTorch
+flwr new @kungfuai/nanogpt-shakespeare
 ```
 
 This will create the following project layout:
@@ -31,7 +33,7 @@ nanogpt-shakespeare
 │   ├── client_app.py   # Defines your ClientApp
 │   ├── server_app.py   # Defines your ServerApp
 │   └── task.py         # NanoGPT model, data loading, train/test
-├── pyproject.toml       # Project metadata and Flower config
+├── pyproject.toml      # Project metadata and Flower config
 └── README.md
 ```
 
