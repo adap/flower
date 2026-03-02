@@ -39,11 +39,14 @@ from flwr.supercore.constant import (
 from flwr.supercore.version import package_version as flwr_version
 
 from ..auth_plugin.oidc_cli_plugin import OidcCliPlugin
+from ..config_utils import load as load_toml
 from ..utils import (
     build_pathspec,
     load_cli_auth_plugin_from_connection,
     load_gitignore_patterns,
 )
+
+ALLOWED_LICENSE_FILES = ("LICENSE", "LICENSE.md")
 
 
 # pylint: disable=too-many-locals
@@ -106,8 +109,53 @@ def _detect_mime(path: Path) -> str:
     return MIME_MAP.get(path.suffix.lower(), "text/plain; charset=utf-8")
 
 
+def _get_declared_license_file(root: Path) -> str | None:
+    """Return [project].license.file if present after validation."""
+    config = load_toml(root / "pyproject.toml")
+    if config is None:
+        return None
+
+    project = config.get("project")
+    if not isinstance(project, dict):
+        return None
+
+    license_entry = project.get("license")
+    if not isinstance(license_entry, dict):
+        return None
+
+    if "file" in license_entry and "text" in license_entry:
+        raise click.ClickException(
+            "Invalid [project].license: `file` and `text` cannot be set together."
+        )
+
+    if "file" not in license_entry:
+        return None
+
+    license_file = license_entry["file"]
+    if not isinstance(license_file, str):
+        raise click.ClickException(
+            "Invalid [project].license.file: expected a string path."
+        )
+
+    if license_file not in ALLOWED_LICENSE_FILES:
+        raise click.ClickException(
+            "Invalid [project].license.file: only `LICENSE` or `LICENSE.md` "
+            "are supported."
+        )
+
+    if not (root / license_file).is_file():
+        raise click.ClickException(
+            f"Invalid [project].license.file: `{license_file}` was declared "
+            "but does not exist."
+        )
+
+    return license_file
+
+
 def _collect_file_paths(root: Path) -> list[Path]:
     """Return list of file paths that match include/exclude patterns."""
+    declared_license_file = _get_declared_license_file(root)
+
     # Build include/exclude pathspecs
     # Note: This should be a temporary solution until we have a complete mechanism
     # for configurable inclusion and exclusion rules.
@@ -118,6 +166,7 @@ def _collect_file_paths(root: Path) -> list[Path]:
 
     # Walk the directory tree
     file_paths: list[Path] = []
+    selected_relative_paths: set[str] = set()
     for path in root.rglob("*"):
         if not path.is_file():
             continue
@@ -137,6 +186,13 @@ def _collect_file_paths(root: Path) -> list[Path]:
             )
 
         file_paths.append(path)
+        selected_relative_paths.add(posix)
+
+    if declared_license_file and declared_license_file not in selected_relative_paths:
+        raise click.ClickException(
+            f"Invalid [project].license.file: `{declared_license_file}` is "
+            "excluded by `.gitignore` or publish exclude rules."
+        )
 
     # Sort for deterministic ordering
     file_paths.sort(key=lambda path: path.as_posix())

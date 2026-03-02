@@ -59,6 +59,8 @@ APP_PUBLISH_INCLUDE_PATTERNS = (
     "**/*.py",
     "**/*.toml",
     "**/*.md",
+    "/LICENSE",
+    "/LICENSE.md",
 )
 APP_PUBLISH_EXCLUDE_PATTERNS = FAB_EXCLUDE_PATTERNS = (
     f"{FLWR_DIR}/**",  # Exclude the .flwr directory
