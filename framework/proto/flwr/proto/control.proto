@@ -96,7 +96,10 @@ message StreamLogsResponse {
   string log_output = 1;
   double latest_timestamp = 2;
 }
-message ListRunsRequest { optional uint64 run_id = 1; }
+message ListRunsRequest {
+  optional uint64 run_id = 1;
+  optional uint64 limit = 2;
+}
 message ListRunsResponse {
   map<uint64, Run> run_dict = 1;
   string now = 2;
