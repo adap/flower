@@ -10,8 +10,8 @@ Using Poetry (recommended)
 ==========================
 
 Install a ``flwr`` pre-release from PyPI: update the ``flwr`` dependency in
-``pyproject.toml`` and then reinstall (don't forget to delete ``poetry.lock`` (``rm
-poetry.lock``) before running ``poetry install``).
+``pyproject.toml`` and then reinstall (ensure to delete ``poetry.lock`` via ``rm
+poetry.lock`` before running ``python -m poetry install``).
 
 - ``flwr = { version = "1.0.0a0", allow-prereleases = true }`` (without extras)
 - ``flwr = { version = "1.0.0a0", allow-prereleases = true, extras = ["simulation"] }``
