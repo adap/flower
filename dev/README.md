@@ -20,7 +20,7 @@ cd dev
 uv sync --frozen
 ```
 
-This creates/updates `dev/.venv` from `uv.lock`).
+This creates/updates `dev/.venv` from `uv.lock`.
 
 ## Run `devtool` Commands
 
