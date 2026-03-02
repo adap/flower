@@ -118,8 +118,10 @@ def test_collect_files_non_utf8_raises_for_text(tmp_path: Path) -> None:
         _validate_files(_collect_file_paths(tmp_path))
 
 
-def test_collect_files_includes_root_license_file(tmp_path: Path) -> None:
-    """Test root LICENSE is accepted by publish file collection."""
+def test_collect_files_includes_root_license_without_pyproject_license_file(
+    tmp_path: Path,
+) -> None:
+    """Test root LICENSE is accepted even without [project].license.file."""
     license_file = write(tmp_path, "LICENSE", b"Apache-2.0")
     write(tmp_path, f"ok{TEXT_EXT}", b"print('ok')")
 
@@ -197,6 +199,24 @@ def test_collect_files_rejects_license_file_with_text_in_pyproject(
         click.ClickException, match="`file` and `text` cannot be set together"
     ):
         _collect_file_paths(tmp_path)
+
+
+def test_collect_files_accepts_license_text_in_pyproject(tmp_path: Path) -> None:
+    """Test [project].license.text is accepted."""
+    pyproject = write(
+        tmp_path,
+        "pyproject.toml",
+        (
+            b'[project]\nname = "app"\nversion = "1.0.0"\n'
+            b'license = { text = "Apache-2.0" }\n'
+        ),
+    )
+    source = write(tmp_path, f"ok{TEXT_EXT}", b"print('ok')")
+
+    paths = _collect_file_paths(tmp_path)
+
+    assert pyproject in paths
+    assert source in paths
 
 
 def test_build_multipart_files_param(tmp_path: Path) -> None:
