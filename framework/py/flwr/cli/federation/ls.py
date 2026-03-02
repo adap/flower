@@ -92,18 +92,21 @@ def ls(  # pylint: disable=R0914, R0913, R0917, R0912
 
             if federation:
                 # Show specific federation details
-                typer.echo(f"📄 Showing '{federation}' federation ...")
-                members, nodes, runs = _show_federation(stub, federation)
+                typer.echo(f"📄 ! Showing '{federation}' federation ...")
+                members, nodes, runs, archived = _show_federation(stub, federation)
 
                 if is_json:
                     print_json_to_stdout(
-                        {
-                            "federation": _to_json(
-                                members=members, nodes=nodes, runs=runs
-                            )
-                        }
+                        _to_json(
+                            members=members, nodes=nodes, runs=runs, archived=archived
+                        )
                     )
                 else:
+                    if archived:
+                        typer.echo(
+                            "This federation is archived.",
+                            err=True,
+                        )
                     Console().print(_to_members_table(members))
                     Console().print(_to_nodes_table(nodes))
                     Console().print(_to_runs_table(runs))
@@ -113,15 +116,13 @@ def ls(  # pylint: disable=R0914, R0913, R0917, R0912
                 federations = _list_federations(stub)
 
                 active = [f for f in federations if not f.archived]
-                archived = [f for f in federations if f.archived]
+                archived_feds = [f for f in federations if f.archived]
 
                 if is_json:
-                    print_json_to_stdout(
-                        {"federations": _to_json(federations=federations)}
-                    )
+                    print_json_to_stdout(_to_json(federations=federations))
                 else:
                     # If verbose, show archived federations after active ones
-                    shown = active + archived if verbose else active
+                    shown = active + archived_feds if verbose else active
                     Console().print(_to_table(shown))
         finally:
             if channel:
@@ -168,20 +169,23 @@ def _to_json(
     members: list[Member] | None = None,
     nodes: list[NodeInfo] | None = None,
     runs: list[RunRow] | None = None,
-) -> list[dict[str, str | bool]] | dict[str, list[dict[str, Any]]]:
+    archived: bool | None = None,
+) -> dict[str, Any]:
     """Format the provided federations list to JSON serializable format."""
     if federations is not None:
-        return [
-            {
-                "name": federation.name,
-                "description": federation.description,
-                "archived": federation.archived,
-            }
-            for federation in federations
-        ]
+        return {
+            "federations": [
+                {
+                    "name": federation.name,
+                    "description": federation.description,
+                    "archived": federation.archived,
+                }
+                for federation in federations
+            ]
+        }
 
     if members is None or nodes is None or runs is None:
-        return {}
+        return {"federation": {}}
 
     members_list: list[dict[str, Any]] = []
     nodes_list: list[dict[str, Any]] = []
@@ -210,15 +214,18 @@ def _to_json(
         )
 
     return {
-        "members": members_list,
-        "nodes": nodes_list,
-        "runs": runs_list,
+        "federation": {
+            "members": members_list,
+            "nodes": nodes_list,
+            "runs": runs_list,
+            "archived": archived,
+        }
     }
 
 
 def _show_federation(
     stub: ControlStub, federation: str
-) -> tuple[list[Member], list[NodeInfo], list[RunRow]]:
+) -> tuple[list[Member], list[NodeInfo], list[RunRow], bool]:
     """Show federation details.
 
     Parameters
@@ -246,6 +253,7 @@ def _show_federation(
         list(fed_proto.members),
         list(fed_proto.nodes),
         formatted_runs,
+        fed_proto.archived,
     )
 
 
