@@ -92,9 +92,13 @@ def ls(  # pylint: disable=R0914, R0913, R0917, R0912
 
             if federation:
                 # Show specific federation details
-                typer.echo(f"📄 ! Showing '{federation}' federation ...")
                 members, nodes, runs, archived = _show_federation(stub, federation)
-
+                is_archived = (
+                    " [bold yellow]\\[ARCHIVED][/bold yellow]" if archived else ""
+                )
+                Console().print(
+                    f"📄 Showing '{federation}' federation{is_archived} ...\n"
+                )
                 if is_json:
                     print_json_to_stdout(
                         _to_json(
@@ -102,11 +106,7 @@ def ls(  # pylint: disable=R0914, R0913, R0917, R0912
                         )
                     )
                 else:
-                    if archived:
-                        typer.echo(
-                            "This federation is archived.",
-                            err=True,
-                        )
+
                     Console().print(_to_members_table(members))
                     Console().print(_to_nodes_table(nodes))
                     Console().print(_to_runs_table(runs))
