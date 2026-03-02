@@ -55,18 +55,24 @@ from flwr.common.serde import (
 from flwr.common.typing import Fab, Run, RunStatus
 from flwr.proto import control_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
+    AcceptInvitationRequest,
+    AcceptInvitationResponse,
     AddNodeToFederationRequest,
     AddNodeToFederationResponse,
     ArchiveFederationRequest,
     ArchiveFederationResponse,
     CreateFederationRequest,
     CreateFederationResponse,
+    CreateInvitationRequest,
+    CreateInvitationResponse,
     GetAuthTokensRequest,
     GetAuthTokensResponse,
     GetLoginDetailsRequest,
     GetLoginDetailsResponse,
     ListFederationsRequest,
     ListFederationsResponse,
+    ListInvitationsRequest,
+    ListInvitationsResponse,
     ListNodesRequest,
     ListNodesResponse,
     ListRunsRequest,
@@ -75,8 +81,12 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     PullArtifactsResponse,
     RegisterNodeRequest,
     RegisterNodeResponse,
+    RejectInvitationRequest,
+    RejectInvitationResponse,
     RemoveNodeFromFederationRequest,
     RemoveNodeFromFederationResponse,
+    RevokeInvitationRequest,
+    RevokeInvitationResponse,
     ShowFederationRequest,
     ShowFederationResponse,
     StartRunRequest,
@@ -102,6 +112,7 @@ from flwr.superlink.auth_plugin import ControlAuthnPlugin
 from .control_account_auth_interceptor import get_current_account_info
 
 
+# pylint: disable=too-many-public-methods
 class ControlServicer(control_pb2_grpc.ControlServicer):
     """Control API servicer."""
 
@@ -554,9 +565,13 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
 
         # Get federations the account is a member of
         federations = state.federation_manager.get_federations(flwr_aid=flwr_aid)
+
         return ListFederationsResponse(
             federations=[
-                Federation(name=fed[0], description=fed[1]) for fed in federations
+                Federation(
+                    name=fed.name, description=fed.description, archived=fed.archived
+                )
+                for fed in federations
             ]
         )
 
@@ -577,7 +592,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
 
         # Ensure flwr_aid is a member of the requested federation
         federation = request.federation_name
-        if federation not in [fed[0] for fed in federations]:
+        if federation not in [fed.name for fed in federations]:
             context.abort(
                 grpc.StatusCode.FAILED_PRECONDITION,
                 f"Federation '{federation}' does not exist or you are "
@@ -593,6 +608,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             members=details.members,
             nodes=details.nodes,
             runs=[run_to_proto(run) for run in details.runs],
+            archived=details.archived,
         )
         return ShowFederationResponse(
             federation=federation_proto, now=now().isoformat()
@@ -747,6 +763,41 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             )
 
         return RemoveNodeFromFederationResponse()
+
+    def CreateInvitation(
+        self, request: CreateInvitationRequest, context: grpc.ServicerContext
+    ) -> CreateInvitationResponse:
+        """Create an invitation."""
+        log(INFO, "ControlServicer.CreateInvitation")
+        raise NotImplementedError("CreateInvitation is not implemented.")
+
+    def ListInvitations(
+        self, request: ListInvitationsRequest, context: grpc.ServicerContext
+    ) -> ListInvitationsResponse:
+        """List invitations."""
+        log(INFO, "ControlServicer.ListInvitations")
+        raise NotImplementedError("ListInvitations is not implemented.")
+
+    def AcceptInvitation(
+        self, request: AcceptInvitationRequest, context: grpc.ServicerContext
+    ) -> AcceptInvitationResponse:
+        """Accept an invitation."""
+        log(INFO, "ControlServicer.AcceptInvitation")
+        raise NotImplementedError("AcceptInvitation is not implemented.")
+
+    def RejectInvitation(
+        self, request: RejectInvitationRequest, context: grpc.ServicerContext
+    ) -> RejectInvitationResponse:
+        """Reject an invitation."""
+        log(INFO, "ControlServicer.RejectInvitation")
+        raise NotImplementedError("RejectInvitation is not implemented.")
+
+    def RevokeInvitation(
+        self, request: RevokeInvitationRequest, context: grpc.ServicerContext
+    ) -> RevokeInvitationResponse:
+        """Revoke an invitation."""
+        log(INFO, "ControlServicer.RevokeInvitation")
+        raise NotImplementedError("RevokeInvitation is not implemented.")
 
 
 def _validate_federation_and_node_in_request(
