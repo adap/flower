@@ -70,6 +70,9 @@ def publish(
     # Load token from the plugin
     token = auth_plugin.access_token
 
+    # Resolve app path
+    app = app.expanduser().resolve()
+
     # Collect & validate app files
     file_paths = _collect_file_paths(app)
     _validate_files(file_paths)
@@ -109,7 +112,7 @@ def _detect_mime(path: Path) -> str:
 
 
 def _get_declared_license_file(root: Path) -> Path | None:
-    """Return validated path from `[project].license.file` if declared, else None."""
+    """Return validated absolute path from `[project].license.file`, else None."""
     # Read optional [project].license.file from pyproject.toml
     config = load_toml(root / "pyproject.toml")
     if config is None:
@@ -145,7 +148,7 @@ def _get_declared_license_file(root: Path) -> Path | None:
             f"Invalid [project].license.file: `{license_file}` was declared "
             "but does not exist."
         )
-    return root / license_file
+    return (root / license_file).expanduser().resolve()
 
 
 def _collect_file_paths(root: Path) -> list[Path]:
