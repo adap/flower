@@ -41,4 +41,3 @@ How-to guides provide step-by-step instructions to help you accomplish specific 
 
   how-to-use-hub
   how-to-contribute-hub
-  how-to-sign-app
