@@ -44,7 +44,7 @@ jobs:
       - uses: actions/checkout@v5
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
-      - name: Install dependencies (mandatory only)
+      - name: Install dependencies
         run: |
           cd framework
           python -m poetry install --all-extras
@@ -225,7 +225,8 @@ jobs:
       - name: Install Flower wheel from artifact store
         if: ${{ needs.changes.outputs.framework == 'true' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
         run: |
-          python -m pip install https://${{ env.ARTIFACT_BUCKET }}/py/${{ needs.wheel.outputs.dir }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}
+          WHEEL_URL="https://${{ env.ARTIFACT_BUCKET }}/py/${{ needs.wheel.outputs.dir }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}"
+          python -m pip install "flwr[simulation] @ ${WHEEL_URL}"
       - name: Download dataset
         if: ${{ needs.changes.outputs.framework == 'true' && matrix.dataset }}
         run: python -c "${{ matrix.dataset }}"
@@ -284,11 +285,12 @@ jobs:
       - name: Install dependencies
         if: ${{ needs.changes.outputs.framework == 'true' }}
         run: |
-          python -m poetry install
+          python -m poetry install --only main
       - name: Install Flower wheel from artifact store
         if: ${{ needs.changes.outputs.framework == 'true' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
         run: |
-          python -m pip install https://${{ env.ARTIFACT_BUCKET }}/py/${{ needs.wheel.outputs.dir }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}
+          WHEEL_URL="https://${{ env.ARTIFACT_BUCKET }}/py/${{ needs.wheel.outputs.dir }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}"
+          python -m pip install "flwr[simulation] @ ${WHEEL_URL}"
       - name: Cache Datasets
         if: ${{ needs.changes.outputs.framework == 'true' }}
         uses: actions/cache@v4
@@ -335,7 +337,8 @@ jobs:
       - name: Install Flower wheel from artifact store
         if: ${{ needs.changes.outputs.framework == 'true' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
         run: |
-          python -m pip install https://${{ env.ARTIFACT_BUCKET }}/py/${{ needs.wheel.outputs.dir }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}
+          WHEEL_URL="https://${{ env.ARTIFACT_BUCKET }}/py/${{ needs.wheel.outputs.dir }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}"
+          python -m pip install "flwr[simulation] @ ${WHEEL_URL}"
       - name: Install project dependencies
         if: ${{ needs.changes.outputs.framework == 'true' }}
         working-directory: examples/${{ matrix.example }}
@@ -378,7 +381,8 @@ jobs:
       - name: Install Flower wheel from artifact store
         if: ${{ needs.changes.outputs.framework == 'true' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
         run: |
-          python -m pip install https://${{ env.ARTIFACT_BUCKET }}/py/${{ needs.wheel.outputs.dir }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}
+          WHEEL_URL="https://${{ env.ARTIFACT_BUCKET }}/py/${{ needs.wheel.outputs.dir }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}"
+          python -m pip install "flwr[simulation] @ ${WHEEL_URL}"
       - name: Create project and install it
         if: ${{ needs.changes.outputs.framework == 'true' }}
         run: |
@@ -424,7 +428,8 @@ jobs:
       - name: Install Flower wheel from artifact store
         if: ${{ needs.changes.outputs.framework == 'true' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
         run: |
-          python -m pip install https://${{ env.ARTIFACT_BUCKET }}/py/${{ needs.wheel.outputs.dir }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}
+          WHEEL_URL="https://${{ env.ARTIFACT_BUCKET }}/py/${{ needs.wheel.outputs.dir }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}"
+          python -m pip install "flwr[simulation] @ ${WHEEL_URL}"
       - name: Create project, build, and install it
         if: ${{ needs.changes.outputs.framework == 'true' }}
         run: |
