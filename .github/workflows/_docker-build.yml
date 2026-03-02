@@ -51,13 +51,21 @@ jobs:
       - name: Create build id
         id: build-id
         shell: python
+        env:
+          NAMESPACE_REPOSITORY: ${{ inputs.namespace-repository }}
+          FILE_DIR: ${{ inputs.file-dir }}
+          BUILD_ARGS: ${{ inputs.build-args }}
         run: |
           import hashlib
           import os
 
-          hash = hashlib.sha256('''${{ inputs.namespace-repository }}
-          ${{ inputs.file-dir }}
-          ${{ inputs.build-args }}'''.encode())
+          namespace_repository = os.environ.get("NAMESPACE_REPOSITORY", "")
+          file_dir = os.environ.get("FILE_DIR", "")
+          build_args_input = os.environ.get("BUILD_ARGS", "")
+
+          hash_input = f"{namespace_repository}\n{file_dir}\n{build_args_input}"
+          hash = hashlib.sha256(hash_input.encode())
+
           # Adds two spaces to the line breaks to ensure proper indentation
           # when passing the multi-line string to the wretry.action.
           # Without it, the multi-line string is passed like this:
@@ -69,7 +77,7 @@ jobs:
           #
           # This causes the Docker action to interpret ARG2 and ARG3 as keys instead
           # of values ​​of the multi-line string.
-          build_args = '''${{ inputs.build-args }}'''.replace("\n", "\n  ")
+          build_args = build_args_input.replace("\n", "\n  ")
 
           with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
               print(f"id={hash.hexdigest()}", file=fh)
