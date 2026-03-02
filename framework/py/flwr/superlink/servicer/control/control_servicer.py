@@ -546,20 +546,13 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         # Get federations the account is a member of
         federations = state.federation_manager.get_federations(flwr_aid=flwr_aid)
 
-        archived_federations = [fed for fed in federations if fed.archived]
-        active_federations = [fed for fed in federations if not fed.archived]
-
-        print(archived_federations)
-        print(active_federations)
         return ListFederationsResponse(
             federations=[
-                Federation(name=fed.name, description=fed.description)
-                for fed in active_federations
-            ],
-            archived_federations=[
-                Federation(name=fed.name, description=fed.description)
-                for fed in archived_federations
-            ],
+                Federation(
+                    name=fed.name, description=fed.description, archived=fed.archived
+                )
+                for fed in federations
+            ]
         )
 
     def ShowFederation(

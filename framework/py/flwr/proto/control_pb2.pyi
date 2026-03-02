@@ -421,18 +421,14 @@ class ListFederationsResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
 
     FEDERATIONS_FIELD_NUMBER: builtins.int
-    ARCHIVED_FEDERATIONS_FIELD_NUMBER: builtins.int
     @property
     def federations(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[flwr.proto.federation_pb2.Federation]: ...
-    @property
-    def archived_federations(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[flwr.proto.federation_pb2.Federation]: ...
     def __init__(
         self,
         *,
         federations: collections.abc.Iterable[flwr.proto.federation_pb2.Federation] | None = ...,
-        archived_federations: collections.abc.Iterable[flwr.proto.federation_pb2.Federation] | None = ...,
     ) -> None: ...
-    def ClearField(self, field_name: typing.Literal["archived_federations", b"archived_federations", "federations", b"federations"]) -> None: ...
+    def ClearField(self, field_name: typing.Literal["federations", b"federations"]) -> None: ...
 
 global___ListFederationsResponse = ListFederationsResponse
 
