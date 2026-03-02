@@ -6,7 +6,6 @@ import time
 
 import numpy as np
 import torch
-
 from flwr.app import ArrayRecord, Context, MetricRecord
 from flwr.serverapp import Grid, ServerApp
 from flwr.serverapp.strategy import FedAvg

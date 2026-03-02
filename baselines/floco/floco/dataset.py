@@ -1,12 +1,12 @@
 """floco: A Flower Baseline."""
 
-from datasets import load_dataset
 from flwr.app import Context
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import InnerDirichletPartitioner
 from torch.utils.data import DataLoader
 from torchvision import transforms
 
+from datasets import load_dataset
 from .partitioners import FoldPartitioner
 
 # pylint: disable=C0103, W0603

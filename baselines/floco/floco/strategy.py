@@ -4,8 +4,6 @@ from collections.abc import Iterable
 from logging import INFO
 
 import numpy as np
-from sklearn import decomposition
-
 from flwr.app import MessageType
 from flwr.common import (
     ArrayRecord,
@@ -22,6 +20,7 @@ from flwr.serverapp.strategy.strategy_utils import (
     aggregate_arrayrecords,
     sample_nodes,
 )
+from sklearn import decomposition
 
 
 class Floco(FedAvg):

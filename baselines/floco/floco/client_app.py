@@ -3,7 +3,6 @@
 import copy
 
 import torch
-
 from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
 from flwr.clientapp import ClientApp
 from flwr.common import bytes_to_ndarray
