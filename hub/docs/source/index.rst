@@ -18,14 +18,14 @@ The Flower Community is growing quickly - we're a friendly group of researchers,
 Flower Hub
 ----------
 
-Flower Hub is a federated app store that enables application discovery, distribution, execution, and decentralized verification across heterogeneous environments — without relying on a centralized trust authority.
+Flower Hub is a federated app store that enables the discovery, distribution, and execution of federated applications across heterogeneous environments.
 
 With Flower Hub, you can:
 
 - Focus on **federated application logic** without managing infrastructure complexity.
-- **Run applications with a single command** across diverse environments.
-- Publish applications that can be **independently verified by trusted entities**.
-- Discover and reuse federated applications built by the community.
+- **Run applications with a single command** across simulation and deployment environments.
+- **Publish applications in a standardized format** and share them with the community, fostering collaboration and accelerating federated AI innovation.
+- Discover, reuse, and build upon federated applications created by others.
 
 Explore the available applications on Flower Hub and contribute your own federated apps to help grow the ecosystem.
 

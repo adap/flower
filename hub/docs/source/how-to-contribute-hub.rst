@@ -99,6 +99,12 @@ Example:
    Choose them carefully to ensure your app is clear, descriptive, and easy to discover.
    The :code:`name` **cannot be changed** after the first publication, so make sure it is final before releasing your app.
 
+.. note::
+   Currently, Flower Hub supports only the following file formats: :code:`.py`, :code:`.toml`, and :code:`.md`. 
+   Ensure that all required files for your app (e.g., source code, metadata, README) are included in the same directory before publishing.
+
+   Support for additional file formats is planned for future releases.
+
 
 Create a Flower Account
 -----------------------
