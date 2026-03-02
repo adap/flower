@@ -106,14 +106,15 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches, R0913, R0917
         channel = None
 
         try:
-            if runs and run_id is not None:
-                raise ValueError(
-                    "The options '--runs' and '--run-id' are mutually exclusive."
-                )
-            if limit is not None and limit <= 0:
-                raise ValueError(
-                    "The option '--limit' must be an integer greater than 0."
-                )
+            if limit is not None:
+                if limit <= 0:
+                    raise ValueError(
+                        "The option '--limit' must be an integer greater than 0."
+                    )
+                if run_id is not None:
+                    raise ValueError(
+                        "The options '--run-id' and '--limit' cannot be used together."
+                    )
             channel = init_channel_from_connection(superlink_connection)
             stub = ControlStub(channel)
 
