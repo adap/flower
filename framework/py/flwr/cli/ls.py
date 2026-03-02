@@ -58,13 +58,6 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches, R0913, R0917
             hidden=True,
         ),
     ] = None,
-    runs: Annotated[
-        bool,
-        typer.Option(
-            "--runs",
-            help="List all runs",
-        ),
-    ] = False,
     run_id: Annotated[
         int | None,
         typer.Option(
