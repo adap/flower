@@ -33,6 +33,9 @@ jobs:
           filters: |
             framework:
               - 'framework/**/*'
+              - 'dev/devtool/**'
+              - 'dev/pyproject.toml'
+              - 'dev/uv.lock'
               - '.github/workflows/framework-test.yml'
             ex_bench:
               - 'examples/**/*'
