@@ -26,6 +26,7 @@ from flwr.proto.simulationio_pb2_grpc import (  # pylint: disable=E0611
     add_SimulationIoServicer_to_server,
 )
 from flwr.server.superlink.linkstate import LinkStateFactory
+from flwr.server.superlink.superexec_auth import SuperExecAuthConfig
 from flwr.supercore.ffs import FfsFactory
 
 from .simulationio_servicer import SimulationIoServicer
@@ -36,12 +37,14 @@ def run_simulationio_api_grpc(
     state_factory: LinkStateFactory,
     ffs_factory: FfsFactory,
     certificates: tuple[bytes, bytes, bytes] | None,
+    superexec_auth_config: SuperExecAuthConfig | None = None,
 ) -> grpc.Server:
     """Run SimulationIo API (gRPC, request-response)."""
     # Create SimulationIo API gRPC server
     simulationio_servicer: grpc.Server = SimulationIoServicer(
         state_factory=state_factory,
         ffs_factory=ffs_factory,
+        superexec_auth_config=superexec_auth_config,
     )
     simulationio_add_servicer_to_server_fn = add_SimulationIoServicer_to_server
     simulationio_grpc_server = generic_create_grpc_server(
