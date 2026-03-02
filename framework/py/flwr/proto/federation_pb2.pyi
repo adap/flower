@@ -80,7 +80,7 @@ class Federation(google.protobuf.message.Message):
     description: builtins.str
     """Added in v1.26.0"""
     archived: builtins.bool
-    """Added in v1.28.0"""
+    """Added in v1.27.0"""
     @property
     def nodes(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[flwr.proto.node_pb2.NodeInfo]: ...
     @property
