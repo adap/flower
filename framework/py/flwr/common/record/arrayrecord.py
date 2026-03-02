@@ -26,12 +26,13 @@ from typing import TYPE_CHECKING, Any, cast, overload
 
 import numpy as np
 
-from ..constant import GC_THRESHOLD
-from ..inflatable_object import (
+from flwr.supercore.inflatable.inflatable_object import (
     InflatableObject,
     add_header_to_object_body,
     get_object_body,
 )
+
+from ..constant import GC_THRESHOLD
 from ..logger import log
 from ..typing import NDArray
 from .array import Array

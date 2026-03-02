@@ -23,12 +23,6 @@ import numpy as np
 from parameterized import parameterized
 
 from flwr.common import ArrayRecord, ConfigRecord, Message, MetricRecord, RecordDict
-from flwr.common.inflatable_utils import (
-    ObjectIdNotPreregisteredError,
-    ObjectUnavailableError,
-    pull_objects,
-    push_objects,
-)
 from flwr.proto.message_pb2 import (  # pylint: disable=E0611
     PullObjectRequest,
     PullObjectResponse,
@@ -36,6 +30,12 @@ from flwr.proto.message_pb2 import (  # pylint: disable=E0611
     PushObjectResponse,
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
+from flwr.supercore.inflatable.inflatable_utils import (
+    ObjectIdNotPreregisteredError,
+    ObjectUnavailableError,
+    pull_objects,
+    push_objects,
+)
 
 from .inflatable_object import get_all_nested_objects
 from .inflatable_protobuf_utils import (
