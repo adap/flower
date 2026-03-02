@@ -82,6 +82,7 @@ class NoOpFederationManager(FederationManager):
             ],
             nodes=nodes,
             runs=runs,
+            archived=False,
         )
 
     def create_federation(
