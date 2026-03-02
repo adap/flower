@@ -97,7 +97,11 @@ def ls(  # pylint: disable=R0914, R0913, R0917, R0912
 
                 if is_json:
                     print_json_to_stdout(
-                        _to_json(members=members, nodes=nodes, runs=runs)
+                        {
+                            "federation": _to_json(
+                                members=members, nodes=nodes, runs=runs
+                            )
+                        }
                     )
                 else:
                     Console().print(_to_members_table(members))
@@ -112,7 +116,9 @@ def ls(  # pylint: disable=R0914, R0913, R0917, R0912
                 archived = [f for f in federations if f.archived]
 
                 if is_json:
-                    print_json_to_stdout(_to_json(federations=federations))
+                    print_json_to_stdout(
+                        {"federations": _to_json(federations=federations)}
+                    )
                 else:
                     # If verbose, show archived federations after active ones
                     shown = active + archived if verbose else active
@@ -159,10 +165,10 @@ def _to_json(
     members: list[Member] | None = None,
     nodes: list[NodeInfo] | None = None,
     runs: list[RunRow] | None = None,
-) -> list[dict[str, str | bool]] | list[list[dict[str, Any]]]:
+) -> list[dict[str, str | bool]] | dict[str, list[dict[str, Any]]]:
     """Format the provided federations list to JSON serializable format."""
     if federations is not None:
-        result: list[dict[str, str | bool]] = [
+        return [
             {
                 "name": federation.name,
                 "description": federation.description,
@@ -170,10 +176,9 @@ def _to_json(
             }
             for federation in federations
         ]
-        return result
 
     if members is None or nodes is None or runs is None:
-        return []
+        return {}
 
     members_list: list[dict[str, Any]] = []
     nodes_list: list[dict[str, Any]] = []
@@ -201,7 +206,11 @@ def _to_json(
             }
         )
 
-    return [members_list, nodes_list, runs_list]
+    return {
+        "members": members_list,
+        "nodes": nodes_list,
+        "runs": runs_list,
+    }
 
 
 def _show_federation(
