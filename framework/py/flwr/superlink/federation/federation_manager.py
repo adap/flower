@@ -123,3 +123,76 @@ class FederationManager(ABC):
         node_id : int
             The ID of the SuperNode to remove.
         """
+
+    @abstractmethod
+    def create_invitation(
+        self, flwr_aid: str, federation: str, invitee_flwr_aid: str
+    ) -> None:
+        """Create an invitation for an account to join a federation.
+
+        Parameters
+        ----------
+        flwr_aid : str
+            The ID of the account creating the invitation (inviter).
+        federation : str
+            The name of the federation.
+        invitee_flwr_aid : str
+            The ID of the account being invited.
+        """
+
+    @abstractmethod
+    def list_invitations(self, flwr_aid: str, federation: str) -> list[dict[str, str]]:
+        """List invitations for a federation visible to the given account.
+
+        Parameters
+        ----------
+        flwr_aid : str
+            The ID of the account listing invitations.
+        federation : str
+            The name of the federation.
+
+        Returns
+        -------
+        list[dict[str, str]]
+            A list of invitation records.
+        """
+
+    @abstractmethod
+    def accept_invitation(self, flwr_aid: str, federation: str) -> None:
+        """Accept a pending invitation to join a federation.
+
+        Parameters
+        ----------
+        flwr_aid : str
+            The ID of the account accepting the invitation (invitee).
+        federation : str
+            The name of the federation.
+        """
+
+    @abstractmethod
+    def reject_invitation(self, flwr_aid: str, federation: str) -> None:
+        """Reject a pending invitation to join a federation.
+
+        Parameters
+        ----------
+        flwr_aid : str
+            The ID of the account rejecting the invitation (invitee).
+        federation : str
+            The name of the federation.
+        """
+
+    @abstractmethod
+    def withdraw_invitation(
+        self, flwr_aid: str, federation: str, invitee_flwr_aid: str
+    ) -> None:
+        """Withdraw a pending invitation.
+
+        Parameters
+        ----------
+        flwr_aid : str
+            The ID of the account withdrawing the invitation (inviter).
+        federation : str
+            The name of the federation.
+        invitee_flwr_aid : str
+            The ID of the account whose invitation is being withdrawn.
+        """
