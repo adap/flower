@@ -545,10 +545,21 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
 
         # Get federations the account is a member of
         federations = state.federation_manager.get_federations(flwr_aid=flwr_aid)
+
+        archived_federations = [fed for fed in federations if fed.archived]
+        active_federations = [fed for fed in federations if not fed.archived]
+
+        print(archived_federations)
+        print(active_federations)
         return ListFederationsResponse(
             federations=[
-                Federation(name=fed[0], description=fed[1]) for fed in federations
-            ]
+                Federation(name=fed.name, description=fed.description)
+                for fed in active_federations
+            ],
+            archived_federations=[
+                Federation(name=fed.name, description=fed.description)
+                for fed in archived_federations
+            ],
         )
 
     def ShowFederation(
@@ -568,7 +579,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
 
         # Ensure flwr_aid is a member of the requested federation
         federation = request.federation_name
-        if federation not in [fed[0] for fed in federations]:
+        if federation not in [fed.name for fed in federations]:
             context.abort(
                 grpc.StatusCode.FAILED_PRECONDITION,
                 f"Federation '{federation}' does not exist or you are "

@@ -136,7 +136,10 @@ message ListNodesResponse {
 }
 
 message ListFederationsRequest {}
-message ListFederationsResponse { repeated Federation federations = 1; }
+message ListFederationsResponse {
+  repeated Federation federations = 1;
+  repeated Federation archived_federations = 2;
+}
 
 message ShowFederationRequest { string federation_name = 1; }
 message ShowFederationResponse {

@@ -48,11 +48,20 @@ class NoOpFederationManager(FederationManager):
             raise ValueError(f"Federation '{federation}' does not exist.")
         return True
 
-    def get_federations(self, flwr_aid: str) -> list[tuple[str, str]]:
+    def get_federations(self, flwr_aid: str) -> list[Federation]:
         """Get federations (name, description) of which the account is a member."""
         if flwr_aid != NOOP_FLWR_AID:
             return []
-        return [(NOOP_FEDERATION, NOOP_FEDERATION_DESCRIPTION)]
+        return [
+            Federation(
+                name=NOOP_FEDERATION,
+                description=NOOP_FEDERATION_DESCRIPTION,
+                members=[],
+                nodes=[],
+                runs=[],
+                archived=False,
+            )
+        ]
 
     def get_details(self, federation: str) -> Federation:
         """Get details of the federation."""

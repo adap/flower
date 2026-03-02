@@ -220,4 +220,7 @@ def test_get_federations() -> None:
 
     # Assert
     assert len(result) == 0
-    assert result2 == [(NOOP_FEDERATION, NOOP_FEDERATION_DESCRIPTION)]
+    assert len(result2) == 1
+    assert result2[0].name == NOOP_FEDERATION
+    assert result2[0].description == NOOP_FEDERATION_DESCRIPTION
+    assert result2[0].archived is False

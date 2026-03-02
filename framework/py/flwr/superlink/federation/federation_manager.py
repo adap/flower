@@ -56,7 +56,7 @@ class FederationManager(ABC):
         """Given a node ID, check if it is in the federation."""
 
     @abstractmethod
-    def get_federations(self, flwr_aid: str) -> list[tuple[str, str]]:
+    def get_federations(self, flwr_aid: str) -> list[Federation]:
         """Get federations (name, description) of which the account is a member."""
 
     @abstractmethod
