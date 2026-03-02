@@ -6,12 +6,14 @@ on:
       - main
     paths:
       - "datasets/**"
+      - "dev/devtool/**"
       - ".github/workflows/datasets-*.yml"
   pull_request:
     branches:
       - main
     paths:
       - "datasets/**"
+      - "dev/devtool/**"
       - ".github/workflows/datasets-*.yml"
 
 concurrency:
