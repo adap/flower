@@ -28,14 +28,13 @@ from cryptography.exceptions import UnsupportedAlgorithm
 from cryptography.hazmat.primitives.asymmetric import ed25519
 
 from flwr.common import now
-from flwr.common.config import get_flwr_dir
 from flwr.supercore.constant import PLATFORM_API_URL, SUPERGRID_ADDRESS
 from flwr.supercore.primitives.asymmetric_ed25519 import (
     create_message_to_sign,
     load_private_key,
     sign_message,
 )
-from flwr.supercore.utils import parse_app_spec, request_download_link
+from flwr.supercore.utils import get_flwr_home, parse_app_spec, request_download_link
 from flwr.supercore.version import package_version as flwr_version
 
 from ..auth_plugin.oidc_cli_plugin import OidcCliPlugin
@@ -83,7 +82,11 @@ def review(
         # Unpack FAB
         typer.secho("Unpacking FAB... ", fg=typer.colors.BLUE)
         review_dir = _create_review_dir()
-        review_app_path = install_from_fab(fab_bytes, review_dir)
+        review_app_path = install_from_fab(
+            fab_bytes,
+            install_dir=review_dir,
+            skip_prompt=True,
+        )
     except ValueError as e:
         raise click.ClickException(str(e)) from e
 
@@ -152,8 +155,7 @@ def review(
 
 def _create_review_dir() -> Path:
     """Create a directory for reviewing code."""
-    home = get_flwr_dir()
-    review_dir = home / "reviews"
+    review_dir = get_flwr_home() / "reviews"
     review_dir.mkdir(parents=True, exist_ok=True)
     return review_dir
 
