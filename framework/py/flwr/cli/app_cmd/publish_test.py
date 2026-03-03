@@ -118,6 +118,107 @@ def test_collect_files_non_utf8_raises_for_text(tmp_path: Path) -> None:
         _validate_files(_collect_file_paths(tmp_path))
 
 
+def test_collect_files_includes_root_license_without_pyproject_license_file(
+    tmp_path: Path,
+) -> None:
+    """Test root LICENSE is accepted even without [project].license.file."""
+    license_file = write(tmp_path, "LICENSE", b"Apache-2.0")
+    write(tmp_path, f"ok{TEXT_EXT}", b"print('ok')")
+
+    paths = _collect_file_paths(tmp_path)
+
+    assert license_file in paths
+
+
+def test_collect_files_rejects_invalid_license_path_in_pyproject(
+    tmp_path: Path,
+) -> None:
+    """Test [project].license.file only allows LICENSE or LICENSE.md."""
+    write(
+        tmp_path,
+        "pyproject.toml",
+        (
+            b'[project]\nname = "app"\nversion = "1.0.0"\n'
+            b'license = { file = "legal/LICENSE.txt" }\n'
+        ),
+    )
+    write(tmp_path, f"ok{TEXT_EXT}", b"print('ok')")
+
+    with pytest.raises(click.ClickException, match="only `LICENSE` or `LICENSE.md`"):
+        _collect_file_paths(tmp_path)
+
+
+def test_collect_files_rejects_missing_license_file_in_pyproject(
+    tmp_path: Path,
+) -> None:
+    """Test declared [project].license.file must exist."""
+    write(
+        tmp_path,
+        "pyproject.toml",
+        b'[project]\nname = "app"\nversion = "1.0.0"\nlicense = { file = "LICENSE" }\n',
+    )
+    write(tmp_path, f"ok{TEXT_EXT}", b"print('ok')")
+
+    with pytest.raises(click.ClickException, match="was declared but does not exist"):
+        _collect_file_paths(tmp_path)
+
+
+def test_collect_files_rejects_license_file_excluded_by_gitignore(
+    tmp_path: Path,
+) -> None:
+    """Test declared [project].license.file cannot be excluded by .gitignore."""
+    write(
+        tmp_path,
+        "pyproject.toml",
+        b'[project]\nname = "app"\nversion = "1.0.0"\nlicense = { file = "LICENSE" }\n',
+    )
+    write(tmp_path, ".gitignore", b"LICENSE\n")
+    write(tmp_path, "LICENSE", b"Apache-2.0")
+    write(tmp_path, f"ok{TEXT_EXT}", b"print('ok')")
+
+    with pytest.raises(click.ClickException, match="excluded by `.gitignore`"):
+        _collect_file_paths(tmp_path)
+
+
+def test_collect_files_rejects_license_file_with_text_in_pyproject(
+    tmp_path: Path,
+) -> None:
+    """Test [project].license.file and [project].license.text are exclusive."""
+    write(
+        tmp_path,
+        "pyproject.toml",
+        (
+            b'[project]\nname = "app"\nversion = "1.0.0"\n'
+            b'license = { file = "LICENSE", text = "Apache-2.0" }\n'
+        ),
+    )
+    write(tmp_path, "LICENSE", b"Apache-2.0")
+    write(tmp_path, f"ok{TEXT_EXT}", b"print('ok')")
+
+    with pytest.raises(
+        click.ClickException, match="`file` and `text` cannot be set together"
+    ):
+        _collect_file_paths(tmp_path)
+
+
+def test_collect_files_accepts_license_text_in_pyproject(tmp_path: Path) -> None:
+    """Test [project].license.text is accepted."""
+    pyproject = write(
+        tmp_path,
+        "pyproject.toml",
+        (
+            b'[project]\nname = "app"\nversion = "1.0.0"\n'
+            b'license = { text = "Apache-2.0" }\n'
+        ),
+    )
+    source = write(tmp_path, f"ok{TEXT_EXT}", b"print('ok')")
+
+    paths = _collect_file_paths(tmp_path)
+
+    assert pyproject in paths
+    assert source in paths
+
+
 def test_build_multipart_files_param(tmp_path: Path) -> None:
     """Test multipart files building."""
     f1 = write(tmp_path, f"a{TEXT_EXT}", b"hello")
