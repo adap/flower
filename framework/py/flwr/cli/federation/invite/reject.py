@@ -14,6 +14,7 @@
 # ==============================================================================
 """Flower command line interface `federation invite reject` command."""
 
+
 from typing import Annotated
 
 import typer
