@@ -86,7 +86,7 @@ Finally, launch the run using :code:`flwr run`, pointing to the appropriate Supe
 Run a Hub App Without Creating It Locally
 -----------------------------------------
 
-In Deployment Runtime, you can run an app directly from Flower Hub without downloading it fist locally. Note this assumes SuperNodes are already connected to the SuperLink:
+In the Deployment Runtime, you can run an app directly from Flower Hub without first creating it locally. Note this assumes SuperNodes are already connected to the SuperLink:
 
 .. code-block:: bash
 
