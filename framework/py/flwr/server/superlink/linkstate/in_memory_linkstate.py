@@ -585,17 +585,6 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
         log(ERROR, "Unexpected run creation failure.")
         return 0
 
-    def get_run(self, run_id: int) -> Run | None:
-        """Retrieve information about the run with the specified `run_id`."""
-        # Clean up expired tokens; this will flag inactive runs as needed
-        self._cleanup_expired_tokens()
-
-        with self.lock:
-            if run_id not in self.run_ids:
-                log(ERROR, "`run_id` is invalid")
-                return None
-            return self.run_ids[run_id].run
-
     def get_run_info(
         self,
         *,

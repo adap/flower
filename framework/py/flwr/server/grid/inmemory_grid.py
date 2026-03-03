@@ -65,7 +65,8 @@ class InMemoryGrid(Grid):
 
     def set_run(self, run_id: int) -> None:
         """Initialize the run."""
-        run = self.state.get_run(run_id)
+        runs = self.state.get_run_info(run_ids=[run_id])
+        run = runs[0] if runs else None
         if run is None:
             raise RuntimeError(f"Cannot find the run with ID: {run_id}")
         self._run = run

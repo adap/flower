@@ -46,7 +46,7 @@ from flwr.common.constant import (
     SubStatus,
 )
 from flwr.common.serde import message_from_proto, message_to_proto
-from flwr.common.typing import RunStatus
+from flwr.common.typing import Run, RunStatus
 
 # pylint: disable=E0611
 from flwr.proto.message_pb2 import Message as ProtoMessage
@@ -78,8 +78,8 @@ class StateTest(CoreStateTest):
         _, public_key = generate_key_pairs()
         return public_key_to_bytes(public_key)
 
-    def test_create_and_get_run(self) -> None:
-        """Test if create_run and get_run work correctly."""
+    def test_create_and_get_run_info(self) -> None:
+        """Test if create_run and get_run_info work correctly."""
         # Prepare
         state: LinkState = self.state_factory()
         run_id = state.create_run(
@@ -93,10 +93,9 @@ class StateTest(CoreStateTest):
         )
 
         # Execute
-        run = state.get_run(run_id)
+        run = state.get_run_info(run_ids=[run_id])[0]
 
         # Assert
-        assert run is not None
         assert run.run_id == run_id
         assert run.fab_hash == "9f86d08"
         assert run.federation == "health-federation"
@@ -322,7 +321,7 @@ class StateTest(CoreStateTest):
         assert status2.status == Status.RUNNING
 
     @parameterized.expand(
-        [("get_run",), ("get_run_status",), ("update_run_status",)]
+        [("get_run_info",), ("get_run_status",), ("update_run_status",)]
     )  # type: ignore
     def test_run_failed_due_to_heartbeat(self, test_method: str) -> None:
         """Test methods work correctly when the run has no heartbeat."""
@@ -339,9 +338,8 @@ class StateTest(CoreStateTest):
         with patch("datetime.datetime") as mock_dt:
             mock_dt.now.return_value = patched_dt
 
-            if test_method == "get_run":
-                run = state.get_run(run_id)
-                assert run is not None
+            if test_method == "get_run_info":
+                run = state.get_run_info(run_ids=[run_id])[0]
                 status = run.status
             elif test_method == "get_run_status":
                 status = state.get_run_status({run_id})[run_id]
@@ -1719,10 +1717,9 @@ class StateTest(CoreStateTest):
 
         # Execute
         state.store_traffic(run_id, bytes_sent=1000, bytes_recv=2000)
-        run = state.get_run(run_id)
+        run = state.get_run_info(run_ids=[run_id])[0]
 
         # Assert
-        assert run is not None
         assert run.bytes_sent == 1000
         assert run.bytes_recv == 2000
 
@@ -1737,10 +1734,9 @@ class StateTest(CoreStateTest):
         state.store_traffic(run_id, bytes_sent=1000, bytes_recv=500)
         state.store_traffic(run_id, bytes_sent=2000, bytes_recv=1500)
         state.store_traffic(run_id, bytes_sent=500, bytes_recv=1000)
-        run = state.get_run(run_id)
+        run = state.get_run_info(run_ids=[run_id])[0]
 
         # Assert
-        assert run is not None
         assert run.bytes_sent == 3500
         assert run.bytes_recv == 3000
 
@@ -1767,8 +1763,7 @@ class StateTest(CoreStateTest):
             state.store_traffic(run_id, bytes_sent=bytes_sent, bytes_recv=bytes_recv)
 
         # Verify traffic was not updated
-        run = state.get_run(run_id)
-        assert run is not None
+        run = state.get_run_info(run_ids=[run_id])[0]
         assert run.bytes_sent == 1000
         assert run.bytes_recv == 2000
 
@@ -1793,8 +1788,7 @@ class StateTest(CoreStateTest):
             state.store_traffic(run_id, bytes_sent=0, bytes_recv=0)
 
         assert "cannot be zero" in str(context.exception)
-        run = state.get_run(run_id)
-        assert run is not None
+        run = state.get_run_info(run_ids=[run_id])[0]
         assert run.bytes_sent == 0
         assert run.bytes_recv == 0
 

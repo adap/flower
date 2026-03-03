@@ -234,15 +234,16 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
 
         # Retrieve run ID and run
         run_id = request.run_id
-        run = state.get_run(run_id)
+        runs = state.get_run_info(run_ids=[run_id])
 
         # Exit if `run_id` not found
-        if not run:
+        if not runs:
             context.abort(grpc.StatusCode.NOT_FOUND, RUN_ID_NOT_FOUND_MESSAGE)
+        run = runs[0]
 
         # Check if `flwr_aid` matches the run's `flwr_aid`
         flwr_aid = get_current_account_info().flwr_aid
-        _check_flwr_aid_in_run(flwr_aid=flwr_aid, run=cast(Run, run), context=context)
+        _check_flwr_aid_in_run(flwr_aid=flwr_aid, run=run, context=context)
 
         after_timestamp = request.after_timestamp + 1e-6
         while context.is_active():
@@ -259,8 +260,8 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             # Wait for and continue to yield more log responses only if the
             # run isn't completed yet. If the run is finished, the entire log
             # is returned at this point and the server ends the stream.
-            run_status = state.get_run_status({run_id})[run_id]
-            if run_status.status == Status.FINISHED:
+            run = state.get_run_info(run_ids=[run_id])[0]
+            if run.status.status == Status.FINISHED:
                 log(INFO, "All logs for run ID `%s` returned", run_id)
 
                 # Delete objects of the run from the object store
@@ -280,14 +281,15 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         if not request.HasField("run_id"):
             # If no `run_id` is specified and account auth is enabled,
             # return run IDs for the authenticated account
-            flwr_aid = get_current_account_info().flwr_aid
-            _check_flwr_aid_exists(flwr_aid, context)
-            run_ids = state.get_run_ids(flwr_aid=flwr_aid)
+            flwr_aid = _check_flwr_aid_exists(
+                get_current_account_info().flwr_aid, context
+            )
+            run_ids = {run.run_id for run in state.get_run_info(flwr_aids=[flwr_aid])}
         # Build a set of run IDs for `flwr ls --run-id <run_id>`
         else:
             # Retrieve run ID and run
             run_id = request.run_id
-            run = state.get_run(run_id)
+            run = _get_run(state, run_id)
 
             # Exit if `run_id` not found
             if not run:
@@ -313,19 +315,19 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
 
         # Retrieve run ID and run
         run_id = request.run_id
-        run = state.get_run(run_id)
+        runs = state.get_run_info(run_ids=[run_id])
 
         # Exit if `run_id` not found
-        if not run:
+        if not runs:
             context.abort(grpc.StatusCode.NOT_FOUND, RUN_ID_NOT_FOUND_MESSAGE)
             raise grpc.RpcError()  # This line is unreachable
+        run = runs[0]
 
         # Check if `flwr_aid` matches the run's `flwr_aid`
         flwr_aid = get_current_account_info().flwr_aid
         _check_flwr_aid_in_run(flwr_aid=flwr_aid, run=run, context=context)
 
-        run_status = state.get_run_status({run_id})[run_id]
-        if run_status.status == Status.FINISHED:
+        if run.status.status == Status.FINISHED:
             context.abort(
                 grpc.StatusCode.FAILED_PRECONDITION,
                 f"Run ID {run_id} is already finished",
@@ -421,7 +423,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
 
         # Retrieve run ID and run
         run_id = request.run_id
-        run = state.get_run(run_id)
+        run = _get_run(state, run_id)
 
         # Exit if `run_id` not found
         if not run:
@@ -786,7 +788,7 @@ def _create_list_runs_response(
     run_ids: set[int], state: LinkState, store: ObjectStore
 ) -> ListRunsResponse:
     """Create response for `flwr ls --runs` and `flwr ls --run-id <run_id>`."""
-    run_dict = {run_id: run for run_id in run_ids if (run := state.get_run(run_id))}
+    run_dict = {run.run_id: run for run in state.get_run_info(run_ids=list(run_ids))}
 
     # Delete objects of finished runs from the object store
     for run_id, run in run_dict.items():
@@ -797,6 +799,12 @@ def _create_list_runs_response(
         run_dict={run_id: run_to_proto(run) for run_id, run in run_dict.items()},
         now=now().isoformat(),
     )
+
+
+def _get_run(state: LinkState, run_id: int) -> Run | None:
+    """Return a run by ID, or `None` if it does not exist."""
+    runs = state.get_run_info(run_ids=[run_id])
+    return runs[0] if runs else None
 
 
 def _check_flwr_aid_exists(flwr_aid: str | None, context: grpc.ServicerContext) -> str:

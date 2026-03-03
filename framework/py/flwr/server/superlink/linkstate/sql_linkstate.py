@@ -838,41 +838,6 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
         log(ERROR, "Unexpected run creation failure.")
         return 0
 
-    def get_run(self, run_id: int) -> Run | None:
-        """Retrieve information about the run with the specified `run_id`."""
-        # Clean up expired tokens; this will flag inactive runs as needed
-        self._cleanup_expired_tokens()
-
-        # Convert the uint64 value to sint64 for SQLite
-        sint64_run_id = uint64_to_int64(run_id)
-        query = "SELECT * FROM run WHERE run_id = :run_id"
-        rows = self.query(query, {"run_id": sint64_run_id})
-        if rows:
-            row = rows[0]
-            return Run(
-                run_id=int64_to_uint64(row["run_id"]),
-                fab_id=row["fab_id"],
-                fab_version=row["fab_version"],
-                fab_hash=row["fab_hash"],
-                override_config=json.loads(row["override_config"]),
-                pending_at=row["pending_at"],
-                starting_at=row["starting_at"],
-                running_at=row["running_at"],
-                finished_at=row["finished_at"],
-                status=RunStatus(
-                    status=determine_run_status(row),
-                    sub_status=row["sub_status"],
-                    details=row["details"],
-                ),
-                flwr_aid=row["flwr_aid"],
-                federation=row["federation"],
-                bytes_sent=row["bytes_sent"],
-                bytes_recv=row["bytes_recv"],
-                clientapp_runtime=row["clientapp_runtime"],
-            )
-        log(ERROR, "`run_id` does not exist.")
-        return None
-
     def get_run_info(  # pylint: disable=too-many-arguments, too-many-branches
         self,
         *,

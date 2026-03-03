@@ -147,7 +147,8 @@ class TestControlServicer(unittest.TestCase):
         ) as mock_get_fab_metadata:
             mock_get_fab_metadata.return_value = (fab_id, fab_version)
             response = self.servicer.StartRun(request, Mock())
-        run_info = self.state.get_run(response.run_id)
+        runs = self.state.get_run_info(run_ids=[response.run_id])
+        run_info = runs[0] if runs else None
 
         # Assert
         assert run_info is not None
@@ -193,7 +194,8 @@ class TestControlServicer(unittest.TestCase):
 
         # Execute
         response = self.servicer.StopRun(StopRunRequest(run_id=run_id), Mock())
-        run_state = self.state.get_run(run_id)
+        runs = self.state.get_run_info(run_ids=[run_id])
+        run_state = runs[0] if runs else None
 
         # Assert
         self.assertTrue(response.success)
@@ -567,7 +569,8 @@ class TestControlServicerAuth(unittest.TestCase):
         ):
             response = self.servicer.StopRun(request, ctx)
             self.assertTrue(response.success)
-            run = self.state.get_run(run_id)
+            runs = self.state.get_run_info(run_ids=[run_id])
+            run = runs[0] if runs else None
             self.assertEqual(cast(Run, run).status.status, Status.FINISHED)
             self.assertEqual(cast(Run, run).status.sub_status, SubStatus.STOPPED)
 

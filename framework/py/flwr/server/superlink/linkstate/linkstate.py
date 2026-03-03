@@ -290,21 +290,6 @@ class LinkState(CoreState):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
-    def get_run(self, run_id: int) -> Run | None:
-        """Retrieve information about the run with the specified `run_id`.
-
-        Parameters
-        ----------
-        run_id : int
-            The identifier of the run.
-
-        Returns
-        -------
-        Optional[Run]
-            The `Run` instance if found; otherwise, `None`.
-        """
-
-    @abc.abstractmethod
     def get_run_info(  # pylint: disable=too-many-arguments
         self,
         *,

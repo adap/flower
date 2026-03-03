@@ -302,12 +302,12 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         state: LinkState = self.state_factory.state()
 
         # Retrieve run information
-        run = state.get_run(request.run_id)
+        runs = state.get_run_info(run_ids=[request.run_id])
 
-        if run is None:
+        if not runs:
             return GetRunResponse()
 
-        return GetRunResponse(run=run_to_proto(run))
+        return GetRunResponse(run=run_to_proto(runs[0]))
 
     def PullAppInputs(
         self, request: PullAppInputsRequest, context: grpc.ServicerContext
@@ -327,7 +327,8 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
 
             # Retrieve Context, Run and Fab for the run_id
             serverapp_ctxt = state.get_serverapp_context(run_id)
-            run = state.get_run(run_id)
+            runs = state.get_run_info(run_ids=[run_id])
+            run = runs[0] if runs else None
             fab = None
             if run and run.fab_hash:
                 if result := ffs.get(run.fab_hash):
