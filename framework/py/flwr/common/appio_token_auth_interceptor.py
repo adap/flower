@@ -116,7 +116,11 @@ def _extract_token_from_metadata(
             continue
         if isinstance(value, str):
             return value
-        return value.decode("ascii", errors="ignore")
+        try:
+            return value.decode("ascii")
+        except UnicodeDecodeError:
+            # Malformed/invalid ASCII in metadata: treat as missing/invalid token.
+            return None
     return None
 
 
