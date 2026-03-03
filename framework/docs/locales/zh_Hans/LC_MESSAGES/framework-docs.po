@@ -8,15 +8,16 @@ msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-01-22 00:08+0000\n"
-"PO-Revision-Date: 2024-06-12 10:09+0000\n"
-"Last-Translator: Yan Gao <y.gaogy@gmail.com>\n"
+"PO-Revision-Date: 2026-03-04 14:09+0000\n"
+"Last-Translator: reducedradius <feixiang512@outlook.com>\n"
+"Language-Team: Chinese (Simplified Han script) <https://hosted.weblate.org/"
+"projects/flower-docs/framework/zh_Hans/>\n"
 "Language: zh_Hans\n"
-"Language-Team: Chinese (Simplified) <https://hosted.weblate.org/projects"
-"/flower-docs/framework/zh_Hans/>\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 5.17-dev\n"
 "Generated-By: Babel 2.17.0\n"
 
 #: ../../source/build.rst:-1
@@ -26,9 +27,8 @@ msgid ""
 msgstr ""
 
 #: ../../source/build.rst:7
-#, fuzzy
 msgid "Build Flower apps"
-msgstr "Flower 服务器。"
+msgstr "构建Flower应用"
 
 #: ../../source/build.rst:11 ../../source/contribute.rst:27
 #: ../../source/deploy.rst:11 ../../source/simulate.rst:11
@@ -64,9 +64,8 @@ msgstr ""
 
 #: ../../source/contribute.rst:7 ../../source/index.rst:112
 #: ../../source/index.rst:117
-#, fuzzy
 msgid "Contribute"
-msgstr "属性"
+msgstr "贡献"
 
 #: ../../source/contribute.rst:9 ../../source/index.rst:114
 msgid ""
@@ -64788,4 +64787,3 @@ msgstr ""
 
 #~ msgid "Name of the federation."
 #~ msgstr "flower-superlink"
-
