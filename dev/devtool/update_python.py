@@ -125,7 +125,7 @@ def _update_python_versions(
                     r"\g<1>" + new_major_minor + r"\g<2>",
                 ),
             ],
-            "dev/*.py": [
+            "dev/devtool/*.py": [
                 # Update version assignments
                 (
                     r'(["\'])' + re.escape(old_version) + r'(\.\d+)?(["\'],?)\s*\n?',

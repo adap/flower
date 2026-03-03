@@ -75,9 +75,12 @@ class Federation(google.protobuf.message.Message):
     RUNS_FIELD_NUMBER: builtins.int
     DESCRIPTION_FIELD_NUMBER: builtins.int
     MEMBERS_FIELD_NUMBER: builtins.int
+    ARCHIVED_FIELD_NUMBER: builtins.int
     name: builtins.str
     description: builtins.str
     """Added in v1.26.0"""
+    archived: builtins.bool
+    """Added in v1.27.0"""
     @property
     def nodes(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[flwr.proto.node_pb2.NodeInfo]: ...
     @property
@@ -94,7 +97,41 @@ class Federation(google.protobuf.message.Message):
         runs: collections.abc.Iterable[flwr.proto.run_pb2.Run] | None = ...,
         description: builtins.str = ...,
         members: collections.abc.Iterable[global___Member] | None = ...,
+        archived: builtins.bool = ...,
     ) -> None: ...
-    def ClearField(self, field_name: typing.Literal["description", b"description", "members", b"members", "name", b"name", "nodes", b"nodes", "runs", b"runs"]) -> None: ...
+    def ClearField(self, field_name: typing.Literal["archived", b"archived", "description", b"description", "members", b"members", "name", b"name", "nodes", b"nodes", "runs", b"runs"]) -> None: ...
 
 global___Federation = Federation
+
+@typing.final
+class Invitation(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    FEDERATION_NAME_FIELD_NUMBER: builtins.int
+    INVITER_FIELD_NUMBER: builtins.int
+    INVITEE_FIELD_NUMBER: builtins.int
+    STATUS_FIELD_NUMBER: builtins.int
+    CREATED_AT_FIELD_NUMBER: builtins.int
+    STATUS_CHANGED_AT_FIELD_NUMBER: builtins.int
+    federation_name: builtins.str
+    status: builtins.str
+    created_at: builtins.str
+    status_changed_at: builtins.str
+    @property
+    def inviter(self) -> global___Account: ...
+    @property
+    def invitee(self) -> global___Account: ...
+    def __init__(
+        self,
+        *,
+        federation_name: builtins.str = ...,
+        inviter: global___Account | None = ...,
+        invitee: global___Account | None = ...,
+        status: builtins.str = ...,
+        created_at: builtins.str = ...,
+        status_changed_at: builtins.str = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing.Literal["invitee", b"invitee", "inviter", b"inviter"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing.Literal["created_at", b"created_at", "federation_name", b"federation_name", "invitee", b"invitee", "inviter", b"inviter", "status", b"status", "status_changed_at", b"status_changed_at"]) -> None: ...
+
+global___Invitation = Invitation
