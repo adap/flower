@@ -245,15 +245,16 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
 
         # Retrieve run ID and run
         run_id = request.run_id
-        run = state.get_run(run_id)
+        runs = state.get_run_info(run_ids=[run_id])
 
         # Exit if `run_id` not found
-        if not run:
+        if not runs:
             context.abort(grpc.StatusCode.NOT_FOUND, RUN_ID_NOT_FOUND_MESSAGE)
+        run = runs[0]
 
         # Check if `flwr_aid` matches the run's `flwr_aid`
         flwr_aid = get_current_account_info().flwr_aid
-        _check_flwr_aid_in_run(flwr_aid=flwr_aid, run=cast(Run, run), context=context)
+        _check_flwr_aid_in_run(flwr_aid=flwr_aid, run=run, context=context)
 
         after_timestamp = request.after_timestamp + 1e-6
         while context.is_active():
@@ -270,8 +271,8 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             # Wait for and continue to yield more log responses only if the
             # run isn't completed yet. If the run is finished, the entire log
             # is returned at this point and the server ends the stream.
-            run_status = state.get_run_status({run_id})[run_id]
-            if run_status.status == Status.FINISHED:
+            run = state.get_run_info(run_ids=[run_id])[0]
+            if run.status.status == Status.FINISHED:
                 log(INFO, "All logs for run ID `%s` returned", run_id)
 
                 # Delete objects of the run from the object store
@@ -333,19 +334,19 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
 
         # Retrieve run ID and run
         run_id = request.run_id
-        run = state.get_run(run_id)
+        runs = state.get_run_info(run_ids=[run_id])
 
         # Exit if `run_id` not found
-        if not run:
+        if not runs:
             context.abort(grpc.StatusCode.NOT_FOUND, RUN_ID_NOT_FOUND_MESSAGE)
             raise grpc.RpcError()  # This line is unreachable
+        run = runs[0]
 
         # Check if `flwr_aid` matches the run's `flwr_aid`
         flwr_aid = get_current_account_info().flwr_aid
         _check_flwr_aid_in_run(flwr_aid=flwr_aid, run=run, context=context)
 
-        run_status = state.get_run_status({run_id})[run_id]
-        if run_status.status == Status.FINISHED:
+        if run.status.status == Status.FINISHED:
             context.abort(
                 grpc.StatusCode.FAILED_PRECONDITION,
                 f"Run ID {run_id} is already finished",
@@ -441,12 +442,13 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
 
         # Retrieve run ID and run
         run_id = request.run_id
-        run = state.get_run(run_id)
+        runs = state.get_run_info(run_ids=[run_id])
 
         # Exit if `run_id` not found
-        if not run:
+        if not runs:
             context.abort(grpc.StatusCode.NOT_FOUND, RUN_ID_NOT_FOUND_MESSAGE)
             raise grpc.RpcError()  # This line is unreachable
+        run = runs[0]
 
         # Exit if the run is not finished yet
         if run.status.status != Status.FINISHED:
@@ -605,6 +607,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         # Build Federation proto object
         federation_proto = Federation(
             name=federation,
+            description=details.description,
             members=details.members,
             nodes=details.nodes,
             runs=[run_to_proto(run) for run in details.runs],
