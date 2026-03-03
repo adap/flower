@@ -282,10 +282,12 @@ jobs:
       - name: Bootstrap
         if: ${{ needs.changes.outputs.framework == 'true' }}
         uses: ./.github/actions/bootstrap
+        with:
+          poetry-skip: 'true'
       - name: Install dependencies
         if: ${{ needs.changes.outputs.framework == 'true' }}
         run: |
-          python -m poetry install --only main
+          python -m pip install --upgrade .
       - name: Install Flower wheel from artifact store
         if: ${{ needs.changes.outputs.framework == 'true' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
         run: |
