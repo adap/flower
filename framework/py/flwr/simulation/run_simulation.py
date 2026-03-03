@@ -20,20 +20,16 @@ import asyncio
 import json
 import logging
 import platform
-import sys
 import threading
 import traceback
 from logging import DEBUG, ERROR, INFO, WARNING
-from pathlib import Path
 from queue import Empty, Queue
 from typing import Any, cast
 
 from flwr.app.user_config import UserConfig
-from flwr.cli.config_utils import load_and_validate
 from flwr.cli.utils import get_sha256_hash
 from flwr.clientapp import ClientApp
 from flwr.common import Context, EventType, RecordDict, event, log, now
-from flwr.common.config import get_fused_config_from_dir, parse_config_args
 from flwr.common.constant import RUN_ID_NUM_BYTES, Status
 from flwr.common.logger import (
     set_logger_propagation,
@@ -78,84 +74,6 @@ def _check_ray_support(backend_name: str) -> None:
                 "On Windows, Flower Simulations run best in WSL2: "
                 "https://learn.microsoft.com/en-us/windows/wsl/about",
             )
-
-
-# Entry point from CLI
-# pylint: disable=too-many-locals
-def run_simulation_from_cli() -> None:
-    """Run Simulation Engine from the CLI."""
-    args = _parse_args_run_simulation().parse_args()
-
-    event(
-        EventType.CLI_FLOWER_SIMULATION_ENTER,
-        event_details={"backend": args.backend, "num-supernodes": args.num_supernodes},
-    )
-
-    if args.enable_tf_gpu_growth:
-        warn_deprecated_feature_with_example(
-            "Passing `--enable-tf-gpu-growth` is deprecated.",
-            example_message="Instead, set the `TF_FORCE_GPU_ALLOW_GROWTH` environmnet "
-            "variable to true.",
-            code_example='TF_FORCE_GPU_ALLOW_GROWTH="true" flower-simulation <...>',
-        )
-
-    _check_ray_support(args.backend)
-
-    # Load JSON config
-    backend_config = json.loads(args.backend_config)
-
-    run_id = (
-        generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
-        if args.run_id is None
-        else args.run_id
-    )
-
-    app_path = Path(args.app)
-    if not app_path.is_dir():
-        log(ERROR, "--app is not a directory")
-        sys.exit("Simulation Engine cannot start.")
-
-    # Load pyproject.toml
-    config, _ = load_and_validate(app_path / "pyproject.toml", check_module=False)
-
-    # Get ClientApp and SeverApp components
-    app_components = config["tool"]["flwr"]["app"]["components"]
-    client_app_attr = app_components["clientapp"]
-    server_app_attr = app_components["serverapp"]
-
-    override_config = parse_config_args(
-        [args.run_config] if args.run_config else args.run_config
-    )
-    fused_config = get_fused_config_from_dir(app_path, override_config)
-
-    # Create run
-    run = Run.create_empty(run_id)
-    run.federation = NOOP_FEDERATION
-    run.override_config = override_config
-
-    # Create Context
-    server_app_context = Context(
-        run_id=run_id,
-        node_id=0,
-        node_config=UserConfig(),
-        state=RecordDict(),
-        run_config=fused_config,
-    )
-
-    _ = _run_simulation(
-        server_app_attr=server_app_attr,
-        client_app_attr=client_app_attr,
-        num_supernodes=args.num_supernodes,
-        backend_name=args.backend,
-        backend_config=backend_config,
-        app_dir=args.app,
-        run=run,
-        enable_tf_gpu_growth=args.enable_tf_gpu_growth,
-        verbose_logging=args.verbose,
-        server_app_context=server_app_context,
-        is_app=True,
-        exit_event=EventType.CLI_FLOWER_SIMULATION_LEAVE,
-    )
 
 
 # Entry point from Python session (script or notebook)

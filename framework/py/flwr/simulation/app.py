@@ -229,6 +229,7 @@ def run_simulation_process(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
         num_supernodes = fed_opt.get("num-supernodes")
         if num_supernodes is None:
             raise ValueError("Federation options expects `num-supernodes` to be set.")
+        backend_name: str = fed_opt.get("backend", {}).get("name", "ray")
         backend_config: BackendConfig = fed_opt.get("backend", {})
         verbose: bool = fed_opt.get("verbose", False)
         enable_tf_gpu_growth: bool = fed_opt.get("enable_tf_gpu_growth", False)
@@ -237,7 +238,7 @@ def run_simulation_process(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
         event(
             EventType.FLWR_SIMULATION_RUN_ENTER,
             event_details={
-                "backend": "ray",
+                "backend": backend_name,
                 "num-supernodes": num_supernodes,
                 "run-id-hash": run_id_hash,
             },
@@ -254,6 +255,7 @@ def run_simulation_process(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
             server_app_attr=server_app_attr,
             client_app_attr=client_app_attr,
             num_supernodes=num_supernodes,
+            backend_name=backend_name,
             backend_config=backend_config,
             app_dir=str(app_path),
             run=run,
