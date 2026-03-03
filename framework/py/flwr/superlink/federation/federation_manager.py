@@ -189,10 +189,13 @@ class FederationManager(ABC):
     ) -> None:
         """Revoke a pending invitation.
 
+        Only the account that created the invitation can revoke it.
+
         Parameters
         ----------
         flwr_aid : str
-            The ID of the account revoking the invitation (inviter).
+            The ID of the account revoking the invitation (must be the
+            original inviter).
         federation : str
             The name of the federation.
         invitee_flwr_aid : str
