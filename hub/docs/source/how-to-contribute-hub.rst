@@ -93,6 +93,30 @@ Example:
     [tool.flwr.app]
     publisher = "your-username"  # Must match your Flower account username
 
+License Field Formats
+^^^^^^^^^^^^^^^^^^^^^
+
+Flower Hub accepts :code:`[project].license` in the following forms:
+
+.. code-block:: toml
+
+    # SPDX identifier (string)
+    license = "Apache-2.0"
+
+    # Inline text
+    license = { text = "Apache-2.0" }
+
+    # File reference (must be at the project root)
+    license = { file = "LICENSE" }
+    # or
+    license = { file = "LICENSE.md" }
+
+Rules:
+
+- :code:`file` and :code:`text` cannot be set together.
+- If you use :code:`license.file`, it must be exactly :code:`LICENSE` or :code:`LICENSE.md`.
+- The referenced license file must exist and be included in the files uploaded by :code:`flwr app publish`.
+
 
 .. warning::
    The :code:`name` and :code:`description` are publicly visible on Flower Hub.
@@ -100,7 +124,8 @@ Example:
    The :code:`name` **cannot be changed** after the first publication, so make sure it is final before releasing your app.
 
 .. note::
-   Currently, Flower Hub supports only the following file formats: :code:`.py`, :code:`.toml`, and :code:`.md`. 
+   Currently, Flower Hub supports :code:`.py`, :code:`.toml`, and :code:`.md` files.
+   As a special case for app licensing, root-level :code:`LICENSE` is also supported.
    Ensure that all required files for your app (e.g., source code, metadata, README) are included in the same directory before publishing.
 
    Support for additional file formats is planned for future releases.
