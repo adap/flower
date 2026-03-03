@@ -1,4 +1,4 @@
-Contribute Hub
+Publish an App
 ==============
 
 Have you built an exciting federated app? Now it's time to share it with the world! Contributing your federated learning app to Flower Hub allows you to share your work with the community, receive feedback, and enable others to build on top of your contributions.
