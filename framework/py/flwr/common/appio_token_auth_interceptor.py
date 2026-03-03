@@ -167,6 +167,9 @@ class AppIoTokenAuthClientInterceptor(grpc.UnaryUnaryClientInterceptor):  # type
     ) -> grpc.Call:
         """Attach App token in metadata and continue RPC."""
         metadata = list(client_call_details.metadata or [])
+        # Remove any existing App token headers to avoid duplicates and ensure
+        # this interceptor's token is the single authoritative value.
+        metadata = [(key, value) for key, value in metadata if key != APP_TOKEN_HEADER]
         metadata.append((APP_TOKEN_HEADER, self._token))
         details = client_call_details._replace(metadata=metadata)
         return continuation(details, request)
