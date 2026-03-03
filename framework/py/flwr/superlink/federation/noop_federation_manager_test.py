@@ -114,6 +114,7 @@ def test_get_details_with_valid_federation() -> None:
     assert mock_node_1 in result.nodes and mock_node_2 in result.nodes
     assert len(result.runs) == 2
     assert mock_run_1 in result.runs and mock_run_2 in result.runs
+    assert result.archived is False
 
 
 def test_get_details_with_invalid_federation() -> None:
@@ -152,6 +153,7 @@ def test_get_details_with_no_runs() -> None:
     )
     assert len(result.nodes) == 0
     assert len(result.runs) == 0
+    assert result.archived is False
 
 
 def test_exists() -> None:
@@ -220,4 +222,7 @@ def test_get_federations() -> None:
 
     # Assert
     assert len(result) == 0
-    assert result2 == [(NOOP_FEDERATION, NOOP_FEDERATION_DESCRIPTION)]
+    assert len(result2) == 1
+    assert result2[0].name == NOOP_FEDERATION
+    assert result2[0].description == NOOP_FEDERATION_DESCRIPTION
+    assert result2[0].archived is False

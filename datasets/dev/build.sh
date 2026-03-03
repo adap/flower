@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2026 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,4 +18,4 @@
 set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 
-uv publish --token "${PYPI_TOKEN}"
+uv build --clear

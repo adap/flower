@@ -165,6 +165,186 @@ class StateTest(CoreStateTest):
         # Sanity check that the existing run is still retrievable by its own aid
         assert state.get_run_ids("existing") == {existing_id}
 
+    def test_get_run_info_without_filters_returns_all_runs(self) -> None:
+        """Test get_run_info returns all runs when no filter is provided."""
+        # Prepare
+        state = self.state_factory()
+        run_id1 = create_dummy_run(state, flwr_aid="aid-1", federation="federation-1")
+        run_id2 = create_dummy_run(state, flwr_aid="aid-2", federation="federation-2")
+
+        # Execute
+        runs = state.get_run_info()
+
+        # Assert
+        self.assertSetEqual({run.run_id for run in runs}, {run_id1, run_id2})
+
+    def test_get_run_info_filter_by_run_ids(self) -> None:
+        """Test get_run_info filters correctly by run_ids."""
+        # Prepare
+        state = self.state_factory()
+        run_id1 = create_dummy_run(state)
+        _ = create_dummy_run(state)
+        run_id3 = create_dummy_run(state)
+
+        # Execute
+        runs = state.get_run_info(run_ids=[run_id1, run_id3])
+
+        # Assert
+        self.assertSetEqual({run.run_id for run in runs}, {run_id1, run_id3})
+
+    def test_get_run_info_filter_logic(self) -> None:
+        """Test get_run_info ORs within each filter and ANDs across filters."""
+        # Prepare
+        state = self.state_factory()
+
+        _ = create_dummy_run(state, flwr_aid="aid-1", federation="federation-a")
+        run_id2 = create_dummy_run(state, flwr_aid="aid-1", federation="federation-b")
+        run_id3 = create_dummy_run(state, flwr_aid="aid-2", federation="federation-a")
+        run_id4 = create_dummy_run(state, flwr_aid="aid-2", federation="federation-b")
+
+        transition_run_status(state, run_id2, 1)  # STARTING
+        transition_run_status(state, run_id3, 1)  # STARTING
+        transition_run_status(state, run_id4, 2)  # RUNNING
+
+        # Execute
+        runs = state.get_run_info(
+            statuses=[Status.STARTING, Status.RUNNING],
+            flwr_aids=["aid-2"],
+            federations=["federation-a", "federation-b"],
+        )
+
+        # Assert
+        self.assertSetEqual({run.run_id for run in runs}, {run_id3, run_id4})
+
+    def test_get_run_info_filter_by_statuses(self) -> None:
+        """Test get_run_info filters correctly by statuses only."""
+        # Prepare
+        state = self.state_factory()
+        pending_run_id = create_dummy_run(state)
+        starting_run_id = create_dummy_run(state)
+        running_run_id = create_dummy_run(state)
+        finished_run_id = create_dummy_run(state)
+
+        transition_run_status(state, starting_run_id, 1)
+        transition_run_status(state, running_run_id, 2)
+        transition_run_status(state, finished_run_id, 3)
+
+        expected_runs = {
+            Status.PENDING: {pending_run_id},
+            Status.STARTING: {starting_run_id},
+            Status.RUNNING: {running_run_id},
+            Status.FINISHED: {finished_run_id},
+        }
+
+        # Execute & Assert
+        for status, expected_run_ids in expected_runs.items():
+            with self.subTest(status=status):
+                runs = state.get_run_info(statuses=[status])
+                self.assertSetEqual(
+                    {run.run_id for run in runs},
+                    expected_run_ids,
+                )
+
+    def test_get_run_info_filter_by_federations(self) -> None:
+        """Test get_run_info filters correctly by federations only."""
+        # Prepare
+        state = self.state_factory()
+        run_id1 = create_dummy_run(state, federation="federation-a")
+        _ = create_dummy_run(state, federation="federation-b")
+        run_id3 = create_dummy_run(state, federation="federation-a")
+
+        # Execute
+        runs = state.get_run_info(federations=["federation-a"])
+
+        # Assert
+        self.assertSetEqual({run.run_id for run in runs}, {run_id1, run_id3})
+
+    def test_get_run_info_filter_by_flwr_aids(self) -> None:
+        """Test get_run_info filters correctly by flwr_aids only."""
+        # Prepare
+        state = self.state_factory()
+        run_id1 = create_dummy_run(state, flwr_aid="aid-1")
+        _ = create_dummy_run(state, flwr_aid="aid-2")
+        run_id3 = create_dummy_run(state, flwr_aid="aid-1")
+
+        # Execute
+        runs = state.get_run_info(flwr_aids=["aid-1"])
+
+        # Assert
+        self.assertSetEqual({run.run_id for run in runs}, {run_id1, run_id3})
+
+    def test_get_run_info_filter_by_nonexistent_run_ids(self) -> None:
+        """Test get_run_info returns empty for non-existent run_ids."""
+        # Prepare
+        state = self.state_factory()
+        _ = create_dummy_run(state)
+
+        # Execute
+        runs = state.get_run_info(run_ids=[999999])
+
+        # Assert
+        self.assertEqual(list(runs), [])
+
+    def test_get_run_info_order_by_pending_at_and_limit(self) -> None:
+        """Test get_run_info ordering by pending_at and applying limit."""
+        # Prepare
+        state = self.state_factory()
+        run_id1 = create_dummy_run(state)
+        time.sleep(1e-6)
+        run_id2 = create_dummy_run(state)
+        time.sleep(1e-6)
+        run_id3 = create_dummy_run(state)
+        run_ids = [run_id1, run_id2, run_id3]
+
+        # Execute
+        ascending_runs = state.get_run_info(order_by="pending_at", ascending=True)
+        descending_runs = state.get_run_info(order_by="pending_at", ascending=False)
+        limited_runs = state.get_run_info(
+            order_by="pending_at", ascending=True, limit=2
+        )
+
+        # Assert
+        self.assertEqual([run.run_id for run in ascending_runs], run_ids)
+        self.assertEqual([run.run_id for run in descending_runs], run_ids[::-1])
+        self.assertEqual([run.run_id for run in limited_runs], run_ids[:2])
+
+    @parameterized.expand([(1,), (2,), (9999,)])  # type: ignore
+    def test_get_run_info_limit_without_order_by(self, limit: int) -> None:
+        """Test get_run_info applies limit when no order_by is specified."""
+        # Prepare
+        state = self.state_factory()
+        run_ids = {create_dummy_run(state) for _ in range(3)}
+        expected_count = min(limit, len(run_ids))
+
+        # Execute
+        runs = state.get_run_info(limit=limit)
+        returned_run_ids = {run.run_id for run in runs}
+
+        # Assert
+        self.assertEqual(len(runs), expected_count)
+        self.assertEqual(len(returned_run_ids), expected_count)
+        self.assertTrue(returned_run_ids.issubset(run_ids))
+
+    def test_get_run_info_empty_filters(self) -> None:
+        """Test get_run_info returns empty when any filter list is empty."""
+        # Prepare
+        state = self.state_factory()
+        _ = create_dummy_run(state, flwr_aid="aid-1", federation="federation-a")
+        _ = create_dummy_run(state, flwr_aid="aid-2", federation="federation-b")
+
+        # Execute & Assert
+        runs_statuses_empty = state.get_run_info(statuses=[])
+        self.assertEqual(list(runs_statuses_empty), [])
+
+        runs_flwr_aids_empty = state.get_run_info(flwr_aids=[])
+        self.assertEqual(list(runs_flwr_aids_empty), [])
+
+        runs_federations_empty = state.get_run_info(federations=[])
+        self.assertEqual(list(runs_federations_empty), [])
+
+        runs_run_ids_empty = state.get_run_info(run_ids=[])
+        self.assertEqual(list(runs_run_ids_empty), [])
+
     def test_get_pending_run_id(self) -> None:
         """Test if get_pending_run_id works correctly."""
         # Prepare
