@@ -1,0 +1,35 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "fedops-mnist"
+version = "0.2.0"
+description = "FedOps MNIST client launcher with Flower"
+license = "Apache-2.0"
+dependencies = [
+    "flwr[simulation]>=1.26.0",
+    "fedops",
+    "hydra-core",
+    "omegaconf",
+    "torch==2.8.0",
+    "torchvision==0.23.0",
+    "scikit-learn",
+    "tqdm",
+    "fastapi",
+    "uvicorn",
+    "requests",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[tool.flwr.app]
+publisher = "local"
+
+[tool.flwr.app.components]
+serverapp = "fedopsmnist.launcher_app:app"
+clientapp = "fedopsmnist.client_app:app"
+
+[tool.flwr.app.config]
+task_id = "task_id"
