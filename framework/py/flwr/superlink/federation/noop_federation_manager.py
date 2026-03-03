@@ -110,3 +110,37 @@ class NoOpFederationManager(FederationManager):
         raise NotImplementedError(
             "`remove_supernode` is not supported by NoOpFederationManager."
         )
+
+    def create_invitation(
+        self, flwr_aid: str, federation: str, invitee_flwr_aid: str
+    ) -> None:
+        """Create an invitation for an account to join a federation."""
+        raise NotImplementedError(
+            "`create_invitation` is not supported by NoOpFederationManager."
+        )
+
+    def list_invitations(self, flwr_aid: str) -> list[dict[str, str]]:
+        """List invitations for a federation visible to the given account."""
+        raise NotImplementedError(
+            "`list_invitations` is not supported by NoOpFederationManager."
+        )
+
+    def accept_invitation(self, flwr_aid: str, federation: str) -> None:
+        """Accept a pending invitation to join a federation."""
+        raise NotImplementedError(
+            "`accept_invitation` is not supported by NoOpFederationManager."
+        )
+
+    def reject_invitation(self, flwr_aid: str, federation: str) -> None:
+        """Reject a pending invitation to join a federation."""
+        raise NotImplementedError(
+            "`reject_invitation` is not supported by NoOpFederationManager."
+        )
+
+    def revoke_invitation(
+        self, flwr_aid: str, federation: str, invitee_flwr_aid: str
+    ) -> None:
+        """Revoke a pending invitation."""
+        raise NotImplementedError(
+            "`revoke_invitation` is not supported by NoOpFederationManager."
+        )
