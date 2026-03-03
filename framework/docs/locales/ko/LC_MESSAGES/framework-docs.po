@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-27 00:12+0000\n"
+"POT-Creation-Date: 2026-03-03 00:11+0000\n"
 "PO-Revision-Date: 2024-08-23 13:09+0000\n"
 "Last-Translator: Seulki Yun <icstuckyi@gmail.com>\n"
 "Language: ko\n"
@@ -841,10 +841,12 @@ msgid "Using Poetry (recommended)"
 msgstr "Poetry 사용하기(권장)"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:12
+#, fuzzy
 msgid ""
 "Install a ``flwr`` pre-release from PyPI: update the ``flwr`` dependency "
-"in ``pyproject.toml`` and then reinstall (don't forget to delete "
-"``poetry.lock`` (``rm poetry.lock``) before running ``poetry install``)."
+"in ``pyproject.toml`` and then reinstall (ensure to delete "
+"``poetry.lock`` via ``rm poetry.lock`` before running ``python -m poetry "
+"install``)."
 msgstr ""
 "PyPI에서 ``flwr`` 사전 릴리스 설치하기: ``pyproject.toml``에서 ``flwr``의 의존성을 업데이트한 "
 "다음, 재설치하세요(``poetry 설치``이전에 ``poetry.lock`` (``rm poetry.lock``)를 제거하는 것을"
@@ -1407,25 +1409,26 @@ msgid "Virtualenv with Poetry"
 msgstr "Poetry를 사용한 가상 환경"
 
 #: ../../source/contributor-how-to-set-up-a-virtual-env.rst:54
+#, fuzzy
 msgid ""
 "The Flower examples are based on `Poetry <https://python-"
 "poetry.org/docs/>`_ to manage dependencies. After installing Poetry you "
-"simply create a virtual environment with:"
+"can create and activate a virtual environment with:"
 msgstr ""
 "Flower examples은 의존성을 관리하기 위해 `Poetry <https://python-"
 "poetry.org/docs/>`_를 기반으로 합니다. Poetry를 설치한 후 가상 환경을 생성하기만 하면 됩니다:"
 
-#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:61
+#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:62
 msgid ""
 "If you open a new terminal you can activate the previously created "
 "virtual environment with the following command:"
 msgstr "새 터미널을 열면 다음 명령을 사용하여 이전에 생성한 가상 환경을 활성화할 수 있습니다:"
 
-#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:70
+#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:71
 msgid "Virtualenv with Anaconda"
 msgstr "Anaconda를 사용한 가상 환경"
 
-#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:72
+#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:73
 #, fuzzy
 msgid ""
 "If you prefer to use Anaconda for your virtual environment then install "
@@ -1438,7 +1441,7 @@ msgstr ""
 "guide/install/index.html>`_ 패키지를 설치 및 설정하세요. 설정 후 다음을 사용하여 가상 환경을 만들 수 "
 "있습니다:"
 
-#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:80
+#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:81
 msgid "and activate the virtual environment with:"
 msgstr "그 후 가상 환경을 활성화합니다:"
 
@@ -1460,9 +1463,10 @@ msgstr ""
 "텍스트(``.rst`` 파일)와 Markdown(``.md`` 파일)을 모두 지원합니다."
 
 #: ../../source/contributor-how-to-write-documentation.rst:12
+#, fuzzy
 msgid ""
-"Note that, in order to build the documentation locally (with ``poetry run"
-" make html``, like described below), `Pandoc "
+"Note that, in order to build the documentation locally (with ``python -m "
+"poetry run make html``, as described below), `Pandoc "
 "<https://pandoc.org/installing.html>`_ needs to be installed on the "
 "system."
 msgstr ""
@@ -1482,7 +1486,9 @@ msgstr "framework/docs/source/``에서 기존 ``.rst``(또는 ``.md``) 파일을
 #: ../../source/contributor-how-to-write-documentation.rst:21
 #: ../../source/contributor-how-to-write-documentation.rst:31
 #, fuzzy
-msgid "Compile the docs: ``cd framework/docs``, then ``poetry run make html``"
+msgid ""
+"Compile the docs: ``cd framework/docs``, then ``python -m poetry run make"
+" html``"
 msgstr "문서를 컴파일합니다: ``cd doc``, ``poetry run make html`` 순으로 컴파일합니다"
 
 #: ../../source/contributor-how-to-write-documentation.rst:22
@@ -2338,7 +2344,8 @@ msgid "`Python 3.10 <https://docs.python.org/3.10/>`_ or above"
 msgstr "Python 3.10 <https://docs.python.org/3.10/>`_ 이상"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:10
-msgid "`Poetry 1.3 <https://python-poetry.org/>`_ or above"
+#, fuzzy
+msgid "`Poetry 2.3 <https://python-poetry.org/>`_ or above"
 msgstr "`Poetry 1.3 <https://python-poetry.org/>`_ _ 이상"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:11
@@ -14463,10 +14470,11 @@ msgid ""
 msgstr "``python -m pip install -U 'flwr[simulation]'``(``start_simulation`` 사용 시)"
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:34
+#, fuzzy
 msgid ""
 "Poetry: update the ``flwr`` dependency in ``pyproject.toml`` and then "
-"reinstall (don't forget to delete ``poetry.lock`` via ``rm poetry.lock`` "
-"before running ``poetry install``)."
+"reinstall (ensure to delete ``poetry.lock`` via ``rm poetry.lock`` before"
+" running ``python -m poetry install``)."
 msgstr ""
 "Poetry: ``pyproject.toml``에서 ``flwr`` dependency을 업데이트한 다음 다시 "
 "설치하세요(``poetry 설치``를 실행하기 전에 ``rm poetry.lock``을 통해 ``poetry.lock``을 삭제하는"
@@ -16529,6 +16537,15 @@ msgstr ""
 msgid "Name of the federation to display"
 msgstr "flower 초연결"
 
+#: ../../flwr federation list:1
+msgid "Show additional details, including archived federations."
+msgstr ""
+
+#: ../../flwr federation list:1 run:1 supernode
+#, fuzzy
+msgid "``False``"
+msgstr "``flwr/base``"
+
 #: ../../flwr federation remove-supernode:1
 #, fuzzy
 msgid "Remove a SuperNode from a federation."
@@ -16629,17 +16646,13 @@ msgid ""
 msgstr ""
 
 #: ../../flwr list:1
-msgid "List all runs"
-msgstr ""
-
-#: ../../flwr list:1 run:1 supernode
-#, fuzzy
-msgid "``False``"
-msgstr "``flwr/base``"
-
-#: ../../flwr list:1
 msgid "Specific run ID to display"
 msgstr ""
+
+#: ../../flwr list:1
+#, fuzzy
+msgid "Maximum number of runs to display"
+msgstr "flower 초연결"
 
 #: ../../flwr log:1
 msgid "Get logs from a run."
@@ -17008,7 +17021,9 @@ msgstr "배열"
 
 #: flwr.common.message.Message:1 flwr.common.record.array.Array:1 of
 #, fuzzy
-msgid "Bases: :py:class:`~flwr.common.inflatable.InflatableObject`"
+msgid ""
+"Bases: "
+":py:class:`~flwr.supercore.inflatable.inflatable_object.InflatableObject`"
 msgstr "Bases: :py:class:`~abc.ABC`"
 
 #: flwr.common.record.array.Array:3 of
@@ -17388,7 +17403,7 @@ msgstr "ParametersRecord"
 msgid ""
 "Bases: :py:class:`~flwr.common.record.typeddict.TypedDict`\\ "
 "[:py:class:`str`, :py:class:`~flwr.common.record.array.Array`], "
-":py:class:`~flwr.common.inflatable.InflatableObject`"
+":py:class:`~flwr.supercore.inflatable.inflatable_object.InflatableObject`"
 msgstr ""
 "Bases: :py:class:`~flwr.common.record.typeddict.TypedDict`\\ "
 "[:py:class:`str`, :py:class:`~flwr.common.record.parametersrecord.Array`]"
@@ -17741,7 +17756,7 @@ msgid ""
 "[:py:class:`int`] | :py:class:`list`\\ [:py:class:`float`] | "
 ":py:class:`list`\\ [:py:class:`str`] | :py:class:`list`\\ "
 "[:py:class:`bytes`] | :py:class:`list`\\ [:py:class:`bool`]], "
-":py:class:`~flwr.common.inflatable.InflatableObject`"
+":py:class:`~flwr.supercore.inflatable.inflatable_object.InflatableObject`"
 msgstr ""
 "Bases: :py:class:`~flwr.common.record.typeddict.TypedDict`\\ "
 "[:py:class:`str`, :py:class:`int` | :py:class:`float` | :py:class:`str` |"
@@ -18417,7 +18432,7 @@ msgid ""
 "[:py:class:`str`, :py:class:`int` | :py:class:`float` | "
 ":py:class:`list`\\ [:py:class:`int`] | :py:class:`list`\\ "
 "[:py:class:`float`]], "
-":py:class:`~flwr.common.inflatable.InflatableObject`"
+":py:class:`~flwr.supercore.inflatable.inflatable_object.InflatableObject`"
 msgstr ""
 "Bases: :py:class:`~flwr.common.record.typeddict.TypedDict`\\ "
 "[:py:class:`str`, :py:class:`int` | :py:class:`float` | "
@@ -18600,7 +18615,7 @@ msgid ""
 "[:py:class:`str`, :py:class:`~flwr.common.record.arrayrecord.ArrayRecord`"
 " | :py:class:`~flwr.common.record.metricrecord.MetricRecord` | "
 ":py:class:`~flwr.common.record.configrecord.ConfigRecord`], "
-":py:class:`~flwr.common.inflatable.InflatableObject`"
+":py:class:`~flwr.supercore.inflatable.inflatable_object.InflatableObject`"
 msgstr ""
 "Bases: :py:class:`~flwr.common.record.typeddict.TypedDict`\\ "
 "[:py:class:`str`, :py:class:`~flwr.common.record.parametersrecord.Array`]"
@@ -62616,5 +62631,8 @@ msgstr ""
 #~ msgid ""
 #~ "Omitting both ``root-certificate`` and "
 #~ "``insecure`` to use default certificates"
+#~ msgstr ""
+
+#~ msgid "List all runs"
 #~ msgstr ""
 
