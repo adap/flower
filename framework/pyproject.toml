@@ -145,6 +145,12 @@ dev = [
     "devtool",
 ]
 
+[tool.uv]
+default-groups = ["dev"]
+
+[tool.uv.sources]
+devtool = { path = "./devtool", editable = true }
+
 [tool.poetry]
 packages = [{ include = "flwr", from = "py" }]
 exclude = ["py/**/*_test.py"]
