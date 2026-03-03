@@ -7,6 +7,8 @@ on:
     paths:
       - "datasets/**"
       - "dev/devtool/**"
+      - "dev/pyproject.toml"
+      - "dev/uv.lock"
       - ".github/workflows/datasets-*.yml"
   pull_request:
     branches:
@@ -14,6 +16,8 @@ on:
     paths:
       - "datasets/**"
       - "dev/devtool/**"
+      - "dev/pyproject.toml"
+      - "dev/uv.lock"
       - ".github/workflows/datasets-*.yml"
 
 concurrency:

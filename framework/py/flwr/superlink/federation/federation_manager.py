@@ -19,6 +19,7 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
 from flwr.common.typing import Federation
+from flwr.proto.federation_pb2 import Invitation  # pylint: disable=E0611
 
 if TYPE_CHECKING:
     from flwr.server.superlink.linkstate.linkstate import LinkState
@@ -125,4 +126,80 @@ class FederationManager(ABC):
             The name of the federation.
         node_id : int
             The ID of the SuperNode to remove.
+        """
+
+    @abstractmethod
+    def create_invitation(
+        self, flwr_aid: str, federation: str, invitee_flwr_aid: str
+    ) -> None:
+        """Create an invitation for an account to join a federation.
+
+        Parameters
+        ----------
+        flwr_aid : str
+            The ID of the account creating the invitation (inviter).
+        federation : str
+            The name of the federation.
+        invitee_flwr_aid : str
+            The ID of the account being invited.
+        """
+
+    @abstractmethod
+    def list_invitations(
+        self, flwr_aid: str
+    ) -> tuple[list[Invitation], list[Invitation]]:
+        """List invitations visible to the given account.
+
+        Parameters
+        ----------
+        flwr_aid : str
+            The ID of the account listing invitations.
+
+        Returns
+        -------
+        tuple[list[Invitation], list[Invitation]]
+            A tuple of (created_invitations, received_invitations).
+        """
+
+    @abstractmethod
+    def accept_invitation(self, flwr_aid: str, federation: str) -> None:
+        """Accept a pending invitation to join a federation.
+
+        Parameters
+        ----------
+        flwr_aid : str
+            The ID of the account accepting the invitation (invitee).
+        federation : str
+            The name of the federation.
+        """
+
+    @abstractmethod
+    def reject_invitation(self, flwr_aid: str, federation: str) -> None:
+        """Reject a pending invitation to join a federation.
+
+        Parameters
+        ----------
+        flwr_aid : str
+            The ID of the account rejecting the invitation (invitee).
+        federation : str
+            The name of the federation.
+        """
+
+    @abstractmethod
+    def revoke_invitation(
+        self, flwr_aid: str, federation: str, invitee_flwr_aid: str
+    ) -> None:
+        """Revoke a pending invitation.
+
+        Only the account that created the invitation can revoke it.
+
+        Parameters
+        ----------
+        flwr_aid : str
+            The ID of the account revoking the invitation (must be the
+            original inviter).
+        federation : str
+            The name of the federation.
+        invitee_flwr_aid : str
+            The ID of the account whose invitation is being revoked.
         """

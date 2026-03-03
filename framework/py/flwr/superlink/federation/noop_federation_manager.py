@@ -17,7 +17,11 @@
 
 from flwr.common.constant import NOOP_ACCOUNT_NAME, NOOP_FLWR_AID
 from flwr.common.typing import Federation
-from flwr.proto.federation_pb2 import Account, Member  # pylint: disable=E0611
+from flwr.proto.federation_pb2 import (  # pylint: disable=E0611
+    Account,
+    Invitation,
+    Member,
+)
 from flwr.supercore.constant import NOOP_FEDERATION, NOOP_FEDERATION_DESCRIPTION
 
 from .federation_manager import FederationManager
@@ -68,11 +72,8 @@ class NoOpFederationManager(FederationManager):
         if federation != NOOP_FEDERATION:
             raise ValueError(f"Federation '{federation}' does not exist.")
 
-        run_ids = self.linkstate.get_run_ids(flwr_aid=NOOP_FLWR_AID)
+        runs = list(self.linkstate.get_run_info(flwr_aids=[NOOP_FLWR_AID]))
         nodes = list(self.linkstate.get_node_info(owner_aids=[NOOP_FLWR_AID]))
-        runs = [
-            run for run_id in run_ids if (run := self.linkstate.get_run(run_id=run_id))
-        ]
         only_account = Account(id=NOOP_FLWR_AID, name=NOOP_ACCOUNT_NAME)
         return Federation(
             name=NOOP_FEDERATION,
@@ -109,4 +110,40 @@ class NoOpFederationManager(FederationManager):
         """Remove a SuperNode from a federation."""
         raise NotImplementedError(
             "`remove_supernode` is not supported by NoOpFederationManager."
+        )
+
+    def create_invitation(
+        self, flwr_aid: str, federation: str, invitee_flwr_aid: str
+    ) -> None:
+        """Create an invitation for an account to join a federation."""
+        raise NotImplementedError(
+            "`create_invitation` is not supported by NoOpFederationManager."
+        )
+
+    def list_invitations(
+        self, flwr_aid: str
+    ) -> tuple[list[Invitation], list[Invitation]]:
+        """List invitations visible to the given account."""
+        raise NotImplementedError(
+            "`list_invitations` is not supported by NoOpFederationManager."
+        )
+
+    def accept_invitation(self, flwr_aid: str, federation: str) -> None:
+        """Accept a pending invitation to join a federation."""
+        raise NotImplementedError(
+            "`accept_invitation` is not supported by NoOpFederationManager."
+        )
+
+    def reject_invitation(self, flwr_aid: str, federation: str) -> None:
+        """Reject a pending invitation to join a federation."""
+        raise NotImplementedError(
+            "`reject_invitation` is not supported by NoOpFederationManager."
+        )
+
+    def revoke_invitation(
+        self, flwr_aid: str, federation: str, invitee_flwr_aid: str
+    ) -> None:
+        """Revoke a pending invitation."""
+        raise NotImplementedError(
+            "`revoke_invitation` is not supported by NoOpFederationManager."
         )

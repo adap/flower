@@ -55,18 +55,24 @@ from flwr.common.serde import (
 from flwr.common.typing import Fab, Run, RunStatus
 from flwr.proto import control_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
+    AcceptInvitationRequest,
+    AcceptInvitationResponse,
     AddNodeToFederationRequest,
     AddNodeToFederationResponse,
     ArchiveFederationRequest,
     ArchiveFederationResponse,
     CreateFederationRequest,
     CreateFederationResponse,
+    CreateInvitationRequest,
+    CreateInvitationResponse,
     GetAuthTokensRequest,
     GetAuthTokensResponse,
     GetLoginDetailsRequest,
     GetLoginDetailsResponse,
     ListFederationsRequest,
     ListFederationsResponse,
+    ListInvitationsRequest,
+    ListInvitationsResponse,
     ListNodesRequest,
     ListNodesResponse,
     ListRunsRequest,
@@ -75,8 +81,12 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     PullArtifactsResponse,
     RegisterNodeRequest,
     RegisterNodeResponse,
+    RejectInvitationRequest,
+    RejectInvitationResponse,
     RemoveNodeFromFederationRequest,
     RemoveNodeFromFederationResponse,
+    RevokeInvitationRequest,
+    RevokeInvitationResponse,
     ShowFederationRequest,
     ShowFederationResponse,
     StartRunRequest,
@@ -102,6 +112,7 @@ from flwr.superlink.auth_plugin import ControlAuthnPlugin
 from .control_account_auth_interceptor import get_current_account_info
 
 
+# pylint: disable=too-many-public-methods
 class ControlServicer(control_pb2_grpc.ControlServicer):
     """Control API servicer."""
 
@@ -234,15 +245,16 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
 
         # Retrieve run ID and run
         run_id = request.run_id
-        run = state.get_run(run_id)
+        runs = state.get_run_info(run_ids=[run_id])
 
         # Exit if `run_id` not found
-        if not run:
+        if not runs:
             context.abort(grpc.StatusCode.NOT_FOUND, RUN_ID_NOT_FOUND_MESSAGE)
+        run = runs[0]
 
         # Check if `flwr_aid` matches the run's `flwr_aid`
         flwr_aid = get_current_account_info().flwr_aid
-        _check_flwr_aid_in_run(flwr_aid=flwr_aid, run=cast(Run, run), context=context)
+        _check_flwr_aid_in_run(flwr_aid=flwr_aid, run=run, context=context)
 
         after_timestamp = request.after_timestamp + 1e-6
         while context.is_active():
@@ -259,8 +271,8 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             # Wait for and continue to yield more log responses only if the
             # run isn't completed yet. If the run is finished, the entire log
             # is returned at this point and the server ends the stream.
-            run_status = state.get_run_status({run_id})[run_id]
-            if run_status.status == Status.FINISHED:
+            run = state.get_run_info(run_ids=[run_id])[0]
+            if run.status.status == Status.FINISHED:
                 log(INFO, "All logs for run ID `%s` returned", run_id)
 
                 # Delete objects of the run from the object store
@@ -322,19 +334,19 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
 
         # Retrieve run ID and run
         run_id = request.run_id
-        run = state.get_run(run_id)
+        runs = state.get_run_info(run_ids=[run_id])
 
         # Exit if `run_id` not found
-        if not run:
+        if not runs:
             context.abort(grpc.StatusCode.NOT_FOUND, RUN_ID_NOT_FOUND_MESSAGE)
             raise grpc.RpcError()  # This line is unreachable
+        run = runs[0]
 
         # Check if `flwr_aid` matches the run's `flwr_aid`
         flwr_aid = get_current_account_info().flwr_aid
         _check_flwr_aid_in_run(flwr_aid=flwr_aid, run=run, context=context)
 
-        run_status = state.get_run_status({run_id})[run_id]
-        if run_status.status == Status.FINISHED:
+        if run.status.status == Status.FINISHED:
             context.abort(
                 grpc.StatusCode.FAILED_PRECONDITION,
                 f"Run ID {run_id} is already finished",
@@ -430,12 +442,13 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
 
         # Retrieve run ID and run
         run_id = request.run_id
-        run = state.get_run(run_id)
+        runs = state.get_run_info(run_ids=[run_id])
 
         # Exit if `run_id` not found
-        if not run:
+        if not runs:
             context.abort(grpc.StatusCode.NOT_FOUND, RUN_ID_NOT_FOUND_MESSAGE)
             raise grpc.RpcError()  # This line is unreachable
+        run = runs[0]
 
         # Exit if the run is not finished yet
         if run.status.status != Status.FINISHED:
@@ -594,6 +607,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         # Build Federation proto object
         federation_proto = Federation(
             name=federation,
+            description=details.description,
             members=details.members,
             nodes=details.nodes,
             runs=[run_to_proto(run) for run in details.runs],
@@ -752,6 +766,41 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             )
 
         return RemoveNodeFromFederationResponse()
+
+    def CreateInvitation(
+        self, request: CreateInvitationRequest, context: grpc.ServicerContext
+    ) -> CreateInvitationResponse:
+        """Create an invitation."""
+        log(INFO, "ControlServicer.CreateInvitation")
+        raise NotImplementedError("CreateInvitation is not implemented.")
+
+    def ListInvitations(
+        self, request: ListInvitationsRequest, context: grpc.ServicerContext
+    ) -> ListInvitationsResponse:
+        """List invitations."""
+        log(INFO, "ControlServicer.ListInvitations")
+        raise NotImplementedError("ListInvitations is not implemented.")
+
+    def AcceptInvitation(
+        self, request: AcceptInvitationRequest, context: grpc.ServicerContext
+    ) -> AcceptInvitationResponse:
+        """Accept an invitation."""
+        log(INFO, "ControlServicer.AcceptInvitation")
+        raise NotImplementedError("AcceptInvitation is not implemented.")
+
+    def RejectInvitation(
+        self, request: RejectInvitationRequest, context: grpc.ServicerContext
+    ) -> RejectInvitationResponse:
+        """Reject an invitation."""
+        log(INFO, "ControlServicer.RejectInvitation")
+        raise NotImplementedError("RejectInvitation is not implemented.")
+
+    def RevokeInvitation(
+        self, request: RevokeInvitationRequest, context: grpc.ServicerContext
+    ) -> RevokeInvitationResponse:
+        """Revoke an invitation."""
+        log(INFO, "ControlServicer.RevokeInvitation")
+        raise NotImplementedError("RevokeInvitation is not implemented.")
 
 
 def _validate_federation_and_node_in_request(

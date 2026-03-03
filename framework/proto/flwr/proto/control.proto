@@ -78,6 +78,26 @@ service Control {
   // Remove SuperNode from Federation
   rpc RemoveNodeFromFederation(RemoveNodeFromFederationRequest)
       returns (RemoveNodeFromFederationResponse) {}
+
+  // Create Invitation
+  rpc CreateInvitation(CreateInvitationRequest)
+      returns (CreateInvitationResponse) {}
+
+  // List Invitations
+  rpc ListInvitations(ListInvitationsRequest)
+      returns (ListInvitationsResponse) {}
+
+  // Accept Invitation
+  rpc AcceptInvitation(AcceptInvitationRequest)
+      returns (AcceptInvitationResponse) {}
+
+  // Reject Invitation
+  rpc RejectInvitation(RejectInvitationRequest)
+      returns (RejectInvitationResponse) {}
+
+  // Revoke Invitation
+  rpc RevokeInvitation(RevokeInvitationRequest)
+      returns (RevokeInvitationResponse) {}
 }
 
 message StartRunRequest {
@@ -167,3 +187,27 @@ message RemoveNodeFromFederationRequest {
   uint64 node_id = 2;
 }
 message RemoveNodeFromFederationResponse {}
+
+message CreateInvitationRequest {
+  string invitee_account_name = 1;
+  string federation_name = 2;
+}
+message CreateInvitationResponse {}
+
+message ListInvitationsRequest {}
+message ListInvitationsResponse {
+  repeated Invitation created_invitations = 1;
+  repeated Invitation received_invitations = 2;
+}
+
+message AcceptInvitationRequest { string federation_name = 1; }
+message AcceptInvitationResponse {}
+
+message RejectInvitationRequest { string federation_name = 1; }
+message RejectInvitationResponse {}
+
+message RevokeInvitationRequest {
+  string invitee_account_name = 1;
+  string federation_name = 2;
+}
+message RevokeInvitationResponse {}
