@@ -1,5 +1,5 @@
-Use Hub
-=============
+Use an App from Flower Hub
+==========================
 
 Applications on Flower Hub leverage Flower's infrastructure so you can focus on application logic instead of managing distributed systems complexity.
 
@@ -65,10 +65,12 @@ Next, launch the SuperNode passing as arguments the address of the SuperLink and
         --superlink <SUPERLINK-FLEET-API> \
         --node-config="data-path=/path/to/demo_data/partition_0"
 
-In this example, :code:`data-path` is an application-specific configuration key used by the ClientApp to locate its local dataset.
+.. tip::
+   For a detailed walkthrough, see the `step-by-step guide <https://flower.ai/docs/framework/how-to-run-flower-with-deployment-engine.html>`_ on using the Deployment Runtime.
 
 .. note::
-   The required `--node-config` parameters depend on the specific app you are running. Always refer to the app's README for the exact configuration keys and expected values.
+   In this example, :code:`data-path` is an application-specific configuration key used by the ClientApp to locate its local dataset.
+   The required :code:`--node-config` parameters depend on the specific app you are running. Always refer to the app's README for the exact configuration keys and expected values.
 
 Make sure the environment of each SuperNode has all required dependencies for the app you envision it to run installed.
 
@@ -79,7 +81,6 @@ Finally, launch the run using :code:`flwr run`, pointing to the appropriate Supe
     flwr run . <SUPERLINK-CONNECTION> --stream
 
 .. tip::
-   Follow this `step-by-step guide <https://flower.ai/docs/framework/how-to-run-flower-with-deployment-engine.html>`_ to run the same app with the Deployment Runtime.  
    Afterward, consider enabling `secure TLS connections <https://flower.ai/docs/framework/how-to-enable-tls-connections.html>`_ and configuring `SuperNode authentication <https://flower.ai/docs/framework/how-to-authenticate-supernodes.html>`_ for production deployments.
 
 

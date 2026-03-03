@@ -1,5 +1,5 @@
-Publish an App
-==============
+Publish an App on Flower Hub
+============================
 
 Have you built an exciting federated app? Now it's time to share it with the world! Contributing your federated learning app to Flower Hub allows you to share your work with the community, receive feedback, and enable others to build on top of your contributions.
 
@@ -59,9 +59,17 @@ Example:
 
 .. tip::
    Recommendations:
-   
+
    - For Simulation, use `Flower Datasets <https://flower.ai/docs/datasets/index.html>`_ to partition data on the fly.
    - For Deployment, generate demo data using the CLI command :code:`flwr-datasets create` (see the `deployment data guide <https://flower.ai/docs/datasets/how-to-generate-demo-data-for-deployment.html>`_ for details).
+
+.. note::
+   The app's README should clearly document the following:
+
+   - For Simulation, specify how many virtual SuperNodes are expected and whether modifications to the `Flower Configuration <https://flower.ai/docs/framework/ref-flower-configuration.html>`_ are required.
+
+   - For Deployment, explain how to generate synthetic data using :code:`flwr-datasets create`.  
+     If the app relies on externally provided data, describe how users can obtain it and how it should be formatted before running the app.
 
 
 Update App Metadata
@@ -124,9 +132,9 @@ Rules:
    The :code:`name` **cannot be changed** after the first publication, so make sure it is final before releasing your app.
 
 .. note::
-   Currently, Flower Hub supports :code:`.py`, :code:`.toml`, and :code:`.md` files.
-   As a special case for app licensing, root-level :code:`LICENSE` is also supported.
-   Ensure that all required files for your app (e.g., source code, metadata, README) are included in the same directory before publishing.
+   Flower Hub currently supports the following file formats: :code:`.py`, :code:`.toml`, and :code:`.md`.  
+   As a special case for licensing, a root-level :code:`LICENSE` file is also supported.
+   Before publishing, ensure that all required files for your app (e.g., source code, metadata, README) are included in the app directory.
 
    Support for additional file formats is planned for future releases.
 
