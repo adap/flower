@@ -78,8 +78,6 @@ from flwr.supercore.version import package_version
 from flwr.supernode.nodestate import NodeState, NodeStateFactory
 from flwr.supernode.servicer.clientappio import ClientAppIoServicer
 
-DEFAULT_FFS_DIR = get_flwr_home() / "supernode" / "ffs"
-
 FAB_VERIFICATION_ERROR = Error(ErrorCode.INVALID_FAB, "The FAB could not be verified.")
 
 

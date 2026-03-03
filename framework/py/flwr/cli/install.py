@@ -42,14 +42,14 @@ def install(
 ) -> None:
     """Install a Flower App Bundle.
 
-    It can be ran with a single FAB file argument:
+    It can be run with a single FAB file argument:
 
         ``flwr install ./target_project.fab``
 
-    Apps are installed into the Flower directory. The default is:
+    Apps are installed to:
 
-        - ``$FLWR_HOME/`` if ``$FLWR_HOME`` is defined
-        - ``$HOME/.flwr/`` otherwise
+        - ``$FLWR_HOME/apps/`` if ``$FLWR_HOME`` is defined
+        - ``$HOME/.flwr/apps/`` otherwise
     """
     if source is None:
         source = Path(typer.prompt("Enter the source FAB file"))
