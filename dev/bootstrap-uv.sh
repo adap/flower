@@ -14,4 +14,4 @@ if ! command -v uv >/dev/null 2>&1; then
 fi
 
 # Use `uv` to install project dependencies from lockfile
-uv sync --frozen --all-extras --all-groups
+uv sync --python=3.10.19 --frozen --all-extras --all-groups
