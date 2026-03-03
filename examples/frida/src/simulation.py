@@ -345,7 +345,7 @@ def save_csv(history, cfg):
 
 
 @hydra.main(
-    config_path="./configurations", config_name="baseline.yaml", version_base=None
+    config_path="./configurations", config_name="baseline", version_base=None
 )
 def simulation(cfg):
     """Main simulation function"""

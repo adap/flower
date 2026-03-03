@@ -6,6 +6,19 @@ build-backend = "setuptools.build_meta"
 name = "frida"
 version = "0.1.0"
 requires-python = ">=3.9"
+dependencies = [
+    "flwr>=1.13.0",
+    "matplotlib",
+    "numpy>=1.26.0",
+    "seaborn",
+    "aiohttp",
+    "hydra-core",
+    "torch",
+    "torchvision",
+    "flwr-datasets",
+    "scipy",
+    "wandb",
+]
 
 [tool.setuptools.packages.find]
 where = ["src"]
