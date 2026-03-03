@@ -1,0 +1,139 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "fedhomo"
+version = "1.0.0"
+description = "Federated Learning with Homomorphic Encryption (CKKS via TenSEAL)"
+license = "Apache-2.0"
+dependencies = [
+    "flwr[simulation]>=1.17.0",
+    "flwr-datasets[vision]>=0.5.0",
+    "torch>=2.0.0",
+    "torchvision>=0.15.0",
+    "tenseal>=0.3.14",
+    "numpy>=1.24.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "black==24.2.0",
+    "isort==5.13.2",
+    "ruff==0.1.9",
+    "mypy==1.8.0",
+    "pytest==6.2.4",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+# ── Flower App ────────────────────────────────────────────────────────────────
+
+[tool.flwr.app]
+publisher = "alecatalfamo"
+
+[tool.flwr.app.components]
+serverapp = "fedhomo.server_app:app"
+clientapp = "fedhomo.client_app:app"
+
+[tool.flwr.app.config]
+num-supernodes = 3
+
+num-server-rounds = 3
+fraction-fit = 0.5
+local-epochs = 1
+dataset = "mnist"           # "mnist" or "cifar10"
+
+# ── Federations ───────────────────────────────────────────────────────────────
+
+
+#######################################################################
+# CONFIGURATION MIGRATION NOTICE:
+#
+# What was previously called "federation config" for SuperLink
+# connections in pyproject.toml has been renamed and moved.
+#
+# These settings are now **SuperLink connection configuration**
+# and are defined in the Flower configuration file.
+#
+# The entries below are commented out intentionally and are kept
+# only as a migration reference.
+#
+# Docs: https://flower.ai/docs/framework/ref-flower-configuration.html
+#######################################################################
+
+
+#######################################################################
+# CONFIGURATION MIGRATION NOTICE:
+#
+# What was previously called "federation config" for SuperLink
+# connections in pyproject.toml has been renamed and moved.
+#
+# These settings are now **SuperLink connection configuration**
+# and are defined in the Flower configuration file.
+#
+# The entries below are commented out intentionally and are kept
+# only as a migration reference.
+#
+# Docs: https://flower.ai/docs/framework/ref-flower-configuration.html
+#######################################################################
+
+# [tool.flwr.federations]
+# default = "local-simulation"
+
+# [tool.flwr.federations.local-simulation]
+# options.num-supernodes = 5
+# options.backend.client-resources.num-cpus = 2
+# options.backend.client-resources.num-gpus = 0.0
+
+# # [tool.flwr.federations.local-deployment]
+# # address = "127.0.0.1:9093"
+# # insecure = true
+
+# # # ── Linting & formatting ──────────────────────────────────────────────────────
+
+[tool.isort]
+profile = "black"
+known_first_party = ["flwr"]
+
+[tool.black]
+line-length = 88
+target-version = ["py38", "py39", "py310", "py311"]
+
+[tool.ruff]
+target-version = "py38"
+line-length = 88
+select = ["D", "E", "F", "W", "B", "ISC", "C4"]
+fixable = ["D", "E", "F", "W", "B", "ISC", "C4"]
+ignore = ["B024", "B027"]
+exclude = [".git", ".venv", "__pypackages__", "build", "dist"]
+
+[tool.ruff.pydocstyle]
+convention = "numpy"
+
+[tool.mypy]
+ignore_missing_imports = true
+strict = false
+plugins = "numpy.typing.mypy_plugin"
+
+[[tool.mypy.overrides]]
+module = "torch.*"
+follow_imports = "skip"
+
+[tool.pytest.ini_options]
+minversion = "6.2"
+addopts = "-qq"
+testpaths = ["fedhomo"]
+
+[tool.pylint."MESSAGES CONTROL"]
+disable = "duplicate-code,too-few-public-methods,useless-import-alias"
+good-names = "i,j,k,_,x,y,X,Y"
+max-args = 10
+max-attributes = 15
+max-locals = 36
+max-branches = 20
+max-statements = 55
