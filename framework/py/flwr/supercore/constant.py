@@ -55,10 +55,13 @@ PLATFORM_API_URL = "https://api.flower.ai/v1"
 SUPERGRID_ADDRESS = "supergrid.flower.ai"
 
 # Specification for app publishing
+APP_PUBLISH_ALLOWED_LICENSE_FILES = ("LICENSE", "LICENSE.md")
 APP_PUBLISH_INCLUDE_PATTERNS = (
     "**/*.py",
     "**/*.toml",
     "**/*.md",
+    "/LICENSE",
+    "/LICENSE.md",
 )
 APP_PUBLISH_EXCLUDE_PATTERNS = FAB_EXCLUDE_PATTERNS = (
     f"{FLWR_DIR}/**",  # Exclude the .flwr directory
