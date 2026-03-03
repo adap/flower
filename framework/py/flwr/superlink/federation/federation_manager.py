@@ -19,6 +19,7 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
 from flwr.common.typing import Federation
+from flwr.proto.federation_pb2 import Invitation  # pylint: disable=E0611
 
 if TYPE_CHECKING:
     from flwr.server.superlink.linkstate.linkstate import LinkState
@@ -144,7 +145,7 @@ class FederationManager(ABC):
         """
 
     @abstractmethod
-    def list_invitations(self, flwr_aid: str) -> list[dict[str, str]]:
+    def list_invitations(self, flwr_aid: str) -> list[Invitation]:
         """List invitations for a federation visible to the given account.
 
         Parameters
@@ -154,8 +155,8 @@ class FederationManager(ABC):
 
         Returns
         -------
-        list[dict[str, str]]
-            A list of invitation records.
+        list[Invitation]
+            A list of Invitation proto messages.
         """
 
     @abstractmethod

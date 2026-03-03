@@ -17,7 +17,11 @@
 
 from flwr.common.constant import NOOP_ACCOUNT_NAME, NOOP_FLWR_AID
 from flwr.common.typing import Federation
-from flwr.proto.federation_pb2 import Account, Member  # pylint: disable=E0611
+from flwr.proto.federation_pb2 import (  # pylint: disable=E0611
+    Account,
+    Invitation,
+    Member,
+)
 from flwr.supercore.constant import NOOP_FEDERATION, NOOP_FEDERATION_DESCRIPTION
 
 from .federation_manager import FederationManager
@@ -116,8 +120,8 @@ class NoOpFederationManager(FederationManager):
             "`create_invitation` is not supported by NoOpFederationManager."
         )
 
-    def list_invitations(self, flwr_aid: str) -> list[dict[str, str]]:
-        """List invitations for a federation visible to the given account."""
+    def list_invitations(self, flwr_aid: str) -> list[Invitation]:
+        """List invitations visible to the given account."""
         raise NotImplementedError(
             "`list_invitations` is not supported by NoOpFederationManager."
         )
