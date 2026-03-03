@@ -1,0 +1,40 @@
+client_0:
+  cpu: Ryzen 5 5500U
+  gpu: GeForce GTX 1050
+  ram_gb: 16
+client_1:
+  cpu: Ryzen AI 7 350
+  gpu: GeForce RTX 3070
+  ram_gb: 16
+client_2:
+  cpu: Ryzen 5 PRO 4650U
+  gpu: GeForce GTX 1650 SUPER
+  ram_gb: 16
+client_3:
+  cpu: Ryzen 5 5500U
+  gpu: GeForce RTX 3060 Ti
+  ram_gb: 16
+client_4:
+  cpu: Processor N100
+  gpu: GeForce RTX 4060 Mobile
+  ram_gb: 8
+client_5:
+  cpu: Ryzen 5 3500U
+  gpu: GeForce GTX 1650
+  ram_gb: 16
+client_6:
+  cpu: Ryzen 7 5700U
+  gpu: GeForce RTX 3060
+  ram_gb: 16
+client_7:
+  cpu: Processor N100
+  gpu: GeForce RTX 3050
+  ram_gb: 16
+client_8:
+  cpu: Ryzen 7 5700U
+  gpu: GeForce GTX 1050 Ti
+  ram_gb: 4
+client_9:
+  cpu: Ryzen 5 5500U
+  gpu: GeForce RTX 3060
+  ram_gb: 16

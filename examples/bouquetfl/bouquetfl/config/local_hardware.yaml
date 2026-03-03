@@ -1,0 +1,9 @@
+cpu_clock_speed: 2200.0
+cpu_cores: 8
+gpu_clock_speed: 3105
+gpu_cores: 7168
+gpu_memory: 11
+gpu_memory_speed: 10501
+gpu_name: NVIDIA GeForce RTX 4070 SUPER
+os: Ubuntu 24.04
+ram_gb: 24
