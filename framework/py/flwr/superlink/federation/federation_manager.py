@@ -146,7 +146,7 @@ class FederationManager(ABC):
 
     @abstractmethod
     def list_invitations(self, flwr_aid: str) -> list[Invitation]:
-        """List invitations for a federation visible to the given account.
+        """List invitations visible to the given account.
 
         Parameters
         ----------
