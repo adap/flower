@@ -26,7 +26,8 @@ cd "$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"/../
 # "0.1.1.dev20200716" as seen at https://pypi.org/project/flwr-nightly/
 
 if [[ $(git log --since="24 hours ago" --pretty=oneline) ]]; then
-    PYTHONPATH=../dev python -m devtool.pyproject_meta set-nightly-name-version pyproject.toml
+    sed -i -E "s/^name = \"(.+)\"/name = \"\1-nightly\"/" pyproject.toml
+    sed -i -E "s/^version = \"(.+)\"/version = \"\1.dev$(date '+%Y%m%d')\"/" pyproject.toml
     python -m poetry build
     python -m poetry publish -u __token__ -p $PYPI_TOKEN
 else
