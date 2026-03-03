@@ -442,12 +442,13 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
 
         # Retrieve run ID and run
         run_id = request.run_id
-        run = _get_run(state, run_id)
+        runs = state.get_run_info(run_ids=[run_id])
 
         # Exit if `run_id` not found
-        if not run:
+        if not runs:
             context.abort(grpc.StatusCode.NOT_FOUND, RUN_ID_NOT_FOUND_MESSAGE)
             raise grpc.RpcError()  # This line is unreachable
+        run = runs[0]
 
         # Exit if the run is not finished yet
         if run.status.status != Status.FINISHED:
@@ -841,12 +842,6 @@ def _validate_federation_and_node_in_request(
             grpc.StatusCode.FAILED_PRECONDITION,
             f"Node {node_id} not found or you are not its owner.",
         )
-
-
-def _get_run(state: LinkState, run_id: int) -> Run | None:
-    """Return a run by ID, or `None` if it does not exist."""
-    runs = state.get_run_info(run_ids=[run_id])
-    return runs[0] if runs else None
 
 
 def _check_flwr_aid_exists(flwr_aid: str | None, context: grpc.ServicerContext) -> str:
