@@ -509,23 +509,23 @@ class TestControlServicerAuth(unittest.TestCase):
     def test_streamlogs_auth_successful(self) -> None:
         """Test StreamLogs successful with matching flwr_aid."""
         # Prepare
-        run_id = self._create_dummy_run("user-123")
+        run_id = 789
         request = StreamLogsRequest(run_id=run_id, after_timestamp=0)
         ctx = self.make_context()
         ctx.is_active.return_value = True
+        mock_get_run_info = Mock()
+        mock_run = Mock(
+            flwr_aid="user-123",
+            status=RunStatus(Status.FINISHED, SubStatus.COMPLETED, ""),
+        )
+        mock_get_run_info.return_value = [mock_run]
 
         # Execute & Assert
         with (
             patch.object(
                 self.state, "get_serverapp_log", new=lambda rid, ts: ("log1", 1.0)
             ),
-            patch.object(
-                self.state,
-                "get_run_status",
-                new=lambda ids: {
-                    run_id: RunStatus(Status.FINISHED, SubStatus.COMPLETED, "")
-                },
-            ),
+            patch.object(self.state, "get_run_info", new=mock_get_run_info),
             patch(
                 "flwr.superlink.servicer.control.control_servicer.get_current_account_info",
                 return_value=SimpleNamespace(flwr_aid="user-123"),
@@ -534,6 +534,7 @@ class TestControlServicerAuth(unittest.TestCase):
             msgs = list(self.servicer.StreamLogs(request, ctx))
             gen = self.servicer.StreamLogs(request, ctx)
             msgs = list(gen)
+            mock_get_run_info.assert_called_with(run_ids=[run_id])
             self.assertEqual(len(msgs), 1)
             self.assertIsInstance(msgs[0], StreamLogsResponse)
             self.assertEqual(msgs[0].log_output, "log1")
