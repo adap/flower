@@ -46,7 +46,7 @@ author = "The Flower Authors"
 _pyproject_path = Path(__file__).parent.parent.parent / "pyproject.toml"
 with open(_pyproject_path, "rb") as f:
     _pyproject = tomllib.load(f)
-release = _pyproject["tool"]["poetry"]["version"]
+release = _pyproject["project"]["version"]
 
 # Make version available as a substitution in rst files (e.g., |release|)
 rst_prolog = f"""

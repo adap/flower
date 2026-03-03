@@ -19,6 +19,7 @@ import hashlib
 import json
 import os
 import tempfile
+import time
 import unittest
 from datetime import datetime
 from types import SimpleNamespace
@@ -147,7 +148,8 @@ class TestControlServicer(unittest.TestCase):
         ) as mock_get_fab_metadata:
             mock_get_fab_metadata.return_value = (fab_id, fab_version)
             response = self.servicer.StartRun(request, Mock())
-        run_info = self.state.get_run(response.run_id)
+        runs = self.state.get_run_info(run_ids=[response.run_id])
+        run_info = runs[0] if runs else None
 
         # Assert
         assert run_info is not None
@@ -155,21 +157,24 @@ class TestControlServicer(unittest.TestCase):
         self.assertEqual(run_info.fab_id, fab_id)
         self.assertEqual(run_info.fab_version, fab_version)
 
-    def test_list_runs(self) -> None:
+    @parameterized.expand([(None,), (1,), (2,), (3,), (9,)])  # type: ignore
+    def test_list_runs(self, limit: int | None) -> None:
         """Test List method of ControlServicer with --runs option."""
         # Prepare
-        run_ids = set()
+        run_ids: list[int] = []
         for _ in range(3):
-            run_id = self._create_dummy_run(self.aid)
-            run_ids.add(run_id)
+            run_ids.append(self._create_dummy_run(self.aid))
+            time.sleep(1e-6)  # Ensure different timestamps for sorting
 
         # Execute
-        response = self.servicer.ListRuns(ListRunsRequest(), Mock())
+        response = self.servicer.ListRuns(ListRunsRequest(limit=limit), Mock())
         retrieved_timestamp = datetime.fromisoformat(response.now).timestamp()
 
         # Assert
+        if limit is None:
+            limit = 999
         self.assertLess(abs(retrieved_timestamp - now().timestamp()), 1e-3)
-        self.assertEqual(set(response.run_dict.keys()), run_ids)
+        self.assertEqual(set(response.run_dict.keys()), set(run_ids[-limit:]))
 
     def test_list_run_id(self) -> None:
         """Test List method of ControlServicer with --run-id option."""
@@ -193,7 +198,8 @@ class TestControlServicer(unittest.TestCase):
 
         # Execute
         response = self.servicer.StopRun(StopRunRequest(run_id=run_id), Mock())
-        run_state = self.state.get_run(run_id)
+        runs = self.state.get_run_info(run_ids=[run_id])
+        run_state = runs[0] if runs else None
 
         # Assert
         self.assertTrue(response.success)
@@ -503,23 +509,23 @@ class TestControlServicerAuth(unittest.TestCase):
     def test_streamlogs_auth_successful(self) -> None:
         """Test StreamLogs successful with matching flwr_aid."""
         # Prepare
-        run_id = self._create_dummy_run("user-123")
+        run_id = 789
         request = StreamLogsRequest(run_id=run_id, after_timestamp=0)
         ctx = self.make_context()
         ctx.is_active.return_value = True
+        mock_get_run_info = Mock()
+        mock_run = Mock(
+            flwr_aid="user-123",
+            status=RunStatus(Status.FINISHED, SubStatus.COMPLETED, ""),
+        )
+        mock_get_run_info.return_value = [mock_run]
 
         # Execute & Assert
         with (
             patch.object(
                 self.state, "get_serverapp_log", new=lambda rid, ts: ("log1", 1.0)
             ),
-            patch.object(
-                self.state,
-                "get_run_status",
-                new=lambda ids: {
-                    run_id: RunStatus(Status.FINISHED, SubStatus.COMPLETED, "")
-                },
-            ),
+            patch.object(self.state, "get_run_info", new=mock_get_run_info),
             patch(
                 "flwr.superlink.servicer.control.control_servicer.get_current_account_info",
                 return_value=SimpleNamespace(flwr_aid="user-123"),
@@ -528,6 +534,7 @@ class TestControlServicerAuth(unittest.TestCase):
             msgs = list(self.servicer.StreamLogs(request, ctx))
             gen = self.servicer.StreamLogs(request, ctx)
             msgs = list(gen)
+            mock_get_run_info.assert_called_with(run_ids=[run_id])
             self.assertEqual(len(msgs), 1)
             self.assertIsInstance(msgs[0], StreamLogsResponse)
             self.assertEqual(msgs[0].log_output, "log1")
@@ -567,7 +574,8 @@ class TestControlServicerAuth(unittest.TestCase):
         ):
             response = self.servicer.StopRun(request, ctx)
             self.assertTrue(response.success)
-            run = self.state.get_run(run_id)
+            runs = self.state.get_run_info(run_ids=[run_id])
+            run = runs[0] if runs else None
             self.assertEqual(cast(Run, run).status.status, Status.FINISHED)
             self.assertEqual(cast(Run, run).status.sub_status, SubStatus.STOPPED)
 
