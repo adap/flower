@@ -92,20 +92,12 @@ class TelemetryTest(unittest.TestCase):
 
     def test_get_source_id_no_home(self) -> None:
         """Test if _get_source_id returns unavailable without a home dir."""
-
         # Prepare
-        def new_callable() -> Callable[[], None]:
-            def _new_failing_get_home() -> None:
-                raise RuntimeError
-
-            return _new_failing_get_home
-
         except_value = "unavailable"
 
         # Execute
         with mock.patch(
-            "flwr.common.telemetry._get_home",
-            new_callable=new_callable,
+            "flwr.common.telemetry.get_flwr_home", side_effect=RuntimeError
         ):
             source_id = _get_source_id()
 
