@@ -145,7 +145,9 @@ class FederationManager(ABC):
         """
 
     @abstractmethod
-    def list_invitations(self, flwr_aid: str) -> list[Invitation]:
+    def list_invitations(
+        self, flwr_aid: str
+    ) -> tuple[list[Invitation], list[Invitation]]:
         """List invitations visible to the given account.
 
         Parameters
@@ -155,8 +157,8 @@ class FederationManager(ABC):
 
         Returns
         -------
-        list[Invitation]
-            A list of Invitation proto messages.
+        tuple[list[Invitation], list[Invitation]]
+            A tuple of (created_invitations, received_invitations).
         """
 
     @abstractmethod
