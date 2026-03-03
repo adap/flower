@@ -70,7 +70,7 @@ In this example, :code:`data-path` is an application-specific configuration key 
 .. note::
    The required `--node-config` parameters depend on the specific app you are running. Always refer to the app's README for the exact configuration keys and expected values.
 
-Make sure the environment of each SuperNode has all required dependencies installed.
+Make sure the environment of each SuperNode has all required dependencies for the app you envision it to run installed.
 
 Finally, launch the run using :code:`flwr run`, pointing to the appropriate SuperLink connection:
 
