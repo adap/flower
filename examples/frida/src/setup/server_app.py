@@ -79,6 +79,15 @@ def _make_cfg(run_config: dict):
     if isinstance(cfg.n_gmm_layers, str):
         cfg.n_gmm_layers = [int(x.strip()) for x in cfg.n_gmm_layers.split(",")]
 
+    if isinstance(cfg.n_convlayers, str):
+        cfg.n_convlayers = [int(x.strip()) for x in cfg.n_convlayers.split(",")]
+
+    if isinstance(cfg.kernel_sizes, str):
+        cfg.kernel_sizes = [int(x.strip()) for x in cfg.kernel_sizes.split(",")]
+
+    if isinstance(cfg.n_linearlayers, str):
+        cfg.n_linearlayers = [int(x.strip()) for x in cfg.n_linearlayers.split(",")]
+
     if cfg.name_layer_grads == "None":
         cfg.name_layer_grads = None
 

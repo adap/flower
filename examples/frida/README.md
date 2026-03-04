@@ -56,6 +56,13 @@ FRIDA uses local offline datasets (pickle format). Download and place your datas
 ├── train_data.pkl
 └── test_data.pkl
 ```
+The dataset should follow the following format:
+  - <dataset_name>/train_data.pkl  -> (train_images, train_labels)
+  - <dataset_name>/test_data.pkl   -> (test_images, test_labels)
+
+Where:
+  train_images/test_images: np.ndarray uint8, shape (N, 32, 32, 3)
+  train_labels/test_labels: np.ndarray int64, shape (N,)
 
 ### Run with the Simulation Engine
 
@@ -77,7 +84,7 @@ options.backend.client-resources.num-cpus = 2
 options.backend.client-resources.num-gpus = 1.0
 ```
 
-Run with default settings (CIFAR-10, AlexNet, Cosine attack, 10 clients):
+Run with default settings (CIFAR-10, CNN, Yeom, 4 clients):
 
 ```bash
 flwr run .
@@ -86,21 +93,21 @@ flwr run .
 You can override settings defined in `pyproject.toml`. For example, to run with a different attack type and number of free-riders:
 
 ```bash
-flwr run . --run-config "attack_types=yeom num_freeriders=2 num_rounds=10"
+flwr run . --run-config "attack_types=yeom num_freeriders=4 num_rounds=10"
 ```
 
 Key configuration options:
 
-| Parameter        | Description                                                                 | Default   |
-| ---------------- | --------------------------------------------------------------------------- | --------- |
-| `num_clients`    | Total number of federated clients                                           | `10`      |
-| `num_freeriders` | Number of free-rider clients                                                | `0`       |
-| `freerider_type` | Free-rider strategy (`none`, `advanced_disguised`, `gradient_noiser`)       | `none`    |
-| `attack_types`   | Detection method (`cosine`, `yeom`, `dagmm`, `inconsistency`, `dist_score`) | `cosine`  |
-| `dataset`        | Dataset to use (`cifar10`, `cifar100`, `fmnist`, `shakespeare`)             | `cifar10` |
-| `architecture`   | Model architecture (`AlexNet`, `VGG19`, `LeNet5`, `LSTM`)                   | `AlexNet` |
-| `iid`            | IID or non-IID data partitioning                                            | `true`    |
-| `mitigation`     | Exclude detected free-riders from aggregation                               | `false`   |
+| Parameter        | Description                                                                 | Default          |
+| ---------------- | --------------------------------------------------------------------------- | -----------------|
+| `num_clients`    | Total number of federated clients                                           | `4`              |
+| `num_freeriders` | Number of free-rider clients                                                | `1`              |
+| `freerider_type` | Free-rider strategy (`none`, `advanced_disguised`, `gradient_noiser`)       | `none`           |
+| `attack_types`   | Detection method (`cosine`, `yeom`, `dagmm`, `inconsistency`, `dist_score`) | `yeom`           |
+| `dataset`        | Dataset to use (`cifar10`, `cifar100`, `fmnist`, `shakespeare`)             | `cifar10`        |
+| `architecture`   | Model architecture (`CNN`, `AlexNet`, `VGG19`, `LeNet5`, `LSTM`)            | `CNN`            |
+| `iid`            | IID or non-IID data partitioning                                            | `true`           |
+| `mitigation`     | Exclude detected free-riders from aggregation                               | `false`          |
 
 ### Run with the Deployment Engine
 

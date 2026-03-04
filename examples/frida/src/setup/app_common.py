@@ -1,4 +1,5 @@
 from .model import (
+    CNN,
     AlexNetCIFAR,
     AlexNetFMNIST,
     AlexNetImageNet,
@@ -42,6 +43,8 @@ def check_config(cfg, attack_types):
 
 
 def get_model(cfg, device):
+    if cfg.architecture == "CNN":
+        return CNN(cfg, device)
     if cfg.architecture == "AlexNet":
         if cfg.dataset == "fmnist":
             return AlexNetFMNIST(num_classes=cfg.num_classes, device=device)

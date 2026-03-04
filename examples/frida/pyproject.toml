@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "frida"
 version = "0.1.0"
 description = ""
-license = ""
+license = { file = "LICENSE" }
 requires-python = ">=3.9"
 dependencies = [
     "flwr[simulation]>=1.13.0",
@@ -34,19 +34,19 @@ serverapp = "setup.server_app:app"
 clientapp = "setup.client_app:app"
 
 [tool.flwr.app.config]
-num_clients = 2
+num_clients = 4
 num_rounds = 5
 batch_size = 32
 local_epochs = 1
 average_detection = 1
 lr = 0.01
 dataset = "cifar10"
-architecture = "AlexNet"
+architecture = "CNN"
 iid = true
 dirichlet_alpha = 0.5
-num_freeriders = 0
+num_freeriders = 1
 freerider_type = "none"
-attack_types = "inconsistency"
+attack_types = "yeom"
 path_to_local_dataset = "./data/cifar10/"
 canary = true
 dynamic_canary = true
@@ -87,3 +87,12 @@ n_encoder_layers = "128,64,32"
 n_gmm_layers = "10,10,2"
 dagmm_batch_size = 16
 dagmm_epochs = 100
+
+# required for CNN architecture
+n_convlayers = "32,32,64"
+kernel_sizes = "3,3,5"
+n_linearlayers = "100,10"
+momentum = 0.9
+w_decay =  1e-5
+pool_size = 2
+

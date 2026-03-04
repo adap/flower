@@ -17,7 +17,7 @@ def client_fn(context: Context):
     cfg = _make_cfg(context.run_config)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     cfg = check_config(cfg, cfg.attack_types)
-    net = deepcopy(get_model(cfg, device)).to(device)
+    net = get_model(cfg, device).to(device)
 
     node_cfg = context.node_config
     is_simulation = "partition-id" in node_cfg and "num-partitions" in node_cfg
@@ -86,6 +86,15 @@ def _make_cfg(run_config: dict):
 
     if isinstance(cfg.n_gmm_layers, str):
         cfg.n_gmm_layers = [int(x.strip()) for x in cfg.n_gmm_layers.split(",")]
+
+    if isinstance(cfg.n_convlayers, str):
+        cfg.n_convlayers = [int(x.strip()) for x in cfg.n_convlayers.split(",")]
+
+    if isinstance(cfg.kernel_sizes, str):
+        cfg.kernel_sizes = [int(x.strip()) for x in cfg.kernel_sizes.split(",")]
+
+    if isinstance(cfg.n_linearlayers, str):
+        cfg.n_linearlayers = [int(x.strip()) for x in cfg.n_linearlayers.split(",")]
 
     if cfg.name_layer_grads == "None":
         cfg.name_layer_grads = None
