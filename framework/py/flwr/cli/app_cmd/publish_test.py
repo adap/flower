@@ -128,7 +128,8 @@ def test_collect_files_includes_additional_allowed_publish_files(
     write(tmp_path, "cfg/config.yml", b"b: 2\n")
     write(tmp_path, "cfg/config.json", b'{"c": 3}\n')
     write(tmp_path, "cfg/config.jsonl", b'{"d": 4}\n')
-    write(tmp_path, "cfg/extra.editorconfig", b"indent_style = space\n")
+    write(tmp_path, "cfg/.editorconfig", b"indent_style = space\n")
+    write(tmp_path, "cfg/extra.editorconfig", b"not included\n")
     write(tmp_path, "skip.txt", b"skip\n")
 
     paths = _collect_file_paths(tmp_path)
@@ -140,7 +141,8 @@ def test_collect_files_includes_additional_allowed_publish_files(
     assert "cfg/config.yml" in rel_paths
     assert "cfg/config.json" in rel_paths
     assert "cfg/config.jsonl" in rel_paths
-    assert "cfg/extra.editorconfig" in rel_paths
+    assert "cfg/.editorconfig" in rel_paths
+    assert "cfg/extra.editorconfig" not in rel_paths
     assert "skip.txt" not in rel_paths
 
 

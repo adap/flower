@@ -64,9 +64,9 @@ APP_PUBLISH_INCLUDE_PATTERNS = (
     "**/*.yml",
     "**/*.json",
     "**/*.jsonl",
-    "**/*.editorconfig",
     "/.gitignore",
     "/.editorconfig",
+    "**/.editorconfig",
     "/LICENSE",
     "/LICENSE.md",
 )
