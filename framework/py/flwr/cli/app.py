@@ -117,8 +117,6 @@ federation_invite_app.command()(federation_invite_create)
 federation_invite_app.command()(federation_invite_accept)
 federation_invite_app.command()(federation_invite_reject)
 federation_invite_app.command()(federation_invite_revoke)
-# Hide "delete" command (left as alias for revoke)
-federation_invite_app.command("delete", hidden=True)(federation_invite_revoke)
 federation_app.add_typer(federation_invite_app, name="invite")
 
 app.add_typer(federation_app, name="federation")
