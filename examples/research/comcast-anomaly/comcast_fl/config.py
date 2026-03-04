@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
+import ipaddress
 import json
 import math
 from pathlib import Path
+import re
 from typing import Any
 
 from .constants import (
@@ -67,10 +69,68 @@ class ArtifactsConfig:
 
 
 @dataclass(slots=True)
+class AzureVmSpec:
+    name: str
+    host: str
+    ssh_port: int = 22
+    ssh_user: str = ""
+    ssh_key_path: str = ""
+    supernodes_on_vm: int = 0
+    roles: list[str] = field(default_factory=lambda: ["worker"])
+
+
+@dataclass(slots=True)
+class AzureSshConfig:
+    vms: list[AzureVmSpec] = field(default_factory=list)
+    total_supernodes: int = 0
+    control_vm: str = ""
+    superlink_vm: str = ""
+    superlink_bind_host: str | None = None
+    allow_public_ips: bool = False
+    remote_workspace_dir: str = "/opt/comcast-anomaly"
+    remote_python: str = "python3"
+    ssh_connect_timeout_sec: int = 10
+    startup_timeout_sec: int = 90
+    poll_interval_sec: float = 2.0
+    domain_run_timeout_sec: int = 3600
+    teardown_grace_sec: int = 10
+    sync_mode: str = "scp_tar"
+
+
+@dataclass(slots=True)
+class TlsConfig:
+    ca_cert_local_path: str
+    server_cert_local_path: str
+    server_key_local_path: str
+    remote_cert_dir: str = "secrets/certificates"
+
+
+@dataclass(slots=True)
+class SupernodeAuthConfig:
+    enabled: bool = True
+    private_key_local_paths: list[str] = field(default_factory=list)
+    public_key_local_paths: list[str] = field(default_factory=list)
+    remote_key_dir: str = "secrets/keys"
+
+
+@dataclass(slots=True)
 class DeploymentConfig:
+    launch_mode: str = "managed_local"
+    connection_name: str = "comcast-local"
+    run_timeout_sec: int = 900
+    poll_interval_sec: float = 2.0
+    startup_timeout_sec: int = 20
+    shutdown_grace_sec: int = 5
+    local_num_supernodes: int | None = None
+    local_insecure: bool = True
+    local_database: str = ":flwr-in-memory:"
+    local_runtime_dir: str | None = None
     superlink: str | None = None
     federation: str | None = None
     stream_logs: bool = True
+    azure_ssh: AzureSshConfig | None = None
+    tls: TlsConfig | None = None
+    supernode_auth: SupernodeAuthConfig | None = None
 
 
 @dataclass(slots=True)
@@ -102,6 +162,12 @@ def _normalize(v: list[float]) -> list[float]:
     s = float(sum(v))
     _require(s > 0.0, "Probability vector sum must be > 0")
     return [float(x) / s for x in v]
+
+
+def _read_bool(raw: Any, key: str) -> bool:
+    if isinstance(raw, bool):
+        return raw
+    raise ValueError(f"{key} must be a boolean")
 
 
 def _load_raw(path: Path) -> dict[str, Any]:
@@ -150,7 +216,83 @@ def _build_config(raw: dict[str, Any]) -> ExperimentConfig:
 
     unknown_gate = UnknownGateConfig(**raw.get("unknown_gate", {}))
     artifacts = ArtifactsConfig(**raw.get("artifacts", {}))
-    deployment = DeploymentConfig(**raw.get("deployment", {}))
+    dep_raw = raw.get("deployment", {})
+    azure_ssh_raw = dep_raw.get("azure_ssh")
+    tls_raw = dep_raw.get("tls")
+    supernode_auth_raw = dep_raw.get("supernode_auth")
+
+    azure_ssh_cfg: AzureSshConfig | None = None
+    if azure_ssh_raw is not None:
+        allow_public_ips_raw = azure_ssh_raw.get("allow_public_ips", False)
+        vms = [AzureVmSpec(**vm) for vm in azure_ssh_raw.get("vms", [])]
+        azure_ssh_cfg = AzureSshConfig(
+            vms=vms,
+            total_supernodes=int(azure_ssh_raw.get("total_supernodes", 0)),
+            control_vm=str(azure_ssh_raw.get("control_vm", "")),
+            superlink_vm=str(azure_ssh_raw.get("superlink_vm", "")),
+            superlink_bind_host=(
+                str(azure_ssh_raw["superlink_bind_host"])
+                if azure_ssh_raw.get("superlink_bind_host") is not None
+                else None
+            ),
+            allow_public_ips=_read_bool(
+                allow_public_ips_raw,
+                "deployment.azure_ssh.allow_public_ips",
+            ),
+            remote_workspace_dir=str(azure_ssh_raw.get("remote_workspace_dir", "/opt/comcast-anomaly")),
+            remote_python=str(azure_ssh_raw.get("remote_python", "python3")),
+            ssh_connect_timeout_sec=int(azure_ssh_raw.get("ssh_connect_timeout_sec", 10)),
+            startup_timeout_sec=int(azure_ssh_raw.get("startup_timeout_sec", 90)),
+            poll_interval_sec=float(azure_ssh_raw.get("poll_interval_sec", 2.0)),
+            domain_run_timeout_sec=int(azure_ssh_raw.get("domain_run_timeout_sec", 3600)),
+            teardown_grace_sec=int(azure_ssh_raw.get("teardown_grace_sec", 10)),
+            sync_mode=str(azure_ssh_raw.get("sync_mode", "scp_tar")),
+        )
+
+    tls_cfg: TlsConfig | None = None
+    if tls_raw is not None:
+        tls_cfg = TlsConfig(
+            ca_cert_local_path=str(tls_raw["ca_cert_local_path"]),
+            server_cert_local_path=str(tls_raw["server_cert_local_path"]),
+            server_key_local_path=str(tls_raw["server_key_local_path"]),
+            remote_cert_dir=str(tls_raw.get("remote_cert_dir", "secrets/certificates")),
+        )
+
+    supernode_auth_cfg: SupernodeAuthConfig | None = None
+    if supernode_auth_raw is not None:
+        supernode_auth_cfg = SupernodeAuthConfig(
+            enabled=bool(supernode_auth_raw.get("enabled", True)),
+            private_key_local_paths=[str(p) for p in supernode_auth_raw.get("private_key_local_paths", [])],
+            public_key_local_paths=[str(p) for p in supernode_auth_raw.get("public_key_local_paths", [])],
+            remote_key_dir=str(supernode_auth_raw.get("remote_key_dir", "secrets/keys")),
+        )
+
+    deployment = DeploymentConfig(
+        launch_mode=str(dep_raw.get("launch_mode", "managed_local")),
+        connection_name=str(dep_raw.get("connection_name", "comcast-local")),
+        run_timeout_sec=int(dep_raw.get("run_timeout_sec", 900)),
+        poll_interval_sec=float(dep_raw.get("poll_interval_sec", 2.0)),
+        startup_timeout_sec=int(dep_raw.get("startup_timeout_sec", 20)),
+        shutdown_grace_sec=int(dep_raw.get("shutdown_grace_sec", 5)),
+        local_num_supernodes=(
+            int(dep_raw["local_num_supernodes"])
+            if dep_raw.get("local_num_supernodes") is not None
+            else None
+        ),
+        local_insecure=bool(dep_raw.get("local_insecure", True)),
+        local_database=str(dep_raw.get("local_database", ":flwr-in-memory:")),
+        local_runtime_dir=(
+            str(dep_raw["local_runtime_dir"])
+            if dep_raw.get("local_runtime_dir") is not None
+            else None
+        ),
+        superlink=(str(dep_raw["superlink"]) if dep_raw.get("superlink") is not None else None),
+        federation=(str(dep_raw["federation"]) if dep_raw.get("federation") is not None else None),
+        stream_logs=bool(dep_raw.get("stream_logs", True)),
+        azure_ssh=azure_ssh_cfg,
+        tls=tls_cfg,
+        supernode_auth=supernode_auth_cfg,
+    )
 
     cfg = ExperimentConfig(
         schema_version=str(raw.get("schema_version", "1.0")),
@@ -215,10 +357,177 @@ def _validate_config(cfg: ExperimentConfig) -> None:
 
     _require(cfg.unknown_gate.threshold_grid_size >= 2, "threshold_grid_size must be >= 2")
     _require(0 <= cfg.unknown_gate.unknown_class_index <= 6, "unknown_class_index must be 0..6")
+    _require(
+        re.fullmatch(r"[A-Za-z0-9._-]{1,64}", cfg.artifacts.run_name) is not None,
+        "artifacts.run_name must match [A-Za-z0-9._-]{1,64}",
+    )
 
     s = resolve_non_iid(cfg)
     for k, v in s.items():
         _require(0.0 <= v <= 1.0, f"non_iid {k} must be in [0,1]")
+
+    dep = cfg.deployment
+    _require(
+        dep.launch_mode in {"managed_local", "external", "managed_azure_ssh"},
+        "deployment.launch_mode must be managed_local, external, or managed_azure_ssh",
+    )
+    _require(dep.connection_name.strip() != "", "deployment.connection_name must be non-empty")
+    _require(
+        re.fullmatch(r"[A-Za-z0-9._-]{1,64}", dep.connection_name) is not None,
+        "deployment.connection_name must match [A-Za-z0-9._-]{1,64}",
+    )
+    _require(dep.run_timeout_sec > 0, "deployment.run_timeout_sec must be > 0")
+    _require(dep.poll_interval_sec > 0.0, "deployment.poll_interval_sec must be > 0")
+    _require(dep.startup_timeout_sec > 0, "deployment.startup_timeout_sec must be > 0")
+    _require(dep.shutdown_grace_sec > 0, "deployment.shutdown_grace_sec must be > 0")
+    if dep.local_num_supernodes is not None:
+        _require(dep.local_num_supernodes > 0, "deployment.local_num_supernodes must be > 0 when set")
+    _require(dep.local_database.strip() != "", "deployment.local_database must be non-empty")
+    if dep.launch_mode == "managed_local":
+        _require(dep.local_insecure is True, "deployment.local_insecure must be true in this phase")
+    if cfg.mode == "deployment" and dep.launch_mode == "external":
+        _require(dep.superlink is not None and dep.superlink.strip() != "", "deployment.superlink must be set in external deployment mode")
+    if dep.launch_mode == "managed_azure_ssh":
+        _require(dep.azure_ssh is not None, "deployment.azure_ssh must be set in managed_azure_ssh mode")
+        _require(dep.tls is not None, "deployment.tls must be set in managed_azure_ssh mode")
+        _require(
+            dep.supernode_auth is not None,
+            "deployment.supernode_auth must be set in managed_azure_ssh mode",
+        )
+
+        azure = dep.azure_ssh
+        tls = dep.tls
+        auth = dep.supernode_auth
+        assert azure is not None
+        assert tls is not None
+        assert auth is not None
+
+        _require(azure.total_supernodes > 0, "deployment.azure_ssh.total_supernodes must be > 0")
+        _require(
+            isinstance(azure.allow_public_ips, bool),
+            "deployment.azure_ssh.allow_public_ips must be a boolean",
+        )
+        _require(len(azure.vms) > 0, "deployment.azure_ssh.vms must be non-empty")
+        _require(azure.ssh_connect_timeout_sec > 0, "deployment.azure_ssh.ssh_connect_timeout_sec must be > 0")
+        _require(azure.startup_timeout_sec > 0, "deployment.azure_ssh.startup_timeout_sec must be > 0")
+        _require(azure.poll_interval_sec > 0.0, "deployment.azure_ssh.poll_interval_sec must be > 0")
+        _require(azure.domain_run_timeout_sec > 0, "deployment.azure_ssh.domain_run_timeout_sec must be > 0")
+        _require(azure.teardown_grace_sec > 0, "deployment.azure_ssh.teardown_grace_sec must be > 0")
+        _require(azure.sync_mode == "scp_tar", "deployment.azure_ssh.sync_mode must be scp_tar")
+        _require(
+            azure.remote_workspace_dir.strip() != "",
+            "deployment.azure_ssh.remote_workspace_dir must be non-empty",
+        )
+        _require(
+            azure.remote_workspace_dir.startswith("/") and azure.remote_workspace_dir != "/",
+            "deployment.azure_ssh.remote_workspace_dir must be an absolute non-root path",
+        )
+        _require(
+            ".." not in azure.remote_workspace_dir.split("/"),
+            "deployment.azure_ssh.remote_workspace_dir must not contain '..'",
+        )
+
+        names = [vm.name for vm in azure.vms]
+        _require(len(set(names)) == len(names), "deployment.azure_ssh.vms names must be unique")
+        _require(
+            azure.control_vm in names,
+            "deployment.azure_ssh.control_vm must match one of deployment.azure_ssh.vms[*].name",
+        )
+        _require(
+            azure.superlink_vm in names,
+            "deployment.azure_ssh.superlink_vm must match one of deployment.azure_ssh.vms[*].name",
+        )
+
+        total_from_vms = 0
+        allowed_roles = {"superlink", "control", "worker"}
+        for vm in azure.vms:
+            _require(vm.name.strip() != "", "deployment.azure_ssh.vms[*].name must be non-empty")
+            _require(vm.host.strip() != "", "deployment.azure_ssh.vms[*].host must be non-empty")
+            _require(vm.ssh_port > 0, "deployment.azure_ssh.vms[*].ssh_port must be > 0")
+            _require(vm.ssh_user.strip() != "", "deployment.azure_ssh.vms[*].ssh_user must be non-empty")
+            _require(vm.supernodes_on_vm >= 0, "deployment.azure_ssh.vms[*].supernodes_on_vm must be >= 0")
+            _require(
+                vm.ssh_key_path.strip() != "",
+                "deployment.azure_ssh.vms[*].ssh_key_path must be non-empty",
+            )
+            key_path = Path(vm.ssh_key_path)
+            _require(key_path.is_absolute(), f"SSH key path must be absolute: {key_path}")
+            _require(key_path.exists(), f"SSH key path does not exist: {key_path}")
+            if not azure.allow_public_ips:
+                try:
+                    host_ip = ipaddress.ip_address(vm.host)
+                except ValueError as exc:
+                    raise ValueError(
+                        f"deployment.azure_ssh.vms[*].host must be an IP literal when allow_public_ips=false: {vm.host}"
+                    ) from exc
+                _require(
+                    host_ip.is_private,
+                    f"Public host IP not allowed when allow_public_ips=false: {vm.host}",
+                )
+
+            vm_roles = set(vm.roles)
+            _require(vm_roles <= allowed_roles, f"Invalid VM roles for {vm.name}: {sorted(vm_roles - allowed_roles)}")
+            total_from_vms += int(vm.supernodes_on_vm)
+
+        if azure.superlink_bind_host is not None:
+            _require(
+                azure.superlink_bind_host.strip() != "",
+                "deployment.azure_ssh.superlink_bind_host must be non-empty when set",
+            )
+            if not azure.allow_public_ips:
+                try:
+                    bind_ip = ipaddress.ip_address(azure.superlink_bind_host)
+                except ValueError as exc:
+                    raise ValueError(
+                        "deployment.azure_ssh.superlink_bind_host must be an IP literal when allow_public_ips=false"
+                    ) from exc
+                _require(
+                    bind_ip.is_private,
+                    "deployment.azure_ssh.superlink_bind_host must be private when allow_public_ips=false",
+                )
+
+        _require(
+            total_from_vms == azure.total_supernodes,
+            "sum(azure_ssh.vms[*].supernodes_on_vm) must equal deployment.azure_ssh.total_supernodes",
+        )
+        _require(
+            azure.total_supernodes == cfg.federation.num_clients,
+            "deployment.azure_ssh.total_supernodes must equal federation.num_clients",
+        )
+
+        _require(auth.enabled is True, "deployment.supernode_auth.enabled must be true in managed_azure_ssh mode")
+        _require(
+            len(auth.private_key_local_paths) == azure.total_supernodes,
+            "deployment.supernode_auth.private_key_local_paths length must equal total_supernodes",
+        )
+        _require(
+            len(auth.public_key_local_paths) == azure.total_supernodes,
+            "deployment.supernode_auth.public_key_local_paths length must equal total_supernodes",
+        )
+        for p in [tls.ca_cert_local_path, tls.server_cert_local_path, tls.server_key_local_path]:
+            cert_path = Path(p)
+            _require(cert_path.is_absolute(), f"TLS path must be absolute: {cert_path}")
+            _require(cert_path.exists(), f"TLS path does not exist: {cert_path}")
+        for p in auth.private_key_local_paths + auth.public_key_local_paths:
+            key_path = Path(p)
+            _require(key_path.is_absolute(), f"SuperNode auth key path must be absolute: {key_path}")
+            _require(key_path.exists(), f"SuperNode auth key path does not exist: {key_path}")
+        _require(
+            not Path(tls.remote_cert_dir).is_absolute(),
+            "deployment.tls.remote_cert_dir must be relative",
+        )
+        _require(
+            ".." not in Path(tls.remote_cert_dir).parts,
+            "deployment.tls.remote_cert_dir must not contain '..'",
+        )
+        _require(
+            not Path(auth.remote_key_dir).is_absolute(),
+            "deployment.supernode_auth.remote_key_dir must be relative",
+        )
+        _require(
+            ".." not in Path(auth.remote_key_dir).parts,
+            "deployment.supernode_auth.remote_key_dir must not contain '..'",
+        )
 
 
 def load_experiment_config(path: str) -> ExperimentConfig:

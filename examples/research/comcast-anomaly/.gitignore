@@ -1,0 +1,31 @@
+# Comcast anomaly demo: keep source/config clean, drop generated runtime files.
+
+# Generated experiment outputs
+artifacts/*
+!artifacts/specs/
+!artifacts/specs/*.json
+deployment_runtime/
+
+# Flower packaging/build outputs
+*.fab
+
+# Local runtime files
+*.log
+*.pid
+*.db
+*.db-shm
+*.db-wal
+
+# Local secrets and machine-specific env files
+env_vars.sh
+secrets/
+
+# Reference papers stored locally for analysis
+*.pdf
+
+# Local caches/temp
+.pytest_cache/
+__pycache__/
+*.pyc
+*.pyo
+.DS_Store

@@ -1,0 +1,116 @@
+schema_version: "1.0"
+mode: deployment
+domains:
+  - downstream_rxmer
+  - upstream_return
+seed: 321
+
+federation:
+  num_clients: 8
+  num_rounds: 5
+  fraction_train: 1.0
+  fraction_evaluate: 1.0
+  min_train_nodes: 8
+  min_evaluate_nodes: 8
+
+local_training:
+  local_epochs: 1
+  batch_size: 128
+  lr: 0.001
+  weight_decay: 0.0001
+
+data:
+  samples_per_client_train: 800
+  samples_per_client_val: 200
+  samples_per_client_test: 200
+
+non_iid:
+  global: 0.5
+  class_skew: 0.7
+  regime_skew: 0.6
+  context_skew: 0.5
+  template_skew: 0.5
+
+unknown_gate:
+  enabled: true
+  threshold_grid_size: 201
+  unknown_class_index: 6
+
+artifacts:
+  root_dir: artifacts/fl
+  run_name: deploy_azure_medium
+
+deployment:
+  launch_mode: managed_azure_ssh
+  connection_name: comcast-azure
+  run_timeout_sec: 3600
+  poll_interval_sec: 2.0
+  startup_timeout_sec: 30
+  shutdown_grace_sec: 10
+  local_num_supernodes: null
+  local_insecure: true
+  local_database: ":flwr-in-memory:"
+  local_runtime_dir: null
+  superlink: null
+  federation: null
+  stream_logs: false
+  azure_ssh:
+    total_supernodes: 8
+    control_vm: vm-a
+    superlink_vm: vm-a
+    remote_workspace_dir: /opt/comcast-anomaly
+    remote_python: python3
+    ssh_connect_timeout_sec: 10
+    startup_timeout_sec: 120
+    poll_interval_sec: 2.0
+    domain_run_timeout_sec: 3600
+    teardown_grace_sec: 15
+    sync_mode: scp_tar
+    vms:
+      - name: vm-a
+        host: 10.0.0.4
+        ssh_port: 22
+        ssh_user: azureuser
+        ssh_key_path: /ABS/PATH/id_ed25519
+        supernodes_on_vm: 3
+        roles: [superlink, control, worker]
+      - name: vm-b
+        host: 10.0.0.5
+        ssh_port: 22
+        ssh_user: azureuser
+        ssh_key_path: /ABS/PATH/id_ed25519
+        supernodes_on_vm: 3
+        roles: [worker]
+      - name: vm-c
+        host: 10.0.0.6
+        ssh_port: 22
+        ssh_user: azureuser
+        ssh_key_path: /ABS/PATH/id_ed25519
+        supernodes_on_vm: 2
+        roles: [worker]
+  tls:
+    ca_cert_local_path: /ABS/PATH/certs/ca.crt
+    server_cert_local_path: /ABS/PATH/certs/server.pem
+    server_key_local_path: /ABS/PATH/certs/server.key
+    remote_cert_dir: secrets/certificates
+  supernode_auth:
+    enabled: true
+    private_key_local_paths:
+      - /ABS/PATH/keys/sn0_private.pem
+      - /ABS/PATH/keys/sn1_private.pem
+      - /ABS/PATH/keys/sn2_private.pem
+      - /ABS/PATH/keys/sn3_private.pem
+      - /ABS/PATH/keys/sn4_private.pem
+      - /ABS/PATH/keys/sn5_private.pem
+      - /ABS/PATH/keys/sn6_private.pem
+      - /ABS/PATH/keys/sn7_private.pem
+    public_key_local_paths:
+      - /ABS/PATH/keys/sn0_public.pem
+      - /ABS/PATH/keys/sn1_public.pem
+      - /ABS/PATH/keys/sn2_public.pem
+      - /ABS/PATH/keys/sn3_public.pem
+      - /ABS/PATH/keys/sn4_public.pem
+      - /ABS/PATH/keys/sn5_public.pem
+      - /ABS/PATH/keys/sn6_public.pem
+      - /ABS/PATH/keys/sn7_public.pem
+    remote_key_dir: secrets/keys

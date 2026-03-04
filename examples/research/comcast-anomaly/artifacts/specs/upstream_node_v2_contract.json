@@ -1,0 +1,44 @@
+{
+  "V2_CLASS_NAMES": [
+    "normal",
+    "narrowband_ingress",
+    "cpd",
+    "micro_reflection",
+    "amp_compression",
+    "impulse_noise",
+    "unknown_other"
+  ],
+  "V2_REGIMES": [
+    "pre_event",
+    "event_peak",
+    "post_event"
+  ],
+  "V2_SIGNAL_DOMAINS": [
+    "downstream_rxmer",
+    "upstream_return"
+  ],
+  "V2_NODE_CONTEXT_FEATURES": [
+    "utilization",
+    "snr_margin",
+    "split_mhz",
+    "total_amps_in_node",
+    "amps_in_series_on_leg",
+    "leg_isolated",
+    "flat_loss_db",
+    "amp_nf_db",
+    "amp_cin_db",
+    "tcp_headroom_db",
+    "hour_of_day_sin",
+    "hour_of_day_cos"
+  ],
+  "V2_EDGE_TARGETS": {
+    "max_params": 200000,
+    "p95_latency_ms_cpu_proxy": 5.0,
+    "quantization_ready": true
+  },
+  "V2_ACCEPTANCE_TARGETS": {
+    "macro_f1_min": 0.7,
+    "event_peak_macro_f1_delta_vs_public_min": 0.03,
+    "edge_targets_required": true
+  }
+}

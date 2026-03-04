@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Comcast FL Live UI</title>
+    <link rel="stylesheet" href="/static/styles.css?v={{ static_version }}" />
+  </head>
+  <body>
+    <header class="topbar">
+      <h1>Comcast FL Live UI</h1>
+      <div class="meta">
+        <span>Run: <code id="run-name">{{ run_name }}</code></span>
+        <span>Root: <code id="run-root">{{ run_root }}</code></span>
+      </div>
+    </header>
+
+    <main>
+      <section class="events">
+        <h2>Live Events</h2>
+        <div id="event-feed" class="event-feed"></div>
+      </section>
+
+      <section>
+        <h2>Panels</h2>
+        <div
+          id="panel-grid"
+          class="panel-grid"
+          style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;"
+        ></div>
+      </section>
+    </main>
+
+    <script src="/static/app.js?v={{ static_version }}"></script>
+  </body>
+</html>

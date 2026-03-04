@@ -4,12 +4,12 @@
   "domains": ["downstream_rxmer", "upstream_return"],
   "seed": 42,
   "federation": {
-    "num_clients": 4,
-    "num_rounds": 2,
+    "num_clients": 1,
+    "num_rounds": 16,
     "fraction_train": 1.0,
     "fraction_evaluate": 1.0,
-    "min_train_nodes": 2,
-    "min_evaluate_nodes": 2
+    "min_train_nodes": 1,
+    "min_evaluate_nodes": 1
   },
   "local_training": {
     "local_epochs": 1,
@@ -36,7 +36,7 @@
   },
   "artifacts": {
     "root_dir": "artifacts/fl",
-    "run_name": "smoke_json"
+    "run_name": "smoke"
   },
   "deployment": {
     "superlink": null,

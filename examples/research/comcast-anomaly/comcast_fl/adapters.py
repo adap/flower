@@ -6,9 +6,11 @@ import csv
 import importlib.util
 import json
 import math
+import os
 from pathlib import Path
 import subprocess
 import tempfile
+import time
 from typing import Any
 
 from flwr.simulation import run_simulation
@@ -18,9 +20,23 @@ import torch
 from .app_state import build_run_config_payload, set_active_experiment
 from .config import ExperimentConfig
 from .constants import V2_SIGNAL_DOMAINS
+from .deployment_azure_ssh import (
+    ManagedAzureRuntimeHandle,
+    collect_remote_artifacts,
+    make_remote_run_config_toml,
+    start_managed_azure_runtime,
+    stop_managed_azure_runtime,
+    submit_run_and_wait_remote,
+)
+from .deployment_local import (
+    ManagedRuntimeHandle,
+    start_managed_local_runtime,
+    stop_managed_local_runtime,
+)
 from .federated_core import build_client_bundle, build_server_eval_bundle, get_device, make_model
 from .model import count_parameters
 from .training import evaluate_edge_constraints, evaluate_with_gate, train_local_epoch
+from .ui_hooks import UiHookSink, emit_hook
 from .utils import ensure_dir, to_builtin
 
 
@@ -38,11 +54,29 @@ def _read_domain_metrics(cfg: ExperimentConfig, domain: str) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def run_domain_simulation(domain: str, cfg: ExperimentConfig) -> dict:
+def run_domain_simulation(
+    domain: str,
+    cfg: ExperimentConfig,
+    hook_sink: UiHookSink | None = None,
+) -> dict:
     """Run one domain in simulation mode with variable number of clients."""
     if domain not in V2_SIGNAL_DOMAINS:
         raise ValueError(f"Unsupported domain: {domain}")
 
+    emit_hook(
+        hook_sink,
+        event_type="domain.started",
+        payload={"mode": "simulation"},
+        run_name=cfg.artifacts.run_name,
+        domain=domain,
+    )
+    emit_hook(
+        hook_sink,
+        event_type="run.started",
+        payload={"mode": "simulation", "domain": domain},
+        run_name=cfg.artifacts.run_name,
+        domain=domain,
+    )
     set_active_experiment(cfg, domain)
 
     from .flower_client_app import app as client_app
@@ -60,11 +94,32 @@ def run_domain_simulation(domain: str, cfg: ExperimentConfig) -> dict:
             msg = str(exc).lower()
             if "ray" not in msg and "backend" not in msg:
                 raise
-            _run_domain_simulation_fallback(domain=domain, cfg=cfg)
+            _run_domain_simulation_fallback(domain=domain, cfg=cfg, hook_sink=hook_sink)
     else:
-        _run_domain_simulation_fallback(domain=domain, cfg=cfg)
+        _run_domain_simulation_fallback(domain=domain, cfg=cfg, hook_sink=hook_sink)
 
     domain_metrics = _read_domain_metrics(cfg, domain)
+    emit_hook(
+        hook_sink,
+        event_type="metrics.updated",
+        payload={"metrics": domain_metrics, "domain": domain},
+        run_name=cfg.artifacts.run_name,
+        domain=domain,
+    )
+    emit_hook(
+        hook_sink,
+        event_type="domain.completed",
+        payload={"status": "finished:completed"},
+        run_name=cfg.artifacts.run_name,
+        domain=domain,
+    )
+    emit_hook(
+        hook_sink,
+        event_type="run.completed",
+        payload={"mode": "simulation", "domain": domain},
+        run_name=cfg.artifacts.run_name,
+        domain=domain,
+    )
     return {
         "domain": domain,
         "mode": "simulation",
@@ -80,55 +135,264 @@ def _make_run_config_toml(cfg: ExperimentConfig, domain: str) -> str:
     return "\n".join(lines) + "\n"
 
 
-def run_domain_deployment(domain: str, cfg: ExperimentConfig) -> dict:
-    """Run one domain through `flwr run` against a configured SuperLink/Federation."""
-    if domain not in V2_SIGNAL_DOMAINS:
-        raise ValueError(f"Unsupported domain: {domain}")
-
-    if not cfg.deployment.superlink:
-        raise ValueError("deployment.superlink must be set for deployment mode")
-
-    toml_text = _make_run_config_toml(cfg, domain)
-    with tempfile.NamedTemporaryFile("w", suffix=".toml", delete=False) as tmp:
-        tmp.write(toml_text)
-        tmp_path = Path(tmp.name)
-
+def submit_run_and_wait(
+    app_dir: Path,
+    connection_name: str,
+    run_config_toml: Path,
+    timeout_sec: int,
+    poll_sec: float,
+    env: dict[str, str],
+    run_name: str | None = None,
+    domain: str | None = None,
+    hook_sink: UiHookSink | None = None,
+) -> dict:
+    """Submit a Flower run and wait for completion/failure with timeout."""
     cmd = [
         "flwr",
         "run",
-        str(APP_DIR),
-        str(cfg.deployment.superlink),
+        str(app_dir),
+        str(connection_name),
         "--run-config",
-        str(tmp_path),
+        str(run_config_toml),
+        "--format",
+        "json",
     ]
-    if cfg.deployment.federation:
-        cmd.extend(["--federation", str(cfg.deployment.federation)])
-    if cfg.deployment.stream_logs:
-        cmd.append("--stream")
+    federation_override = env.get("COMCAST_FL_FEDERATION", "").strip()
+    if federation_override:
+        cmd.extend(["--federation", federation_override])
 
     proc = subprocess.run(
         cmd,
-        cwd=str(APP_DIR),
+        cwd=str(app_dir),
         text=True,
         capture_output=True,
         check=False,
+        env=env,
     )
-
     if proc.returncode != 0:
         raise RuntimeError(
-            "Deployment run failed.\n"
+            "Deployment run submission failed.\n"
             f"Command: {' '.join(cmd)}\n"
             f"STDOUT:\n{proc.stdout}\n"
-            f"STDERR:\n{proc.stderr}"
+            f"STDERR:\n{proc.stderr}\n"
+            f"Runtime logs: {env.get('COMCAST_FL_RUNTIME_LOG_DIR', '(not set)')}"
         )
 
-    domain_metrics = _read_domain_metrics(cfg, domain)
-    return {
-        "domain": domain,
-        "mode": "deployment",
-        "domain_metrics": domain_metrics,
-        "stdout": proc.stdout,
-    }
+    run_payload = json.loads(proc.stdout)
+    run_id = run_payload.get("run-id")
+    if run_id is None:
+        raise RuntimeError(f"Could not parse run-id from `flwr run` output: {proc.stdout}")
+    run_id = int(run_id)
+    emit_hook(
+        hook_sink,
+        event_type="run.started",
+        payload={"run_id": run_id, "connection_name": connection_name},
+        run_name=run_name,
+        domain=domain,
+    )
+
+    deadline = time.monotonic() + float(timeout_sec)
+    last_status = "unknown"
+    last_runs_payload: dict[str, Any] = {}
+    while time.monotonic() < deadline:
+        ls_cmd = [
+            "flwr",
+            "ls",
+            str(connection_name),
+            "--runs",
+            "--format",
+            "json",
+        ]
+        ls_proc = subprocess.run(
+            ls_cmd,
+            cwd=str(app_dir),
+            text=True,
+            capture_output=True,
+            check=False,
+            env=env,
+        )
+        if ls_proc.returncode != 0:
+            raise RuntimeError(
+                "Failed while polling run status.\n"
+                f"Command: {' '.join(ls_cmd)}\n"
+                f"STDOUT:\n{ls_proc.stdout}\n"
+                f"STDERR:\n{ls_proc.stderr}\n"
+                f"Runtime logs: {env.get('COMCAST_FL_RUNTIME_LOG_DIR', '(not set)')}"
+            )
+        last_runs_payload = json.loads(ls_proc.stdout)
+        runs = last_runs_payload.get("runs", [])
+        found = next((r for r in runs if int(r.get("run-id", -1)) == run_id), None)
+        if found is not None:
+            last_status = str(found.get("status", "unknown"))
+            emit_hook(
+                hook_sink,
+                event_type="run.status",
+                payload={"run_id": run_id, "status": last_status},
+                run_name=run_name,
+                domain=domain,
+            )
+            if last_status.startswith("finished:"):
+                if last_status == "finished:completed":
+                    emit_hook(
+                        hook_sink,
+                        event_type="run.completed",
+                        payload={"run_id": run_id, "status": last_status},
+                        run_name=run_name,
+                        domain=domain,
+                    )
+                    return {
+                        "run_id": run_id,
+                        "status": last_status,
+                        "run_payload": run_payload,
+                        "status_payload": last_runs_payload,
+                    }
+                emit_hook(
+                    hook_sink,
+                    event_type="run.failed",
+                    payload={"run_id": run_id, "status": last_status},
+                    run_name=run_name,
+                    domain=domain,
+                )
+                raise RuntimeError(
+                    "Run finished in non-success state.\n"
+                    f"run_id={run_id}, status={last_status}\n"
+                    f"Runtime logs: {env.get('COMCAST_FL_RUNTIME_LOG_DIR', '(not set)')}\n"
+                    f"Status payload: {json.dumps(last_runs_payload)}"
+                )
+        time.sleep(float(poll_sec))
+
+    emit_hook(
+        hook_sink,
+        event_type="run.timeout",
+        payload={"run_id": run_id, "status": last_status, "timeout_sec": timeout_sec},
+        run_name=run_name,
+        domain=domain,
+    )
+    raise TimeoutError(
+        "Timed out waiting for run completion.\n"
+        f"run_id={run_id}, last_status={last_status}, timeout_sec={timeout_sec}\n"
+        f"Runtime logs: {env.get('COMCAST_FL_RUNTIME_LOG_DIR', '(not set)')}\n"
+        f"Last status payload: {json.dumps(last_runs_payload)}"
+    )
+
+
+def run_domain_deployment(
+    domain: str,
+    cfg: ExperimentConfig,
+    runtime: ManagedRuntimeHandle | ManagedAzureRuntimeHandle | None = None,
+    hook_sink: UiHookSink | None = None,
+) -> dict:
+    """Run one domain in deployment mode."""
+    if domain not in V2_SIGNAL_DOMAINS:
+        raise ValueError(f"Unsupported domain: {domain}")
+    emit_hook(
+        hook_sink,
+        event_type="domain.started",
+        payload={"mode": "deployment"},
+        run_name=cfg.artifacts.run_name,
+        domain=domain,
+    )
+
+    runtime_owned = False
+    runtime_handle: ManagedRuntimeHandle | ManagedAzureRuntimeHandle | None = runtime
+    if cfg.deployment.launch_mode == "managed_local":
+        if runtime_handle is None:
+            runtime_owned = True
+            runtime_handle = start_managed_local_runtime(cfg, hook_sink=hook_sink)
+        if not isinstance(runtime_handle, ManagedRuntimeHandle):
+            raise TypeError("Expected ManagedRuntimeHandle for managed_local deployment")
+        connection_name = runtime_handle.connection_name
+        env = runtime_handle.env
+    elif cfg.deployment.launch_mode == "managed_azure_ssh":
+        if runtime_handle is None:
+            runtime_owned = True
+            runtime_handle = start_managed_azure_runtime(cfg, hook_sink=hook_sink)
+        if not isinstance(runtime_handle, ManagedAzureRuntimeHandle):
+            raise TypeError("Expected ManagedAzureRuntimeHandle for managed_azure_ssh deployment")
+        connection_name = runtime_handle.connection_name
+        env = {}
+    else:
+        if not cfg.deployment.superlink:
+            raise ValueError("deployment.superlink must be set for external deployment mode")
+        connection_name = str(cfg.deployment.superlink)
+        env = os.environ.copy()
+
+    if cfg.deployment.launch_mode == "managed_azure_ssh":
+        assert isinstance(runtime_handle, ManagedAzureRuntimeHandle)
+        toml_text = make_remote_run_config_toml(
+            cfg=cfg,
+            domain=domain,
+            remote_output_root=runtime_handle.remote_artifacts_root,
+        )
+        tmp_path: Path | None = None
+    else:
+        toml_text = _make_run_config_toml(cfg, domain)
+        with tempfile.NamedTemporaryFile("w", suffix=".toml", delete=False, encoding="utf-8") as tmp:
+            tmp.write(toml_text)
+            tmp_path = Path(tmp.name)
+
+    if cfg.deployment.federation:
+        env = dict(env)
+        env["COMCAST_FL_FEDERATION"] = str(cfg.deployment.federation)
+
+    try:
+        if cfg.deployment.launch_mode == "managed_azure_ssh":
+            assert isinstance(runtime_handle, ManagedAzureRuntimeHandle)
+            run_info = submit_run_and_wait_remote(
+                handle=runtime_handle,
+                domain=domain,
+                run_config_toml_text=toml_text,
+                cfg=cfg,
+                hook_sink=hook_sink,
+            )
+            collect_remote_artifacts(runtime_handle, cfg)
+        else:
+            assert tmp_path is not None
+            run_info = submit_run_and_wait(
+                app_dir=APP_DIR,
+                connection_name=connection_name,
+                run_config_toml=tmp_path,
+                timeout_sec=int(cfg.deployment.run_timeout_sec),
+                poll_sec=float(cfg.deployment.poll_interval_sec),
+                env=env,
+                run_name=cfg.artifacts.run_name,
+                domain=domain,
+                hook_sink=hook_sink,
+            )
+        domain_metrics = _read_domain_metrics(cfg, domain)
+        emit_hook(
+            hook_sink,
+            event_type="metrics.updated",
+            payload={"metrics": domain_metrics, "domain": domain},
+            run_name=cfg.artifacts.run_name,
+            domain=domain,
+        )
+        emit_hook(
+            hook_sink,
+            event_type="domain.completed",
+            payload={"status": "finished:completed"},
+            run_name=cfg.artifacts.run_name,
+            domain=domain,
+        )
+        return {
+            "domain": domain,
+            "mode": "deployment",
+            "domain_metrics": domain_metrics,
+            "run": run_info,
+        }
+    finally:
+        if tmp_path is not None and tmp_path.exists():
+            tmp_path.unlink()
+        if runtime_owned and runtime_handle is not None:
+            if isinstance(runtime_handle, ManagedRuntimeHandle):
+                stop_managed_local_runtime(
+                    runtime_handle,
+                    shutdown_grace_sec=int(cfg.deployment.shutdown_grace_sec),
+                    hook_sink=hook_sink,
+                    run_name=cfg.artifacts.run_name,
+                )
+            elif isinstance(runtime_handle, ManagedAzureRuntimeHandle):
+                stop_managed_azure_runtime(runtime_handle, quiet=False)
 
 
 def write_run_summary(results: dict[str, dict], out_path: str, cfg: ExperimentConfig) -> None:
@@ -195,7 +459,11 @@ def _aggregate_state_dicts(state_dicts: list[dict[str, torch.Tensor]], weights: 
     return out
 
 
-def _run_domain_simulation_fallback(domain: str, cfg: ExperimentConfig) -> None:
+def _run_domain_simulation_fallback(
+    domain: str,
+    cfg: ExperimentConfig,
+    hook_sink: UiHookSink | None = None,
+) -> None:
     """Fallback local FedAvg loop used when Flower Simulation backend is unavailable."""
     device = get_device()
     num_clients = int(cfg.federation.num_clients)
@@ -215,6 +483,13 @@ def _run_domain_simulation_fallback(domain: str, cfg: ExperimentConfig) -> None:
     for _round in range(1, int(cfg.federation.num_rounds) + 1):
         sample_size = max(min_train, int(math.ceil(frac * num_clients)))
         sampled = rng.choice(all_clients, size=sample_size, replace=False).tolist()
+        emit_hook(
+            hook_sink,
+            event_type="run.status",
+            payload={"status": f"running:round:{_round}", "sampled_clients": sampled},
+            run_name=cfg.artifacts.run_name,
+            domain=domain,
+        )
 
         local_states = []
         local_weights = []

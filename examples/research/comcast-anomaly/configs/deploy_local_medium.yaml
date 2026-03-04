@@ -1,0 +1,56 @@
+schema_version: "1.0"
+mode: deployment
+domains:
+  - downstream_rxmer
+  - upstream_return
+seed: 123
+
+federation:
+  num_clients: 6
+  num_rounds: 3
+  fraction_train: 0.67
+  fraction_evaluate: 0.67
+  min_train_nodes: 4
+  min_evaluate_nodes: 4
+
+local_training:
+  local_epochs: 1
+  batch_size: 128
+  lr: 0.001
+  weight_decay: 0.0001
+
+data:
+  samples_per_client_train: 800
+  samples_per_client_val: 200
+  samples_per_client_test: 200
+
+non_iid:
+  global: 0.5
+  class_skew: 0.6
+  regime_skew: 0.4
+  context_skew: 0.5
+  template_skew: 0.5
+
+unknown_gate:
+  enabled: true
+  threshold_grid_size: 201
+  unknown_class_index: 6
+
+artifacts:
+  root_dir: artifacts/fl
+  run_name: deploy_local_medium
+
+deployment:
+  launch_mode: managed_local
+  connection_name: comcast-local
+  run_timeout_sec: 1800
+  poll_interval_sec: 2.0
+  startup_timeout_sec: 30
+  shutdown_grace_sec: 5
+  local_num_supernodes: null
+  local_insecure: true
+  local_database: ":flwr-in-memory:"
+  local_runtime_dir: null
+  superlink: null
+  federation: null
+  stream_logs: false

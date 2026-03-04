@@ -1,0 +1,181 @@
+:root {
+  --bg: #f7f9fb;
+  --card: #ffffff;
+  --text: #1b2430;
+  --muted: #516174;
+  --ok: #2e7d32;
+  --warn: #b26a00;
+  --bad: #b00020;
+  --line: #d7e0ea;
+  --accent: #0057b8;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+  background: linear-gradient(180deg, #eef4fa 0%, #f9fbfd 100%);
+  color: var(--text);
+}
+
+.topbar {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--line);
+  background: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.topbar h1 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.topbar .meta {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 13px;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+main {
+  padding: 20px;
+  max-width: 1800px;
+  margin: 0 auto;
+}
+
+.events,
+.panel {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.events {
+  padding: 14px;
+  margin-bottom: 20px;
+}
+
+.event-feed {
+  max-height: 180px;
+  overflow: auto;
+  font-family: "IBM Plex Mono", Menlo, monospace;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.event-item {
+  padding: 3px 0;
+  border-bottom: 1px dashed #edf2f7;
+}
+
+.panel-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.panel {
+  padding: 16px;
+  min-height: 360px;
+}
+
+.panel h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.panel-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.badge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  color: var(--muted);
+}
+
+.badge.impl {
+  color: #0d4d00;
+  border-color: #9dd39f;
+  background: #eff9ef;
+}
+
+.badge.stub {
+  color: #7a5a00;
+  border-color: #f1dc8b;
+  background: #fff9e3;
+}
+
+.panel p {
+  margin: 4px 0 10px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.panel-body {
+  min-height: 260px;
+}
+
+.topology svg,
+.quality svg {
+  width: 100%;
+  height: 240px;
+  border: 1px solid #e5edf6;
+  border-radius: 8px;
+  background: #fcfdff;
+}
+
+.timeline-list {
+  max-height: 250px;
+  overflow: auto;
+  font-size: 13px;
+}
+
+.timeline-item {
+  padding: 4px;
+  border-bottom: 1px dashed #edf2f7;
+}
+
+.stub-box {
+  border: 1px dashed #c9d6e5;
+  border-radius: 8px;
+  min-height: 230px;
+  background: #f9fbfe;
+  padding: 10px;
+  font-size: 13px;
+  color: var(--muted);
+  white-space: pre-wrap;
+}
+
+.controls {
+  margin-bottom: 6px;
+  display: flex;
+  gap: 6px;
+}
+
+.controls button {
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: 6px;
+  padding: 3px 7px;
+  cursor: pointer;
+}
+
+.controls button.active {
+  background: #ebf4ff;
+  border-color: #9cbef2;
+  color: #1a4f9c;
+}
