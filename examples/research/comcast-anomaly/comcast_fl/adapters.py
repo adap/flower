@@ -179,6 +179,14 @@ def submit_run_and_wait(
         )
 
     run_payload = json.loads(proc.stdout)
+    if run_payload.get("success") is False:
+        err = str(run_payload.get("error-message", "")).strip()
+        raise RuntimeError(
+            "Deployment run submission reported failure.\n"
+            f"Command: {' '.join(cmd)}\n"
+            f"Error: {err or '(no error-message provided)'}\n"
+            f"Runtime logs: {env.get('COMCAST_FL_RUNTIME_LOG_DIR', '(not set)')}"
+        )
     run_id = run_payload.get("run-id")
     if run_id is None:
         raise RuntimeError(f"Could not parse run-id from `flwr run` output: {proc.stdout}")

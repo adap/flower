@@ -29,3 +29,16 @@ __pycache__/
 *.pyc
 *.pyo
 .DS_Store
+
+# Local Python environments (critical: prevents huge FAB builds)
+.venv/
+venv/
+ENV/
+env/
+env.bak/
+venv.bak/
+
+# Local build metadata
+*.egg-info/
+build/
+dist/

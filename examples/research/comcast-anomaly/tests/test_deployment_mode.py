@@ -166,6 +166,35 @@ def test_submit_run_and_wait_failure_status(monkeypatch: pytest.MonkeyPatch, tmp
         )
 
 
+def test_submit_run_and_wait_submission_error_payload(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    def _fake_run(*args, **kwargs):  # type: ignore[no-untyped-def]
+        cmd = args[0]
+        if cmd[:2] == ["flwr", "run"]:
+            return subprocess.CompletedProcess(
+                cmd,
+                0,
+                stdout='{"success": false, "error-message": "FAB too large"}',
+                stderr="",
+            )
+        raise AssertionError(f"Unexpected command: {cmd}")
+
+    monkeypatch.setattr("comcast_fl.adapters.subprocess.run", _fake_run)
+
+    run_cfg = tmp_path / "run-config.toml"
+    run_cfg.write_text('domain = "downstream_rxmer"\n', encoding="utf-8")
+    with pytest.raises(RuntimeError, match="FAB too large"):
+        submit_run_and_wait(
+            app_dir=tmp_path,
+            connection_name="local-test",
+            run_config_toml=run_cfg,
+            timeout_sec=10,
+            poll_sec=0.01,
+            env={},
+        )
+
+
 def test_submit_run_and_wait_timeout(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     ticks = {"v": 0}
 
