@@ -29,11 +29,11 @@ from flwr.proto.control_pb2_grpc import ControlStub
 
 
 def create(
-    flower_account_name: Annotated[
+    account: Annotated[
         str,
         typer.Argument(help="Name of the Flower account to invite."),
     ],
-    federation_name: Annotated[
+    federation: Annotated[
         str,
         typer.Argument(help="Name of the federation."),
     ],
@@ -53,8 +53,8 @@ def create(
     """Create an invitation to join a federation."""
     with cli_output_control_stub(superlink, output_format) as (stub, is_json):
         request = CreateInvitationRequest(
-            invitee_account_name=flower_account_name,
-            federation_name=federation_name,
+            invitee_account_name=account,
+            federation_name=federation,
         )
         _create_invitation(stub=stub, request=request, is_json=is_json)
 

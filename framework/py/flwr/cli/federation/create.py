@@ -38,7 +38,7 @@ from ..utils import (
 
 def create(  # pylint: disable=R0914, R0913, R0917, R0912
     ctx: typer.Context,
-    federation_name: Annotated[
+    federation: Annotated[
         str,
         typer.Argument(help="Name of the federation to create."),
     ],
@@ -77,7 +77,7 @@ def create(  # pylint: disable=R0914, R0913, R0917, R0912
             stub = ControlStub(channel)
 
             request = CreateFederationRequest(
-                federation_name=federation_name,
+                federation_name=federation,
                 description=description if description else "",
             )
             _create_federation(stub=stub, request=request, is_json=is_json)

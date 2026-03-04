@@ -29,13 +29,13 @@ from flwr.proto.control_pb2_grpc import ControlStub
 
 
 def revoke(
-    flower_account_name: Annotated[
+    account: Annotated[
         str,
         typer.Argument(
             help="Name of the Flower account whose invite should be revoked."
         ),
     ],
-    federation_name: Annotated[
+    federation: Annotated[
         str,
         typer.Argument(help="Name of the federation."),
     ],
@@ -55,8 +55,8 @@ def revoke(
     """Revoke a pending invitation."""
     with cli_output_control_stub(superlink, output_format) as (stub, is_json):
         request = RevokeInvitationRequest(
-            invitee_account_name=flower_account_name,
-            federation_name=federation_name,
+            invitee_account_name=account,
+            federation_name=federation,
         )
         _revoke_invitation(stub=stub, request=request, is_json=is_json)
 

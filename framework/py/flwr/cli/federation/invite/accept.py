@@ -29,7 +29,7 @@ from flwr.proto.control_pb2_grpc import ControlStub
 
 
 def accept(
-    federation_name: Annotated[
+    federation: Annotated[
         str,
         typer.Argument(help="Name of the federation."),
     ],
@@ -48,7 +48,7 @@ def accept(
 ) -> None:
     """Accept an invitation to join a federation."""
     with cli_output_control_stub(superlink, output_format) as (stub, is_json):
-        request = AcceptInvitationRequest(federation_name=federation_name)
+        request = AcceptInvitationRequest(federation_name=federation)
         _accept_invitation(stub=stub, request=request, is_json=is_json)
 
 
