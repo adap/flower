@@ -1,0 +1,13 @@
+# Local env inside repo (HUGE)
+fedler-env/
+
+# Outputs/artifacts (HUGE)
+outputs/
+
+# Python build/cache
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+build/
+dist/

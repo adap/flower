@@ -1,0 +1,59 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "fedler-farms"
+version = "0.1.0"
+description = "Flower app demo: farm clients federated multi-output regression on Sentinel features (X1..X10) in PyTorch."
+license = "Apache-2.0"
+dependencies = [
+  "flwr[simulation]>=1.26.1",
+  "numpy>=1.23,<2",
+  "pandas>=2.0",
+  "torch>=2.0",
+  "scikit-learn>=1.2",
+  "scipy>=1.10",
+  "flwr-datasets>=0.6.0",
+]
+
+[tool.flwr.app]
+publisher = "soil-ai-lab"
+
+[tool.flwr.app.components]
+serverapp = "fedler_farms.server_app:app"
+clientapp = "fedler_farms.client_app:app"
+
+[tool.flwr.app.config]
+
+# federation runtime
+num-server-rounds = 5
+num-clients = 3
+
+# dataset
+hf-dataset = "soil-ai-lab/farms_sentinel_demo"
+partition-by = "farm"
+
+# data/model
+num-features = 10
+targets = "Clay_gkg_filtered,C_gkg_filtered"
+val-ratio = 0.3
+seed = 42
+
+# training
+batch-size = 8
+local-epochs = 3
+learning-rate = 0.001
+early-stop-patience = 10
+
+# outputs
+metrics-dir = "outputs/metrics_demo"
+
+# model hyperparameters
+conv1-filters = 64
+conv2-filters = 64
+kernel-size = 5
+use-pooling = false
+
+[tool.hatch.build.targets.wheel]
+packages = ["fedler_farms"]

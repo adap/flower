@@ -1,0 +1,58 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+dist/
+build/
+.wheelhouse/
+
+# Envs
+.venv/
+venv/
+.env/
+conda/
+.mamba/
+*.conda
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# Data / artifacts
+data/
+datasets/
+outputs/
+results/
+runs/
+wandb/
+mlruns/
+logs/
+checkpoints/
+weights/
+models/
+*.pt
+*.pth
+*.ckpt
+*.npz
+*.npy
+*.pkl
+*.joblib
+*.h5
+*.onnx
+*.tfrecord
+
+# Large misc
+*.zip
+*.tar
+*.tar.gz
+*.7z
+*.parquet
+*.feather
+
+# OS/editor
+.DS_Store
+.idea/
+.vscode/
