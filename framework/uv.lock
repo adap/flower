@@ -851,7 +851,7 @@ dev = [
     { name = "docformatter", specifier = "==1.7.5" },
     { name = "docstrfmt", git = "https://github.com/charlesbvll/docstrfmt.git?branch=patch-2" },
     { name = "furo", specifier = "==2024.8.6" },
-    { name = "gitpython", specifier = "==3.1.32" },
+    { name = "gitpython", specifier = "==3.1.41" },
     { name = "isort", specifier = "==5.13.2" },
     { name = "mdformat", specifier = "==1.0.0" },
     { name = "mdformat-beautysh", specifier = "==1.0.0" },
