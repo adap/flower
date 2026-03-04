@@ -18,7 +18,7 @@ We welcome your contribution!
 Build Your App
 --------------
 
-If you're unsure what to contribute, start by exploring the `available apps on Flower Hub <https://flower.ai/apps>`_, and see if you can add a new app that is not yet present or if you can improve an existing one.
+If you're unsure what to contribute, start by exploring the `available apps on Flower Hub <https://flower.ai/apps>`_, and see if you can add a new app that is not yet present or if you can improve an existing one. A good starting point is `@flwrlabs/quickstart-pytorch <https://flower.ai/apps/flwrlabs/quickstart-pytorch/>`_, which provides a simple example of a Flower app structure.
 
 Simulation vs. Deployment
 ~~~~~~~~~~~~~~~~~~~~~~~~~

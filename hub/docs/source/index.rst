@@ -39,5 +39,5 @@ How-to guides provide step-by-step instructions to help you accomplish specific 
   :maxdepth: 1
   :caption: How-to Guides
 
-  how-to-use-hub
-  how-to-contribute-hub
+  how-to-use-app-from-hub
+  how-to-publish-app-on-hub

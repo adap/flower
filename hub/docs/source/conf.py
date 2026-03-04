@@ -72,8 +72,8 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # To prevent 404 errors and redirect to the new pages.
 redirects = {
     # Renamed pages
-    "contributing-hub": "how-to-contribute-hub.html",
-    "using-hub": "how-to-use-hub.html",
+    "contributing-hub": "how-to-publish-app-on-hub.html",
+    "using-hub": "how-to-use-app-from-hub.html",
 }
 
 # -- Options for HTML output -------------------------------------------------

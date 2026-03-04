@@ -1,7 +1,10 @@
 Use an App from Flower Hub
 ==========================
 
-Applications on Flower Hub leverage Flower's infrastructure so you can focus on application logic instead of managing distributed systems complexity.
+Use an App from Flower Hub
+==========================
+
+Flower Hub is the home for federated applications. It provides a unified experience for discovering, running, and sharing federated apps across both simulation and deployment environments.
 
 Create a New App from Hub
 -------------------------
@@ -12,7 +15,7 @@ First, ensure that :code:`flwr` is installed on your machine:
 
     pip install flwr
 
-Next, select the app you want to download. For example, to create an app from :code:`@flwrlabs/quickstart-pytorch`, run:
+Next, select the app you want to download. For example, to create an app from `@flwrlabs/quickstart-pytorch <https://flower.ai/apps/flwrlabs/quickstart-pytorch/>`_, run:
 
 .. code-block:: bash
 
