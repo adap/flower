@@ -16,6 +16,7 @@
 
 
 from io import BytesIO
+from pathlib import Path
 from zipfile import ZipFile
 
 from .build import build_fab_from_files
@@ -23,7 +24,7 @@ from .build import build_fab_from_files
 
 def test_build_fab_from_files_includes_root_license() -> None:
     """Test root LICENSE is included in FAB when present."""
-    files = {
+    files: dict[str, bytes | Path] = {
         "pyproject.toml": b'[project]\nname = "app"\nversion = "1.0.0"\n',
         "client.py": b"print('ok')\n",
         "LICENSE": b"Apache-2.0\n",
