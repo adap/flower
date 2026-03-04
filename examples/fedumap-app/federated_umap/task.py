@@ -193,9 +193,9 @@ def load_data(
         .load_partition(partition_id, "train")
         .with_format("numpy")
     )
-    images = dataset[feature_column]
+    images = np.array(dataset[feature_column])
     X = images.reshape(images.shape[0], -1).astype(np.float64) / 255.0
-    y = dataset[label_column]
+    y = np.array(dataset[label_column])
     return X, y
 
 
@@ -217,9 +217,9 @@ def load_deployment_data(
     from datasets import load_from_disk
 
     dataset = load_from_disk(data_path).with_format("numpy")
-    images = dataset[feature_column]
+    images = np.array(dataset[feature_column])
     X = images.reshape(images.shape[0], -1).astype(np.float64) / 255.0
-    y = dataset[label_column]
+    y = np.array(dataset[label_column])
     return X, y
 
 
