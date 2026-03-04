@@ -12,11 +12,13 @@ app = ClientApp()
 
 @app.train()
 def train(msg, context):
-    cfg, domain = get_active_experiment_from_context(context.run_config)
+    msg_cfg = msg.content.get("config", {})
+    cfg, domain = get_active_experiment_from_context(context.run_config, msg_cfg)
     return client_train_handler(msg=msg, context=context, cfg=cfg, domain=domain)
 
 
 @app.evaluate()
 def evaluate(msg, context):
-    cfg, domain = get_active_experiment_from_context(context.run_config)
+    msg_cfg = msg.content.get("config", {})
+    cfg, domain = get_active_experiment_from_context(context.run_config, msg_cfg)
     return client_evaluate_handler(msg=msg, context=context, cfg=cfg, domain=domain)

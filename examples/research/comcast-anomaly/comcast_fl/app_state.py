@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Mapping
 
 from .config import ExperimentConfig, dumps_config_json, loads_config_json
 
@@ -16,25 +16,40 @@ def set_active_experiment(cfg: ExperimentConfig, domain: str) -> None:
     _ACTIVE_DOMAIN = domain
 
 
-def get_active_experiment_from_context(run_config: dict[str, Any]) -> tuple[ExperimentConfig, str]:
+def _mapping_get_str(mapping: Mapping[str, Any] | None, key: str, default: str = "") -> str:
+    if mapping is None:
+        return default
+    value = mapping.get(key, default)
+    return str(value) if value is not None else default
+
+
+def get_active_experiment_from_context(
+    run_config: Mapping[str, Any],
+    config_fallback: Mapping[str, Any] | None = None,
+) -> tuple[ExperimentConfig, str]:
     global _ACTIVE_CONFIG, _ACTIVE_DOMAIN
+
+    # Prefer explicit payload from run/message config over stale in-process globals.
+    raw = _mapping_get_str(run_config, "experiment-config-json")
+    if not raw:
+        raw = _mapping_get_str(config_fallback, "experiment-config-json")
+
+    if raw:
+        cfg = loads_config_json(raw)
+        domain = _mapping_get_str(run_config, "domain")
+        if not domain:
+            domain = _mapping_get_str(config_fallback, "domain", cfg.domains[0])
+        _ACTIVE_CONFIG = cfg
+        _ACTIVE_DOMAIN = domain
+        return cfg, domain
 
     if _ACTIVE_CONFIG is not None and _ACTIVE_DOMAIN is not None:
         return _ACTIVE_CONFIG, _ACTIVE_DOMAIN
 
-    raw = run_config.get("experiment-config-json", "")
-    if not raw:
-        raise RuntimeError(
-            "No active experiment config found. For deployment mode, pass "
-            "`experiment-config-json` through Flower run-config."
-        )
-
-    cfg = loads_config_json(str(raw))
-    domain = str(run_config.get("domain", cfg.domains[0]))
-
-    _ACTIVE_CONFIG = cfg
-    _ACTIVE_DOMAIN = domain
-    return cfg, domain
+    raise RuntimeError(
+        "No active experiment config found. Pass `experiment-config-json` with "
+        "run-config (deployment) or message config (simulation)."
+    )
 
 
 def build_run_config_payload(cfg: ExperimentConfig, domain: str) -> dict[str, str]:

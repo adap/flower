@@ -13,6 +13,7 @@ from flwr.serverapp import Grid
 from flwr.serverapp.strategy import FedAvg
 from torch import nn
 
+from .app_state import build_run_config_payload
 from .config import ExperimentConfig
 from .constants import V2_ACCEPTANCE_TARGETS, V2_EDGE_TARGETS
 from .federated_core import (
@@ -141,17 +142,25 @@ def server_main(grid: Grid, context: Context, cfg: ExperimentConfig, domain: str
         metrics = metrics_from_preds(y_true, pred, probs, regime_ids)
         return MetricRecord({"server_val_macro_f1": float(metrics["macro_f1"])})
 
+    run_cfg_payload = build_run_config_payload(cfg, domain)
+    train_cfg = {
+        "local-epochs": int(cfg.local_training.local_epochs),
+        "lr": float(cfg.local_training.lr),
+        "weight-decay": float(cfg.local_training.weight_decay),
+        "experiment-config-json": str(run_cfg_payload["experiment-config-json"]),
+        "domain": str(run_cfg_payload["domain"]),
+    }
+    evaluate_cfg = {
+        "experiment-config-json": str(run_cfg_payload["experiment-config-json"]),
+        "domain": str(run_cfg_payload["domain"]),
+    }
+
     result = strategy.start(
         grid=grid,
         initial_arrays=arrays,
         num_rounds=int(fcfg.num_rounds),
-        train_config=ConfigRecord(
-            {
-                "local-epochs": int(cfg.local_training.local_epochs),
-                "lr": float(cfg.local_training.lr),
-                "weight-decay": float(cfg.local_training.weight_decay),
-            }
-        ),
+        train_config=ConfigRecord(train_cfg),
+        evaluate_config=ConfigRecord(evaluate_cfg),
         evaluate_fn=_evaluate_fn,
     )
 

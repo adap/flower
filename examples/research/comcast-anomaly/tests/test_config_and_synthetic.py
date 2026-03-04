@@ -5,6 +5,11 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+from comcast_fl.app_state import (
+    build_run_config_payload,
+    get_active_experiment_from_context,
+    set_active_experiment,
+)
 from comcast_fl.config import (
     AzureSshConfig,
     AzureVmSpec,
@@ -36,6 +41,28 @@ def test_non_iid_axis_override_precedence() -> None:
     sev = resolve_non_iid(cfg)
     assert sev["class_skew"] == 0.8
     assert sev["regime_skew"] == 0.2
+
+
+def test_active_experiment_resolves_from_message_config() -> None:
+    cfg = load_experiment_config(str(BASE / "configs" / "smoke.yaml"))
+    payload = build_run_config_payload(cfg, "upstream_return")
+    resolved_cfg, resolved_domain = get_active_experiment_from_context({}, payload)
+    assert resolved_domain == "upstream_return"
+    assert resolved_cfg.artifacts.run_name == cfg.artifacts.run_name
+
+
+def test_active_experiment_prefers_payload_over_stale_global() -> None:
+    cfg_old = load_experiment_config(str(BASE / "configs" / "smoke.yaml"))
+    cfg_new = load_experiment_config(str(BASE / "configs" / "smoke.yaml"))
+    cfg_old.artifacts.run_name = "old-run"
+    cfg_new.artifacts.run_name = "new-run"
+
+    set_active_experiment(cfg_old, "downstream_rxmer")
+    payload = build_run_config_payload(cfg_new, "upstream_return")
+
+    resolved_cfg, resolved_domain = get_active_experiment_from_context({}, payload)
+    assert resolved_domain == "upstream_return"
+    assert resolved_cfg.artifacts.run_name == "new-run"
 
 
 def test_external_deployment_requires_superlink() -> None:
