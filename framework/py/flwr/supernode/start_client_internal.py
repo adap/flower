@@ -36,6 +36,10 @@ from flwr.app.user_config import UserConfig
 from flwr.client.grpc_adapter_client.connection import grpc_adapter
 from flwr.client.grpc_rere_client.connection import grpc_request_response
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, Context, Error, Message, RecordDict
+from flwr.common.appio_token_auth_interceptor import (
+    AppIoTokenAuthServerInterceptor,
+    validate_method_requires_token_map,
+)
 from flwr.common.config import get_flwr_dir, get_fused_config_from_fab
 from flwr.common.constant import (
     CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
@@ -53,6 +57,7 @@ from flwr.common.logger import log
 from flwr.common.retry_invoker import RetryInvoker, make_simple_grpc_retry_invoker
 from flwr.common.telemetry import EventType
 from flwr.common.typing import Fab, Run, RunNotRunningException
+from flwr.proto import clientappio_pb2  # pylint: disable=E0611
 from flwr.proto.clientappio_pb2_grpc import add_ClientAppIoServicer_to_server
 from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
 from flwr.supercore.address import parse_address, resolve_bind_address
@@ -81,6 +86,37 @@ from flwr.supernode.servicer.clientappio import ClientAppIoServicer
 DEFAULT_FFS_DIR = get_flwr_dir() / "supernode" / "ffs"
 
 FAB_VERIFICATION_ERROR = Error(ErrorCode.INVALID_FAB, "The FAB could not be verified.")
+
+CLIENTAPPIO_METHOD_REQUIRES_TOKEN = {
+    # Keep this table in sync with the proto service. Startup validation below
+    # fails fast with a targeted error message if an RPC is added/renamed and no
+    # explicit auth decision is recorded here.
+    # SuperExec path (intentionally unauthenticated in this PR)
+    "/flwr.proto.ClientAppIo/ListAppsToLaunch": False,
+    "/flwr.proto.ClientAppIo/RequestToken": False,
+    "/flwr.proto.ClientAppIo/GetRun": False,
+    # App executor path (token required)
+    "/flwr.proto.ClientAppIo/SendAppHeartbeat": True,
+    "/flwr.proto.ClientAppIo/PullAppInputs": True,
+    "/flwr.proto.ClientAppIo/PushAppOutputs": True,
+    "/flwr.proto.ClientAppIo/PullMessage": True,
+    "/flwr.proto.ClientAppIo/PushMessage": True,
+    "/flwr.proto.ClientAppIo/PushObject": True,
+    "/flwr.proto.ClientAppIo/PullObject": True,
+    "/flwr.proto.ClientAppIo/ConfirmMessageReceived": True,
+}
+
+validate_method_requires_token_map(
+    service_name="ClientAppIo",
+    package_name=clientappio_pb2.DESCRIPTOR.package,
+    rpc_method_names=[
+        method.name
+        for method in clientappio_pb2.DESCRIPTOR.services_by_name["ClientAppIo"].methods
+    ],
+    method_requires_token=CLIENTAPPIO_METHOD_REQUIRES_TOKEN,
+    table_name="CLIENTAPPIO_METHOD_REQUIRES_TOKEN",
+    table_location="py/flwr/supernode/start_client_internal.py",
+)
 
 
 # pylint: disable=import-outside-toplevel
@@ -634,6 +670,12 @@ def run_clientappio_api_grpc(
         objectstore_factory=objectstore_factory,
     )
     clientappio_add_servicer_to_server_fn = add_ClientAppIoServicer_to_server
+    interceptors = [
+        AppIoTokenAuthServerInterceptor(
+            state_provider=state_factory.state,
+            method_requires_token=CLIENTAPPIO_METHOD_REQUIRES_TOKEN,
+        )
+    ]
     clientappio_grpc_server = generic_create_grpc_server(
         servicer_and_add_fn=(
             clientappio_servicer,
@@ -642,6 +684,7 @@ def run_clientappio_api_grpc(
         server_address=address,
         max_message_length=GRPC_MAX_MESSAGE_LENGTH,
         certificates=certificates,
+        interceptors=interceptors,
     )
     log(INFO, "Flower Deployment Runtime: Starting ClientAppIo API on %s", address)
     clientappio_grpc_server.start()

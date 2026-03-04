@@ -139,6 +139,10 @@ TIMESTAMP_HEADER = "flwr-timestamp"
 TIMESTAMP_TOLERANCE = 300  # General tolerance for timestamp verification
 SYSTEM_TIME_TOLERANCE = 5  # Allowance for system time drift
 
+# Constants for AppIo token metadata authentication
+# This header carries the app execution token for AppIo gRPC interceptors.
+APP_TOKEN_HEADER = "flwr-app-token"
+
 # Constants for grpc retry
 GRPC_RETRY_MAX_DELAY = 20  # Maximum delay duration between two consecutive retries.
 

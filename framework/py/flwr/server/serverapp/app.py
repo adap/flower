@@ -14,7 +14,6 @@
 # ==============================================================================
 """Flower ServerApp process."""
 
-
 import argparse
 from logging import DEBUG, ERROR, INFO
 from pathlib import Path
@@ -102,8 +101,7 @@ def flwr_serverapp() -> None:
     log(INFO, "Start `flwr-serverapp` process")
     log(
         DEBUG,
-        "`flwr-serverapp` will attempt to connect to SuperLink's "
-        "ServerAppIo API at %s",
+        "`flwr-serverapp` will attempt to connect to SuperLink's ServerAppIo API at %s",
         args.serverappio_api_address,
     )
     run_serverapp(
@@ -182,6 +180,7 @@ def run_serverapp(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
         grid = GrpcGrid(
             serverappio_service_address=serverappio_api_address,
             root_certificates=certificates,
+            token=token,
         )
 
         # Pull ServerAppInputs from LinkState
