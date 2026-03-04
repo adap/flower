@@ -1,6 +1,6 @@
 # uv
 
-## Install 
+## Install
 
 To reproduce a Poetry env with Python 3.10.19, all extras (`simulation`, `rest`) and all dependency groups (`dev`):
 
