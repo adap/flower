@@ -21,12 +21,17 @@ def client_fn(context: Context):
 
     log.info(
         "Client %s: loading partition %d of %d (%s)",
-        context.node_id, partition_id, num_partitions, dataset,
+        context.node_id,
+        partition_id,
+        num_partitions,
+        dataset,
     )
 
     net = get_model(dataset)
     print(f"DEBUG node_config={context.node_config}", flush=True)
-    print(f"DEBUG partition_id={partition_id} num_partitions={num_partitions}", flush=True)
+    print(
+        f"DEBUG partition_id={partition_id} num_partitions={num_partitions}", flush=True
+    )
     trainloader, valloader = load_data(partition_id, num_partitions, dataset)
 
     return EncryptedFlowerClient(
@@ -36,7 +41,6 @@ def client_fn(context: Context):
         valloader=valloader,
         epochs=local_epochs,
     )
-
 
 
 app = ClientApp(client_fn=client_fn)

@@ -60,7 +60,9 @@ def get_model(dataset: str) -> nn.Module:
     elif dataset == "cifar10":
         return CifarNet()
     else:
-        raise ValueError(f"Unsupported dataset: '{dataset}'. Choose 'mnist' or 'cifar10'.")
+        raise ValueError(
+            f"Unsupported dataset: '{dataset}'. Choose 'mnist' or 'cifar10'."
+        )
 
 
 def train(net, trainloader, epochs, device):

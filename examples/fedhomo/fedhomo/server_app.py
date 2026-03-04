@@ -36,7 +36,12 @@ def server_fn(context: Context) -> ServerAppComponents:
         accept_failures=True,
     )
 
-    log.info("Server: %d rounds, fraction_fit=%.2f, dataset=%s", num_rounds, fraction_fit, dataset)
+    log.info(
+        "Server: %d rounds, fraction_fit=%.2f, dataset=%s",
+        num_rounds,
+        fraction_fit,
+        dataset,
+    )
 
     return ServerAppComponents(
         strategy=strategy,

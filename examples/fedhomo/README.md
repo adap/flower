@@ -38,9 +38,11 @@ Install the dependencies with:
 ```bash
 pip install -e .
 ```
+
 This will install Flower, TenSEAL, PyTorch and all required dependencies.
 
 ## Generate Keys
+
 Before running the example, generate the TenSEAL CKKS keys:
 
 ```bash
@@ -48,10 +50,11 @@ mkdir -p keys
 python generated_keys.py
 ```
 
-This will populate the ```keys/``` folder with the encryption context and keys
+This will populate the `keys/` folder with the encryption context and keys
 used by clients and server.
 
 ## Configuration
+
 In pyproject.toml, you can configure the run:
 
 ```text
@@ -60,13 +63,17 @@ dataset = "mnist"        # or "cifar10"
 num-server-rounds = 3
 num-clients = 2
 ```
+
 ## Run with Flower (Simulation Mode)
+
 ```bash
 flwr run .
 ```
 
 ## Run with Flower (Deployment Mode)
+
 1. Start the SuperLink:
+
 ```bash
 flower-superlink --insecure
 ```
@@ -92,6 +99,7 @@ flwr run . --run-config num-server-rounds=3
 ## Notes
 
 ### First Round Decryption Warning
+
 During the **first training round**, clients may log a decryption warning
 or error. This is expected behavior: the server aggregates encrypted weights
 from scratch and the initial aggregation may produce a ciphertext that is
@@ -99,6 +107,7 @@ slightly malformed before the model stabilizes. From the second round onwards
 the process runs cleanly.
 
 ## How It Works
+
 Key generation — CKKS keys are generated once via generated_keys.py
 and stored in the keys/ folder.
 
@@ -106,7 +115,7 @@ Client encryption — each client encrypts its model weights using the
 TenSEAL CKKS context before sending them to the server.
 
 Server aggregation — the server aggregates encrypted weights directly
-via the custom strategy ```HomomorphicFedAvg``` defined in ```strategy.py```, without decrypting them.
+via the custom strategy `HomomorphicFedAvg` defined in `strategy.py`, without decrypting them.
 
 Client decryption — aggregated weights are sent back to clients, which
 decrypt them locally and update the model.

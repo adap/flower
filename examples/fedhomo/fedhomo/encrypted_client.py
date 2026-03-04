@@ -3,6 +3,7 @@
 import logging
 from typing import Dict, Tuple
 
+import flwr as fl
 import numpy as np
 import torch
 from flwr.common import (
@@ -17,17 +18,21 @@ from flwr.common import (
     ndarrays_to_parameters,
     parameters_to_ndarrays,
 )
-import flwr as fl
 
-from fedhomo.model import get_weights, set_weights, train, test
-from fedhomo.crypto import EncryptionError, DecryptionError, HomomorphicError, HomomorphicClientHandler
-
+from fedhomo.crypto import (
+    DecryptionError,
+    EncryptionError,
+    HomomorphicClientHandler,
+    HomomorphicError,
+)
+from fedhomo.model import get_weights, set_weights, test, train
 
 log = logging.getLogger(__name__)
 
 
 class EncryptedFlowerClient(fl.client.Client):
-    """Flower client that encrypts model parameters using CKKS homomorphic encryption."""
+    """Flower client that encrypts model parameters using CKKS homomorphic
+    encryption."""
 
     def __init__(
         self,
@@ -61,29 +66,28 @@ class EncryptedFlowerClient(fl.client.Client):
             )
 
     def _apply_parameters(self, raw_params, round_label: str = "") -> None:
-            """Decrypt and apply parameters to the model.
+        """Decrypt and apply parameters to the model.
 
-            Falls back to plaintext if decryption fails (expected on round 1).
-            """
-            try:
-                params = self.crypto_handler.process_incoming_parameters(raw_params)
-                log.debug("Client %s: parameters decrypted successfully", self.cid)
-            except DecryptionError:
-                log.info(
-                    "Client %s: received plaintext parameters (round 1 — expected behavior)",
-                    self.cid,
-                )
-                params = raw_params
+        Falls back to plaintext if decryption fails (expected on round 1).
+        """
+        try:
+            params = self.crypto_handler.process_incoming_parameters(raw_params)
+            log.debug("Client %s: parameters decrypted successfully", self.cid)
+        except DecryptionError:
+            log.info(
+                "Client %s: received plaintext parameters (round 1 — expected behavior)",
+                self.cid,
+            )
+            params = raw_params
 
-            original_shapes = [p.shape for p in self.net.parameters()]
-            state_dict = {
-                k: torch.from_numpy(v.reshape(shape).astype(np.float32))
-                for (k, _), v, shape in zip(
-                    self.net.state_dict().items(), params, original_shapes
-                )
-            }
-            self.net.load_state_dict(state_dict, strict=True)
-
+        original_shapes = [p.shape for p in self.net.parameters()]
+        state_dict = {
+            k: torch.from_numpy(v.reshape(shape).astype(np.float32))
+            for (k, _), v, shape in zip(
+                self.net.state_dict().items(), params, original_shapes
+            )
+        }
+        self.net.load_state_dict(state_dict, strict=True)
 
     def fit(self, fit_ins: FitIns) -> FitRes:
         """Train model on local data and return encrypted updated parameters."""
@@ -114,7 +118,9 @@ class EncryptedFlowerClient(fl.client.Client):
         try:
             self._apply_parameters(parameters_to_ndarrays(ins.parameters))
             loss, accuracy = test(self.net, self.valloader, self.device)
-            log.info("Client %s: val loss %.4f, accuracy %.4f", self.cid, loss, accuracy)
+            log.info(
+                "Client %s: val loss %.4f, accuracy %.4f", self.cid, loss, accuracy
+            )
             return EvaluateRes(
                 status=Status(Code.OK, "Success"),
                 loss=float(loss),

@@ -4,7 +4,6 @@ from flwr_datasets.partitioner import IidPartitioner
 from torch.utils.data import DataLoader
 from torchvision.transforms import Compose, Normalize, ToTensor
 
-
 _fds_cache: dict = {}
 
 _transforms = {
@@ -59,7 +58,9 @@ def load_data(partition_id: int, num_partitions: int, dataset: str) -> tuple:
         Tuple of (trainloader, testloader).
     """
     if dataset not in _hf_names:
-        raise ValueError(f"Unsupported dataset: '{dataset}'. Choose 'mnist' or 'cifar10'.")
+        raise ValueError(
+            f"Unsupported dataset: '{dataset}'. Choose 'mnist' or 'cifar10'."
+        )
 
     if dataset not in _fds_cache:
         partitioner = IidPartitioner(num_partitions=num_partitions)
@@ -77,8 +78,6 @@ def load_data(partition_id: int, num_partitions: int, dataset: str) -> tuple:
     trainloader = DataLoader(
         partition["train"], batch_size=32, shuffle=True, collate_fn=collate_fn
     )
-    testloader = DataLoader(
-        partition["test"], batch_size=32, collate_fn=collate_fn
-    )
+    testloader = DataLoader(partition["test"], batch_size=32, collate_fn=collate_fn)
 
     return trainloader, testloader

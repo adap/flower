@@ -5,11 +5,17 @@ import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
+import flwr as fl
 import numpy as np
 import tenseal as ts
-from flwr.common import FitRes, Parameters, Scalar, ndarrays_to_parameters, parameters_to_ndarrays
+from flwr.common import (
+    FitRes,
+    Parameters,
+    Scalar,
+    ndarrays_to_parameters,
+    parameters_to_ndarrays,
+)
 from flwr.server.client_proxy import ClientProxy
-import flwr as fl
 
 from fedhomo.crypto import (
     DecryptionError,
@@ -24,7 +30,8 @@ PUBLIC_CONTEXT_PATH = Path("keys") / "public_context.pkl"
 
 
 class HomomorphicFedAvg(fl.server.strategy.FedAvg):
-    """FedAvg strategy that aggregates model updates in the encrypted domain using CKKS."""
+    """FedAvg strategy that aggregates model updates in the encrypted domain using
+    CKKS."""
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -93,7 +100,12 @@ class HomomorphicFedAvg(fl.server.strategy.FedAvg):
             )
 
             elapsed = time.time() - start
-            log.info("Round %d: aggregated %d clients in %.2fs", server_round, len(client_updates), elapsed)
+            log.info(
+                "Round %d: aggregated %d clients in %.2fs",
+                server_round,
+                len(client_updates),
+                elapsed,
+            )
             metrics["aggregation_time"] = elapsed
 
             return parameters, metrics
@@ -108,10 +120,10 @@ class HomomorphicFedAvg(fl.server.strategy.FedAvg):
             return None, metrics
 
     def _process_client_updates(
-    self,
-    results: List[Tuple[ClientProxy, FitRes]],
-    metrics: Dict[str, Any],
-) -> List[Tuple[List[ts.CKKSVector], int]]:
+        self,
+        results: List[Tuple[ClientProxy, FitRes]],
+        metrics: Dict[str, Any],
+    ) -> List[Tuple[List[ts.CKKSVector], int]]:
         client_updates = []
         for client, res in results:
             try:
@@ -122,7 +134,8 @@ class HomomorphicFedAvg(fl.server.strategy.FedAvg):
                     vectors = self.aggregator.process_client_update(encrypted_params)
                     log.info(
                         "Client %s: all %d layers verified as CKKSVector ✓",
-                        client.cid, len(vectors),
+                        client.cid,
+                        len(vectors),
                     )
                 except Exception:
                     log.error(

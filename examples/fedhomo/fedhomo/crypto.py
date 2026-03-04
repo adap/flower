@@ -33,7 +33,9 @@ class EncryptedAggregator:
             raise ValueError("Aggregator requires a public context.")
         self.context = context
 
-    def process_client_update(self, encrypted_params: List[np.ndarray]) -> List[ts.CKKSVector]:
+    def process_client_update(
+        self, encrypted_params: List[np.ndarray]
+    ) -> List[ts.CKKSVector]:
         """Deserialize raw bytes from a client into CKKSVectors."""
         vectors = []
         for param in encrypted_params:
@@ -133,7 +135,9 @@ class HomomorphicClientHandler:
             self.logger.error("Decryption failed: %s", e)
             raise DecryptionError("Vector decryption failed") from e
 
-    def process_incoming_parameters(self, parameters: List[np.ndarray]) -> List[np.ndarray]:
+    def process_incoming_parameters(
+        self, parameters: List[np.ndarray]
+    ) -> List[np.ndarray]:
         """Deserialize and decrypt incoming parameters from the server.
 
         Falls back gracefully on round 1 when parameters are plaintext.
@@ -150,6 +154,7 @@ class HomomorphicClientHandler:
             return self.decrypt_parameters([p.tobytes() for p in parameters])
         except Exception as e:
             self.logger.debug(
-                "Could not decrypt parameters (expected on round 1 — plaintext fallback): %s", e
+                "Could not decrypt parameters (expected on round 1 — plaintext fallback): %s",
+                e,
             )
             raise DecryptionError("Parameter deserialization failed") from e
