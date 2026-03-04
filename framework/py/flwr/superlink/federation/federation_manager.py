@@ -19,6 +19,7 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
 from flwr.common.typing import Federation
+from flwr.proto.federation_pb2 import Invitation  # pylint: disable=E0611
 
 if TYPE_CHECKING:
     from flwr.server.superlink.linkstate.linkstate import LinkState
@@ -144,8 +145,10 @@ class FederationManager(ABC):
         """
 
     @abstractmethod
-    def list_invitations(self, flwr_aid: str) -> list[dict[str, str]]:
-        """List invitations for a federation visible to the given account.
+    def list_invitations(
+        self, flwr_aid: str
+    ) -> tuple[list[Invitation], list[Invitation]]:
+        """List invitations visible to the given account.
 
         Parameters
         ----------
@@ -154,8 +157,8 @@ class FederationManager(ABC):
 
         Returns
         -------
-        list[dict[str, str]]
-            A list of invitation records.
+        tuple[list[Invitation], list[Invitation]]
+            A tuple of (created_invitations, received_invitations).
         """
 
     @abstractmethod
@@ -188,10 +191,13 @@ class FederationManager(ABC):
     ) -> None:
         """Revoke a pending invitation.
 
+        Only the account that created the invitation can revoke it.
+
         Parameters
         ----------
         flwr_aid : str
-            The ID of the account revoking the invitation (inviter).
+            The ID of the account revoking the invitation (must be the
+            original inviter).
         federation : str
             The name of the federation.
         invitee_flwr_aid : str
