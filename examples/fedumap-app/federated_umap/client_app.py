@@ -1,5 +1,4 @@
-"""
-Federated UMAP — client-side Flower app.
+"""Federated UMAP — client-side Flower app.
 
 Implements the client component from:
     "Federated t-SNE and UMAP for Distributed Data Visualization"
@@ -52,11 +51,11 @@ class FlowerClient(NumPyClient):
         return 0.5, len(self.X_p), {"accuracy": 0.0}
 
     def _compute_distance_to_landmarks(self):
-        """
-        Algorithm 2, step 2 / paper eq. 21 (one row-block of B):
-            D_{X_p, Y} ∈ R^{n_p × n_y}
-        Euclidean distances from each local data point to each landmark.
-        Raw data X_p never leaves the client — only this distance matrix is sent.
+        """Algorithm 2, step 2 / paper eq.
+
+        21 (one row-block of B):     D_{X_p, Y} ∈ R^{n_p × n_y} Euclidean distances from
+        each local data point to each landmark. Raw data X_p never leaves the client —
+        only this distance matrix is sent.
         """
         X_flat = self.X_p.reshape(self.X_p.shape[0], -1)
         Y_flat = self.model.Y.reshape(self.model.n_y, -1)

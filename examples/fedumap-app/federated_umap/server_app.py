@@ -1,5 +1,4 @@
-"""
-Federated UMAP — server-side strategy and Nyström reconstruction.
+"""Federated UMAP — server-side strategy and Nyström reconstruction.
 
 Implements the server component from:
     "Federated t-SNE and UMAP for Distributed Data Visualization"
@@ -23,9 +22,8 @@ from federated_umap.task import get_model, get_model_params
 
 
 def nystrom_distance_matrix(B, W, rank=None):
-    """
-    Algorithm 2, step 3 — estimate the full pairwise distance matrix via
-    the Nyström method (paper eq. 22):
+    """Algorithm 2, step 3 — estimate the full pairwise distance matrix via the Nyström
+    method (paper eq. 22):
 
         D̂_{X,X} = B · W†_k · B^T
 
@@ -95,8 +93,7 @@ def _make_scatter_table(embedding, labels):
 
 
 class FedUMAPStrategy(FedAvg):
-    """
-    Flower strategy implementing Fed-UMAP (paper Algorithm 2).
+    """Flower strategy implementing Fed-UMAP (paper Algorithm 2).
 
     Each round:
       - Receives Y_p and D_{X_p,Y} from every client (Algorithm 2, step 2).
@@ -245,8 +242,8 @@ class FedUMAPStrategy(FedAvg):
         self._log_to_wandb(Y, labels_sub, emb_kxy, emb_nystrom, rnd)
 
     def _log_to_wandb(self, Y, labels, emb_kxy, emb_nystrom, rnd):
-        """
-        Log two federated UMAP scatter plots to W&B:
+        """Log two federated UMAP scatter plots to W&B:
+
           - embedding/kxy_features  — UMAP on K_XY kernel features
           - embedding/nystrom       — UMAP on Nyström-reconstructed D̂
         Each is a wandb.Table (for custom charts) + wandb.plot.scatter

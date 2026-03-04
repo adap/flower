@@ -6,10 +6,10 @@ Each client optimises a shared set of landmark points **Y** against its local da
 
 Two federated embeddings are logged to Weights & Biases (W&B) for comparison:
 
-| Embedding | Description |
-|---|---|
-| **Nyström D̂** | UMAP on the Nyström-reconstructed global distance matrix (Algorithm 2) |
-| **K_XY features** | UMAP on Gaussian kernel similarities to the landmarks |
+| Embedding         | Description                                                            |
+| ----------------- | ---------------------------------------------------------------------- |
+| **Nyström D̂**     | UMAP on the Nyström-reconstructed global distance matrix (Algorithm 2) |
+| **K_XY features** | UMAP on Gaussian kernel similarities to the landmarks                  |
 
 ## Project Structure
 
@@ -42,15 +42,14 @@ flwr run . --run-config "wandb-project=my-project"
 
 All keys live under `[tool.flwr.app.config]` in `pyproject.toml` and can be overridden with `--run-config`.
 
-| Key | Default | Description |
-|---|---|---|
-| `num-server-rounds` | `100` | Number of federated rounds |
-| `local-epochs` | `2` | Local gradient descent steps per round |
-| `n-y` | `500` | Number of UMAP landmark points |
-| `dataset` | `ylecun/mnist` | HuggingFace dataset identifier (Simulation only) |
-| `feature-column` | `image` | Dataset column containing images |
-| `label-column` | `label` | Dataset column containing class labels |
-| `feature-dim` | `784` | Flattened feature dimension (28×28 for MNIST) |
-| `umap-max-samples` | `10000` | Max points fed into UMAP at the final round |
-| `wandb-project` | `federated-umap` | W&B project name |
-
+| Key                 | Default          | Description                                      |
+| ------------------- | ---------------- | ------------------------------------------------ |
+| `num-server-rounds` | `100`            | Number of federated rounds                       |
+| `local-epochs`      | `2`              | Local gradient descent steps per round           |
+| `n-y`               | `500`            | Number of UMAP landmark points                   |
+| `dataset`           | `ylecun/mnist`   | HuggingFace dataset identifier (Simulation only) |
+| `feature-column`    | `image`          | Dataset column containing images                 |
+| `label-column`      | `label`          | Dataset column containing class labels           |
+| `feature-dim`       | `784`            | Flattened feature dimension (28×28 for MNIST)    |
+| `umap-max-samples`  | `10000`          | Max points fed into UMAP at the final round      |
+| `wandb-project`     | `federated-umap` | W&B project name                                 |

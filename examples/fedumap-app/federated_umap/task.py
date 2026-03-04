@@ -1,5 +1,4 @@
-"""
-Federated UMAP — client-side model and data utilities.
+"""Federated UMAP — client-side model and data utilities.
 
 Implements the local optimisation component from:
     "Federated t-SNE and UMAP for Distributed Data Visualization"
@@ -18,16 +17,15 @@ _fds_cache: dict = {}  # Cache FederatedDataset by dataset name
 
 
 class FedMMDClient:
-    """
-    Local landmark optimiser for one federated client (paper Algorithm 1 — FedDL).
+    """Local landmark optimiser for one federated client (paper Algorithm 1 — FedDL).
 
-    Each client holds a local copy of the shared landmark matrix Y ∈ R^{n_y × d}
-    and minimises f_p(Y) = MMD(X_p, Y) (paper eq. 9/10) via gradient descent
-    (paper eq. 13) so that Y captures the distribution of its local data X_p.
+    Each client holds a local copy of the shared landmark matrix Y ∈ R^{n_y × d} and
+    minimises f_p(Y) = MMD(X_p, Y) (paper eq. 9/10) via gradient descent (paper eq. 13)
+    so that Y captures the distribution of its local data X_p.
 
-    After Q local steps the updated Y_p is uploaded to the server for FedAvg
-    aggregation (Algorithm 1, steps 11 & 13).  The server broadcasts the new
-    global Y back (step 15) and the cycle repeats for S rounds.
+    After Q local steps the updated Y_p is uploaded to the server for FedAvg aggregation
+    (Algorithm 1, steps 11 & 13).  The server broadcasts the new global Y back (step 15)
+    and the cycle repeats for S rounds.
     """
 
     def __init__(self, params: dict):
@@ -42,9 +40,9 @@ class FedMMDClient:
         self._step_size = params.get("step_size", 0.01)
 
     def forward(self, X):
-        """
-        One local gradient descent step — Algorithm 1, line 8:
-            Y_p^{s,t} = Y_p^{s,t-1} - η · ∇f_p(Y_p^{s,t-1})
+        """One local gradient descent step — Algorithm 1, line 8:
+
+        Y_p^{s,t} = Y_p^{s,t-1} - η · ∇f_p(Y_p^{s,t-1})
         X: (n_p, d)  ->  returns updated Y: (n_y, d)
         """
         X = self._to_2d_f64(X)
@@ -69,22 +67,22 @@ class FedMMDClient:
         return self.Y
 
     def update_Y(self, new_Y):
-        """
-        Receive aggregated Y from server.
+        """Receive aggregated Y from server.
+
         Algorithm 1, step 1 (initial broadcast) and step 15 (per-round broadcast).
         """
         self.Y = np.array(new_Y, dtype=np.float64)
 
     def get_Y(self):
-        """
-        Return Y_p for upload to server.
+        """Return Y_p for upload to server.
+
         Algorithm 1, step 11: upload Y_p^s to the server for averaging.
         """
         return self.Y.copy()
 
     def get_gradient(self, X):
-        """
-        Return ∇f_p(Y) for gradient-based server aggregation.
+        """Return ∇f_p(Y) for gradient-based server aggregation.
+
         Used in the alternative update rule (paper eq. 16):
             Y^s ← Y^{s-1} - η' × (1/P) Σ_p ∇f_p(Y_p^s)
         """
@@ -95,9 +93,8 @@ class FedMMDClient:
         return self._compute_gradient(X, Y, self.gamma)
 
     def _compute_gradient(self, X, Y, gamma):
-        """
-        Gradient of f_p(Y) = MMD(X_p, Y) w.r.t. Y — paper eq. (13).
-        Returns shape (n_y, d).
+        """Gradient of f_p(Y) = MMD(X_p, Y) w.r.t. Y — paper eq. (13). Returns shape
+        (n_y, d).
 
         From eq. (13) (using row-vector convention, i.e. X is (n_p, d)):
             ∇f_p(Y) = -4γ/(n_p·n_y) · [K_{XY}^T X - diag(K_{XY}^T 1) Y]   ← term1
@@ -131,9 +128,9 @@ class FedMMDClient:
         return term1 + term2  # (n_y, d)
 
     def _gaussian_kernel(self, X, Y, gamma):
-        """
-        Gaussian kernel matrix K_{X,Y} with bandwidth γ (paper §3.1):
-            k(x_i, y_j) = exp(-γ · ‖x_i - y_j‖^2)
+        """Gaussian kernel matrix K_{X,Y} with bandwidth γ (paper §3.1):
+
+        k(x_i, y_j) = exp(-γ · ‖x_i - y_j‖^2)
             K_{X,Y} = exp(-γ · D^2_{X,Y})
         where D^2_{X,Y} is the squared pairwise distance matrix (eq. after eq. 10).
         Output is clipped to [-500, 0] before exp for numerical stability.
@@ -152,8 +149,8 @@ class FedMMDClient:
         return np.exp(np.clip(-gamma * sq_dist, -500.0, 0.0))
 
     def _gamma_from_data(self, X):
-        """
-        Compute gamma from a subsample of X using the median heuristic.
+        """Compute gamma from a subsample of X using the median heuristic.
+
         This anchors gamma to the data scale and keeps it stable.
         """
         sample = X[:500] if len(X) > 500 else X
@@ -180,7 +177,8 @@ def load_data(
     feature_column: str = "image",
     label_column: str = "label",
 ):
-    """Load a partition of any HuggingFace image dataset, normalized to [0, 1] as float64."""
+    """Load a partition of any HuggingFace image dataset, normalized to [0, 1] as
+    float64."""
     global _fds_cache
     if dataset_name not in _fds_cache:
         partitioner = IidPartitioner(num_partitions=num_partitions)
@@ -204,8 +202,7 @@ def load_deployment_data(
     feature_column: str = "image",
     label_column: str = "label",
 ):
-    """
-    Load a pre-partitioned dataset from disk (Deployment Engine mode).
+    """Load a pre-partitioned dataset from disk (Deployment Engine mode).
 
     Expects a directory created by:
         flwr-datasets create <dataset> --num-partitions N --out-dir <out>
