@@ -9,11 +9,9 @@ import numpy as np
 import pandas as pd
 import torch
 import wandb
+
 from setup.client import generate_client_fn, generate_client_fn_subset
-from setup.data_loader import (
-    load_shakespeare_subsets_offline,
-    load_subsets_offline,
-)
+from setup.data_loader import load_shakespeare_subsets_offline, load_subsets_offline
 from setup.model import (
     CNN,
     AlexNetCIFAR,
@@ -344,11 +342,9 @@ def save_csv(history, cfg):
                     df = pd.concat([df, result], ignore_index=True)
 
 
-@hydra.main(
-    config_path="./configurations", config_name="baseline", version_base=None
-)
+@hydra.main(config_path="./configurations", config_name="baseline", version_base=None)
 def simulation(cfg):
-    """Main simulation function"""
+    """Main simulation function."""
     print("Start simulation")
     cfg = check_config(cfg, cfg.attack_types)
 

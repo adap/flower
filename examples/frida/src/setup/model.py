@@ -485,9 +485,7 @@ class DenseNet121(nn.Module):
 
 
 class VGG(nn.Module):
-    """
-    VGG model
-    """
+    """VGG model."""
 
     def __init__(self, features):
         super(VGG, self).__init__()
@@ -586,7 +584,7 @@ def vgg11():
 
 
 def vgg11_bn():
-    """VGG 11-layer model (configuration "A") with batch normalization"""
+    """VGG 11-layer model (configuration "A") with batch normalization."""
     return VGG(make_layers(cfg["A"], batch_norm=True))
 
 
@@ -596,7 +594,7 @@ def vgg13():
 
 
 def vgg13_bn():
-    """VGG 13-layer model (configuration "B") with batch normalization"""
+    """VGG 13-layer model (configuration "B") with batch normalization."""
     return VGG(make_layers(cfg["B"], batch_norm=True))
 
 
@@ -606,7 +604,7 @@ def vgg16():
 
 
 def vgg16_bn():
-    """VGG 16-layer model (configuration "D") with batch normalization"""
+    """VGG 16-layer model (configuration "D") with batch normalization."""
     return VGG(make_layers(cfg["D"], batch_norm=True))
 
 
@@ -616,5 +614,5 @@ def vgg19():
 
 
 def vgg19_bn():
-    """VGG 19-layer model (configuration 'E') with batch normalization"""
+    """VGG 19-layer model (configuration 'E') with batch normalization."""
     return VGG(make_layers(cfg["E"], batch_norm=True))

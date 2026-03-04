@@ -1,5 +1,6 @@
 import pickle
 
+import datasets
 import numpy as np
 import torch
 import torchvision.transforms as transforms
@@ -7,8 +8,6 @@ from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import DirichletPartitioner, IidPartitioner
 from PIL import Image
 from torch.utils.data import DataLoader, Dataset
-
-import datasets
 
 
 def create_apply_transforms(cfg):
@@ -404,9 +403,7 @@ def sequences_to_dataset_dict(sequences, targets, cfg):
 
 
 def create_shakespeare_transform(cfg):
-    """
-    Creates a transform function to convert Shakespeare data to tensors.
-    """
+    """Creates a transform function to convert Shakespeare data to tensors."""
 
     def transform_fn(batch):
         batch[cfg.text_input] = torch.tensor(batch[cfg.text_input])

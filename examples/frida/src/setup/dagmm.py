@@ -87,7 +87,7 @@ class STDDAGMM(nn.Module):
         return self.estimator(features)
 
     def _compute_features(self, input, reconstruction, compressed):
-        """Compute enhanced features for anomaly detection"""
+        """Compute enhanced features for anomaly detection."""
         std_input = torch.std(input, dim=1, keepdim=True)
         cosine_sim = F.cosine_similarity(input, reconstruction, dim=1).unsqueeze(1)
         euclidean_dist = torch.norm(input - reconstruction, p=2, dim=1, keepdim=True)
@@ -112,7 +112,7 @@ class STDDAGMM(nn.Module):
         return combined_features
 
     def _normalize_feature(self, feature):
-        """Normalize feature to approximately [0, 1] range"""
+        """Normalize feature to approximately [0, 1] range."""
         min_val = feature.min()
         max_val = feature.max()
         if max_val - min_val > 1e-8:
@@ -121,7 +121,7 @@ class STDDAGMM(nn.Module):
 
 
 class STDDAGMMLoss(nn.Module):
-    """Enhanced loss function with numerical stability improvements"""
+    """Enhanced loss function with numerical stability improvements."""
 
     def __init__(self, lambda_1, lambda_2):
         super(STDDAGMMLoss, self).__init__()
@@ -146,7 +146,7 @@ class STDDAGMMLoss(nn.Module):
         return total_loss
 
     def _get_gmm_parameters(self, gamma, features):
-        """Compute GMM parameters from membership probabilities"""
+        """Compute GMM parameters from membership probabilities."""
         batch_size, n_components = gamma.size()
         feature_dim = features.size(1)
 
@@ -170,7 +170,7 @@ class STDDAGMMLoss(nn.Module):
         return phi, mu, sigma
 
     def _compute_energy(self, features, phi, mu, sigma):
-        """Compute sample energy under the GMM with numerical stability"""
+        """Compute sample energy under the GMM with numerical stability."""
         n_components = phi.size(0)
         feature_dim = features.size(1)
 
@@ -218,13 +218,13 @@ class STDDAGMMLoss(nn.Module):
         return total_energy
 
     def _compute_singularity_loss(self, sigma):
-        """Prevent covariance matrices from becoming singular"""
+        """Prevent covariance matrices from becoming singular."""
         diag_elements = torch.diagonal(sigma, dim1=-2, dim2=-1)
         return torch.sum(1.0 / (diag_elements + 1e-8))
 
 
 def train_std_dagmm(net, data_loader, device, epochs=100, learning_rate=1e-3):
-    """Training function for Improved STD-DAGMM"""
+    """Training function for Improved STD-DAGMM."""
     optimizer = torch.optim.Adam(net.parameters(), lr=learning_rate, weight_decay=1e-5)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
         optimizer, patience=10, factor=0.5

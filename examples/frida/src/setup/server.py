@@ -578,7 +578,7 @@ class PrivacyAttacksForDefense(fl.server.strategy.FedAvg):
         return parameters_aggregated, freerider_metrics
 
     def print_cumulative_stats(self, server_round):
-        """Print cumulative statistics every 10 rounds"""
+        """Print cumulative statistics every 10 rounds."""
         print(f"\n{'='*60}")
         print(f"CUMULATIVE STATISTICS (Rounds 1-{server_round})")
         print(f"{'='*60}")
