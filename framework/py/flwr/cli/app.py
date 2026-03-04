@@ -31,6 +31,11 @@ from .federation import archive as federation_archive
 from .federation import create as federation_create
 from .federation import ls as federation_list
 from .federation import remove_supernode as federation_remove_supernode
+from .federation.invite import accept as federation_invite_accept
+from .federation.invite import create as federation_invite_create
+from .federation.invite import ls as federation_invite_list
+from .federation.invite import reject as federation_invite_reject
+from .federation.invite import revoke as federation_invite_revoke
 from .install import install
 from .log import log
 from .login import login
@@ -101,6 +106,19 @@ federation_app.command(
     "add-supernode",
 )(federation_add_supernode)
 federation_app.command("remove-supernode")(federation_remove_supernode)
+
+# Create federation invite command group
+federation_invite_app = typer.Typer(help="Manage Federation Invitations")
+# Make it appear as "list"
+federation_invite_app.command("list")(federation_invite_list)
+# Hide "ls" command (left as alias)
+federation_invite_app.command(hidden=True)(federation_invite_list)
+federation_invite_app.command()(federation_invite_create)
+federation_invite_app.command()(federation_invite_accept)
+federation_invite_app.command()(federation_invite_reject)
+federation_invite_app.command()(federation_invite_revoke)
+federation_app.add_typer(federation_invite_app, name="invite")
+
 app.add_typer(federation_app, name="federation")
 
 # Create config command group
