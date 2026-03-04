@@ -14,13 +14,8 @@ log = logging.getLogger(__name__)
 
 
 def client_fn(context: Context):
-    """Construct a client given the context."""
-    num_partitions = int(context.run_config["num-supernodes"])
-    
-    # In deployment mode, partition-id is not set automatically
-    # Use node_id to derive a stable partition index
-    partition_id = int(context.node_config.get("partition-id", context.node_id % num_partitions))
-    
+    num_partitions = int(context.node_config["num-partitions"])
+    partition_id = int(context.node_config["partition-id"])
     dataset = context.run_config["dataset"]
     local_epochs = context.run_config["local-epochs"]
 
@@ -30,6 +25,8 @@ def client_fn(context: Context):
     )
 
     net = get_model(dataset)
+    print(f"DEBUG node_config={context.node_config}", flush=True)
+    print(f"DEBUG partition_id={partition_id} num_partitions={num_partitions}", flush=True)
     trainloader, valloader = load_data(partition_id, num_partitions, dataset)
 
     return EncryptedFlowerClient(
@@ -39,6 +36,7 @@ def client_fn(context: Context):
         valloader=valloader,
         epochs=local_epochs,
     )
+
 
 
 app = ClientApp(client_fn=client_fn)
