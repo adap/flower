@@ -82,11 +82,7 @@ def review(
         # Unpack FAB
         typer.secho("Unpacking FAB... ", fg=typer.colors.BLUE)
         review_dir = _create_review_dir()
-        review_app_path = install_from_fab(
-            fab_bytes,
-            install_dir=review_dir,
-            skip_prompt=True,
-        )
+        review_app_path = install_from_fab(fab_bytes, review_dir)
     except ValueError as e:
         raise click.ClickException(str(e)) from e
 
