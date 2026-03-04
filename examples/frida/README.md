@@ -68,6 +68,15 @@ Install the dependencies and the `frida` package:
 cd frida && pip install -e .
 ```
 
+Specify the number of virtual SuperNodes and their resources in `~/.flwr/config.toml`:
+
+```toml
+[superlink.local]
+options.num-supernodes = 10
+options.backend.client-resources.num-cpus = 2
+options.backend.client-resources.num-gpus = 1.0
+```
+
 Run with default settings (CIFAR-10, AlexNet, Cosine attack, 10 clients):
 
 ```bash

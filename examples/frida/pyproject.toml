@@ -5,9 +5,11 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "frida"
 version = "0.1.0"
+description = ""
+license = ""
 requires-python = ">=3.9"
 dependencies = [
-    "flwr>=1.13.0",
+    "flwr[simulation]>=1.13.0",
     "matplotlib",
     "numpy>=1.26.0",
     "seaborn",
@@ -24,12 +26,8 @@ dependencies = [
 where = ["src"]
 include = ["setup*"]
 
-[tool.flwr.federations.local-simulation]
-options.num-supernodes = 2
-
 [tool.flwr.app]
 publisher = "pol-garcia-recasens"
-default-federation = "local-simulation"
 
 [tool.flwr.app.components]
 serverapp = "setup.server_app:app"
