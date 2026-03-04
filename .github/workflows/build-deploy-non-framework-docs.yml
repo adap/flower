@@ -33,7 +33,7 @@ jobs:
         run: |
           cd framework
           uv sync --frozen --all-groups
-          uv run --no-sync python -m pip install -e ../datasets
+          uv pip install -e ../datasets
       - name: Install devtool dependencies
         run: |
           cd dev
