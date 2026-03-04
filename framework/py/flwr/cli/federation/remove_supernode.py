@@ -41,7 +41,7 @@ def remove_supernode(
         int,
         typer.Argument(help="ID of the SuperNode to remove."),
     ],
-    federation_name: Annotated[
+    federation: Annotated[
         str,
         typer.Argument(help="Name of the federation."),
     ],
@@ -72,7 +72,7 @@ def remove_supernode(
             stub = ControlStub(channel)
 
             request = RemoveNodeFromFederationRequest(
-                federation_name=federation_name,
+                federation_name=federation,
                 node_id=node_id,
             )
             _remove_supernode(stub=stub, request=request, is_json=is_json)
