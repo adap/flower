@@ -516,7 +516,7 @@ dev = [
     { name = "docformatter", specifier = "==1.7.5" },
     { name = "docstrfmt", git = "https://github.com/charlesbvll/docstrfmt.git?branch=patch-2" },
     { name = "furo", specifier = "==2024.8.6" },
-    { name = "gitpython", specifier = "==3.1.32" },
+    { name = "gitpython", specifier = "==3.1.41" },
     { name = "isort", specifier = "==5.13.2" },
     { name = "mdformat", specifier = "==1.0.0" },
     { name = "mdformat-beautysh", specifier = "==1.0.0" },
@@ -641,14 +641,14 @@ wheels = [
 
 [[package]]
 name = "gitpython"
-version = "3.1.32"
+version = "3.1.41"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "gitdb" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/87/56/6dcdfde2f3a747988d1693100224fb88fc1d3bbcb3f18377b2a3ef53a70a/GitPython-3.1.32.tar.gz", hash = "sha256:8d9b8cb1e80b9735e8717c9362079d3ce4c6e5ddeebedd0361b228c3a67a62f6", size = 196978, upload-time = "2023-07-10T18:06:52.065Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/e5/c2/6e3a26945a7ff7cf2854b8825026cf3f22ac8e18285bc11b6b1ceeb8dc3f/GitPython-3.1.41.tar.gz", hash = "sha256:ed66e624884f76df22c8e16066d567aaa5a37d5b5fa19db2c6df6f7156db9048", size = 209029, upload-time = "2024-01-10T12:15:19.596Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/67/50/742c2fb60989b76ccf7302c7b1d9e26505d7054c24f08cc7ec187faaaea7/GitPython-3.1.32-py3-none-any.whl", hash = "sha256:e3d59b1c2c6ebb9dfa7a184daf3b6dd4914237e7488a1730a6d8f6f5d0b4187f", size = 188487, upload-time = "2023-07-10T18:06:49.639Z" },
+    { url = "https://files.pythonhosted.org/packages/45/c6/a637a7a11d4619957cb95ca195168759a4502991b1b91c13d3203ffc3748/GitPython-3.1.41-py3-none-any.whl", hash = "sha256:c36b6634d069b3f719610175020a9aed919421c87552185b085e04fbbdb10b7c", size = 196354, upload-time = "2024-01-10T12:15:16.135Z" },
 ]
 
 [[package]]
