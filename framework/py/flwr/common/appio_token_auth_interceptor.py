@@ -109,19 +109,8 @@ def _extract_token_from_metadata(
     # missing/unusable, treat it as invalid token. Do not expose a distinct
     # "malformed token metadata" error (oracle risk).
     """Read App token from invocation metadata."""
-    if metadata is None:
-        return None
-    for key, value in metadata:
-        if key != APP_TOKEN_HEADER:
-            continue
-        if isinstance(value, str):
-            return value
-        try:
-            return value.decode("ascii")
-        except UnicodeDecodeError:
-            # Malformed/invalid ASCII in metadata: treat as missing/invalid token.
-            return None
-    return None
+    token = dict(metadata or ()).get(APP_TOKEN_HEADER)
+    return token if isinstance(token, str) else None
 
 
 def get_authenticated_run_id(context: grpc.ServicerContext) -> int:
