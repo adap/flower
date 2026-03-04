@@ -37,7 +37,7 @@ dev = [
     "mdformat-frontmatter==2.0.10",
     "mdformat-beautysh==1.0.0",
     "beautysh==6.4.2",
-    "GitPython==3.1.32",
+    "GitPython==3.1.41",
     "sphinx-substitution-extensions==2022.2.16",
     "sphinxext-opengraph==0.9.1",
     "docstrfmt",
