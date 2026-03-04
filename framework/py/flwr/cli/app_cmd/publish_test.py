@@ -118,6 +118,32 @@ def test_collect_files_non_utf8_raises_for_text(tmp_path: Path) -> None:
         _validate_files(_collect_file_paths(tmp_path))
 
 
+def test_collect_files_includes_additional_allowed_publish_files(
+    tmp_path: Path,
+) -> None:
+    """Test publish includes newly allowed metadata/config file types."""
+    write(tmp_path, ".gitignore", b"# keep\n")
+    write(tmp_path, ".editorconfig", b"root = true\n")
+    write(tmp_path, "cfg/config.yaml", b"a: 1\n")
+    write(tmp_path, "cfg/config.yml", b"b: 2\n")
+    write(tmp_path, "cfg/config.json", b'{"c": 3}\n')
+    write(tmp_path, "cfg/config.jsonl", b'{"d": 4}\n')
+    write(tmp_path, "cfg/extra.editorconfig", b"indent_style = space\n")
+    write(tmp_path, "skip.txt", b"skip\n")
+
+    paths = _collect_file_paths(tmp_path)
+    rel_paths = {path.relative_to(tmp_path).as_posix() for path in paths}
+
+    assert ".gitignore" in rel_paths
+    assert ".editorconfig" in rel_paths
+    assert "cfg/config.yaml" in rel_paths
+    assert "cfg/config.yml" in rel_paths
+    assert "cfg/config.json" in rel_paths
+    assert "cfg/config.jsonl" in rel_paths
+    assert "cfg/extra.editorconfig" in rel_paths
+    assert "skip.txt" not in rel_paths
+
+
 def test_collect_files_includes_root_license_without_pyproject_license_file(
     tmp_path: Path,
 ) -> None:
