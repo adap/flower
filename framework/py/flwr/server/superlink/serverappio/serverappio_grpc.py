@@ -66,7 +66,7 @@ validate_method_requires_token_map(
     ],
     method_requires_token=SERVERAPPIO_METHOD_REQUIRES_TOKEN,
     table_name="SERVERAPPIO_METHOD_REQUIRES_TOKEN",
-    table_location="py/flwr/server/superlink/serverappio/serverappio_grpc.py",
+    table_location=__file__,
 )
 
 
