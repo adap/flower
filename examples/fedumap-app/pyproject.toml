@@ -1,0 +1,55 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "federated-umap"
+version = "1.0.0"
+description = "Privacy-preserving federated dimensionality reduction: MMD landmark optimisation + Nyström approximation to compute a global UMAP embedding without sharing raw data."
+readme = "README.md"
+license = "Apache-2.0"
+dependencies = [
+    "flwr[simulation]>=1.26.1",
+    "flwr-datasets[vis26.1>=0.6.0",
+    "scikit-learn>=1.6.1",
+    "numpy>=1.26.0,<=2.2.0",
+    "umap-learn>=0.5.0",
+    "wandb>=0.17.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[tool.flwr.app]
+publisher = "uncleDecart"
+
+[tool.flwr.app.components]
+serverapp = "federated_umap.server_app:app"
+clientapp = "federated_umap.client_app:app"
+
+[tool.flwr.app.config]
+num-server-rounds = 100
+local-epochs = 2
+n-y = 500
+
+# Dataset configuration — swap these to use a different dataset
+dataset = "ylecun/mnist"
+feature-column = "image"
+label-column = "label"
+feature-dim = 784  # flattened feature dimension: 28*28 for MNIST, H*W*C for colour images
+
+# W&B configuration
+wandb-project = "federated-umap"
+
+# Max points fed into UMAP at the final round.
+# Nyström materialises an (n × n) matrix, so keeping this ≤ 10k avoids
+# multi-GB allocations. Raise it if you have RAM to spare.
+umap-max-samples = 10000
+
+
+[tool.flwr.federations]
+default = "local-simulation"
+
+[tool.flwr.federations.local-simulation]
+options.num-supernodes = 5
+
