@@ -110,9 +110,9 @@ federation_app.command("remove-supernode")(federation_remove_supernode)
 # Create federation invite command group
 federation_invite_app = typer.Typer(help="Manage Federation Invitations")
 # Make it appear as "list"
-federation_invite_app.command("list", **ALLOW_EXTRAS)(federation_invite_list)
+federation_invite_app.command("list")(federation_invite_list)
 # Hide "ls" command (left as alias)
-federation_invite_app.command(hidden=True, **ALLOW_EXTRAS)(federation_invite_list)
+federation_invite_app.command(hidden=True)(federation_invite_list)
 federation_invite_app.command()(federation_invite_create)
 federation_invite_app.command()(federation_invite_accept)
 federation_invite_app.command()(federation_invite_reject)
