@@ -89,6 +89,15 @@ flower-supernode --insecure --superlink 127.0.0.1:9092 \
 flwr run . --run-config num-server-rounds=3
 ```
 
+## Notes
+
+### First Round Decryption Warning
+During the **first training round**, clients may log a decryption warning
+or error. This is expected behavior: the server aggregates encrypted weights
+from scratch and the initial aggregation may produce a ciphertext that is
+slightly malformed before the model stabilizes. From the second round onwards
+the process runs cleanly.
+
 ## How It Works
 Key generation — CKKS keys are generated once via generated_keys.py
 and stored in the keys/ folder.
