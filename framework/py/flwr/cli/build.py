@@ -217,6 +217,32 @@ def build_fab_from_files(files: dict[str, bytes | Path]) -> bytes:
     def to_bytes(content: bytes | Path) -> bytes:
         return content.read_bytes() if isinstance(content, Path) else content
 
+    def add_to_fab(
+        fab_file: zipfile.ZipFile,
+        path: str,
+        content: bytes,
+    ) -> str:
+        r"""Write a file to the FAB and return its CONTENT manifest line.
+
+        Parameters
+        ----------
+        fab_file : zipfile.ZipFile
+            The ZipFile object to write to.
+        path : str
+            The file path within the FAB.
+        content : bytes
+            The file contents as bytes.
+
+        Returns
+        -------
+        str
+            A CONTENT manifest line: "path,sha256,size_bits\n"
+        """
+        write_to_zip(fab_file, path, content)
+        sha256_hash = hashlib.sha256(content).hexdigest()
+        file_size_bits = len(content) * 8
+        return f"{path},{sha256_hash},{file_size_bits}\n"
+
     # Extract, load, and parse pyproject.toml
     if FAB_CONFIG_FILE not in files:
         raise ValueError(f"{FAB_CONFIG_FILE} not found in files")
@@ -248,29 +274,20 @@ def build_fab_from_files(files: dict[str, bytes | Path]) -> bytes:
     ]
     filtered_paths.sort()  # Sort for deterministic output
 
-    # Create a zip file in memory
-    list_file_content = ""
-
+    # Build FAB with CONTENT manifest
     fab_buffer = BytesIO()
     with zipfile.ZipFile(fab_buffer, "w", zipfile.ZIP_DEFLATED) as fab_file:
-        # Add pyproject.toml
-        write_to_zip(fab_file, FAB_CONFIG_FILE, tomli_w.dumps(config))
+        # Add pyproject.toml and collect manifest entries
+        pyproject_bytes = tomli_w.dumps(config).encode("utf-8")
+        manifest_lines = [add_to_fab(fab_file, FAB_CONFIG_FILE, pyproject_bytes)]
 
+        # Add remaining files and collect their manifest entries
         for file_path in filtered_paths:
-
-            # Get file contents as bytes
             file_content = to_bytes(files[file_path])
+            manifest_lines.append(add_to_fab(fab_file, file_path, file_content))
 
-            # Write file to FAB
-            write_to_zip(fab_file, file_path, file_content)
-
-            # Calculate file info for CONTENT manifest
-            sha256_hash = hashlib.sha256(file_content).hexdigest()
-            file_size_bits = len(file_content) * 8  # size in bits
-            list_file_content += f"{file_path},{sha256_hash},{file_size_bits}\n"
-
-        # Add CONTENT manifest to the zip file
-        write_to_zip(fab_file, ".info/CONTENT", list_file_content)
+        # Write CONTENT manifest to the zip file
+        write_to_zip(fab_file, ".info/CONTENT", "".join(manifest_lines))
 
     fab_bytes = fab_buffer.getvalue()
 
