@@ -1,4 +1,4 @@
-# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2026 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,21 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower command line interface `federation` command."""
+"""Flower command line interface `federation invite` command."""
 
 
-from . import invite as invite
-from .add_supernode import add_supernode as add_supernode
-from .archive import archive as archive
+from .accept import accept as accept
 from .create import create as create
 from .ls import ls as ls
-from .remove_supernode import remove_supernode as remove_supernode
+from .reject import reject as reject
+from .revoke import revoke as revoke
 
 __all__ = [
-    "add_supernode",
-    "archive",
+    "accept",
     "create",
-    "invite",
     "ls",
-    "remove_supernode",
+    "reject",
+    "revoke",
 ]
