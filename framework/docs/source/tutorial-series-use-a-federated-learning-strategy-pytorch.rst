@@ -396,7 +396,7 @@ following:
         """Main entry point for the ServerApp."""
 
         # ... unchanged
-        fraction_train: float = context.run_config["franction-train"]
+        fraction_train: float = context.run_config["fraction-train"]
         # Initialize FedAdagrad strategy
         strategy = CustomFedAdagrad(
             fraction_train=fraction_train,
