@@ -331,11 +331,15 @@ def _start_remote_process(
     pid_file: str,
     log_file: str,
     connect_timeout_sec: int,
+    prepend_path: str | None = None,
 ) -> None:
     cmd_str = " ".join(shlex.quote(part) for part in cmd)
+    env_prefix = ""
+    if prepend_path:
+        env_prefix = f"PATH={shlex.quote(prepend_path)}:$PATH "
     remote_cmd = (
         f"mkdir -p {shlex.quote(str(Path(pid_file).parent))} {shlex.quote(str(Path(log_file).parent))} && "
-        f"nohup {cmd_str} > {shlex.quote(log_file)} 2>&1 < /dev/null & "
+        f"nohup {env_prefix}{cmd_str} > {shlex.quote(log_file)} 2>&1 < /dev/null & "
         f"echo $! > {shlex.quote(pid_file)}"
     )
     _run_remote_command(
@@ -509,9 +513,13 @@ def _run_control_flwr(
     effective_args = list(args)
     if effective_args and effective_args[0] == "flwr":
         effective_args[0] = handle.control_flwr_exec
+    path_assign = ""
+    if handle.remote_venv_dir:
+        venv_bin = f"{handle.remote_venv_dir.rstrip('/')}/bin"
+        path_assign = f"PATH={shlex.quote(venv_bin)}:$PATH "
     remote_cmd = (
         f"cd {shlex.quote(handle.remote_app_dir)} && "
-        f"FLWR_HOME={shlex.quote(handle.control_flwr_home)} "
+        f"FLWR_HOME={shlex.quote(handle.control_flwr_home)} {path_assign}"
         + " ".join(shlex.quote(x) for x in effective_args)
     )
     return _run_remote_command(
@@ -587,6 +595,7 @@ def start_managed_azure_runtime(
     control_flwr_exec = _resolve_remote_exec("flwr", azure.remote_venv_dir)
     superlink_exec = _resolve_remote_exec("flower-superlink", azure.remote_venv_dir)
     supernode_exec = _resolve_remote_exec("flower-supernode", azure.remote_venv_dir)
+    venv_bin_dir = f"{azure.remote_venv_dir.rstrip('/')}/bin" if azure.remote_venv_dir else None
 
     # Preflight and sync package.
     archive_path = _prepare_app_archive(APP_DIR)
@@ -729,6 +738,7 @@ def start_managed_azure_runtime(
             pid_file=superlink_pid_file,
             log_file=f"{remote_runtime_dir}/logs/superlink.log",
             connect_timeout_sec=azure.ssh_connect_timeout_sec,
+            prepend_path=venv_bin_dir,
         )
 
         control_api_addr = f"{superlink_vm.host}:{control_port}"
@@ -863,6 +873,7 @@ def start_managed_azure_runtime(
                 pid_file=pid_file,
                 log_file=log_file,
                 connect_timeout_sec=azure.ssh_connect_timeout_sec,
+                prepend_path=venv_bin_dir,
             )
             started_supernode_pid_files.append((vm, pid_file))
 
