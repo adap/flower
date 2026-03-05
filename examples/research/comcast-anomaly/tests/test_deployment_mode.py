@@ -12,6 +12,7 @@ from comcast_fl.deployment_azure_ssh import (
     _build_partition_plan,
     _make_superlink_cmd,
     _make_supernode_cmd,
+    _run_remote_command,
     stop_managed_azure_runtime,
     submit_run_and_wait_remote,
 )
@@ -285,6 +286,30 @@ def test_partition_plan_deterministic() -> None:
     plan = _build_partition_plan(cfg)
     assert [p["partition_id"] for p in plan] == [0, 1, 2]
     assert [p["vm_name"] for p in plan] == ["a", "a", "b"]
+
+
+def test_run_remote_command_quotes_bash_lc_payload(monkeypatch: pytest.MonkeyPatch) -> None:
+    captured: dict[str, object] = {}
+
+    def _fake_run(*args, **kwargs):  # type: ignore[no-untyped-def]
+        captured["cmd"] = args[0]
+        return subprocess.CompletedProcess(args[0], 0, stdout="", stderr="")
+
+    monkeypatch.setattr("comcast_fl.deployment_azure_ssh.subprocess.run", _fake_run)
+
+    vm = AzureVmSpec(
+        name="vm-a",
+        host="10.0.0.4",
+        ssh_port=22,
+        ssh_user="azureuser",
+        ssh_key_path="/tmp/id_ed25519",
+        supernodes_on_vm=1,
+    )
+    _ = _run_remote_command(vm, "mkdir -p /opt/a /opt/b", connect_timeout_sec=10, check=True)
+
+    cmd = captured["cmd"]
+    assert isinstance(cmd, list)
+    assert cmd[-1] == "bash -lc 'mkdir -p /opt/a /opt/b'"
 
 
 def _fake_azure_handle(tmp_path: Path) -> ManagedAzureRuntimeHandle:

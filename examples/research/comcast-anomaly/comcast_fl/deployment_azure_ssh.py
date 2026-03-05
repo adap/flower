@@ -104,7 +104,10 @@ def _run_remote_command(
     check: bool = True,
     env: dict[str, str] | None = None,
 ) -> subprocess.CompletedProcess[str]:
-    cmd = _ssh_base(vm, connect_timeout_sec) + ["bash", "-lc", remote_cmd]
+    # IMPORTANT: OpenSSH concatenates trailing argv items into one remote command
+    # string. To preserve `remote_cmd` as a single argument to `bash -lc`, quote it
+    # explicitly instead of passing it as a separate argv element.
+    cmd = _ssh_base(vm, connect_timeout_sec) + [f"bash -lc {shlex.quote(remote_cmd)}"]
     proc = subprocess.run(
         cmd,
         text=True,
