@@ -184,6 +184,13 @@ After logging in, publish your app:
 
     flwr app publish <your-app-path>
 
+.. note::
+   :code:`flwr app publish` uploads your project files (source + metadata), not a prebuilt :code:`.fab` file.
+   Flower Hub builds the FAB server-side from the uploaded project contents.
+   This means publish upload rules and FAB packaging rules are related but not identical.
+   For details on FAB packaging, see the Flower Framework CLI reference for :code:`flwr build`:
+   `https://flower.ai/docs/framework/ref-api-cli.html <https://flower.ai/docs/framework/ref-api-cli.html>`_.
+
 🎉 That's it! Your app is now live on Flower Hub.
 
 You can view it at:
