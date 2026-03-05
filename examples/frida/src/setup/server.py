@@ -352,6 +352,7 @@ class PrivacyAttacksForDefense(fl.server.strategy.FedAvg):
         self,
         server_round: int,
         results: List[Tuple[ClientProxy, FitRes]],
+        failures: List[BaseException], 
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate fit results using weighted average and get Yeom probabilities."""
 
