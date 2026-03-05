@@ -73,7 +73,7 @@ pip install "flwr-datasets['vision']"
 
 Create dataset partitions and save them to disk
 ```bash
-flwr-datasets create uoft-cs/cifar10 --num-partitions 2 --out-dir demo_data
+flwr-datasets create ylecun/mnist --num-partitions 2 --out-dir demo_data
 ```
 
 The above command will create two IID partitions of the CIFAR-10 dataset and save them in a demo_data directory. Next, you can pass one partition to each of your SuperNodes like this:
