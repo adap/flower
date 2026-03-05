@@ -137,6 +137,9 @@ def main(grid: Grid, context: Context) -> None:
 
     # Define strategy
     strategy = FedAvg(
+        min_available_nodes=1,
+        min_train_nodes=1,
+        min_evaluate_nodes=1,
         fraction_evaluate=fraction_evaluate,
         train_metrics_aggr_fn=_aggregate_train_metrics,
         evaluate_metrics_aggr_fn=_aggregate_eval_metrics_from_sums,
