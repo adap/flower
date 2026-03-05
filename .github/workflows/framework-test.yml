@@ -68,7 +68,7 @@ jobs:
         if: ${{ needs.changes.outputs.framework == 'true' || needs.changes.outputs.ex_bench == 'true' }}
         run: |
           cd framework
-          uv sync --python=${{ matrix.python }} --frozen --all-extras --all-groups
+          uv sync --python=${{ matrix.python }} --locked --all-extras --all-groups
       - name: Check if protos need recompilation
         if: ${{ needs.changes.outputs.framework == 'true' }}
         run: |

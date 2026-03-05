@@ -56,7 +56,7 @@ installing ``uv`` you can install dependencies with:
 
 .. code-block:: shell
 
-    uv sync
+    uv sync --locked
 
 **************************
  Virtualenv with Anaconda

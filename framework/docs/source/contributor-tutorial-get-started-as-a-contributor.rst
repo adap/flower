@@ -78,7 +78,7 @@ Create Flower Dev Environment
        ::
 
            (your-env-name) $ cd framework
-           (your-env-name) $ uv sync --frozen --all-extras --all-groups
+           (your-env-name) $ uv sync --locked --all-extras --all-groups
 
 *********************
  Convenience Scripts

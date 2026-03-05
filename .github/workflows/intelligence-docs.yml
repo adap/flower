@@ -32,11 +32,11 @@ jobs:
       - name: Install dependencies
         run: |
           cd dev
-          uv sync --frozen
+          uv sync --locked
       - name: Check docs format
         run: |
           cd dev
-          uv run docstrfmt --check ../intelligence/docs/source
+          uv run --no-sync docstrfmt --check ../intelligence/docs/source
   build_ts_docs:
     runs-on: ubuntu-22.04
     name: Build TypeScript Docs
@@ -143,7 +143,7 @@ jobs:
         if: ${{ github.ref == 'refs/heads/main' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork }}
         run: |
           cd framework
-          uv sync --frozen --all-groups --extra simulation
+          uv sync --locked --all-groups --extra simulation
       - name: Download TS docs
         if: ${{ github.ref == 'refs/heads/main' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork }}
         uses: actions/download-artifact@v4

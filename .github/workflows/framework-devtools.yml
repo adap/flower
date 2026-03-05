@@ -30,7 +30,7 @@ jobs:
       - name: Install dependencies (mandatory + optional)
         run: |
           cd framework
-          uv sync --frozen --all-groups
+          uv sync --locked --all-groups
       - name: Lint + Test (isort/black/mypy/pylint/pytest)
         run: |
           cd framework

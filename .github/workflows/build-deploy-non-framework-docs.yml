@@ -32,16 +32,16 @@ jobs:
       - name: Install docs dependencies
         run: |
           cd framework
-          uv sync --frozen --all-groups
+          uv sync --locked --all-groups
           uv pip install -e ../datasets
       - name: Install devtool dependencies
         run: |
           cd dev
-          uv sync --frozen
+          uv sync --locked
       - name: Update HTML theme options
         run: |
           cd dev
-          uv run python -m devtool.update_html_themes
+          uv run --no-sync python -m devtool.update_html_themes
       - name: Build baselines docs
         run: |
           cd framework
@@ -49,7 +49,7 @@ jobs:
       - name: Build examples docs
         run: |
           cd dev
-          uv run python -m devtool.build_example_docs
+          uv run --no-sync python -m devtool.build_example_docs
       - name: Build datasets docs
         run: |
           cd framework

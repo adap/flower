@@ -31,7 +31,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd framework
-          uv sync --frozen --all-groups
+          uv sync --locked --all-groups
 
       - name: Install pandoc
         uses: nikeee/setup-pandoc@v1

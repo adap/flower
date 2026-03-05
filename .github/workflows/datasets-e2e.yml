@@ -63,6 +63,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y ffmpeg
       - name: Install dependencies
-        run: uv sync --frozen
+        run: uv sync --locked
       - name: Run tests
-        run: uv run python -m unittest discover -p '*_test.py'
+        run: uv run --no-sync python -m unittest discover -p '*_test.py'
