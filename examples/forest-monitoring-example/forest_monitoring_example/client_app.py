@@ -1,88 +1,55 @@
-"""forest-monitoring-example: A Flower / PyTorch app."""
+"""Flower ClientApp (new API) for forest_monitoring_example.
+
+Implements:
+- @app.train(): receives global model arrays, trains locally, returns updated arrays + training metrics
+- @app.evaluate(): receives global model arrays, evaluates locally, returns evaluation metrics
+
+This ClientApp supports both:
+- Simulation mode (when context.node_config has partition info)
+- Deployment mode (when context.node_config contains paths/ids per client)
+"""
 
 import numpy as np
 import torch
-from flwr.client import ClientApp, NumPyClient
+from flwr.client import ClientApp
 from flwr.common import Context
 
-from forest_monitoring_example.task import set_seed, load_model, get_weights, load_data_demo_npz, set_weights, test, train_FedAvg
+from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
+from flwr.clientapp import ClientApp
+
+from forest_monitoring_example.task import set_seed, load_model, load_data_demo_npz, test, train_FedAvg
 
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
-# Define Flower Client and client_fn
-class FlowerClient(NumPyClient):
-    def __init__(self, 
-                 net,
-                 trainloader, valloader, target_scaler, feature_scaler,
-                 local_epochs, initial_learning_rate, weight_decay,
-                 id):
-        self.net = net
-        self.trainloader = trainloader
-        self.valloader = valloader
-        self.target_scaler = target_scaler
-        self.feature_scaler = feature_scaler
-        self.local_epochs = local_epochs
-        self.lr = initial_learning_rate
-        self.wd = weight_decay
-        self.device = DEVICE
-        self.id = id
 
-    def fit(self, parameters, config):
+# Flower ClientApp
+app = ClientApp()
 
-        set_weights(self.net, parameters)
+def _is_simulation(context: Context) -> bool:
+    return ("partition-id" in context.node_config) and ("num-partitions" in context.node_config)
 
-        set_seed(42)
+def _get_client_id(context: Context) -> str:
+    if _is_simulation(context):
+        pid = context.node_config.get("partition-id")
+        return f"partition-{pid}"
+    return str(context.node_config.get("client-id", "client"))
 
-        # FedAvg
-        all_epoch_losses = train_FedAvg(
-            self.net,
-            self.trainloader,
-            self.valloader,
-            self.target_scaler,
-            self.lr,
-            self.wd,
-            self.local_epochs,
-            self.device,
-        )
-
-        train_losses = all_epoch_losses['train_loss']
-
-        training_loss = train_losses[-1] if train_losses else float('inf')  # Handle case where no training happens
-
-        return (
-            get_weights(self.net),
-            len(self.trainloader.dataset),
-            {"loss": training_loss,
-             "client_id": self.id},
-        )
-
-    def evaluate(self, parameters, config):
-        
-        set_weights(self.net, parameters)
-
-        loss_val, _, _, _, y_true, y_pred_global  = test(self.net, self.valloader, self.target_scaler, self.device)
-
-        res = y_true - y_pred_global
-        sse = float(np.sum(res**2))
-        sum_y = float(np.sum(y_true))
-        sum_y2 = float(np.sum(y_true**2))
-        sum_pred = float(np.sum(y_pred_global))
-        
-        return float(loss_val), len(self.valloader.dataset), {"sse": sse, "sum_y": sum_y, "sum_y2": sum_y2, "sum_pred": sum_pred}
+def _get_npz_path(context: Context) -> str:
+    if _is_simulation(context):
+        return str(context.run_config["sim-data"])
+    return str(context.node_config["processed-data-npz"])
 
 
-def client_fn(context: Context):
 
-    # Load model and data
-    if "partition-id" in context.node_config and "num-partitions" in context.node_config:
-        print("Simulation mode")
-        processed_data_npz = context.run_config["sim-data"]
-        id = "CID"
-    else:
-        print("Deployment mode")
-        processed_data_npz = context.node_config["processed-data-npz"]
-        id = context.node_config["client-id"]
+@app.train()
+def train(msg: Message, context: Context) -> Message:
+    """Train the model on local data."""
+    
+    set_seed(int(context.run_config.get("seed", 42)))
+
+    client_id = _get_client_id(context)
+    npz_path = _get_npz_path(context)
 
     batch_size = context.run_config["batch-size"]
     local_epochs = context.run_config["local-epochs"]
@@ -99,23 +66,133 @@ def client_fn(context: Context):
     use_adaptive_pool = context.run_config["use-adaptive-pool"]
     
     # train config:
-    initial_learning_rate = context.run_config["lr"]
-    weight_decay = context.run_config["weight-decay"]
+    lr = context.run_config["lr"]
+    wd = context.run_config["weight-decay"]
 
-    trainloader, valloader, _, target_scaler, feature_scaler = load_data_demo_npz(
-        processed_data_npz, batch_size,
+    trainloader, valloader, _testloader, target_scaler, _feature_scaler = load_data_demo_npz(
+        npz_path, batch_size,
         )
     
-    net = load_model(feature_size, t_years, out_conv1, out_conv2, kernel_time, pool_time1, dropout_conv, adaptive_pool_time, use_adaptive_pool)
+    net = load_model(
+        feature_size, 
+        t_years, 
+        out_conv1,
+        out_conv2, 
+        kernel_time, 
+        pool_time1, 
+        dropout_conv, 
+        adaptive_pool_time, 
+        use_adaptive_pool
+    ).to(DEVICE)
+    
+    # Read ArrayRecord received from ServerApp
+    arrays: ArrayRecord = msg.content["arrays"]
+    
+    # Load weights to model
+    net.load_state_dict(arrays.to_torch_state_dict())
 
-    # Return Client instance
-    return FlowerClient(net,
-                        trainloader, valloader, target_scaler, feature_scaler, 
-                        local_epochs, initial_learning_rate, weight_decay,
-                        id).to_client()
+    # FedAvg
+    all_epoch_losses = train_FedAvg(
+        net,
+        trainloader,
+        valloader,
+        target_scaler,
+        lr,
+        wd,
+        local_epochs,
+        DEVICE,
+    )
+
+    #train_losses = all_epoch_losses['train_loss']
+    train_losses = all_epoch_losses.get("train_loss", [])
+    training_loss = train_losses[-1] if train_losses else float('inf')  # Handle case where no training happens
+
+    # Construct reply Message: arrays and metrics
+    model_record = ArrayRecord(net.state_dict())
+    # You can include any metric (scalar or list of scalars)
+    # relevant to your usecase.
+    # A weighting metric (`num-examples` by default) is always
+    # expected by FedAvg to do aggregation
+    metrics = MetricRecord(
+        {
+            "train_loss": training_loss,
+            "num-examples": len(trainloader.dataset),
+            #"client_id": id
+        }
+    )
+    # Construct RecordDict and add ArrayRecord and MetricRecord
+    content = RecordDict({"arrays": model_record, "metrics": metrics})
+    
+    return Message(content=content, reply_to=msg)
+    
 
 
-# Flower ClientApp
-app = ClientApp(
-    client_fn,
-)
+@app.evaluate()
+def evaluate(msg: Message, context: Context) -> Message:
+    """Evaluate the model on local data."""
+
+    set_seed(int(context.run_config.get("seed", 42)))
+    
+    batch_size = context.run_config["batch-size"]
+
+    # model config:
+    feature_size = context.run_config["feature-size"]
+    t_years = context.run_config["t-years"]
+    out_conv1 = context.run_config["out-conv1"]
+    out_conv2 = context.run_config["out-conv2"]
+    kernel_time = context.run_config["kernel-time"]
+    pool_time1 = context.run_config["pool-time1"]
+    dropout_conv = context.run_config["dropout-conv"]
+    adaptive_pool_time = context.run_config["adaptive-pool-time"]
+    use_adaptive_pool = context.run_config["use-adaptive-pool"]
+    
+
+    _, valloader, _, target_scaler, _ = load_data_demo_npz(
+        npz_path, batch_size,
+        )
+    
+    net = load_model(
+        feature_size, 
+        t_years, 
+        out_conv1, 
+        out_conv2, 
+        kernel_time, 
+        pool_time1, 
+        dropout_conv, 
+        adaptive_pool_time, 
+        use_adaptive_pool
+    ).to(DEVICE)
+    
+    # Read ArrayRecord received from ServerApp
+    #arrays = msg.content["arrays"]
+    arrays: ArrayRecord = msg.content["arrays"]
+    
+    # Load weights to model
+    net.load_state_dict(arrays.to_torch_state_dict())
+
+    loss_val, _, _, _, y_true, y_pred_global  = test(net, valloader, target_scaler, DEVICE)
+
+    res = y_true - y_pred_global
+    sse = float(np.sum(res**2))
+    sum_y = float(np.sum(y_true))
+    sum_y2 = float(np.sum(y_true**2))
+    sum_pred = float(np.sum(y_pred_global))
+
+    # Construct reply Message
+    # Retrun metrics relevant to usecase
+    # THe weighting metric is also sent and will be used
+    # to do weighted aggregation of metrics
+    metrics = MetricRecord(
+        {
+            "eval_loss": float(loss_val),
+            "sse": sse, 
+            "sum_y": sum_y, 
+            "sum_y2": sum_y2, 
+            "sum_pred": sum_pred,
+            "num-examples": len(valloader.dataset),
+        }
+    )
+    # Construct RecordDict and add MetricRecord
+    content = RecordDict({"metrics": metrics})
+    return Message(content=content, reply_to=msg)
+

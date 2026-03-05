@@ -10,11 +10,11 @@ build-backend = "hatchling.build"
 [project]
 name = "forest-monitoring-example"
 version = "1.0.0"
-description = ""
+description = "In this Flower example we are modelling forest timber volme using satellite time series data."
 license = "Apache-2.0"
 # Dependencies for your Flower App
 dependencies = [
-    "flwr[simulation]>=1.22.0",
+    "flwr[simulation]>=1.26.0",
     "flwr-datasets[vision]>=0.5.0",
     "torch==2.7.1",
     "torchvision==0.22.1",
@@ -38,9 +38,9 @@ clientapp = "forest_monitoring_example.client_app:app"
 # Custom config values accessible via `context.run_config`
 [tool.flwr.app.config]
 num-server-rounds = 5
-min-available-clients = 2
-min-fit-clients = 2
-fraction-fit = 1.0
+min-available-nodes = 2
+min-train-nodes = 2
+fraction-train = 1.0
 fraction-evaluate = 1.0
 local-epochs = 3
 lr = 0.001
@@ -60,18 +60,3 @@ use-adaptive-pool = true
 weight-decay = 0.0003
 
 sim-data = "./data/simulation/demo_data.npz"
-
-# Default federation to use when running the app
-[tool.flwr.federations]
-default = "local-simulation"
-
-# Local simulation federation with 10 virtual SuperNodes
-[tool.flwr.federations.local-simulation]
-options.num-supernodes = 3
-
-# Remote federation example for use with SuperLink
-[tool.flwr.federations.remote-federation]
-#address = "<SUPERLINK-ADDRESS>:<PORT>"
-address = "flower.nibio.no:9093"
-insecure = true  # Remove this line to enable TLS
-# root-certificates = "<PATH/TO/ca.crt>"  # For TLS setup

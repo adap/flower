@@ -318,12 +318,3 @@ def test(net, dataloader, target_scaler, device):
     # Note that avg_loss is in transformed scale, but rmse, rmse%, r2, actuals_backsc, predictions_backsc are in original (backtransformed) scale!
     return avg_loss, rmse, rmse_pct, r_squared, actuals_backsc, predictions_backsc
 
-
-def get_weights(net):
-    return [val.cpu().numpy() for _, val in net.state_dict().items()]
-
-
-def set_weights(net, parameters):
-    params_dict = zip(net.state_dict().keys(), parameters)
-    state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
-    net.load_state_dict(state_dict, strict=True)
