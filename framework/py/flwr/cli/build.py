@@ -214,7 +214,7 @@ def build_fab_from_files(files: dict[str, bytes | Path]) -> bytes:
         fab_bytes = build_fab_from_files(files)
     """
 
-    def to_bytes(content: bytes | Path) -> bytes:
+    def _to_bytes(content: bytes | Path) -> bytes:
         return content.read_bytes() if isinstance(content, Path) else content
 
     def _add_to_fab(
@@ -246,7 +246,7 @@ def build_fab_from_files(files: dict[str, bytes | Path]) -> bytes:
     # Extract, load, and parse pyproject.toml
     if FAB_CONFIG_FILE not in files:
         raise ValueError(f"{FAB_CONFIG_FILE} not found in files")
-    pyproject_content = to_bytes(files[FAB_CONFIG_FILE])
+    pyproject_content = _to_bytes(files[FAB_CONFIG_FILE])
     config = tomli.loads(pyproject_content.decode("utf-8"))
 
     # Remove the 'federations' field if it exists
@@ -260,7 +260,7 @@ def build_fab_from_files(files: dict[str, bytes | Path]) -> bytes:
     # Extract and load .gitignore if present
     gitignore_content = None
     if ".gitignore" in files:
-        gitignore_content = to_bytes(files[".gitignore"])
+        gitignore_content = _to_bytes(files[".gitignore"])
 
     # Get exclude and include specs
     exclude_spec = get_fab_exclude_pathspec(gitignore_content)
@@ -283,7 +283,7 @@ def build_fab_from_files(files: dict[str, bytes | Path]) -> bytes:
 
         # Add remaining files and collect their manifest entries
         for file_path in filtered_paths:
-            file_content = to_bytes(files[file_path])
+            file_content = _to_bytes(files[file_path])
             manifest_lines.append(_add_to_fab(fab_file, file_path, file_content))
 
         # Write CONTENT manifest to the zip file
