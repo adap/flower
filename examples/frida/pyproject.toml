@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "frida"
 version = "0.1.0"
-description = ""
+description = "FRIDA is a Flower App that implements and evaluates privacy attack-based methods for detecting free-riders in Federated Learning"
 license = { file = "LICENSE" }
 requires-python = ">=3.9"
 dependencies = [

@@ -31,15 +31,16 @@ frida
 ├── src/
 │   └── setup/
 │       ├── __init__.py
-│       ├── client_app.py   # Defines your ClientApp
-│       ├── server_app.py   # Defines your ServerApp
-│       ├── client.py       # Client and free-rider implementations
-│       ├── server.py       # Strategy with attack detection
-│       ├── attacks.py      # Detection attack implementations
-│       ├── model.py        # Model definitions (AlexNet, VGG, LSTM, ...)
-│       ├── data_loader.py  # Data loading and partitioning
-│       └── train.py        # Training and evaluation logic
-├── pyproject.toml          # Project metadata and configuration
+│       ├── client_app.py       # Defines your ClientApp
+│       ├── server_app.py       # Defines your ServerApp
+│       ├── client.py           # Client and free-rider implementations
+│       ├── server.py           # Strategy with attack detection
+│       ├── attacks.py          # Detection attack implementations
+│       ├── model.py            # Model definitions (AlexNet, VGG, LSTM, ...)
+│       ├── data_loader.py      # Data loading and partitioning
+│       ├── download_dataset.py # Example script to download dataset 
+│       └── train.py            # Training and evaluation logic
+├── pyproject.toml              # Project metadata and configuration
 └── README.md
 ```
 
@@ -49,13 +50,14 @@ You can run FRIDA in both _simulation_ and _deployment_ mode without making chan
 
 ### Prepare Your Data
 
-FRIDA uses local offline datasets (pickle format). Download and place your dataset under `./data/<dataset_name>/`:
+FRIDA uses local offline datasets (pickle format). The dataset can be downloaded using the example script download_dataset.py. Download and place your dataset under `./data/<dataset_name>/`:
 
 ```shell
 ./data/cifar10/
 ├── train_data.pkl
 └── test_data.pkl
 ```
+
 The dataset should follow the following format:
   - <dataset_name>/train_data.pkl  -> (train_images, train_labels)
   - <dataset_name>/test_data.pkl   -> (test_images, test_labels)
@@ -79,7 +81,7 @@ Specify the number of virtual SuperNodes and their resources in `~/.flwr/config.
 
 ```toml
 [superlink.local]
-options.num-supernodes = 10
+options.num-supernodes = 4
 options.backend.client-resources.num-cpus = 2
 options.backend.client-resources.num-gpus = 1.0
 ```
