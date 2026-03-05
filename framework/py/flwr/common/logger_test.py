@@ -80,7 +80,7 @@ def test_configure_superlink_log_file(tmp_path: Path) -> None:
         )
 
         # Assert
-        handler = next(
+        rotating_handler = next(
             (
                 h
                 for h in FLOWER_LOGGER.handlers
@@ -89,17 +89,17 @@ def test_configure_superlink_log_file(tmp_path: Path) -> None:
             ),
             None,
         )
-        assert handler is not None
-        assert handler.level == logging.DEBUG
-        assert handler.backupCount == 7
-        assert handler.interval == 24 * 60 * 60
+        assert rotating_handler is not None
+        assert rotating_handler.level == logging.DEBUG
+        assert rotating_handler.backupCount == 7
+        assert rotating_handler.interval == 24 * 60 * 60
     finally:
         # Clean up any handlers introduced by this test
-        for handler in list(FLOWER_LOGGER.handlers):
-            if handler in before:
+        for cleanup_handler in list(FLOWER_LOGGER.handlers):
+            if cleanup_handler in before:
                 continue
-            FLOWER_LOGGER.removeHandler(handler)
-            handler.close()
+            FLOWER_LOGGER.removeHandler(cleanup_handler)
+            cleanup_handler.close()
 
 
 def test_configure_superlink_log_file_idempotent(tmp_path: Path) -> None:

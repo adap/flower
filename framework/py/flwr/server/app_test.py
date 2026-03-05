@@ -57,9 +57,7 @@ def test_parse_superlink_log_rotation_interval_requires_positive_int(
 ) -> None:
     """The interval must be a positive integer."""
     with pytest.raises(SystemExit):
-        _parse_args_run_superlink().parse_args(
-            ["--log-rotation-interval-hours", value]
-        )
+        _parse_args_run_superlink().parse_args(["--log-rotation-interval-hours", value])
 
 
 @pytest.mark.parametrize("value", ["0", "-1"])
@@ -68,6 +66,4 @@ def test_parse_superlink_log_rotation_backup_requires_positive_int(
 ) -> None:
     """The backup count must be a positive integer."""
     with pytest.raises(SystemExit):
-        _parse_args_run_superlink().parse_args(
-            ["--log-rotation-backup-count", value]
-        )
+        _parse_args_run_superlink().parse_args(["--log-rotation-backup-count", value])

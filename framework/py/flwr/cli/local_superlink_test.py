@@ -17,8 +17,7 @@
 
 import subprocess
 from pathlib import Path
-from unittest.mock import MagicMock
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from flwr.cli.typing import SuperLinkConnection, SuperLinkSimulationOptions
 
@@ -96,7 +95,9 @@ def test_start_local_superlink_uses_builtin_log_rotation() -> None:
             return_value=(database, storage, log_file),
         ),
         patch(_IS_STARTED_PATH, return_value=True),
-        patch("flwr.cli.local_superlink.subprocess.Popen", return_value=process) as popen,
+        patch(
+            "flwr.cli.local_superlink.subprocess.Popen", return_value=process
+        ) as popen,
     ):
         _start_local_superlink()
 
