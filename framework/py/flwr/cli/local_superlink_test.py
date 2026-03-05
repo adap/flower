@@ -15,11 +15,14 @@
 """Tests for local SuperLink runtime helpers."""
 
 
+import subprocess
+from pathlib import Path
+from unittest.mock import MagicMock
 from unittest.mock import patch
 
 from flwr.cli.typing import SuperLinkConnection, SuperLinkSimulationOptions
 
-from .local_superlink import ensure_local_superlink
+from .local_superlink import _start_local_superlink, ensure_local_superlink
 
 _IS_STARTED_PATH = "flwr.cli.local_superlink._is_local_superlink_started"
 _START_PATH = "flwr.cli.local_superlink._start_local_superlink"
@@ -75,3 +78,35 @@ def test_local_config_is_preserved_when_endpoint_available() -> None:
     assert resolved is connection
     mock_is_started.assert_not_called()
     mock_start.assert_not_called()
+
+
+def test_start_local_superlink_uses_builtin_log_rotation() -> None:
+    """Start command should include built-in SuperLink log rotation flags."""
+    # Prepare
+    database = Path("/tmp/flwr-local-superlink-state.db")
+    storage = Path("/tmp/flwr-local-superlink-storage")
+    log_file = Path("/tmp/flwr-local-superlink.log")
+    process = MagicMock()
+    process.poll.return_value = None
+
+    # Execute
+    with (
+        patch(
+            "flwr.cli.local_superlink._get_local_superlink_paths",
+            return_value=(database, storage, log_file),
+        ),
+        patch(_IS_STARTED_PATH, return_value=True),
+        patch("flwr.cli.local_superlink.subprocess.Popen", return_value=process) as popen,
+    ):
+        _start_local_superlink()
+
+    # Assert
+    cmd = popen.call_args.args[0]
+    assert "--log-file" in cmd
+    assert str(log_file) in cmd
+    assert "--log-rotation-interval-hours" in cmd
+    assert "24" in cmd
+    assert "--log-rotation-backup-count" in cmd
+    assert "7" in cmd
+    assert popen.call_args.kwargs["stdout"] is subprocess.DEVNULL
+    assert popen.call_args.kwargs["stderr"] is subprocess.DEVNULL

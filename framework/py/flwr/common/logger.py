@@ -24,7 +24,7 @@ import threading
 import time
 from io import StringIO
 from logging import ERROR, WARN, LogRecord
-from logging.handlers import HTTPHandler
+from logging.handlers import HTTPHandler, TimedRotatingFileHandler
 from queue import Empty, Queue
 from typing import TYPE_CHECKING, Any, TextIO
 
@@ -206,6 +206,48 @@ def configure(
         http_handler.setLevel(logging.DEBUG)
         # Override mapLogRecords as setFormatter has no effect on what is send via http
         FLOWER_LOGGER.addHandler(http_handler)
+
+
+def configure_superlink_log_file(
+    *,
+    filename: str,
+    interval_hours: int,
+    backup_count: int,
+) -> None:
+    """Configure timed file rotation for SuperLink process logs."""
+    path = os.path.abspath(os.path.expanduser(filename))
+    matching_handlers: list[TimedRotatingFileHandler] = []
+
+    for handler in FLOWER_LOGGER.handlers:
+        if not isinstance(handler, TimedRotatingFileHandler):
+            continue
+        if os.path.abspath(handler.baseFilename) != path:
+            continue
+        matching_handlers.append(handler)
+        if handler.interval != interval_hours * 60 * 60:
+            continue
+        if handler.backupCount != backup_count:
+            continue
+        return
+
+    for handler in matching_handlers:
+        FLOWER_LOGGER.removeHandler(handler)
+        handler.close()
+
+    formatter = logging.Formatter(
+        "%(levelname)s %(name)s %(asctime)s | %(filename)s:%(lineno)d | %(message)s"
+    )
+    file_handler = TimedRotatingFileHandler(
+        filename=path,
+        when="H",
+        interval=interval_hours,
+        backupCount=backup_count,
+        encoding="utf-8",
+        utc=True,
+    )
+    file_handler.setLevel(logging.DEBUG)
+    file_handler.setFormatter(formatter)
+    FLOWER_LOGGER.addHandler(file_handler)
 
 
 def warn_preview_feature(name: str) -> None:
