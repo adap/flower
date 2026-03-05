@@ -91,7 +91,7 @@ pip install -e .
 Run fully local federated simulation:
 
 ```bash 
-flwr run . local-simulation --stream
+flwr run . local-simulation
 ```
 
 This will:
@@ -100,6 +100,16 @@ This will:
 - Partition the dataset
 - Train the federated CNN
 - Log metrics
+
+### Simulation Configuration
+The `local-simulation` runtime is defined in Flower configuration file: `~/.flwr/config.toml`.
+
+Example:
+```TOML
+[superlink.local-simulation]
+options.num-supernodes = 3
+```
+This configuration runs the federated simulation locally with 3 virtual SuperNodes (clients).
 
 ## Running (Deployment Engine)
 
