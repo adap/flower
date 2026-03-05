@@ -832,7 +832,7 @@ wheels = [
 [[package]]
 name = "devtool"
 version = "0.0.0"
-source = { editable = "devtool" }
+source = { editable = "../dev" }
 dependencies = [
     { name = "black" },
     { name = "pyyaml" },
@@ -1155,7 +1155,7 @@ dev = [
     { name = "black", extras = ["jupyter"], specifier = "==25.11.0" },
     { name = "check-wheel-contents", specifier = "==0.6.3" },
     { name = "clang-format", specifier = "==17.0.6" },
-    { name = "devtool", editable = "devtool" },
+    { name = "devtool", editable = "../dev" },
     { name = "docformatter", specifier = "==1.7.5" },
     { name = "docsig", specifier = "==0.64.0" },
     { name = "docstrfmt", marker = "python_full_version >= '3.10' and python_full_version < '4'", git = "https://github.com/charlesbvll/docstrfmt.git?rev=patch-2" },
