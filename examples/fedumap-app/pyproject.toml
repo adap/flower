@@ -45,11 +45,3 @@ wandb-project = "federated-umap"
 # Nyström materialises an (n × n) matrix, so keeping this ≤ 10k avoids
 # multi-GB allocations. Raise it if you have RAM to spare.
 umap-max-samples = 10000
-
-
-[tool.flwr.federations]
-default = "local-simulation"
-
-[tool.flwr.federations.local-simulation]
-options.num-supernodes = 5
-

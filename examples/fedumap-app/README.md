@@ -38,6 +38,59 @@ Results are logged to the project defined by `wandb-project` in `pyproject.toml`
 flwr run . --run-config "wandb-project=my-project"
 ```
 
+## Running the App
+
+### Run with the Simulation Engine
+
+Install the dependencies defined in pyproject.toml as well as the pytorchexample package.
+
+```bash
+cd example-app && pip install -e .
+```
+
+Run with default settings:
+
+```bash
+flwr run .
+```
+
+You can also override some of the settings for your ClientApp and ServerApp defined in `pyproject.toml`. For example:
+
+```bash
+flwr run . --run-config "num-server-rounds=5 learning-rate=0.05"
+```
+
+For more information check Configuration Section
+
+### Run with the Deployment Engine
+
+To run this App using Flower's Deployment Engine we recommend first creating some demo data using Flower Datasets. For example:
+
+Install Flower datasets
+```bash
+pip install "flwr-datasets['vision']"
+```
+
+Create dataset partitions and save them to disk
+```bash
+flwr-datasets create uoft-cs/cifar10 --num-partitions 2 --out-dir demo_data
+```
+
+The above command will create two IID partitions of the CIFAR-10 dataset and save them in a demo_data directory. Next, you can pass one partition to each of your SuperNodes like this:
+
+```bash
+flower-supernode \
+    --insecure \
+    --superlink <SUPERLINK-FLEET-API> \
+    --node-config="data-path=/path/to/demo_data/partition_0"
+```
+
+Finally, ensure the environment of each SuperNode has all dependencies installed. Then, launch the run via flwr run but pointing to a SuperLink connection that specifies the SuperLink your SuperNode is connected to:
+
+```
+flwr run . <SUPERLINK-CONNECTION> --stream
+```
+
 ## Configuration
 
 All keys live under `[tool.flwr.app.config]` in `pyproject.toml` and can be overridden with `--run-config`.
@@ -53,3 +106,12 @@ All keys live under `[tool.flwr.app.config]` in `pyproject.toml` and can be over
 | `feature-dim`       | `784`            | Flattened feature dimension (28×28 for MNIST)    |
 | `umap-max-samples`  | `10000`          | Max points fed into UMAP at the final round      |
 | `wandb-project`     | `federated-umap` | W&B project name                                 |
+
+Specify the number of virtual SuperNodes and their resources in `~/.flwr/config.toml`:
+
+```toml
+[superlink.local]
+options.num-supernodes = 10
+options.backend.client-resources.num-cpus = 2
+options.backend.client-resources.num-gpus = 1.0
+```
