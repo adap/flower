@@ -222,7 +222,7 @@ def build_fab_from_files(files: dict[str, bytes | Path]) -> bytes:
         path: str,
         content: bytes,
     ) -> str:
-        r"""Write a file to the FAB and return its CONTENT manifest line.
+        """Write a file to the FAB and return its CONTENT manifest line.
 
         Parameters
         ----------
@@ -236,12 +236,12 @@ def build_fab_from_files(files: dict[str, bytes | Path]) -> bytes:
         Returns
         -------
         str
-            A CONTENT manifest line: "path,sha256,size_bits\n"
+            A CONTENT manifest line: "path,sha256,size_bits"
         """
         write_to_zip(fab_file, path, content)
         sha256_hash = hashlib.sha256(content).hexdigest()
         file_size_bits = len(content) * 8
-        return f"{path},{sha256_hash},{file_size_bits}\n"
+        return f"{path},{sha256_hash},{file_size_bits}"
 
     # Extract, load, and parse pyproject.toml
     if FAB_CONFIG_FILE not in files:
@@ -287,7 +287,7 @@ def build_fab_from_files(files: dict[str, bytes | Path]) -> bytes:
             manifest_lines.append(add_to_fab(fab_file, file_path, file_content))
 
         # Write CONTENT manifest to the zip file
-        write_to_zip(fab_file, ".info/CONTENT", "".join(manifest_lines))
+        write_to_zip(fab_file, ".info/CONTENT", "\n".join(manifest_lines))
 
     fab_bytes = fab_buffer.getvalue()
 
