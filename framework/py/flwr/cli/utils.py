@@ -378,10 +378,10 @@ def cli_output_control_stub(
             channel.close()
 
 
-@contextmanager
-def flwr_cli_grpc_exc_handler(
+@contextmanager  # docsig: disable=SIG503
+def flwr_cli_grpc_exc_handler(  # pylint: disable=too-many-branches
     custom_handler: Callable[[grpc.RpcError], None] | None = None,
-) -> Iterator[None]:  # pylint: disable=too-many-branches
+) -> Iterator[None]:
     """Context manager to handle specific gRPC errors.
 
     Catches grpc.RpcError exceptions with UNAUTHENTICATED, UNIMPLEMENTED,
