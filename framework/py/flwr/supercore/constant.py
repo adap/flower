@@ -60,6 +60,12 @@ APP_PUBLISH_INCLUDE_PATTERNS = (
     "**/*.py",
     "**/*.toml",
     "**/*.md",
+    "**/*.yaml",
+    "**/*.yml",
+    "**/*.json",
+    "**/*.jsonl",
+    "/.gitignore",
+    "**/.editorconfig",
     "/LICENSE",
     "/LICENSE.md",
 )
