@@ -217,7 +217,7 @@ def build_fab_from_files(files: dict[str, bytes | Path]) -> bytes:
     def to_bytes(content: bytes | Path) -> bytes:
         return content.read_bytes() if isinstance(content, Path) else content
 
-    def add_to_fab(
+    def _add_to_fab(
         fab_file: zipfile.ZipFile,
         path: str,
         content: bytes,
@@ -279,12 +279,12 @@ def build_fab_from_files(files: dict[str, bytes | Path]) -> bytes:
     with zipfile.ZipFile(fab_buffer, "w", zipfile.ZIP_DEFLATED) as fab_file:
         # Add pyproject.toml and collect manifest entries
         pyproject_bytes = tomli_w.dumps(config).encode("utf-8")
-        manifest_lines = [add_to_fab(fab_file, FAB_CONFIG_FILE, pyproject_bytes)]
+        manifest_lines = [_add_to_fab(fab_file, FAB_CONFIG_FILE, pyproject_bytes)]
 
         # Add remaining files and collect their manifest entries
         for file_path in filtered_paths:
             file_content = to_bytes(files[file_path])
-            manifest_lines.append(add_to_fab(fab_file, file_path, file_content))
+            manifest_lines.append(_add_to_fab(fab_file, file_path, file_content))
 
         # Write CONTENT manifest to the zip file
         write_to_zip(fab_file, ".info/CONTENT", "\n".join(manifest_lines))
