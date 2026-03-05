@@ -8,9 +8,9 @@ import numpy as np
 import pandas as pd
 import torch
 
-from .dataset import make_federated_dataset, load_global_test_split
+from .dataset import load_global_test_split, make_federated_dataset
 from .model import create_model
-from .task import ensure_dir, from_weights, rc_get, rmse, r2, rpiq, to_weights
+from .task import ensure_dir, from_weights, r2, rc_get, rmse, rpiq, to_weights
 
 
 def _feature_cols(rc: Dict[str, Any]) -> list[str]:
@@ -19,7 +19,9 @@ def _feature_cols(rc: Dict[str, Any]) -> list[str]:
 
 
 def _target_cols(rc: Dict[str, Any]) -> list[str]:
-    return list(rc_get(rc, "targets", default="Clay_gkg_filtered,C_gkg_filtered").split(","))
+    return list(
+        rc_get(rc, "targets", default="Clay_gkg_filtered,C_gkg_filtered").split(",")
+    )
 
 
 def server_fn(context: fl.common.Context) -> fl.server.ServerAppComponents:
@@ -120,7 +122,9 @@ def server_fn(context: fl.common.Context) -> fl.server.ServerAppComponents:
     return fl.server.ServerAppComponents(strategy=strategy, config=server_config)
 
 
-def _predict_on_df(model: torch.nn.Module, X: pd.DataFrame, device: torch.device) -> np.ndarray:
+def _predict_on_df(
+    model: torch.nn.Module, X: pd.DataFrame, device: torch.device
+) -> np.ndarray:
     model.eval()
     Xt = torch.tensor(X.values, dtype=torch.float32).to(device)
     with torch.no_grad():

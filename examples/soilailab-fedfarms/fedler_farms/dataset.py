@@ -4,10 +4,12 @@ from typing import List, Tuple
 
 import pandas as pd
 from flwr_datasets import FederatedDataset
-from flwr_datasets.partitioner import NaturalIdPartitioner 
+from flwr_datasets.partitioner import NaturalIdPartitioner
 
 
-def make_federated_dataset(hf_dataset: str, partition_by: str = "farm") -> FederatedDataset:
+def make_federated_dataset(
+    hf_dataset: str, partition_by: str = "farm"
+) -> FederatedDataset:
     """Create a FederatedDataset partitioned by a natural-id column (e.g., 'farm')."""
     partitioner = NaturalIdPartitioner(partition_by=partition_by)
     return FederatedDataset(dataset=hf_dataset, partitioners={"train": partitioner})

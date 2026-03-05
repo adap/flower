@@ -8,7 +8,7 @@ import torch
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader, TensorDataset
 
-from .dataset import make_federated_dataset, load_client_partition
+from .dataset import load_client_partition, make_federated_dataset
 from .model import create_model
 from .task import (
     TrainConfig,
@@ -30,7 +30,9 @@ def _feature_cols(rc: Dict[str, Any]) -> list[str]:
 
 
 def _target_cols(rc: Dict[str, Any]) -> list[str]:
-    return list(rc_get(rc, "targets", default="Clay_gkg_filtered,C_gkg_filtered").split(","))
+    return list(
+        rc_get(rc, "targets", default="Clay_gkg_filtered,C_gkg_filtered").split(",")
+    )
 
 
 class FarmClient(fl.client.NumPyClient):
@@ -78,7 +80,11 @@ class FarmClient(fl.client.NumPyClient):
         rmsev = rmse(y_true, y_pred)
         rpiqv = rpiq(y_true, y_pred)
 
-        metrics = {"client_id": int(self.cid), "round": int(self.round), "val_loss": float(best_val)}
+        metrics = {
+            "client_id": int(self.cid),
+            "round": int(self.round),
+            "val_loss": float(best_val),
+        }
         for i, name in enumerate(self.target_cols):
             metrics[f"R2-{name}"] = float(r2v[i])
             metrics[f"RMSE-{name}"] = float(rmsev[i])
@@ -113,7 +119,7 @@ class FarmClient(fl.client.NumPyClient):
 def client_fn(context: fl.common.Context) -> fl.client.Client:
     rc = context.run_config
 
-    # robust partition id 
+    # robust partition id
     pid = context.node_config.get("partition-id", None)
 
     num_clients = int(rc_get(rc, "num-clients", default=1))
@@ -122,7 +128,9 @@ def client_fn(context: fl.common.Context) -> fl.client.Client:
         partition_id = int(pid)
     else:
         # Try to get a stable node identifier from the context/node_config
-        node_id = getattr(context, "node_id", None) or context.node_config.get("node-id", None)
+        node_id = getattr(context, "node_id", None) or context.node_config.get(
+            "node-id", None
+        )
 
         if node_id is None:
             partition_id = 0
@@ -161,8 +169,12 @@ def client_fn(context: fl.common.Context) -> fl.client.Client:
     X_val_t = torch.tensor(X_val.values, dtype=torch.float32)
     y_val_t = torch.tensor(y_val.values, dtype=torch.float32)
 
-    train_loader = DataLoader(TensorDataset(X_train_t, y_train_t), batch_size=batch_size, shuffle=True)
-    val_loader = DataLoader(TensorDataset(X_val_t, y_val_t), batch_size=batch_size, shuffle=False)
+    train_loader = DataLoader(
+        TensorDataset(X_train_t, y_train_t), batch_size=batch_size, shuffle=True
+    )
+    val_loader = DataLoader(
+        TensorDataset(X_val_t, y_val_t), batch_size=batch_size, shuffle=False
+    )
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -193,5 +205,6 @@ def client_fn(context: fl.common.Context) -> fl.client.Client:
         train_cfg=train_cfg,
         outputs_dir=outputs_dir,
     ).to_client()
+
 
 app = fl.client.ClientApp(client_fn=client_fn)

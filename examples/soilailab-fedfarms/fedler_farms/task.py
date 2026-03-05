@@ -104,7 +104,9 @@ def train_local(
 
         if avg_val < best_val:
             best_val = avg_val
-            best_state = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
+            best_state = {
+                k: v.detach().cpu().clone() for k, v in model.state_dict().items()
+            }
             patience = 0
         else:
             patience += 1
@@ -118,7 +120,9 @@ def train_local(
     return float(best_val)
 
 
-def predict(model: torch.nn.Module, loader: DataLoader, device: torch.device) -> np.ndarray:
+def predict(
+    model: torch.nn.Module, loader: DataLoader, device: torch.device
+) -> np.ndarray:
     model.eval()
     preds = []
     with torch.no_grad():
