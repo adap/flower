@@ -177,6 +177,25 @@ def test_managed_azure_valid_config_passes(tmp_path: Path) -> None:
     assert out.deployment.launch_mode == "managed_azure_ssh"
 
 
+def test_managed_azure_accepts_absolute_remote_venv_dir(tmp_path: Path) -> None:
+    cfg = load_experiment_config(str(BASE / "configs" / "smoke.yaml"))
+    _set_valid_azure_deployment(cfg, tmp_path=tmp_path)
+    assert cfg.deployment.azure_ssh is not None
+    cfg.deployment.azure_ssh.remote_venv_dir = "/home/azureuser/flower/.venv"
+    out = apply_mode_override(cfg, "deployment")
+    assert out.deployment.azure_ssh is not None
+    assert out.deployment.azure_ssh.remote_venv_dir == "/home/azureuser/flower/.venv"
+
+
+def test_managed_azure_rejects_relative_remote_venv_dir(tmp_path: Path) -> None:
+    cfg = load_experiment_config(str(BASE / "configs" / "smoke.yaml"))
+    _set_valid_azure_deployment(cfg, tmp_path=tmp_path)
+    assert cfg.deployment.azure_ssh is not None
+    cfg.deployment.azure_ssh.remote_venv_dir = ".venv"
+    with pytest.raises(ValueError, match="remote_venv_dir must be an absolute non-root path"):
+        apply_mode_override(cfg, "deployment")
+
+
 def test_managed_azure_rejects_public_ip_by_default(tmp_path: Path) -> None:
     cfg = load_experiment_config(str(BASE / "configs" / "smoke.yaml"))
     _set_valid_azure_deployment(cfg, tmp_path=tmp_path)

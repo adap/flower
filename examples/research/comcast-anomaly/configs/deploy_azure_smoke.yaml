@@ -56,6 +56,7 @@ deployment:
     superlink_vm: vm-a
     remote_workspace_dir: /opt/comcast-anomaly
     remote_python: python3
+    remote_venv_dir: /home/azureuser/flower/examples/research/comcast-anomaly/.venv
     ssh_connect_timeout_sec: 10
     startup_timeout_sec: 90
     poll_interval_sec: 2.0

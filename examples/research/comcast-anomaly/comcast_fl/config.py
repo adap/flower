@@ -89,6 +89,7 @@ class AzureSshConfig:
     allow_public_ips: bool = False
     remote_workspace_dir: str = "/opt/comcast-anomaly"
     remote_python: str = "python3"
+    remote_venv_dir: str | None = None
     ssh_connect_timeout_sec: int = 10
     startup_timeout_sec: int = 90
     poll_interval_sec: float = 2.0
@@ -241,6 +242,11 @@ def _build_config(raw: dict[str, Any]) -> ExperimentConfig:
             ),
             remote_workspace_dir=str(azure_ssh_raw.get("remote_workspace_dir", "/opt/comcast-anomaly")),
             remote_python=str(azure_ssh_raw.get("remote_python", "python3")),
+            remote_venv_dir=(
+                str(azure_ssh_raw["remote_venv_dir"])
+                if azure_ssh_raw.get("remote_venv_dir") is not None
+                else None
+            ),
             ssh_connect_timeout_sec=int(azure_ssh_raw.get("ssh_connect_timeout_sec", 10)),
             startup_timeout_sec=int(azure_ssh_raw.get("startup_timeout_sec", 90)),
             poll_interval_sec=float(azure_ssh_raw.get("poll_interval_sec", 2.0)),
@@ -426,6 +432,19 @@ def _validate_config(cfg: ExperimentConfig) -> None:
             ".." not in azure.remote_workspace_dir.split("/"),
             "deployment.azure_ssh.remote_workspace_dir must not contain '..'",
         )
+        if azure.remote_venv_dir is not None:
+            _require(
+                azure.remote_venv_dir.strip() != "",
+                "deployment.azure_ssh.remote_venv_dir must be non-empty when set",
+            )
+            _require(
+                azure.remote_venv_dir.startswith("/") and azure.remote_venv_dir != "/",
+                "deployment.azure_ssh.remote_venv_dir must be an absolute non-root path",
+            )
+            _require(
+                ".." not in azure.remote_venv_dir.split("/"),
+                "deployment.azure_ssh.remote_venv_dir must not contain '..'",
+            )
 
         names = [vm.name for vm in azure.vms]
         _require(len(set(names)) == len(names), "deployment.azure_ssh.vms names must be unique")

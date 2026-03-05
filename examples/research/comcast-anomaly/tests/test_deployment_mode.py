@@ -12,6 +12,7 @@ from comcast_fl.deployment_azure_ssh import (
     _build_partition_plan,
     _make_superlink_cmd,
     _make_supernode_cmd,
+    _run_control_flwr,
     _run_remote_command,
     stop_managed_azure_runtime,
     submit_run_and_wait_remote,
@@ -235,6 +236,7 @@ def test_submit_run_and_wait_timeout(monkeypatch: pytest.MonkeyPatch, tmp_path: 
 
 def test_azure_command_builders_include_tls_and_auth() -> None:
     s_cmd = _make_superlink_cmd(
+        superlink_exec="flower-superlink",
         control_api_addr="0.0.0.0:39093",
         fleet_api_addr="0.0.0.0:39094",
         serverappio_api_addr="0.0.0.0:39095",
@@ -251,6 +253,7 @@ def test_azure_command_builders_include_tls_and_auth() -> None:
     assert "--enable-supernode-auth" in joined
 
     n_cmd = _make_supernode_cmd(
+        supernode_exec="flower-supernode",
         fleet_api_addr="10.0.0.4:39094",
         root_cert="/remote/ca.crt",
         private_key="/remote/sn0.pem",
@@ -333,6 +336,9 @@ def _fake_azure_handle(tmp_path: Path) -> ManagedAzureRuntimeHandle:
         remote_app_dir="/opt/comcast/app",
         remote_runtime_dir="/opt/comcast/runtime/test-run",
         remote_artifacts_root="/opt/comcast/runtime/test-run/artifacts/fl",
+        remote_venv_dir=None,
+        remote_python_exec="python3",
+        control_flwr_exec="flwr",
         control_vm=vm,
         superlink_vm=vm,
         vm_by_name={"vm-a": vm},
@@ -382,6 +388,27 @@ def test_submit_run_and_wait_remote_success(monkeypatch: pytest.MonkeyPatch, tmp
     )
     assert out["run_id"] == 99
     assert out["status"] == "finished:completed"
+
+
+def test_run_control_flwr_uses_configured_binary(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    handle = _fake_azure_handle(tmp_path)
+    handle.control_flwr_exec = "/home/azureuser/flower/.venv/bin/flwr"
+    captured: dict[str, object] = {}
+
+    def _fake_remote(*, vm, remote_cmd, connect_timeout_sec, timeout_sec=None, check=True, env=None):  # type: ignore[no-untyped-def]
+        del vm, connect_timeout_sec, timeout_sec, check, env
+        captured["remote_cmd"] = remote_cmd
+        return subprocess.CompletedProcess(["ssh"], 0, stdout="{}", stderr="")
+
+    monkeypatch.setattr("comcast_fl.deployment_azure_ssh._run_remote_command", _fake_remote)
+    _ = _run_control_flwr(
+        handle=handle,
+        args=["flwr", "ls", "comcast-azure", "--format", "json"],
+        timeout_sec=5.0,
+        check=True,
+    )
+    remote_cmd = str(captured["remote_cmd"])
+    assert "/home/azureuser/flower/.venv/bin/flwr ls comcast-azure --format json" in remote_cmd
 
 
 def test_submit_run_and_wait_remote_failure(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:

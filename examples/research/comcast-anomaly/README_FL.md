@@ -53,7 +53,9 @@ python scripts/run_comcast_fl.py --config configs/deploy_azure_smoke.yaml --mode
 Prerequisites:
 
 - VMs already provisioned and reachable via SSH from your operator machine.
-- `python3`, `flwr`, `flower-superlink`, and `flower-supernode` installed on all target VMs.
+- Either:
+  - `python3`, `flwr`, `flower-superlink`, and `flower-supernode` installed on all target VMs, or
+  - `deployment.azure_ssh.remote_venv_dir` set to a VM-local venv containing those binaries.
 - Absolute local paths configured for:
   - `deployment.tls.ca_cert_local_path`
   - `deployment.tls.server_cert_local_path`

@@ -36,6 +36,9 @@ class ManagedAzureRuntimeHandle:
     remote_app_dir: str
     remote_runtime_dir: str
     remote_artifacts_root: str
+    remote_venv_dir: str | None
+    remote_python_exec: str
+    control_flwr_exec: str
     control_vm: AzureVmSpec
     superlink_vm: AzureVmSpec
     vm_by_name: dict[str, AzureVmSpec]
@@ -207,6 +210,18 @@ def _validate_remote_workspace_dir(remote_workspace_dir: str) -> None:
     )
 
 
+def _resolve_remote_python(remote_python: str, remote_venv_dir: str | None) -> str:
+    if remote_venv_dir is None:
+        return remote_python
+    return f"{remote_venv_dir.rstrip('/')}/bin/python"
+
+
+def _resolve_remote_exec(bin_name: str, remote_venv_dir: str | None) -> str:
+    if remote_venv_dir is None:
+        return bin_name
+    return f"{remote_venv_dir.rstrip('/')}/bin/{bin_name}"
+
+
 def _reserve_remote_port(vm: AzureVmSpec, remote_python: str, connect_timeout_sec: int) -> int:
     cmd = (
         f"{shlex.quote(remote_python)} -c "
@@ -248,6 +263,7 @@ def _build_partition_plan(cfg: ExperimentConfig) -> list[dict[str, Any]]:
 
 
 def _make_superlink_cmd(
+    superlink_exec: str,
     control_api_addr: str,
     fleet_api_addr: str,
     serverappio_api_addr: str,
@@ -258,7 +274,7 @@ def _make_superlink_cmd(
     database: str,
 ) -> list[str]:
     return [
-        "flower-superlink",
+        superlink_exec,
         "--control-api-address",
         control_api_addr,
         "--fleet-api-address",
@@ -280,6 +296,7 @@ def _make_superlink_cmd(
 
 
 def _make_supernode_cmd(
+    supernode_exec: str,
     fleet_api_addr: str,
     root_cert: str,
     private_key: str,
@@ -288,7 +305,7 @@ def _make_supernode_cmd(
     num_partitions: int,
 ) -> list[str]:
     return [
-        "flower-supernode",
+        supernode_exec,
         "--superlink",
         fleet_api_addr,
         "--root-certificates",
@@ -391,6 +408,9 @@ def _write_local_runtime_state(
         "remote_app_dir": handle.remote_app_dir,
         "remote_runtime_dir": handle.remote_runtime_dir,
         "remote_artifacts_root": handle.remote_artifacts_root,
+        "remote_venv_dir": handle.remote_venv_dir,
+        "remote_python_exec": handle.remote_python_exec,
+        "control_flwr_exec": handle.control_flwr_exec,
         "control_vm": handle.control_vm.name,
         "superlink_vm": handle.superlink_vm.name,
         "control_flwr_home_remote": handle.control_flwr_home,
@@ -486,10 +506,13 @@ def _run_control_flwr(
     timeout_sec: float | None = None,
     check: bool = True,
 ) -> subprocess.CompletedProcess[str]:
+    effective_args = list(args)
+    if effective_args and effective_args[0] == "flwr":
+        effective_args[0] = handle.control_flwr_exec
     remote_cmd = (
         f"cd {shlex.quote(handle.remote_app_dir)} && "
         f"FLWR_HOME={shlex.quote(handle.control_flwr_home)} "
-        + " ".join(shlex.quote(x) for x in args)
+        + " ".join(shlex.quote(x) for x in effective_args)
     )
     return _run_remote_command(
         vm=handle.control_vm,
@@ -560,6 +583,10 @@ def start_managed_azure_runtime(
     control_vm = vm_by_name[azure.control_vm]
     superlink_vm = vm_by_name[azure.superlink_vm]
     _validate_remote_workspace_dir(azure.remote_workspace_dir)
+    remote_python_exec = _resolve_remote_python(azure.remote_python, azure.remote_venv_dir)
+    control_flwr_exec = _resolve_remote_exec("flwr", azure.remote_venv_dir)
+    superlink_exec = _resolve_remote_exec("flower-superlink", azure.remote_venv_dir)
+    supernode_exec = _resolve_remote_exec("flower-supernode", azure.remote_venv_dir)
 
     # Preflight and sync package.
     archive_path = _prepare_app_archive(APP_DIR)
@@ -586,10 +613,23 @@ def start_managed_azure_runtime(
             _run_remote_command(
                 vm=vm,
                 remote_cmd=(
-                    f"command -v {shlex.quote(azure.remote_python)} >/dev/null && "
-                    "command -v flwr >/dev/null && "
-                    "command -v flower-superlink >/dev/null && "
-                    "command -v flower-supernode >/dev/null"
+                    (
+                        " && ".join(
+                            [
+                                f"test -x {shlex.quote(remote_python_exec)}",
+                                f"test -x {shlex.quote(control_flwr_exec)}",
+                                f"test -x {shlex.quote(superlink_exec)}",
+                                f"test -x {shlex.quote(supernode_exec)}",
+                            ]
+                        )
+                        if azure.remote_venv_dir
+                        else (
+                            f"command -v {shlex.quote(remote_python_exec)} >/dev/null && "
+                            f"command -v {shlex.quote(control_flwr_exec)} >/dev/null && "
+                            f"command -v {shlex.quote(superlink_exec)} >/dev/null && "
+                            f"command -v {shlex.quote(supernode_exec)} >/dev/null"
+                        )
+                    )
                 ),
                 connect_timeout_sec=azure.ssh_connect_timeout_sec,
                 timeout_sec=20.0,
@@ -611,7 +651,7 @@ def start_managed_azure_runtime(
             _run_remote_command(
                 vm=vm,
                 remote_cmd=(
-                    f"{shlex.quote(azure.remote_python)} -m pip install -e {shlex.quote(remote_app_dir)} "
+                    f"{shlex.quote(remote_python_exec)} -m pip install -e {shlex.quote(remote_app_dir)} "
                     "--quiet"
                 ),
                 connect_timeout_sec=azure.ssh_connect_timeout_sec,
@@ -666,12 +706,13 @@ def start_managed_azure_runtime(
                 connect_timeout_sec=azure.ssh_connect_timeout_sec,
             )
 
-        control_port = _reserve_remote_port(superlink_vm, azure.remote_python, azure.ssh_connect_timeout_sec)
-        fleet_port = _reserve_remote_port(superlink_vm, azure.remote_python, azure.ssh_connect_timeout_sec)
-        serverappio_port = _reserve_remote_port(superlink_vm, azure.remote_python, azure.ssh_connect_timeout_sec)
+        control_port = _reserve_remote_port(superlink_vm, remote_python_exec, azure.ssh_connect_timeout_sec)
+        fleet_port = _reserve_remote_port(superlink_vm, remote_python_exec, azure.ssh_connect_timeout_sec)
+        serverappio_port = _reserve_remote_port(superlink_vm, remote_python_exec, azure.ssh_connect_timeout_sec)
 
         superlink_bind_host = azure.superlink_bind_host or superlink_vm.host
         superlink_cmd = _make_superlink_cmd(
+            superlink_exec=superlink_exec,
             control_api_addr=f"{superlink_bind_host}:{control_port}",
             fleet_api_addr=f"{superlink_bind_host}:{fleet_port}",
             serverappio_api_addr=f"{superlink_bind_host}:{serverappio_port}",
@@ -697,7 +738,7 @@ def start_managed_azure_runtime(
             vm=control_vm,
             target_host=superlink_vm.host,
             target_port=control_port,
-            remote_python=azure.remote_python,
+            remote_python=remote_python_exec,
             timeout_sec=azure.startup_timeout_sec,
             connect_timeout_sec=azure.ssh_connect_timeout_sec,
         )
@@ -705,7 +746,7 @@ def start_managed_azure_runtime(
             vm=control_vm,
             target_host=superlink_vm.host,
             target_port=fleet_port,
-            remote_python=azure.remote_python,
+            remote_python=remote_python_exec,
             timeout_sec=azure.startup_timeout_sec,
             connect_timeout_sec=azure.ssh_connect_timeout_sec,
         )
@@ -723,6 +764,9 @@ def start_managed_azure_runtime(
             remote_app_dir=remote_app_dir,
             remote_runtime_dir=remote_runtime_dir,
             remote_artifacts_root=remote_artifacts_root,
+            remote_venv_dir=azure.remote_venv_dir,
+            remote_python_exec=remote_python_exec,
+            control_flwr_exec=control_flwr_exec,
             control_vm=control_vm,
             superlink_vm=superlink_vm,
             vm_by_name=vm_by_name,
@@ -796,7 +840,7 @@ def start_managed_azure_runtime(
         # Launch supernodes.
         for entry in handle.supernode_entries:
             vm = handle.vm_by_name[str(entry["vm_name"])]
-            clientappio_port = _reserve_remote_port(vm, azure.remote_python, azure.ssh_connect_timeout_sec)
+            clientappio_port = _reserve_remote_port(vm, remote_python_exec, azure.ssh_connect_timeout_sec)
             entry["clientappio_port"] = int(clientappio_port)
             clientappio_addr = f"127.0.0.1:{clientappio_port}"
             entry["clientappio_addr"] = f"{vm.host}:{clientappio_port}"
@@ -805,6 +849,7 @@ def start_managed_azure_runtime(
             entry["pid_file"] = pid_file
             entry["log_file"] = log_file
             cmd = _make_supernode_cmd(
+                supernode_exec=supernode_exec,
                 fleet_api_addr=fleet_api_addr,
                 root_cert=ca_remote_path,
                 private_key=str(entry["private_key_remote_path"]),
