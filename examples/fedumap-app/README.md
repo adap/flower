@@ -76,7 +76,7 @@ Create dataset partitions and save them to disk
 flwr-datasets create ylecun/mnist --num-partitions 2 --out-dir demo_data
 ```
 
-The above command will create two IID partitions of the CIFAR-10 dataset and save them in a demo_data directory. Next, you can pass one partition to each of your SuperNodes like this:
+The above command will create two IID partitions of the MNIST dataset and save them in a demo_data directory. Next, you can pass one partition to each of your SuperNodes like this:
 
 ```bash
 flower-supernode \
