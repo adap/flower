@@ -30,6 +30,8 @@ jobs:
       - name: Install dependencies (mandatory + optional)
         run: |
           cd framework
-          python -m poetry install
+          uv sync --locked --all-groups
       - name: Lint + Test (isort/black/mypy/pylint/pytest)
-        run: ./framework/dev/test-tool.sh
+        run: |
+          cd framework
+          uv run --no-sync ./dev/test-tool.sh

@@ -47,11 +47,15 @@ jobs:
       - name: Install dependencies
         run: |
           cd framework
-          python -m poetry install --all-extras
+          uv sync --locked --all-extras --all-groups
       - name: Build wheel
-        run: ./framework/dev/build.sh
+        run: |
+          cd framework
+          uv run --no-sync ./dev/build.sh
       - name: Test wheel
-        run: ./framework/dev/test-wheel.sh
+        run: |
+          cd framework
+          uv run --no-sync ./dev/test-wheel.sh
       - name: Upload wheel
         if: ${{ github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
         id: upload
@@ -104,7 +108,6 @@ jobs:
         uses: ./.github/actions/bootstrap
         with:
           python-version: ${{ matrix.python-version }}
-          poetry-skip: 'true'
       - name: Install Flower from repo
         if: ${{ needs.changes.outputs.framework == 'true' && (github.repository != 'adap/flower' || github.event.pull_request.head.repo.fork || github.actor == 'dependabot[bot]') }}
         working-directory: ./framework
@@ -282,8 +285,6 @@ jobs:
       - name: Bootstrap
         if: ${{ needs.changes.outputs.framework == 'true' }}
         uses: ./.github/actions/bootstrap
-        with:
-          poetry-skip: 'true'
       - name: Install dependencies
         if: ${{ needs.changes.outputs.framework == 'true' }}
         run: |
@@ -421,7 +422,6 @@ jobs:
         uses: ./.github/actions/bootstrap
         with:
           python-version: ${{ matrix.python-version }}
-          poetry-skip: 'true'
       - name: Install Flower from repo
         if: ${{ needs.changes.outputs.framework == 'true' && (github.repository != 'adap/flower' || github.event.pull_request.head.repo.fork || github.actor == 'dependabot[bot]') }}
         run: |
@@ -469,7 +469,6 @@ jobs:
         uses: ./.github/actions/bootstrap
         with:
           python-version: ${{ matrix.python-version }}
-          poetry-skip: 'true'
       - name: Install Flower from repo
         if: ${{ needs.changes.outputs.framework == 'true' && (github.repository != 'adap/flower' || github.event.pull_request.head.repo.fork || github.actor == 'dependabot[bot]') }}
         working-directory: ./framework
