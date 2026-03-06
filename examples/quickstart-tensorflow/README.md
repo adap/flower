@@ -6,7 +6,7 @@ framework: [tensorflow]
 
 # Federated Learning with Tensorflow/Keras and Flower (Quickstart Example)
 
-This introductory example to Flower uses Tensorflow/Keras but deep knowledge of this frameworks is required to run the example. However, it will help you understand how to adapt Flower to your use case.
+This introductory example to Flower uses Tensorflow/Keras but no deep knowledge of this frameworks is required to run the example. However, it will help you understand how to adapt Flower to your use case.
 Running this example in itself is quite easy. This example uses [Flower Datasets](https://flower.ai/docs/datasets/) to download, partition and preprocess the CIFAR-10 dataset.
 
 ## Set up the project
