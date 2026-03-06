@@ -47,7 +47,7 @@ AVAILABLE_MODELS = {
         "3": {"name": "gemini-3.1-pro-preview", "display": "Gemini 3.1 Pro", "provider": "google"},
     },
     "coding": {
-        "1": {"name": "gpt-5.2", "display": "GPT-5.2", "provider": "openai"},
+        "1": {"name": "gpt-5.4", "display": "GPT-5.4", "provider": "openai"},
         "2": {"name": "claude-sonnet-4-6", "display": "Claude Sonnet 4.6", "provider": "anthropic"},
     }
 }
@@ -365,10 +365,14 @@ def run_coding_workflow(graph, research_plan, thread_id="coding_session_1"):
     
     simulation_attempts = 0
     max_simulation_attempts = 10
-    
+    workflow_complete = False  # Flag to exit the outer stream loop cleanly
+
     try:
         # Stream through the graph execution
         for event in graph.stream(initial_state, config, stream_mode="updates"):
+            if workflow_complete:
+                break
+
             for node_name, node_output in event.items():
                 print(f"\n{'─' * 70}")
                 print(f"📍 Node: {node_name}")
@@ -414,7 +418,13 @@ def run_coding_workflow(graph, research_plan, thread_id="coding_session_1"):
                     if simulation_attempts >= max_simulation_attempts:
                         print(f"\n⚠️  Maximum simulation attempts ({max_simulation_attempts}) reached.")
                         print("Manual intervention may be required.")
+                        workflow_complete = True
                         break
+
+                elif node_name == "toml_generator":
+                    print("📦 pyproject.toml generated. Workflow complete!")
+                    workflow_complete = True
+                    break  # Exit inner loop; outer loop checks workflow_complete
         
         # Get the final state
         final_state = graph.get_state(config).values
@@ -428,11 +438,12 @@ def run_coding_workflow(graph, research_plan, thread_id="coding_session_1"):
         files_generated = []
         
         file_map = {
-            "codebase_task": ("task.py", "Model, training, and data loading"),
-            "codebase_client": ("client_app.py", "FL Client implementation"),
-            "codebase_server": ("server_app.py", "FL Server configuration"),
-            "codebase_strategy": ("strategy.py", "Custom FL strategy"),
-            "codebase_run": ("run.py", "Orchestration script")
+            "codebase_task":     ("application/task.py",       "Model, training, and data loading"),
+            "codebase_client":   ("application/client_app.py", "FL Client implementation"),
+            "codebase_server":   ("application/server_app.py", "FL Server configuration"),
+            "codebase_strategy": ("application/strategy.py",   "Custom FL strategy"),
+            "codebase_run":      ("application/run.py",        "Simulation entry-point"),
+            "codebase_toml":     ("pyproject.toml",            "Flower CLI configuration (flwr run .)"),
         }
         
         for state_key, (filename, description) in file_map.items():
@@ -446,9 +457,10 @@ def run_coding_workflow(graph, research_plan, thread_id="coding_session_1"):
             print("=" * 70)
             print("\n📊 The FL simulation completed all 3 rounds successfully!")
             print("\n🚀 Next Steps:")
-            print("   1. Review the code: cd fl_codebase/")
-            print("   2. Run simulation:  python run.py")
-            print("   3. Customize:       Edit files as needed")
+            print("   1. Review the code:    cd fl_codebase/")
+            print("   2. Run with Python:    python application/run.py")
+            print("   3. Run with Flower CLI: flwr run .")
+            print("   4. Customize:          Edit files in application/ as needed")
         else:
             print("⚠️  WARNING: Simulation Issues Detected")
             print("=" * 70)
@@ -557,7 +569,8 @@ def main():
             print_section_header("🎉 ALL WORKFLOWS COMPLETED!")
             print("\n✅ Your federated learning system is ready!")
             print("\n📁 Check the fl_codebase/ directory for all generated files.")
-            print("📖 Review the code and run: python fl_codebase/run.py")
+            print("📖 Run simulation:    python fl_codebase/application/run.py")
+            print("📦 Or with Flower CLI: cd fl_codebase && flwr run .")
         
     except KeyboardInterrupt:
         print("\n\n⚠️  Process interrupted by user. Exiting gracefully...")

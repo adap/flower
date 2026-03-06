@@ -50,8 +50,15 @@ def cached_tool_invoke(tool, tool_args, tool_name):
     return result
 
 CODEBASE_DIR = Path("fl_codebase")
+APP_DIR = CODEBASE_DIR / "application"
 CODEBASE_DIR.mkdir(exist_ok=True)
+APP_DIR.mkdir(exist_ok=True)
+# Create __init__.py so 'application' is a proper Python package for `flwr run .`
+_init_file = APP_DIR / "__init__.py"
+if not _init_file.exists():
+    _init_file.write_text("")
 print(f"📁 Codebase directory: {CODEBASE_DIR.absolute()}")
+print(f"📁 Application directory: {APP_DIR.absolute()}")
 
 # === Helper Functions ===
 def get_llm_instance(model_name: str, temperature: float = 0, max_tokens: int = 8192, rate_limiter=None):
@@ -274,9 +281,8 @@ def extract_code_blocks(content: str) -> str:
         return content
 
 def save_code_to_file(code: str, module_name: str) -> Path:
-    """Save code to a file in the fl_codebase directory."""
-    # Create codebase directory
-    file_path = CODEBASE_DIR / f"{module_name}.py"
+    """Save code to a file in the fl_codebase/application directory."""
+    file_path = APP_DIR / f"{module_name}.py"
     print(f"Saving {module_name} to: {file_path}")
     
     with open(file_path, 'w', encoding='utf-8') as f:
@@ -300,7 +306,7 @@ def save_code_to_file(code: str, module_name: str) -> Path:
 
 def load_code_from_file(module_name: str) -> Optional[str]:
     """Load existing code from file if it exists."""
-    file_path = CODEBASE_DIR / f"{module_name}.py"
+    file_path = APP_DIR / f"{module_name}.py"
     if file_path.exists():
         print(f"Loading existing {module_name} from: {file_path}")
         with open(file_path, 'r', encoding='utf-8') as f:
@@ -413,7 +419,7 @@ def supervisor_base_node(state: SupervisorState) -> SupervisorState:
 # === Coder Node for Task Module ===
 def task_module_coder(state: SupervisorState) -> SupervisorState:
     task = state.get("task_module_task", "")
-    codebase_task = load_code_from_file("task_module")
+    codebase_task = load_code_from_file("task")
     require_debugging = state.get("task_require_debugging", False)
     pass_status = state.get("task_pass_status", False)
 
@@ -1664,6 +1670,7 @@ def server_module_test(state: SupervisorState) -> SupervisorState:
     ## 7. PARAMETER HANDLING
     - Are model parameters properly converted using ndarrays_to_parameters?
     - Is parameter conversion in evaluate function correct (parameters_ndarrays to model state_dict)?
+    - Is the training round set to 3 rounds for testing purposes?
 
     ## 8. FLOWER FRAMEWORK SCALAR VALIDATION
     - ALL values in configuration dictionaries and metrics dictionaries MUST be scalar types only
@@ -2000,10 +2007,16 @@ def evaluator_node(state: EvaluationState) -> EvaluationState:
     print("\n" + "="*60)
     print("🚀 Running FL Simulation Evaluator...")
     print("="*60)
-    
-    # Check required files
+
+    # Guard: if pyproject.toml was already written by a previous successful run,
+    # this node is being re-entered by a stale parallel branch — skip immediately.
+    if state.get("codebase_toml"):
+        print("⏭️  Skipping evaluator — workflow already completed (pyproject.toml exists).")
+        return Command(goto=END, update={})
+
+    # Check required files in application/ subdirectory
     required_files = ["run.py", "task.py", "client_app.py", "server_app.py", "strategy.py"]
-    missing = [f for f in required_files if not (CODEBASE_DIR / f).exists()]
+    missing = [f for f in required_files if not (APP_DIR / f).exists()]
     
     if missing:
         return Command(
@@ -2015,7 +2028,7 @@ def evaluator_node(state: EvaluationState) -> EvaluationState:
             }
         )
     
-    print(f"📍 Working directory: {CODEBASE_DIR.absolute()}")
+    print(f"📍 Working directory: {APP_DIR.absolute()}")
     
     # Run simulation with proper cleanup
     process = None
@@ -2026,7 +2039,7 @@ def evaluator_node(state: EvaluationState) -> EvaluationState:
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
-            cwd=str(CODEBASE_DIR.absolute()),
+            cwd=str(APP_DIR.absolute()),
             env={**os.environ, 'FL_TEST_MODE': '1'},
             preexec_fn=os.setsid if os.name != 'nt' else None,
             creationflags=subprocess.CREATE_NEW_PROCESS_GROUP if os.name == 'nt' else 0
@@ -2144,9 +2157,9 @@ def evaluator_node(state: EvaluationState) -> EvaluationState:
         # Parse LLM response
         success = "SUCCESS: Yes" in analysis
         if success:
-            print("\n✅ Simulation successful!")
+            print("\n✅ Simulation successful! Generating pyproject.toml for flwr run ...")
             return Command(
-                goto=END,
+                goto="toml_generator",
                 update={
                     "evaluation_pass_status": True,
                     "evaluation_test_feedback": f"✅ FL Simulation Successful!\n\n{analysis}",
@@ -2353,6 +2366,276 @@ def simulation_debugger(state: EvaluationState) -> EvaluationState:
         update=state_updates
     )
     
+# === TOML Generator Node ===
+def toml_generator_node(state) -> dict:
+    """
+    Generate a pyproject.toml for the Flower CLI (`flwr run .`) based on the
+    generated codebase in fl_codebase/application/.
+    """
+    print("\n" + "="*60)
+    print("📦 TOML Generator: Creating pyproject.toml ...")
+    print("="*60)
+
+    # Load all generated code files
+    code_files = {
+        "run.py":        load_code_from_file("run"),
+        "task.py":       load_code_from_file("task"),
+        "client_app.py": load_code_from_file("client_app"),
+        "server_app.py": load_code_from_file("server_app"),
+        "strategy.py":   load_code_from_file("strategy"),
+    }
+
+    llm = get_llm_instance(
+        model_name=code_model,
+        temperature=0,
+        max_tokens=4096,
+        rate_limiter=rate_limiter,
+    )
+
+    prompt = f"""You are a Flower (flwr) packaging expert.
+Your task is to generate a valid `pyproject.toml` for a Flower federated learning project
+so it can be launched with `flwr run .` from the project root directory.
+
+The project root contains:
+  pyproject.toml          <- you are generating this
+  application/
+    __init__.py
+    client_app.py
+    server_app.py
+    strategy.py
+    task.py
+    run.py
+
+# Code Files
+
+## run.py
+```python
+{code_files['run.py']}
+```
+
+## client_app.py
+```python
+{code_files['client_app.py']}
+```
+
+## server_app.py
+```python
+{code_files['server_app.py']}
+```
+
+## strategy.py
+```python
+{code_files['strategy.py']}
+```
+
+## task.py
+```python
+{code_files['task.py']}
+```
+
+# Step 1 — Inspect the code and extract:
+- PUBLISHER: a short lowercase slug derived from the project (e.g. "helmsman")
+- APP_NAME: a short kebab-case project name (e.g. "fl-codebase")
+- CLIENT_APP_VAR: the exact variable name of the `ClientApp` instance in `client_app.py`
+- SERVER_APP_VAR: the exact variable name of the `ServerApp` instance in `server_app.py`
+- NUM_CLIENTS: the value of NUM_CLIENTS (or equivalent num_supernodes) from `run.py`
+- NUM_ROUNDS: the num_rounds / num-server-rounds value from `run.py` or `server_app.py`
+- FRACTION_EVALUATE: the fraction_evaluate value if set, otherwise 1.0
+- LOCAL_EPOCHS: local training epochs if set, otherwise 1
+- BATCH_SIZE: batch size if set, otherwise 32
+- DEPENDENCIES: all non-stdlib third-party packages imported across all five files
+
+# Step 2 — Generate the pyproject.toml using EXACTLY this structure:
+
+```toml
+[project]
+name = "APP_NAME"
+version = "1.0.0"
+description = "Federated Learning system generated by Helmsman"
+license = "Apache-2.0"
+dependencies = [
+    "flwr[simulation]>=1.20.0",
+    "flwr-datasets[vision]>=0.5.0",
+    # ... detected dependencies listed one per line
+]
+
+[tool.flwr.app]
+publisher = "PUBLISHER"
+
+[tool.flwr.app.components]
+serverapp = "application.server_app:SERVER_APP_VAR"
+clientapp = "application.client_app:CLIENT_APP_VAR"
+
+[tool.flwr.app.config]
+num-server-rounds = NUM_ROUNDS
+fraction-evaluate = FRACTION_EVALUATE
+local-epochs = LOCAL_EPOCHS
+batch-size = BATCH_SIZE
+
+[tool.flwr.federations]
+default = "local-simulation"
+
+[tool.flwr.federations.local-simulation]
+options.num-supernodes = NUM_CLIENTS
+```
+
+# Step 3 — Dependency rules:
+- Always include `flwr[simulation]>=1.20.0` and `flwr-datasets[vision]>=0.5.0`
+- `torch` import → add `torch>=2.0.0`
+- `torchvision` import → add `torchvision>=0.15.0`
+- `torchaudio` import → add `torchaudio>=2.0.0`
+- `sklearn` / `scikit-learn` import → add `scikit-learn>=1.3.0`
+- `numpy` import → add `numpy>=1.26.0`
+- `PIL` / `Pillow` import → add `Pillow>=10.0.0`
+- Any other non-stdlib import → add with a sensible minimum version pin
+- Do NOT include stdlib modules (os, sys, re, json, typing, pathlib, etc.)
+
+# Rules:
+- Do NOT include a [build-system] section
+- Do NOT include requires-python
+- Integer config values must be bare integers (no quotes), floats as bare floats
+- Output ONLY the raw TOML — no markdown fences, no explanation, no comments
+"""
+
+    messages = [HumanMessage(content=prompt)]
+    response = llm.invoke(messages)
+    toml_content = response.content.strip()
+
+    # Strip any accidental markdown fences
+    if toml_content.startswith("```"):
+        toml_content = re.sub(r'^```(?:toml)?\s*\n?', '', toml_content)
+        toml_content = re.sub(r'\n?```\s*$', '', toml_content)
+        toml_content = toml_content.strip()
+
+    # Write pyproject.toml to the project root (CODEBASE_DIR), not application/
+    toml_path = CODEBASE_DIR / "pyproject.toml"
+    with open(toml_path, 'w', encoding='utf-8') as f:
+        f.write(toml_content)
+        f.flush()
+        os.fsync(f.fileno())
+
+    print(f"✅ pyproject.toml written to: {toml_path.absolute()}")
+    print("\n📄 pyproject.toml contents:\n" + "-"*60)
+    print(toml_content[:800] + ("..." if len(toml_content) > 800 else ""))
+    print("-"*60)
+
+    # Rewrite sibling imports to relative imports so `flwr run .` works.
+    # run.py is left untouched — Flower never imports it as a package,
+    # and it must keep flat imports so `python run.py` continues to work.
+    rewrite_local_imports(APP_DIR)
+
+    return Command(
+        goto=END,
+        update={"codebase_toml": toml_content}
+    )
+
+
+def rewrite_local_imports(app_dir: Path) -> None:
+    """
+    Rewrite imports so the generated codebase supports BOTH execution modes:
+
+      python application/run.py   (direct script execution)
+      flwr run .                  (Flower CLI, imports as application.<module>)
+
+    Strategy
+    --------
+    The two modes require different import styles in different files:
+
+    • client_app.py / server_app.py / strategy.py / task.py
+        Flower imports these as `application.<module>`, so sibling imports
+        must be RELATIVE:
+            from task import X     →  from .task import X
+            import strategy        →  from . import strategy
+
+    • run.py
+        Flower never imports run.py; it is only ever executed directly.
+        It therefore cannot use relative imports. Instead we:
+          1. Inject a sys.path fix at the very top so that the `application`
+             *package* is findable when running as a script:
+                 sys.path.insert(0, str(Path(__file__).parent.parent))
+          2. Rewrite its sibling imports to ABSOLUTE PACKAGE imports:
+                 from client_app import X   →  from application.client_app import X
+                 import server_app          →  from application import server_app
+
+        With the path fix, Python can locate the `application` package, which
+        means the relative imports inside client_app / server_app / etc. also
+        resolve correctly when run.py drives the simulation directly.
+    """
+    LOCAL_MODULES = {"task", "strategy", "client_app", "server_app"}
+
+    # ── Patterns shared by both rewrite passes ─────────────────────────────
+    # Matches bare  from <local> import ...  (not already dotted / packaged)
+    from_import_re = re.compile(
+        r'^(\s*)from\s+(' + '|'.join(LOCAL_MODULES) + r')(\s+import\s+)',
+        re.MULTILINE
+    )
+    # Matches bare  import <local>
+    bare_import_re = re.compile(
+        r'^(\s*)import\s+(' + '|'.join(LOCAL_MODULES) + r')\s*$',
+        re.MULTILINE
+    )
+
+    # ── sys.path snippet injected at the top of run.py ─────────────────────
+    SYSPATH_SNIPPET = (
+        "import sys\n"
+        "from pathlib import Path as _Path\n"
+        "# Allow both `python run.py` and `flwr run .` to resolve the\n"
+        "# application package and its relative imports correctly.\n"
+        "sys.path.insert(0, str(_Path(__file__).resolve().parent.parent))\n"
+    )
+
+    print("\n🔧 Rewriting imports for dual-mode compatibility "
+          "(`python run.py` + `flwr run .`) ...")
+
+    # ── Pass 1: package files → relative imports ────────────────────────────
+    PACKAGE_FILES = ["client_app.py", "server_app.py", "strategy.py", "task.py"]
+    for filename in PACKAGE_FILES:
+        file_path = app_dir / filename
+        if not file_path.exists():
+            continue
+
+        original = file_path.read_text(encoding="utf-8")
+        rewritten = from_import_re.sub(r'\1from .\2\3', original)
+        rewritten = bare_import_re.sub(r'\1from . import \2', rewritten)
+
+        if rewritten != original:
+            file_path.write_text(rewritten, encoding="utf-8")
+            n = sum(
+                1 for line in rewritten.splitlines()
+                if re.match(r'\s*from \.[a-z]', line)
+            )
+            print(f"   ✅ {filename}: {n} import(s) → relative")
+        else:
+            print(f"   ℹ️  {filename}: no sibling imports found, unchanged")
+
+    # ── Pass 2: run.py → sys.path fix + absolute package imports ───────────
+    run_path = app_dir / "run.py"
+    if run_path.exists():
+        original = run_path.read_text(encoding="utf-8")
+
+        # Rewrite  from <local> import X  →  from application.<local> import X
+        rewritten = from_import_re.sub(r'\1from application.\2\3', original)
+        # Rewrite  import <local>         →  from application import <local>
+        rewritten = bare_import_re.sub(r'\1from application import \2', rewritten)
+
+        # Prepend the sys.path snippet only if not already present
+        if "parent.parent" not in rewritten:
+            rewritten = SYSPATH_SNIPPET + "\n" + rewritten
+
+        if rewritten != original:
+            run_path.write_text(rewritten, encoding="utf-8")
+            print(f"   ✅ run.py: sys.path fix injected + imports → application.*")
+        else:
+            print(f"   ℹ️  run.py: no changes needed")
+
+    print(
+        "\n✅ Import rewrite complete.\n"
+        "   • client_app / server_app / strategy / task → relative imports\n"
+        "   • run.py → sys.path fix + absolute package imports\n"
+        "   Both `python application/run.py` and `flwr run .` are now supported."
+    )
+
+
 # === Building coding workflow graph ===
 def create_coding_workflow(
     code_model_name: str = "gemini-2.5-flash",
@@ -2382,6 +2665,7 @@ def create_coding_workflow(
     builder.add_node("orchestrator_test", orchestrator_test)
     builder.add_node("evaluator", evaluator_node)
     builder.add_node("simulation_debugger", simulation_debugger)
+    builder.add_node("toml_generator", toml_generator_node)
 
     # ============== Define coding stage edges ==============
     # Define edges for supervision stage
@@ -2397,7 +2681,7 @@ def create_coding_workflow(
     # builder.add_edge("orchestrator_test", "orchestrator_node")
 
     # server and ochestrator edges
-    builder.add_edge("server_module_coder", "orchestrator_node")
+    # builder.add_edge("server_module_coder", "orchestrator_node")
 
     checkpointer = MemorySaver()
     return builder.compile(checkpointer=checkpointer)
