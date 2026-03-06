@@ -1,0 +1,601 @@
+# CPU hardware database — source: Steam Hardware Survey (October 2025)
+
+[[cpus]]
+name        = 'Athlon Gold 3150U'
+cores       = '2 / 4'
+core_clock  = '2.4 to 3.3 GHz'
+shss        = 0.0012336201359738187
+
+[[cpus]]
+name        = 'Core Ultra 5 235TA'
+cores       = '14'
+core_clock  = '2.2 to 5 GHz'
+shss        = 0.0003900801779662638
+
+[[cpus]]
+name        = 'Athlon Silver 3050U'
+cores       = '2 / 4'
+core_clock  = '2.2 to 3.2 GHz'
+shss        = 0.0005217670071964738
+
+[[cpus]]
+name        = 'Core Ultra 5 235A'
+cores       = '14'
+core_clock  = '3.4 to 5 GHz'
+shss        = 0.0003900801779662638
+
+[[cpus]]
+name        = 'EPYC 7C13'
+cores       = '64 / 128'
+core_clock  = '2 to 3.675 GHz'
+shss        = 0.001003937107654369
+
+[[cpus]]
+name        = 'Ryzen 5 3600'
+cores       = '6 / 12'
+core_clock  = '3.6 to 4.2 GHz'
+shss        = 0.016318238831581094
+
+[[cpus]]
+name        = 'Ryzen 7 5700X'
+cores       = '8 / 16'
+core_clock  = '3.4 to 4.6 GHz'
+shss        = 0.014049216084834079
+
+[[cpus]]
+name        = 'EPYC 7Y43'
+cores       = '48 / 96'
+core_clock  = '2.55 to 3.6 GHz'
+shss        = 0.001003937107654369
+
+[[cpus]]
+name        = 'Ryzen 5 5600'
+cores       = '6 / 12'
+core_clock  = '3.5 to 4.4 GHz'
+shss        = 0.016318238831581094
+
+[[cpus]]
+name        = 'Ryzen 5 5500'
+cores       = '6 / 12'
+core_clock  = '3.6 to 4.2 GHz'
+shss        = 0.016318238831581094
+
+[[cpus]]
+name        = 'Core 5 120'
+cores       = '6 / 12'
+core_clock  = '2.5 to 4.5 GHz'
+shss        = 0.0023116151346280795
+
+[[cpus]]
+name        = 'Ryzen 5 5600G'
+cores       = '6 / 12'
+core_clock  = '3.9 to 4.4 GHz'
+shss        = 0.016318238831581094
+
+[[cpus]]
+name        = 'Ryzen 7 5700X3D'
+cores       = '8 / 16'
+core_clock  = '3 to 4.1 GHz'
+shss        = 0.014049216084834079
+
+[[cpus]]
+name        = 'Ryzen 5 2600'
+cores       = '6 / 12'
+core_clock  = '3.4 to 3.9 GHz'
+shss        = 0.016318238831581094
+
+[[cpus]]
+name        = 'Ryzen 7 3700X'
+cores       = '8 / 16'
+core_clock  = '3.6 to 4.4 GHz'
+shss        = 0.014049216084834079
+
+[[cpus]]
+name        = 'Ryzen 7 9800X3D'
+cores       = '8 / 16'
+core_clock  = '4.7 to 5.2 GHz'
+shss        = 0.014049216084834079
+
+[[cpus]]
+name        = 'Ryzen 7 5825U'
+cores       = '8 / 16'
+core_clock  = '2 to 4.5 GHz'
+shss        = 0.014049216084834079
+
+[[cpus]]
+name        = 'Ryzen 7 5700G'
+cores       = '8 / 16'
+core_clock  = '3.8 to 4.6 GHz'
+shss        = 0.014049216084834079
+
+[[cpus]]
+name        = 'Ryzen 5 5600X'
+cores       = '6 / 12'
+core_clock  = '3.7 to 4.6 GHz'
+shss        = 0.016318238831581094
+
+[[cpus]]
+name        = 'Ryzen 7 7800X3D'
+cores       = '8 / 16'
+core_clock  = '4.2 to 5 GHz'
+shss        = 0.014049216084834079
+
+[[cpus]]
+name        = 'Ryzen 5 3400G'
+cores       = '4 / 8'
+core_clock  = '3.7 to 4.2 GHz'
+shss        = 0.0076772274489450044
+
+[[cpus]]
+name        = 'Ryzen 7 5700U'
+cores       = '8 / 16'
+core_clock  = '1.8 to 4.3 GHz'
+shss        = 0.014049216084834079
+
+[[cpus]]
+name        = 'Ryzen 5 5600GT'
+cores       = '6 / 12'
+core_clock  = '3.6 to 4.6 GHz'
+shss        = 0.016318238831581094
+
+[[cpus]]
+name        = 'Ryzen 3 3200G'
+cores       = '4'
+core_clock  = '3.6 to 4 GHz'
+shss        = 0.0076772274489450044
+
+[[cpus]]
+name        = 'Ryzen 9 9950X3D'
+cores       = '16 / 32'
+core_clock  = '4.3 to 5.7 GHz'
+shss        = 0.0030620792407556833
+
+[[cpus]]
+name        = 'Ryzen 5 7500F'
+cores       = '6 / 12'
+core_clock  = '3.7 to 5 GHz'
+shss        = 0.016318238831581094
+
+[[cpus]]
+name        = 'Ryzen 5 9600X'
+cores       = '6 / 12'
+core_clock  = '3.9 to 5.4 GHz'
+shss        = 0.016318238831581094
+
+[[cpus]]
+name        = 'Ryzen 5 5500U'
+cores       = '6 / 12'
+core_clock  = '2.1 to 4 GHz'
+shss        = 0.016318238831581094
+
+[[cpus]]
+name        = 'Ryzen 7 5800X'
+cores       = '8 / 16'
+core_clock  = '3.8 to 4.7 GHz'
+shss        = 0.014049216084834079
+
+[[cpus]]
+name        = 'Ryzen 7 2700X'
+cores       = '8 / 16'
+core_clock  = '3.7 to 4.35 GHz'
+shss        = 0.014049216084834079
+
+[[cpus]]
+name        = 'Ryzen 5 1600'
+cores       = '6 / 12'
+core_clock  = '3.2 to 3.6 GHz'
+shss        = 0.010976626014685964
+
+[[cpus]]
+name        = 'Ryzen 7 9700X'
+cores       = '8 / 16'
+core_clock  = '3.8 to 5.5 GHz'
+shss        = 0.014049216084834079
+
+[[cpus]]
+name        = 'Ryzen 3 2200G'
+cores       = '4'
+core_clock  = '3.5 to 3.7 GHz'
+shss        = 0.0076772274489450044
+
+[[cpus]]
+name        = 'Ryzen 5 7600X'
+cores       = '6 / 12'
+core_clock  = '4.7 to 5.3 GHz'
+shss        = 0.016318238831581094
+
+[[cpus]]
+name        = 'Ryzen 5 4500'
+cores       = '6 / 12'
+core_clock  = '3.6 to 4.1 GHz'
+shss        = 0.016318238831581094
+
+[[cpus]]
+name        = 'Ryzen 5 3500U'
+cores       = '4 / 8'
+core_clock  = '2.1 to 3.7 GHz'
+shss        = 0.0076772274489450044
+
+[[cpus]]
+name        = 'Ryzen 5 3500X'
+cores       = '6'
+core_clock  = '3.6 to 4.1 GHz'
+shss        = 0.016318238831581094
+
+[[cpus]]
+name        = 'FX-8350'
+cores       = '8'
+core_clock  = '4 to 4.2 GHz'
+shss        = 0.014049216084834079
+
+[[cpus]]
+name        = 'Ryzen 7 5800X3D'
+cores       = '8 / 16'
+core_clock  = '3.4 to 4.5 GHz'
+shss        = 0.014049216084834079
+
+[[cpus]]
+name        = 'Ryzen 7 7700'
+cores       = '8 / 16'
+core_clock  = '3.8 to 5.3 GHz'
+shss        = 0.014049216084834079
+
+[[cpus]]
+name        = 'Ryzen 5 2400G'
+cores       = '4 / 8'
+core_clock  = '3.6 to 3.9 GHz'
+shss        = 0.0076772274489450044
+
+[[cpus]]
+name        = 'Ryzen 5 3600X'
+cores       = '6 / 12'
+core_clock  = '3.8 to 4.4 GHz'
+shss        = 0.016318238831581094
+
+[[cpus]]
+name        = 'Athlon X2 5000+'
+cores       = '2'
+core_clock  = '2.2 GHz'
+shss        = 0.0004917023655178665
+
+[[cpus]]
+name        = 'Ryzen Threadripper PRO 9995WX'
+cores       = '96 / 192'
+core_clock  = '2.5 to 5.4 GHz'
+shss        = 0.001492488263030198
+
+[[cpus]]
+name        = 'Ryzen AI Max+ 395'
+cores       = '16 / 32'
+core_clock  = '3 to 5.1 GHz'
+shss        = 0.0030620792407556833
+
+[[cpus]]
+name        = 'Ryzen 9 7940HX'
+cores       = '16 / 32'
+core_clock  = '2.4 to 5.2 GHz'
+shss        = 0.0030620792407556833
+
+[[cpus]]
+name        = 'Ryzen 5 4600G'
+cores       = '6 / 12'
+core_clock  = '3.7 to 4.2 GHz'
+shss        = 0.016318238831581094
+
+[[cpus]]
+name        = 'Core i5-12400F'
+cores       = '6 / 12'
+core_clock  = '2.5 to 4.4 GHz'
+shss        = 0.0023116151346280795
+
+[[cpus]]
+name        = 'Ryzen 5 5500X3D'
+cores       = '6 / 12'
+core_clock  = '3 to 4 GHz'
+shss        = 0.016318238831581094
+
+[[cpus]]
+name        = 'Ryzen 9 3900X'
+cores       = '12 / 24'
+core_clock  = '3.8 to 4.6 GHz'
+shss        = 0.0030125132098801416
+
+[[cpus]]
+name        = 'Ryzen 9 5950X'
+cores       = '16 / 32'
+core_clock  = '3.4 to 4.9 GHz'
+shss        = 0.0030620792407556833
+
+[[cpus]]
+name        = 'Ryzen 7 5700'
+cores       = '8 / 16'
+core_clock  = '3.7 to 4.6 GHz'
+shss        = 0.014049216084834079
+
+[[cpus]]
+name        = 'Ryzen 5 6600H'
+cores       = '6 / 12'
+core_clock  = '3.3 to 4.5 GHz'
+shss        = 0.016318238831581094
+
+[[cpus]]
+name        = 'Ryzen 5 8400F'
+cores       = '6 / 12'
+core_clock  = '4.2 to 4.7 GHz'
+shss        = 0.016318238831581094
+
+[[cpus]]
+name        = 'Ryzen AI 7 350'
+cores       = '8 / 16'
+core_clock  = '2 to 5 GHz'
+shss        = 0.014049216084834079
+
+[[cpus]]
+name        = 'Ryzen 5 PRO 4650G'
+cores       = '6 / 12'
+core_clock  = '3.7 to 4.2 GHz'
+shss        = 0.016318238831581094
+
+[[cpus]]
+name        = 'Ryzen 5 7600'
+cores       = '6 / 12'
+core_clock  = '3.8 to 5.1 GHz'
+shss        = 0.016318238831581094
+
+[[cpus]]
+name        = 'Ryzen 7 8845HS'
+cores       = '8 / 16'
+core_clock  = '3.8 to 5.1 GHz'
+shss        = 0.014049216084834079
+
+[[cpus]]
+name        = 'Ryzen 5 5625U'
+cores       = '6 / 12'
+core_clock  = '2.3 to 4.3 GHz'
+shss        = 0.016318238831581094
+
+[[cpus]]
+name        = 'Ryzen AI 9 HX 370'
+cores       = '12 / 24'
+core_clock  = '2 to 5.1 GHz'
+shss        = 0.0030125132098801416
+
+[[cpus]]
+name        = 'Ryzen 7 7730U'
+cores       = '8 / 16'
+core_clock  = '2 to 4.5 GHz'
+shss        = 0.014049216084834079
+
+[[cpus]]
+name        = 'Ryzen 5 7520U'
+cores       = '4 / 8'
+core_clock  = '2.8 to 4.3 GHz'
+shss        = 0.0076772274489450044
+
+[[cpus]]
+name        = 'FX-6300'
+cores       = '6'
+core_clock  = '3.5 to 4.1 GHz'
+shss        = 0.016318238831581094
+
+[[cpus]]
+name        = 'Ryzen 9 5900X'
+cores       = '12 / 24'
+core_clock  = '3.7 to 4.8 GHz'
+shss        = 0.0030125132098801416
+
+[[cpus]]
+name        = 'Core i5-14400F'
+cores       = '10 / 16'
+core_clock  = '2.5 to 4.7 GHz'
+shss        = 0.0005172463159832658
+
+[[cpus]]
+name        = 'Core i5-13420H'
+cores       = '8 / 12'
+core_clock  = '2.1 to 4.6 GHz'
+shss        = 0.001990189067983878
+
+[[cpus]]
+name        = 'Core Ultra 7 155H'
+cores       = '16 / 22'
+core_clock  = '3.8 to 4.8 GHz'
+shss        = 0.0004337691578984854
+
+[[cpus]]
+name        = 'Ryzen 7 6800H'
+cores       = '8 / 16'
+core_clock  = '3.2 to 4.7 GHz'
+shss        = 0.014049216084834079
+
+[[cpus]]
+name        = 'Ryzen 5 2600X'
+cores       = '6 / 12'
+core_clock  = '3.6 to 4.25 GHz'
+shss        = 0.016318238831581094
+
+[[cpus]]
+name        = 'Ryzen 7 1700'
+cores       = '8 / 16'
+core_clock  = '3 to 3.7 GHz'
+shss        = 0.014049216084834079
+
+[[cpus]]
+name        = 'Ryzen 7 5800H'
+cores       = '8 / 16'
+core_clock  = '3.2 to 4.4 GHz'
+shss        = 0.014049216084834079
+
+[[cpus]]
+name        = 'Core Ultra 9 285K'
+cores       = '24'
+core_clock  = '3.7 to 5.7 GHz'
+shss        = 0.000211423456457715
+
+[[cpus]]
+name        = 'Ryzen 5 PRO 4650U'
+cores       = '6 / 12'
+core_clock  = '2.1 to 4 GHz'
+shss        = 0.016318238831581094
+
+[[cpus]]
+name        = 'Processor N150'
+cores       = '4'
+core_clock  = '0.1 to 3.6 GHz'
+shss        = 0.007557033289796276
+
+[[cpus]]
+name        = 'Core 2 Duo E8400'
+cores       = '2'
+core_clock  = '3 GHz'
+shss        = 0.0007047728606154168
+
+[[cpus]]
+name        = 'Core i9-14900K'
+cores       = '24 / 32'
+core_clock  = '3.2 to 6 GHz'
+shss        = 0.000211423456457715
+
+[[cpus]]
+name        = 'Ryzen 7 8700G'
+cores       = '8 / 16'
+core_clock  = '4.2 to 5.1 GHz'
+shss        = 0.014049216084834079
+
+[[cpus]]
+name        = 'Ryzen 7 2700'
+cores       = '8 / 16'
+core_clock  = '3.2 to 4.1 GHz'
+shss        = 0.014049216084834079
+
+[[cpus]]
+name        = 'Processor N100'
+cores       = '4'
+core_clock  = '0.1 to 3.4 GHz'
+shss        = 0.007557033289796276
+
+[[cpus]]
+name        = 'Ryzen 5 PRO 5650U'
+cores       = '6 / 12'
+core_clock  = '2.3 to 4.2 GHz'
+shss        = 0.016318238831581094
+
+[[cpus]]
+name        = 'Core Ultra 7 265K'
+cores       = '20'
+core_clock  = '3.9 to 5.5 GHz'
+shss        = 0.00013964870371192242
+
+[[cpus]]
+name        = 'Core i7-13620H'
+cores       = '10 / 16'
+core_clock  = '2.4 to 4.9 GHz'
+shss        = 0.0005172463159832658
+
+[[cpus]]
+name        = 'Core i7-3770'
+cores       = '4 / 8'
+core_clock  = '3.4 to 3.9 GHz'
+shss        = 0.0010875435361699436
+
+[[cpus]]
+name        = 'Core i5-6500'
+cores       = '4'
+core_clock  = '3.2 to 3.6 GHz'
+shss        = 0.007557033289796276
+
+[[cpus]]
+name        = 'Ryzen 5 8600G'
+cores       = '6 / 12'
+core_clock  = '4.3 to 5 GHz'
+shss        = 0.016318238831581094
+
+[[cpus]]
+name        = 'Ryzen 7 4800H'
+cores       = '8 / 16'
+core_clock  = '2.9 to 4.2 GHz'
+shss        = 0.014049216084834079
+
+[[cpus]]
+name        = 'Ryzen 9 9950X'
+cores       = '16 / 32'
+core_clock  = '4.3 to 5.7 GHz'
+shss        = 0.0030620792407556833
+
+[[cpus]]
+name        = 'Ryzen 5 5500GT'
+cores       = '6 / 12'
+core_clock  = '3.6 to 4.4 GHz'
+shss        = 0.016318238831581094
+
+[[cpus]]
+name        = 'Ryzen AI Max+ PRO 395'
+cores       = '16 / 32'
+core_clock  = '3 to 5.1 GHz'
+shss        = 0.0030620792407556833
+
+[[cpus]]
+name        = 'Ryzen 5 4500U'
+cores       = '6'
+core_clock  = '2.3 to 4 GHz'
+shss        = 0.016318238831581094
+
+[[cpus]]
+name        = 'A8-7600'
+cores       = '4'
+core_clock  = '3.1 to 3.8 GHz'
+shss        = 0.0076772274489450044
+
+[[cpus]]
+name        = 'Ryzen 7 7700X'
+cores       = '8 / 16'
+core_clock  = '4.5 to 5.4 GHz'
+shss        = 0.014049216084834079
+
+[[cpus]]
+name        = 'Ryzen 7 3800X'
+cores       = '8 / 16'
+core_clock  = '3.9 to 4.5 GHz'
+shss        = 0.014049216084834079
+
+[[cpus]]
+name        = 'Core Ultra 5 225'
+cores       = '10'
+core_clock  = '3.3 to 4.9 GHz'
+shss        = 0.0005172463159832658
+
+[[cpus]]
+name        = 'Ryzen 7 8700F'
+cores       = '8 / 16'
+core_clock  = '4.1 to 5 GHz'
+shss        = 0.014049216084834079
+
+[[cpus]]
+name        = 'Ryzen 3 3100'
+cores       = '4 / 8'
+core_clock  = '3.6 to 3.9 GHz'
+shss        = 0.0076772274489450044
+
+[[cpus]]
+name        = 'Ryzen 5 7535HS'
+cores       = '6 / 12'
+core_clock  = '3.3 to 4.55 GHz'
+shss        = 0.016318238831581094
+
+[[cpus]]
+name        = 'Athlon 3000G (FH)'
+cores       = '2 / 4'
+core_clock  = '3.5 GHz'
+shss        = 0.0012336201359738187
+
+[[cpus]]
+name        = 'Core i7-7700'
+cores       = '4 / 8'
+core_clock  = '3.6 to 4.2 GHz'
+shss        = 0.0010875435361699436
+
+[[cpus]]
+name        = 'Ryzen 3 1200'
+cores       = '4'
+core_clock  = '3.1 to 3.4 GHz'
+shss        = 0.005164163572214725

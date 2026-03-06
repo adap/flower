@@ -1,60 +1,88 @@
-[tool.poetry]
-name = "bouquetfl"
-version = "0.1.0"
-description = ""
-authors = ["arnogeimer"]
-readme = "README.md"
-
-[tool.poetry.dependencies]
-python = "3.12"
-isort = "^8.0.1"
-flwr-datasets = "^0.6.0"
-flwr = {extras = ["simulation"], version = "^1.26.1"}
-numpy = "^2.4.2"
-pandas = "^3.0.1"
-torch = "^2.10.0"
-pre-commit = "^4.5.1"
-
-[project]
-name = "bouquetfl"
-version = "0.1.0"
-description = "Add your description here"
-readme = "README.md"
-requires-python = ">=3.12"
-dependencies = [
-    "black>=25.12.0",
-    "flwr-datasets>=0.6.0",
-    "flwr[simulation]>=1.26.1",
-    "ipython>=9.10.0",
-    "isort>=8.0.1",
-    "keyring>=25.7.0",
-    "keyrings-alt>=5.0.2",
-    "numba>=0.64.0",
-    "psutil>=7.2.2",
-    "timm>=1.0.25",
-    "torch==2.7.0",
-    "torchvision>=0.22.0",
-]
+# =====================================================================
+# For a full TOML configuration guide, check the Flower docs:
+# https://flower.ai/docs/framework/how-to-configure-pyproject-toml.html
+# =====================================================================
 
 [build-system]
-requires = ["poetry-core"]
+requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
-[tool.hatch.build.targets.wheel]
-packages = ["."]
+[tool.poetry]
+name = "bouquetfl"
+version = "1.0.0"
+description = ""
+license = "Apache-2.0"
+authors = ["arnogeimer"]
+packages = [{include = "bouquetfl"}, {include = "scripts"}, {include = "task"}]
+
+[tool.poetry.dependencies]
+python = ">=3.12,<3.13"
+flwr-datasets = ">=0.5.0"
+flwr = {version = ">=1.20.0", extras = ["simulation"]}
+numba = ">=0.62.1"
+numpy = "<2.3.2"
+psutil = ">=6.0.0"
+ray = "2.31.0"
+timm = ">=1.0.19"
+torch = ">=2.7.0"
+torchvision = ">=0.22.0"
+keyring = ">=25.0.0"
+keyrings-alt = ">=5.0.0"
+
+# Flower reads [project] for app metadata (entry points, deps)
+[project]
+name = "bouquetfl"
+version = "1.0.0"
+description = "A local hardware emulator for Federated Learning in Flower."
+license = "Apache-2.0"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "flwr-datasets>=0.5.0",
+    "flwr[simulation]>=1.20.0",
+    "numba>=0.62.1",
+    "numpy<2.3.2",
+    "psutil>=6.0.0",
+    "ray==2.31.0",
+    "timm>=1.0.19",
+    "torch>=2.7.0",
+    "torchvision>=0.22.0",
+    "keyring>=25.0.0",
+    "keyrings-alt>=5.0.0",
+]
 
 [tool.flwr.app]
 publisher = "arnogeimer"
 
+# Point to your ServerApp and ClientApp objects
+# Format: "<module>:<object>"
 [tool.flwr.app.components]
-serverapp = "bouquetfl.server_app:app"
-clientapp = "bouquetfl.client_app:app"
+serverapp = "scripts.server_app:app"
+clientapp = "scripts.client_app:app"
 
+# Custom config values accessible via `context.run_config`
 [tool.flwr.app.config]
 num-server-rounds = 3
 fraction-fit = 1
 fraction-evaluate = 1
-local-epochs = 5
-batch-size = 64                # training batch size
-learning-rate = 0.01 
-num-partitions = 10
+local-epochs = 1
+experiment = "cifar10"
+model = "resnet18"              # model architecture or LLM, optional
+batch-size = 64                 # training batch size
+learning-rate = 0.01
+num-clients = 5
+
+# Default federation to use when running the app
+[tool.flwr.federations]
+default = "local-simulation"
+
+# Local simulation federation with x virtual SuperNodes
+[tool.flwr.federations.local-simulation]
+options.num-supernodes = 5       # number of clients
+options.backend.client-resources.num-cpus = 8       # needed to spawn clients successively, not in parallel
+options.backend.client-resources.num-gpus = 1       # needed to spawn clients successively, not in parallel
+
+# Remote federation example for use with SuperLink
+[tool.flwr.federations.remote-federation]
+address = "<SUPERLINK-ADDRESS>:<PORT>"
+insecure = true  # Remove this line to enable TLS
+# root-certificates = "<PATH/TO/ca.crt>"  # For TLS setup

@@ -2,20 +2,14 @@ import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 warnings.filterwarnings("ignore", category=FutureWarning)
 
-import sys
-from typing import List, OrderedDict, Tuple
+from typing import Tuple
 
-
-import datasets
 import numpy as np
 import timm
 import torch
 import torch.nn as nn
 import torchvision
 import tqdm
-import yaml
-from datasets import Dataset
-from flwr.common.typing import NDArrays
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import (DirichletPartitioner, LinearPartitioner,
                                        SizePartitioner, SquarePartitioner)
@@ -154,7 +148,7 @@ def test(
     if len(testloader) == 0:
         return np.inf, 0
     with torch.no_grad():
-        for batch in testloader: 
+        for batch in testloader:
             images, labels = batch["img"].to(device), batch["label"].to(device)
             outputs = model(images)
             loss += criterion(outputs, labels).item()
@@ -163,27 +157,6 @@ def test(
             correct += (predicted == labels).sum().item()
     accuracy = correct / total
     del (testloader, model)
-    torch.cuda.empty_cache()
-    return loss, accuracy
-
-
-def ndarrays_from_model(model: torch.nn.ModuleList) -> NDArrays:
-    """Get model weights as a list of NumPy ndarrays."""
-    return [val.cpu().numpy() for _, val in model.state_dict().items()]
-
-
-def ndarrays_to_model(model: torch.nn.ModuleList, params: NDArrays):
-    """Set model weights from a list of NumPy ndarrays."""
-    params_dict = zip(model.state_dict().keys(), params)
-    state_dict = OrderedDict({k: torch.from_numpy(np.copy(v)) for k, v in params_dict})
-    model.load_state_dict(state_dict, strict=True)
-
-
-def evaluate_fn(server_round, weights_aggregated, config, **kwargs):
-    model = get_model()
-    ndarrays_to_model(model, weights_aggregated)
-    loss, accuracy = test(model, load_global_test_data())
-    del model
     torch.cuda.empty_cache()
     return loss, accuracy
 

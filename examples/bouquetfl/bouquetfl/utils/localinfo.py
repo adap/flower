@@ -1,12 +1,10 @@
-import platform
 import subprocess
 
+import platform
 import psutil
 from numba import cuda
-import yaml
 
-
-def get_local_gpu_cores():
+def _get_local_gpu_cores():
 
     cc_cores_per_SM_dict = {
         (2, 0): 32,
@@ -43,7 +41,7 @@ def _get_local_gpu_info():
         text=True,
     )
     name, mem_total, max_graphics, max_mem = result.stdout.strip().split(", ")
-    total_cores = get_local_gpu_cores()
+    total_cores = _get_local_gpu_cores()
     return {
         "gpu_name": name,
         "gpu_memory": int(int(mem_total) / 1024),
@@ -56,7 +54,7 @@ def _get_local_gpu_info():
 def _get_local_cpu_info():
     cpu_info = {}
     cpu_info["cpu_cores"] = psutil.cpu_count(logical=False)
-    cpu_info["cpu_clock_speed"] = psutil.cpu_freq().max
+    cpu_info["cpu_clock_speed"] = psutil.cpu_freq().max  # Convert MHz to GHz
     return cpu_info
 
 
@@ -65,20 +63,8 @@ def _get_local_ram_info() -> int:
     available_ram_gb = int(ram.available / (1024**3))
     return {"ram_gb": available_ram_gb}
 
-
 def _get_local_os_info():
-    return {
-        "os": platform.freedesktop_os_release()["NAME"]
-        + " "
-        + platform.freedesktop_os_release()["VERSION_ID"]
-    }
+    return {"os": platform.freedesktop_os_release()['NAME'] + " " + platform.freedesktop_os_release()['VERSION_ID']}
 
-
-def profile_local_hardware():
-    local_info = {
-        **_get_local_gpu_info(),
-        **_get_local_cpu_info(),
-        **_get_local_ram_info(),
-        **_get_local_os_info(),
-    }
-    return local_info
+def get_all_local_info():
+    return {**_get_local_gpu_info(), **_get_local_cpu_info(), **_get_local_ram_info(), **_get_local_os_info()}

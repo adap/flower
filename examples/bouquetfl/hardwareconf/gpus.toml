@@ -1,0 +1,981 @@
+# GPU hardware database — source: Steam Hardware Survey (October 2025)
+
+[[gpus]]
+name          = 'RTX PRO 6000 Blackwell'
+memory_gb     = 96.0
+memory_type   = 'GDDR7'
+memory_bw     = 512.0
+clock_speed   = 2617.0
+memory_speed  = 1750.0
+cuda_cores    = 24064
+shss          = 0.0
+
+[[gpus]]
+name          = 'Radeon RX 5700 XT'
+memory_gb     = 8.0
+memory_type   = 'GDDR6'
+memory_bw     = 256.0
+clock_speed   = 1905.0
+memory_speed  = 1750.0
+cuda_cores    = 2560
+shss          = 0.8609738884968243
+
+[[gpus]]
+name          = 'GeForce GTX 1070'
+memory_gb     = 8.0
+memory_type   = 'GDDR5'
+memory_bw     = 256.0
+clock_speed   = 1683.0
+memory_speed  = 2002.0
+cuda_cores    = 1920
+shss          = 1.1291460832745237
+
+[[gpus]]
+name          = 'Radeon RX 590'
+memory_gb     = 8.0
+memory_type   = 'GDDR5'
+memory_bw     = 256.0
+clock_speed   = 1545.0
+memory_speed  = 2000.0
+cuda_cores    = 2304
+shss          = 0.0
+
+[[gpus]]
+name          = 'Radeon RX 7600'
+memory_gb     = 8.0
+memory_type   = 'GDDR6'
+memory_bw     = 128.0
+clock_speed   = 2655.0
+memory_speed  = 2250.0
+cuda_cores    = 2048
+shss          = 0.0
+
+[[gpus]]
+name          = 'Radeon RX 9060 XT 8 GB'
+memory_gb     = 8.0
+memory_type   = 'GDDR6'
+memory_bw     = 128.0
+clock_speed   = 3130.0
+memory_speed  = 2518.0
+cuda_cores    = 2048
+shss          = 0.0
+
+[[gpus]]
+name          = 'Radeon RX 6650 XT'
+memory_gb     = 8.0
+memory_type   = 'GDDR6'
+memory_bw     = 128.0
+clock_speed   = 2635.0
+memory_speed  = 2190.0
+cuda_cores    = 2048
+shss          = 0.43754410726887794
+
+[[gpus]]
+name          = 'GeForce GTX 1070 Ti'
+memory_gb     = 8.0
+memory_type   = 'GDDR5'
+memory_bw     = 256.0
+clock_speed   = 1683.0
+memory_speed  = 2002.0
+cuda_cores    = 2432
+shss          = 0.3669724770642202
+
+[[gpus]]
+name          = 'GeForce RTX 2080 SUPER'
+memory_gb     = 8.0
+memory_type   = 'GDDR6'
+memory_bw     = 256.0
+clock_speed   = 1815.0
+memory_speed  = 1937.0
+cuda_cores    = 3072
+shss          = 0.47988708539167263
+
+[[gpus]]
+name          = 'GeForce RTX 3050 8 GB'
+memory_gb     = 8.0
+memory_type   = 'GDDR6'
+memory_bw     = 128.0
+clock_speed   = 1777.0
+memory_speed  = 1750.0
+cuda_cores    = 2560
+shss          = 0.0
+
+[[gpus]]
+name          = 'GeForce RTX 5060 Ti'
+memory_gb     = 8.0
+memory_type   = 'GDDR7'
+memory_bw     = 128.0
+clock_speed   = 2572.0
+memory_speed  = 1750.0
+cuda_cores    = 4608
+shss          = 1.397318278052223
+
+[[gpus]]
+name          = 'GeForce RTX 3070 Ti'
+memory_gb     = 8.0
+memory_type   = 'GDDR6X'
+memory_bw     = 256.0
+clock_speed   = 1770.0
+memory_speed  = 1188.0
+cuda_cores    = 6144
+shss          = 1.5384615384615388
+
+[[gpus]]
+name          = 'GeForce RTX 2060 SUPER'
+memory_gb     = 8.0
+memory_type   = 'GDDR6'
+memory_bw     = 256.0
+clock_speed   = 1650.0
+memory_speed  = 1750.0
+cuda_cores    = 2176
+shss          = 1.3549752999294284
+
+[[gpus]]
+name          = 'GeForce RTX 2080'
+memory_gb     = 8.0
+memory_type   = 'GDDR6'
+memory_bw     = 256.0
+clock_speed   = 1710.0
+memory_speed  = 1750.0
+cuda_cores    = 2944
+shss          = 0.39520112914608335
+
+[[gpus]]
+name          = 'GeForce GTX 1080'
+memory_gb     = 8.0
+memory_type   = 'GDDR5X'
+memory_bw     = 256.0
+clock_speed   = 1733.0
+memory_speed  = 1251.0
+cuda_cores    = 2560
+shss          = 0.7198306280875089
+
+[[gpus]]
+name          = 'GeForce RTX 2070'
+memory_gb     = 8.0
+memory_type   = 'GDDR6'
+memory_bw     = 256.0
+clock_speed   = 1620.0
+memory_speed  = 1750.0
+cuda_cores    = 2304
+shss          = 0.804516584333098
+
+[[gpus]]
+name          = 'GeForce RTX 4060 Ti'
+memory_gb     = 8.0
+memory_type   = 'GDDR6'
+memory_bw     = 128.0
+clock_speed   = 2535.0
+memory_speed  = 2250.0
+cuda_cores    = 4352
+shss          = 3.9520112914608325
+
+[[gpus]]
+name          = 'Radeon RX 6600 XT'
+memory_gb     = 8.0
+memory_type   = 'GDDR6'
+memory_bw     = 128.0
+clock_speed   = 2589.0
+memory_speed  = 2000.0
+cuda_cores    = 2048
+shss          = 0.4516584333098095
+
+[[gpus]]
+name          = 'Radeon RX 6600'
+memory_gb     = 8.0
+memory_type   = 'GDDR6'
+memory_bw     = 128.0
+clock_speed   = 2491.0
+memory_speed  = 1750.0
+cuda_cores    = 1792
+shss          = 1.2985179957657023
+
+[[gpus]]
+name          = 'GeForce RTX 2070 SUPER'
+memory_gb     = 8.0
+memory_type   = 'GDDR6'
+memory_bw     = 256.0
+clock_speed   = 1770.0
+memory_speed  = 1750.0
+cuda_cores    = 2560
+shss          = 1.213832039520113
+
+[[gpus]]
+name          = 'GeForce RTX 4060'
+memory_gb     = 8.0
+memory_type   = 'GDDR6'
+memory_bw     = 128.0
+clock_speed   = 2460.0
+memory_speed  = 2125.0
+cuda_cores    = 3072
+shss          = 5.885673959068455
+
+[[gpus]]
+name          = 'GeForce RTX 5060'
+memory_gb     = 8.0
+memory_type   = 'GDDR7'
+memory_bw     = 128.0
+clock_speed   = 2497.0
+memory_speed  = 1750.0
+cuda_cores    = 3840
+shss          = 1.834862385321101
+
+[[gpus]]
+name          = 'Radeon RX 7400'
+memory_gb     = 8.0
+memory_type   = 'GDDR6'
+memory_bw     = 128.0
+clock_speed   = 2300.0
+memory_speed  = 2250.0
+cuda_cores    = 1792
+shss          = 0.0
+
+[[gpus]]
+name          = 'Radeon RX 5700'
+memory_gb     = 8.0
+memory_type   = 'GDDR6'
+memory_bw     = 256.0
+clock_speed   = 1725.0
+memory_speed  = 1750.0
+cuda_cores    = 2304
+shss          = 0.0
+
+[[gpus]]
+name          = 'Radeon RX 580'
+memory_gb     = 8.0
+memory_type   = 'GDDR5'
+memory_bw     = 256.0
+clock_speed   = 1340.0
+memory_speed  = 2000.0
+cuda_cores    = 2304
+shss          = 0.9738884968242766
+
+[[gpus]]
+name          = 'GeForce RTX 3060 Ti'
+memory_gb     = 8.0
+memory_type   = 'GDDR6'
+memory_bw     = 256.0
+clock_speed   = 1665.0
+memory_speed  = 1750.0
+cuda_cores    = 4864
+shss          = 3.641496118560339
+
+[[gpus]]
+name          = 'GeForce RTX 4060 Mobile'
+memory_gb     = 8.0
+memory_type   = 'GDDR6'
+memory_bw     = 128.0
+clock_speed   = 1890.0
+memory_speed  = 2000.0
+cuda_cores    = 3072
+shss          = 6.0691601976005645
+
+[[gpus]]
+name          = 'GeForce RTX 5050'
+memory_gb     = 8.0
+memory_type   = 'GDDR6'
+memory_bw     = 128.0
+clock_speed   = 2572.0
+memory_speed  = 2500.0
+cuda_cores    = 2560
+shss          = 0.0
+
+[[gpus]]
+name          = 'GeForce RTX 3070'
+memory_gb     = 8.0
+memory_type   = 'GDDR6'
+memory_bw     = 256.0
+clock_speed   = 1725.0
+memory_speed  = 1750.0
+cuda_cores    = 5888
+shss          = 3.401552575864503
+
+[[gpus]]
+name          = 'GeForce GTX 1660'
+memory_gb     = 6.0
+memory_type   = 'GDDR5'
+memory_bw     = 192.0
+clock_speed   = 1785.0
+memory_speed  = 2001.0
+cuda_cores    = 1408
+shss          = 0.8186309103740296
+
+[[gpus]]
+name          = 'GeForce RTX 4050 Mobile'
+memory_gb     = 6.0
+memory_type   = 'GDDR6'
+memory_bw     = 96.0
+clock_speed   = 1755.0
+memory_speed  = 2000.0
+cuda_cores    = 2560
+shss          = 2.074805928016937
+
+[[gpus]]
+name          = 'Radeon RX 5600 XT'
+memory_gb     = 6.0
+memory_type   = 'GDDR6'
+memory_bw     = 192.0
+clock_speed   = 1560.0
+memory_speed  = 1500.0
+cuda_cores    = 2304
+shss          = 0.22582921665490474
+
+[[gpus]]
+name          = 'GeForce RTX 2060'
+memory_gb     = 6.0
+memory_type   = 'GDDR6'
+memory_bw     = 192.0
+clock_speed   = 1680.0
+memory_speed  = 1750.0
+cuda_cores    = 1920
+shss          = 2.978122794636556
+
+[[gpus]]
+name          = 'GeForce GTX 980 Ti'
+memory_gb     = 6.0
+memory_type   = 'GDDR5'
+memory_bw     = 384.0
+clock_speed   = 1076.0
+memory_speed  = 1753.0
+cuda_cores    = 2816
+shss          = 0.0
+
+[[gpus]]
+name          = 'GeForce GTX 1060'
+memory_gb     = 6.0
+memory_type   = 'GDDR5'
+memory_bw     = 192.0
+clock_speed   = 1709.0
+memory_speed  = 2002.0
+cuda_cores    = 1280
+shss          = 2.7522935779816513
+
+[[gpus]]
+name          = 'GeForce RTX 4050'
+memory_gb     = 6.0
+memory_type   = 'GDDR6'
+memory_bw     = 96.0
+clock_speed   = 2640.0
+memory_speed  = 2250.0
+cuda_cores    = 2560
+shss          = 0.0
+
+[[gpus]]
+name          = 'GeForce GTX 1660 SUPER'
+memory_gb     = 6.0
+memory_type   = 'GDDR6'
+memory_bw     = 192.0
+clock_speed   = 1785.0
+memory_speed  = 1750.0
+cuda_cores    = 1408
+shss          = 2.385321100917431
+
+[[gpus]]
+name          = 'GeForce RTX 3050'
+memory_gb     = 6.0
+memory_type   = 'GDDR6'
+memory_bw     = 96.0
+clock_speed   = 1470.0
+memory_speed  = 1750.0
+cuda_cores    = 2304
+shss          = 4.37544107268878
+
+[[gpus]]
+name          = 'GeForce GTX 1660 Ti'
+memory_gb     = 6.0
+memory_type   = 'GDDR6'
+memory_bw     = 192.0
+clock_speed   = 1770.0
+memory_speed  = 1500.0
+cuda_cores    = 1536
+shss          = 1.5384615384615388
+
+[[gpus]]
+name          = 'GeForce GTX 1650 SUPER'
+memory_gb     = 4.0
+memory_type   = 'GDDR6'
+memory_bw     = 128.0
+clock_speed   = 1725.0
+memory_speed  = 1500.0
+cuda_cores    = 1280
+shss          = 0.46577275935074103
+
+[[gpus]]
+name          = 'Radeon RX 470'
+memory_gb     = 4.0
+memory_type   = 'GDDR5'
+memory_bw     = 256.0
+clock_speed   = 1206.0
+memory_speed  = 1650.0
+cuda_cores    = 2048
+shss          = 0.0
+
+[[gpus]]
+name          = 'Radeon RX 580 2048SP'
+memory_gb     = 4.0
+memory_type   = 'GDDR5'
+memory_bw     = 256.0
+clock_speed   = 1284.0
+memory_speed  = 1750.0
+cuda_cores    = 2048
+shss          = 0.8750882145377559
+
+[[gpus]]
+name          = 'Radeon RX 6500 XT'
+memory_gb     = 4.0
+memory_type   = 'GDDR6'
+memory_bw     = 64.0
+clock_speed   = 2815.0
+memory_speed  = 2248.0
+cuda_cores    = 1024
+shss          = 0.2822865208186309
+
+[[gpus]]
+name          = 'Radeon RX 570'
+memory_gb     = 4.0
+memory_type   = 'GDDR5'
+memory_bw     = 256.0
+clock_speed   = 1244.0
+memory_speed  = 1750.0
+cuda_cores    = 2048
+shss          = 0.6069160197600565
+
+[[gpus]]
+name          = 'Radeon RX 5500 XT'
+memory_gb     = 4.0
+memory_type   = 'GDDR6'
+memory_bw     = 128.0
+clock_speed   = 1845.0
+memory_speed  = 1750.0
+cuda_cores    = 1408
+shss          = 0.0
+
+[[gpus]]
+name          = 'GeForce GTX 970'
+memory_gb     = 4.0
+memory_type   = 'GDDR5'
+memory_bw     = 256.0
+clock_speed   = 1178.0
+memory_speed  = 1753.0
+cuda_cores    = 1664
+shss          = 0.35285815102328866
+
+[[gpus]]
+name          = 'Radeon RX 6400'
+memory_gb     = 4.0
+memory_type   = 'GDDR6'
+memory_bw     = 64.0
+clock_speed   = 2321.0
+memory_speed  = 2000.0
+cuda_cores    = 768
+shss          = 0.0
+
+[[gpus]]
+name          = 'GeForce GTX 980'
+memory_gb     = 4.0
+memory_type   = 'GDDR5'
+memory_bw     = 256.0
+clock_speed   = 1216.0
+memory_speed  = 1753.0
+cuda_cores    = 2048
+shss          = 0.0
+
+[[gpus]]
+name          = 'GeForce RTX 2050 Mobile'
+memory_gb     = 4.0
+memory_type   = 'GDDR6'
+memory_bw     = 64.0
+clock_speed   = 1245.0
+memory_speed  = 1750.0
+cuda_cores    = 2048
+shss          = 0.0
+
+[[gpus]]
+name          = 'GeForce GTX 1050 Ti'
+memory_gb     = 4.0
+memory_type   = 'GDDR5'
+memory_bw     = 128.0
+clock_speed   = 1392.0
+memory_speed  = 1752.0
+cuda_cores    = 768
+shss          = 2.1030345800988
+
+[[gpus]]
+name          = 'GeForce GTX 1650'
+memory_gb     = 4.0
+memory_type   = 'GDDR5'
+memory_bw     = 128.0
+clock_speed   = 1665.0
+memory_speed  = 2001.0
+cuda_cores    = 896
+shss          = 4.304869442484121
+
+[[gpus]]
+name          = 'GeForce RTX 5090'
+memory_gb     = 32.0
+memory_type   = 'GDDR7'
+memory_bw     = 512.0
+clock_speed   = 2407.0
+memory_speed  = 1750.0
+cuda_cores    = 21760
+shss          = 0.46577275935074103
+
+[[gpus]]
+name          = 'Radeon RX 7900 XTX'
+memory_gb     = 24.0
+memory_type   = 'GDDR6'
+memory_bw     = 384.0
+clock_speed   = 2498.0
+memory_speed  = 2500.0
+cuda_cores    = 6144
+shss          = 0.6916019760056458
+
+[[gpus]]
+name          = 'GeForce RTX 3090 Ti'
+memory_gb     = 24.0
+memory_type   = 'GDDR6X'
+memory_bw     = 384.0
+clock_speed   = 1860.0
+memory_speed  = 1313.0
+cuda_cores    = 10752
+shss          = 0.0
+
+[[gpus]]
+name          = 'GeForce RTX 4090'
+memory_gb     = 24.0
+memory_type   = 'GDDR6X'
+memory_bw     = 384.0
+clock_speed   = 2520.0
+memory_speed  = 1313.0
+cuda_cores    = 16384
+shss          = 1.1997177134791814
+
+[[gpus]]
+name          = 'GeForce RTX 3090'
+memory_gb     = 24.0
+memory_type   = 'GDDR6X'
+memory_bw     = 384.0
+clock_speed   = 1695.0
+memory_speed  = 1219.0
+cuda_cores    = 10496
+shss          = 0.6351446718419196
+
+[[gpus]]
+name          = 'GeForce RTX 5080 SUPER'
+memory_gb     = 24.0
+memory_type   = 'GDDR7'
+memory_bw     = 256.0
+clock_speed   = 2617.0
+memory_speed  = 2000.0
+cuda_cores    = 10752
+shss          = 0.0
+
+[[gpus]]
+name          = 'Radeon RX 7900 XT'
+memory_gb     = 20.0
+memory_type   = 'GDDR6'
+memory_bw     = 320.0
+clock_speed   = 2394.0
+memory_speed  = 2500.0
+cuda_cores    = 5376
+shss          = 0.0
+
+[[gpus]]
+name          = 'GeForce GTX 1050'
+memory_gb     = 2.0
+memory_type   = 'GDDR5'
+memory_bw     = 128.0
+clock_speed   = 1455.0
+memory_speed  = 1752.0
+cuda_cores    = 640
+shss          = 1.0162314749470713
+
+[[gpus]]
+name          = 'GeForce GTX 960'
+memory_gb     = 2.0
+memory_type   = 'GDDR5'
+memory_bw     = 128.0
+clock_speed   = 1178.0
+memory_speed  = 1753.0
+cuda_cores    = 1024
+shss          = 0.310515172900494
+
+[[gpus]]
+name          = 'Radeon RX 550'
+memory_gb     = 2.0
+memory_type   = 'GDDR5'
+memory_bw     = 128.0
+clock_speed   = 1183.0
+memory_speed  = 1750.0
+cuda_cores    = 512
+shss          = 0.35285815102328866
+
+[[gpus]]
+name          = 'GeForce GTX 950'
+memory_gb     = 2.0
+memory_type   = 'GDDR5'
+memory_bw     = 128.0
+clock_speed   = 1188.0
+memory_speed  = 1653.0
+cuda_cores    = 768
+shss          = 0.0
+
+[[gpus]]
+name          = 'GeForce GT 1030'
+memory_gb     = 2.0
+memory_type   = 'GDDR5'
+memory_bw     = 64.0
+clock_speed   = 1468.0
+memory_speed  = 1502.0
+cuda_cores    = 384
+shss          = 0.3669724770642202
+
+[[gpus]]
+name          = 'GeForce GTX 750 Ti'
+memory_gb     = 2.0
+memory_type   = 'GDDR5'
+memory_bw     = 128.0
+clock_speed   = 1085.0
+memory_speed  = 1350.0
+cuda_cores    = 640
+shss          = 0.310515172900494
+
+[[gpus]]
+name          = 'GeForce GTX 660'
+memory_gb     = 2.0
+memory_type   = 'GDDR5'
+memory_bw     = 192.0
+clock_speed   = 1032.0
+memory_speed  = 1502.0
+cuda_cores    = 960
+shss          = 0.0
+
+[[gpus]]
+name          = 'GeForce GT 730'
+memory_gb     = 2.0
+memory_type   = 'DDR3'
+memory_bw     = 128.0
+clock_speed   = 700.0
+memory_speed  = 800.0
+cuda_cores    = 96
+shss          = 0.25405786873676783
+
+[[gpus]]
+name          = 'GeForce RTX 5080'
+memory_gb     = 16.0
+memory_type   = 'GDDR7'
+memory_bw     = 256.0
+clock_speed   = 2617.0
+memory_speed  = 1875.0
+cuda_cores    = 10752
+shss          = 1.213832039520113
+
+[[gpus]]
+name          = 'Radeon Instinct MI50'
+memory_gb     = 16.0
+memory_type   = 'HBM2'
+memory_bw     = 4096.0
+clock_speed   = 1746.0
+memory_speed  = 1000.0
+cuda_cores    = 3840
+shss          = 0.0
+
+[[gpus]]
+name          = 'GeForce RTX 5060 Ti 16 GB'
+memory_gb     = 16.0
+memory_type   = 'GDDR7'
+memory_bw     = 128.0
+clock_speed   = 2572.0
+memory_speed  = 1750.0
+cuda_cores    = 4608
+shss          = 0.0
+
+[[gpus]]
+name          = 'GeForce RTX 5070 Ti'
+memory_gb     = 16.0
+memory_type   = 'GDDR7'
+memory_bw     = 256.0
+clock_speed   = 2452.0
+memory_speed  = 1750.0
+cuda_cores    = 8960
+shss          = 1.340860973888497
+
+[[gpus]]
+name          = 'Radeon RX 7900 GRE'
+memory_gb     = 16.0
+memory_type   = 'GDDR6'
+memory_bw     = 256.0
+clock_speed   = 2245.0
+memory_speed  = 2250.0
+cuda_cores    = 5120
+shss          = 0.0
+
+[[gpus]]
+name          = 'Intel Arc A770'
+memory_gb     = 16.0
+memory_type   = 'GDDR6'
+memory_bw     = 256.0
+clock_speed   = 2400.0
+memory_speed  = 2000.0
+cuda_cores    = 4096
+shss          = 0.0
+
+[[gpus]]
+name          = 'Radeon RX 9070'
+memory_gb     = 16.0
+memory_type   = 'GDDR6'
+memory_bw     = 256.0
+clock_speed   = 2520.0
+memory_speed  = 2518.0
+cuda_cores    = 3584
+shss          = 0.0
+
+[[gpus]]
+name          = 'Radeon RX 6950 XT'
+memory_gb     = 16.0
+memory_type   = 'GDDR6'
+memory_bw     = 256.0
+clock_speed   = 2310.0
+memory_speed  = 2250.0
+cuda_cores    = 5120
+shss          = 0.0
+
+[[gpus]]
+name          = 'Radeon RX 9070 XT'
+memory_gb     = 16.0
+memory_type   = 'GDDR6'
+memory_bw     = 256.0
+clock_speed   = 2970.0
+memory_speed  = 2518.0
+cuda_cores    = 4096
+shss          = 0.0
+
+[[gpus]]
+name          = 'Radeon RX 7800 XT'
+memory_gb     = 16.0
+memory_type   = 'GDDR6'
+memory_bw     = 256.0
+clock_speed   = 2430.0
+memory_speed  = 2438.0
+cuda_cores    = 3840
+shss          = 1.058574453069866
+
+[[gpus]]
+name          = 'Radeon RX 9060 XT 16 GB'
+memory_gb     = 16.0
+memory_type   = 'GDDR6'
+memory_bw     = 128.0
+clock_speed   = 3130.0
+memory_speed  = 2518.0
+cuda_cores    = 2048
+shss          = 0.0
+
+[[gpus]]
+name          = 'GeForce RTX 4070 Ti SUPER'
+memory_gb     = 16.0
+memory_type   = 'GDDR6X'
+memory_bw     = 256.0
+clock_speed   = 2610.0
+memory_speed  = 1313.0
+cuda_cores    = 8448
+shss          = 1.1573747353563868
+
+[[gpus]]
+name          = 'Radeon RX 6800 XT'
+memory_gb     = 16.0
+memory_type   = 'GDDR6'
+memory_bw     = 256.0
+clock_speed   = 2250.0
+memory_speed  = 2000.0
+cuda_cores    = 4608
+shss          = 0.39520112914608335
+
+[[gpus]]
+name          = 'Radeon RX 6800'
+memory_gb     = 16.0
+memory_type   = 'GDDR6'
+memory_bw     = 256.0
+clock_speed   = 2105.0
+memory_speed  = 2000.0
+cuda_cores    = 3840
+shss          = 0.2681721947776994
+
+[[gpus]]
+name          = 'Radeon RX 7600 XT'
+memory_gb     = 16.0
+memory_type   = 'GDDR6'
+memory_bw     = 128.0
+clock_speed   = 2755.0
+memory_speed  = 2250.0
+cuda_cores    = 2048
+shss          = 0.5645730416372619
+
+[[gpus]]
+name          = 'Radeon RX 6900 XT'
+memory_gb     = 16.0
+memory_type   = 'GDDR6'
+memory_bw     = 256.0
+clock_speed   = 2250.0
+memory_speed  = 2000.0
+cuda_cores    = 5120
+shss          = 0.2681721947776994
+
+[[gpus]]
+name          = 'GeForce RTX 4080'
+memory_gb     = 16.0
+memory_type   = 'GDDR6X'
+memory_bw     = 256.0
+clock_speed   = 2505.0
+memory_speed  = 1400.0
+cuda_cores    = 9728
+shss          = 0.9880028228652081
+
+[[gpus]]
+name          = 'GeForce RTX 4080 SUPER'
+memory_gb     = 16.0
+memory_type   = 'GDDR6X'
+memory_bw     = 256.0
+clock_speed   = 2550.0
+memory_speed  = 1438.0
+cuda_cores    = 10240
+shss          = 1.0162314749470713
+
+[[gpus]]
+name          = 'Radeon RX 6750 XT'
+memory_gb     = 12.0
+memory_type   = 'GDDR6'
+memory_bw     = 192.0
+clock_speed   = 2600.0
+memory_speed  = 2250.0
+cuda_cores    = 2560
+shss          = 0.43754410726887794
+
+[[gpus]]
+name          = 'Radeon RX 7700 XT'
+memory_gb     = 12.0
+memory_type   = 'GDDR6'
+memory_bw     = 192.0
+clock_speed   = 2544.0
+memory_speed  = 2250.0
+cuda_cores    = 3456
+shss          = 0.3669724770642202
+
+[[gpus]]
+name          = 'GeForce RTX 5070'
+memory_gb     = 12.0
+memory_type   = 'GDDR7'
+memory_bw     = 192.0
+clock_speed   = 2512.0
+memory_speed  = 1750.0
+cuda_cores    = 6144
+shss          = 2.6534932956951307
+
+[[gpus]]
+name          = 'GeForce RTX 4070 Ti'
+memory_gb     = 12.0
+memory_type   = 'GDDR6X'
+memory_bw     = 192.0
+clock_speed   = 2610.0
+memory_speed  = 1313.0
+cuda_cores    = 7680
+shss          = 1.4537755822159493
+
+[[gpus]]
+name          = 'Radeon RX 6700 XT'
+memory_gb     = 12.0
+memory_type   = 'GDDR6'
+memory_bw     = 192.0
+clock_speed   = 2581.0
+memory_speed  = 2000.0
+cuda_cores    = 2560
+shss          = 0.9174311926605505
+
+[[gpus]]
+name          = 'GeForce RTX 4070 SUPER'
+memory_gb     = 12.0
+memory_type   = 'GDDR6X'
+memory_bw     = 192.0
+clock_speed   = 2475.0
+memory_speed  = 1313.0
+cuda_cores    = 7168
+shss          = 2.413549752999294
+
+[[gpus]]
+name          = 'GeForce RTX 3080 Ti'
+memory_gb     = 12.0
+memory_type   = 'GDDR6X'
+memory_bw     = 384.0
+clock_speed   = 1665.0
+memory_speed  = 1188.0
+cuda_cores    = 10240
+shss          = 0.9174311926605505
+
+[[gpus]]
+name          = 'GeForce RTX 4070'
+memory_gb     = 12.0
+memory_type   = 'GDDR6X'
+memory_bw     = 192.0
+clock_speed   = 2475.0
+memory_speed  = 1313.0
+cuda_cores    = 5888
+shss          = 2.992237120677488
+
+[[gpus]]
+name          = 'Arc B580'
+memory_gb     = 12.0
+memory_type   = 'GDDR6'
+memory_bw     = 192.0
+clock_speed   = 2670.0
+memory_speed  = 2375.0
+cuda_cores    = 2560
+shss          = 0.0
+
+[[gpus]]
+name          = 'GeForce RTX 3060'
+memory_gb     = 8.0
+memory_type   = 'GDDR6'
+memory_bw     = 192.0
+clock_speed   = 1777.0
+memory_speed  = 1875.0
+cuda_cores    = 3584
+shss          = 6.3091037402964005
+
+[[gpus]]
+name          = 'GeForce RTX 2080 Ti'
+memory_gb     = 11.0
+memory_type   = 'GDDR6'
+memory_bw     = 352.0
+clock_speed   = 1545.0
+memory_speed  = 1750.0
+cuda_cores    = 4352
+shss          = 0.39520112914608335
+
+[[gpus]]
+name          = 'GeForce GTX 1080 Ti'
+memory_gb     = 11.0
+memory_type   = 'GDDR5X'
+memory_bw     = 352.0
+clock_speed   = 1582.0
+memory_speed  = 1376.0
+cuda_cores    = 3584
+shss          = 0.5645730416372619
+
+[[gpus]]
+name          = 'GeForce RTX 3080'
+memory_gb     = 10.0
+memory_type   = 'GDDR6X'
+memory_bw     = 320.0
+clock_speed   = 1710.0
+memory_speed  = 1188.0
+cuda_cores    = 8704
+shss          = 2.357092448835568
+
+[[gpus]]
+name          = 'GeForce 210'
+memory_gb     = 0.5
+memory_type   = 'DDR3'
+memory_bw     = 64.0
+clock_speed   = 520.0
+memory_speed  = 400.0
+cuda_cores    = 16
+shss          = 0.0
