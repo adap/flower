@@ -172,16 +172,6 @@ def _to_json(
     """Convert invitations to JSON serializable structure."""
     return {
         "success": True,
-        "received-invitations": [
-            {
-                "federation-name": invitation.federation_name,
-                "invited-by": invitation.inviter.name,
-                "status": invitation.status,
-                "created-at": invitation.created_at,
-                "status-changed-at": invitation.status_changed_at,
-            }
-            for invitation in received_invitations
-        ],
         "created-invitations": [
             {
                 "federation-name": invitation.federation_name,
@@ -191,5 +181,15 @@ def _to_json(
                 "status-changed-at": invitation.status_changed_at,
             }
             for invitation in created_invitations
+        ],
+        "received-invitations": [
+            {
+                "federation-name": invitation.federation_name,
+                "invited-by": invitation.inviter.name,
+                "status": invitation.status,
+                "created-at": invitation.created_at,
+                "status-changed-at": invitation.status_changed_at,
+            }
+            for invitation in received_invitations
         ],
     }

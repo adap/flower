@@ -66,8 +66,6 @@ def _reject_invitation(
         _: RejectInvitationResponse = stub.RejectInvitation(request)
 
     if is_json:
-        print_json_to_stdout(
-            {"success": True, "federation-name": request.federation_name}
-        )
+        print_json_to_stdout({"success": True})
     else:
         typer.secho(f"✅ Rejected invitation to join '{request.federation_name}'.")

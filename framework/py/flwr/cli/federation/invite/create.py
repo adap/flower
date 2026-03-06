@@ -73,13 +73,7 @@ def _create_invitation(
         _: CreateInvitationResponse = stub.CreateInvitation(request)
 
     if is_json:
-        print_json_to_stdout(
-            {
-                "success": True,
-                "invitee-account-name": request.invitee_account_name,
-                "federation-name": request.federation_name,
-            }
-        )
+        print_json_to_stdout({"success": True})
     else:
         typer.secho(
             f"✅ Created invitation for '{request.invitee_account_name}' to join "
