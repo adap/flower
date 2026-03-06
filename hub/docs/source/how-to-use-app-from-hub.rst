@@ -1,9 +1,6 @@
 Use an App from Flower Hub
 ==========================
 
-Use an App from Flower Hub
-==========================
-
 Flower Hub is the home for federated applications. It provides a unified experience for discovering, running, and sharing federated apps across both simulation and deployment environments.
 
 Create a New App from Hub
