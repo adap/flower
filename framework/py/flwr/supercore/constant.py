@@ -132,10 +132,3 @@ class InvitationStatus(str, Enum):
     REJECTED = "rejected"
     REVOKED = "revoked"
     EXPIRED = "expired"
-
-
-class Roles(str, Enum):
-    """Roles of federation accounts."""
-
-    OWNER = "owner"
-    COLLABORATOR = "collaborator"
