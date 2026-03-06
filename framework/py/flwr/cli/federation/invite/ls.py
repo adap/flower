@@ -34,6 +34,15 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.control_pb2_grpc import ControlStub
 from flwr.proto.federation_pb2 import Invitation  # pylint: disable=E0611
+from flwr.supercore.constant import InvitationStatus
+
+_STATUS_TO_COLOR = {
+    InvitationStatus.PENDING: "yellow",
+    InvitationStatus.ACCEPTED: "green",
+    InvitationStatus.REJECTED: "red",
+    InvitationStatus.REVOKED: "bright_black",
+    InvitationStatus.EXPIRED: "bright_black",
+}
 
 
 def ls(
@@ -78,28 +87,16 @@ def _list_invitations(
     with flwr_cli_grpc_exc_handler():
         response: ListInvitationsResponse = stub.ListInvitations(request)
 
-    received_invitations = _filter_invitations(
-        invitations=list(response.received_invitations),
-        verbose=verbose,
-    )
-    created_invitations = _filter_invitations(
-        invitations=list(response.created_invitations),
-        verbose=verbose,
-    )
+    created_invitations = _filter_invitations(response.created_invitations, verbose)
+    received_invitations = _filter_invitations(response.received_invitations, verbose)
 
     if is_json:
-        print_json_to_stdout(
-            _to_json(
-                created_invitations=created_invitations,
-                received_invitations=received_invitations,
-            )
-        )
+        print_json_to_stdout(_to_json(created_invitations, received_invitations))
     else:
         console = Console()
-        console.print("Your invitations:")
+        console.print()
         console.print(_to_received_invitations_table(received_invitations))
         console.print()
-        console.print("Invitations you created:")
         console.print(_to_created_invitations_table(created_invitations))
         if not verbose and not received_invitations and not created_invitations:
             console.print(
@@ -110,33 +107,19 @@ def _list_invitations(
 def _filter_invitations(
     invitations: list[Invitation], verbose: bool
 ) -> list[Invitation]:
-    """Filter and sort invitations for presentation."""
-    filtered = (
-        invitations
-        if verbose
-        else [
-            invitation for invitation in invitations if _is_pending(invitation.status)
-        ]
-    )
-    return sorted(
-        filtered,
-        key=lambda invitation: (
-            invitation.federation_name.lower(),
-            invitation.inviter.name.lower(),
-            invitation.invitee.name.lower(),
-            invitation.created_at,
-        ),
-    )
-
-
-def _is_pending(status: str) -> bool:
-    """Return True if invitation status is pending."""
-    return status.strip().lower() == "pending"
+    """Filter invitations for presentation."""
+    if verbose:
+        return invitations
+    return [iv for iv in invitations if iv.status == InvitationStatus.PENDING]
 
 
 def _to_received_invitations_table(invitations: list[Invitation]) -> Table:
     """Render invitations received by the current account."""
-    table = Table(header_style="bold cyan", show_lines=True)
+    table = Table(
+        title="Received Invitations",
+        header_style="bold cyan",
+        show_lines=True,
+    )
     table.add_column(
         Text("Federation Name", justify="center"),
         style="bright_black",
@@ -146,12 +129,11 @@ def _to_received_invitations_table(invitations: list[Invitation]) -> Table:
     table.add_column(Text("Status", justify="center"), no_wrap=True)
 
     for invitation in invitations:
-        status_label = _format_status(invitation.status)
-        status_style = _status_style(invitation.status)
+        color = _STATUS_TO_COLOR.get(invitation.status, "bright_black")
         table.add_row(
             invitation.federation_name,
             invitation.inviter.name,
-            f"[{status_style}]{status_label}[/{status_style}]",
+            f"[{color}]{invitation.status}[/{color}]",
         )
 
     return table
@@ -159,7 +141,11 @@ def _to_received_invitations_table(invitations: list[Invitation]) -> Table:
 
 def _to_created_invitations_table(invitations: list[Invitation]) -> Table:
     """Render invitations created by the current account."""
-    table = Table(header_style="bold cyan", show_lines=True)
+    table = Table(
+        title="Created Invitations",
+        header_style="bold cyan",
+        show_lines=True,
+    )
     table.add_column(
         Text("Federation Name", justify="center"),
         style="bright_black",
@@ -169,33 +155,14 @@ def _to_created_invitations_table(invitations: list[Invitation]) -> Table:
     table.add_column(Text("Status", justify="center"), no_wrap=True)
 
     for invitation in invitations:
-        status_label = _format_status(invitation.status)
-        status_style = _status_style(invitation.status)
+        color = _STATUS_TO_COLOR.get(invitation.status, "bright_black")
         table.add_row(
             invitation.federation_name,
             invitation.invitee.name,
-            f"[{status_style}]{status_label}[/{status_style}]",
+            f"[{color}]{invitation.status}[/{color}]",
         )
 
     return table
-
-
-def _status_style(status: str) -> str:
-    """Return rich style name for an invitation status."""
-    normalized = status.strip().lower()
-    if normalized == "accepted":
-        return "green"
-    if normalized == "pending":
-        return "yellow"
-    if normalized == "rejected":
-        return "red"
-    return "bright_black"
-
-
-def _format_status(status: str) -> str:
-    """Format status for readable CLI output."""
-    normalized = status.strip().replace("_", " ")
-    return " ".join(part.capitalize() for part in normalized.split()) or "Unknown"
 
 
 def _to_json(
