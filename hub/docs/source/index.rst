@@ -18,7 +18,7 @@ The Flower Community is growing quickly - we're a friendly group of researchers,
 Flower Hub
 ----------
 
-Flower Hub is a federated app store that enables the discovery, distribution, and execution of federated applications across heterogeneous environments.
+Flower Hub is a hub for collaborative AI that enables the discovery, distribution, and execution of federated AI apps across heterogeneous environments.
 
 With Flower Hub, you can:
 
