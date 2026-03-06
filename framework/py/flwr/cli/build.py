@@ -214,13 +214,39 @@ def build_fab_from_files(files: dict[str, bytes | Path]) -> bytes:
         fab_bytes = build_fab_from_files(files)
     """
 
-    def to_bytes(content: bytes | Path) -> bytes:
+    def _to_bytes(content: bytes | Path) -> bytes:
         return content.read_bytes() if isinstance(content, Path) else content
+
+    def _add_to_fab(
+        fab_file: zipfile.ZipFile,
+        path: str,
+        content: bytes,
+    ) -> str:
+        """Write a file to the FAB and return its CONTENT manifest line.
+
+        Parameters
+        ----------
+        fab_file : zipfile.ZipFile
+            The ZipFile object to write to.
+        path : str
+            The file path within the FAB.
+        content : bytes
+            The file contents as bytes.
+
+        Returns
+        -------
+        str
+            A CONTENT manifest line: "path,sha256,size_bits"
+        """
+        write_to_zip(fab_file, path, content)
+        sha256_hash = hashlib.sha256(content).hexdigest()
+        file_size_bits = len(content) * 8
+        return f"{path},{sha256_hash},{file_size_bits}"
 
     # Extract, load, and parse pyproject.toml
     if FAB_CONFIG_FILE not in files:
         raise ValueError(f"{FAB_CONFIG_FILE} not found in files")
-    pyproject_content = to_bytes(files[FAB_CONFIG_FILE])
+    pyproject_content = _to_bytes(files[FAB_CONFIG_FILE])
     config = tomli.loads(pyproject_content.decode("utf-8"))
 
     # Remove the 'federations' field if it exists
@@ -234,7 +260,7 @@ def build_fab_from_files(files: dict[str, bytes | Path]) -> bytes:
     # Extract and load .gitignore if present
     gitignore_content = None
     if ".gitignore" in files:
-        gitignore_content = to_bytes(files[".gitignore"])
+        gitignore_content = _to_bytes(files[".gitignore"])
 
     # Get exclude and include specs
     exclude_spec = get_fab_exclude_pathspec(gitignore_content)
@@ -248,29 +274,20 @@ def build_fab_from_files(files: dict[str, bytes | Path]) -> bytes:
     ]
     filtered_paths.sort()  # Sort for deterministic output
 
-    # Create a zip file in memory
-    list_file_content = ""
-
+    # Build FAB with CONTENT manifest
     fab_buffer = BytesIO()
     with zipfile.ZipFile(fab_buffer, "w", zipfile.ZIP_DEFLATED) as fab_file:
-        # Add pyproject.toml
-        write_to_zip(fab_file, FAB_CONFIG_FILE, tomli_w.dumps(config))
+        # Add pyproject.toml and collect manifest entries
+        pyproject_bytes = tomli_w.dumps(config).encode("utf-8")
+        manifest_lines = [_add_to_fab(fab_file, FAB_CONFIG_FILE, pyproject_bytes)]
 
+        # Add remaining files and collect their manifest entries
         for file_path in filtered_paths:
+            file_content = _to_bytes(files[file_path])
+            manifest_lines.append(_add_to_fab(fab_file, file_path, file_content))
 
-            # Get file contents as bytes
-            file_content = to_bytes(files[file_path])
-
-            # Write file to FAB
-            write_to_zip(fab_file, file_path, file_content)
-
-            # Calculate file info for CONTENT manifest
-            sha256_hash = hashlib.sha256(file_content).hexdigest()
-            file_size_bits = len(file_content) * 8  # size in bits
-            list_file_content += f"{file_path},{sha256_hash},{file_size_bits}\n"
-
-        # Add CONTENT manifest to the zip file
-        write_to_zip(fab_file, ".info/CONTENT", list_file_content)
+        # Write CONTENT manifest to the zip file
+        write_to_zip(fab_file, ".info/CONTENT", "\n".join(manifest_lines))
 
     fab_bytes = fab_buffer.getvalue()
 
