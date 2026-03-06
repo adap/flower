@@ -31,6 +31,8 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.control_pb2_grpc import ControlStub
 
+from ..error_handlers import handle_invite_grpc_error
+
 
 def create(
     account: Annotated[
@@ -69,7 +71,7 @@ def _create_invitation(
     is_json: bool,
 ) -> None:
     """Send a create invitation request."""
-    with flwr_cli_grpc_exc_handler():
+    with flwr_cli_grpc_exc_handler(handle_invite_grpc_error):
         _: CreateInvitationResponse = stub.CreateInvitation(request)
 
     if is_json:

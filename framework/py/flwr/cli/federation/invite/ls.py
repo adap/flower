@@ -37,6 +37,8 @@ from flwr.proto.control_pb2_grpc import ControlStub
 from flwr.proto.federation_pb2 import Invitation  # pylint: disable=E0611
 from flwr.supercore.constant import InvitationStatus
 
+from ..error_handlers import handle_invite_grpc_error
+
 _STATUS_TO_COLOR: dict[str, str] = {
     InvitationStatus.PENDING: "yellow",
     InvitationStatus.ACCEPTED: "green",
@@ -85,7 +87,7 @@ def _list_invitations(
     verbose: bool,
 ) -> None:
     """Send a list invitations request."""
-    with flwr_cli_grpc_exc_handler():
+    with flwr_cli_grpc_exc_handler(handle_invite_grpc_error):
         response: ListInvitationsResponse = stub.ListInvitations(request)
 
     created_invitations = _filter_invitations(response.created_invitations, verbose)

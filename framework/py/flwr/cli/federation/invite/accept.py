@@ -31,6 +31,8 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.control_pb2_grpc import ControlStub
 
+from ..error_handlers import handle_invite_grpc_error
+
 
 def accept(
     federation: Annotated[
@@ -62,7 +64,7 @@ def _accept_invitation(
     is_json: bool,
 ) -> None:
     """Send an accept invitation request."""
-    with flwr_cli_grpc_exc_handler():
+    with flwr_cli_grpc_exc_handler(handle_invite_grpc_error):
         _: AcceptInvitationResponse = stub.AcceptInvitation(request)
 
     if is_json:
