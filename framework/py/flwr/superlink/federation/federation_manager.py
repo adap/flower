@@ -130,7 +130,7 @@ class FederationManager(ABC):
 
     @abstractmethod
     def create_invitation(
-        self, flwr_aid: str, federation: str, invitee_flwr_aid: str
+        self, flwr_aid: str, federation: str, invitee_account_name: str
     ) -> None:
         """Create an invitation for an account to join a federation.
 
@@ -140,8 +140,8 @@ class FederationManager(ABC):
             The ID of the account creating the invitation (inviter).
         federation : str
             The name of the federation.
-        invitee_flwr_aid : str
-            The ID of the account being invited.
+        invitee_account_name : str
+            The name of the account being invited.
 
         Raises
         ------
