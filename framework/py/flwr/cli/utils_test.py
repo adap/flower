@@ -24,6 +24,8 @@ from pathlib import Path
 from unittest.mock import Mock, patch
 
 import click
+import grpc
+import pytest
 
 from flwr.cli.typing import SuperLinkConnection, SuperLinkSimulationOptions
 from flwr.common.constant import (
@@ -36,6 +38,7 @@ from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH
 
 from .utils import (
     build_pathspec,
+    flwr_cli_grpc_exc_handler,
     get_executed_command,
     get_sha256_hash,
     init_channel_from_connection,
@@ -229,3 +232,21 @@ def test_init_channel_from_connection_uses_resolved_connection() -> None:
     assert kwargs["max_message_length"] == GRPC_MAX_MESSAGE_LENGTH
     assert len(kwargs["interceptors"]) == 1
     channel.subscribe.assert_called_once()
+
+
+def test_custom_grpc_err_handler() -> None:
+    """Test flwr_cli_grpc_exc_handler with a custom error handler."""
+
+    # Prepare
+    class CustomError(Exception):
+        """Custom error for testing."""
+
+    mock_handler = Mock(side_effect=CustomError)
+    grpc_error = grpc.RpcError()
+
+    # Execute & assert
+    with pytest.raises(CustomError):
+        with flwr_cli_grpc_exc_handler(mock_handler):
+            raise grpc_error
+
+    mock_handler.assert_called_once_with(grpc_error)

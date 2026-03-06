@@ -54,12 +54,14 @@ from flwr.common.grpc import (
     on_channel_state_change,
 )
 from flwr.common.logger import print_json_error, redirect_output, restore_output
+from flwr.proto.control_pb2_grpc import ControlStub  # pylint: disable=E0611
 from flwr.supercore.credential_store import get_credential_store
 
 from .auth_plugin import CliAuthPlugin, get_cli_plugin_class
 from .cli_account_auth_interceptor import CliAccountAuthInterceptor
 from .config_utils import load_certificate_in_connection
 from .constant import AUTHN_TYPE_STORE_KEY
+from .flower_config import read_superlink_connection
 from .local_superlink import ensure_local_superlink
 
 
@@ -348,14 +350,50 @@ def init_channel_from_connection(
     return channel
 
 
-@contextmanager
-def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-branches
+@contextmanager  # docsig: disable=SIG503
+def cli_output_control_stub(
+    superlink: str | None,
+    output_format: str = CliOutputFormat.DEFAULT,
+) -> Iterator[tuple[ControlStub, bool]]:
+    """Manage CLI output handling and Control API stub lifecycle.
+
+    Parameters
+    ----------
+    superlink : str | None
+        Name of the SuperLink connection.
+    output_format : str
+        Output format for CLI rendering.
+
+    Yields
+    ------
+    tuple[ControlStub, bool]
+        A tuple of (ControlStub, is_json), where `is_json` indicates JSON output.
+    """
+    with cli_output_handler(output_format=output_format) as is_json:
+        superlink_connection = read_superlink_connection(superlink)
+        channel = init_channel_from_connection(superlink_connection)
+        try:
+            yield ControlStub(channel), is_json
+        finally:
+            channel.close()
+
+
+@contextmanager  # docsig: disable=SIG503
+def flwr_cli_grpc_exc_handler(  # pylint: disable=too-many-branches
+    custom_handler: Callable[[grpc.RpcError], None] | None = None,
+) -> Iterator[None]:
     """Context manager to handle specific gRPC errors.
 
     Catches grpc.RpcError exceptions with UNAUTHENTICATED, UNIMPLEMENTED,
     UNAVAILABLE, PERMISSION_DENIED, NOT_FOUND, and FAILED_PRECONDITION statuses,
     informs the user, and exits the application. All other exceptions will be
     allowed to escape.
+
+    Parameters
+    ----------
+    custom_handler : Callable[[grpc.RpcError], None] | None (default: None)
+        Optional custom handler called with the caught gRPC error before applying
+        default Flower CLI error handling.
 
     Yields
     ------
@@ -372,6 +410,8 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-b
     try:
         yield
     except grpc.RpcError as e:
+        if custom_handler is not None:
+            custom_handler(e)
         if e.code() == grpc.StatusCode.UNAUTHENTICATED:
             raise click.ClickException(
                 "Authentication failed. Please run `flwr login`"

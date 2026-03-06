@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-04 00:10+0000\n"
+"POT-Creation-Date: 2026-03-05 00:11+0000\n"
 "PO-Revision-Date: 2024-05-25 11:09+0000\n"
 "Last-Translator: Gustavo Bertoli <gubertoli@gmail.com>\n"
 "Language: pt_BR\n"
@@ -15458,9 +15458,9 @@ msgstr ""
 msgid "Arguments"
 msgstr "Argumento de compilação"
 
-#: ../../flwr add-supernode:1 app archive:1 create:1 federation install:1
-#: list:1 log:1 login:1 new:1 publish:1 pull:1 register:1 remove-supernode:1
-#: run:1 stop:1 supernode unregister:1
+#: ../../flwr accept:1 add-supernode:1 app archive:1 create:1 federation
+#: install:1 invite list:1 log:1 login:1 new:1 publish:1 pull:1 register:1
+#: reject:1 remove-supernode:1 revoke:1 run:1 stop:1 supernode unregister:1
 #, fuzzy
 msgid "Optional argument"
 msgstr "Argumento de compilação"
@@ -15475,8 +15475,9 @@ msgid ""
 "confirmation sign & submit the review to the Platform."
 msgstr ""
 
-#: ../../flwr add-supernode:1 app archive:1 create:1 federation log:1 pull:1
-#: register:1 remove-supernode:1 review:1 stop:1 supernode unregister:1
+#: ../../flwr accept:1 add-supernode:1 app archive:1 create:1 federation invite
+#: log:1 pull:1 register:1 reject:1 remove-supernode:1 review:1 revoke:1 stop:1
+#: supernode unregister:1
 #, fuzzy
 msgid "Required argument"
 msgstr "Argumento de compilação"
@@ -15517,18 +15518,20 @@ msgstr "``FLWR_VERSION``"
 msgid "List all SuperLink connections (alias: ls)."
 msgstr "``FLWR_VERSION``"
 
-#: ../../flwr add-supernode:1 archive:1 config create:1 federation list:1
-#: register:1 remove-supernode:1 run:1 stop:1 supernode unregister:1
+#: ../../flwr accept:1 add-supernode:1 archive:1 config create:1 federation
+#: invite list:1 register:1 reject:1 remove-supernode:1 revoke:1 run:1 stop:1
+#: supernode unregister:1
 msgid "Format output using 'default' view or 'json'"
 msgstr ""
 
-#: ../../flwr add-supernode archive config create federation list log register
-#: remove-supernode run stop supernode unregister
+#: ../../flwr accept add-supernode archive config create federation invite list
+#: log register reject remove-supernode revoke run stop supernode unregister
 msgid "default"
 msgstr ""
 
-#: ../../flwr add-supernode:1 archive:1 config create:1 federation list:1
-#: register:1 remove-supernode:1 run:1 stop:1 supernode unregister:1
+#: ../../flwr accept:1 add-supernode:1 archive:1 config create:1 federation
+#: invite list:1 register:1 reject:1 remove-supernode:1 revoke:1 run:1 stop:1
+#: supernode unregister:1
 #, fuzzy
 msgid "``'default'``"
 msgstr "``FLWR_VERSION``"
@@ -15548,14 +15551,15 @@ msgstr "``FLWR_VERSION``"
 msgid "ID of the SuperNode to add."
 msgstr "Construindo a imagem do servidor"
 
-#: ../../flwr add-supernode:1 federation remove-supernode:1
+#: ../../flwr accept:1 add-supernode:1 create:1 federation invite reject:1
+#: remove-supernode:1 revoke:1
 #, fuzzy
 msgid "Name of the federation."
 msgstr "``FLWR_VERSION``"
 
-#: ../../flwr add-supernode:1 archive:1 create:1 federation list:1 log:1
-#: login:1 pull:1 register:1 remove-supernode:1 run:1 stop:1 supernode
-#: unregister:1
+#: ../../flwr accept:1 add-supernode:1 archive:1 create:1 federation invite
+#: list:1 log:1 login:1 pull:1 register:1 reject:1 remove-supernode:1 revoke:1
+#: run:1 stop:1 supernode unregister:1
 #, fuzzy
 msgid "Name of the SuperLink connection."
 msgstr "``FLWR_VERSION``"
@@ -15585,6 +15589,54 @@ msgstr "``FLWR_VERSION``"
 msgid "Name of the federation to create."
 msgstr "``FLWR_VERSION``"
 
+#: ../../flwr federation invite:1
+#, fuzzy
+msgid "Manage Federation Invitations"
+msgstr "``FLWR_VERSION``"
+
+#: ../../flwr accept:1 federation invite
+#, fuzzy
+msgid "Accept an invitation to join a federation."
+msgstr "``FLWR_VERSION``"
+
+#: ../../flwr create:1 federation invite
+#, fuzzy
+msgid "Create an invitation to join a federation."
+msgstr "``FLWR_VERSION``"
+
+#: ../../flwr create:1 federation invite
+#, fuzzy
+msgid "Name of the Flower account to invite."
+msgstr "``FLWR_VERSION``"
+
+#: ../../flwr federation invite list:1
+msgid ""
+"List invitations addressed to you and invitations created by you (alias: "
+"ls)."
+msgstr ""
+
+#: ../../flwr federation invite list:1
+msgid "Show non-pending invitations."
+msgstr ""
+
+#: ../../flwr federation invite list:1 run:1 supernode
+#, fuzzy
+msgid "``False``"
+msgstr "``FLWR_VERSION``"
+
+#: ../../flwr federation invite reject:1
+#, fuzzy
+msgid "Reject an invitation to join a federation."
+msgstr "``FLWR_VERSION``"
+
+#: ../../flwr federation invite revoke:1
+msgid "Revoke a pending invitation."
+msgstr ""
+
+#: ../../flwr federation invite revoke:1
+msgid "Name of the Flower account whose invite should be revoked."
+msgstr ""
+
 #: ../../flwr federation list:1
 msgid ""
 "List available federations or details of a specific federation (alias: "
@@ -15599,11 +15651,6 @@ msgstr "``FLWR_VERSION``"
 #: ../../flwr federation list:1
 msgid "Show additional details, including archived federations."
 msgstr ""
-
-#: ../../flwr federation list:1 run:1 supernode
-#, fuzzy
-msgid "``False``"
-msgstr "``FLWR_VERSION``"
 
 #: ../../flwr federation remove-supernode:1
 #, fuzzy
@@ -15620,7 +15667,7 @@ msgid "Install a Flower App Bundle."
 msgstr ""
 
 #: ../../flwr install:1
-msgid "It can be ran with a single FAB file argument:"
+msgid "It can be run with a single FAB file argument:"
 msgstr ""
 
 #: ../../flwr install:1
@@ -15628,33 +15675,15 @@ msgid "``flwr install ./target_project.fab``"
 msgstr ""
 
 #: ../../flwr install:1
-msgid "The target install directory can be specified with ``--flwr-dir``:"
+msgid "Apps are installed to:"
 msgstr ""
 
 #: ../../flwr install:1
-msgid "``flwr install ./target_project.fab --flwr-dir ./docs/flwr``"
+msgid "``$FLWR_HOME/apps/`` if ``$FLWR_HOME`` is defined"
 msgstr ""
 
 #: ../../flwr install:1
-msgid ""
-"This will install ``target_project`` to ``./docs/flwr/``. By default, "
-"``flwr-dir`` is equal to:"
-msgstr ""
-
-#: ../../flwr install:1
-msgid "``$FLWR_HOME/`` if ``$FLWR_HOME`` is defined"
-msgstr ""
-
-#: ../../flwr install:1
-msgid "``$XDG_DATA_HOME/.flwr/`` if ``$XDG_DATA_HOME`` is defined"
-msgstr ""
-
-#: ../../flwr install:1
-msgid "``$HOME/.flwr/`` in all other cases"
-msgstr ""
-
-#: ../../flwr install:1
-msgid "The desired install path."
+msgid "``$HOME/.flwr/apps/`` otherwise"
 msgstr ""
 
 #: ../../flwr install:1
