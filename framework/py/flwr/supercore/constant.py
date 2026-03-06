@@ -132,11 +132,3 @@ class InvitationStatus(str, Enum):
     REJECTED = "rejected"
     REVOKED = "revoked"
     EXPIRED = "expired"
-
-    def __repr__(self) -> str:
-        """."""
-        return self.value.__repr__()
-
-    def __str__(self) -> str:
-        """."""
-        return self.value
