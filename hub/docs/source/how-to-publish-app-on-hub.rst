@@ -27,7 +27,7 @@ Your app should run in both **Simulation** and **Deployment** runtimes **without
 
 To achieve this, implement separate data-loading logic for each mode while keeping the training logic identical.
 
-One way to distinguish between Simulation and Deployment using :code:`context.node_config` inside your ClientApp. If the keys :code:`"partition-id"` and :code:`"num-partitions"` are present, the app is running in Simulation mode.
+One way to distinguish between Simulation and Deployment is using :code:`context.node_config` inside your ClientApp. If the keys :code:`"partition-id"` and :code:`"num-partitions"` are present, the app is running in Simulation mode.
 
 Example:
 
@@ -144,7 +144,7 @@ Create a Flower Account
 
 If you don't already have one, create a Flower account at: `https://flower.ai/ <https://flower.ai/>`_.
 
-Click **Sign Up** in the top-right corner and follow the instructions. Make sure the username is same as the publisher name defined in your app's :code:`pyproject.toml`.
+Click **Sign Up** in the top-right corner and follow the instructions. Make sure the username is the same as the publisher name defined in your app's :code:`pyproject.toml`.
 
 Publishing on behalf of an organization?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

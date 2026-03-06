@@ -54,7 +54,7 @@ This starts the simulation locally using Flower's built-in Simulation Runtime.
 Run with the Deployment Runtime
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To run the app using Flower's Deployment Runtime, point the ``SuperNode`` to the path where your data is. For prototyping and first-time users we recommend generating demo data using `Flower Datasets <https://flower.ai/docs/datasets/how-to-generate-demo-data-for-deployment.html>`_.
+To run the app using Flower's Deployment Runtime, point the ``SuperNode`` to the path where your data is. For prototyping and first-time users, we recommend generating demo data using `Flower Datasets <https://flower.ai/docs/datasets/how-to-generate-demo-data-for-deployment.html>`_.
 
 Next, launch the SuperNode passing as arguments the address of the SuperLink and the path to the data. For example:
 
