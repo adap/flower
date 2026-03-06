@@ -170,13 +170,18 @@ First, ensure :code:`flwr` is installed:
 
     pip install flwr
 
-Next, log in:
+Next, log in to your SuperLink connection that points to SuperGrid
+(the default connection name is usually :code:`supergrid`):
 
 .. code-block:: bash
 
-    flwr login
+    flwr login supergrid
 
 This will open a browser window where you can authenticate using your Flower account.
+
+.. note::
+   After installing :code:`flwr`, the default connection is typically :code:`local`.
+   So :code:`flwr login` without an explicit connection name might not target SuperGrid.
 
 After logging in, publish your app:
 
