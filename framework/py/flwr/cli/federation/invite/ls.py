@@ -15,6 +15,7 @@
 """Flower command line interface `federation invite list` command."""
 
 
+from collections.abc import Sequence
 from typing import Annotated, Any
 
 import typer
@@ -36,7 +37,7 @@ from flwr.proto.control_pb2_grpc import ControlStub
 from flwr.proto.federation_pb2 import Invitation  # pylint: disable=E0611
 from flwr.supercore.constant import InvitationStatus
 
-_STATUS_TO_COLOR = {
+_STATUS_TO_COLOR: dict[str, str] = {
     InvitationStatus.PENDING: "yellow",
     InvitationStatus.ACCEPTED: "green",
     InvitationStatus.REJECTED: "red",
@@ -105,15 +106,15 @@ def _list_invitations(
 
 
 def _filter_invitations(
-    invitations: list[Invitation], verbose: bool
-) -> list[Invitation]:
+    invitations: Sequence[Invitation], verbose: bool
+) -> Sequence[Invitation]:
     """Filter invitations for presentation."""
     if verbose:
         return invitations
     return [iv for iv in invitations if iv.status == InvitationStatus.PENDING]
 
 
-def _to_received_invitations_table(invitations: list[Invitation]) -> Table:
+def _to_received_invitations_table(invitations: Sequence[Invitation]) -> Table:
     """Render invitations received by the current account."""
     table = Table(
         title="Received Invitations",
@@ -139,7 +140,7 @@ def _to_received_invitations_table(invitations: list[Invitation]) -> Table:
     return table
 
 
-def _to_created_invitations_table(invitations: list[Invitation]) -> Table:
+def _to_created_invitations_table(invitations: Sequence[Invitation]) -> Table:
     """Render invitations created by the current account."""
     table = Table(
         title="Created Invitations",
@@ -166,8 +167,8 @@ def _to_created_invitations_table(invitations: list[Invitation]) -> Table:
 
 
 def _to_json(
-    created_invitations: list[Invitation],
-    received_invitations: list[Invitation],
+    created_invitations: Sequence[Invitation],
+    received_invitations: Sequence[Invitation],
 ) -> dict[str, Any]:
     """Convert invitations to JSON serializable structure."""
     return {
