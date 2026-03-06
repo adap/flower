@@ -170,8 +170,7 @@ First, ensure :code:`flwr` is installed:
 
     pip install flwr
 
-Next, log in to your SuperLink connection that points to SuperGrid
-(the default connection name is usually :code:`supergrid`):
+Next, log in to your SuperLink connection that points to SuperGrid:
 
 .. code-block:: bash
 
@@ -180,8 +179,10 @@ Next, log in to your SuperLink connection that points to SuperGrid
 This will open a browser window where you can authenticate using your Flower account.
 
 .. note::
-   After installing :code:`flwr`, the default connection is typically :code:`local`.
-   So :code:`flwr login` without an explicit connection name might not target SuperGrid.
+   To login to SuperGrid it is expected that your Flower Configuration has a SuperLink connection
+   named :code:`superlink.supergrid` with the address :code:`supergrid.flower.ai`. This connection should
+   be present by default after intalling Flower. Read more about SuperLink connections and how to configure them in the
+   `Flower Configuration documentation <https://flower.ai/docs/framework/ref-flower-configuration.html>`_.
 
 After logging in, publish your app:
 

@@ -63,7 +63,7 @@ Next, launch the SuperNode passing as arguments the address of the SuperLink and
     flower-supernode \
         --insecure \
         --superlink <SUPERLINK-FLEET-API> \
-        --node-config="data-path=/path/to/demo_data/partition_0"
+        --node-config="data-path='/path/to/demo_data/partition_0'"
 
 .. tip::
    For a detailed walkthrough, see the `step-by-step guide <https://flower.ai/docs/framework/how-to-run-flower-with-deployment-engine.html>`_ on using the Deployment Runtime.
@@ -83,6 +83,8 @@ Finally, launch the run using :code:`flwr run`, pointing to the appropriate Supe
 .. tip::
    Afterward, consider enabling `secure TLS connections <https://flower.ai/docs/framework/how-to-enable-tls-connections.html>`_ and configuring `SuperNode authentication <https://flower.ai/docs/framework/how-to-authenticate-supernodes.html>`_ for production deployments.
 
+.. tip::
+   Learn more about SuperLink connections and how to configure them in the `Flower Configuration documentation <https://flower.ai/docs/framework/ref-flower-configuration.html>`_.
 
 Run a Hub App Without Creating It Locally
 -----------------------------------------
