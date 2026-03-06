@@ -21,6 +21,7 @@ from io import BytesIO
 from pathlib import Path
 from typing import Annotated, Any
 
+import click
 import pathspec
 import tomli
 import tomli_w
@@ -70,7 +71,7 @@ def get_fab_filename(config: dict[str, Any], fab_hash: str) -> str:
     Parameters
     ----------
     config : dict[str, Any]
-        The project configuration dictionary.
+        The Flower App configuration dictionary.
     fab_hash : str
         The SHA-256 hash of the FAB file.
 
@@ -105,43 +106,29 @@ def build(
     if app is None:
         app = Path.cwd()
 
-    app = app.resolve()
+    app = app.expanduser().resolve()
     if not app.is_dir():
-        typer.secho(
-            f"❌ The path {app} is not a valid path to a Flower app.",
-            fg=typer.colors.RED,
-            bold=True,
-            err=True,
+        raise click.ClickException(
+            f"The path {app} is not a valid path to a Flower app."
         )
-        raise typer.Exit(code=1)
 
     if not is_valid_project_name(app.name):
-        typer.secho(
-            f"❌ The project name {app.name} is invalid, "
-            "a valid project name must start with a letter, "
-            "and can only contain letters, digits, and hyphens.",
-            fg=typer.colors.RED,
-            bold=True,
-            err=True,
+        raise click.ClickException(
+            f"The Flower App name {app.name} is invalid, "
+            "a valid app name must start with a letter, "
+            "and can only contain letters, digits, and hyphens."
         )
-        raise typer.Exit(code=1)
 
-    config, errors, warnings = load_and_validate(app / "pyproject.toml")
-    if config is None:
-        typer.secho(
-            "Project configuration could not be loaded.\npyproject.toml is invalid:\n"
-            + "\n".join([f"- {line}" for line in errors]),
-            fg=typer.colors.RED,
-            bold=True,
-            err=True,
-        )
-        raise typer.Exit(code=1)
+    try:
+        config, warnings = load_and_validate(app / "pyproject.toml")
+    except ValueError as e:
+        raise click.ClickException(str(e)) from None
 
     if warnings:
         typer.secho(
-            "Project configuration is missing the following "
+            "Flower App configuration (pyproject.toml) is missing the following "
             "recommended properties:\n" + "\n".join([f"- {line}" for line in warnings]),
-            fg=typer.colors.RED,
+            fg=typer.colors.YELLOW,
             bold=True,
         )
 
@@ -227,13 +214,39 @@ def build_fab_from_files(files: dict[str, bytes | Path]) -> bytes:
         fab_bytes = build_fab_from_files(files)
     """
 
-    def to_bytes(content: bytes | Path) -> bytes:
+    def _to_bytes(content: bytes | Path) -> bytes:
         return content.read_bytes() if isinstance(content, Path) else content
+
+    def _add_to_fab(
+        fab_file: zipfile.ZipFile,
+        path: str,
+        content: bytes,
+    ) -> str:
+        """Write a file to the FAB and return its CONTENT manifest line.
+
+        Parameters
+        ----------
+        fab_file : zipfile.ZipFile
+            The ZipFile object to write to.
+        path : str
+            The file path within the FAB.
+        content : bytes
+            The file contents as bytes.
+
+        Returns
+        -------
+        str
+            A CONTENT manifest line: "path,sha256,size_bits"
+        """
+        write_to_zip(fab_file, path, content)
+        sha256_hash = hashlib.sha256(content).hexdigest()
+        file_size_bits = len(content) * 8
+        return f"{path},{sha256_hash},{file_size_bits}"
 
     # Extract, load, and parse pyproject.toml
     if FAB_CONFIG_FILE not in files:
         raise ValueError(f"{FAB_CONFIG_FILE} not found in files")
-    pyproject_content = to_bytes(files[FAB_CONFIG_FILE])
+    pyproject_content = _to_bytes(files[FAB_CONFIG_FILE])
     config = tomli.loads(pyproject_content.decode("utf-8"))
 
     # Remove the 'federations' field if it exists
@@ -247,7 +260,7 @@ def build_fab_from_files(files: dict[str, bytes | Path]) -> bytes:
     # Extract and load .gitignore if present
     gitignore_content = None
     if ".gitignore" in files:
-        gitignore_content = to_bytes(files[".gitignore"])
+        gitignore_content = _to_bytes(files[".gitignore"])
 
     # Get exclude and include specs
     exclude_spec = get_fab_exclude_pathspec(gitignore_content)
@@ -261,29 +274,20 @@ def build_fab_from_files(files: dict[str, bytes | Path]) -> bytes:
     ]
     filtered_paths.sort()  # Sort for deterministic output
 
-    # Create a zip file in memory
-    list_file_content = ""
-
+    # Build FAB with CONTENT manifest
     fab_buffer = BytesIO()
     with zipfile.ZipFile(fab_buffer, "w", zipfile.ZIP_DEFLATED) as fab_file:
-        # Add pyproject.toml
-        write_to_zip(fab_file, FAB_CONFIG_FILE, tomli_w.dumps(config))
+        # Add pyproject.toml and collect manifest entries
+        pyproject_bytes = tomli_w.dumps(config).encode("utf-8")
+        manifest_lines = [_add_to_fab(fab_file, FAB_CONFIG_FILE, pyproject_bytes)]
 
+        # Add remaining files and collect their manifest entries
         for file_path in filtered_paths:
+            file_content = _to_bytes(files[file_path])
+            manifest_lines.append(_add_to_fab(fab_file, file_path, file_content))
 
-            # Get file contents as bytes
-            file_content = to_bytes(files[file_path])
-
-            # Write file to FAB
-            write_to_zip(fab_file, file_path, file_content)
-
-            # Calculate file info for CONTENT manifest
-            sha256_hash = hashlib.sha256(file_content).hexdigest()
-            file_size_bits = len(file_content) * 8  # size in bits
-            list_file_content += f"{file_path},{sha256_hash},{file_size_bits}\n"
-
-        # Add CONTENT manifest to the zip file
-        write_to_zip(fab_file, ".info/CONTENT", list_file_content)
+        # Write CONTENT manifest to the zip file
+        write_to_zip(fab_file, ".info/CONTENT", "\n".join(manifest_lines))
 
     fab_bytes = fab_buffer.getvalue()
 

@@ -305,7 +305,10 @@ def mirror_output_to_queue(log_queue: Queue[str | None]) -> None:
         original_write = stream.write
 
         def fn(s: str) -> int:
-            ret = original_write(s)
+            try:
+                ret = original_write(s)
+            except UnicodeEncodeError:
+                ret = original_write(_remove_emojis(s))
             stream.flush()
             log_queue.put(s)
             return ret
@@ -385,7 +388,7 @@ def start_log_uploader(
 ) -> threading.Thread:
     """Start the log uploader thread and return it."""
     thread = threading.Thread(
-        target=_log_uploader, args=(log_queue, node_id, run_id, stub)
+        target=_log_uploader, args=(log_queue, node_id, run_id, stub), daemon=True
     )
     thread.start()
     return thread

@@ -49,7 +49,7 @@ classifier on Higgs dataset using Flower and XGBoost. It is recommended to creat
 virtual environment and run everything within a :doc:`virtualenv
 <contributor-how-to-set-up-a-virtual-env>`.
 
-Let's use `flwr new` to create a complete Flower+XGBoost project. It will generate all
+Let's use ``flwr new`` to create a complete Flower+XGBoost project. It will generate all
 the files needed to run, by default with the Simulation Engine, a federation of 10 nodes
 using |fedxgbbagging_link|_ strategy. The dataset will be partitioned using Flower
 Dataset's `IidPartitioner
@@ -68,21 +68,19 @@ install Flower in your new environment:
     # In a new Python environment
     $ pip install flwr
 
-Then, run the command below. You will be prompted to select one of the available
-templates (choose ``XGBoost``), give a name to your project, and enter your developer
-name:
+Then, run the command below:
 
 .. code-block:: shell
 
-    $ flwr new
+    $ flwr new @flwrlabs/quickstart-xgboost
 
-After running it you'll notice a new directory with your project name has been created.
-It should have the following structure:
+After running it you'll notice a new directory named ``quickstart-xgboost`` has been
+created. It should have the following structure:
 
 .. code-block:: shell
 
-    <your-project-name>
-    ├── <your-project-name>
+    quickstart-xgboost
+    ├── quickstart_xgboost
     │   ├── __init__.py
     │   ├── client_app.py   # Defines your ClientApp
     │   ├── server_app.py   # Defines your ServerApp
@@ -376,17 +374,16 @@ follows:
 
 .. code-block:: python
 
-    def _local_boost(self, bst_input):
+    def _local_boost(bst_input, num_local_round, train_dmatrix):
         # Update trees based on local training data.
-        for i in range(self.num_local_round):
-            bst_input.update(self.train_dmatrix, bst_input.num_boosted_rounds())
+        for i in range(num_local_round):
+            bst_input.update(train_dmatrix, bst_input.num_boosted_rounds())
 
         # Bagging: extract the last N=num_local_round trees for sever aggregation
         bst = bst_input[
             bst_input.num_boosted_rounds()
-            - self.num_local_round : bst_input.num_boosted_rounds()
+            - num_local_round : bst_input.num_boosted_rounds()
         ]
-
         return bst
 
 Given ``num_local_round``, we update trees by calling ``bst_input.update`` method. After
@@ -472,6 +469,11 @@ weights as an ``ArrayRecord``, and federated training and evaluation metrics as
 ``MetricRecords``.
 
 Congratulations! You've successfully built and run your first federated learning system.
+
+.. tip::
+
+    Check the :doc:`how-to-run-simulations` documentation to learn more about how to
+    configure and run Flower simulations.
 
 .. note::
 

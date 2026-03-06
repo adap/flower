@@ -16,8 +16,10 @@
 
 
 import hashlib
+import json
 import os
 import tempfile
+import time
 import unittest
 from datetime import datetime
 from types import SimpleNamespace
@@ -29,24 +31,36 @@ from parameterized import parameterized
 
 from flwr.common import ConfigRecord, now
 from flwr.common.constant import (
+    FEDERATION_NOT_SPECIFIED_MESSAGE,
     NODE_NOT_FOUND_MESSAGE,
+    NOOP_ACCOUNT_NAME,
     PUBLIC_KEY_ALREADY_IN_USE_MESSAGE,
     PUBLIC_KEY_NOT_VALID,
+    SUPERLINK_DOES_NOT_SUPPORT_FED_MANAGEMENT_MESSAGE,
     Status,
     SubStatus,
 )
 from flwr.common.typing import Run, RunStatus
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
+    AddNodeToFederationRequest,
+    AddNodeToFederationResponse,
+    ArchiveFederationRequest,
+    CreateFederationRequest,
     ListNodesRequest,
     ListNodesResponse,
     ListRunsRequest,
     RegisterNodeRequest,
+    RemoveNodeFromFederationRequest,
+    RemoveNodeFromFederationResponse,
+    ShowFederationRequest,
+    ShowFederationResponse,
     StartRunRequest,
     StopRunRequest,
     StreamLogsRequest,
     StreamLogsResponse,
     UnregisterNodeRequest,
 )
+from flwr.proto.federation_pb2 import Account, Member  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkStateFactory
 from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME, NOOP_FEDERATION
 from flwr.supercore.ffs import FfsFactory
@@ -57,7 +71,11 @@ from flwr.superlink.servicer.control.control_account_auth_interceptor import (
     shared_account_info,
 )
 
-from .control_servicer import ControlServicer
+from .control_servicer import (
+    ControlServicer,
+    _format_verification,
+    _validate_federation_and_node_in_request,
+)
 
 FLWR_AID_MISMATCH_CASES = (
     # (context_flwr_aid, run_flwr_aid)
@@ -92,7 +110,8 @@ class TestControlServicer(unittest.TestCase):
         )
         account_info = authn_plugin.validate_tokens_in_metadata([])[1]
         assert account_info is not None
-        self.aid = account_info.flwr_aid
+        assert account_info.flwr_aid is not None
+        self.aid: str = account_info.flwr_aid
         shared_account_info.set(account_info)
         self.state = self.servicer.linkstate_factory.state()
 
@@ -129,7 +148,8 @@ class TestControlServicer(unittest.TestCase):
         ) as mock_get_fab_metadata:
             mock_get_fab_metadata.return_value = (fab_id, fab_version)
             response = self.servicer.StartRun(request, Mock())
-        run_info = self.state.get_run(response.run_id)
+        runs = self.state.get_run_info(run_ids=[response.run_id])
+        run_info = runs[0] if runs else None
 
         # Assert
         assert run_info is not None
@@ -137,21 +157,24 @@ class TestControlServicer(unittest.TestCase):
         self.assertEqual(run_info.fab_id, fab_id)
         self.assertEqual(run_info.fab_version, fab_version)
 
-    def test_list_runs(self) -> None:
+    @parameterized.expand([(None,), (1,), (2,), (3,), (9,)])  # type: ignore
+    def test_list_runs(self, limit: int | None) -> None:
         """Test List method of ControlServicer with --runs option."""
         # Prepare
-        run_ids = set()
+        run_ids: list[int] = []
         for _ in range(3):
-            run_id = self._create_dummy_run(self.aid)
-            run_ids.add(run_id)
+            run_ids.append(self._create_dummy_run(self.aid))
+            time.sleep(1e-6)  # Ensure different timestamps for sorting
 
         # Execute
-        response = self.servicer.ListRuns(ListRunsRequest(), Mock())
+        response = self.servicer.ListRuns(ListRunsRequest(limit=limit), Mock())
         retrieved_timestamp = datetime.fromisoformat(response.now).timestamp()
 
         # Assert
+        if limit is None:
+            limit = 999
         self.assertLess(abs(retrieved_timestamp - now().timestamp()), 1e-3)
-        self.assertEqual(set(response.run_dict.keys()), run_ids)
+        self.assertEqual(set(response.run_dict.keys()), set(run_ids[-limit:]))
 
     def test_list_run_id(self) -> None:
         """Test List method of ControlServicer with --run-id option."""
@@ -175,7 +198,8 @@ class TestControlServicer(unittest.TestCase):
 
         # Execute
         response = self.servicer.StopRun(StopRunRequest(run_id=run_id), Mock())
-        run_state = self.state.get_run(run_id)
+        runs = self.state.get_run_info(run_ids=[run_id])
+        run_state = runs[0] if runs else None
 
         # Assert
         self.assertTrue(response.success)
@@ -304,6 +328,120 @@ class TestControlServicer(unittest.TestCase):
         else:
             self.assertEqual(len(res.nodes_info), 0)
 
+    def test_show_federation(self) -> None:
+        """Test ShowFederation method of ControlServicer."""
+        # Prepare
+        request = ShowFederationRequest(federation_name=NOOP_FEDERATION)
+
+        # Execute
+        response: ShowFederationResponse = self.servicer.ShowFederation(request, Mock())
+        retrieved_timestamp = datetime.fromisoformat(response.now).timestamp()
+
+        # Assert
+        self.assertLess(abs(retrieved_timestamp - now().timestamp()), 1e-3)
+        self.assertEqual(response.federation.name, NOOP_FEDERATION)
+
+    def test_create_federation_success(self) -> None:
+        """Test CreateFederation succeeds when federation_manager.create_federation
+        works."""
+        # Prepare
+        name = "test-federation"
+        description = "A test federation"
+        expected_name = f"@{NOOP_ACCOUNT_NAME}/{name}"
+        request = CreateFederationRequest(
+            federation_name=name,
+            description=description,
+        )
+        mock_members = [
+            Member(account=Account(id=self.aid), role="owner"),
+        ]
+        mock_federation = SimpleNamespace(
+            name=expected_name,
+            description=description,
+            members=mock_members,
+        )
+
+        # Execute
+        with patch.object(
+            self.state.federation_manager,
+            "create_federation",
+            return_value=mock_federation,
+        ) as mock_create:
+            response = self.servicer.CreateFederation(request, Mock())
+
+        # Assert
+        mock_create.assert_called_once_with(
+            name=expected_name,
+            description=description,
+            flwr_aid=self.aid,
+        )
+        self.assertEqual(response.federation.name, expected_name)
+        self.assertEqual(response.federation.description, description)
+        self.assertEqual(len(response.federation.members), 1)
+        self.assertEqual(response.federation.members[0].account.id, self.aid)
+        self.assertEqual(response.federation.members[0].role, "owner")
+
+    def test_create_federation_fails_on_manager_error(self) -> None:
+        """Test CreateFederation aborts when federation_manager.create_federation
+        raises."""
+        # Prepare
+        name = "test-federation"
+        description = "A test federation"
+        request = CreateFederationRequest(
+            federation_name=name,
+            description=description,
+        )
+        mock_context = Mock()
+        mock_context.abort.side_effect = grpc.RpcError()
+
+        # Execute & Assert
+        with self.assertRaises(grpc.RpcError):
+            self.servicer.CreateFederation(request, mock_context)
+
+        mock_context.abort.assert_called_once_with(
+            grpc.StatusCode.FAILED_PRECONDITION,
+            SUPERLINK_DOES_NOT_SUPPORT_FED_MANAGEMENT_MESSAGE,
+        )
+
+    def test_archive_federation_success(self) -> None:
+        """Test ArchiveFederation succeeds when federation_manager.archive_federation
+        works."""
+        # Prepare
+        request = ArchiveFederationRequest(federation_name="test-federation")
+
+        # Execute
+        with patch.object(
+            self.state.federation_manager,
+            "archive_federation",
+            return_value=None,
+        ) as mock_archive:
+            response = self.servicer.ArchiveFederation(request, Mock())
+
+        # Assert
+        mock_archive.assert_called_once_with(
+            flwr_aid=self.aid,
+            name="test-federation",
+        )
+        self.assertIsNotNone(response)
+
+    def test_archive_federation_fails_on_manager_error(self) -> None:
+        """Test ArchiveFederation aborts when federation_manager.archive_federation
+        raises."""
+        # Prepare
+        name = "test-federation"
+        request = ArchiveFederationRequest(federation_name=name)
+        mock_context = Mock()
+        mock_context.abort.side_effect = grpc.RpcError()
+
+        # Execute & Assert
+        with self.assertRaises(grpc.RpcError):
+            self.servicer.ArchiveFederation(request, mock_context)
+
+        mock_context.abort.assert_called_once_with(
+            grpc.StatusCode.FAILED_PRECONDITION,
+            SUPERLINK_DOES_NOT_SUPPORT_FED_MANAGEMENT_MESSAGE,
+        )
+
 
 class TestControlServicerAuth(unittest.TestCase):
     """Test ControlServicer methods with authentication plugin and flwr_aid checking."""
@@ -371,23 +509,23 @@ class TestControlServicerAuth(unittest.TestCase):
     def test_streamlogs_auth_successful(self) -> None:
         """Test StreamLogs successful with matching flwr_aid."""
         # Prepare
-        run_id = self._create_dummy_run("user-123")
+        run_id = 789
         request = StreamLogsRequest(run_id=run_id, after_timestamp=0)
         ctx = self.make_context()
         ctx.is_active.return_value = True
+        mock_get_run_info = Mock()
+        mock_run = Mock(
+            flwr_aid="user-123",
+            status=RunStatus(Status.FINISHED, SubStatus.COMPLETED, ""),
+        )
+        mock_get_run_info.return_value = [mock_run]
 
         # Execute & Assert
         with (
             patch.object(
                 self.state, "get_serverapp_log", new=lambda rid, ts: ("log1", 1.0)
             ),
-            patch.object(
-                self.state,
-                "get_run_status",
-                new=lambda ids: {
-                    run_id: RunStatus(Status.FINISHED, SubStatus.COMPLETED, "")
-                },
-            ),
+            patch.object(self.state, "get_run_info", new=mock_get_run_info),
             patch(
                 "flwr.superlink.servicer.control.control_servicer.get_current_account_info",
                 return_value=SimpleNamespace(flwr_aid="user-123"),
@@ -396,6 +534,7 @@ class TestControlServicerAuth(unittest.TestCase):
             msgs = list(self.servicer.StreamLogs(request, ctx))
             gen = self.servicer.StreamLogs(request, ctx)
             msgs = list(gen)
+            mock_get_run_info.assert_called_with(run_ids=[run_id])
             self.assertEqual(len(msgs), 1)
             self.assertIsInstance(msgs[0], StreamLogsResponse)
             self.assertEqual(msgs[0].log_output, "log1")
@@ -435,7 +574,8 @@ class TestControlServicerAuth(unittest.TestCase):
         ):
             response = self.servicer.StopRun(request, ctx)
             self.assertTrue(response.success)
-            run = self.state.get_run(run_id)
+            runs = self.state.get_run_info(run_ids=[run_id])
+            run = runs[0] if runs else None
             self.assertEqual(cast(Run, run).status.status, Status.FINISHED)
             self.assertEqual(cast(Run, run).status.sub_status, SubStatus.STOPPED)
 
@@ -473,3 +613,183 @@ class TestControlServicerAuth(unittest.TestCase):
         ):
             response = self.servicer.ListRuns(request, ctx)
             self.assertEqual(set(response.run_dict.keys()), {run_id})
+
+
+class TestValidateFederationAndNodesInRequest(unittest.TestCase):
+    """Tests for the _validate_federation_and_node_in_request helper."""
+
+    def setUp(self) -> None:
+        """Set up test fixtures."""
+        self.tmp_dir = tempfile.TemporaryDirectory()  # pylint: disable=R1732
+        objectstore_factory = Mock(store=Mock(return_value=Mock()))
+        self.servicer = ControlServicer(
+            linkstate_factory=LinkStateFactory(
+                FLWR_IN_MEMORY_DB_NAME, NoOpFederationManager(), objectstore_factory
+            ),
+            ffs_factory=FfsFactory(self.tmp_dir.name),
+            objectstore_factory=objectstore_factory,
+            is_simulation=False,
+            authn_plugin=(authn_plugin := NoOpControlAuthnPlugin(Mock(), False)),
+        )
+        account_info = authn_plugin.validate_tokens_in_metadata([])[1]
+        assert account_info is not None
+        assert account_info.flwr_aid is not None
+        self.aid: str = account_info.flwr_aid
+        shared_account_info.set(account_info)
+        self.state = self.servicer.linkstate_factory.state()
+
+    def tearDown(self) -> None:
+        """Clean up after tests."""
+        self.tmp_dir.cleanup()
+
+    def _make_context(self) -> MagicMock:
+        """Create a mock gRPC context that raises on abort."""
+        ctx = MagicMock(spec=grpc.ServicerContext)
+        ctx.abort.side_effect = lambda code, msg: (_ for _ in ()).throw(
+            RuntimeError(f"{code}:{msg}")
+        )
+        return ctx
+
+    def _create_owned_node(self, owner_aid: str) -> int:
+        """Create a node owned by the given flwr_aid."""
+        pub_key = public_key_to_bytes(generate_key_pairs()[1])
+        return self.state.create_node(
+            owner_aid=owner_aid,
+            owner_name="test_owner",
+            public_key=pub_key,
+            heartbeat_interval=10,
+        )
+
+    # --- _validate_federation_and_node_in_request tests ---
+
+    def test_validate_aborts_when_federation_not_specified(self) -> None:
+        """Test abort when federation name is empty."""
+        ctx = self._make_context()
+        with self.assertRaises(RuntimeError) as cm:
+            _validate_federation_and_node_in_request(self.state, self.aid, "", 1, ctx)
+        ctx.abort.assert_called_once()
+        self.assertIn(FEDERATION_NOT_SPECIFIED_MESSAGE, str(cm.exception))
+
+    def test_validate_aborts_when_federation_not_found(self) -> None:
+        """Test abort when federation does not exist."""
+        ctx = self._make_context()
+        with self.assertRaises(RuntimeError) as cm:
+            _validate_federation_and_node_in_request(
+                self.state, self.aid, "nonexistent-fed", 1, ctx
+            )
+        ctx.abort.assert_called_once()
+        self.assertIn("nonexistent-fed", str(cm.exception))
+
+    def test_validate_aborts_when_not_a_member(self) -> None:
+        """Test abort when flwr_aid is not a member of the federation."""
+        ctx = self._make_context()
+        with self.assertRaises(RuntimeError) as cm:
+            _validate_federation_and_node_in_request(
+                self.state, "wrong-aid", NOOP_FEDERATION, 1, ctx
+            )
+        ctx.abort.assert_called_once()
+        self.assertIn("not a member", str(cm.exception))
+
+    def test_validate_aborts_when_node_not_owned(self) -> None:
+        """Test abort when a node is not owned by the requester."""
+        # Create a node owned by someone else
+        node_id = self._create_owned_node("other-aid")
+        ctx = self._make_context()
+        with self.assertRaises(RuntimeError) as cm:
+            _validate_federation_and_node_in_request(
+                self.state, self.aid, NOOP_FEDERATION, node_id, ctx
+            )
+        ctx.abort.assert_called_once()
+        self.assertIn("not found or you are not its owner", str(cm.exception))
+
+    def test_validate_aborts_when_node_does_not_exist(self) -> None:
+        """Test abort when a node ID does not exist."""
+        ctx = self._make_context()
+        with self.assertRaises(RuntimeError) as cm:
+            _validate_federation_and_node_in_request(
+                self.state, self.aid, NOOP_FEDERATION, 999999, ctx
+            )
+        ctx.abort.assert_called_once()
+        self.assertIn("not found or you are not its owner", str(cm.exception))
+
+    # --- AddNodeToFederation / RemoveNodeFromFederation integration tests ---
+
+    def test_add_node_to_federation_success(self) -> None:
+        """Test AddNodeToFederation succeeds with valid inputs."""
+        node_id = self._create_owned_node(self.aid)
+        request = AddNodeToFederationRequest(
+            federation_name=NOOP_FEDERATION, node_id=node_id
+        )
+        ctx = self._make_context()
+
+        with patch.object(
+            self.state.federation_manager,
+            "add_supernode",
+            return_value=None,
+        ) as mock_add:
+            response = self.servicer.AddNodeToFederation(request, ctx)
+
+        mock_add.assert_called_once_with(
+            flwr_aid=self.aid,
+            federation=NOOP_FEDERATION,
+            node_id=node_id,
+        )
+        self.assertIsInstance(response, AddNodeToFederationResponse)
+        ctx.abort.assert_not_called()
+
+    def test_add_node_to_federation_aborts_no_federation(self) -> None:
+        """Test AddNodeToFederation aborts when no federation is specified."""
+        request = AddNodeToFederationRequest(federation_name="", node_id=1)
+        ctx = self._make_context()
+        with self.assertRaises(RuntimeError) as cm:
+            self.servicer.AddNodeToFederation(request, ctx)
+        self.assertIn(FEDERATION_NOT_SPECIFIED_MESSAGE, str(cm.exception))
+
+    def test_remove_node_from_federation_success(self) -> None:
+        """Test RemoveNodeFromFederation succeeds with valid inputs."""
+        node_id = self._create_owned_node(self.aid)
+        request = RemoveNodeFromFederationRequest(
+            federation_name=NOOP_FEDERATION, node_id=node_id
+        )
+        ctx = self._make_context()
+
+        with patch.object(
+            self.state.federation_manager,
+            "remove_supernode",
+            return_value=None,
+        ) as mock_remove:
+            response = self.servicer.RemoveNodeFromFederation(request, ctx)
+
+        mock_remove.assert_called_once_with(
+            flwr_aid=self.aid,
+            federation=NOOP_FEDERATION,
+            node_id=node_id,
+        )
+        self.assertIsInstance(response, RemoveNodeFromFederationResponse)
+        ctx.abort.assert_not_called()
+
+    def test_remove_node_from_federation_aborts_no_federation(self) -> None:
+        """Test RemoveNodeFromFederation aborts when no federation is specified."""
+        request = RemoveNodeFromFederationRequest(federation_name="", node_id=1)
+        ctx = self._make_context()
+        with self.assertRaises(RuntimeError) as cm:
+            self.servicer.RemoveNodeFromFederation(request, ctx)
+        self.assertIn(FEDERATION_NOT_SPECIFIED_MESSAGE, str(cm.exception))
+
+
+def test_format_verification_compact() -> None:
+    """One test covering both 'with entries' and 'None' input."""
+    # Case 1: verifications list present
+    verifications: list[dict[str, str]] = [
+        {"public_key_id": "key1", "sig": "abc", "algo": "ed25519"},
+        {"public_key_id": "key2", "sig": "def", "algo": "ed25519"},
+    ]
+    out: dict[str, str] = _format_verification(verifications)
+
+    # Should mark valid
+    assert out["valid_license"] == "Valid"
+    # public_key_id -> JSON of remaining fields
+    v1: dict[str, str] = json.loads(out["key1"])
+    v2: dict[str, str] = json.loads(out["key2"])
+    assert v1 == {"sig": "abc", "algo": "ed25519"}
+    assert v2 == {"sig": "def", "algo": "ed25519"}

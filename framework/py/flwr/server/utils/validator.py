@@ -17,7 +17,7 @@
 
 from flwr.common import Message
 from flwr.common.constant import SUPERLINK_NODE_ID
-from flwr.common.date import now
+from flwr.supercore.date import now
 
 
 # pylint: disable-next=too-many-branches

@@ -168,3 +168,48 @@ class NodeState(CoreState):
         Sequence[int]
             Sequence of run IDs with pending messages.
         """
+
+    @abstractmethod
+    def record_message_processing_start(self, message_id: str) -> None:
+        """Record the start time of message processing based on the message ID.
+
+        Parameters
+        ----------
+        message_id : str
+            The ID of the message associated with the start time.
+        """
+
+    @abstractmethod
+    def record_message_processing_end(self, message_id: str) -> None:
+        """Record the end time of message processing based on the message ID.
+
+        Parameters
+        ----------
+        message_id : str
+            The ID of the message associated with the end time.
+
+        Raises
+        ------
+        ValueError
+            If the message ID is not found.
+        """
+
+    @abstractmethod
+    def get_message_processing_duration(self, message_id: str) -> float:
+        """Get the message processing duration based on the message ID.
+
+        Parameters
+        ----------
+        message_id : str
+            The ID of the message.
+
+        Returns
+        -------
+        float
+            The processing duration in seconds.
+
+        Raises
+        ------
+        ValueError
+            If the message ID is not found, or if start/end times are missing.
+        """

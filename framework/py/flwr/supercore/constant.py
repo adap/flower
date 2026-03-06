@@ -17,7 +17,25 @@
 
 from __future__ import annotations
 
-from flwr.common.constant import FLWR_DIR
+import os
+
+from flwr.common.constant import FLWR_DIR, NOOP_ACCOUNT_NAME
+
+# Constants for Inflatable
+HEAD_BODY_DIVIDER = b"\x00"
+HEAD_VALUE_DIVIDER = " "
+
+# Constants for object pushing and pulling
+FLWR_PRIVATE_MAX_CONCURRENT_OBJ_PUSHES = int(
+    os.getenv("FLWR_PRIVATE_MAX_CONCURRENT_OBJ_PUSHES", "2")
+)  # Default maximum number of concurrent pushes
+FLWR_PRIVATE_MAX_CONCURRENT_OBJ_PULLS = int(
+    os.getenv("FLWR_PRIVATE_MAX_CONCURRENT_OBJ_PULLS", "2")
+)  # Default maximum number of concurrent pulls
+PULL_MAX_TIME = 7200  # Default maximum time to wait for pulling objects
+PULL_MAX_TRIES_PER_OBJECT = 500  # Default maximum number of tries to pull an object
+PULL_INITIAL_BACKOFF = 1  # Initial backoff time for pulling objects
+PULL_BACKOFF_CAP = 10  # Maximum backoff time for pulling objects
 
 # Top-level key in YAML config for exec plugin settings
 EXEC_PLUGIN_SECTION = "exec_plugin"
@@ -25,16 +43,31 @@ EXEC_PLUGIN_SECTION = "exec_plugin"
 # Flower in-memory Python-based database name
 FLWR_IN_MEMORY_DB_NAME = ":flwr-in-memory:"
 
+# Flower in-memory SQLite database URL
+FLWR_IN_MEMORY_SQLITE_DB_URL = "sqlite:///:memory:"
+
 # Constants for Hub
 APP_ID_PATTERN = r"^@[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
 APP_VERSION_PATTERN = r"^\d+\.\d+\.\d+$"
 PLATFORM_API_URL = "https://api.flower.ai/v1"
 
+# SuperGrid constants
+SUPERGRID_ADDRESS = "supergrid.flower.ai"
+
 # Specification for app publishing
+APP_PUBLISH_ALLOWED_LICENSE_FILES = ("LICENSE", "LICENSE.md")
 APP_PUBLISH_INCLUDE_PATTERNS = (
     "**/*.py",
     "**/*.toml",
     "**/*.md",
+    "**/*.yaml",
+    "**/*.yml",
+    "**/*.json",
+    "**/*.jsonl",
+    "/.gitignore",
+    "**/.editorconfig",
+    "/LICENSE",
+    "/LICENSE.md",
 )
 APP_PUBLISH_EXCLUDE_PATTERNS = FAB_EXCLUDE_PATTERNS = (
     f"{FLWR_DIR}/**",  # Exclude the .flwr directory
@@ -52,10 +85,29 @@ MIME_MAP = {
 }
 
 # Constants for federations
-NOOP_FEDERATION = "default"
+NOOP_FEDERATION = f"@{NOOP_ACCOUNT_NAME}/default"
+NOOP_FEDERATION_DESCRIPTION = "A federation for testing and development purposes."
 
 # Constants for exit handling
 FORCE_EXIT_TIMEOUT_SECONDS = 5  # Used in `flwr_exit` function
+
+# Constants for message processing timing
+MESSAGE_TIME_ENTRY_MAX_AGE_SECONDS = 3600
+
+
+# System message type
+SYSTEM_MESSAGE_TYPE = "system"
+
+# SQLite PRAGMA settings for optimal performance and correctness
+SQLITE_PRAGMAS = (
+    ("busy_timeout", "5000"),  # Retry lock acquisition for up to 5s before SQLITE_BUSY
+    ("journal_mode", "WAL"),  # Enable Write-Ahead Logging for better concurrency
+    ("synchronous", "NORMAL"),
+    ("foreign_keys", "ON"),
+    ("cache_size", "-64000"),  # 64MB cache
+    ("temp_store", "MEMORY"),  # In-memory temp tables
+    ("mmap_size", "268435456"),  # 256MB memory-mapped I/O
+)
 
 
 class NodeStatus:

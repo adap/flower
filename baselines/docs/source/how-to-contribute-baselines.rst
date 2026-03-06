@@ -26,10 +26,10 @@ Let's say you want to contribute the code of your most recent Federated Learning
     #. Fork the Flower codebase: go to the `Flower GitHub repo <https://github.com/adap/flower>`_ and fork the code (click the *Fork* button in the top-right corner and follow the instructions)
     #. Clone the (forked) Flower source code: :code:`git clone git@github.com:[your_github_username]/flower.git`
 #. **Create a new baseline using the template**
-    #. Create a new Python environment with Python 3.10 (we recommend doing this with `pyenv <https://github.com/pyenv/pyenv>`_)
+    #. Create a new Python environment with Python 3.12 (we recommend doing this with `pyenv <https://github.com/pyenv/pyenv>`_)
     #. Install flower with: :code:`pip install flwr`.
-    #. Navigate to the baselines directory and run: :code:`flwr new fedawesome`. When prompted, choose the option :code:`Flower Baseline`.
-    #. A new directory in :code:`baselines/fedawesome` is created with the structure needed for a Flower Baseline.
+    #. Navigate to the baselines directory and run: :code:`flwr new @flwrlabs/baseline`. This will create a new baseline named `baseline`.
+    #. Rename the newly created baseline directory to your baseline name, e.g., :code:`mv baseline fedawesome`.
     #. Follow the instructions in the :code:`README.md` in your baseline directory.
     
     .. tip::

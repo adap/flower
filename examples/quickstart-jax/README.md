@@ -10,15 +10,18 @@ This introductory example to Flower uses JAX, but deep knowledge of JAX is not n
 
 ## Set up the project
 
-### Clone the project
+### Fetch the app
 
-Start by cloning the example project:
+Install Flower:
 
 ```shell
-git clone --depth=1 https://github.com/adap/flower.git _tmp \
-        && mv _tmp/examples/quickstart-jax . \
-        && rm -rf _tmp \
-        && cd quickstart-jax
+pip install flwr
+```
+
+Fetch the app:
+
+```shell
+flwr new @flwrlabs/quickstart-jax
 ```
 
 This will create a new directory called `quickstart-jax` with the following structure:

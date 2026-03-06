@@ -45,7 +45,7 @@ def grpc_adapter(  # pylint: disable=R0913,too-many-positional-arguments
     tuple[
         int,
         Callable[[], tuple[Message, ObjectTree] | None],
-        Callable[[Message, ObjectTree], set[str]],
+        Callable[[Message, ObjectTree, float], set[str]],
         Callable[[int], Run],
         Callable[[str, int], Fab],
         Callable[[int, str], bytes],
@@ -81,7 +81,7 @@ def grpc_adapter(  # pylint: disable=R0913,too-many-positional-arguments
     -------
     node_id : int
     receive : Callable[[], Optional[tuple[Message, ObjectTree]]]
-    send : Callable[[Message, ObjectTree], set[str]]
+    send : Callable[[Message, ObjectTree, float], set[str]]
     get_run : Callable[[int], Run]
     get_fab : Callable[[str, int], Fab]
     pull_object : Callable[[str], bytes]

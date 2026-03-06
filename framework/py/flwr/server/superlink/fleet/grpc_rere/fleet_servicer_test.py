@@ -17,7 +17,7 @@
 
 import tempfile
 import unittest
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 import grpc
 from parameterized import parameterized
@@ -29,12 +29,6 @@ from flwr.common.constant import (
     NOOP_FLWR_AID,
     SUPERLINK_NODE_ID,
     Status,
-)
-from flwr.common.inflatable import (
-    get_all_nested_objects,
-    get_object_id,
-    get_object_tree,
-    iterate_object_tree,
 )
 from flwr.common.message import get_message_to_descendant_id_mapping
 from flwr.common.serde import message_from_proto
@@ -74,6 +68,12 @@ from flwr.server.superlink.linkstate.linkstate_test import (
 from flwr.server.superlink.utils import _STATUS_TO_MSG
 from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME, NOOP_FEDERATION, NodeStatus
 from flwr.supercore.ffs import FfsFactory
+from flwr.supercore.inflatable.inflatable_object import (
+    get_all_nested_objects,
+    get_object_id,
+    get_object_tree,
+    iterate_object_tree,
+)
 from flwr.supercore.object_store import ObjectStoreFactory
 from flwr.superlink.federation import NoOpFederationManager
 
@@ -652,16 +652,19 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902, R0904
         # Preregister object
         self.store.preregister(run_id, get_object_tree(obj))
 
-        # Pull
-        req = PullObjectRequest(
-            node=Node(node_id=node_id), run_id=run_id, object_id=obj.object_id
-        )
-        res: PullObjectResponse = self._pull_object(req)
+        # Mock store_traffic to avoid validation error when object_content is empty
+        # This is because the object has been preregistered but not yet pushed
+        with patch.object(self.state, "store_traffic"):
+            # Pull
+            req = PullObjectRequest(
+                node=Node(node_id=node_id), run_id=run_id, object_id=obj.object_id
+            )
+            res: PullObjectResponse = self._pull_object(req)
 
-        # Assert object content is b"" (it was never pushed)
-        assert res.object_found
-        assert not res.object_available
-        assert res.object_content == b""
+            # Assert object content is b"" (it was never pushed)
+            assert res.object_found
+            assert not res.object_available
+            assert res.object_content == b""
 
         # Put object in store, then check it can be pulled
         self.store.put(object_id=obj.object_id, object_content=obj_b)
@@ -687,10 +690,14 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902, R0904
         # Attempt pulling object that doesn't exist
         self._transition_run_status(run_id, 2)
         node_id = self._create_dummy_node()
-        req = PullObjectRequest(
-            node=Node(node_id=node_id), run_id=run_id, object_id="1234"
-        )
-        res: PullObjectResponse = self._pull_object(req)
+        # Mock store_traffic to avoid validation error when object_content is empty
+        # This is because the object has been preregistered but not yet pushed
+        with patch.object(self.state, "store_traffic"):
+            req = PullObjectRequest(
+                node=Node(node_id=node_id), run_id=run_id, object_id="1234"
+            )
+            res: PullObjectResponse = self._pull_object(req)
+
         # Empty response
         assert not res.object_found
 
@@ -728,6 +735,67 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902, R0904
 
         # Assert: Message is removed from ObjectStore
         assert len(self.store) == 0
+
+    def test_push_object_records_traffic(self) -> None:
+        """Test `PushObject` records traffic data."""
+        # Prepare
+        run_id = self._create_dummy_run()
+        node_id = self._create_dummy_node()
+        obj = ConfigRecord({"a": 321, "b": [6, 5, 4]})
+        obj_b = obj.deflate()
+
+        # Pre-register object
+        self.store.preregister(run_id, get_object_tree(obj))
+
+        # Get initial traffic
+        run_before = self.state.get_run_info(run_ids=[run_id])[0]
+        bytes_recv_before = run_before.bytes_recv
+
+        # Execute
+        req = PushObjectRequest(
+            node=Node(node_id=node_id),
+            run_id=run_id,
+            object_id=obj.object_id,
+            object_content=obj_b,
+        )
+        res: PushObjectResponse = self._push_object(request=req)
+
+        # Assert
+        assert res.stored
+        run_after = self.state.get_run_info(run_ids=[run_id])[0]
+        # Verify traffic was recorded
+        assert run_after.bytes_recv == bytes_recv_before + len(obj_b)
+        assert run_after.bytes_sent == 0  # No bytes sent during push
+
+    def test_pull_object_records_traffic(self) -> None:
+        """Test `PullObject` records traffic data."""
+        # Prepare
+        run_id = self._create_dummy_run()
+        node_id = self._create_dummy_node()
+        obj = ConfigRecord({"a": 789, "b": [6, 7, 8]})
+        obj_b = obj.deflate()
+
+        # Preregister and store object
+        self.store.preregister(run_id, get_object_tree(obj))
+        self.store.put(object_id=obj.object_id, object_content=obj_b)
+
+        # Get initial traffic
+        run_before = self.state.get_run_info(run_ids=[run_id])[0]
+        bytes_sent_before = run_before.bytes_sent
+
+        # Execute
+        req = PullObjectRequest(
+            node=Node(node_id=node_id), run_id=run_id, object_id=obj.object_id
+        )
+        res: PullObjectResponse = self._pull_object(req)
+
+        # Assert
+        assert res.object_found
+        assert res.object_available
+        run_after = self.state.get_run_info(run_ids=[run_id])[0]
+        # Verify traffic was recorded
+        assert run_after.bytes_sent == bytes_sent_before + len(obj_b)
+        assert run_after.bytes_recv == 0  # No bytes received during pull
 
 
 class TestFleetServicerWithNodeAuthEnabled(TestFleetServicer):
