@@ -19,7 +19,11 @@ from typing import Annotated
 
 import typer
 
-from flwr.cli.utils import cli_output_control_stub, flwr_cli_grpc_exc_handler
+from flwr.cli.utils import (
+    cli_output_control_stub,
+    flwr_cli_grpc_exc_handler,
+    print_json_to_stdout,
+)
 from flwr.common.constant import CliOutputFormat
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     RejectInvitationRequest,
@@ -55,10 +59,15 @@ def reject(
 def _reject_invitation(
     stub: ControlStub,
     request: RejectInvitationRequest,
-    is_json: bool,  # pylint: disable=W0613
+    is_json: bool,
 ) -> None:
     """Send a reject invitation request."""
     with flwr_cli_grpc_exc_handler():
         _: RejectInvitationResponse = stub.RejectInvitation(request)
 
-    raise NotImplementedError
+    if is_json:
+        print_json_to_stdout(
+            {"success": True, "federation-name": request.federation_name}
+        )
+    else:
+        typer.secho(f"✅ Rejected invitation to join '{request.federation_name}'.")

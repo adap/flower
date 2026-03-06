@@ -19,7 +19,11 @@ from typing import Annotated
 
 import typer
 
-from flwr.cli.utils import cli_output_control_stub, flwr_cli_grpc_exc_handler
+from flwr.cli.utils import (
+    cli_output_control_stub,
+    flwr_cli_grpc_exc_handler,
+    print_json_to_stdout,
+)
 from flwr.common.constant import CliOutputFormat
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     RevokeInvitationRequest,
@@ -32,7 +36,7 @@ def revoke(
     account: Annotated[
         str,
         typer.Argument(
-            help="Name of the Flower account whose invite should be revoked."
+            help="Name of the Flower account whose invitation should be revoked."
         ),
     ],
     federation: Annotated[
@@ -64,10 +68,22 @@ def revoke(
 def _revoke_invitation(
     stub: ControlStub,
     request: RevokeInvitationRequest,
-    is_json: bool,  # pylint: disable=W0613
+    is_json: bool,
 ) -> None:
     """Send a revoke invitation request."""
     with flwr_cli_grpc_exc_handler():
         _: RevokeInvitationResponse = stub.RevokeInvitation(request)
 
-    raise NotImplementedError
+    if is_json:
+        print_json_to_stdout(
+            {
+                "success": True,
+                "invitee-account-name": request.invitee_account_name,
+                "federation-name": request.federation_name,
+            }
+        )
+    else:
+        typer.secho(
+            f"✅ Revoked invitation for '{request.invitee_account_name}' to join "
+            f"'{request.federation_name}'."
+        )
