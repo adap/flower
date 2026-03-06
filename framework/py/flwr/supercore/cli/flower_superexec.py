@@ -99,7 +99,6 @@ def flower_superexec() -> None:
         stub_class=stub_class,  # type: ignore
         appio_api_address=args.appio_api_address,
         plugin_config=plugin_config,
-        flwr_dir=args.flwr_dir,
         parent_pid=args.parent_pid,
         health_server_address=args.health_server_address,
     )
@@ -126,17 +125,6 @@ def _parse_args() -> argparse.ArgumentParser:
         help="Connect to the AppIO API without TLS. "
         "Data transmitted between the client and server is not encrypted. "
         "Use this flag only if you understand the risks.",
-    )
-    parser.add_argument(
-        "--flwr-dir",
-        default=None,
-        help="""The path containing installed Flower Apps.
-        By default, this value is equal to:
-
-            - `$FLWR_HOME/` if `$FLWR_HOME` is defined
-            - `$XDG_DATA_HOME/.flwr/` if `$XDG_DATA_HOME` is defined
-            - `$HOME/.flwr/` in all other cases
-        """,
     )
     parser.add_argument(
         "--parent-pid",

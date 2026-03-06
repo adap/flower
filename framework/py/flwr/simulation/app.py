@@ -25,7 +25,6 @@ from flwr.cli.utils import get_sha256_hash
 from flwr.common import EventType, event
 from flwr.common.args import add_args_flwr_app_common
 from flwr.common.config import (
-    get_flwr_dir,
     get_fused_config_from_dir,
     get_project_config,
     get_project_dir,
@@ -96,7 +95,6 @@ def flwr_simulation() -> None:
             plugin_class=SimulationExecPlugin,
             stub_class=SimulationIoStub,
             appio_api_address=args.simulationio_api_address,
-            flwr_dir=args.flwr_dir,
             parent_pid=args.parent_pid,
             warn_run_once=args.run_once,
         )
@@ -113,7 +111,6 @@ def flwr_simulation() -> None:
         simulationio_api_address=args.simulationio_api_address,
         log_queue=log_queue,
         token=args.token,
-        flwr_dir_=args.flwr_dir,
         certificates=None,
         parent_pid=args.parent_pid,
     )
@@ -126,7 +123,6 @@ def run_simulation_process(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
     simulationio_api_address: str,
     log_queue: Queue[str | None],
     token: str,
-    flwr_dir_: str | None = None,
     certificates: bytes | None = None,
     parent_pid: int | None = None,
 ) -> None:
@@ -141,7 +137,6 @@ def run_simulation_process(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
     )
 
     # Initialize variables for finally block
-    flwr_dir = get_flwr_dir(flwr_dir_)
     log_uploader = None
     heartbeat_sender = None
     run = None
@@ -187,11 +182,11 @@ def run_simulation_process(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
         )
 
         log(DEBUG, "Simulation process starts FAB installation.")
-        install_from_fab(fab.content, flwr_dir=flwr_dir, skip_prompt=True)
+        install_from_fab(fab.content, skip_prompt=True)
 
         fab_id, fab_version = get_fab_metadata(fab.content)
 
-        app_path = get_project_dir(fab_id, fab_version, fab.hash_str, flwr_dir)
+        app_path = get_project_dir(fab_id, fab_version, fab.hash_str)
         config = get_project_config(app_path)
 
         # Get ClientApp and SeverApp components

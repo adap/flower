@@ -235,7 +235,6 @@ def _main_loop(
     enable_tf_gpu_growth: bool,
     run: Run,
     exit_event: EventType,
-    flwr_dir: str | None = None,
     client_app: ClientApp | None = None,
     client_app_attr: str | None = None,
     server_app: ServerApp | None = None,
@@ -300,7 +299,6 @@ def _main_loop(
             state_factory=state_factory,
             f_stop=f_stop,
             run=run,
-            flwr_dir=flwr_dir,
         )
 
         updated_context = output_context_queue.get(timeout=3)
@@ -345,7 +343,6 @@ def _run_simulation(
     server_app_attr: str | None = None,
     server_app_context: Context | None = None,
     app_dir: str = "",
-    flwr_dir: str | None = None,
     run: Run | None = None,
     enable_tf_gpu_growth: bool = False,
     verbose_logging: bool = False,
@@ -402,7 +399,6 @@ def _run_simulation(
         enable_tf_gpu_growth,
         run,
         exit_event,
-        flwr_dir,
         client_app,
         client_app_attr,
         server_app,
@@ -485,17 +481,6 @@ def _parse_args_run_simulation() -> argparse.ArgumentParser:
         action="store_true",
         help="When unset, only INFO, WARNING and ERROR log messages will be shown. "
         "If set, DEBUG-level logs will be displayed. ",
-    )
-    parser.add_argument(
-        "--flwr-dir",
-        default=None,
-        help="""The path containing installed Flower Apps.
-    By default, this value is equal to:
-
-        - `$FLWR_HOME/` if `$FLWR_HOME` is defined
-        - `$XDG_DATA_HOME/.flwr/` if `$XDG_DATA_HOME` is defined
-        - `$HOME/.flwr/` in all other cases
-    """,
     )
     parser.add_argument(
         "--run-id",

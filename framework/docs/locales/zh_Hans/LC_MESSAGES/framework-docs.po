@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-27 00:12+0000\n"
+"POT-Creation-Date: 2026-03-05 00:11+0000\n"
 "PO-Revision-Date: 2024-06-12 10:09+0000\n"
 "Last-Translator: Yan Gao <y.gaogy@gmail.com>\n"
 "Language: zh_Hans\n"
@@ -854,10 +854,12 @@ msgid "Using Poetry (recommended)"
 msgstr "使用诗歌（推荐）"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:12
+#, fuzzy
 msgid ""
 "Install a ``flwr`` pre-release from PyPI: update the ``flwr`` dependency "
-"in ``pyproject.toml`` and then reinstall (don't forget to delete "
-"``poetry.lock`` (``rm poetry.lock``) before running ``poetry install``)."
+"in ``pyproject.toml`` and then reinstall (ensure to delete "
+"``poetry.lock`` via ``rm poetry.lock`` before running ``python -m poetry "
+"install``)."
 msgstr ""
 "安装来自 PyPI 的 ``flwr`` 预发布版本：更新 ``pyproject.toml`` 中的 ``flwr`` "
 "依赖关系，然后重新安装（运行 ``poetry install` 前，别忘了删除 ``poetry.lock` (``rm "
@@ -1414,25 +1416,26 @@ msgid "Virtualenv with Poetry"
 msgstr "有诗意的 Virtualenv"
 
 #: ../../source/contributor-how-to-set-up-a-virtual-env.rst:54
+#, fuzzy
 msgid ""
 "The Flower examples are based on `Poetry <https://python-"
 "poetry.org/docs/>`_ to manage dependencies. After installing Poetry you "
-"simply create a virtual environment with:"
+"can create and activate a virtual environment with:"
 msgstr ""
 "Flower 示例基于 `Poetry <https://python-poetry.org/docs/>`_ 来管理依赖关系。安装 Poetry"
 " 后，只需创建一个虚拟环境即可："
 
-#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:61
+#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:62
 msgid ""
 "If you open a new terminal you can activate the previously created "
 "virtual environment with the following command:"
 msgstr "如果打开一个新终端，可以使用以下命令激活之前创建的虚拟环境："
 
-#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:70
+#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:71
 msgid "Virtualenv with Anaconda"
 msgstr "使用 Anaconda 的 Virtualenv"
 
-#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:72
+#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:73
 #, fuzzy
 msgid ""
 "If you prefer to use Anaconda for your virtual environment then install "
@@ -1444,7 +1447,7 @@ msgstr ""
 "<https://docs.conda.io/projects/conda/en/latest/user-"
 "guide/install/index.html>`_ 软件包。设置完成后，您就可以使用以下工具创建虚拟环境："
 
-#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:80
+#: ../../source/contributor-how-to-set-up-a-virtual-env.rst:81
 msgid "and activate the virtual environment with:"
 msgstr "并激活虚拟环境："
 
@@ -1468,8 +1471,8 @@ msgstr ""
 #: ../../source/contributor-how-to-write-documentation.rst:12
 #, fuzzy
 msgid ""
-"Note that, in order to build the documentation locally (with ``poetry run"
-" make html``, like described below), `Pandoc "
+"Note that, in order to build the documentation locally (with ``python -m "
+"poetry run make html``, as described below), `Pandoc "
 "<https://pandoc.org/installing.html>`_ needs to be installed on the "
 "system."
 msgstr ""
@@ -1489,7 +1492,9 @@ msgstr "编辑 ``framework/docs/source/`` 下现有的 ``.rst`` (或 ``.md``) �
 #: ../../source/contributor-how-to-write-documentation.rst:21
 #: ../../source/contributor-how-to-write-documentation.rst:31
 #, fuzzy
-msgid "Compile the docs: ``cd framework/docs``, then ``poetry run make html``"
+msgid ""
+"Compile the docs: ``cd framework/docs``, then ``python -m poetry run make"
+" html``"
 msgstr "编译文档： cd doc``，然后 ``poetry run make html``"
 
 #: ../../source/contributor-how-to-write-documentation.rst:22
@@ -2353,7 +2358,8 @@ msgid "`Python 3.10 <https://docs.python.org/3.10/>`_ or above"
 msgstr "Python 3.10 <https://docs.python.org/3.10/>`_ 或更高版本"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:10
-msgid "`Poetry 1.3 <https://python-poetry.org/>`_ or above"
+#, fuzzy
+msgid "`Poetry 2.3 <https://python-poetry.org/>`_ or above"
 msgstr "`Poetry 1.3 <https://python-poetry.org/>`_ 或更高版本"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:11
@@ -14478,10 +14484,11 @@ msgid ""
 msgstr "``python -m pip install -U 'flwr[simulation]'``（当使用`start_simulation``时）"
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:34
+#, fuzzy
 msgid ""
 "Poetry: update the ``flwr`` dependency in ``pyproject.toml`` and then "
-"reinstall (don't forget to delete ``poetry.lock`` via ``rm poetry.lock`` "
-"before running ``poetry install``)."
+"reinstall (ensure to delete ``poetry.lock`` via ``rm poetry.lock`` before"
+" running ``python -m poetry install``)."
 msgstr ""
 "Poetry：更新 ``pyproject.toml`` 中的 ``flwr`` 依赖包，然后重新安装（运行 ``poetry install``"
 " 前，别忘了通过 ``rm poetry.lock` 删除 ``poetry.lock`）。"
@@ -16398,9 +16405,9 @@ msgstr ""
 msgid "Arguments"
 msgstr "构建文档"
 
-#: ../../flwr add-supernode:1 app archive:1 create:1 federation install:1
-#: list:1 log:1 login:1 new:1 publish:1 pull:1 register:1 remove-supernode:1
-#: run:1 stop:1 supernode unregister:1
+#: ../../flwr accept:1 add-supernode:1 app archive:1 create:1 federation
+#: install:1 invite list:1 log:1 login:1 new:1 publish:1 pull:1 register:1
+#: reject:1 remove-supernode:1 revoke:1 run:1 stop:1 supernode unregister:1
 #, fuzzy
 msgid "Optional argument"
 msgstr "可选的改进措施"
@@ -16415,8 +16422,9 @@ msgid ""
 "confirmation sign & submit the review to the Platform."
 msgstr ""
 
-#: ../../flwr add-supernode:1 app archive:1 create:1 federation log:1 pull:1
-#: register:1 remove-supernode:1 review:1 stop:1 supernode unregister:1
+#: ../../flwr accept:1 add-supernode:1 app archive:1 create:1 federation invite
+#: log:1 pull:1 register:1 reject:1 remove-supernode:1 review:1 revoke:1 stop:1
+#: supernode unregister:1
 #, fuzzy
 msgid "Required argument"
 msgstr "构建文档"
@@ -16457,19 +16465,21 @@ msgstr "配置值"
 msgid "List all SuperLink connections (alias: ls)."
 msgstr "然后，我们启动服务器："
 
-#: ../../flwr add-supernode:1 archive:1 config create:1 federation list:1
-#: register:1 remove-supernode:1 run:1 stop:1 supernode unregister:1
+#: ../../flwr accept:1 add-supernode:1 archive:1 config create:1 federation
+#: invite list:1 register:1 reject:1 remove-supernode:1 revoke:1 run:1 stop:1
+#: supernode unregister:1
 msgid "Format output using 'default' view or 'json'"
 msgstr ""
 
-#: ../../flwr add-supernode archive config create federation list log register
-#: remove-supernode run stop supernode unregister
+#: ../../flwr accept add-supernode archive config create federation invite list
+#: log register reject remove-supernode revoke run stop supernode unregister
 #, fuzzy
 msgid "default"
 msgstr "工作流程"
 
-#: ../../flwr add-supernode:1 archive:1 config create:1 federation list:1
-#: register:1 remove-supernode:1 run:1 stop:1 supernode unregister:1
+#: ../../flwr accept:1 add-supernode:1 archive:1 config create:1 federation
+#: invite list:1 register:1 reject:1 remove-supernode:1 revoke:1 run:1 stop:1
+#: supernode unregister:1
 #, fuzzy
 msgid "``'default'``"
 msgstr "工作流程"
@@ -16489,14 +16499,15 @@ msgstr "flower-superlink"
 msgid "ID of the SuperNode to add."
 msgstr "然后，我们启动服务器："
 
-#: ../../flwr add-supernode:1 federation remove-supernode:1
+#: ../../flwr accept:1 add-supernode:1 create:1 federation invite reject:1
+#: remove-supernode:1 revoke:1
 #, fuzzy
 msgid "Name of the federation."
 msgstr "flower-superlink"
 
-#: ../../flwr add-supernode:1 archive:1 create:1 federation list:1 log:1
-#: login:1 pull:1 register:1 remove-supernode:1 run:1 stop:1 supernode
-#: unregister:1
+#: ../../flwr accept:1 add-supernode:1 archive:1 create:1 federation invite
+#: list:1 log:1 login:1 pull:1 register:1 reject:1 remove-supernode:1 revoke:1
+#: run:1 stop:1 supernode unregister:1
 #, fuzzy
 msgid "Name of the SuperLink connection."
 msgstr "flower-superlink"
@@ -16526,6 +16537,54 @@ msgstr "flower-superlink"
 msgid "Name of the federation to create."
 msgstr "flower-superlink"
 
+#: ../../flwr federation invite:1
+#, fuzzy
+msgid "Manage Federation Invitations"
+msgstr "运行模拟"
+
+#: ../../flwr accept:1 federation invite
+#, fuzzy
+msgid "Accept an invitation to join a federation."
+msgstr "使用现有策略"
+
+#: ../../flwr create:1 federation invite
+#, fuzzy
+msgid "Create an invitation to join a federation."
+msgstr "创建新页面"
+
+#: ../../flwr create:1 federation invite
+#, fuzzy
+msgid "Name of the Flower account to invite."
+msgstr "flower-superlink"
+
+#: ../../flwr federation invite list:1
+msgid ""
+"List invitations addressed to you and invitations created by you (alias: "
+"ls)."
+msgstr ""
+
+#: ../../flwr federation invite list:1
+msgid "Show non-pending invitations."
+msgstr ""
+
+#: ../../flwr federation invite list:1 run:1 supernode
+#, fuzzy
+msgid "``False``"
+msgstr "``FLWR_VERSION``"
+
+#: ../../flwr federation invite reject:1
+#, fuzzy
+msgid "Reject an invitation to join a federation."
+msgstr "flower-superlink"
+
+#: ../../flwr federation invite revoke:1
+msgid "Revoke a pending invitation."
+msgstr ""
+
+#: ../../flwr federation invite revoke:1
+msgid "Name of the Flower account whose invite should be revoked."
+msgstr ""
+
 #: ../../flwr federation list:1
 msgid ""
 "List available federations or details of a specific federation (alias: "
@@ -16536,6 +16595,10 @@ msgstr ""
 #, fuzzy
 msgid "Name of the federation to display"
 msgstr "flower-superlink"
+
+#: ../../flwr federation list:1
+msgid "Show additional details, including archived federations."
+msgstr ""
 
 #: ../../flwr federation remove-supernode:1
 #, fuzzy
@@ -16553,7 +16616,7 @@ msgid "Install a Flower App Bundle."
 msgstr "安装Flower"
 
 #: ../../flwr install:1
-msgid "It can be ran with a single FAB file argument:"
+msgid "It can be run with a single FAB file argument:"
 msgstr ""
 
 #: ../../flwr install:1
@@ -16561,33 +16624,15 @@ msgid "``flwr install ./target_project.fab``"
 msgstr ""
 
 #: ../../flwr install:1
-msgid "The target install directory can be specified with ``--flwr-dir``:"
+msgid "Apps are installed to:"
 msgstr ""
 
 #: ../../flwr install:1
-msgid "``flwr install ./target_project.fab --flwr-dir ./docs/flwr``"
+msgid "``$FLWR_HOME/apps/`` if ``$FLWR_HOME`` is defined"
 msgstr ""
 
 #: ../../flwr install:1
-msgid ""
-"This will install ``target_project`` to ``./docs/flwr/``. By default, "
-"``flwr-dir`` is equal to:"
-msgstr ""
-
-#: ../../flwr install:1
-msgid "``$FLWR_HOME/`` if ``$FLWR_HOME`` is defined"
-msgstr ""
-
-#: ../../flwr install:1
-msgid "``$XDG_DATA_HOME/.flwr/`` if ``$XDG_DATA_HOME`` is defined"
-msgstr ""
-
-#: ../../flwr install:1
-msgid "``$HOME/.flwr/`` in all other cases"
-msgstr ""
-
-#: ../../flwr install:1
-msgid "The desired install path."
+msgid "``$HOME/.flwr/apps/`` otherwise"
 msgstr ""
 
 #: ../../flwr install:1
@@ -16637,17 +16682,13 @@ msgid ""
 msgstr ""
 
 #: ../../flwr list:1
-msgid "List all runs"
-msgstr ""
-
-#: ../../flwr list:1 run:1 supernode
-#, fuzzy
-msgid "``False``"
-msgstr "``FLWR_VERSION``"
-
-#: ../../flwr list:1
 msgid "Specific run ID to display"
 msgstr ""
+
+#: ../../flwr list:1
+#, fuzzy
+msgid "Maximum number of runs to display"
+msgstr "flower-superlink"
 
 #: ../../flwr log:1
 msgid "Get logs from a run."
@@ -17023,7 +17064,9 @@ msgstr "数组"
 
 #: flwr.common.message.Message:1 flwr.common.record.array.Array:1 of
 #, fuzzy
-msgid "Bases: :py:class:`~flwr.common.inflatable.InflatableObject`"
+msgid ""
+"Bases: "
+":py:class:`~flwr.supercore.inflatable.inflatable_object.InflatableObject`"
 msgstr "Bases: :py:class:`~flwr.common.context.Context`"
 
 #: flwr.common.record.array.Array:3 of
@@ -17404,7 +17447,7 @@ msgstr "参数"
 msgid ""
 "Bases: :py:class:`~flwr.common.record.typeddict.TypedDict`\\ "
 "[:py:class:`str`, :py:class:`~flwr.common.record.array.Array`], "
-":py:class:`~flwr.common.inflatable.InflatableObject`"
+":py:class:`~flwr.supercore.inflatable.inflatable_object.InflatableObject`"
 msgstr ""
 "Bases: :py:class:`~flwr.common.record.typeddict.TypedDict`\\ "
 "[:py:class:`str`, :py:class:`~flwr.common.record.parametersrecord.Array`]"
@@ -17758,7 +17801,7 @@ msgid ""
 "[:py:class:`int`] | :py:class:`list`\\ [:py:class:`float`] | "
 ":py:class:`list`\\ [:py:class:`str`] | :py:class:`list`\\ "
 "[:py:class:`bytes`] | :py:class:`list`\\ [:py:class:`bool`]], "
-":py:class:`~flwr.common.inflatable.InflatableObject`"
+":py:class:`~flwr.supercore.inflatable.inflatable_object.InflatableObject`"
 msgstr ""
 "Bases: :py:class:`~flwr.common.record.typeddict.TypedDict`\\ "
 "[:py:class:`str`, :py:obj:`~typing.Union`\\ [:py:class:`int`, "
@@ -18467,7 +18510,7 @@ msgid ""
 "[:py:class:`str`, :py:class:`int` | :py:class:`float` | "
 ":py:class:`list`\\ [:py:class:`int`] | :py:class:`list`\\ "
 "[:py:class:`float`]], "
-":py:class:`~flwr.common.inflatable.InflatableObject`"
+":py:class:`~flwr.supercore.inflatable.inflatable_object.InflatableObject`"
 msgstr ""
 "Bases: :py:class:`~flwr.common.record.typeddict.TypedDict`\\ "
 "[:py:class:`str`, :py:obj:`~typing.Union`\\ [:py:class:`int`, "
@@ -18648,7 +18691,7 @@ msgid ""
 "[:py:class:`str`, :py:class:`~flwr.common.record.arrayrecord.ArrayRecord`"
 " | :py:class:`~flwr.common.record.metricrecord.MetricRecord` | "
 ":py:class:`~flwr.common.record.configrecord.ConfigRecord`], "
-":py:class:`~flwr.common.inflatable.InflatableObject`"
+":py:class:`~flwr.supercore.inflatable.inflatable_object.InflatableObject`"
 msgstr ""
 "Bases: :py:class:`~flwr.common.record.typeddict.TypedDict`\\ "
 "[:py:class:`str`, :py:class:`~flwr.common.record.parametersrecord.Array`]"
@@ -66837,5 +66880,8 @@ msgstr ""
 #~ msgid ""
 #~ "Omitting both ``root-certificate`` and "
 #~ "``insecure`` to use default certificates"
+#~ msgstr ""
+
+#~ msgid "List all runs"
 #~ msgstr ""
 

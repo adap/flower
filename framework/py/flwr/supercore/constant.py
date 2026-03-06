@@ -18,6 +18,7 @@
 from __future__ import annotations
 
 import os
+from enum import Enum
 
 from flwr.common.constant import FLWR_DIR, NOOP_ACCOUNT_NAME
 
@@ -60,6 +61,12 @@ APP_PUBLISH_INCLUDE_PATTERNS = (
     "**/*.py",
     "**/*.toml",
     "**/*.md",
+    "**/*.yaml",
+    "**/*.yml",
+    "**/*.json",
+    "**/*.jsonl",
+    "/.gitignore",
+    "**/.editorconfig",
     "/LICENSE",
     "/LICENSE.md",
 )
@@ -115,3 +122,13 @@ class NodeStatus:
     def __new__(cls) -> NodeStatus:
         """Prevent instantiation."""
         raise TypeError(f"{cls.__name__} cannot be instantiated.")
+
+
+class InvitationStatus(str, Enum):
+    """Status of a federation invitation."""
+
+    PENDING = "pending"
+    ACCEPTED = "accepted"
+    REJECTED = "rejected"
+    REVOKED = "revoked"
+    EXPIRED = "expired"
