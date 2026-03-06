@@ -24,13 +24,13 @@ pip install flwr
 Fetch the app:
 
 ```shell
-flwr new @flwrlabs/flower-authentication
+flwr new @flwrlabs/supernode-authentication
 ```
 
-This will create a new directory called `flower-authentication` with the following project structure:
+This will create a new directory called `supernode-authentication` with the following project structure:
 
 ```shell
-flower-authentication
+supernode-authentication
 ├── authexample
 │   ├── __init__.py
 │   ├── client_app.py   # Defines your ClientApp
