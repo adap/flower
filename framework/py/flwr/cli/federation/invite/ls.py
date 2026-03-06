@@ -16,6 +16,7 @@
 
 
 from collections.abc import Sequence
+from datetime import datetime
 from typing import Annotated, Any
 
 import typer
@@ -36,6 +37,7 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
 from flwr.proto.control_pb2_grpc import ControlStub
 from flwr.proto.federation_pb2 import Invitation  # pylint: disable=E0611
 from flwr.supercore.constant import InvitationStatus
+from flwr.supercore.date import isoformat8601_utc
 
 from ..error_handlers import handle_invite_grpc_error
 
@@ -96,11 +98,17 @@ def _list_invitations(
     if is_json:
         print_json_to_stdout(_to_json(created_invitations, received_invitations))
     else:
+        created_table = _to_invitations_table(
+            created_invitations, is_received=False, verbose=verbose
+        )
+        received_table = _to_invitations_table(
+            received_invitations, is_received=True, verbose=verbose
+        )
         console = Console()
         console.print()
-        console.print(_to_received_invitations_table(received_invitations))
+        console.print(created_table)
         console.print()
-        console.print(_to_created_invitations_table(created_invitations))
+        console.print(received_table)
         if not verbose and not received_invitations and not created_invitations:
             console.print(
                 "[dim]No pending invitations. Use --verbose to show all statuses.[/dim]"
@@ -116,54 +124,46 @@ def _filter_invitations(
     return [iv for iv in invitations if iv.status == InvitationStatus.PENDING]
 
 
-def _to_received_invitations_table(invitations: Sequence[Invitation]) -> Table:
-    """Render invitations received by the current account."""
+def _format_datetime(dt_str: str) -> str:
+    """Format ISO 8601 timestamp as `YYYY-MM-DD HH:MM:SSZ`."""
+    dt = datetime.fromisoformat(dt_str) if dt_str else None
+    return isoformat8601_utc(dt).replace("T", " ") if dt else "N/A"
+
+
+def _to_invitations_table(
+    invitations: Sequence[Invitation],
+    is_received: bool,
+    verbose: bool,
+) -> Table:
+    """Render an invitations table."""
+    title = "Received Invitations" if is_received else "Created Invitations"
+    actor_column = "Invited By" if is_received else "Invited"
+
     table = Table(
-        title="Received Invitations",
+        title=title,
         header_style="bold cyan",
         show_lines=True,
     )
-    table.add_column(
-        Text("Federation Name", justify="center"),
-        style="bright_black",
-        no_wrap=True,
-    )
-    table.add_column(Text("Invited By", justify="center"), no_wrap=True)
+    table.add_column(Text("Federation", justify="center"), no_wrap=True)
+    table.add_column(Text(actor_column, justify="center"), no_wrap=True)
     table.add_column(Text("Status", justify="center"), no_wrap=True)
+    if verbose:
+        table.add_column(Text("Created @", justify="center"))
+        table.add_column(Text("Status Changed @", justify="center"))
 
     for invitation in invitations:
         color = _STATUS_TO_COLOR.get(invitation.status, "bright_black")
-        table.add_row(
+        row = [
             invitation.federation_name,
-            invitation.inviter.name,
+            invitation.inviter.name if is_received else invitation.invitee.name,
             f"[{color}]{invitation.status}[/{color}]",
-        )
-
-    return table
-
-
-def _to_created_invitations_table(invitations: Sequence[Invitation]) -> Table:
-    """Render invitations created by the current account."""
-    table = Table(
-        title="Created Invitations",
-        header_style="bold cyan",
-        show_lines=True,
-    )
-    table.add_column(
-        Text("Federation Name", justify="center"),
-        style="bright_black",
-        no_wrap=True,
-    )
-    table.add_column(Text("Invited", justify="center"), no_wrap=True)
-    table.add_column(Text("Status", justify="center"), no_wrap=True)
-
-    for invitation in invitations:
-        color = _STATUS_TO_COLOR.get(invitation.status, "bright_black")
-        table.add_row(
-            invitation.federation_name,
-            invitation.invitee.name,
-            f"[{color}]{invitation.status}[/{color}]",
-        )
+        ]
+        if verbose:
+            row += [
+                _format_datetime(invitation.created_at),
+                _format_datetime(invitation.status_changed_at),
+            ]
+        table.add_row(*row)
 
     return table
 
@@ -180,8 +180,8 @@ def _to_json(
                 "federation-name": invitation.federation_name,
                 "invited": invitation.invitee.name,
                 "status": invitation.status,
-                "created-at": invitation.created_at,
-                "status-changed-at": invitation.status_changed_at,
+                "created-at": _format_datetime(invitation.created_at),
+                "status-changed-at": _format_datetime(invitation.status_changed_at),
             }
             for invitation in created_invitations
         ],
@@ -190,8 +190,8 @@ def _to_json(
                 "federation-name": invitation.federation_name,
                 "invited-by": invitation.inviter.name,
                 "status": invitation.status,
-                "created-at": invitation.created_at,
-                "status-changed-at": invitation.status_changed_at,
+                "created-at": _format_datetime(invitation.created_at),
+                "status-changed-at": _format_datetime(invitation.status_changed_at),
             }
             for invitation in received_invitations
         ],
