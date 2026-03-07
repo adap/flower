@@ -1,0 +1,65 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "federated_pft_classification"
+version = "1.0.0"
+description = "Federated Learning with XGBoost and Flower (Comprehensive Example)"
+license = "Apache-2.0"
+dependencies = [
+    "flwr[simulation]>=1.26.1",
+    "xgboost>=2.0.0",
+    "pandas>=2.0.0",
+    "openpyxl>=3.1.0",
+    "numpy>=1.24.0",
+    "scipy>=1.10.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[tool.flwr.app]
+publisher = "flwrlabs"
+
+[tool.flwr.app.components]
+serverapp = "federated_pft_classification.server_app:app"
+clientapp = "federated_pft_classification.client_app:app"
+
+[tool.flwr.app.config]
+train-method = "bagging" # Choose from [bagging, cyclic]
+num-server-rounds = 3
+fraction-train = 1.0
+fraction-evaluate = 1.0
+centralised-eval = false
+test-fraction = 0.2
+seed = 42
+local-epochs = 1
+scaled-lr = false
+
+# Path to the combined Excel file used in Simulation mode (partitioned across virtual clients)
+# In Deployment mode, each client node sets its own data-path in node_config instead
+sim-data-path = "data/simulation_data.xlsx"
+
+# Column names in the Excel files (shared across simulation and deployment)
+col-age = "age"
+col-height = "height"
+col-sex = "sex"
+col-fev1 = "fev1"
+col-fvc = "fvc"
+col-fev1-fvc = "fev1_fvc"
+col-fef75 = "fef75"
+col-tlc = "tlc"
+col-rv = "rv"
+col-rv-tlc = "rv_tlc"
+
+# XGBoost parameters
+params.objective = "multi:softmax"
+params.num-class = 7
+params.eta = 0.1 # Learning rate
+params.max-depth = 8
+params.eval-metric = "mlogloss"
+params.nthread = 16
+params.num-parallel-tree = 1
+params.subsample = 1
+params.tree-method = "hist"
