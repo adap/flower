@@ -16,11 +16,14 @@
 
 
 import json
+import os
 import re
+from pathlib import Path
 
 import requests
 
-from flwr.common.version import package_version as flwr_version
+from flwr.common.constant import FLWR_DIR, FLWR_HOME
+from flwr.supercore.version import package_version as flwr_version
 
 from .constant import APP_ID_PATTERN, APP_VERSION_PATTERN
 
@@ -60,6 +63,17 @@ def int64_to_uint64(signed: int) -> int:
     if signed < 0:
         return signed + (1 << 64)
     return signed
+
+
+def get_flwr_home() -> Path:
+    """Get the Flower home directory path.
+
+    Returns FLWR_HOME environment variable if set, otherwise returns a default
+    subdirectory in the user's home directory.
+    """
+    if flwr_home := os.getenv(FLWR_HOME):
+        return Path(flwr_home)
+    return Path.home() / FLWR_DIR
 
 
 def parse_app_spec(app_spec: str) -> tuple[str, str | None]:
@@ -240,3 +254,24 @@ def humanize_bytes(num_bytes: int) -> str:
         value /= 1024
 
     raise RuntimeError("Unreachable code")  # Make mypy happy
+
+
+def check_federation_format(federation: str) -> None:
+    """Check if the federation string is valid.
+
+    Parameters
+    ----------
+    federation : str
+        The federation string to check.
+
+    Raises
+    ------
+    ValueError
+        If the federation string is not valid. The expected
+        format is '@<account-name>/<federation-name>'.
+    """
+    if not re.match(r"^@[a-zA-Z0-9\-_]+/[a-zA-Z0-9\-_]+$", federation):
+        raise ValueError(
+            f"Invalid federation format: {federation}. "
+            f"Expected format: '@<account-name>/<federation-name>'."
+        )

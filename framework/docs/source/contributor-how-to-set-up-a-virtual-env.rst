@@ -52,7 +52,8 @@ Activate the virtualenv by running the following command:
 ************************
 
 The Flower examples are based on `Poetry <https://python-poetry.org/docs/>`_ to manage
-dependencies. After installing Poetry you simply create a virtual environment with:
+dependencies. After installing Poetry you can create and activate a virtual environment
+with:
 
 .. code-block:: shell
 

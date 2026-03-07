@@ -161,6 +161,9 @@ def _get_contributors_from_commits(api: Github, commits: list[Commit]) -> set[st
         for name in executor.map(lambda x: _get_user(*x), coauthor_names_emails):
             if name:
                 contributors.add(name)
+
+    # Remove Copilot from the contributors list if present
+    contributors.discard("Copilot")
     return contributors
 
 

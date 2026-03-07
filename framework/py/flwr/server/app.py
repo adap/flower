@@ -31,19 +31,15 @@ import grpc
 import yaml
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
-from flwr.common.address import parse_address
 from flwr.common.args import try_obtain_server_certificates
-from flwr.common.config import get_flwr_dir
 from flwr.common.constant import (
     AUTHN_TYPE_YAML_KEY,
     AUTHZ_TYPE_YAML_KEY,
-    CLIENT_OCTET,
     CONTROL_API_DEFAULT_SERVER_ADDRESS,
     FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
     FLEET_API_REST_DEFAULT_ADDRESS,
     ISOLATION_MODE_PROCESS,
     ISOLATION_MODE_SUBPROCESS,
-    SERVER_OCTET,
     SERVERAPPIO_API_DEFAULT_SERVER_ADDRESS,
     SIMULATIONIO_API_DEFAULT_SERVER_ADDRESS,
     TRANSPORT_TYPE_GRPC_ADAPTER,
@@ -58,16 +54,18 @@ from flwr.common.event_log_plugin import EventLogWriterPlugin
 from flwr.common.exit import ExitCode, flwr_exit, register_signal_handlers
 from flwr.common.grpc import generic_create_grpc_server
 from flwr.common.logger import log
-from flwr.common.version import package_version
 from flwr.proto.fleet_pb2_grpc import (  # pylint: disable=E0611
     add_FleetServicer_to_server,
 )
 from flwr.proto.grpcadapter_pb2_grpc import add_GrpcAdapterServicer_to_server
 from flwr.server.fleet_event_log_interceptor import FleetEventLogInterceptor
+from flwr.supercore.address import parse_address, resolve_bind_address
 from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.grpc_health import add_args_health, run_health_server_grpc_no_tls
 from flwr.supercore.object_store import ObjectStoreFactory
+from flwr.supercore.utils import get_flwr_home
+from flwr.supercore.version import package_version
 from flwr.superlink.artifact_provider import ArtifactProvider
 from flwr.superlink.auth_plugin import (
     ControlAuthnPlugin,
@@ -87,7 +85,7 @@ from .superlink.linkstate import LinkStateFactory
 from .superlink.serverappio.serverappio_grpc import run_serverappio_api_grpc
 from .superlink.simulation.simulationio_grpc import run_simulationio_api_grpc
 
-BASE_DIR = get_flwr_dir() / "superlink" / "ffs"
+BASE_DIR = get_flwr_home() / "superlink" / "ffs"
 P = TypeVar("P", ControlAuthnPlugin, ControlAuthzPlugin)
 
 
@@ -131,8 +129,7 @@ except ImportError:
         """Return all Control API authorization plugins for EE."""
         return {}
 
-    # pylint: disable-next=unused-argument
-    def get_ee_federation_manager(config_path: str) -> FederationManager:
+    def get_ee_federation_manager() -> FederationManager:
         """Return the EE FederationManager."""
         raise NotImplementedError("No federation manager is currently supported.")
 
@@ -149,12 +146,13 @@ def get_control_authz_plugins() -> dict[str, type[ControlAuthzPlugin]]:
     return ee_dict | {AuthzType.NOOP: NoOpControlAuthzPlugin}
 
 
-def get_federation_manager(config_path: str | None = None) -> FederationManager:
+def get_federation_manager() -> FederationManager:
     """Return the FederationManager."""
-    if config_path is None:
+    try:
+        federation_manager: FederationManager = get_ee_federation_manager()
+        return federation_manager
+    except NotImplementedError:
         return NoOpFederationManager()
-    federation_manager: FederationManager = get_ee_federation_manager(config_path)
-    return federation_manager
 
 
 # pylint: disable=too-many-branches, too-many-locals, too-many-statements
@@ -165,12 +163,6 @@ def run_superlink() -> None:
     log(INFO, "Starting Flower SuperLink")
 
     event(EventType.RUN_SUPERLINK_ENTER)
-
-    # Warn unused options
-    if args.flwr_dir is not None:
-        log(
-            WARN, "The `--flwr-dir` option is currently not in use and will be ignored."
-        )
 
     # Detect if `--executor*` arguments were set
     if args.executor or args.executor_dir or args.executor_config:
@@ -297,8 +289,7 @@ def run_superlink() -> None:
         )
 
     # Load Federation Manager
-    fed_config_path = getattr(args, "federations_config", None)
-    federation_manager = get_federation_manager(fed_config_path)
+    federation_manager = get_federation_manager()
 
     # Initialize ObjectStoreFactory
     objectstore_factory = ObjectStoreFactory(args.database)
@@ -429,16 +420,11 @@ def run_superlink() -> None:
             raise ValueError(f"Unknown fleet_api_type: {args.fleet_api_type}")
 
     if args.isolation == ISOLATION_MODE_SUBPROCESS:
-
-        _octet, _colon, _port = serverappio_address.rpartition(":")
-        io_address = (
-            f"{CLIENT_OCTET}:{_port}" if _octet == SERVER_OCTET else serverappio_address
+        appio_address = resolve_bind_address(
+            simulationio_address if is_simulation else serverappio_address
         )
         command = ["flower-superexec", "--insecure"]
-        command += [
-            "--appio-api-address",
-            simulationio_address if is_simulation else io_address,
-        ]
+        command += ["--appio-api-address", appio_address]
         command += [
             "--plugin-type",
             ExecPluginType.SIMULATION if is_simulation else ExecPluginType.SERVER_APP,
@@ -492,7 +478,7 @@ def _load_control_auth_plugins(
         }
     # Load YAML file
     else:
-        with Path(config_path).open("r", encoding="utf-8") as file:
+        with Path(config_path).expanduser().open("r", encoding="utf-8") as file:
             config = yaml.safe_load(file)
 
     def _load_plugin(
@@ -699,17 +685,6 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
         "paths are provided. Data transmitted between the gRPC client and server "
         "is not encrypted. By default, the server runs with HTTPS enabled. "
         "Use this flag only if you understand the risks.",
-    )
-    parser.add_argument(
-        "--flwr-dir",
-        default=None,
-        help="""The path containing installed Flower Apps.
-        The default directory is:
-
-        - `$FLWR_HOME/` if `$FLWR_HOME` is defined
-        - `$XDG_DATA_HOME/.flwr/` if `$XDG_DATA_HOME` is defined
-        - `$HOME/.flwr/` in all other cases
-        """,
     )
     parser.add_argument(
         "--ssl-certfile",

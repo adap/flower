@@ -20,22 +20,22 @@ from __future__ import annotations
 from logging import WARNING
 from typing import Any, cast, overload
 
-from flwr.common.date import now
 from flwr.common.logger import warn_deprecated_feature
 from flwr.proto.message_pb2 import Message as ProtoMessage  # pylint: disable=E0611
 from flwr.proto.message_pb2 import Metadata as ProtoMetadata  # pylint: disable=E0611
 from flwr.proto.message_pb2 import ObjectIDs  # pylint: disable=E0611
-
-from ..app.error import Error
-from ..app.metadata import Metadata
-from .constant import MESSAGE_TTL_TOLERANCE
-from .inflatable import (
+from flwr.supercore.date import now
+from flwr.supercore.inflatable.inflatable_object import (
     InflatableObject,
     add_header_to_object_body,
     get_descendant_object_ids,
     get_object_body,
     get_object_children_ids_from_object_content,
 )
+
+from ..app.error import Error
+from ..app.metadata import Metadata
+from .constant import MESSAGE_TTL_TOLERANCE
 from .logger import log
 from .record import RecordDict
 from .serde_utils import (

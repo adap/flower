@@ -2,15 +2,14 @@
 
 <p align="center">
   <a href="https://flower.ai/">
-    <img src="https://flower.ai/_next/image/?url=%2F_next%2Fstatic%2Fmedia%2Fflwr-head.4d68867a.png&w=384&q=75" width="140px" alt="Flower Website" />
+    <img src="https://flower.ai/_next/image/?url=%2F_next%2Fstatic%2Fmedia%2Fflwr-head.194c330a.png&w=384&q=75" width="140px" alt="Flower Website" />
   </a>
 </p>
 <p align="center">
     <a href="https://flower.ai/">Website</a> |
     <a href="https://flower.ai/blog">Blog</a> |
     <a href="https://flower.ai/docs/">Docs</a> |
-    <a href="https://flower.ai/events/flower-ai-summit-2025">Summit</a> |
-    <a href="https://flower.ai/events/flower-ai-day-2025">AI Day</a> |
+    <a href="https://flower.ai/events/flower-ai-summit-2026">Summit</a> |
     <a href="https://flower.ai/join-slack">Slack</a>
     <br /><br />
 </p>

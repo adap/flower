@@ -51,14 +51,6 @@ def flower_supernode() -> None:
 
     event(EventType.RUN_SUPERNODE_ENTER)
 
-    # Check if both `--flwr-dir` and `--isolation` were set
-    if args.flwr_dir is not None and args.isolation is not None:
-        log(
-            WARN,
-            "Both `--flwr-dir` and `--isolation` were specified. "
-            "Ignoring `--flwr-dir`.",
-        )
-
     trusted_entities = _try_obtain_trusted_entities(args.trusted_entities)
     if trusted_entities:
         _validate_public_keys_ed25519(trusted_entities)
@@ -85,7 +77,6 @@ def flower_supernode() -> None:
         node_config=parse_config_args(
             [args.node_config] if args.node_config else args.node_config
         ),
-        flwr_path=args.flwr_dir,
         isolation=args.isolation,
         clientappio_api_address=args.clientappio_api_address,
         health_server_address=args.health_server_address,
@@ -99,17 +90,6 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
         description="Start a Flower SuperNode",
     )
     _parse_args_common(parser)
-    parser.add_argument(
-        "--flwr-dir",
-        default=None,
-        help="""The path containing installed Flower Apps.
-        The default directory is:
-
-        - `$FLWR_HOME/` if `$FLWR_HOME` is defined
-        - `$XDG_DATA_HOME/.flwr/` if `$XDG_DATA_HOME` is defined
-        - `$HOME/.flwr/` in all other cases
-        """,
-    )
     parser.add_argument(
         "--isolation",
         default=ISOLATION_MODE_SUBPROCESS,
@@ -233,7 +213,7 @@ def _try_setup_client_authentication(
 
     try:
         ssh_private_key = load_ssh_private_key(
-            Path(args.auth_supernode_private_key).read_bytes(),
+            Path(args.auth_supernode_private_key).expanduser().read_bytes(),
             None,
         )
         if not isinstance(ssh_private_key, ec.EllipticCurvePrivateKey):
@@ -260,6 +240,7 @@ def _try_obtain_trusted_entities(
     """Validate and return the trust entities."""
     if not trusted_entities_path:
         return None
+    trusted_entities_path = trusted_entities_path.expanduser()
     if not trusted_entities_path.is_file():
         flwr_exit(
             ExitCode.SUPERNODE_INVALID_TRUSTED_ENTITIES,

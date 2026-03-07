@@ -4,7 +4,7 @@ Installation
 Python Version
 --------------
 
-Flower Datasets requires `Python 3.9 <https://docs.python.org/3.9/>`_ or above.
+Flower Datasets requires `Python 3.10 <https://docs.python.org/3.10/>`_ or above.
 
 
 Install stable release (pip)
@@ -67,7 +67,7 @@ The following command can be used to verify if Flower Datasets was successfully 
 
 If everything works, it should print the version of Flower Datasets to the command line:
 
-.. code-block:: none
+.. parsed-literal::
 
-  0.5.0
+  |release|
 

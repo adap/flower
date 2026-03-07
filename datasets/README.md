@@ -78,17 +78,4 @@ partition = fds.load_partition(0)
 centralized_data = fds.load_split("test")
 ```
 
-For more details, please refer to the specific how-to guides or tutorial. They showcase customization and more advanced features.
-
-## Future release
-
-Here are a few of the things that we will work on in future releases:
-
-* ✅ Support for more datasets (especially the ones that have user id present).
-* ✅ Creation of custom `Partitioner`s.
-* ✅ More out-of-the-box `Partitioner`s.
-* ✅ Passing `Partitioner`s via `FederatedDataset`'s `partitioners` argument.
-* ✅ Customization of the dataset splitting before the partitioning.
-* ✅ Simplification of the dataset transformation to the popular frameworks/types.
-* Creation of the synthetic data,
-* Support for Vertical FL.
+For more details, please refer to the specific how-to guides or tutorials. They showcase customization and more advanced features.

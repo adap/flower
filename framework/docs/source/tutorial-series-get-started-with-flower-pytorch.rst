@@ -89,6 +89,11 @@ Then, run the command below:
 
     $ flwr new @flwrlabs/quickstart-pytorch
 
+.. note::
+
+    If you're on Windows and see unexpected terminal output (e.g.: ``� □[32m□[1m``),
+    check :ref:`this FAQ entry <faq-windows-unexpected-output>`.
+
 After running it you'll notice a new directory named ``quickstart-pytorch`` has been
 created. It should have the following structure:
 
@@ -243,7 +248,7 @@ The PyTorch quickstart also provides the usual training and test functions:
                 loss.backward()
                 optimizer.step()
                 running_loss += loss.item()
-        avg_trainloss = running_loss / len(trainloader)
+        avg_trainloss = running_loss / (epochs * len(trainloader))
         return avg_trainloss
 
 
@@ -557,8 +562,8 @@ with Flower! The last step is to run our simulation in the command line, as foll
     $ flwr run .
 
 This will execute the federated learning simulation with 10 clients, or SuperNodes,
-defined in the ``[tool.flwr.federations.local-simulation]`` section in the
-``pyproject.toml``. You should expect an output log similar to this:
+defined in the ``[superlink.local]`` section in your Flower Configuration file. You
+should expect an output log similar to this:
 
 .. code-block:: shell
 

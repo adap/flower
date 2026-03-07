@@ -270,7 +270,7 @@ training/testing functions to perform local training or evaluation:
                 loss.backward()
                 optimizer.step()
                 running_loss += loss.item()
-        avg_trainloss = running_loss / len(trainloader)
+        avg_trainloss = running_loss / (epochs * len(trainloader))
         return avg_trainloss
 
 
@@ -457,6 +457,11 @@ weights as an ``ArrayRecord``, and federated training and evaluation metrics as
 ``MetricRecords``.
 
 Congratulations! You've successfully built and run your first federated learning system.
+
+.. tip::
+
+    Check the :doc:`how-to-run-simulations` documentation to learn more about how to
+    configure and run Flower simulations.
 
 .. note::
 

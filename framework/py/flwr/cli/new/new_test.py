@@ -15,8 +15,8 @@
 """Test for Flower command line interface `new` command."""
 
 
+import click
 import pytest
-import typer
 
 from .new import download_remote_app_via_api
 
@@ -33,8 +33,9 @@ from .new import download_remote_app_via_api
     ],
 )
 def test_download_remote_app_via_api_rejects_invalid_formats(value: str) -> None:
-    """For an invalid string, the function should fail fast with typer.Exit(code=1)."""
-    with pytest.raises(typer.Exit) as exc:
+    """For an invalid string, the function should fail fast with
+    click.ClickException(code=1)."""
+    with pytest.raises(click.ClickException) as exc:
         download_remote_app_via_api(value)
 
     # Ensure we specifically exited with code 1

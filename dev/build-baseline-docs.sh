@@ -2,11 +2,11 @@
 set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 
-# Determine platform
+# Determine platform - use a function to handle sed -i correctly on macOS
 if [[ "$OSTYPE" == "darwin"* ]]; then
-  SED_INPLACE="sed -i ''"
+  sed_inplace() { sed -i '' "$@"; }
 else
-  SED_INPLACE="sed -i"
+  sed_inplace() { sed -i "$@"; }
 fi
 
 ROOT=$(pwd)
@@ -59,7 +59,7 @@ function add_table_entry ()
 
 
 # Create Sphinx table block and header
-! $SED_INPLACE -e "s/.. BASELINES_TABLE_ANCHOR/$table_body/" $INDEX
+! sed_inplace -e "s/.. BASELINES_TABLE_ANCHOR/$table_body/" $INDEX
 
 ! grep -q ":caption: References" $INDEX && echo "$initial_text" >> $INDEX && echo "" >> $INDEX
 
@@ -110,7 +110,7 @@ for d in $(printf '%s\n' */ | sort -V); do
 
       # Add entry to the table
       add_table_entry $baseline
-      ! $SED_INPLACE -e "s/.. BASELINES_TABLE_ENTRY/$table_entry/" $INDEX
+      ! sed_inplace -e "s/.. BASELINES_TABLE_ENTRY/$table_entry/" $INDEX
 
     fi
   fi

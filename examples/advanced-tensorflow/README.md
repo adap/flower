@@ -98,7 +98,7 @@ The `results.json` would look along the lines of:
 With default parameters, 25% of the total 50 nodes (see `num-supernodes` in `pyproject.toml`) will be sampled for `train` and 50% for an `evaluate` round. By default, `ClientApp` objects will run on CPU.
 
 > [!TIP]
-> To run your `ClientApps` on GPU or to adjust the degree or parallelism of your simulation, edit the `[tool.flwr.federations.local-simulation]` section in the `pyproject.toml`. Check the [Simulation Engine documentation](https://flower.ai/docs/framework/how-to-run-simulations.html) to learn more about Flower simulations and how to optimize them.
+> To run your `ClientApps` on GPU or to adjust the degree or parallelism of your simulation, edit the Flower Config. Check the [Simulation Engine documentation](https://flower.ai/docs/framework/how-to-run-simulations.html#defining-clientapp-resources) to learn more about Flower simulations and how to optimize them.
 
 ```bash
 flwr run .
@@ -106,13 +106,6 @@ flwr run .
 
 > [!WARNING]
 > By default TensorFlow processes that use GPU will try to pre-allocate the entire available VRAM. This is undesirable for simulations where we want the GPU to be shared among several `ClientApp` instances. Enable the [GPU memory growth](https://www.tensorflow.org/guide/gpu#limiting_gpu_memory_growth) by setting the `TF_FORCE_GPU_ALLOW_GROWTH` environment variable to ensure processes only make use of the VRAM they need.
-
-You can run the app using another federation (see `pyproject.toml`). For example, if you have a GPU available, select the `local-sim-gpu` federation:
-
-```bash
-export TF_FORCE_GPU_ALLOW_GROWTH="true"
-flwr run . local-sim-gpu
-```
 
 You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example:
 
