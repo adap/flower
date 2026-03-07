@@ -361,7 +361,7 @@ def _run_simulation(
         log(DEBUG, "backend_config: %s", backend_config)
 
     # Exit early if the `ray` dependency is missing
-    if backend_name == "ray":
+    if backend_name.lower() == "ray":
         if importlib.util.find_spec("ray") is None:
             flwr_exit(
                 code=ExitCode.SIMULATION_MISSING_EXTRA,
