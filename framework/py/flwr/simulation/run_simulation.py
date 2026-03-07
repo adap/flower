@@ -67,7 +67,7 @@ def _replace_keys(d: Any, match: str, target: str) -> Any:
 
 
 def _check_ray_support(backend_name: str) -> None:
-    if backend_name.lower() == "ray":
+    if backend_name == "ray":
         if platform.system() == "Windows":
             log(
                 WARNING,
@@ -361,7 +361,7 @@ def _run_simulation(
         log(DEBUG, "backend_config: %s", backend_config)
 
     # Exit early if the `ray` dependency is missing
-    if backend_name.lower() == "ray":
+    if backend_name == "ray":
         if importlib.util.find_spec("ray") is None:
             flwr_exit(
                 code=ExitCode.SIMULATION_MISSING_EXTRA,
