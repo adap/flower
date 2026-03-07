@@ -358,6 +358,16 @@ def _run_simulation(
         )
         log(DEBUG, "backend_config: %s", backend_config)
 
+    # Exit early if the `ray` dependency is missing
+    if backend_name == "ray":
+        try:
+            import ray  # type: ignore[import]
+        except ImportError:
+            raise ImportError(
+                "`ray` backend selected for simulation, but `ray` is not installed. "
+                "Please install `flwr[simulation]` to use this backend."
+            ) from None
+
     # Set default init_args if not passed
     backend_config.setdefault("init_args", {})
     # Set default client_resources if not passed
