@@ -12,8 +12,7 @@ Extra dependencies required for simulation are missing.
  How to Resolve
 ****************
 
-To use simulation with the Ray backend, install ``flwr`` with the ``simulation``
-extra:
+To use simulation with the Ray backend, install ``flwr`` with the ``simulation`` extra:
 
 .. code-block:: bash
 
