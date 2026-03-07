@@ -1,0 +1,62 @@
+# =====================================================================
+# For a full TOML configuration guide, check the Flower docs:
+# https://flower.ai/docs/framework/how-to-configure-pyproject-toml.html
+# =====================================================================
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "forest-monitoring-example"
+version = "1.0.0"
+description = "In this Flower example we are modelling forest timber volme using satellite time series data."
+license = "Apache-2.0"
+# Dependencies for your Flower App
+dependencies = [
+    "flwr[simulation]>=1.26.0",
+    "flwr-datasets[vision]>=0.5.0",
+    "torch==2.7.1",
+    "torchvision==0.22.1",
+    "scikit-learn>=1.7.2",
+    "numpy>=1.26.4",
+    "joblib>=1.5.2",
+    "pandas>=2.3.3",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[tool.flwr.app]
+publisher = "Johannes Schumacher NIBIO"
+
+# Point to your ServerApp and ClientApp objects
+[tool.flwr.app.components]
+serverapp = "forest_monitoring_example.server_app:app"
+clientapp = "forest_monitoring_example.client_app:app"
+
+# Custom config values accessible via `context.run_config`
+[tool.flwr.app.config]
+num-server-rounds = 5
+min-available-nodes = 2
+min-train-nodes = 2
+fraction-train = 1.0
+fraction-evaluate = 1.0
+local-epochs = 3
+lr = 0.001
+batch-size = 32
+
+feature-size = 19
+
+t-years = 40
+out-conv1 = 8
+out-conv2 = 16
+
+kernel-time = 5
+pool-time1 = 2
+dropout-conv = 0.2
+adaptive-pool-time = 2
+use-adaptive-pool = true
+weight-decay = 0.0003
+
+sim-data = "./data/simulation/demo_data.npz"
