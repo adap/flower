@@ -3,7 +3,7 @@
 from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
 from flwr.clientapp import ClientApp
 
-from timeseries.task import load_data, load_model
+from tftsexample.task import load_model, load_sim_data, load_local_data
 
 # Flower ClientApp
 app = ClientApp()
@@ -22,11 +22,20 @@ def train(msg: Message, context: Context):
     epochs = context.run_config["local-epochs"]
     batch_size = context.run_config["batch-size"]
     verbose = context.run_config.get("verbose")
-
+    
     # Load the data
-    partition_id = context.node_config["partition-id"]
-    num_partitions = context.node_config["num-partitions"]
-    tf_train, _ = load_data(partition_id, num_partitions, batch_size)
+    if (
+        "partition-id" in context.node_config
+        and "num-partitions" in context.node_config
+    ):
+        # Simulation engine: use `flwr_datasets` and partition data on the fly
+        partition_id = context.node_config["partition-id"]
+        num_partitions = context.node_config["num-partitions"]
+        tf_train, _ = load_sim_data(partition_id, num_partitions, batch_size)
+    else:
+        # Deployment engine: load demo data or real user data
+        data_path = context.node_config["data-path"]
+        tf_train, _ = load_local_data(data_path, batch_size)
 
     # Train the model on local data
     history = model.fit(
@@ -63,10 +72,19 @@ def evaluate(msg: Message, context: Context):
     model.set_weights(ndarrays)
 
     # Load the data
-    partition_id = context.node_config["partition-id"]
     batch_size = context.run_config["batch-size"]
-    num_partitions = context.node_config["num-partitions"]
-    _, tf_test = load_data(partition_id, num_partitions, batch_size)
+    if (
+        "partition-id" in context.node_config
+        and "num-partitions" in context.node_config
+    ):
+        # Simulation engine: use `flwr_datasets` and partition data on the fly
+        partition_id = context.node_config["partition-id"]
+        num_partitions = context.node_config["num-partitions"]
+        _ , tf_test = load_sim_data(partition_id, num_partitions, batch_size)
+    else:
+        # Deployment engine: load demo data or real user data
+        data_path = context.node_config["data-path"]
+        _ , tf_test = load_local_data(data_path, batch_size)
 
     # Evaluate the model on local data
     loss, accuracy = model.evaluate(tf_test, verbose=0)
