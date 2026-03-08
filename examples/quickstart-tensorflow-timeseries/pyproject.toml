@@ -24,7 +24,7 @@ serverapp = "tftsexample.server_app:app"
 clientapp = "tftsexample.client_app:app"
 
 [tool.flwr.app.config]
-num-server-rounds = 1
+num-server-rounds = 5
 local-epochs = 1
 batch-size = 32
 learning-rate = 0.005
