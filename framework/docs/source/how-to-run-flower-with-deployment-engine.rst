@@ -1,12 +1,12 @@
-:og:description: Guide to use Flower's Deployment Engine and run a Flower App trough a federation consisting of a SuperLink and two SuperNodes.
+:og:description: Guide to use Flower's Deployment Runtime and run a Flower App through a federation consisting of a SuperLink and two SuperNodes.
 .. meta::
-    :description: Guide to use Flower's Deployment Engine and run a Flower App trough a federation consisting of a SuperLink and two SuperNodes.
+    :description: Guide to use Flower's Deployment Runtime and run a Flower App through a federation consisting of a SuperLink and two SuperNodes.
 
 #######################################
- Run Flower with the Deployment Engine
+ Run Flower with the Deployment Runtime
 #######################################
 
-This how-to guide demonstrates how to set up and run Flower with the Deployment Engine
+This how-to guide demonstrates how to set up and run Flower with the Deployment Runtime
 using minimal configurations to illustrate the workflow. This is a complementary guide
 to the :doc:`docker/index` guides.
 
