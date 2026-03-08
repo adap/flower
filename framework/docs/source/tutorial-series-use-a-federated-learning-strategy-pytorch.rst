@@ -155,7 +155,7 @@ Next, run the training with the following command:
 
 .. code-block:: shell
 
-    $ flwr run .
+    $ flwr run . --stream
 
 **************************************
  Server-side parameter **evaluation**
@@ -253,7 +253,7 @@ Finally, we run the simulation.
 
 .. code-block:: shell
 
-    $ flwr run .
+    $ flwr run . --stream
 
 You'll note that the server logs the metrics returned by the callback after each round.
 Also, at the end of the run, note the ``ServerApp-side Evaluate Metrics`` shown:
@@ -317,7 +317,7 @@ rounds to 15 to see the learning rate decay in action.
 
 .. code-block:: shell
 
-    $ flwr run . --run-config="num-server-rounds=15"
+    $ flwr run . --stream --run-config="num-server-rounds=15"
 
 You'll note that in the ``configure_train`` stage of rounds 5 and 10, the learning rate
 is decreased by a factor of 0.5 and the new learning rate is printed to the terminal.
@@ -412,7 +412,7 @@ Finally, run the simulation with the following command:
 
 .. code-block:: shell
 
-    $ flwr run .
+    $ flwr run . --stream
 
 *******
  Recap
