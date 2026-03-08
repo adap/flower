@@ -55,7 +55,7 @@ install Flower in your new environment:
 .. code-block:: shell
 
     # In a new Python environment
-    $ pip install flwr
+    $ pip install flwr[simulation]
 
 Then, run the command below:
 
