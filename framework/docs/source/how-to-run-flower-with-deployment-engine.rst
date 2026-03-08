@@ -2,9 +2,9 @@
 .. meta::
     :description: Guide to use Flower's Deployment Runtime and run a Flower App through a federation consisting of a SuperLink and two SuperNodes.
 
-#######################################
+########################################
  Run Flower with the Deployment Runtime
-#######################################
+########################################
 
 This how-to guide demonstrates how to set up and run Flower with the Deployment Runtime
 using minimal configurations to illustrate the workflow. This is a complementary guide
@@ -77,9 +77,9 @@ executing ``flwr new``:
 .. note::
 
     If you decide to run the project with ``flwr run .`` against the default local
-    profile, Flower submits the run to a managed local SuperLink, which then executes
-    it with the Simulation Runtime. Continue to Step 2 to instead point ``flwr run`` at
-    a named SuperLink connection for the Deployment Runtime.
+    profile, Flower submits the run to a managed local SuperLink, which then executes it
+    with the Simulation Runtime. Continue to Step 2 to instead point ``flwr run`` at a
+    named SuperLink connection for the Deployment Runtime.
 
 .. tip::
 

@@ -426,8 +426,7 @@ so little code, right?
 In the later sections, we've seen how we can communicate arbitrary values between server
 and clients to fully customize client-side execution. With that capability, we built a
 large-scale Federated Learning simulation using the Flower Simulation Runtime and ran an
-experiment involving 1000 clients in the same workload — all in the same Flower
-project!
+experiment involving 1000 clients in the same workload — all in the same Flower project!
 
 ************
  Next steps

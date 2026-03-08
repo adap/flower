@@ -48,12 +48,11 @@ In this federated learning tutorial, we will learn how to train a simple MLP on 
 using Flower and MLX. It is recommended to create a virtual environment and run
 everything within a :doc:`virtualenv <contributor-how-to-set-up-a-virtual-env>`.
 
-Let's use ``flwr new`` to create a complete Flower+MLX project. It will generate all
-the files needed to run a federation of 10 nodes using |fedavg_link|_. By default, the
+Let's use ``flwr new`` to create a complete Flower+MLX project. It will generate all the
+files needed to run a federation of 10 nodes using |fedavg_link|_. By default, the
 generated app uses a local simulation profile that ``flwr run`` submits to a managed
 local SuperLink, which then executes the run with the Flower Simulation Runtime. The
-dataset will be partitioned using Flower Dataset's
-`IidPartitioner
+dataset will be partitioned using Flower Dataset's `IidPartitioner
 <https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.IidPartitioner.html#flwr_datasets.partitioner.IidPartitioner>`_.
 
 Now that we have a rough idea of what this example is about, let's get started. First,

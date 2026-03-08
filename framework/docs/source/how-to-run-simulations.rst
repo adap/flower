@@ -111,12 +111,11 @@ multiple apps to choose from. The example below uses the ``PyTorch`` quickstart 
 Then, follow the instructions shown after completing the |flwr_new_link|_ command. When
 you execute |flwr_run_link|_, the run will execute with the ``Simulation Runtime``.
 
-For local simulation profiles, ``flwr run`` submits the run to a managed local
-SuperLink via the Control API. If the profile has ``options.*`` and no explicit
-``address``, Flower starts a local SuperLink automatically when needed, keeps it
-running in the background, and reuses it for ``flwr list``, ``flwr log``, and
-``flwr stop``. See :doc:`how-to-run-flower-locally` for the full local workflow and
-runtime lifecycle.
+For local simulation profiles, ``flwr run`` submits the run to a managed local SuperLink
+via the Control API. If the profile has ``options.*`` and no explicit ``address``,
+Flower starts a local SuperLink automatically when needed, keeps it running in the
+background, and reuses it for ``flwr list``, ``flwr log``, and ``flwr stop``. See
+:doc:`how-to-run-flower-locally` for the full local workflow and runtime lifecycle.
 
 Simulation examples
 ===================
@@ -144,8 +143,8 @@ The complete list of examples can be found in `the Flower GitHub
  Defining ``ClientApp`` resources
 **********************************
 
-By default, the ``Simulation Runtime`` assigns two CPU cores to each backend worker. This
-means that if your system has 10 CPU cores, five backend workers can be running in
+By default, the ``Simulation Runtime`` assigns two CPU cores to each backend worker.
+This means that if your system has 10 CPU cores, five backend workers can be running in
 parallel, each executing a different ``ClientApp`` instance.
 
 More often than not, you would probably like to adjust the resources your ``ClientApp``
@@ -227,9 +226,9 @@ round but your system can only accommodate 8 clients concurrently. The ``Simulat
 Runtime`` will schedule 100 ``ClientApps`` to run and then will execute them in a
 resource-aware manner in batches of 8.
 
-*****************************
+******************************
  Simulation Runtime resources
-*****************************
+******************************
 
 By default, the ``Simulation Runtime`` has **access to all system resources** (i.e., all
 CPUs, all GPUs). However, in some settings, you might want to limit how many of your

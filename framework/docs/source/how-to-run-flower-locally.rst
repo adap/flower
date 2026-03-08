@@ -2,9 +2,9 @@
 .. meta::
     :description: Learn how local `flwr run` uses a managed local SuperLink, how to inspect runs, stream logs, stop runs, and stop the background local SuperLink process.
 
-===========================================
-Run Flower Locally with a Managed SuperLink
-===========================================
+#############################################
+ Run Flower Locally with a Managed SuperLink
+#############################################
 
 When you use a local Flower configuration profile with ``options.*`` and no explicit
 ``address``, ``flwr`` does not call the simulation runtime directly. Instead, Flower
@@ -40,9 +40,9 @@ On the first command that needs the local Control API, Flower starts a local
 You can override those default ports with the environment variables
 ``FLWR_LOCAL_CONTROL_API_PORT`` and ``FLWR_LOCAL_SIMULATIONIO_API_PORT``.
 
-*****************
+**************
  Submit a run
-*****************
+**************
 
 From your Flower App directory, submit a run as usual:
 
@@ -65,9 +65,9 @@ submit the run and immediately follow the logs in the same terminal, use:
 
     $ flwr run . --stream
 
-************
+***********
  List runs
-************
+***********
 
 To see all runs known to the local SuperLink:
 
@@ -120,9 +120,9 @@ To stop a submitted or running run:
 
 This stops the run only. It does **not** stop the background local SuperLink process.
 
-*********************************
+*******************************
  Local runtime files and state
-*********************************
+*******************************
 
 The managed local SuperLink keeps its files in ``$FLWR_HOME/local-superlink/``:
 
@@ -132,9 +132,9 @@ The managed local SuperLink keeps its files in ``$FLWR_HOME/local-superlink/``:
 
 These files persist across local runs until you remove them yourself.
 
-***************************************
+*************************************
  Stop the background local SuperLink
-***************************************
+*************************************
 
 There is currently no dedicated ``flwr`` command to stop the managed local SuperLink
 process. To stop it, first inspect the matching process and then terminate it.
@@ -180,9 +180,9 @@ Stop the process:
 If you changed the local Control API port with ``FLWR_LOCAL_CONTROL_API_PORT``, replace
 ``39093`` in the commands above.
 
-*******************
+*****************
  Troubleshooting
-*******************
+*****************
 
 If a local run fails before it starts, or if the managed local SuperLink does not come
 up correctly, inspect:

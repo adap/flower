@@ -45,8 +45,7 @@ Let's use ``flwr new`` to create a complete Flower+scikit-learn project. It will
 generate all the files needed to run a federation of 10 nodes using |fedavg_link|_. By
 default, the generated app uses a local simulation profile that ``flwr run`` submits to
 a managed local SuperLink, which then executes the run with the Flower Simulation
-Runtime. The dataset will be partitioned using
-|flowerdatasets|_'s |iidpartitioner|_
+Runtime. The dataset will be partitioned using |flowerdatasets|_'s |iidpartitioner|_
 
 Now that we have a rough idea of what this example is about, let's get started. First,
 install Flower in your new environment:

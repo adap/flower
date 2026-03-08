@@ -33,8 +33,8 @@ This guide shows JSON output for:
  ``flwr run`` JSON output
 **************************
 
-The |flwr_run| command submits a Flower App run. For a local app, the CLI first builds
-a FAB and then starts the run through the Control API.
+The |flwr_run| command submits a Flower App run. For a local app, the CLI first builds a
+FAB and then starts the run through the Control API.
 
 Representative default output:
 
@@ -71,8 +71,7 @@ The |flwr_run| JSON output contains:
 - ``fab-hash``: the short FAB hash
 - ``fab-filename``: the built FAB filename
 
-If the command fails, the JSON output contains ``success: false`` and
-``error-message``.
+If the command fails, the JSON output contains ``success: false`` and ``error-message``.
 
 ***************************
  ``flwr list`` JSON output
@@ -198,5 +197,4 @@ To return structured JSON instead:
       "run-id": "1859953118041441032"
     }
 
-If the command fails, the JSON output contains ``success: false`` and
-``error-message``.
+If the command fails, the JSON output contains ``success: false`` and ``error-message``.
