@@ -20,6 +20,7 @@ AUTH_MECHANISM_TOKEN: Final[str] = "token"
 AUTH_MECHANISM_SUPEREXEC_SIGNED_METADATA: Final[str] = "superexec-signed-metadata"
 CALLER_TYPE_APP_EXECUTOR: Final[str] = "app_executor"
 CALLER_TYPE_SUPEREXEC: Final[str] = "superexec"
+AUTHENTICATION_FAILED_MESSAGE: Final[str] = "Authentication failed."
 
 AuthSelectionMode: TypeAlias = Literal["any_one", "exactly_one"]
 AUTH_SELECTION_MODE_ANY_ONE: Final[AuthSelectionMode] = "any_one"

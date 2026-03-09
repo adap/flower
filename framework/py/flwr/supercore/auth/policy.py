@@ -18,11 +18,11 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 
 from .constant import (
-    AuthSelectionMode,
     AUTH_MECHANISM_SUPEREXEC_SIGNED_METADATA,
     AUTH_MECHANISM_TOKEN,
     AUTH_SELECTION_MODE_ANY_ONE,
     AUTH_SELECTION_MODE_EXACTLY_ONE,
+    AuthSelectionMode,
 )
 
 
@@ -30,8 +30,8 @@ from .constant import (
 class MethodAuthPolicy:
     """Authentication policy for a single RPC method.
 
-    Policy is intentionally separate from mechanism implementations. This keeps
-    RPC access decisions declarative and lets mechanisms evolve independently.
+    Policy is intentionally separate from mechanism implementations. This keeps RPC
+    access decisions declarative and lets mechanisms evolve independently.
     """
 
     allowed_mechanisms: tuple[str, ...] = ()
@@ -102,7 +102,8 @@ class MethodAuthPolicy:
         )
 
 
-def validate_method_auth_policy_map(
+# Keep explicit keyword arguments for clearer startup error messages.
+def validate_method_auth_policy_map(  # pylint: disable=too-many-arguments
     *,
     service_name: str,
     package_name: str,

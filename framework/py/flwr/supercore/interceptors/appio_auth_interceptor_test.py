@@ -21,14 +21,6 @@ from unittest.mock import Mock
 import grpc
 from google.protobuf.message import Message as GrpcMessage
 
-from flwr.supercore.interceptors.appio_auth_interceptor import (
-    AppIoAuthClientInterceptor,
-    AppIoAuthServerInterceptor,
-    get_authenticated_caller_identity,
-    get_authenticated_run_id,
-    get_authenticated_token,
-    verify_authenticated_run_matches_request_run_id,
-)
 from flwr.common.constant import APP_TOKEN_HEADER
 from flwr.proto.serverappio_pb2 import GetNodesRequest  # pylint: disable=E0611
 from flwr.supercore.auth.appio_auth import (
@@ -42,18 +34,26 @@ from flwr.supercore.auth.constant import (
     APPIO_SIGNED_METADATA_PUBLIC_KEY_HEADER,
     APPIO_SIGNED_METADATA_SIGNATURE_HEADER,
     APPIO_SIGNED_METADATA_TIMESTAMP_HEADER,
-    CALLER_TYPE_APP_EXECUTOR,
-    CALLER_TYPE_SUPEREXEC,
+    AUTHENTICATION_FAILED_MESSAGE,
     AUTH_MECHANISM_SUPEREXEC_SIGNED_METADATA,
     AUTH_MECHANISM_TOKEN,
+    CALLER_TYPE_APP_EXECUTOR,
+    CALLER_TYPE_SUPEREXEC,
 )
 from flwr.supercore.auth.policy import MethodAuthPolicy
+from flwr.supercore.interceptors.appio_auth_interceptor import (
+    AppIoAuthClientInterceptor,
+    AppIoAuthServerInterceptor,
+    get_authenticated_caller_identity,
+    get_authenticated_run_id,
+    get_authenticated_token,
+    verify_authenticated_run_matches_request_run_id,
+)
 
 _ClientCallDetails = namedtuple(
     "_ClientCallDetails",
     ["method", "timeout", "metadata", "credentials", "wait_for_ready", "compression"],
 )
-_CANONICAL_AUTH_DENY_DETAILS = "Invalid token."
 
 
 class _HandlerCallDetails:
@@ -82,10 +82,12 @@ class _SignedMetadataProbeAuthenticator:
         self.last_auth_input: AuthInput | None = None
 
     def is_present(self, auth_input: AuthInput) -> bool:
+        """Return whether signed metadata auth input was supplied."""
         self.last_auth_input = auth_input
         return auth_input.signed_metadata_present
 
     def authenticate(self, auth_input: AuthInput) -> CallerIdentity | None:
+        """Return synthetic caller identity when signed metadata is complete."""
         if auth_input.signed_metadata is None:
             return None
         return CallerIdentity(
@@ -229,7 +231,7 @@ class TestAppIoAuthServerInterceptor(TestCase):
         with self.assertRaises(grpc.RpcError):
             intercepted.unary_unary(GetNodesRequest(run_id=11), context)
         context.abort.assert_called_once_with(
-            grpc.StatusCode.PERMISSION_DENIED, _CANONICAL_AUTH_DENY_DETAILS
+            grpc.StatusCode.PERMISSION_DENIED, AUTHENTICATION_FAILED_MESSAGE
         )
 
     def test_invalid_token_denied(self) -> None:
@@ -257,7 +259,7 @@ class TestAppIoAuthServerInterceptor(TestCase):
         with self.assertRaises(grpc.RpcError):
             intercepted.unary_unary(GetNodesRequest(run_id=11), context)
         context.abort.assert_called_once_with(
-            grpc.StatusCode.PERMISSION_DENIED, _CANONICAL_AUTH_DENY_DETAILS
+            grpc.StatusCode.PERMISSION_DENIED, AUTHENTICATION_FAILED_MESSAGE
         )
 
     def test_verify_token_false_denied(self) -> None:
@@ -286,7 +288,7 @@ class TestAppIoAuthServerInterceptor(TestCase):
         with self.assertRaises(grpc.RpcError):
             intercepted.unary_unary(GetNodesRequest(run_id=11), context)
         context.abort.assert_called_once_with(
-            grpc.StatusCode.PERMISSION_DENIED, _CANONICAL_AUTH_DENY_DETAILS
+            grpc.StatusCode.PERMISSION_DENIED, AUTHENTICATION_FAILED_MESSAGE
         )
         state.get_run_id_by_token.assert_called_once_with("invalid")
         state.verify_token.assert_called_once_with(11, "invalid")
@@ -317,7 +319,7 @@ class TestAppIoAuthServerInterceptor(TestCase):
         with self.assertRaises(grpc.RpcError):
             intercepted.unary_unary(GetNodesRequest(run_id=99), context)
         context.abort.assert_called_once_with(
-            grpc.StatusCode.PERMISSION_DENIED, _CANONICAL_AUTH_DENY_DETAILS
+            grpc.StatusCode.PERMISSION_DENIED, AUTHENTICATION_FAILED_MESSAGE
         )
 
     def test_token_exposed_in_authenticated_context(self) -> None:
@@ -377,7 +379,9 @@ class TestAppIoAuthServerInterceptor(TestCase):
         )
         response = intercepted.unary_unary(GetNodesRequest(run_id=1), Mock())
 
-        self.assertEqual(response, f"{CALLER_TYPE_APP_EXECUTOR}:token:11")
+        self.assertEqual(
+            response, f"{CALLER_TYPE_APP_EXECUTOR}:{AUTH_MECHANISM_TOKEN}:11"
+        )
 
     def test_token_not_required_method_passes_without_metadata(self) -> None:
         """Methods marked as token-optional pass through without metadata."""
@@ -446,7 +450,7 @@ class TestAppIoAuthServerInterceptor(TestCase):
         with self.assertRaises(grpc.RpcError):
             intercepted.unary_unary(GetNodesRequest(run_id=1), context)
         context.abort.assert_called_once_with(
-            grpc.StatusCode.PERMISSION_DENIED, _CANONICAL_AUTH_DENY_DETAILS
+            grpc.StatusCode.PERMISSION_DENIED, AUTHENTICATION_FAILED_MESSAGE
         )
         state.get_run_id_by_token.assert_not_called()
         state.verify_token.assert_not_called()
@@ -494,7 +498,7 @@ class TestAppIoAuthServerInterceptor(TestCase):
         with self.assertRaises(grpc.RpcError):
             intercepted.unary_unary(GetNodesRequest(run_id=1), context)
         context.abort.assert_called_once_with(
-            grpc.StatusCode.PERMISSION_DENIED, _CANONICAL_AUTH_DENY_DETAILS
+            grpc.StatusCode.PERMISSION_DENIED, AUTHENTICATION_FAILED_MESSAGE
         )
         state.get_run_id_by_token.assert_not_called()
         state.verify_token.assert_not_called()
@@ -523,7 +527,7 @@ class TestAppIoAuthServerInterceptor(TestCase):
         with self.assertRaises(grpc.RpcError):
             intercepted.unary_unary(GetNodesRequest(run_id=11), context)
         context.abort.assert_called_once_with(
-            grpc.StatusCode.PERMISSION_DENIED, _CANONICAL_AUTH_DENY_DETAILS
+            grpc.StatusCode.PERMISSION_DENIED, AUTHENTICATION_FAILED_MESSAGE
         )
         state.get_run_id_by_token.assert_not_called()
         state.verify_token.assert_not_called()
@@ -556,7 +560,7 @@ class TestAppIoAuthServerInterceptor(TestCase):
         with self.assertRaises(grpc.RpcError):
             intercepted.unary_unary(GetNodesRequest(run_id=1), context)
         context.abort.assert_called_once_with(
-            grpc.StatusCode.PERMISSION_DENIED, _CANONICAL_AUTH_DENY_DETAILS
+            grpc.StatusCode.PERMISSION_DENIED, AUTHENTICATION_FAILED_MESSAGE
         )
         state.get_run_id_by_token.assert_called_once_with("second")
         state.verify_token.assert_not_called()
@@ -588,11 +592,13 @@ class TestAppIoAuthServerInterceptor(TestCase):
         with self.assertRaises(grpc.RpcError):
             intercepted.unary_unary(GetNodesRequest(run_id=1), context)
         context.abort.assert_called_once_with(
-            grpc.StatusCode.PERMISSION_DENIED, _CANONICAL_AUTH_DENY_DETAILS
+            grpc.StatusCode.PERMISSION_DENIED, AUTHENTICATION_FAILED_MESSAGE
         )
         self.assertIsNotNone(probe_authenticator.last_auth_input)
-        self.assertFalse(probe_authenticator.last_auth_input.signed_metadata_present)
-        self.assertIsNone(probe_authenticator.last_auth_input.signed_metadata)
+        auth_input = probe_authenticator.last_auth_input
+        assert auth_input is not None
+        self.assertFalse(auth_input.signed_metadata_present)
+        self.assertIsNone(auth_input.signed_metadata)
 
     def test_signed_metadata_partial_headers_are_marked_present_but_malformed(
         self,
@@ -626,11 +632,13 @@ class TestAppIoAuthServerInterceptor(TestCase):
         with self.assertRaises(grpc.RpcError):
             intercepted.unary_unary(GetNodesRequest(run_id=1), context)
         context.abort.assert_called_once_with(
-            grpc.StatusCode.PERMISSION_DENIED, _CANONICAL_AUTH_DENY_DETAILS
+            grpc.StatusCode.PERMISSION_DENIED, AUTHENTICATION_FAILED_MESSAGE
         )
         self.assertIsNotNone(probe_authenticator.last_auth_input)
-        self.assertTrue(probe_authenticator.last_auth_input.signed_metadata_present)
-        self.assertIsNone(probe_authenticator.last_auth_input.signed_metadata)
+        auth_input = probe_authenticator.last_auth_input
+        assert auth_input is not None
+        self.assertTrue(auth_input.signed_metadata_present)
+        self.assertIsNone(auth_input.signed_metadata)
 
     def test_signed_metadata_complete_headers_build_signed_metadata_input(self) -> None:
         """Complete signed metadata should be parsed into AuthInput.signed_metadata."""
@@ -673,16 +681,14 @@ class TestAppIoAuthServerInterceptor(TestCase):
 
         self.assertEqual(response, "ok")
         self.assertIsNotNone(probe_authenticator.last_auth_input)
-        self.assertTrue(probe_authenticator.last_auth_input.signed_metadata_present)
-        self.assertIsNotNone(probe_authenticator.last_auth_input.signed_metadata)
-        self.assertEqual(
-            probe_authenticator.last_auth_input.signed_metadata.public_key,
-            b"pk",
-        )
-        self.assertEqual(
-            probe_authenticator.last_auth_input.signed_metadata.signature,
-            b"sig",
-        )
+        auth_input = probe_authenticator.last_auth_input
+        assert auth_input is not None
+        self.assertTrue(auth_input.signed_metadata_present)
+        self.assertIsNotNone(auth_input.signed_metadata)
+        signed_metadata = auth_input.signed_metadata
+        assert signed_metadata is not None
+        self.assertEqual(signed_metadata.public_key, b"pk")
+        self.assertEqual(signed_metadata.signature, b"sig")
 
     def test_get_authenticated_run_id_denied_when_context_missing_attr(self) -> None:
         """Missing authenticated run_id in context yields invalid-token error."""
@@ -692,7 +698,7 @@ class TestAppIoAuthServerInterceptor(TestCase):
         with self.assertRaises(grpc.RpcError):
             get_authenticated_run_id(context)
         context.abort.assert_called_once_with(
-            grpc.StatusCode.PERMISSION_DENIED, _CANONICAL_AUTH_DENY_DETAILS
+            grpc.StatusCode.PERMISSION_DENIED, AUTHENTICATION_FAILED_MESSAGE
         )
 
     def test_get_authenticated_caller_identity_denied_when_context_missing(
@@ -705,7 +711,7 @@ class TestAppIoAuthServerInterceptor(TestCase):
         with self.assertRaises(grpc.RpcError):
             get_authenticated_caller_identity(context)
         context.abort.assert_called_once_with(
-            grpc.StatusCode.PERMISSION_DENIED, _CANONICAL_AUTH_DENY_DETAILS
+            grpc.StatusCode.PERMISSION_DENIED, AUTHENTICATION_FAILED_MESSAGE
         )
 
     def test_get_authenticated_token_denied_when_context_missing_attr(self) -> None:
@@ -716,5 +722,5 @@ class TestAppIoAuthServerInterceptor(TestCase):
         with self.assertRaises(grpc.RpcError):
             get_authenticated_token(context)
         context.abort.assert_called_once_with(
-            grpc.StatusCode.PERMISSION_DENIED, _CANONICAL_AUTH_DENY_DETAILS
+            grpc.StatusCode.PERMISSION_DENIED, AUTHENTICATION_FAILED_MESSAGE
         )

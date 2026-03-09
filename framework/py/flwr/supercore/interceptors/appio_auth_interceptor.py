@@ -26,20 +26,21 @@ from typing import Any, cast
 import grpc
 from google.protobuf.message import Message as GrpcMessage
 
+from flwr.common.constant import APP_TOKEN_HEADER
 from flwr.supercore.auth.appio_auth import (
     AuthDecisionEngine,
-    AuthInput,
     Authenticator,
+    AuthInput,
     CallerIdentity,
     SignedMetadataAuthInput,
 )
-from flwr.common.constant import APP_TOKEN_HEADER
 from flwr.supercore.auth.constant import (
     APPIO_SIGNED_METADATA_METHOD_HEADER,
     APPIO_SIGNED_METADATA_PLUGIN_TYPE_HEADER,
     APPIO_SIGNED_METADATA_PUBLIC_KEY_HEADER,
     APPIO_SIGNED_METADATA_SIGNATURE_HEADER,
     APPIO_SIGNED_METADATA_TIMESTAMP_HEADER,
+    AUTHENTICATION_FAILED_MESSAGE,
 )
 from flwr.supercore.auth.policy import MethodAuthPolicy
 
@@ -47,7 +48,6 @@ from flwr.supercore.auth.policy import MethodAuthPolicy
 # Do not vary details by failure mode (missing token, unknown token, run mismatch,
 # malformed metadata, etc.), or callers could use error differences as an auth
 # oracle.
-_CANONICAL_AUTH_DENY_DETAILS = "Invalid token."
 _AUTH_CALLER_IDENTITY_CTX_ATTR = "_flwr_appio_authenticated_caller_identity"
 _AUTH_RUN_ID_CTX_ATTR = "_flwr_appio_authenticated_run_id"
 _AUTH_TOKEN_CTX_ATTR = "_flwr_appio_authenticated_token"
@@ -58,7 +58,7 @@ def _abort_auth_denied(context: grpc.ServicerContext) -> None:
     # executing RPC. This complements `_permission_denied_terminator`, which is
     # used while building the handler in `intercept_service`.
     """Abort current RPC with canonical AppIo auth denied status/details."""
-    context.abort(grpc.StatusCode.PERMISSION_DENIED, _CANONICAL_AUTH_DENY_DETAILS)
+    context.abort(grpc.StatusCode.PERMISSION_DENIED, AUTHENTICATION_FAILED_MESSAGE)
     raise grpc.RpcError()
 
 
@@ -171,11 +171,11 @@ def verify_authenticated_run_matches_request_run_id(
 class AppIoAuthClientInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: ignore
     """Attach AppIo authentication metadata to outbound unary RPCs.
 
-    Current implementation injects token metadata. Keeping this class general
-    avoids introducing one client interceptor per mechanism.
+    Current implementation injects token metadata. Keeping this class general avoids
+    introducing one client interceptor per mechanism.
 
-    This interceptor is responsible for attaching auth metadata/material to
-    outgoing RPCs.
+    This interceptor is responsible for attaching auth metadata/material to outgoing
+    RPCs.
     """
 
     def __init__(self, token: str) -> None:
@@ -200,9 +200,9 @@ class AppIoAuthClientInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: ign
 class AppIoAuthServerInterceptor(grpc.ServerInterceptor):  # type: ignore
     """Validate AppIo auth metadata based on per-method policy.
 
-    This interceptor is the single AppIo auth enforcement point. It delegates
-    mechanism checks to the decision engine/authenticators, then attaches a
-    normalized caller identity for downstream servicer logic.
+    This interceptor is the single AppIo auth enforcement point. It delegates mechanism
+    checks to the decision engine/authenticators, then attaches a normalized caller
+    identity for downstream servicer logic.
 
     This interceptor is responsible for extracting AuthInputs from incoming RPCs.
     """
@@ -230,7 +230,7 @@ class AppIoAuthServerInterceptor(grpc.ServerInterceptor):  # type: ignore
             # Fail closed for unknown methods: policy tables must explicitly
             # classify every exposed RPC to avoid accidental unauthenticated
             # access when methods are added.
-            return _permission_denied_terminator(_CANONICAL_AUTH_DENY_DETAILS)
+            return _permission_denied_terminator(AUTHENTICATION_FAILED_MESSAGE)
         method_handler: grpc.RpcMethodHandler = continuation(handler_call_details)
 
         if not method_policy.requires_authentication:
@@ -239,7 +239,7 @@ class AppIoAuthServerInterceptor(grpc.ServerInterceptor):  # type: ignore
             # This interceptor currently protects unary-unary AppIo RPCs only.
             # If method shape is unexpected, fail closed with the same auth
             # error.
-            return _permission_denied_terminator(_CANONICAL_AUTH_DENY_DETAILS)
+            return _permission_denied_terminator(AUTHENTICATION_FAILED_MESSAGE)
         unary_unary_handler = cast(
             Callable[[GrpcMessage, grpc.ServicerContext], GrpcMessage],
             method_handler.unary_unary,
@@ -261,7 +261,7 @@ class AppIoAuthServerInterceptor(grpc.ServerInterceptor):  # type: ignore
         )
         caller_identity = decision.caller_identity
         if not decision.is_allowed or caller_identity is None:
-            return _permission_denied_terminator(_CANONICAL_AUTH_DENY_DETAILS)
+            return _permission_denied_terminator(AUTHENTICATION_FAILED_MESSAGE)
 
         def authenticated_handler(
             request: GrpcMessage,

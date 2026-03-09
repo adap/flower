@@ -20,9 +20,9 @@ from enum import Enum
 from typing import Protocol
 
 from .constant import (
-    CALLER_TYPE_APP_EXECUTOR,
     AUTH_MECHANISM_TOKEN,
     AUTH_SELECTION_MODE_EXACTLY_ONE,
+    CALLER_TYPE_APP_EXECUTOR,
 )
 from .policy import MethodAuthPolicy
 
@@ -31,10 +31,9 @@ from .policy import MethodAuthPolicy
 class SignedMetadataAuthInput:
     """Signed metadata payload extracted from request metadata.
 
-    This is transport-normalized input only. Signature/timestamp verification
-    remains in authenticator implementations so policy logic stays mechanism-
-    agnostic. This payload is raw metadata and is not pre-verified at extraction
-    time.
+    This is transport-normalized input only. Signature/timestamp verification remains in
+    authenticator implementations so policy logic stays mechanism- agnostic. This
+    payload is raw metadata and is not pre-verified at extraction time.
     """
 
     # Caller's public key from metadata, used for key identity + signature verify.
@@ -79,8 +78,7 @@ class CallerIdentity:
     """Normalized authenticated caller identity.
 
     This shape supports both app-executor and SuperExec callers. Fields are
-    intentionally optional so one identity type can represent multiple auth
-    mechanisms.
+    intentionally optional so one identity type can represent multiple auth mechanisms.
     """
 
     # Auth mechanism that produced this identity (token, signed-metadata, ...).
@@ -237,8 +235,8 @@ class _TokenState(Protocol):
 class TokenAuthenticator:
     """Token-based authenticator for AppIo callers.
 
-    This is one concrete mechanism implementation registered into the decision
-    engine. Future SuperExec signed-metadata auth will follow the same pattern.
+    This is one concrete mechanism implementation registered into the decision engine.
+    Future SuperExec signed-metadata auth will follow the same pattern.
     """
 
     mechanism = AUTH_MECHANISM_TOKEN

@@ -19,20 +19,20 @@ from unittest import TestCase
 from unittest.mock import Mock
 
 from flwr.supercore.auth.appio_auth import (
-    AuthDecisionFailureReason,
     AuthDecisionEngine,
+    AuthDecisionFailureReason,
     AuthInput,
     CallerIdentity,
     SignedMetadataAuthInput,
     TokenAuthenticator,
 )
 from flwr.supercore.auth.constant import (
-    AuthSelectionMode,
-    CALLER_TYPE_APP_EXECUTOR,
-    CALLER_TYPE_SUPEREXEC,
     AUTH_MECHANISM_SUPEREXEC_SIGNED_METADATA,
     AUTH_MECHANISM_TOKEN,
     AUTH_SELECTION_MODE_EXACTLY_ONE,
+    CALLER_TYPE_APP_EXECUTOR,
+    CALLER_TYPE_SUPEREXEC,
+    AuthSelectionMode,
 )
 from flwr.supercore.auth.policy import MethodAuthPolicy, validate_method_auth_policy_map
 
@@ -43,9 +43,11 @@ class _SignedMetadataPresenceAuthenticator:
     mechanism = AUTH_MECHANISM_SUPEREXEC_SIGNED_METADATA
 
     def is_present(self, auth_input: AuthInput) -> bool:
+        """Return whether signed metadata auth input is present."""
         return auth_input.signed_metadata_present
 
     def authenticate(self, auth_input: AuthInput) -> CallerIdentity | None:
+        """Return synthetic identity when signed metadata is fully populated."""
         if auth_input.signed_metadata is None:
             return None
         return CallerIdentity(
@@ -331,7 +333,7 @@ class TestSignedMetadataPresence(TestCase):
                         signature=b"sig",
                         timestamp_iso="2026-03-09T10:00:00",
                         method="/flwr.proto.ServerAppIo/GetNodes",
-                    )
+                    ),
                 )
             )
         )
@@ -358,9 +360,7 @@ class TestAuthInputInvariant(TestCase):
 
     def test_signed_metadata_requires_presence_flag(self) -> None:
         """Setting signed metadata without presence flag should fail."""
-        with self.assertRaisesRegex(
-            ValueError, "signed_metadata_present must be True"
-        ):
+        with self.assertRaisesRegex(ValueError, "signed_metadata_present must be True"):
             AuthInput(
                 signed_metadata=SignedMetadataAuthInput(
                     public_key=b"pk",
