@@ -41,6 +41,17 @@ def test_rpc_error_translator_mapped_flower_error() -> None:
     context.abort.assert_called_once_with(spec.status_code, spec.public_message)
 
 
+def test_rpc_error_translator_grpc_error() -> None:
+    """Allow gRPC errors to propagate unmodified."""
+    context = Mock(spec=grpc.ServicerContext)
+
+    with pytest.raises(grpc.RpcError, match="Mock gRPC failure"):
+        with rpc_error_translator(context, "MockApi.MockRpc"):
+            raise grpc.RpcError("Mock gRPC failure")
+
+    context.abort.assert_not_called()
+
+
 def test_rpc_error_translator_unmapped_flower_error() -> None:
     """Translate an unmapped FlowerError into INTERNAL."""
     context = Mock(spec=grpc.ServicerContext)

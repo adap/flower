@@ -50,6 +50,8 @@ def rpc_error_translator(
         log(ERROR, msg)
         context.abort(grpc_status, public_message)
         raise grpc.RpcError() from None  # Unreachable, but satisfies type checker
+    except grpc.RpcError:
+        raise  # Allow gRPC errors to propagate unmodified
     except Exception as err:
         msg = f"[{rpc_name}][UnexpectedError:{type(err).__name__}] {err}"
         log(ERROR, msg)
