@@ -46,9 +46,9 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     AddNodeToFederationRequest,
     AddNodeToFederationResponse,
     ArchiveFederationRequest,
+    CreateFederationRequest,
     CreateInvitationRequest,
     CreateInvitationResponse,
-    CreateFederationRequest,
     ListInvitationsRequest,
     ListInvitationsResponse,
     ListNodesRequest,
@@ -98,6 +98,7 @@ FLWR_AID_MISMATCH_CASES = (
     ("", None),
     (None, ""),
 )
+
 
 class TestControlServicer(unittest.TestCase):
     """Test the Control API servicer."""
@@ -465,16 +466,7 @@ class TestControlServicerInvitationRPCs(unittest.TestCase):
         self.mock_get_current_account_info = (
             self.get_current_account_info_patcher.start()
         )
-        self.check_flwr_aid_exists_patcher = patch(
-            "flwr.superlink.servicer.control.control_servicer._check_flwr_aid_exists",
-            return_value=self.flwr_aid,
-        )
-        self.mock_check_flwr_aid_exists = self.check_flwr_aid_exists_patcher.start()
-
-    def tearDown(self) -> None:
-        """Clean up test fixtures."""
-        self.check_flwr_aid_exists_patcher.stop()
-        self.get_current_account_info_patcher.stop()
+        self.addCleanup(self.get_current_account_info_patcher.stop)
 
     def test_create_invitation_success(self) -> None:
         """Test CreateInvitation success path."""
@@ -486,11 +478,10 @@ class TestControlServicerInvitationRPCs(unittest.TestCase):
 
         response = self.servicer.CreateInvitation(request, context)
 
-        self.mock_check_flwr_aid_exists.assert_called_once_with(self.flwr_aid, context)
         self.state.federation_manager.create_invitation.assert_called_once_with(
             flwr_aid=self.flwr_aid,
             federation="test-federation",
-            invitee_flwr_aid="invitee-aid",
+            invitee_account_name="invitee-aid",
         )
         self.assertIsInstance(response, CreateInvitationResponse)
 
@@ -502,9 +493,8 @@ class TestControlServicerInvitationRPCs(unittest.TestCase):
 
         response = self.servicer.ListInvitations(request, context)
 
-        self.mock_check_flwr_aid_exists.assert_called_once_with("ctx-aid", context)
         self.state.federation_manager.list_invitations.assert_called_once_with(
-            flwr_aid=self.flwr_aid
+            self.flwr_aid
         )
         self.assertIsInstance(response, ListInvitationsResponse)
         self.assertEqual(len(response.created_invitations), 0)
@@ -517,7 +507,6 @@ class TestControlServicerInvitationRPCs(unittest.TestCase):
 
         response = self.servicer.AcceptInvitation(request, context)
 
-        self.mock_check_flwr_aid_exists.assert_called_once_with("ctx-aid", context)
         self.state.federation_manager.accept_invitation.assert_called_once_with(
             flwr_aid=self.flwr_aid,
             federation="test-federation",
@@ -531,7 +520,6 @@ class TestControlServicerInvitationRPCs(unittest.TestCase):
 
         response = self.servicer.RejectInvitation(request, context)
 
-        self.mock_check_flwr_aid_exists.assert_called_once_with("ctx-aid", context)
         self.state.federation_manager.reject_invitation.assert_called_once_with(
             flwr_aid=self.flwr_aid,
             federation="test-federation",
@@ -548,11 +536,10 @@ class TestControlServicerInvitationRPCs(unittest.TestCase):
 
         response = self.servicer.RevokeInvitation(request, context)
 
-        self.mock_check_flwr_aid_exists.assert_called_once_with("ctx-aid", context)
         self.state.federation_manager.revoke_invitation.assert_called_once_with(
             flwr_aid=self.flwr_aid,
             federation="test-federation",
-            invitee_flwr_aid="invitee-aid",
+            invitee_account_name="invitee-aid",
         )
         self.assertIsInstance(response, RevokeInvitationResponse)
 

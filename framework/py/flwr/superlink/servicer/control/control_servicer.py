@@ -18,8 +18,7 @@
 import hashlib
 import json
 import time
-from collections.abc import Generator, Iterator, Sequence
-from contextlib import contextmanager
+from collections.abc import Generator, Sequence
 from logging import ERROR, INFO
 from typing import Any, cast
 
@@ -720,66 +719,61 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         self, request: CreateInvitationRequest, context: grpc.ServicerContext
     ) -> CreateInvitationResponse:
         """Create an invitation."""
-        log(INFO, "ControlServicer.CreateInvitation")
+        log(INFO, rpc_name := self.CreateInvitation.__qualname__)
 
         state = self.linkstate_factory.state()
-        flwr_aid = _check_flwr_aid_exists(get_current_account_info().flwr_aid, context)
-        invitee_flwr_aid = request.invitee_account_name
 
-        with _handle_invite_error(context, "CreateInvitation"):
+        with rpc_error_translator(context, rpc_name):
             state.federation_manager.create_invitation(
-                flwr_aid=flwr_aid,
+                flwr_aid=_get_flwr_aid(context),
                 federation=request.federation_name,
-                invitee_flwr_aid=invitee_flwr_aid,
+                invitee_account_name=request.invitee_account_name,
             )
-            return CreateInvitationResponse()
+        return CreateInvitationResponse()
 
     def ListInvitations(
         self, request: ListInvitationsRequest, context: grpc.ServicerContext
     ) -> ListInvitationsResponse:
         """List invitations."""
-        log(INFO, "ControlServicer.ListInvitations")
+        log(INFO, rpc_name := self.ListInvitations.__qualname__)
 
         state = self.linkstate_factory.state()
-        flwr_aid = _check_flwr_aid_exists(get_current_account_info().flwr_aid, context)
 
-        with _handle_invite_error(context, "ListInvitations"):
+        with rpc_error_translator(context, rpc_name):
             created_invitations, received_invitations = (
-                state.federation_manager.list_invitations(flwr_aid=flwr_aid)
+                state.federation_manager.list_invitations(_get_flwr_aid(context))
             )
-            return ListInvitationsResponse(
-                created_invitations=created_invitations,
-                received_invitations=received_invitations,
-            )
+        return ListInvitationsResponse(
+            created_invitations=created_invitations,
+            received_invitations=received_invitations,
+        )
 
     def AcceptInvitation(
         self, request: AcceptInvitationRequest, context: grpc.ServicerContext
     ) -> AcceptInvitationResponse:
         """Accept an invitation."""
-        log(INFO, "ControlServicer.AcceptInvitation")
+        log(INFO, rpc_name := self.AcceptInvitation.__qualname__)
 
         state = self.linkstate_factory.state()
-        flwr_aid = _check_flwr_aid_exists(get_current_account_info().flwr_aid, context)
 
-        with _handle_invite_error(context, "AcceptInvitation"):
+        with rpc_error_translator(context, rpc_name):
             state.federation_manager.accept_invitation(
-                flwr_aid=flwr_aid,
+                flwr_aid=_get_flwr_aid(context),
                 federation=request.federation_name,
             )
-            return AcceptInvitationResponse()
+        return AcceptInvitationResponse()
 
     def RejectInvitation(
         self, request: RejectInvitationRequest, context: grpc.ServicerContext
     ) -> RejectInvitationResponse:
         """Reject an invitation."""
-        log(INFO, "ControlServicer.RejectInvitation")
+        log(INFO, rpc_name := self.RejectInvitation.__qualname__)
 
         state = self.linkstate_factory.state()
-        flwr_aid = _check_flwr_aid_exists(get_current_account_info().flwr_aid, context)
 
-        with _handle_invite_error(context, "RejectInvitation"):
+        with rpc_error_translator(context, rpc_name):
             state.federation_manager.reject_invitation(
-                flwr_aid=flwr_aid,
+                flwr_aid=_get_flwr_aid(context),
                 federation=request.federation_name,
             )
             return RejectInvitationResponse()
@@ -788,19 +782,17 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         self, request: RevokeInvitationRequest, context: grpc.ServicerContext
     ) -> RevokeInvitationResponse:
         """Revoke an invitation."""
-        log(INFO, "ControlServicer.RevokeInvitation")
+        log(INFO, rpc_name := self.RevokeInvitation.__qualname__)
 
         state = self.linkstate_factory.state()
-        flwr_aid = _check_flwr_aid_exists(get_current_account_info().flwr_aid, context)
-        invitee_flwr_aid = request.invitee_account_name
 
-        with _handle_invite_error(context, "RevokeInvitation"):
+        with rpc_error_translator(context, rpc_name):
             state.federation_manager.revoke_invitation(
-                flwr_aid=flwr_aid,
+                flwr_aid=_get_flwr_aid(context),
                 federation=request.federation_name,
-                invitee_flwr_aid=invitee_flwr_aid,
+                invitee_account_name=request.invitee_account_name,
             )
-            return RevokeInvitationResponse()
+        return RevokeInvitationResponse()
 
 
 def _validate_federation_and_node_in_request(
@@ -947,19 +939,3 @@ def _get_remote_fab(
         )
     fab_file = r.content
     return fab_file, verification_dict
-
-
-@contextmanager
-def _handle_invite_error(
-    context: grpc.ServicerContext, rpc_name: str
-) -> Iterator[None]:
-    """Context manager to handle errors related to federation invitations."""
-    try:
-        yield
-    except (NotImplementedError, ValueError, PermissionError) as e:
-        log(ERROR, "%s operation failed: %s", rpc_name, str(e))
-        if isinstance(e, PermissionError):
-            code = grpc.StatusCode.PERMISSION_DENIED
-        else:
-            code = grpc.StatusCode.FAILED_PRECONDITION
-        context.abort(code, str(e))
