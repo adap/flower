@@ -677,7 +677,7 @@ class TestValidateFederationAndNodesInRequest(unittest.TestCase):
                 self.state, "wrong-aid", NOOP_FEDERATION, 1, ctx
             )
         ctx.abort.assert_called_once()
-        self.assertIn("not a member", str(cm.exception))
+        self.assertIn("does not exist", str(cm.exception))
 
     def test_validate_aborts_when_node_not_owned(self) -> None:
         """Test abort when a node is not owned by the requester."""
