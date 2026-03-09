@@ -161,9 +161,6 @@ class TestControlServicer(unittest.TestCase):
                 "flwr.superlink.servicer.control.control_servicer.get_fab_metadata"
             ) as mock_get_fab_metadata,
         ):
-            # with patch(
-            #     "flwr.superlink.servicer.control.control_servicer.get_fab_metadata"
-            # ) as mock_get_fab_metadata:
             mock_get_fab_metadata.return_value = (fab_id, fab_version)
             response = self.servicer.StartRun(request, Mock())
         runs = self.state.get_run_info(run_ids=[response.run_id])
