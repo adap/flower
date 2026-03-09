@@ -426,14 +426,7 @@ def flwr_cli_grpc_exc_handler(  # pylint: disable=too-many-branches
                 raise click.ClickException(
                     "The SuperLink does not support `flwr pull` command."
                 ) from None
-            raise click.ClickException(
-                "The SuperLink cannot process this request. Please verify that "
-                "you set the address to its Control API endpoint correctly in your "
-                "SuperLink connection in your Flower Configuration file. You may use "
-                "`flwr config list` to see its location in the file system. "
-                "Additonally, ensure that the Flower versions used by the CLI and "
-                "SuperLink are compatible."
-            ) from None
+            raise click.ClickException(e.details()) from None  # pylint: disable=E1101
         if e.code() == grpc.StatusCode.PERMISSION_DENIED:
             # pylint: disable-next=E1101
             raise click.ClickException(f"Permission denied.\n{e.details()}") from None
@@ -479,9 +472,8 @@ def flwr_cli_grpc_exc_handler(  # pylint: disable=too-many-branches
                     "Please verify the federation name and try again."
                 ) from None
 
-            # Log details from grpc error directly
-            raise click.ClickException(f"{e.details()}") from None
-        raise
+        # Log details from grpc error directly
+        raise click.ClickException(f"{e.details()}") from None
 
 
 def build_pathspec(patterns: Iterable[str]) -> pathspec.PathSpec:

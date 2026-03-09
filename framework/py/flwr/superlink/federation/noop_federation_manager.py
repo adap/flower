@@ -28,8 +28,8 @@ from flwr.supercore.error import ApiErrorCode, FlowerError
 from .federation_manager import FederationManager
 
 
-class NoOpFederationManagerError(FlowerError):
-    """Error raised by NoOpFederationManager."""
+class UnsupportedError(FlowerError):
+    """Exception raised when operation is unsupported by NoOpFederationManager."""
 
     def __init__(self, message: str):
         super().__init__(
@@ -101,25 +101,25 @@ class NoOpFederationManager(FederationManager):
         self, flwr_aid: str, name: str, description: str
     ) -> Federation:
         """Create a new federation."""
-        raise NotImplementedError(
+        raise UnsupportedError(
             "`create_federation` is not supported by NoOpFederationManager."
         )
 
     def archive_federation(self, flwr_aid: str, name: str) -> None:
         """Archive an existing federation."""
-        raise NotImplementedError(
+        raise UnsupportedError(
             "`archive_federation` is not supported by NoOpFederationManager."
         )
 
     def add_supernode(self, flwr_aid: str, federation: str, node_id: int) -> None:
         """Add a SuperNode to a federation."""
-        raise NotImplementedError(
+        raise UnsupportedError(
             "`add_supernode` is not supported by NoOpFederationManager."
         )
 
     def remove_supernode(self, flwr_aid: str, federation: str, node_id: int) -> None:
         """Remove a SuperNode from a federation."""
-        raise NotImplementedError(
+        raise UnsupportedError(
             "`remove_supernode` is not supported by NoOpFederationManager."
         )
 
@@ -127,7 +127,7 @@ class NoOpFederationManager(FederationManager):
         self, flwr_aid: str, federation: str, invitee_account_name: str
     ) -> None:
         """Create an invitation for an account to join a federation."""
-        raise NotImplementedError(
+        raise UnsupportedError(
             "`create_invitation` is not supported by NoOpFederationManager."
         )
 
@@ -135,19 +135,19 @@ class NoOpFederationManager(FederationManager):
         self, flwr_aid: str
     ) -> tuple[list[Invitation], list[Invitation]]:
         """List invitations visible to the given account."""
-        raise NotImplementedError(
+        raise UnsupportedError(
             "`list_invitations` is not supported by NoOpFederationManager."
         )
 
     def accept_invitation(self, flwr_aid: str, federation: str) -> None:
         """Accept a pending invitation to join a federation."""
-        raise NotImplementedError(
+        raise UnsupportedError(
             "`accept_invitation` is not supported by NoOpFederationManager."
         )
 
     def reject_invitation(self, flwr_aid: str, federation: str) -> None:
         """Reject a pending invitation to join a federation."""
-        raise NotImplementedError(
+        raise UnsupportedError(
             "`reject_invitation` is not supported by NoOpFederationManager."
         )
 
@@ -155,6 +155,6 @@ class NoOpFederationManager(FederationManager):
         self, flwr_aid: str, federation: str, invitee_account_name: str
     ) -> None:
         """Revoke a pending invitation."""
-        raise NotImplementedError(
+        raise UnsupportedError(
             "`revoke_invitation` is not supported by NoOpFederationManager."
         )
