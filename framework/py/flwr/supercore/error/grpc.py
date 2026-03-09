@@ -24,7 +24,7 @@ from grpc import StatusCode
 
 from flwr.common.logger import log
 
-from .base import ApiErrorCode, FlowerError
+from .base import FlowerError
 from .catalog import API_ERROR_MAP
 
 INTERNAL_SERVER_ERROR_MESSAGE = "Internal server error."
