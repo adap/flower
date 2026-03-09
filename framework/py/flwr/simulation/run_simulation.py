@@ -17,6 +17,7 @@
 
 import argparse
 import asyncio
+import importlib
 import json
 import logging
 import platform
@@ -31,6 +32,7 @@ from flwr.cli.utils import get_sha256_hash
 from flwr.clientapp import ClientApp
 from flwr.common import Context, EventType, RecordDict, event, log, now
 from flwr.common.constant import RUN_ID_NUM_BYTES, Status
+from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.logger import (
     set_logger_propagation,
     update_console_handler,
@@ -65,7 +67,7 @@ def _replace_keys(d: Any, match: str, target: str) -> Any:
 
 
 def _check_ray_support(backend_name: str) -> None:
-    if backend_name.lower() == "ray":
+    if backend_name == "ray":
         if platform.system() == "Windows":
             log(
                 WARNING,
@@ -357,6 +359,19 @@ def _run_simulation(
             BackendConfig, _replace_keys(backend_config, match="-", target="_")
         )
         log(DEBUG, "backend_config: %s", backend_config)
+
+    # Exit early if the `ray` dependency is missing
+    if backend_name == "ray":
+        if importlib.util.find_spec("ray") is None:
+            flwr_exit(
+                code=ExitCode.SIMULATION_MISSING_EXTRA,
+                message=(
+                    "`ray` backend selected for simulation, but `ray` is not "
+                    "installed."
+                ),
+                event_type=exit_event,
+                event_details={"success": False},
+            )
 
     # Set default init_args if not passed
     backend_config.setdefault("init_args", {})

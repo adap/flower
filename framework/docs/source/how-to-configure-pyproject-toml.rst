@@ -131,6 +131,12 @@ Access these values in your code using ``context.run_config``. For example:
 
     server_rounds = context.run_config["num-server-rounds"]
 
+.. tip::
+
+    You can also override the ``run_config`` values by passing the ``--run-config`` flag
+    followed by key-value pairs when executing ``flwr run``. See the
+    |flwr_run_cli_link|_ for more details.
+
 **************************
  Federation Configuration
 **************************
@@ -141,3 +147,7 @@ Access these values in your code using ``context.run_config``. For example:
     ``pyproject.toml`` has been renamed and moved. These settings are now **SuperLink
     connection configuration** and are defined in the Flower configuration file. Refer
     to the `Flower Configuration <ref-flower-configuration.html>`_ for more information.
+
+.. |flwr_run_cli_link| replace:: ``flwr run`` CLI documentation
+
+.. _flwr_run_cli_link: ref-api-cli.html#flwr-run
