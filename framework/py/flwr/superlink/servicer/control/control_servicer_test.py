@@ -463,9 +463,7 @@ class TestControlServicerInvitationRPCs(unittest.TestCase):
             "flwr.superlink.servicer.control.control_servicer.get_current_account_info",
             return_value=SimpleNamespace(flwr_aid=self.flwr_aid),
         )
-        self.mock_get_current_account_info = (
-            self.get_current_account_info_patcher.start()
-        )
+        self.get_current_account_info_patcher.start()
         self.addCleanup(self.get_current_account_info_patcher.stop)
 
     def test_create_invitation_success(self) -> None:

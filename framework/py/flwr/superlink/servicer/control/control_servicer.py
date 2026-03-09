@@ -776,7 +776,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 flwr_aid=_get_flwr_aid(context),
                 federation=request.federation_name,
             )
-            return RejectInvitationResponse()
+        return RejectInvitationResponse()
 
     def RevokeInvitation(
         self, request: RevokeInvitationRequest, context: grpc.ServicerContext
