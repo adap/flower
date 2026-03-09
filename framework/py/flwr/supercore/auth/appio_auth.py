@@ -135,6 +135,13 @@ class AuthDecisionEngine:
     The engine is deliberately transport-independent (e.g. gRPC, REST, etc...).
     It decides mechanism selection and delegates cryptographic/token checks to
     authenticators.
+
+    Reviewer note:
+    - We intentionally validate policy/authenticator consistency at construction
+      time (fail fast) and again at evaluation time (runtime safety).
+    - The fail-fast check catches config errors early during startup.
+    - The runtime check defends against callers passing ad-hoc policy objects or
+      config drift after construction.
     """
 
     def __init__(
@@ -150,28 +157,28 @@ class AuthDecisionEngine:
         self, method_auth_policy: Mapping[str, MethodAuthPolicy]
     ) -> None:
         """Fail fast if policy references unknown mechanisms."""
-        configured = set(self._authenticators)
-        missing_by_method = {
-            method: sorted(set(policy.allowed_mechanisms) - configured)
-            for method, policy in method_auth_policy.items()
-            if set(policy.allowed_mechanisms) - configured
-        }
+        missing_by_method: dict[str, list[str]] = {}
+        for method, policy in method_auth_policy.items():
+            missing = self._find_missing_mechanisms(policy)
+            if missing:
+                missing_by_method[method] = missing
         if missing_by_method:
             raise ValueError(
                 "Method auth policy references mechanisms without authenticators: "
                 f"{missing_by_method}"
             )
 
+    def _find_missing_mechanisms(self, policy: MethodAuthPolicy) -> list[str]:
+        """Return policy mechanisms that have no registered authenticator."""
+        configured = set(self._authenticators)
+        return sorted(set(policy.allowed_mechanisms) - configured)
+
     def evaluate(self, policy: MethodAuthPolicy, auth_input: AuthInput) -> AuthDecision:
         """Evaluate authentication for a single method invocation."""
         if not policy.requires_authentication:
             return AuthDecision(is_allowed=True, caller_identity=None)
 
-        missing_mechanisms = [
-            mechanism
-            for mechanism in policy.allowed_mechanisms
-            if mechanism not in self._authenticators
-        ]
+        missing_mechanisms = self._find_missing_mechanisms(policy)
         if missing_mechanisms:
             return AuthDecision(
                 is_allowed=False,
