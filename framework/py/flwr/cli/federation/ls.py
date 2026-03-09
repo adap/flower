@@ -97,7 +97,7 @@ def ls(  # pylint: disable=R0914, R0913, R0917, R0912
                     " [bold yellow]\\[ARCHIVED][/bold yellow]" if archived else ""
                 )
                 Console().print(
-                    f"📄 Showing '{federation}' federation{archived_str} ...\n"
+                    f"📄 Showing '{federation}' federation{archived_str}...\n"
                 )
                 if is_json:
                     print_json_to_stdout(
@@ -272,10 +272,8 @@ def _to_members_table(members: list[Member]) -> Table:
     """
     table = Table(title="Federation Members", header_style="bold cyan", show_lines=True)
 
-    table.add_column(
-        Text("Account Name", justify="center"), style="bright_black", no_wrap=True
-    )
-    table.add_column(Text("Role", justify="center"), style="bright_black", no_wrap=True)
+    table.add_column(Text("Account Name", justify="center"), no_wrap=True)
+    table.add_column(Text("Role", justify="center"), no_wrap=True)
 
     for member in members:
         table.add_row(member.account.name, member.role)
