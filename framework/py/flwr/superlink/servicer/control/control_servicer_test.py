@@ -41,16 +41,26 @@ from flwr.common.constant import (
 )
 from flwr.common.typing import Run, RunStatus
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
+    AcceptInvitationRequest,
+    AcceptInvitationResponse,
     AddNodeToFederationRequest,
     AddNodeToFederationResponse,
     ArchiveFederationRequest,
     CreateFederationRequest,
+    CreateInvitationRequest,
+    CreateInvitationResponse,
+    ListInvitationsRequest,
+    ListInvitationsResponse,
     ListNodesRequest,
     ListNodesResponse,
     ListRunsRequest,
     RegisterNodeRequest,
+    RejectInvitationRequest,
+    RejectInvitationResponse,
     RemoveNodeFromFederationRequest,
     RemoveNodeFromFederationResponse,
+    RevokeInvitationRequest,
+    RevokeInvitationResponse,
     ShowFederationRequest,
     ShowFederationResponse,
     StartRunRequest,
@@ -430,6 +440,106 @@ class TestControlServicer(unittest.TestCase):
         # Execute & Assert
         with self.assertRaises(grpc.RpcError):
             self.servicer.ArchiveFederation(request, mock_context)
+
+
+class TestControlServicerInvitationRPCs(unittest.TestCase):
+    """Unit tests for invitation RPC success paths."""
+
+    def setUp(self) -> None:
+        """Set up test fixtures."""
+        self.flwr_aid = "test-flwr-aid"
+        self.state = Mock()
+        self.state.federation_manager = Mock()
+        self.linkstate_factory = Mock()
+        self.linkstate_factory.state.return_value = self.state
+        self.servicer = ControlServicer(
+            linkstate_factory=self.linkstate_factory,
+            ffs_factory=Mock(),
+            objectstore_factory=Mock(),
+            is_simulation=False,
+            authn_plugin=Mock(),
+        )
+        self.get_current_account_info_patcher = patch(
+            "flwr.superlink.servicer.control.control_servicer.get_current_account_info",
+            return_value=SimpleNamespace(flwr_aid=self.flwr_aid),
+        )
+        self.get_current_account_info_patcher.start()
+        self.addCleanup(self.get_current_account_info_patcher.stop)
+
+    def test_create_invitation_success(self) -> None:
+        """Test CreateInvitation success path."""
+        request = CreateInvitationRequest(
+            invitee_account_name="invitee-aid",
+            federation_name="test-federation",
+        )
+        context = Mock()
+
+        response = self.servicer.CreateInvitation(request, context)
+
+        self.state.federation_manager.create_invitation.assert_called_once_with(
+            flwr_aid=self.flwr_aid,
+            federation="test-federation",
+            invitee_account_name="invitee-aid",
+        )
+        self.assertIsInstance(response, CreateInvitationResponse)
+
+    def test_list_invitations_success(self) -> None:
+        """Test ListInvitations success path."""
+        request = ListInvitationsRequest()
+        context = Mock()
+        self.state.federation_manager.list_invitations.return_value = ([], [])
+
+        response = self.servicer.ListInvitations(request, context)
+
+        self.state.federation_manager.list_invitations.assert_called_once_with(
+            self.flwr_aid
+        )
+        self.assertIsInstance(response, ListInvitationsResponse)
+        self.assertEqual(len(response.created_invitations), 0)
+        self.assertEqual(len(response.received_invitations), 0)
+
+    def test_accept_invitation_success(self) -> None:
+        """Test AcceptInvitation success path."""
+        request = AcceptInvitationRequest(federation_name="test-federation")
+        context = Mock()
+
+        response = self.servicer.AcceptInvitation(request, context)
+
+        self.state.federation_manager.accept_invitation.assert_called_once_with(
+            flwr_aid=self.flwr_aid,
+            federation="test-federation",
+        )
+        self.assertIsInstance(response, AcceptInvitationResponse)
+
+    def test_reject_invitation_success(self) -> None:
+        """Test RejectInvitation success path."""
+        request = RejectInvitationRequest(federation_name="test-federation")
+        context = Mock()
+
+        response = self.servicer.RejectInvitation(request, context)
+
+        self.state.federation_manager.reject_invitation.assert_called_once_with(
+            flwr_aid=self.flwr_aid,
+            federation="test-federation",
+        )
+        self.assertIsInstance(response, RejectInvitationResponse)
+
+    def test_revoke_invitation_success(self) -> None:
+        """Test RevokeInvitation success path."""
+        request = RevokeInvitationRequest(
+            invitee_account_name="invitee-aid",
+            federation_name="test-federation",
+        )
+        context = Mock()
+
+        response = self.servicer.RevokeInvitation(request, context)
+
+        self.state.federation_manager.revoke_invitation.assert_called_once_with(
+            flwr_aid=self.flwr_aid,
+            federation="test-federation",
+            invitee_account_name="invitee-aid",
+        )
+        self.assertIsInstance(response, RevokeInvitationResponse)
 
 
 class TestControlServicerAuth(unittest.TestCase):
