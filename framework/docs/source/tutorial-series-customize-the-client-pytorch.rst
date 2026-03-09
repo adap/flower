@@ -302,7 +302,10 @@ Finally, we run the Flower App.
 
 .. code-block:: shell
 
-    $ flwr run .
+    $ flwr run . --stream
+
+Plain ``flwr run .`` submits the run, prints the run ID, and returns without streaming
+logs. See :doc:`how-to-run-flower-locally` for the full local workflow.
 
 You will observe that the training metadata from each client is logged to the console of
 the ``ServerApp``. If you finish embedding the creation of the ``TrainProcessMetadata``
