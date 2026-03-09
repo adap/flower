@@ -6,10 +6,11 @@
  Run Flower Locally with a Managed SuperLink
 #############################################
 
-When you use a local Flower configuration profile with ``options.*`` and no explicit
-``address``, ``flwr`` does not call the simulation runtime directly. Instead, Flower
-starts a managed local ``flower-superlink`` on demand, submits the run through the
-Control API, and the local SuperLink executes the run with the simulation runtime.
+When you use a local profile in the :doc:`Flower configuration
+<ref-flower-configuration>` with ``options.*`` and no explicit ``address``, ``flwr``
+does not call the simulation runtime directly. Instead, Flower starts a managed local
+``flower-superlink`` on demand, submits the run through the Control API, and the local
+SuperLink executes the run with the simulation runtime.
 
 This is the default experience for a profile like the one created automatically in your
 Flower configuration:
