@@ -25,9 +25,8 @@ from typing import Any, cast
 import grpc
 import requests
 
-from flwr.cli.config_utils import get_fab_metadata
 from flwr.common import Context, RecordDict, now
-from flwr.common.config import flatten_dict, fuse_dicts, get_fab_config
+from flwr.common.config import flatten_dict, fuse_dicts, get_fab_config, get_metadata_from_config
 from flwr.common.constant import (
     FAB_MAX_SIZE,
     FEDERATION_NOT_FOUND_MESSAGE,
@@ -165,9 +164,8 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
 
         try:
             # Validate user config overrides matches keys in run config in FAB
-            run_config = flatten_dict(
-                get_fab_config(fab_file)["tool"]["flwr"]["app"].get("config", {})
-            )
+            fab_config = get_fab_config(fab_file)
+            run_config = flatten_dict(fab_config["tool"]["flwr"]["app"].get("config"))
             _ = fuse_dicts(run_config, override_config)
 
             # Check that num-supernodes is set
@@ -202,7 +200,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 raise ValueError(
                     f"FAB ({fab.hash_str}) hash from request doesn't match contents"
                 )
-            fab_id, fab_version = get_fab_metadata(fab.content)
+            fab_id, fab_version = get_metadata_from_config(fab_config)
 
             run_id = state.create_run(
                 fab_id,
