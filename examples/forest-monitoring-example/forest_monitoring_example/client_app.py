@@ -10,7 +10,6 @@ This ClientApp supports both:
 """
 
 import numpy as np
-from logging import INFO
 import torch
 from flwr.client import ClientApp
 from flwr.common import Context, log
@@ -50,7 +49,6 @@ def train(msg: Message, context: Context) -> Message:
     set_seed(int(context.run_config.get("seed", 42)))
 
     client_id = _get_client_id(context)
-    log(INFO, "Train on client id %s", _get_client_id(context))
     npz_path = _get_npz_path(context)
 
     batch_size = context.run_config["batch-size"]
@@ -133,13 +131,10 @@ def train(msg: Message, context: Context) -> Message:
 def evaluate(msg: Message, context: Context) -> Message:
     """Evaluate the model on local data."""
 
-    log(INFO, "EVALUATE called on client %s", _get_client_id(context))
-
     set_seed(int(context.run_config.get("seed", 42)))
     
     # Load model and data
     npz_path = _get_npz_path(context)
-    log(INFO, "npz-file is %s", npz_path)
     batch_size = context.run_config["batch-size"]
 
     # model config:
