@@ -3,40 +3,24 @@
 <div align="center">
 
 <div>
-    <a href='https://haoyuan-l.github.io/' target='_blank'>Haoyuan Li</a><sup>1</sup>&emsp;
-    <a href='https://mathias-funk.com/' target='_blank'>Mathias Funk</a><sup>1</sup>&emsp;
-    <a href='https://aqibsaeed.github.io/' target='_blank'>Aaqib Saeed</a><sup>1</sup>&emsp;
+    <a href="https://haoyuan-l.github.io/" target="_blank">Haoyuan Li</a><sup>1</sup>&emsp;
+    <a href="https://mathias-funk.com/" target="_blank">Mathias Funk</a><sup>1</sup>&emsp;
+    <a href="https://aqibsaeed.github.io/" target="_blank">Aaqib Saeed</a><sup>1</sup>&emsp;
 </div>
 
 <div>
-<sup>1</sup><a href="https://www.tue.nl/en/our-university/departments/industrial-design/research/our-research-labs/decentralized-artificial-intelligence-research-lab" target="_blank" rel="noopener noreferrer">
-Decentralized Artificial Intelligence Research Lab, Eindhoven University of Technology
-</a>
+    <sup>1</sup><a href="https://www.tue.nl/en/our-university/departments/industrial-design/research/our-research-labs/decentralized-artificial-intelligence-research-lab" target="_blank" rel="noopener noreferrer">
+    Decentralized Artificial Intelligence Research Lab, Eindhoven University of Technology
+    </a>
 </div>
-
-<br>
-
-![visitors](https://visitor-badge.laobi.icu/badge?page_id=Decentralized-AI-Research-Lab.Helmsman&left_color=blue&right_color=green)
-[![arXiv](https://img.shields.io/badge/arXiv-2510.14512-B31B1B.svg?logo=arxiv&logoColor=white)](https://arxiv.org/abs/2510.14512)
-[![ICLR 2026](https://img.shields.io/badge/ICLR%202026-Accepted-003087.svg)](https://iclr.cc/)
-[![Project Page](https://img.shields.io/badge/Project%20Page-Online-brightgreen)](https://haoyuan-l.github.io/helmsman-web/)
-[![Flower](https://img.shields.io/badge/Flower-1.20.0-pink.svg)](https://flower.ai)
-[![flwr-datasets](https://img.shields.io/badge/flwr--datasets-0.5.0-blue.svg)](https://flower.ai/docs/datasets/)
 
 </div>
 
-## 📢 Updates
-
-* **[02/2026]** 🚀 **Code Release:** The official implementation and **AgentFL-Bench** are now available.
-* **[02/2026]** 🌐 **Project Page:** We have released the [project page](https://haoyuan-l.github.io/helmsman-web/) with demos and visualizations.
-* **[01/2026]** 🎉 **Acceptance:** **Helmsman** has been accepted to **ICLR 2026**!
-* **[11/2025]** 📄 **Preprint:** The [arXiv paper](https://arxiv.org/abs/2510.14512) has been released.
-
-![Helmsman Architecture](img/AgenticFL_overview.jpg)
+## ☸ Helmsman
 
 **Helmsman** is a pioneering multi-agent framework designed to automate the end-to-end synthesis of Federated Learning (FL) systems. By bridging the gap between high-level user intent and executable, robust code, Helmsman addresses the intractable complexity of the FL design space.
 
-This repository hosts the official implementation of the paper **"Helmsman: Autonomous Synthesis of Federated Learning Systems via Collaborative LLM Agents"**, published at **ICLR 2026**.
+This app hosts the implementation of the paper **"Helmsman: Autonomous Synthesis of Federated Learning Systems via Collaborative LLM Agents"** from the [official repository](https://github.com/haoyuan-l/Helmsman), published at **ICLR 2026**.
 
 ---
 

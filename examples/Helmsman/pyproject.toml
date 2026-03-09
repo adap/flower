@@ -1,0 +1,8 @@
+[project]
+name = "Helmsman"
+version = "1.0.0"
+description = "Helmsman, an agentic framework for autonomous synthesis of federated learning systems via collaborative LLM agents"
+license = "Apache-2.0"
+
+[tool.flwr.app]
+publisher = "beothuk"
