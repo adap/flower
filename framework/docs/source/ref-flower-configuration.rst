@@ -28,7 +28,7 @@ you can reference by name when running ``flwr`` commands. For example, you can s
 configurations for local testing, staging servers, and production deployments, then
 easily switch between them.
 
-Most ``flwr`` commands (like ``flwr log``, ``flwr ls``, and ``flwr stop``) can use the
+Most ``flwr`` commands (like ``flwr log``, ``flwr list``, and ``flwr stop``) can use the
 Flower Configuration from anywhere on your system. The exception is ``flwr run``, which
 must be executed from within a Flower App directory to access the app code.
 
@@ -122,7 +122,8 @@ testing before deploying to real distributed environments.
     [superlink.local]
     options.num-supernodes = 10
 
-This creates a simulation connection configuration with 10 virtual SuperNodes.
+This creates a managed local SuperLink profile that runs 10 virtual SuperNodes through
+the simulation runtime.
 
 **Simulation with custom resources**
 
@@ -133,9 +134,9 @@ This creates a simulation connection configuration with 10 virtual SuperNodes.
     options.backend.client-resources.num-cpus = 1
     options.backend.client-resources.num-gpus = 0.1
 
-This creates a simulation connection configuration with 100 virtual SuperNodes, where
-each is allocated 1 CPU and 10% of a GPU. This is useful when you want to control
-resource distribution or simulate resource-constrained environments.
+This creates a managed local SuperLink profile with 100 virtual SuperNodes, where each
+is allocated 1 CPU and 10% of a GPU. This is useful when you want to control resource
+distribution or simulate resource-constrained environments.
 
 **When to use each**
 
@@ -150,7 +151,10 @@ optional parameters you can use to configure your local simulation.
 
 When you use a local simulation profile (``options.*``), Flower CLI commands that
 communicate with SuperLink use the Control API. If the profile has no explicit
-``address``, Flower starts a local SuperLink automatically when needed.
+``address``, Flower starts a managed local SuperLink automatically when needed and
+reuses it across ``flwr run``, ``flwr list``, ``flwr log``, and ``flwr stop``. See
+:doc:`how-to-run-flower-locally` for the full local workflow, background process
+behavior, and runtime file locations.
 
 ***************************
  Remote Deployment Example

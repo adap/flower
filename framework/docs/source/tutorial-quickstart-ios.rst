@@ -37,7 +37,7 @@ server environment. We first need to install Flower. You can do this by using pi
 
 .. code-block:: shell
 
-    $ pip install flwr
+    $ pip install flwr[simulation]
 
 Or Poetry:
 
