@@ -8,117 +8,56 @@ We would like to give our special thanks to all the contributors who made the ne
 
 `Charles Beauville`, `Chong Shen Ng`, `Daniel J. Beutel`, `Heng Pan`, `Javier`, `Micah Sheller`, `Mohammad Naseri`, `Roma Klapaukh`, `Ruth Galindo`, `Taner Topal`, `Yan Gao` <!---TOKEN_v1.27.0-->
 
+### What's new?
 
-### Federation run listing and run metadata
-- **feat(framework): Add** `--limit` **option to** `flwr ls` ([#6639](https://github.com/adap/flower/pull/6639))
+- **Introduce Local SuperLink for managing local simulations** ([#6599](https://github.com/adap/flower/pull/6599), [#6717](https://github.com/adap/flower/pull/6717))
 
-### Add Federated Analytics example
-- **feat(examples): Add Federated Analytics example** ([#6314](https://github.com/adap/flower/pull/6314))
+  Local simulations are now managed by a Local SuperLink, which is automatically launched on demand. This enables running most `flwr` CLI commands locally, such as `flwr ls` to list previous runs and `flwr log` to retrieve logs from earlier runs. See the [documentation](https://flower.ai/docs/framework/1.27/en/how-to-run-flower-locally.html) for more details.
 
-### Flower Hub and app publishing
-- **feat(framework): Include more file types in app publish command** ([#6686](https://github.com/adap/flower/pull/6686))
-- **feat(framework): Handle app license in publish command** ([#6656](https://github.com/adap/flower/pull/6656))
-- **feat(framework): Include root LICENSE in FAB** ([#6685](https://github.com/adap/flower/pull/6685))
-- **feat(framework): Refactor FAB build to include** `pyproject.toml` **into** `.info/CONTENT` **manifest** ([#6689](https://github.com/adap/flower/pull/6689))
+- **Update framework documentation** ([#6533](https://github.com/adap/flower/pull/6533), [#6537](https://github.com/adap/flower/pull/6537), [#6541](https://github.com/adap/flower/pull/6541), [#6546](https://github.com/adap/flower/pull/6546), [#6551](https://github.com/adap/flower/pull/6551), [#6593](https://github.com/adap/flower/pull/6593), [#6598](https://github.com/adap/flower/pull/6598), [#6612](https://github.com/adap/flower/pull/6612), [#6615](https://github.com/adap/flower/pull/6615), [#6629](https://github.com/adap/flower/pull/6629), [#6631](https://github.com/adap/flower/pull/6631), [#6635](https://github.com/adap/flower/pull/6635), [#6681](https://github.com/adap/flower/pull/6681), [#6694](https://github.com/adap/flower/pull/6694), [#6710](https://github.com/adap/flower/pull/6710), [#6718](https://github.com/adap/flower/pull/6718), [#6719](https://github.com/adap/flower/pull/6719))
 
-### Local SuperLink
-- **feat(framework): Start local SuperLink** ([#6599](https://github.com/adap/flower/pull/6599))
-- **docs(framework): Document local SuperLink usage** ([#6717](https://github.com/adap/flower/pull/6717))
+  Improves and fixes various parts of the framework documentation, including a new FAQ for unexpected Windows PowerShell output (https://flower.ai/docs/framework/1.27/en/ref-faq.html#faq-windows-unexpected-output).
 
-### CLI and transport error handling
-- **feat(framework): Allow custom gRPC error handling in CLI** ([#6696](https://github.com/adap/flower/pull/6696))
-- **feat(framework): Add translator for transport-layer error handling** ([#6720](https://github.com/adap/flower/pull/6720))
-- **feat(framework): Ensure robustness of** `FileCredentialStore` ([#6652](https://github.com/adap/flower/pull/6652))
-- **refactor(framework): Improve TOML override help message for** `--run-config` ([#6721](https://github.com/adap/flower/pull/6721))
+- **Adopt release-branch workflow for Flower framework releases** ([#6560](https://github.com/adap/flower/pull/6560), [#6566](https://github.com/adap/flower/pull/6566), [#6594](https://github.com/adap/flower/pull/6594))
 
-### Framework docs updates
-- **docs(framework:skip): Update source texts for translations (auto)** ([#6551](https://github.com/adap/flower/pull/6551))
-- **docs(framework:skip): Update source texts for translations (auto)** ([#6615](https://github.com/adap/flower/pull/6615))
-- **docs(framework:skip): Update source texts for translations (auto)** ([#6537](https://github.com/adap/flower/pull/6537))
-- **docs(framework:skip): Update source texts for translations (auto)** ([#6631](https://github.com/adap/flower/pull/6631))
-- **docs(framework:skip): Update source texts for translations (auto)** ([#6541](https://github.com/adap/flower/pull/6541))
-- **docs(framework:skip): Update source texts for translations** ([#6694](https://github.com/adap/flower/pull/6694))
-- **docs(framework:skip): Update source texts for translations (auto)** ([#6635](https://github.com/adap/flower/pull/6635))
-- **docs(framework:skip): Update source texts for translations (auto)** ([#6710](https://github.com/adap/flower/pull/6710))
-- **docs(framework:skip): Update source texts for translations (auto)** ([#6681](https://github.com/adap/flower/pull/6681))
-- **docs(framework): Add tip for overriding run configs in** `pyproject.toml` ([#6719](https://github.com/adap/flower/pull/6719))
-- **docs(framework): Bump Helm chart parameters to 1.26.1 and** `mdformat` **version** ([#6546](https://github.com/adap/flower/pull/6546))
-- **docs(framework): Fix small docs issues** ([#6612](https://github.com/adap/flower/pull/6612))
-- **docs(framework): Add FAQ for error output on Windows** ([#6629](https://github.com/adap/flower/pull/6629))
-- **docs(framework): Fix incorrect config option name in Flower Configuration docs** ([#6598](https://github.com/adap/flower/pull/6598))
-- **docs(framework): Update framework docs UI** ([#6533](https://github.com/adap/flower/pull/6533))
-- **docs(examples:skip): Redirect Flower authentication docs to SuperNode authentication docs** ([#6718](https://github.com/adap/flower/pull/6718))
+  Adopts a release-branch workflow for the Flower framework, enabling releases from dedicated `release/framework-X.Y` branches and introducing the `framework-X.Y.Z` release tag format.
+
+- **Introduce versioned Flower documentation built from release branches** ([#6564](https://github.com/adap/flower/pull/6564), [#6569](https://github.com/adap/flower/pull/6569), [#6596](https://github.com/adap/flower/pull/6596), [#6607](https://github.com/adap/flower/pull/6607), [#6609](https://github.com/adap/flower/pull/6609), [#6610](https://github.com/adap/flower/pull/6610))
+
+  Introduces a new documentation release workflow where versioned Flower documentation is built and published from release branches. One documentation version is generated for each minor series (`X.Y.x`), allowing documentation updates after a release.
+
+- **Add `--limit` option to `flwr ls` for limiting the number of runs listed** ([#6639](https://github.com/adap/flower/pull/6639))
+
+- **Add Federated Analytics example** ([#6314](https://github.com/adap/flower/pull/6314))
+
+- **Improve Flower Hub app publishing and FAB building** ([#6656](https://github.com/adap/flower/pull/6656), [#6685](https://github.com/adap/flower/pull/6685), [#6686](https://github.com/adap/flower/pull/6686), [#6689](https://github.com/adap/flower/pull/6689))
+
+- **Update examples** ([#6545](https://github.com/adap/flower/pull/6545), [#6555](https://github.com/adap/flower/pull/6555), [#6697](https://github.com/adap/flower/pull/6697), [#6709](https://github.com/adap/flower/pull/6709))
+
+- **Update packaging and dependency configuration** ([#6548](https://github.com/adap/flower/pull/6548), [#6558](https://github.com/adap/flower/pull/6558), [#6648](https://github.com/adap/flower/pull/6648), [#6651](https://github.com/adap/flower/pull/6651), [#6654](https://github.com/adap/flower/pull/6654), [#6683](https://github.com/adap/flower/pull/6683))
+
+- **Improve CI workflows** ([#6549](https://github.com/adap/flower/pull/6549), [#6550](https://github.com/adap/flower/pull/6550), [#6573](https://github.com/adap/flower/pull/6573), [#6575](https://github.com/adap/flower/pull/6575), [#6579](https://github.com/adap/flower/pull/6579), [#6585](https://github.com/adap/flower/pull/6585), [#6601](https://github.com/adap/flower/pull/6601), [#6617](https://github.com/adap/flower/pull/6617), [#6624](https://github.com/adap/flower/pull/6624), [#6633](https://github.com/adap/flower/pull/6633), [#6645](https://github.com/adap/flower/pull/6645), [#6647](https://github.com/adap/flower/pull/6647), [#6655](https://github.com/adap/flower/pull/6655), [#6665](https://github.com/adap/flower/pull/6665), [#6706](https://github.com/adap/flower/pull/6706))
+
+- **General improvements** ([#6540](https://github.com/adap/flower/pull/6540), [#6547](https://github.com/adap/flower/pull/6547), [#6553](https://github.com/adap/flower/pull/6553), [#6563](https://github.com/adap/flower/pull/6563), [#6568](https://github.com/adap/flower/pull/6568), [#6591](https://github.com/adap/flower/pull/6591), [#6595](https://github.com/adap/flower/pull/6595), [#6602](https://github.com/adap/flower/pull/6602), [#6616](https://github.com/adap/flower/pull/6616), [#6634](https://github.com/adap/flower/pull/6634), [#6637](https://github.com/adap/flower/pull/6637), [#6642](https://github.com/adap/flower/pull/6642), [#6643](https://github.com/adap/flower/pull/6643), [#6650](https://github.com/adap/flower/pull/6650), [#6652](https://github.com/adap/flower/pull/6652), [#6659](https://github.com/adap/flower/pull/6659), [#6670](https://github.com/adap/flower/pull/6670), [#6679](https://github.com/adap/flower/pull/6679), [#6696](https://github.com/adap/flower/pull/6696), [#6712](https://github.com/adap/flower/pull/6712), [#6716](https://github.com/adap/flower/pull/6716), [#6720](https://github.com/adap/flower/pull/6720), [#6721](https://github.com/adap/flower/pull/6721), [#6724](https://github.com/adap/flower/pull/6724))
+
+  As always, many parts of the Flower framework and quality infrastructure were improved and updated.
 
 ### Incompatible changes
 
-- **break(framework): Hide** `v1.8.0` **-** `v1.16.0` **framework docs from version switcher** ([#6621](https://github.com/adap/flower/pull/6621))
+- **Unpublish `v1.8.0`–`v1.16.0` framework documentation** ([#6621](https://github.com/adap/flower/pull/6621))
 
-- **break(framework): Remove** `flower-simulation` **CLI entrypoint** ([#6628](https://github.com/adap/flower/pull/6628))
+  Unpublishes very old documentation versions that are no longer compatible with the updated documentation structure and release workflow.
 
-- **break(framework): Drop** `--flwr-dir` **and use Flower home everywhere** ([#6677](https://github.com/adap/flower/pull/6677))
+- **Drop deprecated `--flwr-dir` CLI option** ([#6677](https://github.com/adap/flower/pull/6677))
 
+  Removes the deprecated `--flwr-dir` option from CLI commands. A custom Flower directory can still be configured using the `FLWR_HOME` environment variable.
 
-### Migration to uv
+- **Remove `flower-simulation` CLI entrypoint** ([#6628](https://github.com/adap/flower/pull/6628))
 
-### Packaging and dependency updates
-- **refactor(framework): Bump** `cryptography` ([#6558](https://github.com/adap/flower/pull/6558))
-- **ci(framework): Upgrade pip/setuptools/poetry/twine** ([#6648](https://github.com/adap/flower/pull/6648))
-- **ci(framework): Prepare pyproject.toml migration** ([#6654](https://github.com/adap/flower/pull/6654))
-- **ci(framework): Migrate pyproject.toml to use [project]** ([#6651](https://github.com/adap/flower/pull/6651))
-- **ci(framework): Fix framework CI by pinning** `setuptools` **version in TOML files** ([#6548](https://github.com/adap/flower/pull/6548))
-- **refactor(:skip): Bump** `gitpython` ([#6683](https://github.com/adap/flower/pull/6683))
-
-### CI and release workflows
-- **ci(:skip): Build and deploy Hub docs** ([#6706](https://github.com/adap/flower/pull/6706))
-- **ci(:skip): Improve bootstrap action** ([#6647](https://github.com/adap/flower/pull/6647))
-- **ci(:skip): Extend** `CODEOWNERS` **for datasets workflows** ([#6585](https://github.com/adap/flower/pull/6585))
-- **ci(:skip): Update rm-caches.sh** ([#6549](https://github.com/adap/flower/pull/6549))
-- **ci(framework): Trigger test CI on** `release/framework-X.Y` **branches** ([#6566](https://github.com/adap/flower/pull/6566))
-- **ci(framework): Enable release branch for** `flwr` ([#6560](https://github.com/adap/flower/pull/6560))
-- **ci(:skip): Rename GitHub Actions workflows** ([#6573](https://github.com/adap/flower/pull/6573))
-- **ci(framework): Fix framework docs** ([#6601](https://github.com/adap/flower/pull/6601))
-- **ci(:skip): Bump repo workflows** ([#6575](https://github.com/adap/flower/pull/6575))
-- **ci(baselines): Remove tests for deprecated baselines** ([#6645](https://github.com/adap/flower/pull/6645))
-- **ci(framework): Change release tag format to** `framework-X.Y.Z` ([#6594](https://github.com/adap/flower/pull/6594))
-- **ci(framework): Migrate strategies E2E test to hatchling** ([#6665](https://github.com/adap/flower/pull/6665))
-- **ci(framework): Build version switcher and announcement in runtime and add warning banner for old versions** ([#6593](https://github.com/adap/flower/pull/6593))
-- **ci(:skip): Add** `hub` **to PR title check** ([#6624](https://github.com/adap/flower/pull/6624))
-- **ci(:skip): Move all Python scripts under dev into devtool** ([#6655](https://github.com/adap/flower/pull/6655))
-- **ci(framework): Fix e2e test** ([#6550](https://github.com/adap/flower/pull/6550))
-- **ci(examples): Add CODEOWNER for examples directory** ([#6617](https://github.com/adap/flower/pull/6617))
-- **ci(framework): Use** `--stream` **to run simulation tests** ([#6633](https://github.com/adap/flower/pull/6633))
-- **ci(:skip): Update CODEOWNERS** ([#6579](https://github.com/adap/flower/pull/6579))
-
-### Examples maintenance
-- **refactor(examples): Update flower-authentication example** ([#6709](https://github.com/adap/flower/pull/6709))
-- **refactor(examples): Make examples compatible with FDS 0.6.0** ([#6545](https://github.com/adap/flower/pull/6545))
-- **refactor(examples): Bump version examples** ([#6555](https://github.com/adap/flower/pull/6555))
-- **refactor(examples): Update examples for hub migration** ([#6697](https://github.com/adap/flower/pull/6697))
-
-### General improvements
-- **feat(framework): Add utm to fs26 link** ([#6595](https://github.com/adap/flower/pull/6595))
-- **fix(:skip): Remove PyPy from comments** ([#6716](https://github.com/adap/flower/pull/6716))
-- **refactor(:skip): Bump dev versions to** `v1.27.0` ([#6540](https://github.com/adap/flower/pull/6540))
-- **fix(framework): Fix dev script** `update_changelog.py` **to avoid listing** `Copilot` **as a contributor** ([#6547](https://github.com/adap/flower/pull/6547))
-- **ci(:skip): Migrate devtool to uv** ([#6659](https://github.com/adap/flower/pull/6659))
-- **ci(framework): Add uv support** ([#6679](https://github.com/adap/flower/pull/6679))
-- **refactor(framework): Make alembic consider external sources and version locations** ([#6563](https://github.com/adap/flower/pull/6563))
-- **refactor(framework): Improve plugin selection for** `SuperExec` ([#6553](https://github.com/adap/flower/pull/6553))
-- **refactor(framework): Propagate backend name for simulations** ([#6650](https://github.com/adap/flower/pull/6650))
-- **refactor(framework): Move all** `inflatable` **modules from** `flwr.common` **to** `flwr.supercore.inflatable` ([#6643](https://github.com/adap/flower/pull/6643))
-- **refactor(framework): Rename** `inflatable.py` **to** `inflatable_object.py` ([#6642](https://github.com/adap/flower/pull/6642))
-- **refactor(framework): Perform** `paracelsus` **checks against external schema** ([#6616](https://github.com/adap/flower/pull/6616))
-- **fix(framework): Correct resolving of** `Click` **command executed** ([#6568](https://github.com/adap/flower/pull/6568))
-- **fix(framework): Exit simulation early if ray is missing** ([#6712](https://github.com/adap/flower/pull/6712))
-- **fix(framework): Set timeout in e2e heartbeat test for server app correctly** ([#6591](https://github.com/adap/flower/pull/6591))
-- **feat(framework): Define** `LinkState.get_run_info` ([#6634](https://github.com/adap/flower/pull/6634))
-- **feat(framework): Implement** `LinkState.get_run_info` ([#6637](https://github.com/adap/flower/pull/6637))
-- **refactor(framework): Drop** `LinkState.get_run` **and** `LinkState.get_run_ids` ([#6670](https://github.com/adap/flower/pull/6670))
-- **refactor(framework): Align log text with** `ListRuns` **method** ([#6724](https://github.com/adap/flower/pull/6724))
-- **fix(framework): Add retries around flwr ls in the test code to mitigate rare erroneous timing failures** ([#6602](https://github.com/adap/flower/pull/6602))
-
+  Removes the `flower-simulation` CLI entrypoint. With the introduction of Local SuperLink, this command is no longer needed.
 
 ### multi-federation
+
 - **refactor(framework): Update import external FederationManager** ([#6618](https://github.com/adap/flower/pull/6618))
 - **refactor(framework): Introduce** `Member` **protobuf message for federations** ([#6623](https://github.com/adap/flower/pull/6623))
 - **feat(framework): Implement** `flwr federation invite` **commands** ([#6707](https://github.com/adap/flower/pull/6707))
@@ -143,16 +82,6 @@ We would like to give our special thanks to all the contributors who made the ne
 - **feat(framework): Prepare invitation system** ([#6662](https://github.com/adap/flower/pull/6662))
 - **feat(framework): Introduce** `flwr federation add/remove-supernode` **commands** ([#6589](https://github.com/adap/flower/pull/6589))
 - **refactor(framework): Tweak** `flwr federation ls --federation` **view** ([#6726](https://github.com/adap/flower/pull/6726))
-
-
-
-### New doc release flow
-- **ci(framework): Add CI to dispatch docs release workflow to all release branches upon global config changes** ([#6610](https://github.com/adap/flower/pull/6610))
-- **ci(framework): Add CI for doc releasing** ([#6596](https://github.com/adap/flower/pull/6596))
-- **ci(framework): Remove and refactor old dev scripts for building framework docs** ([#6607](https://github.com/adap/flower/pull/6607))
-- **docs(framework): Separate shared doc config into** `conf_base.py` ([#6564](https://github.com/adap/flower/pull/6564))
-- **refactor(framework): Use updated URL in** `flwr_exit` ([#6609](https://github.com/adap/flower/pull/6609))
-- **ci(:skip): Disable framework docs building temporarily** ([#6569](https://github.com/adap/flower/pull/6569))
 
 ## v1.26.1 (2026-02-07)
 
