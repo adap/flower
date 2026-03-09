@@ -14,7 +14,7 @@ This will create a new directory called forest-monitoring-example with the follo
 
 ```bash
 forest-monitoring-example
-├── data
+├── data  # the data is not included in the FlowerHub repositroy but can be downloaded from https://zenodo.org/records/18929115; see below for further info
 │   ├── deployment
 │   │   ├── client_1_demo_data.npz
 │   │   └── client_2_demo_data.npz
@@ -41,8 +41,12 @@ pip install -e .
 > **Tip:** Your `pyproject.toml` file can define more than just the dependencies of your Flower app. You can also use it to specify hyperparameters for your runs and control which Flower Runtime is used. By default, it uses the Simulation Runtime, but you can switch to the Deployment Runtime when needed.
 > Learn more in the [TOML configuration guide](https://flower.ai/docs/framework/how-to-configure-pyproject-toml.html).
 
+## Demo data sets
+Demo data sets for simulation and deployment mode can be downloaded from the Zenodo repository: https://zenodo.org/records/18929115
+Save the demo_data.npz in the folder: `/forest-monitoring-example/data/simulation/` for running the app with the simulation engine. 
+
 # Run the App
-You can run your Flower App in both simulation and deployment mode without making changes to the code. If you are starting with Flower, we recommend you using the simulation mode as it requires fewer components to be launched manually. By default, flwr run will make use of the Simulation Engine.
+Once you downloaded the data from Zenodo and saved them, you can run your Flower App in both simulation and deployment mode without making changes to the code. If you are starting with Flower, we recommend you using the simulation mode as it requires fewer components to be launched manually. By default, flwr run will make use of the Simulation Engine.
 
 
 ## Run with the Simulation Engine
