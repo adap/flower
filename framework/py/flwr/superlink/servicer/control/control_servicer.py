@@ -285,7 +285,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         self, request: ListRunsRequest, context: grpc.ServicerContext
     ) -> ListRunsResponse:
         """Handle `flwr ls` command."""
-        log(INFO, "ControlServicer.List")
+        log(INFO, "ControlServicer.ListRuns")
         state = self.linkstate_factory.state()
 
         flwr_aid = _check_flwr_aid_exists(get_current_account_info().flwr_aid, context)
