@@ -78,6 +78,7 @@ redirects = {
     "quickstart-sklearn-tabular": "quickstart-sklearn.html",
     "xgboost-quickstart": "quickstart-xgboost.html",
     "tensorflow-privacy": "index.html",
+    "flower-authentication": "supernode-authentication.html",
 }
 
 
