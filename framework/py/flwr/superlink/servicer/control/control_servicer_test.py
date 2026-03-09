@@ -158,10 +158,10 @@ class TestControlServicer(unittest.TestCase):
                 "flwr.superlink.servicer.control.control_servicer.get_fab_config"
             ) as _,
             patch(
-                "flwr.superlink.servicer.control.control_servicer.get_fab_metadata"
-            ) as mock_get_fab_metadata,
+                "flwr.superlink.servicer.control.control_servicer.get_metadata_from_config"
+            ) as mock_get_metadata_from_config,
         ):
-            mock_get_fab_metadata.return_value = (fab_id, fab_version)
+            mock_get_metadata_from_config.return_value = (fab_id, fab_version)
             response = self.servicer.StartRun(request, Mock())
         runs = self.state.get_run_info(run_ids=[response.run_id])
         run_info = runs[0] if runs else None
@@ -192,15 +192,15 @@ class TestControlServicer(unittest.TestCase):
                 "flwr.superlink.servicer.control.control_servicer.get_fab_config"
             ) as mock_get_fab_config,
             patch(
-                "flwr.superlink.servicer.control.control_servicer.get_fab_metadata"
-            ) as mock_get_fab_metadata,
+                "flwr.superlink.servicer.control.control_servicer.get_metadata_from_config"
+            ) as mock_get_metadata_from_config,
         ):
             mock_get_fab_config.return_value = {
                 "tool": {
                     "flwr": {"app": {"config": {"train": {"lr": 0.1, "epochs": 1}}}}
                 }
             }
-            mock_get_fab_metadata.return_value = ("flwr/demo", "v1.0.0")
+            mock_get_metadata_from_config.return_value = ("flwr/demo", "v1.0.0")
             response = self.servicer.StartRun(request, Mock())
         runs = self.state.get_run_info(run_ids=[response.run_id])
         run_info = runs[0] if runs else None
@@ -230,14 +230,14 @@ class TestControlServicer(unittest.TestCase):
                 "flwr.superlink.servicer.control.control_servicer.get_fab_config"
             ) as mock_get_fab_config,
             patch(
-                "flwr.superlink.servicer.control.control_servicer.get_fab_metadata"
-            ) as mock_get_fab_metadata,
+                "flwr.superlink.servicer.control.control_servicer.get_metadata_from_config"
+            ) as mock_get_metadata_from_config,
             self.assertRaises(grpc.RpcError),
         ):
             mock_get_fab_config.return_value = {
                 "tool": {"flwr": {"app": {"config": {"train": {"lr": 0.1}}}}}
             }
-            mock_get_fab_metadata.return_value = ("flwr/demo", "v1.0.0")
+            mock_get_metadata_from_config.return_value = ("flwr/demo", "v1.0.0")
             self.servicer.StartRun(request, context)
 
         context.abort.assert_called_once()
