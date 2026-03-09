@@ -35,7 +35,7 @@ RUN_CONFIG_HELP_MESSAGE = CONFIG_HELP_MESSAGE.format(
     "run-config",
     " | --run-config <path/to/your/toml>",
     "[tool.flwr.app.config]",
-    " Alternatively, provide a TOML file containing overrides.",
+    " Alternatively, provide a TOML file containing key/value pair overrides.",
 )
 
 # The help message for `--federation-config` option
