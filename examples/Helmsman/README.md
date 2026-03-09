@@ -20,6 +20,8 @@ Decentralized Artificial Intelligence Research Lab, Eindhoven University of Tech
 [![arXiv](https://img.shields.io/badge/arXiv-2510.14512-B31B1B.svg?logo=arxiv&logoColor=white)](https://arxiv.org/abs/2510.14512)
 [![ICLR 2026](https://img.shields.io/badge/ICLR%202026-Accepted-003087.svg)](https://iclr.cc/)
 [![Project Page](https://img.shields.io/badge/Project%20Page-Online-brightgreen)](https://haoyuan-l.github.io/helmsman-web/)
+[![Flower](https://img.shields.io/badge/Flower-1.20.0-pink.svg)](https://flower.ai)
+[![flwr-datasets](https://img.shields.io/badge/flwr--datasets-0.5.0-blue.svg)](https://flower.ai/docs/datasets/)
 
 </div>
 
@@ -36,6 +38,8 @@ Decentralized Artificial Intelligence Research Lab, Eindhoven University of Tech
 
 This repository hosts the official implementation of the paper **"Helmsman: Autonomous Synthesis of Federated Learning Systems via Collaborative LLM Agents"**, published at **ICLR 2026**.
 
+---
+
 ## 📖 Introduction
 
 Federated Learning (FL) holds immense promise for privacy-centric collaborative AI, yet its practical deployment remains a complex engineering challenge. Designing an effective FL system requires navigating a combinatorial design space defined by statistical heterogeneity, system constraints, and shifting task objectives. To date, this process has been a manual, labor-intensive effort led by domain experts, resulting in bespoke solutions that are often brittle in the face of real-world dynamics.
@@ -47,6 +51,8 @@ To bridge this gap, we introduce **Helmsman**, a multi-agent system designed to 
 * **End-to-End Synthesis**: We develop **Helmsman**, an agentic framework that translates high-level specifications into deployable FL systems through three collaborative phases: *Interactive Planning*, *Modular Coding*, and *Autonomous Evaluation*.
 * **Novel Benchmark**: We introduce **AgentFL-Bench**, a rigorous benchmark comprising 16 diverse tasks across 5 research areas, designed to evaluate the system-level generation capabilities of agentic systems.
 * **SOTA Performance**: Extensive experiments demonstrate that Helmsman-generated solutions achieve performance competitive with, and often exceeding, established hand-crafted FL baselines.
+
+---
 
 ## 🏗️ System Architecture
 
@@ -61,6 +67,7 @@ A **Supervisor Agent** decomposes the plan into a modular blueprint (*Task, Clie
 ### 3. Autonomous Refinement
 To guarantee robustness, the system runs a closed-loop **Flower simulation**. An **Evaluator Agent** diagnoses runtime and semantic failures, triggering a **Debugger Agent** to iteratively patch the code until the system is certified as fully executable and high-performing.
 
+---
 
 ## ⚙️ Installation
 
@@ -74,8 +81,9 @@ We recommend using [Miniconda](https://docs.conda.io/en/latest/miniconda.html) t
 
 ```bash
 # Download and install Miniconda
-wget [https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh](https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh)
-bash Miniconda3-latest-Linux-x86_64.sh source ~/.bashrc
+wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+bash Miniconda3-latest-Linux-x86_64.sh
+source ~/.bashrc
 
 # Create and activate the environment
 conda create --name agenticfl python=3.12
@@ -83,15 +91,21 @@ conda activate agenticfl
 ```
 
 ### 2. Install Core FL Dependencies
-Install PyTorch and the Flower (Flwr) federated learning framework.
+
+Helmsman generates FL systems built on the following pinned framework versions:
+
+| Package | Version | Role |
+| :--- | :---: | :--- |
+| [`flwr[simulation]`](https://flower.ai) | **1.20.0** | Federated learning framework and simulation engine |
+| [`flwr-datasets[vision]`](https://flower.ai/docs/datasets/) | **0.5.0** | Federated dataset loading and partitioning |
+
 ```bash
 # Install PyTorch (CUDA 12.9)
-pip3 install torch torchvision torchaudio --index-url [https://download.pytorch.org/whl/cu129](https://download.pytorch.org/whl/cu129)
+pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu129
 
-# Install Flower framework and vision datasets
-python -m pip install flwr
-python -m pip install "flwr[simulation]"
-python -m pip install "flwr-datasets[vision]"
+# Install Flower framework and datasets at the pinned versions
+pip install "flwr[simulation]==1.20.0"
+pip install "flwr-datasets[vision]==0.5.0"
 
 # Audio processing support
 pip install librosa
@@ -111,11 +125,13 @@ pip install -U langgraph
 pip install huggingface-hub
 ```
 
+---
+
 ## 🔑 API Configuration
 
 Helmsman requires API keys from various LLM providers. We recommend using a `.env` file to manage your keys securely.
 
-**1. Create a `.env` file in the project root directory**
+**1. Create a `.env` file in the project root directory.**
 
 **2. Edit `.env` and add your API keys:**
 
@@ -131,18 +147,18 @@ COHERE_API_KEY=your_cohere_api_key_here
 TAVILY_API_KEY=your_tavily_api_key_here
 ```
 
+---
+
 ## 🚀 Usage
 
-To start Helmsman, execute the main script. The system will prompt you for the necessary API keys (OpenAI, Anthropic, Google, etc.) if they are not already set in your environment variables.
+To start Helmsman, execute the main script. The system will prompt you to select models and confirm API keys.
 
 ```bash
 python agenticFL_workflow.py
 ```
 
-## 🔄 Workflow
-
 ### 1. API Setup
-Enter your Models and API keys when prompted.
+Select your LLM models and confirm API keys when prompted.
 
 ### 2. Input Query
 Provide a natural language description of your FL experiment when asked.
@@ -152,16 +168,109 @@ Provide a natural language description of your FL experiment when asked.
 > "I need to deploy a personalized handwriting recognition app across 15 mobile devices. Each client holds FEMNIST data from individual users with unique writing styles. Help me build a personalized federated learning framework that balances global knowledge with local user adaptation for a CNN model, evaluating performance by average client test accuracy."
 
 ### 3. Plan Approval
-The agents will generate a research plan. Review it and type `yes` to proceed or provide feedback to refine it.
+The agents will generate a research plan. Review it and type `yes` to proceed, or provide feedback to refine it.
 
 ### 4. Auto-Coding
-Helmsman will generate the code, run unit tests, and execute a simulation.
+Helmsman will generate the code, run module-level tests, execute a simulation, and package the result.
 
 ### 5. Results
-Upon success, the generated FL system will be available in the `fl_codebase/` directory, and you can run it independently:
-```bash
-python fl_codebase/run.py
+Upon success, the generated FL system is written to `fl_codebase/`. See below for how to run it.
+
+---
+
+## 📁 Generated Codebase Structure
+
+After a successful run, Helmsman produces a self-contained, standards-compliant FL project at `fl_codebase/`:
+
 ```
+fl_codebase/
+├── application/
+│   ├── __init__.py       # Package marker (auto-generated)
+│   ├── client_app.py     # FL client definition (FlowerClient + ClientApp)
+│   ├── server_app.py     # FL server configuration (ServerApp)
+│   ├── strategy.py       # Custom aggregation strategy
+│   ├── task.py           # Model architecture, data loading, train/test functions
+│   └── run.py            # Simulation entry-point for standalone execution
+└── pyproject.toml        # Flower project config (CLI entry-points + hyperparameters)
+```
+
+The `application/` directory is a valid Python package and `pyproject.toml` declares the Flower CLI entry-points, federation topology, and training hyperparameters. This dual structure means the generated system supports **two independent execution modes** with no manual edits required.
+
+---
+
+## ▶️ Running the Generated FL System
+
+### Option 1 — Flower CLI
+
+The standard Flower deployment path. The Flower CLI reads `pyproject.toml` to locate the `ClientApp` and `ServerApp`, resolve the federation topology, and apply all hyperparameters.
+
+```bash
+cd fl_codebase/
+flwr run .
+```
+
+This mode is recommended for production use, reproducible benchmarking, or multi-machine federation. Training hyperparameters such as number of rounds, fraction of clients evaluated, local epochs, and batch size can be adjusted directly in `pyproject.toml` under `[tool.flwr.app.config]` — no Python edits needed.
+
+**Example `pyproject.toml` structure generated by Helmsman:**
+
+```toml
+[project]
+name = "fl-codebase"
+version = "1.0.0"
+description = "Federated Learning system generated by Helmsman"
+license = "Apache-2.0"
+dependencies = [
+    "flwr[simulation]>=1.20.0",
+    "flwr-datasets[vision]>=0.5.0",
+    "torch>=2.0.0",
+    "torchvision>=0.15.0",
+]
+
+[tool.flwr.app]
+publisher = "helmsman"
+
+[tool.flwr.app.components]
+serverapp = "application.server_app:server_app"
+clientapp = "application.client_app:client_app"
+
+[tool.flwr.app.config]
+num-server-rounds = 10
+fraction-evaluate = 0.5
+local-epochs = 1
+batch-size = 32
+
+[tool.flwr.federations]
+default = "local-simulation"
+
+[tool.flwr.federations.local-simulation]
+options.num-supernodes = 15
+```
+
+### Option 2 — Python Simulation Engine
+
+A self-contained script mode ideal for **Google Colab**, **Jupyter notebooks**, and local experimentation — no Flower CLI installation required.
+
+```bash
+# From the project root
+python fl_codebase/application/run.py
+
+# Or from inside fl_codebase/
+cd fl_codebase/
+python application/run.py
+```
+
+`run.py` uses `flwr.simulation.run_simulation()` internally and resolves all imports automatically, so it works correctly regardless of the working directory.
+
+### Compatibility Summary
+
+| Mode | Command | Best For |
+| :--- | :--- | :--- |
+| **Flower CLI** | `flwr run .` (from `fl_codebase/`) | Production, benchmarking, multi-machine federation |
+| **Python script** | `python application/run.py` | Google Colab, Jupyter, quick local experiments |
+
+> **Note:** Both modes execute the exact same code in `application/`. No modifications to any source file are needed to switch between them.
+
+---
 
 ## 📈 Key Results
 
@@ -182,9 +291,11 @@ Helmsman proves capable of solving complex, compound challenges that require sop
 * **Personalization**: In handwriting recognition (FEMNIST) and distribution skew tasks, Helmsman synthesizes solutions that effectively balance global knowledge with local adaptation, rivaling specialized personalization methods like FedPer.
 * **Federated Continual Learning (FCL)**: Notably, in the challenging Split-CIFAR100 task (Q16), Helmsman synthesized a solution that **substantially outperformed** the specialized *FedWeIT* baseline (**50.95%** vs. 29.45%), demonstrating exceptional capability in mitigating catastrophic forgetting.
 
+---
+
 ## 🏆 Evaluation & Performance
 
-We evaluated Helmsman against state-of-the-art code synthesis pipelines—**Codex** (powered by GPT-5.1) and **Claude Code** (powered by Claude Sonnet 4.5)—across all 16 tasks in the **AgentFL-Bench**.
+We evaluated Helmsman against state-of-the-art code synthesis pipelines — **Codex** (powered by GPT-5.1) and **Claude Code** (powered by Claude Sonnet 4.5) — across all 16 tasks in **AgentFL-Bench**.
 
 **Key Findings:**
 * ✅ **100% Success Rate**: Helmsman successfully synthesized valid, executable FL systems for every query, whereas standard coding agents failed more than half the time.
@@ -201,6 +312,8 @@ We evaluated Helmsman against state-of-the-art code synthesis pipelines—**Code
 | Codex | GPT-5.1 | 37.5% | $0.93 | 2,455k | 909 |
 
 > **Note**: *Success Rate* indicates the percentage of tasks where the system produced fully executable code that passed both runtime and semantic verification. *Avg Cost* and *Tokens* represent the resources required to generate one complete solution.
+
+---
 
 ## 📚 Citation
 
