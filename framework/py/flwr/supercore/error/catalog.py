@@ -36,7 +36,7 @@ API_ERROR_MAP: Final[dict[int, ApiErrorSpec]] = {
         status_code=StatusCode.UNIMPLEMENTED,
         public_message="SuperLink does not support federation management.",
     ),
-    ApiErrorCode.FEDERATION_NOT_FOUND_OR_NO_PERMIT: ApiErrorSpec(
+    ApiErrorCode.FEDERATION_NOT_FOUND_OR_NO_PERMISSION: ApiErrorSpec(
         status_code=StatusCode.NOT_FOUND,
         public_message="Federation not found or you do not have permission "
         "to perform this action.",
