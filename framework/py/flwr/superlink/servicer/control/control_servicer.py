@@ -26,7 +26,12 @@ import grpc
 import requests
 
 from flwr.common import Context, RecordDict, now
-from flwr.common.config import flatten_dict, fuse_dicts, get_fab_config, get_metadata_from_config
+from flwr.common.config import (
+    flatten_dict,
+    fuse_dicts,
+    get_fab_config,
+    get_metadata_from_config,
+)
 from flwr.common.constant import (
     FAB_MAX_SIZE,
     FEDERATION_NOT_FOUND_MESSAGE,
