@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "federated_pft_classification"
 version = "1.0.0"
-description = "Federated Learning with XGBoost and Flower (Comprehensive Example)"
+description = "Federated classification using XG-Boost to predict lung function categories based on pulmonary function tests, specifically spirometry. Data cleaning and target generation procedures are based off of University of Toronto Pulmonary Function Test Guidelines."
 license = "Apache-2.0"
 dependencies = [
     "flwr[simulation]>=1.26.1",
@@ -20,7 +20,7 @@ dependencies = [
 packages = ["."]
 
 [tool.flwr.app]
-publisher = "flwrlabs"
+publisher = "chongsource"
 
 [tool.flwr.app.components]
 serverapp = "federated_pft_classification.server_app:app"
