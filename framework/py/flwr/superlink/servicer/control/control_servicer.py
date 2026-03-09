@@ -719,36 +719,80 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         self, request: CreateInvitationRequest, context: grpc.ServicerContext
     ) -> CreateInvitationResponse:
         """Create an invitation."""
-        log(INFO, "ControlServicer.CreateInvitation")
-        raise NotImplementedError("CreateInvitation is not implemented.")
+        log(INFO, rpc_name := self.CreateInvitation.__qualname__)
+
+        state = self.linkstate_factory.state()
+
+        with rpc_error_translator(context, rpc_name):
+            state.federation_manager.create_invitation(
+                flwr_aid=_get_flwr_aid(context),
+                federation=request.federation_name,
+                invitee_account_name=request.invitee_account_name,
+            )
+        return CreateInvitationResponse()
 
     def ListInvitations(
         self, request: ListInvitationsRequest, context: grpc.ServicerContext
     ) -> ListInvitationsResponse:
         """List invitations."""
-        log(INFO, "ControlServicer.ListInvitations")
-        raise NotImplementedError("ListInvitations is not implemented.")
+        log(INFO, rpc_name := self.ListInvitations.__qualname__)
+
+        state = self.linkstate_factory.state()
+
+        with rpc_error_translator(context, rpc_name):
+            created_invitations, received_invitations = (
+                state.federation_manager.list_invitations(_get_flwr_aid(context))
+            )
+        return ListInvitationsResponse(
+            created_invitations=created_invitations,
+            received_invitations=received_invitations,
+        )
 
     def AcceptInvitation(
         self, request: AcceptInvitationRequest, context: grpc.ServicerContext
     ) -> AcceptInvitationResponse:
         """Accept an invitation."""
-        log(INFO, "ControlServicer.AcceptInvitation")
-        raise NotImplementedError("AcceptInvitation is not implemented.")
+        log(INFO, rpc_name := self.AcceptInvitation.__qualname__)
+
+        state = self.linkstate_factory.state()
+
+        with rpc_error_translator(context, rpc_name):
+            state.federation_manager.accept_invitation(
+                flwr_aid=_get_flwr_aid(context),
+                federation=request.federation_name,
+            )
+        return AcceptInvitationResponse()
 
     def RejectInvitation(
         self, request: RejectInvitationRequest, context: grpc.ServicerContext
     ) -> RejectInvitationResponse:
         """Reject an invitation."""
-        log(INFO, "ControlServicer.RejectInvitation")
-        raise NotImplementedError("RejectInvitation is not implemented.")
+        log(INFO, rpc_name := self.RejectInvitation.__qualname__)
+
+        state = self.linkstate_factory.state()
+
+        with rpc_error_translator(context, rpc_name):
+            state.federation_manager.reject_invitation(
+                flwr_aid=_get_flwr_aid(context),
+                federation=request.federation_name,
+            )
+        return RejectInvitationResponse()
 
     def RevokeInvitation(
         self, request: RevokeInvitationRequest, context: grpc.ServicerContext
     ) -> RevokeInvitationResponse:
         """Revoke an invitation."""
-        log(INFO, "ControlServicer.RevokeInvitation")
-        raise NotImplementedError("RevokeInvitation is not implemented.")
+        log(INFO, rpc_name := self.RevokeInvitation.__qualname__)
+
+        state = self.linkstate_factory.state()
+
+        with rpc_error_translator(context, rpc_name):
+            state.federation_manager.revoke_invitation(
+                flwr_aid=_get_flwr_aid(context),
+                federation=request.federation_name,
+                invitee_account_name=request.invitee_account_name,
+            )
+        return RevokeInvitationResponse()
 
 
 def _validate_federation_and_node_in_request(
