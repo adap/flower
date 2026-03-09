@@ -164,12 +164,11 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         federation_options = config_record_from_proto(request.federation_options)
 
         try:
-            # Validate user config overrides matches keys in FAB config when fused
-            fab_config = get_fab_config(fab_file)["tool"]["flwr"]["app"].get(
-                "config", {}
+            # Validate user config overrides matches keys in run config in FAB
+            run_config = flatten_dict(
+                get_fab_config(fab_file)["tool"]["flwr"]["app"].get("config", {})
             )
-            flat_fab_config = flatten_dict(fab_config)
-            fuse_dicts(flat_fab_config, override_config)
+            _ = fuse_dicts(run_config, override_config)
 
             # Check that num-supernodes is set
             if self.is_simulation and "num-supernodes" not in federation_options:
