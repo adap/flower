@@ -113,7 +113,7 @@ class NoOpFederationManager(FederationManager):
         )
 
     def create_invitation(
-        self, flwr_aid: str, federation: str, invitee_flwr_aid: str
+        self, flwr_aid: str, federation: str, invitee_account_name: str
     ) -> None:
         """Create an invitation for an account to join a federation."""
         raise NotImplementedError(
@@ -141,7 +141,7 @@ class NoOpFederationManager(FederationManager):
         )
 
     def revoke_invitation(
-        self, flwr_aid: str, federation: str, invitee_flwr_aid: str
+        self, flwr_aid: str, federation: str, invitee_account_name: str
     ) -> None:
         """Revoke a pending invitation."""
         raise NotImplementedError(
