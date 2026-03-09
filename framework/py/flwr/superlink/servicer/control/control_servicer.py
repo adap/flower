@@ -40,7 +40,6 @@ from flwr.common.constant import (
     PUBLIC_KEY_NOT_VALID,
     PULL_UNFINISHED_RUN_MESSAGE,
     RUN_ID_NOT_FOUND_MESSAGE,
-    SUPERLINK_DOES_NOT_SUPPORT_FED_MANAGEMENT_MESSAGE,
     SUPERLINK_NODE_ID,
     TRANSPORT_TYPE_GRPC_ADAPTER,
     Status,
@@ -102,6 +101,7 @@ from flwr.proto.federation_pb2 import Federation  # pylint: disable=E0611
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
 from flwr.supercore.constant import NOOP_FEDERATION, PLATFORM_API_URL
+from flwr.supercore.error import rpc_error_translator
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStoreFactory
 from flwr.supercore.primitives.asymmetric import bytes_to_public_key, uses_nist_ec_curve
@@ -621,7 +621,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         self, request: CreateFederationRequest, context: grpc.ServicerContext
     ) -> CreateFederationResponse:
         """Create a new Federation."""
-        log(INFO, "ControlServicer.CreateFederation")
+        log(INFO, rpc_name := self.CreateFederation.__qualname__)
 
         # Check that a federation is specified
         if not request.federation_name:
@@ -640,21 +640,12 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         federation_name = f"@{account_info.account_name}/{request.federation_name}"
 
         # Create federation
-        try:
+        with rpc_error_translator(context, rpc_name):
             federation = state.federation_manager.create_federation(
                 name=federation_name,
                 description=request.description,
                 flwr_aid=flwr_aid,
             )
-        except NotImplementedError as e:
-            log(ERROR, "Could not create federation: %s", str(e))
-            context.abort(
-                grpc.StatusCode.FAILED_PRECONDITION,
-                SUPERLINK_DOES_NOT_SUPPORT_FED_MANAGEMENT_MESSAGE,
-            )
-        except ValueError as e:
-            log(ERROR, "Could not create federation: %s", str(e))
-            context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(e))
 
         return CreateFederationResponse(
             federation=Federation(
@@ -668,7 +659,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         self, request: ArchiveFederationRequest, context: grpc.ServicerContext
     ) -> ArchiveFederationResponse:
         """Archive a Federation."""
-        log(INFO, "ControlServicer.ArchiveFederation")
+        log(INFO, rpc_name := self.ArchiveFederation.__qualname__)
 
         # Check that a federation is specified
         if not request.federation_name:
@@ -684,20 +675,11 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
 
         # Archive federation
-        try:
+        with rpc_error_translator(context, rpc_name):
             state.federation_manager.archive_federation(
                 flwr_aid=flwr_aid,
                 name=request.federation_name,
             )
-        except NotImplementedError as e:
-            log(ERROR, "Could not archive federation: %s", str(e))
-            context.abort(
-                grpc.StatusCode.FAILED_PRECONDITION,
-                SUPERLINK_DOES_NOT_SUPPORT_FED_MANAGEMENT_MESSAGE,
-            )
-        except ValueError as e:
-            log(ERROR, "Could not archive federation: %s", str(e))
-            context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(e))
 
         return ArchiveFederationResponse()
 
@@ -705,7 +687,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         self, request: AddNodeToFederationRequest, context: grpc.ServicerContext
     ) -> AddNodeToFederationResponse:
         """Add a node to a Federation."""
-        log(INFO, "ControlServicer.AddNodeToFederation")
+        log(INFO, rpc_name := self.AddNodeToFederation.__qualname__)
 
         # Init link state
         state = self.linkstate_factory.state()
@@ -719,17 +701,11 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         )
 
         # Add node to the federation
-        try:
+        with rpc_error_translator(context, rpc_name):
             state.federation_manager.add_supernode(
                 flwr_aid=flwr_aid,
                 federation=request.federation_name,
                 node_id=request.node_id,
-            )
-        except NotImplementedError as e:
-            log(ERROR, "Could not add node to federation: %s", str(e))
-            context.abort(
-                grpc.StatusCode.FAILED_PRECONDITION,
-                SUPERLINK_DOES_NOT_SUPPORT_FED_MANAGEMENT_MESSAGE,
             )
 
         return AddNodeToFederationResponse()
@@ -738,7 +714,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         self, request: RemoveNodeFromFederationRequest, context: grpc.ServicerContext
     ) -> RemoveNodeFromFederationResponse:
         """Remove a node from a Federation."""
-        log(INFO, "ControlServicer.RemoveNodeFromFederation")
+        log(INFO, rpc_name := self.RemoveNodeFromFederation.__qualname__)
 
         # Init link state
         state = self.linkstate_factory.state()
@@ -752,17 +728,11 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         )
 
         # Remove node from the federation
-        try:
+        with rpc_error_translator(context, rpc_name):
             state.federation_manager.remove_supernode(
                 flwr_aid=flwr_aid,
                 federation=request.federation_name,
                 node_id=request.node_id,
-            )
-        except NotImplementedError as e:
-            log(ERROR, "Could not remove node from federation: %s", str(e))
-            context.abort(
-                grpc.StatusCode.FAILED_PRECONDITION,
-                SUPERLINK_DOES_NOT_SUPPORT_FED_MANAGEMENT_MESSAGE,
             )
 
         return RemoveNodeFromFederationResponse()

@@ -23,8 +23,19 @@ from flwr.proto.federation_pb2 import (  # pylint: disable=E0611
     Member,
 )
 from flwr.supercore.constant import NOOP_FEDERATION, NOOP_FEDERATION_DESCRIPTION
+from flwr.supercore.error import ApiErrorCode, FlowerError
 
 from .federation_manager import FederationManager
+
+
+class NoOpFederationManagerError(FlowerError):
+    """Error raised by NoOpFederationManager."""
+
+    def __init__(self, message: str):
+        super().__init__(
+            message=message,
+            code=ApiErrorCode.NO_FEDERATION_MANAGEMENT_SUPPORT,
+        )
 
 
 class NoOpFederationManager(FederationManager):
