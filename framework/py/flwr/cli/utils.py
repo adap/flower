@@ -384,10 +384,8 @@ def flwr_cli_grpc_exc_handler(  # pylint: disable=too-many-branches
 ) -> Iterator[None]:
     """Context manager to handle specific gRPC errors.
 
-    Catches grpc.RpcError exceptions with UNAUTHENTICATED, UNIMPLEMENTED,
-    UNAVAILABLE, PERMISSION_DENIED, NOT_FOUND, and FAILED_PRECONDITION statuses,
-    informs the user, and exits the application. All other exceptions will be
-    allowed to escape.
+    Catches grpc.RpcError exceptions and translates them into user-friendly messages
+    based on the error code and details.
 
     Parameters
     ----------
@@ -403,9 +401,8 @@ def flwr_cli_grpc_exc_handler(  # pylint: disable=too-many-branches
     Raises
     ------
     click.ClickException
-        On handled gRPC error statuses with appropriate exit code.
-    grpc.RpcError
-        For unhandled gRPC error statuses.
+        For handled gRPC errors, with user-friendly messages. Or raw gRPC error details
+        will be shown.
     """
     try:
         yield
@@ -426,14 +423,7 @@ def flwr_cli_grpc_exc_handler(  # pylint: disable=too-many-branches
                 raise click.ClickException(
                     "The SuperLink does not support `flwr pull` command."
                 ) from None
-            raise click.ClickException(
-                "The SuperLink cannot process this request. Please verify that "
-                "you set the address to its Control API endpoint correctly in your "
-                "SuperLink connection in your Flower Configuration file. You may use "
-                "`flwr config list` to see its location in the file system. "
-                "Additonally, ensure that the Flower versions used by the CLI and "
-                "SuperLink are compatible."
-            ) from None
+            raise click.ClickException(e.details()) from None  # pylint: disable=E1101
         if e.code() == grpc.StatusCode.PERMISSION_DENIED:
             # pylint: disable-next=E1101
             raise click.ClickException(f"Permission denied.\n{e.details()}") from None
@@ -479,9 +469,8 @@ def flwr_cli_grpc_exc_handler(  # pylint: disable=too-many-branches
                     "Please verify the federation name and try again."
                 ) from None
 
-            # Log details from grpc error directly
-            raise click.ClickException(f"{e.details()}") from None
-        raise
+        # Log details from grpc error directly
+        raise click.ClickException(f"{e.details()}") from None
 
 
 def build_pathspec(patterns: Iterable[str]) -> pathspec.PathSpec:
