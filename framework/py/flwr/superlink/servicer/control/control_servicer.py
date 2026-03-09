@@ -27,6 +27,7 @@ import requests
 
 from flwr.cli.config_utils import get_fab_metadata
 from flwr.common import Context, RecordDict, now
+from flwr.common.config import flatten_dict, fuse_dicts, get_fab_config
 from flwr.common.constant import (
     FAB_MAX_SIZE,
     FEDERATION_NOT_FOUND_MESSAGE,
@@ -163,6 +164,13 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         federation_options = config_record_from_proto(request.federation_options)
 
         try:
+            # Validate user config overrides matches keys in FAB config when fused
+            fab_config = get_fab_config(fab_file)["tool"]["flwr"]["app"].get(
+                "config", {}
+            )
+            flat_fab_config = flatten_dict(fab_config)
+            fuse_dicts(flat_fab_config, override_config)
+
             # Check that num-supernodes is set
             if self.is_simulation and "num-supernodes" not in federation_options:
                 raise ValueError(
