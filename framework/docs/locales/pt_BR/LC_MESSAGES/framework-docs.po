@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-05 00:11+0000\n"
+"POT-Creation-Date: 2026-03-07 00:11+0000\n"
 "PO-Revision-Date: 2024-05-25 11:09+0000\n"
 "Last-Translator: Gustavo Bertoli <gubertoli@gmail.com>\n"
 "Language: pt_BR\n"
@@ -2839,7 +2839,7 @@ msgstr ""
 #: ../../source/docker/tutorial-quickstart-docker-compose.rst:250
 #: ../../source/docker/tutorial-quickstart-docker.rst:326
 #: ../../source/how-to-authenticate-accounts.rst:96
-#: ../../source/how-to-enable-tls-connections.rst:127
+#: ../../source/how-to-enable-tls-connections.rst:128
 #: ../../source/how-to-run-flower-on-azure.rst:230
 #: ../../source/how-to-run-flower-on-gcp.rst:624
 #: ../../source/how-to-run-flower-on-red-hat-openshift.rst:678
@@ -9266,23 +9266,23 @@ msgstr ""
 #: ../../source/how-to-authenticate-supernodes.rst:53
 msgid ""
 "Checkout the `Flower Authentication "
-"<https://github.com/adap/flower/tree/main/examples/flower-"
+"<https://github.com/adap/flower/tree/main/examples/supernode-"
 "authentication>`_ example for a complete self-contained example on how to"
 " setup TLS and node authentication."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:59
+#: ../../source/how-to-authenticate-supernodes.rst:60
 msgid "Generate authentication keys"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:61
+#: ../../source/how-to-authenticate-supernodes.rst:62
 msgid ""
 "To establish an authentication mechanism by which only authorized "
 "SuperNodes can connect to a running SuperLink, a set of key pairs for "
 "both SuperLink and SuperNodes need to be created."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:65
+#: ../../source/how-to-authenticate-supernodes.rst:66
 msgid ""
 "We have prepared a script that can be used to generate such set of keys. "
 "While using these are fine for prototyping, we advice you to follow the "
@@ -9292,7 +9292,7 @@ msgid ""
 " at the top of this guide."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:77
+#: ../../source/how-to-authenticate-supernodes.rst:78
 msgid ""
 "This will generate the keys in a new ``keys/`` directory. By default it "
 "creates a key pair for the SuperLink and one for each SuperNode. Copy "
@@ -9300,11 +9300,11 @@ msgid ""
 " earlier via ``flwr new``)."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:83
+#: ../../source/how-to-authenticate-supernodes.rst:84
 msgid "Enable node authentication in SuperLink"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:85
+#: ../../source/how-to-authenticate-supernodes.rst:86
 msgid ""
 "To launch a SuperLink with SuperNode authentication enabled, you need to "
 "provide three aditional files in addition to the certificates needed for "
@@ -9312,19 +9312,19 @@ msgid ""
 "enabled in the presence of TLS."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:100
+#: ../../source/how-to-authenticate-supernodes.rst:101
 msgid ""
 "``--enable-supernode-auth``: Enables SuperNode authentication therefore "
 "only Supernodes that are first register on the SuperLink will be able to "
 "establish a connection."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:104
+#: ../../source/how-to-authenticate-supernodes.rst:105
 #, fuzzy
 msgid "Register SuperNodes"
 msgstr "Construindo a imagem do servidor"
 
-#: ../../source/how-to-authenticate-supernodes.rst:106
+#: ../../source/how-to-authenticate-supernodes.rst:107
 msgid ""
 "Once your SuperLink is running, the next step is to register the "
 "SuperNodes that will be allowed to connect to it. This process is handled"
@@ -9333,70 +9333,70 @@ msgid ""
 "SuperLink."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:111
+#: ../../source/how-to-authenticate-supernodes.rst:112
 msgid "Here's how this looks in code:"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:118
+#: ../../source/how-to-authenticate-supernodes.rst:119
 msgid "Next, let's register the second SuperNode as well:"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:124
+#: ../../source/how-to-authenticate-supernodes.rst:125
 msgid "You can list the registered SuperNodes using the following command:"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:131
+#: ../../source/how-to-authenticate-supernodes.rst:132
 msgid ""
 "This will display the IDs of the SuperNodes you just registered as well "
 "as their status. You should see a table similar to the following:"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:144
+#: ../../source/how-to-authenticate-supernodes.rst:145
 msgid ""
 "The status of the SuperNodes will change after they connect to the "
 "SuperLink. Let's proceed and laucnh the SuperNodes."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:149
+#: ../../source/how-to-authenticate-supernodes.rst:150
 msgid "Enable node authentication in SuperNode"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:151
+#: ../../source/how-to-authenticate-supernodes.rst:152
 msgid ""
 "Connecting a SuperNode to a SuperLink that has node authentication "
 "enabled requires passing one additional argument (i.e. the private key of"
 " the SuperNode) in addition to the TLS certificate."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:167
+#: ../../source/how-to-authenticate-supernodes.rst:168
 msgid "``--auth-supernode-private-key``: the private key of this SuperNode."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:169
+#: ../../source/how-to-authenticate-supernodes.rst:170
 msgid ""
 "Follow the same procedure to launch the second SuperNode by passing its "
 "corresponding private key:"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:182
+#: ../../source/how-to-authenticate-supernodes.rst:183
 msgid ""
 "After connecting both SuperNodes, you can check the status of the "
 "SuperNodes again. You will notice their status is now ``online``:"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:199
+#: ../../source/how-to-authenticate-supernodes.rst:200
 #, fuzzy
 msgid "Unregister SuperNodes"
 msgstr "Construindo a imagem do servidor"
 
-#: ../../source/how-to-authenticate-supernodes.rst:203
+#: ../../source/how-to-authenticate-supernodes.rst:204
 msgid ""
 "This is a destructive operation. Unregistering a SuperNode is permanent "
 "and cannot be undone. If you wish to connect a SuperNode again, a new key"
 " pair is needed."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:206
+#: ../../source/how-to-authenticate-supernodes.rst:207
 msgid ""
 "At anypoint you can unregister a SuperNode from the SuperLink (even if it"
 " has never connected). This will prevent the SuperNode from making future"
@@ -9406,13 +9406,13 @@ msgid ""
 "|flower_cli_supernode_link|_ as follows:"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:217
+#: ../../source/how-to-authenticate-supernodes.rst:218
 msgid ""
 "The above command unregisters the first SuperNode. You can verify this by"
 " listing the SuperNodes again:"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:231
+#: ../../source/how-to-authenticate-supernodes.rst:232
 msgid ""
 "If you pass the ``--verbose`` flag to the previous command you'll see "
 "that the status of the unregistered SuperNode has changed to "
@@ -9421,11 +9421,11 @@ msgid ""
 "wish to connect a second SuperNode a new EC key pair is needed.**"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:251
+#: ../../source/how-to-authenticate-supernodes.rst:252
 msgid "Security notice"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:253
+#: ../../source/how-to-authenticate-supernodes.rst:254
 msgid ""
 "The system's security relies on the credentials of the SuperLink and each"
 " SuperNode. Therefore, it is imperative to safeguard and safely store the"
@@ -9436,22 +9436,22 @@ msgid ""
 "methods."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:261
-#: ../../source/how-to-enable-tls-connections.rst:144
+#: ../../source/how-to-authenticate-supernodes.rst:262
+#: ../../source/how-to-enable-tls-connections.rst:145
 #: ../../source/how-to-use-built-in-mods.rst:175
 #: ../../source/tutorial-series-what-is-federated-learning.rst:297
 msgid "Conclusion"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:263
+#: ../../source/how-to-authenticate-supernodes.rst:264
 msgid ""
 "You should now have learned how to start a long-running Flower SuperLink "
 "and SuperNode with node authentication enabled. You should also know the "
 "significance of the private key and store it securely to minimize risks."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:269
-#: ../../source/how-to-enable-tls-connections.rst:154
+#: ../../source/how-to-authenticate-supernodes.rst:270
+#: ../../source/how-to-enable-tls-connections.rst:155
 msgid ""
 "Refer to the :doc:`docker/index` documentation to learn how to setup a "
 "federation where each component runs in its own Docker container. You can"
@@ -10142,18 +10142,18 @@ msgstr ""
 #: ../../source/how-to-enable-tls-connections.rst:21
 msgid ""
 "Checkout the `Flower Authentication "
-"<https://github.com/adap/flower/tree/main/examples/flower-"
+"<https://github.com/adap/flower/tree/main/examples/supernode-"
 "authentication>`_ example for a complete self-contained example on how to"
 " setup TLS and (optionally) node authentication. Check out the :doc:`how-"
 "to-authenticate-supernodes` guide to learn more about adding an "
 "authentication layer to SuperLink ↔ SuperNode connections."
 msgstr ""
 
-#: ../../source/how-to-enable-tls-connections.rst:29
+#: ../../source/how-to-enable-tls-connections.rst:30
 msgid "Certificates"
 msgstr ""
 
-#: ../../source/how-to-enable-tls-connections.rst:31
+#: ../../source/how-to-enable-tls-connections.rst:32
 msgid ""
 "Using TLS-enabled connections expects some certificates generated and "
 "passed when launching the SuperLink, the SuperNodes and when a user (e.g."
@@ -10161,7 +10161,7 @@ msgid ""
 "federation via the `flwr CLI <ref-api-cli.html>`_."
 msgstr ""
 
-#: ../../source/how-to-enable-tls-connections.rst:36
+#: ../../source/how-to-enable-tls-connections.rst:37
 msgid ""
 "We have prepared a script that can be used to generate such set of "
 "certificates. While using these are fine for prototyping, we advice you "
@@ -10171,14 +10171,14 @@ msgid ""
 " this guide."
 msgstr ""
 
-#: ../../source/how-to-enable-tls-connections.rst:47
+#: ../../source/how-to-enable-tls-connections.rst:48
 msgid ""
 "This will generate the TLS certificates in a new ``certificates/`` "
 "directory. Copy this directory into the directory of your app (e.g. a "
 "directory generated earlier via ``flwr new``)."
 msgstr ""
 
-#: ../../source/how-to-enable-tls-connections.rst:51
+#: ../../source/how-to-enable-tls-connections.rst:52
 msgid ""
 "The approach for generating TLS certificates in the context of this "
 "example can serve as an inspiration and starting point, but it should not"
@@ -10189,11 +10189,11 @@ msgid ""
 "generated using the scripts mentioned in this guide."
 msgstr ""
 
-#: ../../source/how-to-enable-tls-connections.rst:60
+#: ../../source/how-to-enable-tls-connections.rst:61
 msgid "Launching the SuperLink with TLS"
 msgstr ""
 
-#: ../../source/how-to-enable-tls-connections.rst:62
+#: ../../source/how-to-enable-tls-connections.rst:63
 msgid ""
 "This section describes how to launch a SuperLink that works on TLS-"
 "enabled connections. The code snippet below assumes the `certificates/` "
@@ -10203,7 +10203,7 @@ msgid ""
 "CA certificate, server certificate and server private key."
 msgstr ""
 
-#: ../../source/how-to-enable-tls-connections.rst:78
+#: ../../source/how-to-enable-tls-connections.rst:79
 msgid ""
 "``--ssl-ca-certfile``: Specify the location of the CA certificate file in"
 " your file. This file is a certificate that is used to verify the "
@@ -10224,11 +10224,11 @@ msgid ""
 "over the network."
 msgstr ""
 
-#: ../../source/how-to-enable-tls-connections.rst:84
+#: ../../source/how-to-enable-tls-connections.rst:85
 msgid "Connecting the SuperNodes with TLS"
 msgstr ""
 
-#: ../../source/how-to-enable-tls-connections.rst:86
+#: ../../source/how-to-enable-tls-connections.rst:87
 msgid ""
 "This section describes how to launch a SuperNode that works on TLS-"
 "enabled connections. The code snippet below assumes the `certificates/` "
@@ -10237,24 +10237,24 @@ msgid ""
 "replacing ``--insecure`` with ``--root-certificates``"
 msgstr ""
 
-#: ../../source/how-to-enable-tls-connections.rst:102
+#: ../../source/how-to-enable-tls-connections.rst:103
 msgid ""
 "``--root-certificates``:This specifies the location of the CA certificate"
 " file. The ``ca.crt`` file is used to verify the identity of the "
 "SuperLink."
 msgstr ""
 
-#: ../../source/how-to-enable-tls-connections.rst:104
+#: ../../source/how-to-enable-tls-connections.rst:105
 msgid ""
 "Follow the same procedure, i.e. replacing ``--insecure`` with ``--root-"
 "certificates``, to launch the second SuperNode."
 msgstr ""
 
-#: ../../source/how-to-enable-tls-connections.rst:118
+#: ../../source/how-to-enable-tls-connections.rst:119
 msgid "TLS-enabled Flower CLI"
 msgstr ""
 
-#: ../../source/how-to-enable-tls-connections.rst:120
+#: ../../source/how-to-enable-tls-connections.rst:121
 msgid ""
 "The `Flower CLI <ref-api-cli.html>`_ (e.g. ``flwr run`` command) is the "
 "way a user (e.g. a data scientist) can interact with a deployed "
@@ -10266,13 +10266,13 @@ msgid ""
 "certificate:"
 msgstr ""
 
-#: ../../source/how-to-enable-tls-connections.rst:135
+#: ../../source/how-to-enable-tls-connections.rst:136
 msgid ""
 "Note that the path to the ``root-certificates`` is relative to the root "
 "of the project. Now, you can run the example by executing ``flwr run``:"
 msgstr ""
 
-#: ../../source/how-to-enable-tls-connections.rst:146
+#: ../../source/how-to-enable-tls-connections.rst:147
 msgid ""
 "You should now have learned how to generate self-signed certificates "
 "using the given script, start an TLS-enabled server and have two clients "
@@ -10282,21 +10282,21 @@ msgid ""
 "enabled."
 msgstr ""
 
-#: ../../source/how-to-enable-tls-connections.rst:161
+#: ../../source/how-to-enable-tls-connections.rst:162
 msgid "Additional resources"
 msgstr ""
 
-#: ../../source/how-to-enable-tls-connections.rst:163
+#: ../../source/how-to-enable-tls-connections.rst:164
 msgid ""
 "These additional sources might be relevant if you would like to dive "
 "deeper into the topic of certificates:"
 msgstr ""
 
-#: ../../source/how-to-enable-tls-connections.rst:166
+#: ../../source/how-to-enable-tls-connections.rst:167
 msgid "`Let's Encrypt <https://letsencrypt.org/docs/>`_"
 msgstr ""
 
-#: ../../source/how-to-enable-tls-connections.rst:167
+#: ../../source/how-to-enable-tls-connections.rst:168
 msgid "`certbot <https://certbot.eff.org/>`_"
 msgstr ""
 
@@ -66795,5 +66795,26 @@ msgstr ""
 #~ ":py:class:`~flwr.common.record.metricrecord.MetricRecord` | "
 #~ ":py:class:`~flwr.common.record.configrecord.ConfigRecord`], "
 #~ ":py:class:`~flwr.common.inflatable.InflatableObject`"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Checkout the `Flower Authentication "
+#~ "<https://github.com/adap/flower/tree/main/examples/flower-"
+#~ "authentication>`_ example for a complete "
+#~ "self-contained example on how to "
+#~ "setup TLS and node authentication."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Checkout the `Flower Authentication "
+#~ "<https://github.com/adap/flower/tree/main/examples/flower-"
+#~ "authentication>`_ example for a complete "
+#~ "self-contained example on how to "
+#~ "setup TLS and (optionally) node "
+#~ "authentication. Check out the :doc:`how-"
+#~ "to-authenticate-supernodes` guide to learn"
+#~ " more about adding an authentication "
+#~ "layer to SuperLink ↔ SuperNode "
+#~ "connections."
 #~ msgstr ""
 

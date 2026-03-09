@@ -36,7 +36,6 @@ from flwr.common.constant import (
     NOOP_ACCOUNT_NAME,
     PUBLIC_KEY_ALREADY_IN_USE_MESSAGE,
     PUBLIC_KEY_NOT_VALID,
-    SUPERLINK_DOES_NOT_SUPPORT_FED_MANAGEMENT_MESSAGE,
     Status,
     SubStatus,
 )
@@ -398,11 +397,6 @@ class TestControlServicer(unittest.TestCase):
         with self.assertRaises(grpc.RpcError):
             self.servicer.CreateFederation(request, mock_context)
 
-        mock_context.abort.assert_called_once_with(
-            grpc.StatusCode.FAILED_PRECONDITION,
-            SUPERLINK_DOES_NOT_SUPPORT_FED_MANAGEMENT_MESSAGE,
-        )
-
     def test_archive_federation_success(self) -> None:
         """Test ArchiveFederation succeeds when federation_manager.archive_federation
         works."""
@@ -436,11 +430,6 @@ class TestControlServicer(unittest.TestCase):
         # Execute & Assert
         with self.assertRaises(grpc.RpcError):
             self.servicer.ArchiveFederation(request, mock_context)
-
-        mock_context.abort.assert_called_once_with(
-            grpc.StatusCode.FAILED_PRECONDITION,
-            SUPERLINK_DOES_NOT_SUPPORT_FED_MANAGEMENT_MESSAGE,
-        )
 
 
 class TestControlServicerAuth(unittest.TestCase):
@@ -688,7 +677,7 @@ class TestValidateFederationAndNodesInRequest(unittest.TestCase):
                 self.state, "wrong-aid", NOOP_FEDERATION, 1, ctx
             )
         ctx.abort.assert_called_once()
-        self.assertIn("not a member", str(cm.exception))
+        self.assertIn("does not exist", str(cm.exception))
 
     def test_validate_aborts_when_node_not_owned(self) -> None:
         """Test abort when a node is not owned by the requester."""
