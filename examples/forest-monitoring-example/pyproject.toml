@@ -28,7 +28,7 @@ dependencies = [
 packages = ["."]
 
 [tool.flwr.app]
-publisher = "dajosc24"
+publisher = "Johannes Schumacher NIBIO"
 
 # Point to your ServerApp and ClientApp objects
 [tool.flwr.app.components]
