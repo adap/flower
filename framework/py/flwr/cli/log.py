@@ -137,22 +137,22 @@ def print_logs(run_id: int, channel: grpc.Channel, timeout: int) -> None:
     stub = ControlStub(channel)
     req = StreamLogsRequest(run_id=run_id, after_timestamp=0.0)
 
-    try:
-        with flwr_cli_grpc_exc_handler():
+    with flwr_cli_grpc_exc_handler():
+        try:
             # Enforce timeout for graceful exit
             for res in stub.StreamLogs(req, timeout=timeout):
                 print(res.log_output)
                 break
-    except grpc.RpcError as e:
-        if e.code() == grpc.StatusCode.NOT_FOUND:  # pylint: disable=E1101
-            logger(ERROR, "Invalid run_id `%s`, exiting", run_id)
-        elif e.code() == grpc.StatusCode.DEADLINE_EXCEEDED:  # pylint: disable=E1101
-            pass
-        else:
-            raise e
-    finally:
-        channel.close()
-        logger(DEBUG, "Channel closed")
+        except grpc.RpcError as e:
+            if e.code() == grpc.StatusCode.NOT_FOUND:  # pylint: disable=E1101
+                logger(ERROR, "Invalid run_id `%s`, exiting", run_id)
+            elif e.code() == grpc.StatusCode.DEADLINE_EXCEEDED:  # pylint: disable=E1101
+                pass
+            else:
+                raise e
+        finally:
+            channel.close()
+            logger(DEBUG, "Channel closed")
 
 
 def log(
