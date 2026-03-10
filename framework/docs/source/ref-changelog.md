@@ -34,11 +34,11 @@ We would like to give our special thanks to all the contributors who made the ne
 
   On supported SuperLinks, users can manage federations using the `flwr federation` CLI. This includes creating federations (`flwr federation create`), adding or removing SuperNodes (`flwr federation add-supernode` / `remove-supernode`), and archiving federations (`flwr federation archive`). Users can also collaborate through federation invitations using `flwr federation invite` commands to create, list, accept, reject, or revoke invitations.
 
-- **Add `--limit` option to `flwr list` to limit the number of runs listed** ([#6639](https://github.com/adap/flower/pull/6639))
+- **Add `--limit` option to `flwr list` to limit the number of runs listed** ([#6639](https://github.com/adap/flower/pull/6639), [#6737](https://github.com/adap/flower/pull/6737))
 
 - **Add Federated Analytics example** ([#6314](https://github.com/adap/flower/pull/6314))
 
-- **Improve Flower Hub app publishing and FAB building** ([#6656](https://github.com/adap/flower/pull/6656), [#6685](https://github.com/adap/flower/pull/6685), [#6686](https://github.com/adap/flower/pull/6686), [#6689](https://github.com/adap/flower/pull/6689))
+- **Improve Flower Hub app publishing and FAB building** ([#6656](https://github.com/adap/flower/pull/6656), [#6685](https://github.com/adap/flower/pull/6685), [#6686](https://github.com/adap/flower/pull/6686), [#6689](https://github.com/adap/flower/pull/6689), [#6736](https://github.com/adap/flower/pull/6736))
 
 - **Update examples** ([#6545](https://github.com/adap/flower/pull/6545), [#6555](https://github.com/adap/flower/pull/6555), [#6697](https://github.com/adap/flower/pull/6697), [#6709](https://github.com/adap/flower/pull/6709))
 
