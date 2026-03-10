@@ -75,4 +75,4 @@ def test_install_from_fab_rejects_zip_slip(tmp_path: Path) -> None:
     )
 
     with pytest.raises(click.ClickException, match="Unsafe path in FAB archive"):
-        _ = install_from_fab(fab_bytes, flwr_dir=tmp_path, skip_prompt=True)
+        _ = install_from_fab(fab_bytes, install_dir=tmp_path, skip_prompt=True)

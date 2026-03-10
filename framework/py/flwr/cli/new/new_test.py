@@ -19,6 +19,7 @@ import importlib
 import io
 import zipfile
 from pathlib import Path
+from unittest.mock import Mock
 
 import click
 import pytest
@@ -55,13 +56,6 @@ def test_download_remote_app_via_api_rejects_zip_slip(
 ) -> None:
     """Reject app ZIP archives containing path traversal entries."""
 
-    class _Response:
-        def __init__(self, content: bytes) -> None:
-            self.content = content
-
-        def raise_for_status(self) -> None:
-            return None
-
     def _zip_bytes(entries: list[tuple[str, bytes]]) -> bytes:
         buf = io.BytesIO()
         with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
@@ -70,6 +64,7 @@ def test_download_remote_app_via_api_rejects_zip_slip(
         return buf.getvalue()
 
     malicious_zip = _zip_bytes([("../evil.txt", b"x")])
+    mock_response = Mock(content=malicious_zip, raise_for_status=lambda: None)
 
     monkeypatch.chdir(tmp_path)
     monkeypatch.setattr(
@@ -80,7 +75,7 @@ def test_download_remote_app_via_api_rejects_zip_slip(
     monkeypatch.setattr(
         new_module.requests,
         "get",
-        lambda *_args, **_kwargs: _Response(malicious_zip),
+        lambda *_args, **_kwargs: mock_response,
     )
 
     with pytest.raises(click.ClickException, match="Unsafe path in FAB archive"):
