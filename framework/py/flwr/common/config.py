@@ -15,7 +15,6 @@
 """Provide functions for managing global Flower config."""
 
 
-import os
 import re
 import zipfile
 from io import BytesIO
@@ -26,37 +25,19 @@ import click
 import tomli
 
 from flwr.app.user_config import UserConfig, UserConfigValue
-from flwr.common.constant import (
-    APP_DIR,
-    FAB_CONFIG_FILE,
-    FAB_HASH_TRUNCATION,
-    FLWR_DIR,
-    FLWR_HOME,
-)
+from flwr.common.constant import APP_DIR, FAB_CONFIG_FILE, FAB_HASH_TRUNCATION
 from flwr.common.typing import Run
+from flwr.supercore.utils import get_flwr_home
 
 from . import ConfigRecord, object_ref
 
 T_dict = TypeVar("T_dict", bound=dict[str, Any])  # pylint: disable=invalid-name
 
 
-def get_flwr_dir(provided_path: str | None = None) -> Path:
-    """Return the Flower home directory based on env variables."""
-    if provided_path is None or not Path(provided_path).expanduser().is_dir():
-        return Path(
-            os.getenv(
-                FLWR_HOME,
-                Path(f"{os.getenv('XDG_DATA_HOME', os.getenv('HOME'))}") / FLWR_DIR,
-            )
-        )
-    return Path(provided_path).absolute()
-
-
 def get_project_dir(
     fab_id: str,
     fab_version: str,
     fab_hash: str,
-    flwr_dir: str | Path | None = None,
 ) -> Path:
     """Return the project directory based on the given fab_id and fab_version."""
     # Check the fab_id
@@ -65,10 +46,8 @@ def get_project_dir(
             f"Invalid FAB ID: {fab_id}",
         )
     publisher, project_name = fab_id.split("/")
-    if flwr_dir is None:
-        flwr_dir = get_flwr_dir()
     return (
-        Path(flwr_dir)
+        get_flwr_home()
         / APP_DIR
         / f"{publisher}.{project_name}.{fab_version}.{fab_hash[:FAB_HASH_TRUNCATION]}"
     )
@@ -147,7 +126,7 @@ def get_fused_config_from_fab(fab_file: Path | bytes, run: Run) -> UserConfig:
     return fuse_dicts(flat_config_flat, run.override_config)
 
 
-def get_fused_config(run: Run, flwr_dir: Path | None) -> UserConfig:
+def get_fused_config(run: Run) -> UserConfig:
     """Merge the overrides from a `Run` with the config from a FAB.
 
     Get the config using the fab_id and the fab_version, remove the nesting by adding
@@ -157,7 +136,7 @@ def get_fused_config(run: Run, flwr_dir: Path | None) -> UserConfig:
     if not run.fab_id or not run.fab_version:
         return {}
 
-    project_dir = get_project_dir(run.fab_id, run.fab_version, run.fab_hash, flwr_dir)
+    project_dir = get_project_dir(run.fab_id, run.fab_version, run.fab_hash)
 
     # Return empty dict if project directory does not exist
     if not project_dir.is_dir():

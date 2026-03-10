@@ -37,7 +37,7 @@ from ..utils import (
 
 def archive(
     ctx: typer.Context,
-    federation_name: Annotated[
+    federation: Annotated[
         str,
         typer.Argument(help="Name of the federation to archive."),
     ],
@@ -68,7 +68,7 @@ def archive(
             stub = ControlStub(channel)
 
             request = ArchiveFederationRequest(
-                federation_name=federation_name,
+                federation_name=federation,
             )
             _archive_federation(
                 stub=stub,

@@ -29,14 +29,17 @@ jobs:
       - uses: actions/checkout@v5
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
-      - name: Install dependencies (mandatory only)
+        with:
+          uv-skip: "false"
+          poetry-skip: "true"
+      - name: Install dependencies
         run: |
           cd dev
-          python -m poetry install --all-extras
+          uv sync --frozen
       - name: Check docs format
         run: |
           cd dev
-          docstrfmt --check ../intelligence/docs/source
+          uv run docstrfmt --check ../intelligence/docs/source
   build_ts_docs:
     runs-on: ubuntu-22.04
     name: Build TypeScript Docs

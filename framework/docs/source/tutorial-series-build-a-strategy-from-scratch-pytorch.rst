@@ -366,7 +366,10 @@ Finally, let's run the ``FlowerApp``:
 
 .. code-block:: shell
 
-    $ flwr run .
+    $ flwr run . --stream
+
+Plain ``flwr run .`` submits the run, prints the run ID, and returns without streaming
+logs. See :doc:`how-to-run-flower-locally` for the full local workflow.
 
 After starting the run you will notice two things:
 

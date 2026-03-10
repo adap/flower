@@ -29,7 +29,7 @@ copyright = f"{datetime.date.today().year} Flower Labs GmbH"
 author = "The Flower Authors"
 
 # The full version, including alpha/beta/rc tags
-release = "1.27.0"
+release = "1.28.0"
 
 
 # -- General configuration ---------------------------------------------------
@@ -78,6 +78,7 @@ redirects = {
     "quickstart-sklearn-tabular": "quickstart-sklearn.html",
     "xgboost-quickstart": "quickstart-xgboost.html",
     "tensorflow-privacy": "index.html",
+    "flower-authentication": "supernode-authentication.html",
 }
 
 

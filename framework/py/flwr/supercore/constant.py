@@ -17,7 +17,26 @@
 
 from __future__ import annotations
 
+import os
+from enum import Enum
+
 from flwr.common.constant import FLWR_DIR, NOOP_ACCOUNT_NAME
+
+# Constants for Inflatable
+HEAD_BODY_DIVIDER = b"\x00"
+HEAD_VALUE_DIVIDER = " "
+
+# Constants for object pushing and pulling
+FLWR_PRIVATE_MAX_CONCURRENT_OBJ_PUSHES = int(
+    os.getenv("FLWR_PRIVATE_MAX_CONCURRENT_OBJ_PUSHES", "2")
+)  # Default maximum number of concurrent pushes
+FLWR_PRIVATE_MAX_CONCURRENT_OBJ_PULLS = int(
+    os.getenv("FLWR_PRIVATE_MAX_CONCURRENT_OBJ_PULLS", "2")
+)  # Default maximum number of concurrent pulls
+PULL_MAX_TIME = 7200  # Default maximum time to wait for pulling objects
+PULL_MAX_TRIES_PER_OBJECT = 500  # Default maximum number of tries to pull an object
+PULL_INITIAL_BACKOFF = 1  # Initial backoff time for pulling objects
+PULL_BACKOFF_CAP = 10  # Maximum backoff time for pulling objects
 
 # Top-level key in YAML config for exec plugin settings
 EXEC_PLUGIN_SECTION = "exec_plugin"
@@ -37,10 +56,19 @@ PLATFORM_API_URL = "https://api.flower.ai/v1"
 SUPERGRID_ADDRESS = "supergrid.flower.ai"
 
 # Specification for app publishing
+APP_PUBLISH_ALLOWED_LICENSE_FILES = ("LICENSE", "LICENSE.md")
 APP_PUBLISH_INCLUDE_PATTERNS = (
     "**/*.py",
     "**/*.toml",
     "**/*.md",
+    "**/*.yaml",
+    "**/*.yml",
+    "**/*.json",
+    "**/*.jsonl",
+    "/.gitignore",
+    "**/.editorconfig",
+    "/LICENSE",
+    "/LICENSE.md",
 )
 APP_PUBLISH_EXCLUDE_PATTERNS = FAB_EXCLUDE_PATTERNS = (
     f"{FLWR_DIR}/**",  # Exclude the .flwr directory
@@ -94,3 +122,13 @@ class NodeStatus:
     def __new__(cls) -> NodeStatus:
         """Prevent instantiation."""
         raise TypeError(f"{cls.__name__} cannot be instantiated.")
+
+
+class InvitationStatus(str, Enum):
+    """Status of a federation invitation."""
+
+    PENDING = "pending"
+    ACCEPTED = "accepted"
+    REJECTED = "rejected"
+    REVOKED = "revoked"
+    EXPIRED = "expired"

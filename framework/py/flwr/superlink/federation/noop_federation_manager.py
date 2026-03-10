@@ -17,10 +17,25 @@
 
 from flwr.common.constant import NOOP_ACCOUNT_NAME, NOOP_FLWR_AID
 from flwr.common.typing import Federation
-from flwr.proto.federation_pb2 import Account, Member  # pylint: disable=E0611
+from flwr.proto.federation_pb2 import (  # pylint: disable=E0611
+    Account,
+    Invitation,
+    Member,
+)
 from flwr.supercore.constant import NOOP_FEDERATION, NOOP_FEDERATION_DESCRIPTION
+from flwr.supercore.error import ApiErrorCode, FlowerError
 
 from .federation_manager import FederationManager
+
+
+class UnsupportedError(FlowerError):
+    """Exception raised when operation is unsupported by NoOpFederationManager."""
+
+    def __init__(self, message: str):
+        super().__init__(
+            message=message,
+            code=ApiErrorCode.NO_FEDERATION_MANAGEMENT_SUPPORT,
+        )
 
 
 class NoOpFederationManager(FederationManager):
@@ -48,22 +63,28 @@ class NoOpFederationManager(FederationManager):
             raise ValueError(f"Federation '{federation}' does not exist.")
         return True
 
-    def get_federations(self, flwr_aid: str) -> list[tuple[str, str]]:
-        """Get federations (name, description) of which the account is a member."""
+    def get_federations(self, flwr_aid: str) -> list[Federation]:
+        """Get federations of which the account is a member."""
         if flwr_aid != NOOP_FLWR_AID:
             return []
-        return [(NOOP_FEDERATION, NOOP_FEDERATION_DESCRIPTION)]
+        return [
+            Federation(
+                name=NOOP_FEDERATION,
+                description=NOOP_FEDERATION_DESCRIPTION,
+                members=[],
+                nodes=[],
+                runs=[],
+                archived=False,
+            )
+        ]
 
     def get_details(self, federation: str) -> Federation:
         """Get details of the federation."""
         if federation != NOOP_FEDERATION:
             raise ValueError(f"Federation '{federation}' does not exist.")
 
-        run_ids = self.linkstate.get_run_ids(flwr_aid=NOOP_FLWR_AID)
+        runs = list(self.linkstate.get_run_info(flwr_aids=[NOOP_FLWR_AID]))
         nodes = list(self.linkstate.get_node_info(owner_aids=[NOOP_FLWR_AID]))
-        runs = [
-            run for run_id in run_ids if (run := self.linkstate.get_run(run_id=run_id))
-        ]
         only_account = Account(id=NOOP_FLWR_AID, name=NOOP_ACCOUNT_NAME)
         return Federation(
             name=NOOP_FEDERATION,
@@ -73,30 +94,67 @@ class NoOpFederationManager(FederationManager):
             ],
             nodes=nodes,
             runs=runs,
+            archived=False,
         )
 
     def create_federation(
         self, flwr_aid: str, name: str, description: str
     ) -> Federation:
         """Create a new federation."""
-        raise NotImplementedError(
+        raise UnsupportedError(
             "`create_federation` is not supported by NoOpFederationManager."
         )
 
     def archive_federation(self, flwr_aid: str, name: str) -> None:
         """Archive an existing federation."""
-        raise NotImplementedError(
+        raise UnsupportedError(
             "`archive_federation` is not supported by NoOpFederationManager."
         )
 
     def add_supernode(self, flwr_aid: str, federation: str, node_id: int) -> None:
         """Add a SuperNode to a federation."""
-        raise NotImplementedError(
+        raise UnsupportedError(
             "`add_supernode` is not supported by NoOpFederationManager."
         )
 
     def remove_supernode(self, flwr_aid: str, federation: str, node_id: int) -> None:
         """Remove a SuperNode from a federation."""
-        raise NotImplementedError(
+        raise UnsupportedError(
             "`remove_supernode` is not supported by NoOpFederationManager."
+        )
+
+    def create_invitation(
+        self, flwr_aid: str, federation: str, invitee_account_name: str
+    ) -> None:
+        """Create an invitation for an account to join a federation."""
+        raise UnsupportedError(
+            "`create_invitation` is not supported by NoOpFederationManager."
+        )
+
+    def list_invitations(
+        self, flwr_aid: str
+    ) -> tuple[list[Invitation], list[Invitation]]:
+        """List invitations visible to the given account."""
+        raise UnsupportedError(
+            "`list_invitations` is not supported by NoOpFederationManager."
+        )
+
+    def accept_invitation(self, flwr_aid: str, federation: str) -> None:
+        """Accept a pending invitation to join a federation."""
+        raise UnsupportedError(
+            "`accept_invitation` is not supported by NoOpFederationManager."
+        )
+
+    def reject_invitation(self, flwr_aid: str, federation: str) -> None:
+        """Reject a pending invitation to join a federation."""
+        raise UnsupportedError(
+            "`reject_invitation` is not supported by NoOpFederationManager."
+        )
+
+    def revoke_invitation(
+        self, flwr_aid: str, federation: str, invitee_account_name: str
+    ) -> None:
+        """Revoke a pending invitation."""
+        raise UnsupportedError(
+            "`revoke_invitation` is not supported by NoOpFederationManager."
         )

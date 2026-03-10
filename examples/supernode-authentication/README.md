@@ -13,18 +13,24 @@ The following steps describe how to start a long-running Flower server (SuperLin
 
 ## Project Setup
 
-Start by cloning the example project. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
+### Fetch the app
+
+Install Flower:
 
 ```shell
-git clone --depth=1 https://github.com/adap/flower.git _tmp \
-        && mv _tmp/examples/flower-authentication . \
-        && rm -rf _tmp && cd flower-authentication
+pip install flwr
 ```
 
-This will create a new directory called `flower-authentication` with the following project structure:
+Fetch the app:
 
 ```shell
-flower-authentication
+flwr new @flwrlabs/supernode-authentication
+```
+
+This will create a new directory called `supernode-authentication` with the following project structure:
+
+```shell
+supernode-authentication
 ├── authexample
 │   ├── __init__.py
 │   ├── client_app.py   # Defines your ClientApp
