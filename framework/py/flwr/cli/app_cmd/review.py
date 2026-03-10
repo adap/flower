@@ -182,7 +182,7 @@ def _sign_fab(
 def _submit_review(
     app_id: str, app_version: str, signature: bytes, signed_at: int, token: str
 ) -> None:
-    """Submit review to Flower Platform API."""
+    """Submit review to Flower App Hub."""
     signature_b64 = base64.urlsafe_b64encode(signature).rstrip(b"=").decode("ascii")
     url = f"{PLATFORM_API_URL}/hub/apps/signature"
     headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}

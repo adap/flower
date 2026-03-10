@@ -117,7 +117,7 @@ def parse_app_spec(app_spec: str) -> tuple[str, str | None]:
 def request_download_link(
     app_id: str, app_version: str | None, in_url: str, out_url: str
 ) -> tuple[str, list[dict[str, str]] | None]:
-    """Request a download link for the given app from the Flower Platform API.
+    """Request a download link for the given app from the Flower App Hub.
 
     Parameters
     ----------
