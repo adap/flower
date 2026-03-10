@@ -902,12 +902,12 @@ def _get_remote_fab(
     app_spec: str,
     context: grpc.ServicerContext,
 ) -> tuple[bytes, dict[str, str]]:
-    """Get remote FAB from Flower platform API."""
+    """Get remote FAB from Flower Hub."""
     if fleet_api_type == TRANSPORT_TYPE_GRPC_ADAPTER:
         context.abort(
             grpc.StatusCode.FAILED_PRECONDITION,
             "The selected SuperLink transport type is not "
-            "supported for connecting to Flower Platform.",
+            "supported for connecting to Flower Hub.",
         )
 
     # Parse and validate app specification
@@ -938,7 +938,7 @@ def _get_remote_fab(
         else {"valid_license": ""}
     )
 
-    # Download FAB from Flower platform API
+    # Download FAB from Flower Hub
     try:
         r = requests.get(presigned_url, timeout=60)
         r.raise_for_status()
