@@ -15,7 +15,6 @@
 """Flower Logger tests."""
 
 
-import logging
 import sys
 from logging.handlers import TimedRotatingFileHandler
 from pathlib import Path
@@ -23,6 +22,7 @@ from queue import Queue
 
 from .logger import (
     FLOWER_LOGGER,
+    console_handler,
     configure_superlink_log_file,
     mirror_output_to_queue,
     restore_output,
@@ -90,7 +90,7 @@ def test_configure_superlink_log_file(tmp_path: Path) -> None:
             None,
         )
         assert rotating_handler is not None
-        assert rotating_handler.level == logging.DEBUG
+        assert rotating_handler.level == console_handler.level
         assert rotating_handler.backupCount == 7
         assert rotating_handler.interval == 24 * 60 * 60
     finally:

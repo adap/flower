@@ -25,6 +25,7 @@ import time
 from io import StringIO
 from logging import ERROR, WARN, LogRecord
 from logging.handlers import HTTPHandler, TimedRotatingFileHandler
+from pathlib import Path
 from queue import Empty, Queue
 from typing import TYPE_CHECKING, Any, TextIO
 
@@ -245,7 +246,7 @@ def configure_superlink_log_file(
         encoding="utf-8",
         utc=True,
     )
-    file_handler.setLevel(logging.DEBUG)
+    file_handler.setLevel(console_handler.level)
     file_handler.setFormatter(formatter)
     FLOWER_LOGGER.addHandler(file_handler)
 
