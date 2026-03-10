@@ -99,11 +99,18 @@ def _extract_signed_metadata_from_metadata(
     method = md_map.get(APPIO_SIGNED_METADATA_METHOD_HEADER)
     plugin_type = md_map.get(APPIO_SIGNED_METADATA_PLUGIN_TYPE_HEADER)
 
+    # Any signed-metadata-related header (including plugin_type) indicates
+    # that the signed-metadata mechanism was present in some form, even if
+    # the required fields are incomplete or malformed.
+    presence_values = (public_key, signature, timestamp, method, plugin_type)
     required_values = (public_key, signature, timestamp, method)
-    if all(value is None for value in required_values):
+
+    if all(value is None for value in presence_values):
+        # Fully absent: no signed-metadata-related headers were provided.
         return False, None
     if any(value is None for value in required_values):
-        # Preserve the distinction between "absent" and "present but malformed".
+        # Present but incomplete: at least one signed-metadata-related header
+        # was provided, but some required fields are missing.
         return True, None
     if (
         not isinstance(public_key, bytes)
