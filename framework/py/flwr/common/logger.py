@@ -215,7 +215,7 @@ def configure_superlink_log_file(
     backup_count: int,
 ) -> None:
     """Configure timed file rotation for SuperLink process logs."""
-    path = os.path.abspath(os.path.expanduser(filename))
+    path = Path(filename).expanduser().resolve()
     matching_handlers: list[TimedRotatingFileHandler] = []
 
     for handler in FLOWER_LOGGER.handlers:
