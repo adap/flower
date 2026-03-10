@@ -2,7 +2,7 @@
 
 <p align="center">
   <a href="https://flower.ai/">
-    <img src="https://flower.ai/_next/image/?url=%2F_next%2Fstatic%2Fmedia%2Fflwr-head.194c330a.png&w=384&q=75" width="140px" alt="Flower Website" />
+    <img src="https://flower.ai/static/images/icon/icon.png" width="140px" alt="Flower Website" />
   </a>
 </p>
 <p align="center">
@@ -106,8 +106,9 @@ Flower Baselines is a collection of community-contributed projects that reproduc
 - [FedOpt](https://github.com/adap/flower/tree/main/baselines/flwr_baselines/flwr_baselines/publications/adaptive_federated_optimization)
 
 Please refer to the [Flower Baselines Documentation](https://flower.ai/docs/baselines/) for a detailed categorization of baselines and for additional info including:
-* [How to use Flower Baselines](https://flower.ai/docs/baselines/how-to-use-baselines.html)
-* [How to contribute a new Flower Baseline](https://flower.ai/docs/baselines/how-to-contribute-baselines.html)
+
+- [How to use Flower Baselines](https://flower.ai/docs/baselines/how-to-use-baselines.html)
+- [How to contribute a new Flower Baseline](https://flower.ai/docs/baselines/how-to-contribute-baselines.html)
 
 ## Flower Usage Examples
 
