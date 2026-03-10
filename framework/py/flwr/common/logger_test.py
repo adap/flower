@@ -22,8 +22,8 @@ from queue import Queue
 
 from .logger import (
     FLOWER_LOGGER,
-    console_handler,
     configure_superlink_log_file,
+    console_handler,
     mirror_output_to_queue,
     restore_output,
 )
