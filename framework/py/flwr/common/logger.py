@@ -221,7 +221,7 @@ def configure_superlink_log_file(
     for handler in FLOWER_LOGGER.handlers:
         if not isinstance(handler, TimedRotatingFileHandler):
             continue
-        if os.path.abspath(handler.baseFilename) != path:
+        if Path(handler.baseFilename).resolve() != path:
             continue
         matching_handlers.append(handler)
         if handler.interval != interval_hours * 60 * 60:
