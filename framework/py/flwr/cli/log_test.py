@@ -19,6 +19,7 @@ import unittest
 from typing import NoReturn
 from unittest.mock import Mock, call, patch
 
+import grpc
 from flwr.proto.control_pb2 import StreamLogsResponse  # pylint: disable=E0611
 
 from .log import print_logs, stream_logs
@@ -36,6 +37,18 @@ class InterruptedStreamLogsResponse:
     def latest_timestamp(self) -> NoReturn:
         """Raise KeyboardInterrupt to exit logstream test gracefully."""
         raise KeyboardInterrupt
+
+
+class DeadlineExceededRpcError(grpc.RpcError):
+    """Synthetic gRPC deadline error used to test stream reconnect behavior."""
+
+    def code(self) -> grpc.StatusCode:
+        """Return gRPC deadline exceeded status code."""
+        return grpc.StatusCode.DEADLINE_EXCEEDED
+
+    def details(self) -> str:
+        """Return a default gRPC deadline exceeded message."""
+        return "Deadline Exceeded"
 
 
 class TestFlwrLog(unittest.TestCase):
@@ -84,3 +97,19 @@ class TestFlwrLog(unittest.TestCase):
             print_logs(run_id=123, channel=self.mock_channel, timeout=0)
             # Assert that mock print was called with the expected arguments
             mock_print.assert_has_calls(self.expected_print_call)
+
+    def test_flwr_log_stream_method_deadline_exceeded(self) -> None:
+        """Test stream_logs handles deadline exceeded without raising."""
+        self.mock_stub.StreamLogs.side_effect = DeadlineExceededRpcError()
+
+        result = stream_logs(
+            run_id=123, stub=self.mock_stub, duration=1, after_timestamp=0.0
+        )
+
+        self.assertEqual(result, 0.0)
+
+    def test_flwr_log_print_method_deadline_exceeded(self) -> None:
+        """Test print_logs handles deadline exceeded without raising."""
+        self.mock_stub.StreamLogs.side_effect = DeadlineExceededRpcError()
+
+        print_logs(run_id=123, channel=self.mock_channel, timeout=0)

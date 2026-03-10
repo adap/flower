@@ -43,6 +43,12 @@ class AllLogsRetrieved(BaseException):
     """
 
 
+def _reraise_deadline_exceeded(err: grpc.RpcError) -> None:
+    """Propagate stream deadlines so callers can reconnect gracefully."""
+    if err.code() == grpc.StatusCode.DEADLINE_EXCEEDED:  # pylint: disable=E1101
+        raise err
+
+
 def start_stream(
     run_id: int, channel: grpc.Channel, refresh_period: int = CONN_REFRESH_PERIOD
 ) -> None:
@@ -106,7 +112,7 @@ def stream_logs(
     latest_timestamp = 0.0
     res = None
     try:
-        with flwr_cli_grpc_exc_handler():
+        with flwr_cli_grpc_exc_handler(_reraise_deadline_exceeded):
             for res in stub.StreamLogs(req, timeout=duration):
                 print(res.log_output, end="")
         raise AllLogsRetrieved()
@@ -137,7 +143,7 @@ def print_logs(run_id: int, channel: grpc.Channel, timeout: int) -> None:
     req = StreamLogsRequest(run_id=run_id, after_timestamp=0.0)
 
     try:
-        with flwr_cli_grpc_exc_handler():
+        with flwr_cli_grpc_exc_handler(_reraise_deadline_exceeded):
             # Enforce timeout for graceful exit
             for res in stub.StreamLogs(req, timeout=timeout):
                 print(res.log_output)
