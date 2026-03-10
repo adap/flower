@@ -19,20 +19,20 @@ pip install flwr
 Fetch the app:
 
 ```shell
-flwr new @yan-gao/example-app
+flwr new @sarah/quickstart-tensorflow-timeseries
 ```
 
-This will create a new directory called `example-app` with the following structure:
+This will create a new directory called `quickstart-tensorflow-timeseries` with the following structure:
 
 ```shell
-example-app
-â”œâ”€â”€ pytorchexample
-â”‚   â”œâ”€â”€ __init__.py
-â”‚   â”œâ”€â”€ client_app.py   # Defines your ClientApp
-â”‚   â”œâ”€â”€ server_app.py   # Defines your ServerApp
-â”‚   â””â”€â”€ task.py         # Defines your model, training and data loading
-â”œâ”€â”€ pyproject.toml      # Project metadata like dependencies and configs
-â””â”€â”€ README.md
+quickstart-tensorflow-timeseries
+tftsexample
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; __init__.py
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; client_app.py   # Defines your ClientApp
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; server_app.py   # Defines your ServerApp
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; task.py         # Defines your model, training and data loading
+&nbsp;&nbsp;&nbsp;&nbsp; pyproject.toml      # Project metadata like dependencies and configs
+&nbsp;&nbsp;&nbsp;&nbsp; README.md
 ```
 
 ## Run the App
@@ -44,10 +44,10 @@ You can run your Flower App in both _simulation_ and _deployment_ mode without m
 > [!TIP]
 > Check the [Simulation Engine documentation](https://flower.ai/docs/framework/how-to-run-simulations.html) to learn more about Flower simulations, how to use more virtual SuperNodes, and how to configure CPU/GPU usage in your ClientApp.
 
-Install the dependencies defined in `pyproject.toml` as well as the `pytorchexample` package.
+Install the dependencies defined in `pyproject.toml` package.
 
 ```bash
-cd example-app && pip install -e .
+cd quickstart-tensorflow-timeseries && pip install -e .
 ```
 
 Run with default settings:
@@ -71,10 +71,10 @@ To run this App using Flower's Deployment Engine we recommend first creating som
 pip install "flwr-datasets['vision']"
 
 # Create dataset partitions and save them to disk
-flwr-datasets create uoft-cs/cifar10 --num-partitions 2 --out-dir demo_data
+flwr-datasets create sayanroy058/Jena-Climate --num-partitions 2 --out-dir demo_data
 ```
 
-The above command will create two IID partitions of the CIFAR-10 dataset and save them in a `demo_data` directory. Next, you can pass one partition to each of your `SuperNodes` like this:
+The above command will create two IID partitions of the Jena-climate dataset and save them in a `demo_data` directory. Next, you can pass one partition to each of your `SuperNodes` like this:
 
 ```shell
 flower-supernode \

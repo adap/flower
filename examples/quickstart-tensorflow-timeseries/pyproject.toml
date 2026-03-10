@@ -3,8 +3,8 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "tftsexample"
-version = "0.0.0"
+name = "quickstart-tensorflow-timeseries"
+version = "0.1.0"
 description = "Federated Learning on time series with Tensorflow/Keras and Flower (Quickstart Example)"
 license = "Apache-2.0"
 dependencies = [
@@ -17,7 +17,7 @@ dependencies = [
 packages = ["."]
 
 [tool.flwr.app]
-publisher = "flwrlabs"
+publisher = "sarah"
 
 [tool.flwr.app.components]
 serverapp = "tftsexample.server_app:app"
