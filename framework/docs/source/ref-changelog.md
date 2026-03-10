@@ -12,7 +12,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Introduce Local SuperLink for managing local simulations** ([#6599](https://github.com/adap/flower/pull/6599), [#6717](https://github.com/adap/flower/pull/6717))
 
-  Local simulations are now managed by a Local SuperLink, which is automatically launched on demand. This enables running most `flwr` CLI commands locally, such as `flwr ls` to list previous runs and `flwr log` to retrieve logs from earlier runs. See the [documentation](https://flower.ai/docs/framework/1.27/en/how-to-run-flower-locally.html) for more details.
+  Local simulations are now managed by a Local SuperLink, which is automatically launched on demand. This enables running most `flwr` CLI commands locally, such as `flwr list` to list previous runs and `flwr log` to retrieve logs from earlier runs. See the [documentation](https://flower.ai/docs/framework/1.27/en/how-to-run-flower-locally.html) for more details.
 
 - **Update framework documentation** ([#6533](https://github.com/adap/flower/pull/6533), [#6537](https://github.com/adap/flower/pull/6537), [#6541](https://github.com/adap/flower/pull/6541), [#6546](https://github.com/adap/flower/pull/6546), [#6551](https://github.com/adap/flower/pull/6551), [#6593](https://github.com/adap/flower/pull/6593), [#6598](https://github.com/adap/flower/pull/6598), [#6612](https://github.com/adap/flower/pull/6612), [#6615](https://github.com/adap/flower/pull/6615), [#6629](https://github.com/adap/flower/pull/6629), [#6631](https://github.com/adap/flower/pull/6631), [#6635](https://github.com/adap/flower/pull/6635), [#6681](https://github.com/adap/flower/pull/6681), [#6694](https://github.com/adap/flower/pull/6694), [#6710](https://github.com/adap/flower/pull/6710), [#6718](https://github.com/adap/flower/pull/6718), [#6719](https://github.com/adap/flower/pull/6719))
 
@@ -26,7 +26,11 @@ We would like to give our special thanks to all the contributors who made the ne
 
   Introduces a new documentation release workflow where versioned Flower documentation is built and published from release branches. One documentation version is generated for each minor series (`X.Y.x`), allowing documentation updates after a release.
 
-- **Add `--limit` option to `flwr ls` for limiting the number of runs listed** ([#6639](https://github.com/adap/flower/pull/6639))
+- **Introduce multi-federation management via `flwr federation` CLI commands** ([#6559](https://github.com/adap/flower/pull/6559), [#6582](https://github.com/adap/flower/pull/6582), [#6583](https://github.com/adap/flower/pull/6583), [#6588](https://github.com/adap/flower/pull/6588), [#6589](https://github.com/adap/flower/pull/6589), [#6611](https://github.com/adap/flower/pull/6611), [#6618](https://github.com/adap/flower/pull/6618), [#6623](https://github.com/adap/flower/pull/6623), [#6625](https://github.com/adap/flower/pull/6625), [#6632](https://github.com/adap/flower/pull/6632), [#6658](https://github.com/adap/flower/pull/6658), [#6662](https://github.com/adap/flower/pull/6662), [#6673](https://github.com/adap/flower/pull/6673), [#6674](https://github.com/adap/flower/pull/6674), [#6676](https://github.com/adap/flower/pull/6676), [#6680](https://github.com/adap/flower/pull/6680), [#6695](https://github.com/adap/flower/pull/6695), [#6703](https://github.com/adap/flower/pull/6703), [#6705](https://github.com/adap/flower/pull/6705), [#6707](https://github.com/adap/flower/pull/6707), [#6708](https://github.com/adap/flower/pull/6708), [#6722](https://github.com/adap/flower/pull/6722), [#6725](https://github.com/adap/flower/pull/6725), [#6726](https://github.com/adap/flower/pull/6726))
+
+  On supported SuperLinks, users can manage federations using the `flwr federation` CLI. This includes creating federations (`flwr federation create`), adding or removing SuperNodes (`flwr federation add-supernode` / `remove-supernode`), and archiving federations (`flwr federation archive`). Users can also collaborate through federation invitations using `flwr federation invite` commands to create, list, accept, reject, or revoke invitations.
+
+- **Add `--limit` option to `flwr list` for limiting the number of runs listed** ([#6639](https://github.com/adap/flower/pull/6639))
 
 - **Add Federated Analytics example** ([#6314](https://github.com/adap/flower/pull/6314))
 
@@ -55,33 +59,6 @@ We would like to give our special thanks to all the contributors who made the ne
 - **Remove `flower-simulation` CLI entrypoint** ([#6628](https://github.com/adap/flower/pull/6628))
 
   Removes the `flower-simulation` CLI entrypoint. With the introduction of Local SuperLink, this command is no longer needed.
-
-### multi-federation
-
-- **refactor(framework): Update import external FederationManager** ([#6618](https://github.com/adap/flower/pull/6618))
-- **refactor(framework): Introduce** `Member` **protobuf message for federations** ([#6623](https://github.com/adap/flower/pull/6623))
-- **feat(framework): Implement** `flwr federation invite` **commands** ([#6707](https://github.com/adap/flower/pull/6707))
-- **feat(framework): Add error codes for multi-federation** ([#6725](https://github.com/adap/flower/pull/6725))
-- **feat(framework): Implement** `ControlServicer.Invitation` **RPCs** ([#6695](https://github.com/adap/flower/pull/6695))
-- **refactor(framework): Update signature** `create/revoke_invitation` ([#6708](https://github.com/adap/flower/pull/6708))
-- **refactor(framework): Use same wording to avoid leaking federation existence** ([#6722](https://github.com/adap/flower/pull/6722))
-- **feat(framework): Introduce** `flwr federation create/archive` **commands** ([#6583](https://github.com/adap/flower/pull/6583))
-- **feat(framework): Add gRPCs for creating federations and adding SuperNodes to them** ([#6559](https://github.com/adap/flower/pull/6559))
-- **refactor(framework): Add new methods to** `FederationManager` ([#6582](https://github.com/adap/flower/pull/6582))
-- **refactor(framework): Make** `flwr federation ls` **return archived federations** ([#6658](https://github.com/adap/flower/pull/6658))
-- **feat(framework): Add** `flwr federation invite create/list/accept/reject/revoke` **commands** ([#6680](https://github.com/adap/flower/pull/6680))
-- **refactor(framework): Capture** `ValueError` **when creating/archiving federations** ([#6632](https://github.com/adap/flower/pull/6632))
-- **refactor(framework): Make** `list_invitations` **return a list of** `Invitation` **proto objects** ([#6674](https://github.com/adap/flower/pull/6674))
-- **feat(framework): Return** `description` **in** `ShowFederation` **RPC** ([#6673](https://github.com/adap/flower/pull/6673))
-- **refactor(framework): Return two lists of invites in** `ListInvitationsResponse` ([#6676](https://github.com/adap/flower/pull/6676))
-- **refactor(framework): Extend docstring for invitation methods in** `FederationManager` **ABC** ([#6703](https://github.com/adap/flower/pull/6703))
-- **refactor(framework): Implement methods to add/remove** `SuperNodes` **to federations** ([#6588](https://github.com/adap/flower/pull/6588))
-- **refactor(framework): Complete** `flwr federation` **CLI commands** ([#6625](https://github.com/adap/flower/pull/6625))
-- **feat(framework): Add** `InvitationStatus` **as a constant** ([#6705](https://github.com/adap/flower/pull/6705))
-- **refactor(framework): Modify signature for adding/removing** `SuperNodes` **from federations** ([#6611](https://github.com/adap/flower/pull/6611))
-- **feat(framework): Prepare invitation system** ([#6662](https://github.com/adap/flower/pull/6662))
-- **feat(framework): Introduce** `flwr federation add/remove-supernode` **commands** ([#6589](https://github.com/adap/flower/pull/6589))
-- **refactor(framework): Tweak** `flwr federation ls --federation` **view** ([#6726](https://github.com/adap/flower/pull/6726))
 
 ## v1.26.1 (2026-02-07)
 
