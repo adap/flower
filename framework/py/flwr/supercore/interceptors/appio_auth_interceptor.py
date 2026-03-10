@@ -278,8 +278,6 @@ class AppIoAuthServerInterceptor(grpc.ServerInterceptor):  # type: ignore
             # These attributes are internal-only and must be set exclusively by
             # this interceptor.
             setattr(context, _AUTH_CALLER_IDENTITY_CTX_ATTR, caller_identity)
-            if caller_identity.run_id is not None:
-                setattr(context, _AUTH_RUN_ID_CTX_ATTR, caller_identity.run_id)
             if token is not None:
                 setattr(context, _AUTH_TOKEN_CTX_ATTR, token)
             return unary_unary_handler(request, context)
