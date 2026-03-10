@@ -57,10 +57,10 @@ def publish(
         ),
     ] = Path("."),
 ) -> None:
-    """Publish a Flower App to the Flower App Hub.
+    """Publish a Flower App to Flower Hub.
 
-    This command uploads your app project to the Flower App Hub. Files are filtered
-    based on .gitignore patterns and allowed file extensions.
+    This command uploads your app project to Flower Hub. Files are filtered based on
+    .gitignore patterns and allowed file extensions.
     """
     auth_plugin = load_cli_auth_plugin_from_connection(SUPERGRID_ADDRESS)
     auth_plugin.load_tokens()
