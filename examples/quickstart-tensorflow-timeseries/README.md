@@ -25,14 +25,14 @@ flwr new @sarah/quickstart-tensorflow-timeseries
 This will create a new directory called `quickstart-tensorflow-timeseries` with the following structure:
 
 ```shell
-quickstart-tensorflow-timeseries
-tftsexample
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; __init__.py
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; client_app.py   # Defines your ClientApp
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; server_app.py   # Defines your ServerApp
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; task.py         # Defines your model, training and data loading
-&nbsp;&nbsp;&nbsp;&nbsp; pyproject.toml      # Project metadata like dependencies and configs
-&nbsp;&nbsp;&nbsp;&nbsp; README.md
+- quickstart-tensorflow-timeseries
+  - tftsexample
+    - __init__.py
+    - client_app.py   # Defines your ClientApp
+    - server_app.py   # Defines your ServerApp
+    - task.py         # Defines your model, training and data loading
+  - pyproject.toml      # Project metadata like dependencies and configs
+  - README.md
 ```
 
 ## Run the App
