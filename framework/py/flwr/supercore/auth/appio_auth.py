@@ -32,7 +32,7 @@ class SignedMetadataAuthInput:
     """Signed metadata payload extracted from request metadata.
 
     This is transport-normalized input only. Signature/timestamp verification remains in
-    authenticator implementations so policy logic stays mechanism- agnostic. This
+    authenticator implementations so policy logic stays mechanism-agnostic. This
     payload is raw metadata and is not pre-verified at extraction time.
     """
 
