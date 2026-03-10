@@ -31,7 +31,10 @@ import grpc
 import yaml
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
-from flwr.common.args import try_obtain_server_certificates
+from flwr.common.args import (
+    add_args_runtime_dependency_install,
+    try_obtain_server_certificates,
+)
 from flwr.common.constant import (
     AUTHN_TYPE_YAML_KEY,
     AUTHZ_TYPE_YAML_KEY,
@@ -430,6 +433,10 @@ def run_superlink() -> None:
             ExecPluginType.SIMULATION if is_simulation else ExecPluginType.SERVER_APP,
         ]
         command += ["--parent-pid", str(os.getpid())]
+        if args.runtime_dependency_install:
+            command += ["--allow-runtime-dependency-installation"]
+        if args.index_url:
+            command += ["--index-url", args.index_url]
         # pylint: disable-next=consider-using-with
         subprocess.Popen(command)
 
@@ -740,6 +747,7 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
         action="store_true",
         help="Enable supernode authentication.",
     )
+    add_args_runtime_dependency_install(parser)
 
 
 def _add_args_serverappio_api(parser: argparse.ArgumentParser) -> None:

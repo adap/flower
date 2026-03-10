@@ -106,9 +106,8 @@ def stream_logs(
     latest_timestamp = 0.0
     res = None
     try:
-        with flwr_cli_grpc_exc_handler():
-            for res in stub.StreamLogs(req, timeout=duration):
-                print(res.log_output, end="")
+        for res in stub.StreamLogs(req, timeout=duration):
+            print(res.log_output, end="")
         raise AllLogsRetrieved()
     except grpc.RpcError as e:
         # pylint: disable=E1101

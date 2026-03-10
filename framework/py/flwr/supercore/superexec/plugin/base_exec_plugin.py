@@ -44,6 +44,10 @@ class BaseExecPlugin(ExecPlugin):
         cmds += [self.appio_api_address_arg, self.appio_api_address]
         cmds += ["--token", token]
         cmds += ["--parent-pid", str(os.getpid())]
+        if self.runtime_dependency_install:
+            cmds += ["--allow-runtime-dependency-installation"]
+        if self.index_url:
+            cmds += ["--index-url", self.index_url]
         # Launch the client app without waiting for it to complete.
         # Since we don't need to manage the process, we intentionally avoid using
         # a `with` statement. Suppress the pylint warning for it in this case.

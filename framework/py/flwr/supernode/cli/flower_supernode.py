@@ -26,7 +26,10 @@ from cryptography.hazmat.primitives.serialization import load_ssh_private_key
 from cryptography.hazmat.primitives.serialization.ssh import load_ssh_public_key
 
 from flwr.common import EventType, event
-from flwr.common.args import try_obtain_root_certificates
+from flwr.common.args import (
+    add_args_runtime_dependency_install,
+    try_obtain_root_certificates,
+)
 from flwr.common.config import parse_config_args
 from flwr.common.constant import (
     CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
@@ -81,6 +84,8 @@ def flower_supernode() -> None:
         clientappio_api_address=args.clientappio_api_address,
         health_server_address=args.health_server_address,
         trusted_entities=trusted_entities,
+        index_url=args.index_url,
+        runtime_dependency_install=args.runtime_dependency_install,
     )
 
 
@@ -121,6 +126,7 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
             "fpk_UUID2: 'ssh-ed25519 <key2> [comment2]' }"
         ),
     )
+    add_args_runtime_dependency_install(parser)
     add_args_health(parser)
 
     return parser

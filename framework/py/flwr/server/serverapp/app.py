@@ -33,6 +33,7 @@ from flwr.common.config import (
     get_project_dir,
 )
 from flwr.common.constant import (
+    RUNTIME_DEPENDENCY_INSTALL,
     SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
     ExecPluginType,
     Status,
@@ -66,6 +67,10 @@ from flwr.server.grid.grpc_grid import GrpcGrid
 from flwr.server.run_serverapp import run as run_
 from flwr.supercore.app_utils import start_parent_process_monitor
 from flwr.supercore.heartbeat import HeartbeatSender, make_app_heartbeat_fn_grpc
+from flwr.supercore.superexec.dependency_installer import (
+    cleanup_app_runtime_environment,
+    install_app_dependencies,
+)
 from flwr.supercore.superexec.plugin import ServerAppExecPlugin
 from flwr.supercore.superexec.run_superexec import run_with_deprecation_warning
 
@@ -94,6 +99,8 @@ def flwr_serverapp() -> None:
             appio_api_address=args.serverappio_api_address,
             parent_pid=args.parent_pid,
             warn_run_once=args.run_once,
+            index_url=args.index_url,
+            runtime_dependency_install=args.runtime_dependency_install,
         )
         return
 
@@ -110,6 +117,8 @@ def flwr_serverapp() -> None:
         token=args.token,
         certificates=None,
         parent_pid=args.parent_pid,
+        index_url=args.index_url,
+        runtime_dependency_install=args.runtime_dependency_install,
     )
 
     # Restore stdout/stderr
@@ -122,6 +131,8 @@ def run_serverapp(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
     token: str,
     certificates: bytes | None = None,
     parent_pid: int | None = None,
+    index_url: str | None = None,
+    runtime_dependency_install: bool = RUNTIME_DEPENDENCY_INSTALL,
 ) -> None:
     """Run Flower ServerApp process."""
     # Monitor the main process in case of SIGKILL
@@ -136,6 +147,7 @@ def run_serverapp(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
     heartbeat_sender = None
     grid = None
     context = None
+    runtime_env_dir: Path | None = None
     exit_code = ExitCode.SUCCESS
 
     def on_exit() -> None:
@@ -164,6 +176,9 @@ def run_serverapp(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
         # Close the Grpc connection
         if grid:
             grid.close()
+
+        # Clean up run-scoped runtime environment, if any.
+        cleanup_app_runtime_environment(runtime_env_dir)
 
     # Register signal handlers for graceful shutdown
     register_signal_handlers(
@@ -210,6 +225,21 @@ def run_serverapp(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
         fab_id, fab_version = get_fab_metadata(fab.content)
 
         app_path = str(get_project_dir(fab_id, fab_version, fab.hash_str))
+
+        if runtime_dependency_install:
+            log(DEBUG, "[flwr-serverapp] Installing app dependencies.")
+            runtime_env_dir = install_app_dependencies(
+                app_path,
+                launch_id=token,
+                run_id=run.run_id,
+                index_url=index_url,
+            )
+        else:
+            log(
+                DEBUG,
+                "[flwr-serverapp] Runtime dependency installation is disabled.",
+            )
+
         config = get_project_config(app_path)
 
         # Obtain server app reference and the run config
