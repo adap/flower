@@ -18,6 +18,7 @@
 import os
 import subprocess
 from collections.abc import Sequence
+from typing import Any
 
 from .exec_plugin import ExecPlugin
 
@@ -48,4 +49,8 @@ class BaseExecPlugin(ExecPlugin):
         # Since we don't need to manage the process, we intentionally avoid using
         # a `with` statement. Suppress the pylint warning for it in this case.
         # pylint: disable-next=consider-using-with
-        subprocess.Popen(cmds)
+        subprocess.Popen(cmds, **self.get_popen_kwargs())
+
+    def get_popen_kwargs(self) -> dict[str, Any]:
+        """Return subprocess keyword arguments when launching app processes."""
+        return {}
