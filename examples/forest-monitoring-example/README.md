@@ -86,7 +86,8 @@ flwr run . <SUPERLINK-CONNECTION> --stream
 You can run Flower on Docker too! Check out the [Flower with Docker](https://flower.ai/docs/framework/docker/index.html) documentation.
 
 ## Resources
-This app is based on the preprint: https://zenodo.org/records/17415920
+- This app is based on the preprint: https://zenodo.org/records/17415920
+- The work behind this App is funded by the Horizon Europe projects MoniFun (Grant Agreement no. 101134991) and PathFinder (Grant Agreement no. 101056907)
 
 - Flower website: [flower.ai](https://flower.ai/)
 - Check the documentation: [flower.ai/docs](https://flower.ai/docs/)
