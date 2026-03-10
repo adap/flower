@@ -40,6 +40,7 @@ from flwr.supercore.auth.constant import (
     APPIO_SIGNED_METADATA_PUBLIC_KEY_HEADER,
     APPIO_SIGNED_METADATA_SIGNATURE_HEADER,
     APPIO_SIGNED_METADATA_TIMESTAMP_HEADER,
+    AUTH_MECHANISM_TOKEN,
     AUTHENTICATION_FAILED_MESSAGE,
 )
 from flwr.supercore.auth.policy import MethodAuthPolicy
@@ -49,7 +50,6 @@ from flwr.supercore.auth.policy import MethodAuthPolicy
 # malformed metadata, etc.), or callers could use error differences as an auth
 # oracle.
 _AUTH_CALLER_IDENTITY_CTX_ATTR = "_flwr_appio_authenticated_caller_identity"
-_AUTH_RUN_ID_CTX_ATTR = "_flwr_appio_authenticated_run_id"
 _AUTH_TOKEN_CTX_ATTR = "_flwr_appio_authenticated_token"
 
 
@@ -156,6 +156,9 @@ def get_authenticated_token(context: grpc.ServicerContext) -> str:
     Token-only helper: this aborts for non-token authenticated callers and
     should not be used in mechanism-agnostic code paths.
     """
+    caller_identity = get_authenticated_caller_identity(context)
+    if caller_identity.mechanism != AUTH_MECHANISM_TOKEN:
+        _abort_auth_denied(context)
     token = getattr(context, _AUTH_TOKEN_CTX_ATTR, None)
     if token is None:
         _abort_auth_denied(context)
@@ -278,7 +281,7 @@ class AppIoAuthServerInterceptor(grpc.ServerInterceptor):  # type: ignore
             # These attributes are internal-only and must be set exclusively by
             # this interceptor.
             setattr(context, _AUTH_CALLER_IDENTITY_CTX_ATTR, caller_identity)
-            if token is not None:
+            if token is not None and caller_identity.mechanism == AUTH_MECHANISM_TOKEN:
                 setattr(context, _AUTH_TOKEN_CTX_ATTR, token)
             return unary_unary_handler(request, context)
 

@@ -67,6 +67,8 @@ class _AbortContext:
 
     def __init__(self) -> None:
         self.abort = Mock(side_effect=grpc.RpcError())
+        self._flwr_appio_authenticated_caller_identity: CallerIdentity | None = None
+        self._flwr_appio_authenticated_token: str | None = None
 
 
 class _SignedMetadataProbeAuthenticator:
@@ -157,7 +159,9 @@ class TestAppIoAuthClientInterceptor(TestCase):
         self.assertIn((APP_TOKEN_HEADER, "abc"), captured["metadata"])
 
 
-class TestAppIoAuthServerInterceptor(TestCase):
+class TestAppIoAuthServerInterceptor(
+    TestCase
+):  # pylint: disable=too-many-public-methods
     """Unit tests for the server interceptor."""
 
     def _make_token_interceptor(
@@ -717,6 +721,58 @@ class TestAppIoAuthServerInterceptor(TestCase):
 
         with self.assertRaises(grpc.RpcError):
             get_authenticated_token(context)
+        context.abort.assert_called_once_with(
+            grpc.StatusCode.PERMISSION_DENIED, AUTHENTICATION_FAILED_MESSAGE
+        )
+
+    def test_get_authenticated_token_denied_for_non_token_authenticated_caller(
+        self,
+    ) -> None:
+        """Non-token authenticated callers cannot access token helper."""
+        # Reason: prevent exposing unverified token headers on mixed-mechanism
+        # auth paths where token is present but not the successful mechanism.
+        state = Mock()
+        state.get_run_id_by_token.return_value = None
+        probe_authenticator = _SignedMetadataProbeAuthenticator()
+        interceptor = AppIoAuthServerInterceptor(
+            method_auth_policy={
+                "/flwr.proto.ServerAppIo/GetNodes": MethodAuthPolicy.any_one(
+                    allowed_mechanisms=(
+                        AUTH_MECHANISM_TOKEN,
+                        AUTH_MECHANISM_SUPEREXEC_SIGNED_METADATA,
+                    ),
+                )
+            },
+            authenticators={
+                AUTH_MECHANISM_TOKEN: TokenAuthenticator(lambda: state),
+                AUTH_MECHANISM_SUPEREXEC_SIGNED_METADATA: probe_authenticator,
+            },
+        )
+
+        intercepted = interceptor.intercept_service(
+            lambda _: grpc.unary_unary_rpc_method_handler(
+                lambda _request, context: get_authenticated_token(context)
+            ),
+            _HandlerCallDetails(
+                method="/flwr.proto.ServerAppIo/GetNodes",
+                invocation_metadata=(
+                    (APP_TOKEN_HEADER, "bogus"),
+                    (APPIO_SIGNED_METADATA_PUBLIC_KEY_HEADER, b"pk"),
+                    (APPIO_SIGNED_METADATA_SIGNATURE_HEADER, b"sig"),
+                    (APPIO_SIGNED_METADATA_TIMESTAMP_HEADER, "2026-03-09T10:00:00"),
+                    (
+                        APPIO_SIGNED_METADATA_METHOD_HEADER,
+                        "/flwr.proto.ServerAppIo/GetNodes",
+                    ),
+                    (APPIO_SIGNED_METADATA_PLUGIN_TYPE_HEADER, "serverapp"),
+                ),
+            ),
+        )
+        context = Mock()
+        context.abort.side_effect = grpc.RpcError()
+
+        with self.assertRaises(grpc.RpcError):
+            intercepted.unary_unary(GetNodesRequest(run_id=1), context)
         context.abort.assert_called_once_with(
             grpc.StatusCode.PERMISSION_DENIED, AUTHENTICATION_FAILED_MESSAGE
         )
