@@ -238,7 +238,7 @@ def configure_superlink_log_file(
         "%(levelname)s %(name)s %(asctime)s | %(filename)s:%(lineno)d | %(message)s"
     )
     file_handler = TimedRotatingFileHandler(
-        filename=path,
+        filename=str(path),
         when="H",
         interval=interval_hours,
         backupCount=backup_count,
