@@ -20,6 +20,7 @@ from typing import NoReturn
 from unittest.mock import Mock, call, patch
 
 import grpc
+
 from flwr.proto.control_pb2 import StreamLogsResponse  # pylint: disable=E0611
 
 from .log import print_logs, stream_logs
