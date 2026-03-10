@@ -79,12 +79,12 @@ def test_local_config_is_preserved_when_endpoint_available() -> None:
     mock_start.assert_not_called()
 
 
-def test_start_local_superlink_uses_builtin_log_rotation() -> None:
+def test_start_local_superlink_uses_builtin_log_rotation(tmp_path: Path) -> None:
     """Start command should include built-in SuperLink log rotation flags."""
     # Prepare
-    database = Path("/tmp/flwr-local-superlink-state.db")
-    storage = Path("/tmp/flwr-local-superlink-storage")
-    log_file = Path("/tmp/flwr-local-superlink.log")
+    database = tmp_path / "flwr-local-superlink-state.db"
+    storage = tmp_path / "flwr-local-superlink-storage"
+    log_file = tmp_path / "flwr-local-superlink.log"
     process = MagicMock()
     process.poll.return_value = None
 
