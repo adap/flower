@@ -105,18 +105,19 @@ def stream_logs(
 
     latest_timestamp = 0.0
     res = None
-    try:
-        with flwr_cli_grpc_exc_handler():
+    
+    with flwr_cli_grpc_exc_handler():
+        try:
             for res in stub.StreamLogs(req, timeout=duration):
                 print(res.log_output, end="")
-        raise AllLogsRetrieved()
-    except grpc.RpcError as e:
-        # pylint: disable=E1101
-        if e.code() != grpc.StatusCode.DEADLINE_EXCEEDED:
-            raise e
-    finally:
-        if res is not None:
-            latest_timestamp = cast(float, res.latest_timestamp)
+            raise AllLogsRetrieved()
+        except grpc.RpcError as e:
+            # pylint: disable=E1101
+            if e.code() != grpc.StatusCode.DEADLINE_EXCEEDED:
+                raise e
+        finally:
+            if res is not None:
+                latest_timestamp = cast(float, res.latest_timestamp)
 
     return max(latest_timestamp, after_timestamp)
 
