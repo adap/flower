@@ -20,7 +20,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Update framework documentation** ([#6533](https://github.com/adap/flower/pull/6533), [#6537](https://github.com/adap/flower/pull/6537), [#6541](https://github.com/adap/flower/pull/6541), [#6546](https://github.com/adap/flower/pull/6546), [#6551](https://github.com/adap/flower/pull/6551), [#6593](https://github.com/adap/flower/pull/6593), [#6598](https://github.com/adap/flower/pull/6598), [#6612](https://github.com/adap/flower/pull/6612), [#6615](https://github.com/adap/flower/pull/6615), [#6629](https://github.com/adap/flower/pull/6629), [#6631](https://github.com/adap/flower/pull/6631), [#6635](https://github.com/adap/flower/pull/6635), [#6681](https://github.com/adap/flower/pull/6681), [#6694](https://github.com/adap/flower/pull/6694), [#6710](https://github.com/adap/flower/pull/6710), [#6718](https://github.com/adap/flower/pull/6718), [#6719](https://github.com/adap/flower/pull/6719), [#6731](https://github.com/adap/flower/pull/6731))
 
-  Improves and fixes various parts of the framework documentation, including a new FAQ for unexpected Windows PowerShell output (https://flower.ai/docs/framework/1.27/en/ref-faq.html#faq-windows-unexpected-output).
+  Improves and fixes various parts of the framework documentation, including a new FAQ for unexpected Windows PowerShell output ([FAQ entry](https://flower.ai/docs/framework/1.27/en/ref-faq.html#faq-windows-unexpected-output)).
 
 - **Adopt release-branch workflow for Flower framework releases** ([#6560](https://github.com/adap/flower/pull/6560), [#6566](https://github.com/adap/flower/pull/6566), [#6594](https://github.com/adap/flower/pull/6594))
 
@@ -36,7 +36,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Enable timestamped logging by default** ([#6727](https://github.com/adap/flower/pull/6727))
 
-- **Add `--limit` option to `flwr list` for limiting the number of runs listed** ([#6639](https://github.com/adap/flower/pull/6639))
+- **Add `--limit` option to `flwr list` to limit the number of runs listed** ([#6639](https://github.com/adap/flower/pull/6639))
 
 - **Add Federated Analytics example** ([#6314](https://github.com/adap/flower/pull/6314))
 
