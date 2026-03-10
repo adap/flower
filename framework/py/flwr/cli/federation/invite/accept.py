@@ -19,13 +19,19 @@ from typing import Annotated
 
 import typer
 
-from flwr.cli.utils import cli_output_control_stub, flwr_cli_grpc_exc_handler
+from flwr.cli.utils import (
+    cli_output_control_stub,
+    flwr_cli_grpc_exc_handler,
+    print_json_to_stdout,
+)
 from flwr.common.constant import CliOutputFormat
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     AcceptInvitationRequest,
     AcceptInvitationResponse,
 )
 from flwr.proto.control_pb2_grpc import ControlStub
+
+from ..error_handlers import handle_invite_grpc_error
 
 
 def accept(
@@ -55,10 +61,13 @@ def accept(
 def _accept_invitation(
     stub: ControlStub,
     request: AcceptInvitationRequest,
-    is_json: bool,  # pylint: disable=W0613
+    is_json: bool,
 ) -> None:
     """Send an accept invitation request."""
-    with flwr_cli_grpc_exc_handler():
+    with flwr_cli_grpc_exc_handler(handle_invite_grpc_error):
         _: AcceptInvitationResponse = stub.AcceptInvitation(request)
 
-    raise NotImplementedError
+    if is_json:
+        print_json_to_stdout({"success": True})
+    else:
+        typer.secho(f"✅ Accepted invitation to join '{request.federation_name}'.")
