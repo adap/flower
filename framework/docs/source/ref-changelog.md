@@ -10,9 +10,9 @@ We would like to give our special thanks to all the contributors who made the ne
 
 ### What's new?
 
-- **Introduce Local SuperLink for managing local simulations** ([#6599](https://github.com/adap/flower/pull/6599), [#6717](https://github.com/adap/flower/pull/6717))
+- **Introduce local SuperLink for managing local simulations** ([#6599](https://github.com/adap/flower/pull/6599), [#6717](https://github.com/adap/flower/pull/6717))
 
-  Local simulations are now managed by a Local SuperLink, which is automatically launched on demand. This enables running most `flwr` CLI commands locally, such as `flwr list` to list previous runs and `flwr log` to retrieve logs from earlier runs. See the [documentation](https://flower.ai/docs/framework/1.27/en/how-to-run-flower-locally.html) for more details.
+  Local simulations are now managed by a local SuperLink, which is automatically launched on demand. This enables running most `flwr` CLI commands locally, such as `flwr list` to list previous runs and `flwr log` to retrieve logs from earlier runs. See the [documentation](https://flower.ai/docs/framework/1.27/en/how-to-run-flower-locally.html) for more details.
 
 - **Update framework documentation** ([#6533](https://github.com/adap/flower/pull/6533), [#6537](https://github.com/adap/flower/pull/6537), [#6541](https://github.com/adap/flower/pull/6541), [#6546](https://github.com/adap/flower/pull/6546), [#6551](https://github.com/adap/flower/pull/6551), [#6593](https://github.com/adap/flower/pull/6593), [#6598](https://github.com/adap/flower/pull/6598), [#6612](https://github.com/adap/flower/pull/6612), [#6615](https://github.com/adap/flower/pull/6615), [#6629](https://github.com/adap/flower/pull/6629), [#6631](https://github.com/adap/flower/pull/6631), [#6635](https://github.com/adap/flower/pull/6635), [#6681](https://github.com/adap/flower/pull/6681), [#6694](https://github.com/adap/flower/pull/6694), [#6710](https://github.com/adap/flower/pull/6710), [#6718](https://github.com/adap/flower/pull/6718), [#6719](https://github.com/adap/flower/pull/6719))
 
@@ -58,7 +58,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Remove `flower-simulation` CLI entrypoint** ([#6628](https://github.com/adap/flower/pull/6628))
 
-  Removes the `flower-simulation` CLI entrypoint. With the introduction of Local SuperLink, this command is no longer needed.
+  Removes the `flower-simulation` CLI entrypoint. With the introduction of local SuperLink, this command is no longer needed.
 
 ## v1.26.1 (2026-02-07)
 
