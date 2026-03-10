@@ -120,7 +120,7 @@ def update_console_handler(
 
 # Configure console logger
 console_handler = ConsoleHandler(
-    timestamps=False,
+    timestamps=True,
     json=False,
     colored=True,
 )
@@ -132,7 +132,7 @@ if log_level := os.getenv("FLWR_LOG_LEVEL"):
     log_level = log_level.upper()
     try:
         is_debug = log_level == "DEBUG"
-        update_console_handler(level=log_level, timestamps=is_debug, colored=True)
+        update_console_handler(level=log_level, timestamps=True, colored=True)
         if is_debug:
             log(
                 WARN,
