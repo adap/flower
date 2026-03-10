@@ -27,6 +27,7 @@ AUTH_SELECTION_MODE_ANY_ONE: Final[AuthSelectionMode] = "any_one"
 AUTH_SELECTION_MODE_EXACTLY_ONE: Final[AuthSelectionMode] = "exactly_one"
 
 # gRPC metadata keys for signed-metadata AppIo auth input extraction.
+APP_TOKEN_HEADER: Final[str] = "flwr-app-token"
 APPIO_SIGNED_METADATA_PUBLIC_KEY_HEADER: Final[str] = "flwr-superexec-public-key-bin"
 APPIO_SIGNED_METADATA_SIGNATURE_HEADER: Final[str] = "flwr-superexec-signature-bin"
 APPIO_SIGNED_METADATA_TIMESTAMP_HEADER: Final[str] = "flwr-superexec-timestamp"

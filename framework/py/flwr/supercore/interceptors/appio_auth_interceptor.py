@@ -26,7 +26,6 @@ from typing import Any, cast
 import grpc
 from google.protobuf.message import Message as GrpcMessage
 
-from flwr.common.constant import APP_TOKEN_HEADER
 from flwr.supercore.auth.appio_auth import (
     AuthDecisionEngine,
     Authenticator,
@@ -35,6 +34,7 @@ from flwr.supercore.auth.appio_auth import (
     SignedMetadataAuthInput,
 )
 from flwr.supercore.auth.constant import (
+    APP_TOKEN_HEADER,
     APPIO_SIGNED_METADATA_METHOD_HEADER,
     APPIO_SIGNED_METADATA_PLUGIN_TYPE_HEADER,
     APPIO_SIGNED_METADATA_PUBLIC_KEY_HEADER,

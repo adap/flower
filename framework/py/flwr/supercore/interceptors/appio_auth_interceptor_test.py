@@ -21,10 +21,10 @@ from unittest.mock import Mock
 import grpc
 from google.protobuf.message import Message as GrpcMessage
 
-from flwr.common.constant import APP_TOKEN_HEADER
 from flwr.proto.serverappio_pb2 import GetNodesRequest  # pylint: disable=E0611
 from flwr.supercore.auth.appio_auth import AuthInput, CallerIdentity, TokenAuthenticator
 from flwr.supercore.auth.constant import (
+    APP_TOKEN_HEADER,
     APPIO_SIGNED_METADATA_METHOD_HEADER,
     APPIO_SIGNED_METADATA_PLUGIN_TYPE_HEADER,
     APPIO_SIGNED_METADATA_PUBLIC_KEY_HEADER,
