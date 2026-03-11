@@ -403,13 +403,13 @@ for an LLM.
 
 .. _flowerdatasets: https://flower.ai/docs/datasets/
 
-.. _flowertune: https://github.com/adap/flower/tree/main/examples/flowertune-llm
+.. _flowertune: https://github.com/flwrlabs/flower/tree/main/examples/flowertune-llm
 
 .. _iidpartitioner: https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.IidPartitioner.html#flwr_datasets.partitioner.IidPartitioner
 
 .. _otherpartitioners: https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.html
 
-.. _quickstart_hf_link: https://github.com/adap/flower/tree/main/examples/quickstart-huggingface
+.. _quickstart_hf_link: https://github.com/flwrlabs/flower/tree/main/examples/quickstart-huggingface
 
 .. |arrayrecord_link| replace:: ``ArrayRecord``
 

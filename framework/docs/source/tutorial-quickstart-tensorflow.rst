@@ -366,4 +366,4 @@ Congratulations! You've successfully built and run your first federated learning
 
 .. |quickstart_tf_link| replace:: ``examples/quickstart-tensorflow``
 
-.. _quickstart_tf_link: https://github.com/adap/flower/blob/main/examples/quickstart-tensorflow
+.. _quickstart_tf_link: https://github.com/flwrlabs/flower/blob/main/examples/quickstart-tensorflow

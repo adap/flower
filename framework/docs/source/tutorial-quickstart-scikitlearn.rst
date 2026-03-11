@@ -351,7 +351,7 @@ in scikit-learn on the Iris dataset using the new Message API.
 
     Check the source code of another Flower App using ``scikit-learn`` in the `Flower
     GitHub repository
-    <https://github.com/adap/flower/tree/main/examples/quickstart-sklearn-tabular>`_.
+    <https://github.com/flwrlabs/flower/tree/main/examples/quickstart-sklearn-tabular>`_.
 
 .. |flowerdatasets| replace:: Flower Datasets
 

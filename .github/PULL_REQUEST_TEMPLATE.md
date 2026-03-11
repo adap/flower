@@ -2,7 +2,7 @@
 Thank you for opening a pull request (PR)!
 
 Please rename your PRs following this [format](https://flower.ai/docs/framework/contributor-tutorial-contribute-on-github.html#pr-title-format).
-Contribution guidelines: https://github.com/adap/flower/blob/main/CONTRIBUTING.md
+Contribution guidelines: https://github.com/flwrlabs/flower/blob/main/CONTRIBUTING.md
 -->
 
 ## Issue
