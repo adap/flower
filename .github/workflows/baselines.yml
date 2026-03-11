@@ -1,8 +1,3 @@
-# For now we have decided to disable this workflow as many of the baselines are
-# not being actively maintained and we don't want to block PRs that touch
-# multiple baselines. We will revisit this in the future when we have a better
-# idea of how to maintain the baselines and ensure they are up to date.
-#
 # To re-enable, remove `if: false` from the changes job.
 
 name: Baselines
