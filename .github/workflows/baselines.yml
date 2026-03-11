@@ -3,18 +3,17 @@
 # multiple baselines. We will revisit this in the future when we have a better
 # idea of how to maintain the baselines and ensure they are up to date.
 #
-# To re-enable, restore the `on` triggers below and remove `if: false` from the
-# changes job.
+# To re-enable, remove `if: false` from the changes job.
 
 name: Baselines
 
 on:
-  # push:
-  #   branches:
-  #     - main
-  # pull_request:
-  #   branches:
-  #     - main
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 concurrency:
