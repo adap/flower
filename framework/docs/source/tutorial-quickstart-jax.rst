@@ -437,7 +437,7 @@ for JAX with Flower!
 
 .. |quickstart_jax_link| replace:: ``examples/quickstart-jax``
 
-.. _quickstart_jax_link: https://github.com/adap/flower/tree/main/examples/quickstart-jax
+.. _quickstart_jax_link: https://github.com/flwrlabs/flower/tree/main/examples/quickstart-jax
 
 .. |message_link| replace:: ``Message``
 
