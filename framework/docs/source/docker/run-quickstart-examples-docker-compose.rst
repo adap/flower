@@ -7,10 +7,10 @@
 ####################################################
 
 Flower provides a set of `quickstart examples
-<https://github.com/flwrlabs/flower/tree/main/examples>`_ to help you get started with the
-framework. These examples are designed to demonstrate the capabilities of Flower and by
-default run using the Simulation Runtime. This guide demonstrates how to run them using
-Flower's Deployment Runtime via Docker Compose.
+<https://github.com/flwrlabs/flower/tree/main/examples>`_ to help you get started with
+the framework. These examples are designed to demonstrate the capabilities of Flower and
+by default run using the Simulation Runtime. This guide demonstrates how to run them
+using Flower's Deployment Runtime via Docker Compose.
 
 .. important::
 

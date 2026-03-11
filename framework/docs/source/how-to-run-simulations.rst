@@ -131,8 +131,10 @@ simulation-ready.
   <https://github.com/flwrlabs/flower/tree/main/examples/quickstart-pytorch>`_
 - `Advanced PyTorch
   <https://github.com/flwrlabs/flower/tree/main/examples/advanced-pytorch>`_
-- `Quickstart MLX <https://github.com/flwrlabs/flower/tree/main/examples/quickstart-mlx>`_
-- `ViT fine-tuning <https://github.com/flwrlabs/flower/tree/main/examples/flowertune-vit>`_
+- `Quickstart MLX
+  <https://github.com/flwrlabs/flower/tree/main/examples/quickstart-mlx>`_
+- `ViT fine-tuning
+  <https://github.com/flwrlabs/flower/tree/main/examples/flowertune-vit>`_
 
 The complete list of examples can be found in `the Flower GitHub
 <https://github.com/flwrlabs/flower/tree/main/examples>`_.
