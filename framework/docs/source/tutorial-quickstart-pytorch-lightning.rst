@@ -17,7 +17,7 @@ Then, clone the code example directly from GitHub:
 
 .. code-block:: shell
 
-    git clone --depth=1 https://github.com/adap/flower.git _tmp \
+    git clone --depth=1 https://github.com/flwrlabs/flower.git _tmp \
                  && mv _tmp/examples/quickstart-pytorch-lightning . \
                  && rm -rf _tmp && cd quickstart-pytorch-lightning
 
@@ -111,7 +111,7 @@ in ``pyproject.toml`` like this:
 .. note::
 
     Check the `source code
-    <https://github.com/adap/flower/tree/main/examples/quickstart-pytorch-lightning>`_
+    <https://github.com/flwrlabs/flower/tree/main/examples/quickstart-pytorch-lightning>`_
     of this tutorial in ``examples/quickstart-pytorch-lightning`` in the Flower GitHub
     repository.
 
