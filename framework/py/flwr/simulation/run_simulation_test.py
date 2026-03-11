@@ -81,4 +81,3 @@ class TestMainLoop(TestCase):
         self.assertEqual(updated_context.run_id, run.run_id)
         mock_grid.set_run.assert_called_once_with(run)
         mock_thread.join.assert_called_once()
-

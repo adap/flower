@@ -128,6 +128,12 @@ class TestInMemoryGrid(unittest.TestCase):
         with self.assertRaises(TypeError):
             self.grid.set_run(61016)  # type: ignore[arg-type]
 
+    def test_set_run_rejects_missing_run(self) -> None:
+        """Test `set_run` rejects runs that are not registered in state."""
+        self.state.get_run_info.return_value = []
+        with self.assertRaises(RuntimeError):
+            self.grid.set_run(self.run)
+
     def test_get_nodes(self) -> None:
         """Test retrieval of nodes."""
         # Execute
