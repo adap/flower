@@ -72,6 +72,7 @@ jobs:
           path: intelligence/docs/source/ts-api-ref/
 
   build_swift_docs:
+    if: false
     runs-on: macos-14
     name: Build Swift Docs
     steps:
@@ -90,7 +91,11 @@ jobs:
         run: brew install sourcedocs
       - name: Build Swift docs
         run: |
-          sourcedocs generate --module-name FlowerIntelligence -- -scheme Flwr -destination 'platform=macOS'
+          (
+            mv FlowerIntelligenceExamples.xcodeproj FlowerIntelligenceExamples.xcodeproj.bak
+            trap 'mv FlowerIntelligenceExamples.xcodeproj.bak FlowerIntelligenceExamples.xcodeproj' EXIT
+            sourcedocs generate --module-name FlowerIntelligence -- -scheme flower -destination 'platform=macOS'
+          )
           mkdir -p intelligence/docs/source/swift-api-ref
           cp -r Documentation/Reference/* intelligence/docs/source/swift-api-ref/
           mv intelligence/docs/source/swift-api-ref/README.md intelligence/docs/source/swift-api-ref/index.md
@@ -131,7 +136,7 @@ jobs:
 
   build_and_deploy:
     runs-on: ubuntu-22.04
-    needs: [build_ts_docs, build_swift_docs, build_kt_docs]
+    needs: [build_ts_docs, build_kt_docs]
     name: Deploy Docs
     steps:
       - uses: actions/checkout@v5
@@ -153,12 +158,6 @@ jobs:
         with:
           name: ts-docs
           path: intelligence/docs/source/ts-api-ref/
-      - name: Download Swift docs
-        if: ${{ github.ref == 'refs/heads/main' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork }}
-        uses: actions/download-artifact@v4
-        with:
-          name: swift-docs
-          path: intelligence/docs/source/swift-api-ref/
       - name: Download Kotlin docs
         if: ${{ github.ref == 'refs/heads/main' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork }}
         uses: actions/download-artifact@v4
