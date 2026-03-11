@@ -83,7 +83,7 @@ flwr-clientapp = "flwr.supernode.cli:flwr_clientapp"
 
 [project.urls]
 homepage = "https://flower.ai"
-repository = "https://github.com/adap/flower"
+repository = "https://github.com/flwrlabs/flower"
 documentation = "https://flower.ai"
 
 [dependency-groups]

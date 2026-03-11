@@ -9,11 +9,11 @@ Flower.
 
     Yes, it can! Flower even comes with a few under-the-hood optimizations to make it work even better on Colab. Here's a quickstart example:
 
-    * `Flower 30-minute tutorial <https://colab.research.google.com/github/adap/flower/blob/main/examples/flower-in-30-minutes/tutorial.ipynb>`_
+    * `Flower 30-minute tutorial <https://colab.research.google.com/github/flwrlabs/flower/blob/main/examples/flower-in-30-minutes/tutorial.ipynb>`_
 
 .. dropdown:: :fa:`eye,mr-1` How can I run Federated Learning on a Raspberry Pi?
 
-    Find the `blog post about federated learning on embedded device here <https://flower.ai/blog/2020-12-16-running_federated_learning_applications_on_embedded_devices_with_flower>`_ and the corresponding `GitHub code example <https://github.com/adap/flower/tree/main/examples/embedded-devices>`_.
+    Find the `blog post about federated learning on embedded device here <https://flower.ai/blog/2020-12-16-running_federated_learning_applications_on_embedded_devices_with_flower>`_ and the corresponding `GitHub code example <https://github.com/flwrlabs/flower/tree/main/examples/embedded-devices>`_.
 
 .. dropdown:: :fa:`eye,mr-1` Does Flower support federated learning on Android devices?
 

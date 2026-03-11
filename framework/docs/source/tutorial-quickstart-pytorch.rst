@@ -428,6 +428,6 @@ Congratulations! You've successfully built and run your first federated learning
 .. note::
 
     Check the `source code
-    <https://github.com/adap/flower/blob/main/examples/quickstart-pytorch>`_ of the
+    <https://github.com/flwrlabs/flower/blob/main/examples/quickstart-pytorch>`_ of the
     extended version of this tutorial in ``examples/quickstart-pytorch`` in the Flower
     GitHub repository.
