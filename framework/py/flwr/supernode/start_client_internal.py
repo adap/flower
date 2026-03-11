@@ -24,7 +24,6 @@ from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from functools import partial
 from logging import ERROR, INFO, WARN
-from pathlib import Path
 from typing import cast
 
 import grpc
@@ -36,7 +35,7 @@ from flwr.app.user_config import UserConfig
 from flwr.client.grpc_adapter_client.connection import grpc_adapter
 from flwr.client.grpc_rere_client.connection import grpc_request_response
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, Context, Error, Message, RecordDict
-from flwr.common.config import get_flwr_dir, get_fused_config_from_fab
+from flwr.common.config import get_fused_config_from_fab
 from flwr.common.constant import (
     CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
     ISOLATION_MODE_SUBPROCESS,
@@ -74,11 +73,10 @@ from flwr.supercore.primitives.asymmetric_ed25519 import (
     decode_base64url,
     verify_signature,
 )
+from flwr.supercore.utils import get_flwr_home
 from flwr.supercore.version import package_version
 from flwr.supernode.nodestate import NodeState, NodeStateFactory
 from flwr.supernode.servicer.clientappio import ClientAppIoServicer
-
-DEFAULT_FFS_DIR = get_flwr_dir() / "supernode" / "ffs"
 
 FAB_VERIFICATION_ERROR = Error(ErrorCode.INVALID_FAB, "The FAB could not be verified.")
 
@@ -100,7 +98,6 @@ def start_client_internal(
     ) = None,
     max_retries: int | None = None,
     max_wait_time: float | None = None,
-    flwr_path: Path | None = None,
     isolation: str = ISOLATION_MODE_SUBPROCESS,
     clientappio_api_address: str = CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
     health_server_address: str | None = None,
@@ -141,8 +138,6 @@ def start_client_internal(
         The maximum duration before the client stops trying to
         connect to the server in case of connection error.
         If set to None, there is no limit to the total time.
-    flwr_path: Optional[Path] (default: None)
-        The fully resolved path containing installed Flower Apps.
     isolation : str (default: ISOLATION_MODE_SUBPROCESS)
         Isolation mode for `ClientApp`. Possible values are `subprocess` and
         `process`. If `subprocess`, the `ClientApp` runs in a subprocess started
@@ -180,7 +175,7 @@ def start_client_internal(
     # Initialize factories
     object_store_factory = ObjectStoreFactory()
     state_factory = NodeStateFactory(objectstore_factory=object_store_factory)
-    ffs_factory = FfsFactory(get_flwr_dir(flwr_path) / "supernode" / "ffs")  # type: ignore
+    ffs_factory = FfsFactory(str(get_flwr_home() / "supernode" / "ffs"))
 
     # Launch ClientAppIo API server
     grpc_servers = []

@@ -32,7 +32,6 @@ import yaml
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.args import try_obtain_server_certificates
-from flwr.common.config import get_flwr_dir
 from flwr.common.constant import (
     AUTHN_TYPE_YAML_KEY,
     AUTHZ_TYPE_YAML_KEY,
@@ -54,7 +53,7 @@ from flwr.common.constant import (
 from flwr.common.event_log_plugin import EventLogWriterPlugin
 from flwr.common.exit import ExitCode, flwr_exit, register_signal_handlers
 from flwr.common.grpc import generic_create_grpc_server
-from flwr.common.logger import log
+from flwr.common.logger import configure_superlink_log_file, log
 from flwr.proto.fleet_pb2_grpc import (  # pylint: disable=E0611
     add_FleetServicer_to_server,
 )
@@ -65,6 +64,7 @@ from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.grpc_health import add_args_health, run_health_server_grpc_no_tls
 from flwr.supercore.object_store import ObjectStoreFactory
+from flwr.supercore.utils import get_flwr_home
 from flwr.supercore.version import package_version
 from flwr.superlink.artifact_provider import ArtifactProvider
 from flwr.superlink.auth_plugin import (
@@ -85,7 +85,7 @@ from .superlink.linkstate import LinkStateFactory
 from .superlink.serverappio.serverappio_grpc import run_serverappio_api_grpc
 from .superlink.simulation.simulationio_grpc import run_simulationio_api_grpc
 
-BASE_DIR = get_flwr_dir() / "superlink" / "ffs"
+BASE_DIR = get_flwr_home() / "superlink" / "ffs"
 P = TypeVar("P", ControlAuthnPlugin, ControlAuthzPlugin)
 
 
@@ -160,15 +160,16 @@ def run_superlink() -> None:
     """Run Flower SuperLink (ServerAppIo API and Fleet API)."""
     args = _parse_args_run_superlink().parse_args()
 
+    if args.log_file:
+        configure_superlink_log_file(
+            filename=args.log_file,
+            interval_hours=args.log_rotation_interval_hours,
+            backup_count=args.log_rotation_backup_count,
+        )
+
     log(INFO, "Starting Flower SuperLink")
 
     event(EventType.RUN_SUPERLINK_ENTER)
-
-    # Warn unused options
-    if args.flwr_dir is not None:
-        log(
-            WARN, "The `--flwr-dir` option is currently not in use and will be ignored."
-        )
 
     # Detect if `--executor*` arguments were set
     if args.executor or args.executor_dir or args.executor_config:
@@ -693,17 +694,6 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
         "Use this flag only if you understand the risks.",
     )
     parser.add_argument(
-        "--flwr-dir",
-        default=None,
-        help="""The path containing installed Flower Apps.
-        The default directory is:
-
-        - `$FLWR_HOME/` if `$FLWR_HOME` is defined
-        - `$XDG_DATA_HOME/.flwr/` if `$XDG_DATA_HOME` is defined
-        - `$HOME/.flwr/` in all other cases
-        """,
-    )
-    parser.add_argument(
         "--ssl-certfile",
         help="Fleet API server SSL certificate file (as a path str) "
         "to create a secure connection.",
@@ -757,6 +747,25 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
         action="store_true",
         help="Enable supernode authentication.",
     )
+    parser.add_argument(
+        "--log-file",
+        type=str,
+        default=None,
+        help="Path to the SuperLink log file. If provided, logs are written to this "
+        "file and rotated on a fixed schedule.",
+    )
+    parser.add_argument(
+        "--log-rotation-interval-hours",
+        type=_positive_int,
+        default=24,
+        help="Rotate SuperLink log files every N hours.",
+    )
+    parser.add_argument(
+        "--log-rotation-backup-count",
+        type=_positive_int,
+        default=7,
+        help="Maximum number of rotated SuperLink log files to keep.",
+    )
 
 
 def _add_args_serverappio_api(parser: argparse.ArgumentParser) -> None:
@@ -766,6 +775,13 @@ def _add_args_serverappio_api(parser: argparse.ArgumentParser) -> None:
         help="ServerAppIo API (gRPC) server address (IPv4, IPv6, or a domain name). "
         f"By default, it is set to {SERVERAPPIO_API_DEFAULT_SERVER_ADDRESS}.",
     )
+
+
+def _positive_int(value: str) -> int:
+    parsed = int(value)
+    if parsed < 1:
+        raise argparse.ArgumentTypeError("value must be >= 1")
+    return parsed
 
 
 def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:

@@ -19,6 +19,7 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
 from flwr.common.typing import Federation
+from flwr.proto.federation_pb2 import Invitation  # pylint: disable=E0611
 
 if TYPE_CHECKING:
     from flwr.server.superlink.linkstate.linkstate import LinkState
@@ -129,7 +130,7 @@ class FederationManager(ABC):
 
     @abstractmethod
     def create_invitation(
-        self, flwr_aid: str, federation: str, invitee_flwr_aid: str
+        self, flwr_aid: str, federation: str, invitee_account_name: str
     ) -> None:
         """Create an invitation for an account to join a federation.
 
@@ -139,13 +140,27 @@ class FederationManager(ABC):
             The ID of the account creating the invitation (inviter).
         federation : str
             The name of the federation.
-        invitee_flwr_aid : str
-            The ID of the account being invited.
+        invitee_account_name : str
+            The name of the account being invited.
+
+        Raises
+        ------
+        ValueError
+            If the federation does not exist.
+        PermissionError
+            If the caller is not the owner, the invitee is already a member,
+            or a pending invitation already exists for the invitee.
         """
 
     @abstractmethod
-    def list_invitations(self, flwr_aid: str) -> list[dict[str, str]]:
-        """List invitations for a federation visible to the given account.
+    def list_invitations(
+        self, flwr_aid: str
+    ) -> tuple[list[Invitation], list[Invitation]]:
+        """List all invitations visible to the given account.
+
+        Returns invitations split into those created by the account
+        (as inviter) and those received (as invitee). Each list is
+        ordered by creation time (oldest first).
 
         Parameters
         ----------
@@ -154,13 +169,13 @@ class FederationManager(ABC):
 
         Returns
         -------
-        list[dict[str, str]]
-            A list of invitation records.
+        tuple[list[Invitation], list[Invitation]]
+            A tuple of (created_invitations, received_invitations).
         """
 
     @abstractmethod
     def accept_invitation(self, flwr_aid: str, federation: str) -> None:
-        """Accept a pending invitation to join a federation.
+        """Accept a pending invitation and become a member of the federation.
 
         Parameters
         ----------
@@ -168,11 +183,17 @@ class FederationManager(ABC):
             The ID of the account accepting the invitation (invitee).
         federation : str
             The name of the federation.
+
+        Raises
+        ------
+        ValueError
+            If the federation does not exist, or no pending
+            invitation exists for the account in the federation.
         """
 
     @abstractmethod
     def reject_invitation(self, flwr_aid: str, federation: str) -> None:
-        """Reject a pending invitation to join a federation.
+        """Reject a pending invitation.
 
         Parameters
         ----------
@@ -180,20 +201,34 @@ class FederationManager(ABC):
             The ID of the account rejecting the invitation (invitee).
         federation : str
             The name of the federation.
+
+        Raises
+        ------
+        ValueError
+            If the federation does not exist, or no pending invitation exists
+            for the account in the federation.
         """
 
     @abstractmethod
     def revoke_invitation(
-        self, flwr_aid: str, federation: str, invitee_flwr_aid: str
+        self, flwr_aid: str, federation: str, invitee_account_name: str
     ) -> None:
         """Revoke a pending invitation.
 
         Parameters
         ----------
         flwr_aid : str
-            The ID of the account revoking the invitation (inviter).
+            The ID of the account revoking the invitation.
         federation : str
             The name of the federation.
-        invitee_flwr_aid : str
-            The ID of the account whose invitation is being revoked.
+        invitee_account_name : str
+            The name of the account whose invitation is being revoked.
+
+        Raises
+        ------
+        ValueError
+            If the federation does not exist, or no pending invitation exists
+            for the invitee.
+        PermissionError
+            If the caller is not an owner of the federation.
         """

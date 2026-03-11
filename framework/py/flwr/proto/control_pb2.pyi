@@ -631,15 +631,19 @@ global___ListInvitationsRequest = ListInvitationsRequest
 class ListInvitationsResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
 
-    INVITATIONS_FIELD_NUMBER: builtins.int
+    CREATED_INVITATIONS_FIELD_NUMBER: builtins.int
+    RECEIVED_INVITATIONS_FIELD_NUMBER: builtins.int
     @property
-    def invitations(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[flwr.proto.federation_pb2.Invitation]: ...
+    def created_invitations(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[flwr.proto.federation_pb2.Invitation]: ...
+    @property
+    def received_invitations(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[flwr.proto.federation_pb2.Invitation]: ...
     def __init__(
         self,
         *,
-        invitations: collections.abc.Iterable[flwr.proto.federation_pb2.Invitation] | None = ...,
+        created_invitations: collections.abc.Iterable[flwr.proto.federation_pb2.Invitation] | None = ...,
+        received_invitations: collections.abc.Iterable[flwr.proto.federation_pb2.Invitation] | None = ...,
     ) -> None: ...
-    def ClearField(self, field_name: typing.Literal["invitations", b"invitations"]) -> None: ...
+    def ClearField(self, field_name: typing.Literal["created_invitations", b"created_invitations", "received_invitations", b"received_invitations"]) -> None: ...
 
 global___ListInvitationsResponse = ListInvitationsResponse
 

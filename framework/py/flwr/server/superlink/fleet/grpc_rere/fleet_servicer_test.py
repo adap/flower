@@ -748,8 +748,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902, R0904
         self.store.preregister(run_id, get_object_tree(obj))
 
         # Get initial traffic
-        run_before = self.state.get_run(run_id)
-        assert run_before is not None
+        run_before = self.state.get_run_info(run_ids=[run_id])[0]
         bytes_recv_before = run_before.bytes_recv
 
         # Execute
@@ -763,8 +762,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902, R0904
 
         # Assert
         assert res.stored
-        run_after = self.state.get_run(run_id)
-        assert run_after is not None
+        run_after = self.state.get_run_info(run_ids=[run_id])[0]
         # Verify traffic was recorded
         assert run_after.bytes_recv == bytes_recv_before + len(obj_b)
         assert run_after.bytes_sent == 0  # No bytes sent during push
@@ -782,8 +780,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902, R0904
         self.store.put(object_id=obj.object_id, object_content=obj_b)
 
         # Get initial traffic
-        run_before = self.state.get_run(run_id)
-        assert run_before is not None
+        run_before = self.state.get_run_info(run_ids=[run_id])[0]
         bytes_sent_before = run_before.bytes_sent
 
         # Execute
@@ -795,8 +792,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902, R0904
         # Assert
         assert res.object_found
         assert res.object_available
-        run_after = self.state.get_run(run_id)
-        assert run_after is not None
+        run_after = self.state.get_run_info(run_ids=[run_id])[0]
         # Verify traffic was recorded
         assert run_after.bytes_sent == bytes_sent_before + len(obj_b)
         assert run_after.bytes_recv == 0  # No bytes received during pull
