@@ -33,7 +33,7 @@ communicate arbitrary Python objects via a ``Message`` and how to use it on the
 
 .. tip::
 
-    `Star Flower on GitHub <https://github.com/adap/flower>`__ ⭐️ and join the Flower
+    `Star Flower on GitHub <https://github.com/flwrlabs/flower>`__ ⭐️ and join the Flower
     community on Flower Discuss and the Flower Slack to connect, ask questions, and get
     help:
 

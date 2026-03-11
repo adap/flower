@@ -126,16 +126,16 @@ Tutorial <tutorial-quickstart-pytorch.html>`_, `quickstart JAX Tutorial
 simulation-ready.
 
 - `Quickstart TensorFlow/Keras
-  <https://github.com/adap/flower/tree/main/examples/quickstart-tensorflow>`_.
+  <https://github.com/flwrlabs/flower/tree/main/examples/quickstart-tensorflow>`_.
 - `Quickstart PyTorch
-  <https://github.com/adap/flower/tree/main/examples/quickstart-pytorch>`_
+  <https://github.com/flwrlabs/flower/tree/main/examples/quickstart-pytorch>`_
 - `Advanced PyTorch
-  <https://github.com/adap/flower/tree/main/examples/advanced-pytorch>`_
-- `Quickstart MLX <https://github.com/adap/flower/tree/main/examples/quickstart-mlx>`_
-- `ViT fine-tuning <https://github.com/adap/flower/tree/main/examples/flowertune-vit>`_
+  <https://github.com/flwrlabs/flower/tree/main/examples/advanced-pytorch>`_
+- `Quickstart MLX <https://github.com/flwrlabs/flower/tree/main/examples/quickstart-mlx>`_
+- `ViT fine-tuning <https://github.com/flwrlabs/flower/tree/main/examples/flowertune-vit>`_
 
 The complete list of examples can be found in `the Flower GitHub
-<https://github.com/adap/flower/tree/main/examples>`_.
+<https://github.com/flwrlabs/flower/tree/main/examples>`_.
 
 .. _clientappresources:
 
@@ -292,7 +292,7 @@ resources are assigned (i.e., 2xCPUs per ``ClientApp`` and no GPU).
     )
 
 Refer to the `30 minutes Federated AI Tutorial
-<https://colab.research.google.com/github/adap/flower/blob/main/examples/flower-in-30-minutes/tutorial.ipynb>`_
+<https://colab.research.google.com/github/flwrlabs/flower/blob/main/examples/flower-in-30-minutes/tutorial.ipynb>`_
 for a complete example on how to run Flower Simulations in Colab.
 
 .. _multinodesimulations:

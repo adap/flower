@@ -54,7 +54,7 @@ loading. In part 2, we federate this PyTorch project using Flower.
 
 .. tip::
 
-    `Star Flower on GitHub <https://github.com/adap/flower>`__ ⭐️ and join the Flower
+    `Star Flower on GitHub <https://github.com/flwrlabs/flower>`__ ⭐️ and join the Flower
     community on Flower Discuss and the Flower Slack to connect, ask questions, and get
     help:
 
