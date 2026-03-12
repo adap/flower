@@ -106,7 +106,7 @@ def _validate_description(description: Any) -> None:
     """Validate app description before publishing."""
     if not isinstance(description, str):
         raise click.ClickException(
-            "Invalid app description: expected a string with fewer than 200 characters."
+            ""Missing or invalid app description. Please set `description` in [project] of pyproject.toml."
         )
 
     if description.strip() == "":
