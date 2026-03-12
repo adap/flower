@@ -266,26 +266,19 @@ def test_request_download_link_all_scenarios(
 
     current_case: dict[str, Any] = {"data": None}
 
-    class _FakeResp:
+    class _FakeResp:  # pylint: disable=too-few-public-methods
         ok: bool
         status_code: int
-        _json: dict[str, Any]
+        _json: Any
         text: str
         _json_raises: ValueError | None
 
-        def __init__(
-            self,
-            ok: bool,
-            status: int,
-            json_data: dict[str, Any] | None = None,
-            text: str = "",
-            json_raises: ValueError | None = None,
-        ) -> None:
-            self.ok = ok
-            self.status_code = status
-            self._json = json_data or {}
-            self.text = text
-            self._json_raises = json_raises
+        def __init__(self, fake_resp: dict[str, Any]) -> None:
+            self.ok = fake_resp["ok"]
+            self.status_code = fake_resp["status"]
+            self._json = fake_resp.get("json", {})
+            self.text = fake_resp.get("text", "")
+            self._json_raises = fake_resp.get("json_raises")
 
         def json(self) -> Any:
             """Return JSON data."""
@@ -310,13 +303,7 @@ def test_request_download_link_all_scenarios(
             raise case_data["fake_exc"]
 
         fr: dict[str, Any] = case_data["fake_resp"]  # type: ignore[index]
-        return _FakeResp(
-            ok=fr["ok"],
-            status=fr["status"],
-            json_data=fr.get("json"),
-            text=fr.get("text", ""),
-            json_raises=fr.get("json_raises"),
-        )
+        return _FakeResp(fr)
 
     monkeypatch.setattr(requests, "post", fake_post)
 
