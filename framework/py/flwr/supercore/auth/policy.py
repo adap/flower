@@ -28,10 +28,20 @@ class MethodAuthPolicy:
     access decisions declarative and lets mechanisms evolve independently.
 
     This policy currently supports at most one mechanism per RPC.
+    `requires_run_id_match` is enforced in transport/handler layers that
+    have request context (for example, gRPC interceptors/servicers), not by
+    `AuthDecisionEngine`.
     """
 
     required_mechanism: str | None = None
     requires_run_id_match: bool = False
+
+    def __post_init__(self) -> None:
+        """Validate cross-field invariants."""
+        if self.required_mechanism is None and self.requires_run_id_match:
+            raise ValueError(
+                "requires_run_id_match=True requires a non-None required_mechanism."
+            )
 
     @property
     def requires_authentication(self) -> bool:

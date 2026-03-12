@@ -137,6 +137,11 @@ class AuthDecisionEngine:
         authenticators: Mapping[str, Authenticator],
         method_auth_policies: Mapping[str, MethodAuthPolicy],
     ) -> None:
+        """Initialize decision engine and validate startup policy/authenticator shape.
+
+        ``method_auth_policies`` is used for fail-fast startup validation only.
+        Runtime evaluation remains per-call via ``evaluate(policy, auth_input)``.
+        """
         self._authenticators = authenticators
         # Validate at construction to fail fast on startup configuration bugs.
         self._validate_policy_mechanisms(method_auth_policies)
@@ -211,13 +216,18 @@ class AuthDecisionEngine:
             # attempt authentication with that mechanism.
             else:
                 caller_identity = required_authenticator.authenticate(auth_input)
-                if caller_identity is not None:
+                if caller_identity is None:
+                    failure_reason = AuthDecisionFailureReason.INVALID_AUTH_INPUT
+                elif caller_identity.mechanism != required_mechanism:
+                    # Defensive check: authenticator returned identity inconsistent
+                    # with the mechanism required by policy.
+                    failure_reason = AuthDecisionFailureReason.POLICY_MISCONFIGURED
+                else:
                     return AuthDecision(
                         is_allowed=True,
                         caller_identity=caller_identity,
                         failure_reason=None,
                     )
-                failure_reason = AuthDecisionFailureReason.INVALID_AUTH_INPUT
 
         return AuthDecision(
             is_allowed=False,

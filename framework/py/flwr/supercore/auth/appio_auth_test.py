@@ -55,6 +55,26 @@ class _SignedMetadataPresenceAuthenticator:
         )
 
 
+class _BadTokenAuthenticator:
+    """Test authenticator that returns inconsistent mechanism identity."""
+
+    mechanism = AUTH_MECHANISM_TOKEN
+
+    def is_present(self, auth_input: AuthInput) -> bool:
+        """Return whether token auth input is present."""
+        return auth_input.token is not None
+
+    def authenticate(self, auth_input: AuthInput) -> CallerIdentity | None:
+        """Return mismatched identity to simulate authenticator bug."""
+        if auth_input.token is None:
+            return None
+        return CallerIdentity(
+            mechanism=AUTH_MECHANISM_SUPEREXEC_SIGNED_METADATA,
+            caller_type=CALLER_TYPE_APP_EXECUTOR,
+            run_id=1,
+        )
+
+
 class TestAuthDecisionEngine(TestCase):
     """Unit tests for ``AuthDecisionEngine``."""
 
@@ -156,6 +176,26 @@ class TestAuthDecisionEngine(TestCase):
         self.assertIsNone(decision.caller_identity)
         self.assertEqual(
             decision.failure_reason, AuthDecisionFailureReason.MISSING_AUTH_INPUT
+        )
+
+    def test_token_policy_denies_when_authenticator_returns_wrong_mechanism(
+        self,
+    ) -> None:
+        """Mismatched caller mechanism from authenticator is misconfiguration."""
+        engine = AuthDecisionEngine(
+            authenticators={AUTH_MECHANISM_TOKEN: _BadTokenAuthenticator()},
+            method_auth_policies={},
+        )
+
+        decision = engine.evaluate(
+            policy=MethodAuthPolicy.token_required(),
+            auth_input=AuthInput(token="token"),
+        )
+
+        self.assertFalse(decision.is_allowed)
+        self.assertIsNone(decision.caller_identity)
+        self.assertEqual(
+            decision.failure_reason, AuthDecisionFailureReason.POLICY_MISCONFIGURED
         )
 
     def test_token_required_denies_when_extra_signed_metadata_is_present(self) -> None:
@@ -426,6 +466,14 @@ class TestAuthInputInvariant(TestCase):
 
 class TestMethodAuthPolicyValidation(TestCase):
     """Unit tests for method policy table validation."""
+
+    def test_method_auth_policy_rejects_run_match_without_mechanism(self) -> None:
+        """Run-id-match cannot be enabled when no mechanism is required."""
+        with self.assertRaisesRegex(
+            ValueError,
+            "requires_run_id_match=True requires a non-None required_mechanism.",
+        ):
+            MethodAuthPolicy(required_mechanism=None, requires_run_id_match=True)
 
     def test_validate_method_auth_policy_map_accepts_matching_table(self) -> None:
         """Validation passes when table exactly matches service RPC names."""
