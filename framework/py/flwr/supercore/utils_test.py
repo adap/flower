@@ -180,6 +180,30 @@ def test_request_download_link_all_scenarios(
             "raises": "status 503",
         },
         {
+            "name": "http_412_incompatible",
+            "fake_resp": {
+                "ok": False,
+                "status": 412,
+                "json": {
+                    "detail": {
+                        "message": (
+                            "Requested Flower version is incompatible with this app "
+                            "version."
+                        ),
+                        "reason": (
+                            "Requested Flower version 1.10.0 is lower than minimum "
+                            "supported version 1.11.0."
+                        ),
+                        "requested_flwr_version": "1.10.0",
+                        "flwr_version_min": "1.11.0",
+                        "flwr_version_target": "1.12.0",
+                        "flwr_version_max": "2.0.0",
+                    }
+                },
+            },
+            "raises": "incompatible with this app version",
+        },
+        {
             "name": "network_error",
             "fake_exc": requests.RequestException("network down"),
             "raises": "Unable to connect to Platform API",
