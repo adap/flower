@@ -25,10 +25,7 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.control_pb2_grpc import ControlStub
 
-from ..utils import (
-    cli_output_control_stub,
-    flwr_cli_grpc_exc_handler,
-)
+from ..utils import cli_output_control_stub, flwr_cli_grpc_exc_handler
 
 
 def remove_account(
