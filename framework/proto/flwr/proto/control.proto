@@ -79,6 +79,10 @@ service Control {
   rpc RemoveNodeFromFederation(RemoveNodeFromFederationRequest)
       returns (RemoveNodeFromFederationResponse) {}
 
+  // Remove Account from Federation
+  rpc RemoveAccountFromFederation(RemoveAccountFromFederationRequest)
+      returns (RemoveAccountFromFederationResponse) {}
+
   // Create Invitation
   rpc CreateInvitation(CreateInvitationRequest)
       returns (CreateInvitationResponse) {}
@@ -187,6 +191,12 @@ message RemoveNodeFromFederationRequest {
   uint64 node_id = 2;
 }
 message RemoveNodeFromFederationResponse {}
+
+message RemoveAccountFromFederationRequest {
+  string federation_name = 1;
+  optional string account_name = 2;
+}
+message RemoveAccountFromFederationResponse {}
 
 message CreateInvitationRequest {
   string invitee_account_name = 1;
