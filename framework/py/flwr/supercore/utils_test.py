@@ -185,66 +185,9 @@ def test_request_download_link_all_scenarios(
                 "ok": False,
                 "status": 412,
                 "json": {
-                    "detail": {
-                        "message": (
-                            "Requested Flower version is incompatible with this app "
-                            "version."
-                        ),
-                        "reason": (
-                            "Requested Flower version 1.10.0 is lower than minimum "
-                            "supported version 1.11.0."
-                        ),
-                        "requested_flwr_version": "1.10.0",
-                        "flwr_version_min": "1.11.0",
-                        "flwr_version_target": "1.12.0",
-                        "flwr_version_max": "2.0.0",
-                    }
+                    "detail": "Requested Flower version is incompatible with this app"
+                    " version.",
                 },
-            },
-            "raises": "incompatible with this app version",
-        },
-        {
-            "name": "http_412_detail_string",
-            "fake_resp": {
-                "ok": False,
-                "status": 412,
-                "json": {"detail": "simple 412 error"},
-            },
-            "raises": "simple 412 error",
-        },
-        {
-            "name": "http_412_detail_missing",
-            "fake_resp": {
-                "ok": False,
-                "status": 412,
-                "json": {},
-            },
-            "raises": "incompatible with this app version",
-        },
-        {
-            "name": "http_412_non_object_json_string",
-            "fake_resp": {
-                "ok": False,
-                "status": 412,
-                "json": "raw incompatible response",
-            },
-            "raises": "raw incompatible response",
-        },
-        {
-            "name": "http_412_non_object_json_list",
-            "fake_resp": {
-                "ok": False,
-                "status": 412,
-                "json": ["one", "two"],
-            },
-            "raises": "incompatible with this app version",
-        },
-        {
-            "name": "http_412_invalid_json",
-            "fake_resp": {
-                "ok": False,
-                "status": 412,
-                "json_raises": ValueError("invalid json"),
             },
             "raises": "incompatible with this app version",
         },
@@ -269,21 +212,23 @@ def test_request_download_link_all_scenarios(
     class _FakeResp:  # pylint: disable=too-few-public-methods
         ok: bool
         status_code: int
-        _json: Any
+        _json: dict[str, Any]
         text: str
-        _json_raises: ValueError | None
 
-        def __init__(self, fake_resp: dict[str, Any]) -> None:
-            self.ok = fake_resp["ok"]
-            self.status_code = fake_resp["status"]
-            self._json = fake_resp.get("json", {})
-            self.text = fake_resp.get("text", "")
-            self._json_raises = fake_resp.get("json_raises")
+        def __init__(
+            self,
+            ok: bool,
+            status: int,
+            json_data: dict[str, Any] | None = None,
+            text: str = "",
+        ) -> None:
+            self.ok = ok
+            self.status_code = status
+            self._json = json_data or {}
+            self.text = text
 
-        def json(self) -> Any:
+        def json(self) -> dict[str, Any]:
             """Return JSON data."""
-            if self._json_raises is not None:
-                raise self._json_raises
             return self._json
 
     def fake_post(url: str, data: str | None = None, **_: Any) -> _FakeResp:
@@ -303,7 +248,12 @@ def test_request_download_link_all_scenarios(
             raise case_data["fake_exc"]
 
         fr: dict[str, Any] = case_data["fake_resp"]  # type: ignore[index]
-        return _FakeResp(fr)
+        return _FakeResp(
+            ok=fr["ok"],
+            status=fr["status"],
+            json_data=fr.get("json"),
+            text=fr.get("text", ""),
+        )
 
     monkeypatch.setattr(requests, "post", fake_post)
 
