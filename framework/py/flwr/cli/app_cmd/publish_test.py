@@ -283,3 +283,19 @@ def test_validate_description_long_continue(monkeypatch: pytest.MonkeyPatch) -> 
 
     long_desc = "x" * 201
     _validate_description(long_desc)
+
+
+def test_validate_description_long_decline(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test long description aborts when user declines."""
+    monkeypatch.setattr("typer.confirm", lambda *args, **kwargs: False)
+
+    long_desc = "x" * 201
+    with pytest.raises(click.Abort):
+        _validate_description(long_desc)
+
+
+@pytest.mark.parametrize("value", [None, 123, 3.14, [], {}])
+def test_validate_description_non_string_raises(value: object) -> None:
+    """Test non-string descriptions raise ClickException."""
+    with pytest.raises(click.ClickException):
+        _validate_description(value)  # type: ignore[arg-type]
