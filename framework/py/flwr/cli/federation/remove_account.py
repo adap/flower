@@ -18,8 +18,6 @@ from typing import Annotated
 
 import typer
 
-from flwr.cli.config_migration import migrate
-from flwr.cli.flower_config import read_superlink_connection
 from flwr.common.constant import CliOutputFormat
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     RemoveAccountFromFederationRequest,
@@ -28,9 +26,8 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
 from flwr.proto.control_pb2_grpc import ControlStub
 
 from ..utils import (
-    cli_output_handler,
+    cli_output_control_stub,
     flwr_cli_grpc_exc_handler,
-    init_channel_from_connection,
 )
 
 
@@ -58,30 +55,15 @@ def remove_account(
     ] = CliOutputFormat.DEFAULT,
 ) -> None:
     """Remove an account from an existing federation."""
-    with cli_output_handler(output_format=output_format) as is_json:
-        # Migrate legacy usage if any
-        migrate(superlink, args=ctx.args)
-
-        # Read superlink connection configuration
-        superlink_connection = read_superlink_connection(superlink)
-        channel = None
-
-        try:
-            channel = init_channel_from_connection(superlink_connection)
-            stub = ControlStub(channel)
-
-            request = RemoveAccountFromFederationRequest(
-                federation_name=federation, account_name=account_name
-            )
-            _remove_account_from_federation(
-                stub=stub,
-                request=request,
-                is_json=is_json,
-            )
-
-        finally:
-            if channel:
-                channel.close()
+    with cli_output_control_stub(superlink, output_format) as (stub, is_json):
+        request = RemoveAccountFromFederationRequest(
+            federation_name=federation, account_name=account_name
+        )
+        _remove_account_from_federation(
+            stub=stub,
+            request=request,
+            is_json=is_json,
+        )
 
 
 def _remove_account_from_federation(  # pylint: disable=W0613
