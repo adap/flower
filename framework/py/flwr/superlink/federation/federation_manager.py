@@ -130,15 +130,24 @@ class FederationManager(ABC):
 
     @abstractmethod
     def remove_account(
-        self, flwr_aid: str, federation: str, account_name: str | None
+        self, flwr_aid: str, federation: str, target_account_name: str | None
     ) -> None:
         """Remove an account from a federation.
 
-        If ``account_name`` is ``None`` the caller removes themselves (leave).
-        Otherwise only the owner may remove another account. The owner can
-        never be removed. All supernodes owned by the removed account are
-        also soft-removed from the federation.
+        If ``target_account_name`` is ``None`` the caller removes themselves
+        (leave). Otherwise only the owner may remove another account. The
+        owner can never be removed. All supernodes owned by the removed
+        account are also soft-removed from the federation.
 
+        Parameters
+        ----------
+        flwr_aid : str
+            The ID of the account initiating the removal (or leaving).
+        federation : str
+            The name of the federation.
+        account_name : str | None
+            The name of the account to remove. If ``None``, the caller removes
+            themselves from the federation.
         Raises
         ------
         FlowerError

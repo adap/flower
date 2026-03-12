@@ -124,7 +124,7 @@ class NoOpFederationManager(FederationManager):
         )
 
     def remove_account(
-        self, flwr_aid: str, federation: str, account_name: str | None
+        self, flwr_aid: str, federation: str, target_account_name: str | None
     ) -> None:
         """Remove an account from a federation."""
         raise UnsupportedError(
