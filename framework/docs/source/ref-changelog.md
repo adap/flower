@@ -2,12 +2,6 @@
 
 ## Unreleased
 
-### Incompatible changes
-
-- **Require `Run` object in `Grid.set_run`**
-
-  `Grid.set_run` now requires a full `Run` object instead of a `run_id`. This removes `GetRun` calls from `flwr-serverapp` and `flwr-simulation` executor initialization paths, which now pass the `Run` from `PullAppInputs` directly.
-
 ## v1.27.0 (2026-03-10)
 
 ### Thanks to our contributors
