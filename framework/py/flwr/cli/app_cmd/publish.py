@@ -77,8 +77,7 @@ def publish(
 
     # Validate app description from config
     config, _ = load_and_validate(app / FAB_CONFIG_FILE, check_module=False)
-    description = config["project"]["description"]
-    _validate_description(description)
+    _validate_description(config["project"].get("description", ""))
 
     # Collect & validate app files
     file_paths = _collect_file_paths(app)
