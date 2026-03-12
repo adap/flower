@@ -22,7 +22,7 @@ CALLER_TYPE_APP_EXECUTOR: Final[str] = "app_executor"
 CALLER_TYPE_SUPEREXEC: Final[str] = "superexec"
 AUTHENTICATION_FAILED_MESSAGE: Final[str] = "Authentication failed."
 
-# gRPC metadata keys for signed-metadata AppIo auth input extraction.
+# gRPC metadata keys for AppIo auth input extraction (token-based and signed-metadata).
 APP_TOKEN_HEADER: Final[str] = "flwr-app-token"
 APPIO_SIGNED_METADATA_PUBLIC_KEY_HEADER: Final[str] = "flwr-superexec-public-key-bin"
 APPIO_SIGNED_METADATA_SIGNATURE_HEADER: Final[str] = "flwr-superexec-signature-bin"
