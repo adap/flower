@@ -145,9 +145,10 @@ class FederationManager(ABC):
             The ID of the account initiating the removal (or leaving).
         federation : str
             The name of the federation.
-        account_name : str | None
+        target_account_name : str | None
             The name of the account to remove. If ``None``, the caller removes
-            themselves from the federation.
+            themselves from the federation. The owner cannot remove themselves.
+
         Raises
         ------
         FlowerError
