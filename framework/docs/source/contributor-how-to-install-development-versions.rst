@@ -44,19 +44,19 @@ commands to install the Flower directly from GitHub.
 
 Install ``flwr`` from the default GitHub branch (``main``):
 
-- ``pip install flwr@git+https://github.com/adap/flower.git#subdirectory=framework``
+- ``pip install flwr@git+https://github.com/flwrlabs/flower.git#subdirectory=framework``
   (without extras)
 - ``pip install
-  'flwr[simulation]@git+https://github.com/adap/flower.git#subdirectory=framework'``
+  'flwr[simulation]@git+https://github.com/flwrlabs/flower.git#subdirectory=framework'``
   (with extras)
 
 Install ``flwr`` from a specific GitHub branch (``branch-name``):
 
 - ``pip install
-  flwr@git+https://github.com/adap/flower.git@branch-name#subdirectory=framework``
+  flwr@git+https://github.com/flwrlabs/flower.git@branch-name#subdirectory=framework``
   (without extras)
 - ``pip install
-  'flwr[simulation]@git+https://github.com/adap/flower.git@branch-name#subdirectory=framework'``
+  'flwr[simulation]@git+https://github.com/flwrlabs/flower.git@branch-name#subdirectory=framework'``
   (with extras)
 
 ****************************************
@@ -65,12 +65,12 @@ Install ``flwr`` from a specific GitHub branch (``branch-name``):
 
 Open the notebook ``examples/flower-in-30-minutes/tutorial.ipynb``:
 
-- https://colab.research.google.com/github/adap/flower/blob/main/examples/flower-in-30-minutes/tutorial.ipynb
+- https://colab.research.google.com/github/flwrlabs/flower/blob/main/examples/flower-in-30-minutes/tutorial.ipynb
 
 Open a development version of the same notebook from branch `branch-name` by changing
 ``main`` to ``branch-name`` (right after ``blob``):
 
-- https://colab.research.google.com/github/adap/flower/blob/branch-name/examples/flower-in-30-minutes/tutorial.ipynb
+- https://colab.research.google.com/github/flwrlabs/flower/blob/branch-name/examples/flower-in-30-minutes/tutorial.ipynb
 
 Install a `whl` on Google Colab:
 

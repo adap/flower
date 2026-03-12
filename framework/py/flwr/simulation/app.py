@@ -149,6 +149,7 @@ def run_simulation_process(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
 
     # Initialize variables for finally block
     log_uploader = None
+    run_id_hash = None
     heartbeat_sender = None
     run = None
     run_status = None

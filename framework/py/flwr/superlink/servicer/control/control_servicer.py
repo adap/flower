@@ -25,8 +25,13 @@ from typing import Any, cast
 import grpc
 import requests
 
-from flwr.cli.config_utils import get_fab_metadata
 from flwr.common import Context, RecordDict, now
+from flwr.common.config import (
+    flatten_dict,
+    fuse_dicts,
+    get_fab_config,
+    get_metadata_from_config,
+)
 from flwr.common.constant import (
     FAB_MAX_SIZE,
     FEDERATION_NOT_FOUND_MESSAGE,
@@ -163,6 +168,11 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         federation_options = config_record_from_proto(request.federation_options)
 
         try:
+            # Validate user config overrides matches keys in run config in FAB
+            fab_config = get_fab_config(fab_file)
+            run_config = flatten_dict(fab_config["tool"]["flwr"]["app"].get("config"))
+            _ = fuse_dicts(run_config, override_config)
+
             # Check that num-supernodes is set
             if self.is_simulation and "num-supernodes" not in federation_options:
                 raise ValueError(
@@ -195,7 +205,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 raise ValueError(
                     f"FAB ({fab.hash_str}) hash from request doesn't match contents"
                 )
-            fab_id, fab_version = get_fab_metadata(fab.content)
+            fab_id, fab_version = get_metadata_from_config(fab_config)
 
             run_id = state.create_run(
                 fab_id,
@@ -719,36 +729,80 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         self, request: CreateInvitationRequest, context: grpc.ServicerContext
     ) -> CreateInvitationResponse:
         """Create an invitation."""
-        log(INFO, "ControlServicer.CreateInvitation")
-        raise NotImplementedError("CreateInvitation is not implemented.")
+        log(INFO, rpc_name := self.CreateInvitation.__qualname__)
+
+        state = self.linkstate_factory.state()
+
+        with rpc_error_translator(context, rpc_name):
+            state.federation_manager.create_invitation(
+                flwr_aid=_get_flwr_aid(context),
+                federation=request.federation_name,
+                invitee_account_name=request.invitee_account_name,
+            )
+        return CreateInvitationResponse()
 
     def ListInvitations(
         self, request: ListInvitationsRequest, context: grpc.ServicerContext
     ) -> ListInvitationsResponse:
         """List invitations."""
-        log(INFO, "ControlServicer.ListInvitations")
-        raise NotImplementedError("ListInvitations is not implemented.")
+        log(INFO, rpc_name := self.ListInvitations.__qualname__)
+
+        state = self.linkstate_factory.state()
+
+        with rpc_error_translator(context, rpc_name):
+            created_invitations, received_invitations = (
+                state.federation_manager.list_invitations(_get_flwr_aid(context))
+            )
+        return ListInvitationsResponse(
+            created_invitations=created_invitations,
+            received_invitations=received_invitations,
+        )
 
     def AcceptInvitation(
         self, request: AcceptInvitationRequest, context: grpc.ServicerContext
     ) -> AcceptInvitationResponse:
         """Accept an invitation."""
-        log(INFO, "ControlServicer.AcceptInvitation")
-        raise NotImplementedError("AcceptInvitation is not implemented.")
+        log(INFO, rpc_name := self.AcceptInvitation.__qualname__)
+
+        state = self.linkstate_factory.state()
+
+        with rpc_error_translator(context, rpc_name):
+            state.federation_manager.accept_invitation(
+                flwr_aid=_get_flwr_aid(context),
+                federation=request.federation_name,
+            )
+        return AcceptInvitationResponse()
 
     def RejectInvitation(
         self, request: RejectInvitationRequest, context: grpc.ServicerContext
     ) -> RejectInvitationResponse:
         """Reject an invitation."""
-        log(INFO, "ControlServicer.RejectInvitation")
-        raise NotImplementedError("RejectInvitation is not implemented.")
+        log(INFO, rpc_name := self.RejectInvitation.__qualname__)
+
+        state = self.linkstate_factory.state()
+
+        with rpc_error_translator(context, rpc_name):
+            state.federation_manager.reject_invitation(
+                flwr_aid=_get_flwr_aid(context),
+                federation=request.federation_name,
+            )
+        return RejectInvitationResponse()
 
     def RevokeInvitation(
         self, request: RevokeInvitationRequest, context: grpc.ServicerContext
     ) -> RevokeInvitationResponse:
         """Revoke an invitation."""
-        log(INFO, "ControlServicer.RevokeInvitation")
-        raise NotImplementedError("RevokeInvitation is not implemented.")
+        log(INFO, rpc_name := self.RevokeInvitation.__qualname__)
+
+        state = self.linkstate_factory.state()
+
+        with rpc_error_translator(context, rpc_name):
+            state.federation_manager.revoke_invitation(
+                flwr_aid=_get_flwr_aid(context),
+                federation=request.federation_name,
+                invitee_account_name=request.invitee_account_name,
+            )
+        return RevokeInvitationResponse()
 
 
 def _validate_federation_and_node_in_request(
@@ -848,12 +902,12 @@ def _get_remote_fab(
     app_spec: str,
     context: grpc.ServicerContext,
 ) -> tuple[bytes, dict[str, str]]:
-    """Get remote FAB from Flower platform API."""
+    """Get remote FAB from Flower Hub."""
     if fleet_api_type == TRANSPORT_TYPE_GRPC_ADAPTER:
         context.abort(
             grpc.StatusCode.FAILED_PRECONDITION,
             "The selected SuperLink transport type is not "
-            "supported for connecting to Flower Platform.",
+            "supported for connecting to Flower Hub.",
         )
 
     # Parse and validate app specification
@@ -884,7 +938,7 @@ def _get_remote_fab(
         else {"valid_license": ""}
     )
 
-    # Download FAB from Flower platform API
+    # Download FAB from Flower Hub
     try:
         r = requests.get(presigned_url, timeout=60)
         r.raise_for_status()
