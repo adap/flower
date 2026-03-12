@@ -60,7 +60,7 @@ class TestAuthDecisionEngine(TestCase):
 
     def test_no_auth_policy_always_allows(self) -> None:
         """Methods with no auth policy are always allowed."""
-        engine = AuthDecisionEngine(authenticators={}, method_auth_policy={})
+        engine = AuthDecisionEngine(authenticators={}, method_auth_policies={})
 
         decision = engine.evaluate(
             policy=MethodAuthPolicy.no_auth(),
@@ -78,7 +78,7 @@ class TestAuthDecisionEngine(TestCase):
         state.verify_token.return_value = True
         engine = AuthDecisionEngine(
             authenticators={AUTH_MECHANISM_TOKEN: TokenAuthenticator(lambda: state)},
-            method_auth_policy={},
+            method_auth_policies={},
         )
 
         decision = engine.evaluate(
@@ -102,20 +102,33 @@ class TestAuthDecisionEngine(TestCase):
     ) -> None:
         """Construction fails if any required mechanism has no authenticator."""
         with self.assertRaisesRegex(
-            ValueError, "references mechanisms without authenticators"
+            ValueError, "Entries referencing mechanisms without authenticators"
         ):
             AuthDecisionEngine(
                 authenticators={},
-                method_auth_policy={
+                method_auth_policies={
                     "/flwr.proto.ServerAppIo/GetNodes": (
                         MethodAuthPolicy.token_required()
                     )
                 },
             )
 
+    def test_engine_fails_fast_when_policy_value_is_wrong_type(self) -> None:
+        """Construction fails with actionable error for non-policy values."""
+        with self.assertRaisesRegex(
+            ValueError, "Entries with invalid policy objects"
+        ):
+            AuthDecisionEngine(
+                authenticators={},
+                method_auth_policies=cast(
+                    dict[str, MethodAuthPolicy],
+                    {"/flwr.proto.ServerAppIo/GetNodes": "bad-policy"},
+                ),
+            )
+
     def test_token_policy_denies_when_authenticator_missing(self) -> None:
         """Policy requiring an unavailable authenticator is denied."""
-        engine = AuthDecisionEngine(authenticators={}, method_auth_policy={})
+        engine = AuthDecisionEngine(authenticators={}, method_auth_policies={})
 
         decision = engine.evaluate(
             policy=MethodAuthPolicy.token_required(),
@@ -133,7 +146,7 @@ class TestAuthDecisionEngine(TestCase):
         state = Mock()
         engine = AuthDecisionEngine(
             authenticators={AUTH_MECHANISM_TOKEN: TokenAuthenticator(lambda: state)},
-            method_auth_policy={},
+            method_auth_policies={},
         )
 
         decision = engine.evaluate(
@@ -160,7 +173,7 @@ class TestAuthDecisionEngine(TestCase):
                     _SignedMetadataPresenceAuthenticator()
                 ),
             },
-            method_auth_policy={},
+            method_auth_policies={},
         )
 
         decision = engine.evaluate(
@@ -194,13 +207,82 @@ class TestAuthDecisionEngine(TestCase):
                     _SignedMetadataPresenceAuthenticator()
                 ),
             },
-            method_auth_policy={},
+            method_auth_policies={},
         )
 
         decision = engine.evaluate(
             policy=MethodAuthPolicy.signed_metadata_required(),
             auth_input=AuthInput(
                 token="some-token",
+                signed_metadata=SignedMetadataAuthInput(
+                    public_key=b"pk",
+                    signature=b"sig",
+                    timestamp_iso="2026-03-09T10:00:00",
+                    method="/flwr.proto.ServerAppIo/GetNodes",
+                ),
+                signed_metadata_present=True,
+            ),
+        )
+
+        self.assertFalse(decision.is_allowed)
+        self.assertIsNone(decision.caller_identity)
+        self.assertEqual(
+            decision.failure_reason,
+            AuthDecisionFailureReason.NON_REQUIRED_MECHANISM_PRESENT,
+        )
+
+    def test_token_required_denies_extra_signed_metadata_without_registered_authenticator(
+        self,
+    ) -> None:
+        """Extra signed-metadata input is denied even without its authenticator."""
+        state = Mock()
+        state.get_run_id_by_token.return_value = 1
+        state.verify_token.return_value = True
+        engine = AuthDecisionEngine(
+            authenticators={AUTH_MECHANISM_TOKEN: TokenAuthenticator(lambda: state)},
+            method_auth_policies={},
+        )
+
+        decision = engine.evaluate(
+            policy=MethodAuthPolicy.token_required(),
+            auth_input=AuthInput(
+                token="valid-token",
+                signed_metadata=SignedMetadataAuthInput(
+                    public_key=b"pk",
+                    signature=b"sig",
+                    timestamp_iso="2026-03-09T10:00:00",
+                    method="/flwr.proto.ServerAppIo/GetNodes",
+                ),
+                signed_metadata_present=True,
+            ),
+        )
+
+        self.assertFalse(decision.is_allowed)
+        self.assertIsNone(decision.caller_identity)
+        self.assertEqual(
+            decision.failure_reason,
+            AuthDecisionFailureReason.NON_REQUIRED_MECHANISM_PRESENT,
+        )
+        state.get_run_id_by_token.assert_not_called()
+        state.verify_token.assert_not_called()
+
+    def test_signed_metadata_required_denies_extra_token_without_registered_authenticator(
+        self,
+    ) -> None:
+        """Extra token input is denied even without a token authenticator."""
+        engine = AuthDecisionEngine(
+            authenticators={
+                AUTH_MECHANISM_SUPEREXEC_SIGNED_METADATA: (
+                    _SignedMetadataPresenceAuthenticator()
+                )
+            },
+            method_auth_policies={},
+        )
+
+        decision = engine.evaluate(
+            policy=MethodAuthPolicy.signed_metadata_required(),
+            auth_input=AuthInput(
+                token="token",
                 signed_metadata=SignedMetadataAuthInput(
                     public_key=b"pk",
                     signature=b"sig",
@@ -226,7 +308,7 @@ class TestAuthDecisionEngine(TestCase):
                     _SignedMetadataPresenceAuthenticator()
                 )
             },
-            method_auth_policy={},
+            method_auth_policies={},
         )
 
         decision = engine.evaluate(

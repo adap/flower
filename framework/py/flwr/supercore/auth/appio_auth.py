@@ -19,7 +19,11 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Protocol
 
-from .constant import AUTH_MECHANISM_TOKEN, CALLER_TYPE_APP_EXECUTOR
+from .constant import (
+    AUTH_MECHANISM_SUPEREXEC_SIGNED_METADATA,
+    AUTH_MECHANISM_TOKEN,
+    CALLER_TYPE_APP_EXECUTOR,
+)
 from .policy import MethodAuthPolicy
 
 
@@ -131,29 +135,45 @@ class AuthDecisionEngine:
     def __init__(
         self,
         authenticators: Mapping[str, Authenticator],
-        method_auth_policy: Mapping[str, MethodAuthPolicy],
+        method_auth_policies: Mapping[str, MethodAuthPolicy],
     ) -> None:
         self._authenticators = authenticators
         # Validate at construction to fail fast on startup configuration bugs.
-        self._validate_policy_mechanisms(method_auth_policy)
+        self._validate_policy_mechanisms(method_auth_policies)
 
     def _validate_policy_mechanisms(
-        self, method_auth_policy: Mapping[str, MethodAuthPolicy]
+        self, method_auth_policies: Mapping[str, MethodAuthPolicy]
     ) -> None:
         """Fail fast if policy references unknown mechanisms."""
+        invalid_policy_values: list[str] = []
         missing_by_method: dict[str, list[str]] = {}
-        for method, policy in method_auth_policy.items():
+        for method, policy in method_auth_policies.items():
+            if not isinstance(policy, MethodAuthPolicy):
+                invalid_policy_values.append(method)
+                continue
             required_mechanism = policy.required_mechanism
             if (
                 required_mechanism is not None
                 and required_mechanism not in self._authenticators
             ):
                 missing_by_method[method] = [required_mechanism]
-        if missing_by_method:
+        if invalid_policy_values or missing_by_method:
             raise ValueError(
-                "Method auth policy references mechanisms without authenticators: "
-                f"{missing_by_method}"
+                "Invalid method auth policies for AuthDecisionEngine.\n"
+                f"Entries with invalid policy objects: {invalid_policy_values or 'None'}\n"
+                "Entries referencing mechanisms without authenticators: "
+                f"{missing_by_method or 'None'}"
             )
+
+    @staticmethod
+    def _present_mechanisms_from_auth_input(auth_input: AuthInput) -> set[str]:
+        """Return present mechanisms based directly on normalized auth input."""
+        present_mechanisms: set[str] = set()
+        if auth_input.token is not None:
+            present_mechanisms.add(AUTH_MECHANISM_TOKEN)
+        if auth_input.signed_metadata_present:
+            present_mechanisms.add(AUTH_MECHANISM_SUPEREXEC_SIGNED_METADATA)
+        return present_mechanisms
 
     def evaluate(self, policy: MethodAuthPolicy, auth_input: AuthInput) -> AuthDecision:
         """Evaluate authentication for a single method invocation."""
@@ -172,11 +192,7 @@ class AuthDecisionEngine:
             # Defensive fallback for malformed policies and runtime safety.
             failure_reason = AuthDecisionFailureReason.POLICY_MISCONFIGURED
         else:
-            present_mechanisms = [
-                mechanism
-                for mechanism, authenticator in self._authenticators.items()
-                if authenticator.is_present(auth_input)
-            ]
+            present_mechanisms = self._present_mechanisms_from_auth_input(auth_input)
 
             # Check if the required mechanism is missing.
             if required_mechanism not in present_mechanisms:
