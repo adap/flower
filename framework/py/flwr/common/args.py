@@ -21,10 +21,7 @@ from logging import DEBUG, ERROR, INFO, WARN
 from os.path import isfile
 from pathlib import Path
 
-from flwr.common.constant import (
-    RUNTIME_DEPENDENCY_INSTALL,
-    TRANSPORT_TYPE_REST,
-)
+from flwr.common.constant import RUNTIME_DEPENDENCY_INSTALL, TRANSPORT_TYPE_REST
 from flwr.common.logger import log
 
 

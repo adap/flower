@@ -26,6 +26,8 @@ import pytest
 
 from flwr.supercore.superexec import dependency_installer
 
+# pylint: disable=protected-access
+
 
 def _make_site_packages(runtime_env_dir: Path) -> None:
     site_packages = (
@@ -39,13 +41,12 @@ def _make_site_packages(runtime_env_dir: Path) -> None:
 
 def _fake_run_cmd(
     cmd: list[str],
-    cwd: Path | None = None,  # noqa: ARG001
+    _cwd: Path | None = None,
     env: dict[str, str] | None = None,
-) -> str | None:
+) -> None:
     if cmd[:4] == [sys.executable, "-m", "uv", "sync"] and env is not None:
         runtime_env_dir = Path(env["UV_PROJECT_ENVIRONMENT"])
         _make_site_packages(runtime_env_dir)
-    return None
 
 
 def test_exclude_flwr_dependencies_handles_extras_and_markers() -> None:
@@ -101,7 +102,9 @@ def test_install_app_dependencies_uses_resolved_index_url(tmp_path: Path) -> Non
             "_get_project_dependencies",
             return_value=["numpy>=1.26.0"],
         ),
-        patch.object(dependency_installer, "_run_cmd", side_effect=_fake_run_cmd) as run_cmd,
+        patch.object(
+            dependency_installer, "_run_cmd", side_effect=_fake_run_cmd
+        ) as run_cmd,
     ):
         runtime_env = dependency_installer.install_app_dependencies(
             project_dir=tmp_path,
@@ -135,14 +138,13 @@ def test_same_host_superlink_and_supernode_share_run_scoped_env(tmp_path: Path) 
 
     def fake_run_cmd_with_delay(
         cmd: list[str],
-        cwd: Path | None = None,  # noqa: ARG001
+        _cwd: Path | None = None,
         env: dict[str, str] | None = None,
-    ) -> str | None:
+    ) -> None:
         if cmd[:4] == [sys.executable, "-m", "uv", "sync"] and env is not None:
             runtime_env_dir = Path(env["UV_PROJECT_ENVIRONMENT"])
             _make_site_packages(runtime_env_dir)
             time.sleep(0.1)
-        return None
 
     results: list[Path] = []
     failures: list[Exception] = []
@@ -229,7 +231,12 @@ def test_ensure_uv_available_uses_index_url_for_pip_install() -> None:
             dependency_index_url=dependency_index_url
         )
 
-    assert run_cmd.call_args_list[0].args[0] == [sys.executable, "-m", "uv", "--version"]
+    assert run_cmd.call_args_list[0].args[0] == [
+        sys.executable,
+        "-m",
+        "uv",
+        "--version",
+    ]
     assert run_cmd.call_args_list[1].args[0] == [
         sys.executable,
         "-m",
@@ -239,4 +246,9 @@ def test_ensure_uv_available_uses_index_url_for_pip_install() -> None:
         "--index-url",
         dependency_index_url,
     ]
-    assert run_cmd.call_args_list[2].args[0] == [sys.executable, "-m", "uv", "--version"]
+    assert run_cmd.call_args_list[2].args[0] == [
+        sys.executable,
+        "-m",
+        "uv",
+        "--version",
+    ]

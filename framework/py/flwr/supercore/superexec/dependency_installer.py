@@ -35,12 +35,12 @@ RuntimeDependencyIndexContext = dict[str, str | int | None]
 
 try:
     from flwr.ee import (
-        resolve_runtime_dependency_index_url as _resolve_runtime_dependency_index_url_from_ee,
+        resolve_runtime_dependency_index_url as _resolve_index_url_from_ee,
     )
 except ImportError:
 
-    def _resolve_runtime_dependency_index_url_from_ee(
-        context: RuntimeDependencyIndexContext,  # noqa: ARG001
+    def _resolve_index_url_from_ee(
+        _context: RuntimeDependencyIndexContext,
     ) -> str | None:
         """Fallback when `flwr.ee` resolver hook is unavailable."""
         return None
@@ -49,7 +49,7 @@ except ImportError:
 def _resolve_runtime_dependency_index_url(
     context: RuntimeDependencyIndexContext,
 ) -> str | None:
-    resolved = _resolve_runtime_dependency_index_url_from_ee(context)
+    resolved = _resolve_index_url_from_ee(context)
     if resolved is not None and not isinstance(resolved, str):
         raise TypeError(
             "Runtime dependency index resolver must return `str | None`, "
@@ -160,7 +160,9 @@ def _get_project_dependencies(project_dir: Path) -> list[str]:
     config = get_project_config(project_dir)
     deps = config.get("project", {}).get("dependencies", [])
     if not isinstance(deps, list):
-        raise RuntimeError("Invalid pyproject.toml: [project].dependencies is not a list")
+        raise RuntimeError(
+            "Invalid pyproject.toml: [project].dependencies is not a list"
+        )
     return [str(dep) for dep in deps]
 
 
@@ -184,7 +186,9 @@ def _create_runtime_env_dir(
     if run_id is not None:
         env_name = str(run_id)
     else:
-        project_hash = hashlib.sha256(str(project_dir.resolve()).encode("utf-8")).hexdigest()
+        project_hash = hashlib.sha256(
+            str(project_dir.resolve()).encode("utf-8")
+        ).hexdigest()
         launch_source = launch_id if launch_id is not None else uuid.uuid4().hex
         launch_hash = hashlib.sha256(launch_source.encode("utf-8")).hexdigest()
         nonce = uuid.uuid4().hex[:8]
@@ -269,7 +273,9 @@ def _ensure_uv_available(dependency_index_url: str | None) -> None:
             if dependency_index_url
             else "the default index"
         )
-        raise RuntimeError(f"Failed to install `uv` from {source_hint}: {install_error}")
+        raise RuntimeError(
+            f"Failed to install `uv` from {source_hint}: {install_error}"
+        )
 
     recheck_error = _run_cmd(uv_version_cmd)
     if recheck_error is not None:
@@ -288,23 +294,23 @@ def _run_cmd(
     log(DEBUG, "Running: %s", " ".join(cmd))
     try:
         # Stream output to Flower logs to avoid long silent periods.
-        proc = subprocess.Popen(
+        with subprocess.Popen(
             cmd,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
             cwd=str(cwd) if cwd else None,
             env=env,
-        )
-        output_lines: list[str] = []
-        if proc.stdout is not None:
-            for line in proc.stdout:
-                line = line.rstrip()
-                if line:
-                    output_lines.append(line)
-                    log(INFO, "%s", line)
+        ) as proc:
+            output_lines: list[str] = []
+            if proc.stdout is not None:
+                for line in proc.stdout:
+                    line = line.rstrip()
+                    if line:
+                        output_lines.append(line)
+                        log(INFO, "%s", line)
 
-        returncode = proc.wait()
+            returncode = proc.wait()
         if returncode != 0:
             details = "\n".join(output_lines[-20:]) if output_lines else ""
             return f"exit code {returncode}: {details}"
