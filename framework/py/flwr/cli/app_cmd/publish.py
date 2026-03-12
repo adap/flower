@@ -112,7 +112,8 @@ def _validate_description(description: object) -> None:
 
     if description.strip() == "":
         raise click.ClickException(
-            "App description can't be empty. Please provide one with fewer than 200 characters."
+            "App description can't be empty. "
+            "Please provide one with fewer than 200 characters."
         )
 
     if len(description) > 200:
