@@ -24,6 +24,8 @@ import requests
 import typer
 from requests import Response
 
+from flwr.cli.config_utils import load_and_validate
+from flwr.common.constant import FAB_CONFIG_FILE
 from flwr.supercore.constant import (
     APP_PUBLISH_ALLOWED_LICENSE_FILES,
     APP_PUBLISH_EXCLUDE_PATTERNS,
@@ -73,6 +75,11 @@ def publish(
     # Resolve app path
     app = app.expanduser().resolve()
 
+    # Validate app description from config
+    config, _ = load_and_validate(app / FAB_CONFIG_FILE)
+    description = config["project"]["description"]
+    _validate_description(description)
+
     # Collect & validate app files
     file_paths = _collect_file_paths(app)
     _validate_files(file_paths)
@@ -94,6 +101,29 @@ def publish(
     if resp.text:
         msg += f": {resp.text}"
     raise click.ClickException(msg)
+
+
+def _validate_description(description: object) -> None:
+    """Validate app description before publishing."""
+    if not isinstance(description, str):
+        raise click.ClickException(
+            "Invalid app description: expected a string with fewer than 200 characters."
+        )
+
+    if description.strip() == "":
+        raise click.ClickException(
+            "App description can't be empty. Please provide one with fewer than 200 characters."
+        )
+
+    if len(description) > 200:
+        typer.secho(
+            "Warning: the app description is more than 200 characters.",
+            fg=typer.colors.YELLOW,
+            bold=True,
+        )
+        should_continue = typer.confirm("Do you want to continue publishing anyway?")
+        if not should_continue:
+            raise click.ClickException("Publishing cancelled by user.")
 
 
 def _depth_of(relative_path_to_root: Path) -> int:

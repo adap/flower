@@ -33,6 +33,7 @@ from .publish import (
     _collect_file_paths,
     _depth_of,
     _detect_mime,
+    _validate_description,
     _validate_files,
 )
 
@@ -263,3 +264,22 @@ def test_build_multipart_files_param(tmp_path: Path) -> None:
     # ExitStack closes the opened file object
     with pytest.raises(ValueError):
         fobj.read(1)  # closed file
+
+
+def test_validate_description_empty_raises() -> None:
+    """Test empty description raises ClickException."""
+    with pytest.raises(click.ClickException, match="can't be empty"):
+        _validate_description("")
+
+
+def test_validate_description_valid() -> None:
+    """Test valid description passes validation."""
+    _validate_description("A simple Flower federated learning app.")
+
+
+def test_validate_description_long_continue(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test long description continues when user confirms."""
+    monkeypatch.setattr("typer.confirm", lambda *args, **kwargs: True)
+
+    long_desc = "x" * 201
+    _validate_description(long_desc)
