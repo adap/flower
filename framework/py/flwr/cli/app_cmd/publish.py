@@ -76,7 +76,7 @@ def publish(
     app = app.expanduser().resolve()
 
     # Validate app description from config
-    config, _ = load_and_validate(app / FAB_CONFIG_FILE)
+    config, _ = load_and_validate(app / FAB_CONFIG_FILE, check_module=False)
     description = config["project"]["description"]
     _validate_description(description)
 
