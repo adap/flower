@@ -102,7 +102,7 @@ def publish(
     raise click.ClickException(msg)
 
 
-def _validate_description(description: object) -> None:
+def _validate_description(description: Any) -> None:
     """Validate app description before publishing."""
     if not isinstance(description, str):
         raise click.ClickException(
