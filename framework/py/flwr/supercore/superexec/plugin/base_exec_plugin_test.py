@@ -65,12 +65,11 @@ class DummyExecPlugin(BaseExecPlugin):
     appio_api_address_arg = "--appio-api-address"
 
 
-def test_launch_app_forwards_runtime_dependency_install_and_index_url() -> None:
-    """Ensure app launch forwards runtime install flags."""
+def test_launch_app_forwards_runtime_dependency_install_flag() -> None:
+    """Ensure app launch forwards runtime install flag."""
     plugin = DummyExecPlugin(
         appio_api_address="127.0.0.1:9091",
         get_run=Mock(),
-        index_url="http://127.0.0.1:3141/root/pypi/+simple/",
         runtime_dependency_install=True,
     )
 
@@ -95,8 +94,6 @@ def test_launch_app_forwards_runtime_dependency_install_and_index_url() -> None:
         "--parent-pid",
         "1234",
         "--allow-runtime-dependency-installation",
-        "--index-url",
-        "http://127.0.0.1:3141/root/pypi/+simple/",
     ]
 
 
@@ -113,4 +110,3 @@ def test_launch_app_skips_optional_runtime_flags_by_default() -> None:
         plugin.launch_app(token="token-123", run_id=7)
 
     assert "--allow-runtime-dependency-installation" not in popen.call_args.args[0]
-    assert "--index-url" not in popen.call_args.args[0]

@@ -103,7 +103,6 @@ def start_client_internal(
     clientappio_api_address: str = CLIENTAPPIO_API_DEFAULT_SERVER_ADDRESS,
     health_server_address: str | None = None,
     trusted_entities: dict[str, str] | None = None,
-    index_url: str | None = None,
     runtime_dependency_install: bool = RUNTIME_DEPENDENCY_INSTALL,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
@@ -158,8 +157,6 @@ def start_client_internal(
         A dictionary mapping public key IDs to public keys.
         Only apps verified by at least one of these
         entities can run on a supernode.
-    index_url : Optional[str] (default: None)
-        Package index URL to forward to app dependency installation.
     runtime_dependency_install : bool (default: False)
         Whether runtime dependency installation is allowed.
     """
@@ -223,8 +220,6 @@ def start_client_internal(
         command += ["--parent-pid", str(os.getpid())]
         if runtime_dependency_install:
             command += ["--allow-runtime-dependency-installation"]
-        if index_url:
-            command += ["--index-url", index_url]
         # pylint: disable-next=consider-using-with
         subprocess.Popen(command)
 

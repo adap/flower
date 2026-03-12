@@ -102,7 +102,6 @@ def flower_superexec() -> None:
         plugin_config=plugin_config,
         parent_pid=args.parent_pid,
         health_server_address=args.health_server_address,
-        index_url=args.index_url,
         runtime_dependency_install=args.runtime_dependency_install,
     )
 

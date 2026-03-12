@@ -48,7 +48,6 @@ def flwr_clientapp() -> None:
             appio_api_address=args.clientappio_api_address,
             parent_pid=args.parent_pid,
             warn_run_once=args.run_once,
-            index_url=args.index_url,
             runtime_dependency_install=args.runtime_dependency_install,
         )
         return
@@ -66,7 +65,6 @@ def flwr_clientapp() -> None:
         token=args.token,
         certificates=None,
         parent_pid=args.parent_pid,
-        index_url=args.index_url,
         runtime_dependency_install=args.runtime_dependency_install,
     )
 

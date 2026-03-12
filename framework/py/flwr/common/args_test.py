@@ -29,7 +29,6 @@ def test_runtime_dependency_install_args_defaults() -> None:
     args = parser.parse_args([])
 
     assert args.runtime_dependency_install is RUNTIME_DEPENDENCY_INSTALL
-    assert args.index_url is None
 
 
 def test_runtime_dependency_install_args_flags() -> None:
@@ -37,13 +36,6 @@ def test_runtime_dependency_install_args_flags() -> None:
     parser = argparse.ArgumentParser()
     add_args_runtime_dependency_install(parser)
 
-    args = parser.parse_args(
-        [
-            "--allow-runtime-dependency-installation",
-            "--index-url",
-            "http://127.0.0.1:3141/root/pypi/+simple/",
-        ]
-    )
+    args = parser.parse_args(["--allow-runtime-dependency-installation"])
 
     assert args.runtime_dependency_install is True
-    assert args.index_url == "http://127.0.0.1:3141/root/pypi/+simple/"

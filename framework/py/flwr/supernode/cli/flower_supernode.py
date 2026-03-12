@@ -84,7 +84,6 @@ def flower_supernode() -> None:
         clientappio_api_address=args.clientappio_api_address,
         health_server_address=args.health_server_address,
         trusted_entities=trusted_entities,
-        index_url=args.index_url,
         runtime_dependency_install=args.runtime_dependency_install,
     )
 

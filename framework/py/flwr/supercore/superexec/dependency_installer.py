@@ -31,13 +31,38 @@ from flwr.common.logger import log
 from flwr.supercore.utils import get_flwr_home
 
 _RUNTIME_ENV_DIR = "runtime-envs"
+RuntimeDependencyIndexContext = dict[str, str | int | None]
+
+try:
+    from flwr.ee import (
+        resolve_runtime_dependency_index_url as _resolve_runtime_dependency_index_url_from_ee,
+    )
+except ImportError:
+
+    def _resolve_runtime_dependency_index_url_from_ee(
+        context: RuntimeDependencyIndexContext,  # noqa: ARG001
+    ) -> str | None:
+        """Fallback when `flwr.ee` resolver hook is unavailable."""
+        return None
+
+
+def _resolve_runtime_dependency_index_url(
+    context: RuntimeDependencyIndexContext,
+) -> str | None:
+    resolved = _resolve_runtime_dependency_index_url_from_ee(context)
+    if resolved is not None and not isinstance(resolved, str):
+        raise TypeError(
+            "Runtime dependency index resolver must return `str | None`, "
+            f"got `{type(resolved).__name__}`."
+        )
+    return resolved
 
 
 def install_app_dependencies(
     project_dir: str | Path,
     launch_id: str | None = None,
     run_id: int | None = None,
-    index_url: str | None = None,
+    index_context: RuntimeDependencyIndexContext | None = None,
 ) -> Path:
     """Install app dependencies from a project's pyproject.toml using ``uv sync``.
 
@@ -55,9 +80,9 @@ def install_app_dependencies(
     run_id : Optional[int]
         Run identifier used to include run context in the runtime environment
         directory name.
-    index_url : Optional[str]
-        Optional package index URL used by uv to install packages from a curated
-        repository. When provided, it is passed as ``--index-url`` to uv.
+    index_context : Optional[RuntimeDependencyIndexContext]
+        Optional context passed to the EE runtime dependency index resolver.
+        If EE provides an index URL, it is passed to uv as ``--index-url``.
 
     Returns
     -------
@@ -66,7 +91,13 @@ def install_app_dependencies(
     """
     project_dir = Path(project_dir)
 
-    _ensure_uv_available(index_url)
+    dependency_index_url = (
+        _resolve_runtime_dependency_index_url(index_context)
+        if index_context is not None
+        else None
+    )
+
+    _ensure_uv_available(dependency_index_url)
 
     dependencies = _get_project_dependencies(project_dir)
     installable_dependencies = _exclude_flwr_dependencies(dependencies)
@@ -106,8 +137,8 @@ def install_app_dependencies(
         "--inexact",
     ]
 
-    if index_url is not None:
-        sync_cmd += ["--index-url", index_url]
+    if dependency_index_url is not None:
+        sync_cmd += ["--index-url", dependency_index_url]
 
     sync_env = os.environ.copy()
     sync_env["UV_PROJECT_ENVIRONMENT"] = str(runtime_env_dir)
@@ -210,7 +241,7 @@ def cleanup_app_runtime_environment(runtime_env_dir: Path | None) -> None:
         log(DEBUG, "Cleaned up runtime environment %s", runtime_env_dir)
 
 
-def _ensure_uv_available(index_url: str | None) -> None:
+def _ensure_uv_available(dependency_index_url: str | None) -> None:
     """Ensure `uv` is available in the current runtime environment."""
     uv_version_cmd = [sys.executable, "-m", "uv", "--version"]
     uv_check_error = _run_cmd(uv_version_cmd)
@@ -228,12 +259,16 @@ def _ensure_uv_available(index_url: str | None) -> None:
         "install",
         "uv",
     ]
-    if index_url is not None:
-        pip_install_uv_cmd += ["--index-url", index_url]
+    if dependency_index_url is not None:
+        pip_install_uv_cmd += ["--index-url", dependency_index_url]
 
     install_error = _run_cmd(pip_install_uv_cmd)
     if install_error is not None:
-        source_hint = "the configured private index" if index_url else "the default index"
+        source_hint = (
+            "the configured private index"
+            if dependency_index_url
+            else "the default index"
+        )
         raise RuntimeError(f"Failed to install `uv` from {source_hint}: {install_error}")
 
     recheck_error = _run_cmd(uv_version_cmd)

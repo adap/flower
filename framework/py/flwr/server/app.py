@@ -442,8 +442,6 @@ def run_superlink() -> None:
         command += ["--parent-pid", str(os.getpid())]
         if args.runtime_dependency_install:
             command += ["--allow-runtime-dependency-installation"]
-        if args.index_url:
-            command += ["--index-url", args.index_url]
         # pylint: disable-next=consider-using-with
         subprocess.Popen(command)
 

@@ -38,14 +38,6 @@ def add_args_runtime_dependency_install(parser: argparse.ArgumentParser) -> None
         help="Allow runtime installation of app dependencies via `uv sync`. "
         "By default, runtime dependency installation is disabled.",
     )
-    parser.add_argument(
-        "--index-url",
-        type=str,
-        default=None,
-        help="Package index URL for runtime app dependency installation. "
-        "Use an administrator-managed private index containing approved "
-        "packages.",
-    )
 
 
 def add_args_flwr_app_common(parser: argparse.ArgumentParser) -> None:

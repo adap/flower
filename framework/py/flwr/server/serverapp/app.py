@@ -99,7 +99,6 @@ def flwr_serverapp() -> None:
             appio_api_address=args.serverappio_api_address,
             parent_pid=args.parent_pid,
             warn_run_once=args.run_once,
-            index_url=args.index_url,
             runtime_dependency_install=args.runtime_dependency_install,
         )
         return
@@ -117,7 +116,6 @@ def flwr_serverapp() -> None:
         token=args.token,
         certificates=None,
         parent_pid=args.parent_pid,
-        index_url=args.index_url,
         runtime_dependency_install=args.runtime_dependency_install,
     )
 
@@ -131,7 +129,6 @@ def run_serverapp(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
     token: str,
     certificates: bytes | None = None,
     parent_pid: int | None = None,
-    index_url: str | None = None,
     runtime_dependency_install: bool = RUNTIME_DEPENDENCY_INSTALL,
 ) -> None:
     """Run Flower ServerApp process."""
@@ -232,7 +229,15 @@ def run_serverapp(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
                 app_path,
                 launch_id=token,
                 run_id=run.run_id,
-                index_url=index_url,
+                index_context={
+                    "component": "serverapp",
+                    "project_dir": app_path,
+                    "run_id": run.run_id,
+                    "launch_id": token,
+                    "fab_id": run.fab_id,
+                    "fab_version": run.fab_version,
+                    "fab_hash": fab.hash_str,
+                },
             )
         else:
             log(

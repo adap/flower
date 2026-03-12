@@ -48,7 +48,6 @@ def run_superexec(  # pylint: disable=R0913,R0914,R0917
     plugin_config: dict[str, Any] | None = None,
     parent_pid: int | None = None,
     health_server_address: str | None = None,
-    index_url: str | None = None,
     runtime_dependency_install: bool = RUNTIME_DEPENDENCY_INSTALL,
 ) -> None:
     """Run Flower SuperExec.
@@ -70,8 +69,6 @@ def run_superexec(  # pylint: disable=R0913,R0914,R0917
     health_server_address : Optional[str] (default: None)
         The address of the health server. If `None` is provided, the health server will
         NOT be started.
-    index_url : Optional[str] (default: None)
-        Package index URL for installing app dependencies via uv.
     runtime_dependency_install : bool (default: False)
         Whether runtime dependency installation is allowed.
     """
@@ -115,7 +112,6 @@ def run_superexec(  # pylint: disable=R0913,R0914,R0917
     plugin = plugin_class(
         appio_api_address=appio_api_address,
         get_run=get_run,
-        index_url=index_url,
         runtime_dependency_install=runtime_dependency_install,
     )
 
@@ -164,7 +160,6 @@ def run_with_deprecation_warning(  # pylint: disable=R0913, R0917
     appio_api_address: str,
     parent_pid: int | None,
     warn_run_once: bool,
-    index_url: str | None = None,
     runtime_dependency_install: bool = RUNTIME_DEPENDENCY_INSTALL,
 ) -> None:
     """Log a deprecation warning and run the equivalent `flower-superexec` command.
@@ -183,8 +178,6 @@ def run_with_deprecation_warning(  # pylint: disable=R0913, R0917
     new_cmd += f"--appio-api-address {appio_api_address} "
     if parent_pid is not None:
         new_cmd += f"--parent-pid {parent_pid}"
-    if index_url:
-        new_cmd += f" --index-url {index_url}"
     if runtime_dependency_install:
         new_cmd += " --allow-runtime-dependency-installation"
     log(WARN, new_cmd)
@@ -198,6 +191,5 @@ def run_with_deprecation_warning(  # pylint: disable=R0913, R0917
         stub_class=stub_class,
         appio_api_address=appio_api_address,
         parent_pid=parent_pid,
-        index_url=index_url,
         runtime_dependency_install=runtime_dependency_install,
     )

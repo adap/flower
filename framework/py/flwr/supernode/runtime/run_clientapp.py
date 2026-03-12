@@ -82,7 +82,6 @@ def run_clientapp(  # pylint: disable=R0913, R0914, R0917
     token: str,
     certificates: bytes | None = None,
     parent_pid: int | None = None,
-    index_url: str | None = None,
     runtime_dependency_install: bool = RUNTIME_DEPENDENCY_INSTALL,
 ) -> None:
     """Run Flower ClientApp process."""
@@ -139,7 +138,15 @@ def run_clientapp(  # pylint: disable=R0913, R0914, R0917
                         app_path,
                         launch_id=token,
                         run_id=run.run_id,
-                        index_url=index_url,
+                        index_context={
+                            "component": "clientapp",
+                            "project_dir": str(app_path),
+                            "run_id": run.run_id,
+                            "launch_id": token,
+                            "fab_id": run.fab_id,
+                            "fab_version": run.fab_version,
+                            "fab_hash": fab.hash_str,
+                        },
                     )
                 else:
                     log(

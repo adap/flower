@@ -36,14 +36,12 @@ def test_run_with_deprecation_warning_logs_and_forwards_runtime_flags() -> None:
             appio_api_address="127.0.0.1:9091",
             parent_pid=321,
             warn_run_once=False,
-            index_url="http://127.0.0.1:3141/root/pypi/+simple/",
             runtime_dependency_install=True,
         )
 
     assert (
         "flower-superexec --insecure --plugin-type serverapp "
         "--appio-api-address 127.0.0.1:9091 --parent-pid 321 "
-        "--index-url http://127.0.0.1:3141/root/pypi/+simple/ "
         "--allow-runtime-dependency-installation"
     ) in [call.args[1] for call in log.call_args_list]
     run_superexec_fn.assert_called_once_with(
@@ -51,6 +49,5 @@ def test_run_with_deprecation_warning_logs_and_forwards_runtime_flags() -> None:
         stub_class=object,
         appio_api_address="127.0.0.1:9091",
         parent_pid=321,
-        index_url="http://127.0.0.1:3141/root/pypi/+simple/",
         runtime_dependency_install=True,
     )

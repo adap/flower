@@ -30,12 +30,10 @@ class ExecPlugin(ABC):
         self,
         appio_api_address: str,
         get_run: Callable[[int], Run],
-        index_url: str | None = None,
         runtime_dependency_install: bool = RUNTIME_DEPENDENCY_INSTALL,
     ) -> None:
         self.appio_api_address = appio_api_address
         self.get_run = get_run
-        self.index_url = index_url
         self.runtime_dependency_install = runtime_dependency_install
 
     @abstractmethod

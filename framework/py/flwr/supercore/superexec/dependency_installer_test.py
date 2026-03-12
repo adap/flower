@@ -22,6 +22,8 @@ import time
 from pathlib import Path
 from unittest.mock import patch
 
+import pytest
+
 from flwr.supercore.superexec import dependency_installer
 
 
@@ -73,13 +75,27 @@ def test_create_runtime_env_dir_uses_run_id_when_provided(tmp_path: Path) -> Non
     assert runtime_env_dir == tmp_path / "runtime-envs" / "123"
 
 
-def test_install_app_dependencies_passes_index_url_to_uv_sync(tmp_path: Path) -> None:
-    """Ensure uv sync receives the configured package index."""
-    index_url = "http://127.0.0.1:3141/root/pypi/+simple/"
+def test_install_app_dependencies_uses_resolved_index_url(tmp_path: Path) -> None:
+    """Ensure resolver output is forwarded to uv sync and uv bootstrap."""
+    resolved_index_url = "http://127.0.0.1:3141/root/pypi/+simple/"
+    index_context: dependency_installer.RuntimeDependencyIndexContext = {
+        "component": "serverapp",
+        "project_dir": str(tmp_path),
+        "run_id": 321,
+        "launch_id": "token-a",
+        "fab_id": "publisher/app",
+        "fab_version": "1.0.0",
+        "fab_hash": "fab-hash",
+    }
 
     with (
         patch.dict(os.environ, {"FLWR_HOME": str(tmp_path)}, clear=False),
         patch.object(dependency_installer, "_ensure_uv_available") as ensure_uv,
+        patch.object(
+            dependency_installer,
+            "_resolve_runtime_dependency_index_url",
+            return_value=resolved_index_url,
+        ) as resolve_index,
         patch.object(
             dependency_installer,
             "_get_project_dependencies",
@@ -91,10 +107,11 @@ def test_install_app_dependencies_passes_index_url_to_uv_sync(tmp_path: Path) ->
             project_dir=tmp_path,
             launch_id="token-a",
             run_id=321,
-            index_url=index_url,
+            index_context=index_context,
         )
 
-    ensure_uv.assert_called_once_with(index_url)
+    resolve_index.assert_called_once_with(index_context)
+    ensure_uv.assert_called_once_with(resolved_index_url)
     sync_cmd = run_cmd.call_args.args[0]
     sync_env = run_cmd.call_args.kwargs["env"]
     assert sync_cmd == [
@@ -107,7 +124,7 @@ def test_install_app_dependencies_passes_index_url_to_uv_sync(tmp_path: Path) ->
         "flwr",
         "--inexact",
         "--index-url",
-        index_url,
+        resolved_index_url,
     ]
     assert sync_env["UV_PROJECT_ENVIRONMENT"] == str(runtime_env)
     dependency_installer.cleanup_app_runtime_environment(runtime_env)
@@ -166,6 +183,28 @@ def test_same_host_superlink_and_supernode_share_run_scoped_env(tmp_path: Path) 
     dependency_installer.cleanup_app_runtime_environment(results[0])
 
 
+def test_install_app_dependencies_propagates_resolver_error(tmp_path: Path) -> None:
+    """Ensure resolver errors are surfaced instead of silently ignored."""
+    index_context: dependency_installer.RuntimeDependencyIndexContext = {
+        "component": "clientapp",
+        "project_dir": str(tmp_path),
+        "run_id": 777,
+        "launch_id": "token-x",
+    }
+    with patch.object(
+        dependency_installer,
+        "_resolve_runtime_dependency_index_url",
+        side_effect=RuntimeError("resolver failed"),
+    ):
+        with pytest.raises(RuntimeError, match="resolver failed"):
+            dependency_installer.install_app_dependencies(
+                project_dir=tmp_path,
+                launch_id="token-x",
+                run_id=777,
+                index_context=index_context,
+            )
+
+
 def test_cleanup_app_runtime_environment_removes_directory(tmp_path: Path) -> None:
     """Ensure cleanup removes the selected runtime environment."""
     runtime_env_dir = tmp_path / "runtime-envs" / "456"
@@ -179,14 +218,16 @@ def test_cleanup_app_runtime_environment_removes_directory(tmp_path: Path) -> No
 
 def test_ensure_uv_available_uses_index_url_for_pip_install() -> None:
     """Ensure uv bootstrap uses the configured package index."""
-    index_url = "http://127.0.0.1:3141/root/pypi/+simple/"
+    dependency_index_url = "http://127.0.0.1:3141/root/pypi/+simple/"
 
     with patch.object(
         dependency_installer,
         "_run_cmd",
         side_effect=["uv missing", None, None],
     ) as run_cmd:
-        dependency_installer._ensure_uv_available(index_url=index_url)
+        dependency_installer._ensure_uv_available(
+            dependency_index_url=dependency_index_url
+        )
 
     assert run_cmd.call_args_list[0].args[0] == [sys.executable, "-m", "uv", "--version"]
     assert run_cmd.call_args_list[1].args[0] == [
@@ -196,6 +237,6 @@ def test_ensure_uv_available_uses_index_url_for_pip_install() -> None:
         "install",
         "uv",
         "--index-url",
-        index_url,
+        dependency_index_url,
     ]
     assert run_cmd.call_args_list[2].args[0] == [sys.executable, "-m", "uv", "--version"]
