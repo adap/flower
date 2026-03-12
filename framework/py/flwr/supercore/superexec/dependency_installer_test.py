@@ -41,9 +41,11 @@ def _make_site_packages(runtime_env_dir: Path) -> None:
 
 def _fake_run_cmd(
     cmd: list[str],
-    _cwd: Path | None = None,
+    cwd: Path | None = None,
     env: dict[str, str] | None = None,
+    **_kwargs: object,
 ) -> None:
+    _ = cwd
     if cmd[:4] == [sys.executable, "-m", "uv", "sync"] and env is not None:
         runtime_env_dir = Path(env["UV_PROJECT_ENVIRONMENT"])
         _make_site_packages(runtime_env_dir)
@@ -138,9 +140,11 @@ def test_same_host_superlink_and_supernode_share_run_scoped_env(tmp_path: Path) 
 
     def fake_run_cmd_with_delay(
         cmd: list[str],
-        _cwd: Path | None = None,
+        cwd: Path | None = None,
         env: dict[str, str] | None = None,
+        **_kwargs: object,
     ) -> None:
+        _ = cwd
         if cmd[:4] == [sys.executable, "-m", "uv", "sync"] and env is not None:
             runtime_env_dir = Path(env["UV_PROJECT_ENVIRONMENT"])
             _make_site_packages(runtime_env_dir)
