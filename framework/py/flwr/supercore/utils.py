@@ -19,6 +19,7 @@ import json
 import os
 import re
 from pathlib import Path
+from typing import Any, NoReturn
 
 import requests
 
@@ -114,6 +115,93 @@ def parse_app_spec(app_spec: str) -> tuple[str, str | None]:
     return app_id, app_version
 
 
+def _raise_not_found_error(
+    resp: requests.Response, app_id: str, app_version: str | None
+) -> NoReturn:
+    """Raise a standardized 404 download-link error."""
+    try:
+        payload = resp.json()
+    except ValueError:
+        # JSON parsing failed
+        raise ValueError(f"{app_id} not found in Platform API.") from None
+
+    error_message = payload.get("detail") if isinstance(payload, dict) else payload
+    if isinstance(error_message, dict):
+        available_app_versions = error_message.get("available_app_versions", [])
+        available_versions_str = (
+            ", ".join(map(str, available_app_versions))
+            if available_app_versions
+            else "None"
+        )
+        raise ValueError(
+            f"{app_id}=={app_version} not found in Platform API. "
+            f"Available app versions for {app_id}: {available_versions_str}"
+        )
+
+    raise ValueError(f"{app_id} not found in Platform API.")
+
+
+def _build_compatibility_error_message(error_message: dict[str, Any]) -> str:
+    """Build a user-facing compatibility error message from 412 details."""
+    message = error_message.get(
+        "message",
+        "Requested Flower version is incompatible with this app version.",
+    )
+    reason = error_message.get("reason")
+    requested_flwr_version = error_message.get("requested_flwr_version")
+    min_version = error_message.get("flwr_version_min")
+    target_version = error_message.get("flwr_version_target")
+    max_version = error_message.get("flwr_version_max")
+
+    details: list[str] = [str(message)]
+    if reason:
+        details.append(str(reason))
+    if requested_flwr_version:
+        details.append(f"Requested Flower version: {requested_flwr_version}.")
+
+    bounds: list[str] = []
+    if min_version:
+        bounds.append(f"min={min_version}")
+    if target_version:
+        bounds.append(f"target={target_version}")
+    if max_version:
+        bounds.append(f"max={max_version}")
+    if bounds:
+        details.append(f"Supported bounds: {', '.join(bounds)}.")
+
+    return " ".join(details)
+
+
+def _raise_compatibility_error(resp: requests.Response) -> NoReturn:
+    """Raise a standardized 412 compatibility error."""
+    default_message = "Requested Flower version is incompatible with this app version."
+    try:
+        payload = resp.json()
+    except ValueError:
+        raise ValueError(default_message) from None
+
+    error_message = payload.get("detail") if isinstance(payload, dict) else payload
+    if isinstance(error_message, dict):
+        raise ValueError(_build_compatibility_error_message(error_message))
+
+    if isinstance(error_message, str) and error_message:
+        raise ValueError(error_message)
+
+    raise ValueError(default_message)
+
+
+def _extract_download_link_response(
+    resp: requests.Response, out_url: str
+) -> tuple[str, list[dict[str, str]] | None]:
+    """Extract download URL and optional verifications from a successful response."""
+    data = resp.json()
+    if not isinstance(data, dict) or out_url not in data:
+        raise ValueError("Invalid response from Platform API")
+
+    verifications = data["verifications"] if "verifications" in data else None
+    return str(data[out_url]), verifications
+
+
 def request_download_link(
     app_id: str, app_version: str | None, in_url: str, out_url: str
 ) -> tuple[str, list[dict[str, str]] | None]:
@@ -159,70 +247,10 @@ def request_download_link(
         raise ValueError(f"Unable to connect to Platform API: {e}") from e
 
     if resp.status_code == 404:
-        # Expecting a JSON body with a "detail" field
-        try:
-            error_message = resp.json().get("detail")
-        except ValueError:
-            # JSON parsing failed
-            raise ValueError(f"{app_id} not found in Platform API.") from None
-
-        if isinstance(error_message, dict):
-            available_app_versions = error_message.get("available_app_versions", [])
-            available_versions_str = (
-                ", ".join(map(str, available_app_versions))
-                if available_app_versions
-                else "None"
-            )
-            raise ValueError(
-                f"{app_id}=={app_version} not found in Platform API. "
-                f"Available app versions for {app_id}: {available_versions_str}"
-            )
-
-        raise ValueError(f"{app_id} not found in Platform API.")
+        _raise_not_found_error(resp, app_id, app_version)
 
     if resp.status_code == 412:
-        try:
-            error_message = resp.json().get("detail")
-        except ValueError:
-            raise ValueError(
-                "Requested Flower version is incompatible with this app version."
-            ) from None
-
-        if isinstance(error_message, dict):
-            message = error_message.get(
-                "message",
-                "Requested Flower version is incompatible with this app version.",
-            )
-            reason = error_message.get("reason")
-            requested_flwr_version = error_message.get("requested_flwr_version")
-            min_version = error_message.get("flwr_version_min")
-            target_version = error_message.get("flwr_version_target")
-            max_version = error_message.get("flwr_version_max")
-
-            details: list[str] = [str(message)]
-            if reason:
-                details.append(str(reason))
-            if requested_flwr_version:
-                details.append(f"Requested Flower version: {requested_flwr_version}.")
-
-            bounds: list[str] = []
-            if min_version:
-                bounds.append(f"min={min_version}")
-            if target_version:
-                bounds.append(f"target={target_version}")
-            if max_version:
-                bounds.append(f"max={max_version}")
-            if bounds:
-                details.append(f"Supported bounds: {', '.join(bounds)}.")
-
-            raise ValueError(" ".join(details))
-
-        if isinstance(error_message, str) and error_message:
-            raise ValueError(error_message)
-
-        raise ValueError(
-            "Requested Flower version is incompatible with this app version."
-        )
+        _raise_compatibility_error(resp)
 
     if not resp.ok:
         raise ValueError(
@@ -230,13 +258,7 @@ def request_download_link(
             f"Details: {resp.text}"
         )
 
-    data = resp.json()
-    if out_url not in data:
-        raise ValueError("Invalid response from Platform API")
-
-    verifications = data["verifications"] if "verifications" in data else None
-
-    return str(data[out_url]), verifications
+    return _extract_download_link_response(resp, out_url)
 
 
 def humanize_duration(seconds: float) -> str:

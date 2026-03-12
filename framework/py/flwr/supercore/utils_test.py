@@ -204,6 +204,51 @@ def test_request_download_link_all_scenarios(
             "raises": "incompatible with this app version",
         },
         {
+            "name": "http_412_detail_string",
+            "fake_resp": {
+                "ok": False,
+                "status": 412,
+                "json": {"detail": "simple 412 error"},
+            },
+            "raises": "simple 412 error",
+        },
+        {
+            "name": "http_412_detail_missing",
+            "fake_resp": {
+                "ok": False,
+                "status": 412,
+                "json": {},
+            },
+            "raises": "incompatible with this app version",
+        },
+        {
+            "name": "http_412_non_object_json_string",
+            "fake_resp": {
+                "ok": False,
+                "status": 412,
+                "json": "raw incompatible response",
+            },
+            "raises": "raw incompatible response",
+        },
+        {
+            "name": "http_412_non_object_json_list",
+            "fake_resp": {
+                "ok": False,
+                "status": 412,
+                "json": ["one", "two"],
+            },
+            "raises": "incompatible with this app version",
+        },
+        {
+            "name": "http_412_invalid_json",
+            "fake_resp": {
+                "ok": False,
+                "status": 412,
+                "json_raises": ValueError("invalid json"),
+            },
+            "raises": "incompatible with this app version",
+        },
+        {
             "name": "network_error",
             "fake_exc": requests.RequestException("network down"),
             "raises": "Unable to connect to Platform API",
@@ -226,6 +271,7 @@ def test_request_download_link_all_scenarios(
         status_code: int
         _json: dict[str, Any]
         text: str
+        _json_raises: ValueError | None
 
         def __init__(
             self,
@@ -233,14 +279,18 @@ def test_request_download_link_all_scenarios(
             status: int,
             json_data: dict[str, Any] | None = None,
             text: str = "",
+            json_raises: ValueError | None = None,
         ) -> None:
             self.ok = ok
             self.status_code = status
             self._json = json_data or {}
             self.text = text
+            self._json_raises = json_raises
 
-        def json(self) -> dict[str, Any]:
+        def json(self) -> Any:
             """Return JSON data."""
+            if self._json_raises is not None:
+                raise self._json_raises
             return self._json
 
     def fake_post(url: str, data: str | None = None, **_: Any) -> _FakeResp:
@@ -265,6 +315,7 @@ def test_request_download_link_all_scenarios(
             status=fr["status"],
             json_data=fr.get("json"),
             text=fr.get("text", ""),
+            json_raises=fr.get("json_raises"),
         )
 
     monkeypatch.setattr(requests, "post", fake_post)
