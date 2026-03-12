@@ -16,6 +16,9 @@ on:
       - "**/uv.lock"
       - ".github/workflows/uv-lock-check.yml"
 
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.run_id || github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
@@ -38,7 +41,7 @@ jobs:
     name: Check ${{ matrix.project }} / uv.lock
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
         with:
