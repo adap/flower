@@ -36,6 +36,7 @@ from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.logger import (
     set_logger_propagation,
     update_console_handler,
+    warn_deprecated_feature,
     warn_deprecated_feature_with_example,
 )
 from flwr.common.typing import Run, RunStatus
@@ -128,6 +129,12 @@ def run_simulation(
         When disabled, only INFO, WARNING and ERROR log messages will be shown. If
         enabled, DEBUG-level logs will be displayed.
     """
+    warn_deprecated_feature(
+        "The `run_simulation` function is deprecated and will be removed in a future "
+        "version of Flower. Please use `flwr run` in the CLI instead to run your "
+        "simulation. Refer to the Flower Tutorials "
+        "for more details: https://flower.ai/docs/framework/tutorial-quickstart-pytorch.html",
+    )
     event(
         EventType.PYTHON_API_RUN_SIMULATION_ENTER,
         event_details={"backend": backend_name, "num-supernodes": num_supernodes},
