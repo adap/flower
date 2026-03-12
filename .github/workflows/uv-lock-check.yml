@@ -35,7 +35,7 @@ jobs:
           - datasets
           - framework
 
-    name: Check ${{ matrix.project }}/uv.lock
+    name: Check ${{ matrix.project }} / uv.lock
 
     steps:
       - uses: actions/checkout@v5
