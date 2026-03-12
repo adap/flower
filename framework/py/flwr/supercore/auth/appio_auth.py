@@ -104,7 +104,7 @@ class AuthDecisionFailureReason(Enum):
 
     MISSING_AUTH_INPUT = "missing_auth_input"
     INVALID_AUTH_INPUT = "invalid_auth_input"
-    INVALID_MECHANISM_COMBINATION = "invalid_mechanism_combination"
+    NON_REQUIRED_MECHANISM_PRESENT = "non_required_mechanism_present"
     POLICY_MISCONFIGURED = "policy_misconfigured"
 
 
@@ -178,12 +178,19 @@ class AuthDecisionEngine:
                 if authenticator.is_present(auth_input)
             ]
 
+            # Check if the required mechanism is missing.
             if required_mechanism not in present_mechanisms:
                 failure_reason = AuthDecisionFailureReason.MISSING_AUTH_INPUT
+            # Check if any present mechanism is not the one required by policy.
+            # This is explicitly denied to keep one-mechanism-per-RPC semantics.
             elif any(
                 mechanism != required_mechanism for mechanism in present_mechanisms
             ):
-                failure_reason = AuthDecisionFailureReason.INVALID_MECHANISM_COMBINATION
+                failure_reason = (
+                    AuthDecisionFailureReason.NON_REQUIRED_MECHANISM_PRESENT
+                )
+            # If required mechanism is present and no extra mechanism is present,
+            # attempt authentication with that mechanism.
             else:
                 caller_identity = required_authenticator.authenticate(auth_input)
                 if caller_identity is not None:

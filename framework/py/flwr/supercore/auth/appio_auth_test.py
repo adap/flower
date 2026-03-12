@@ -181,7 +181,7 @@ class TestAuthDecisionEngine(TestCase):
         self.assertIsNone(decision.caller_identity)
         self.assertEqual(
             decision.failure_reason,
-            AuthDecisionFailureReason.INVALID_MECHANISM_COMBINATION,
+            AuthDecisionFailureReason.NON_REQUIRED_MECHANISM_PRESENT,
         )
 
     def test_signed_metadata_required_denies_when_extra_token_is_present(self) -> None:
@@ -215,7 +215,7 @@ class TestAuthDecisionEngine(TestCase):
         self.assertIsNone(decision.caller_identity)
         self.assertEqual(
             decision.failure_reason,
-            AuthDecisionFailureReason.INVALID_MECHANISM_COMBINATION,
+            AuthDecisionFailureReason.NON_REQUIRED_MECHANISM_PRESENT,
         )
 
     def test_signed_metadata_required_denies_when_input_is_malformed(self) -> None:
