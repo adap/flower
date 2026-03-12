@@ -91,7 +91,7 @@ class TestInMemoryGrid(unittest.TestCase):
             generate_rand_int_from_bytes(NODE_ID_NUM_BYTES)
             for _ in range(self.num_nodes)
         ]
-        self.run = Run(
+        self.mock_run = Run(
             run_id=61016,
             fab_id="mock/mock",
             fab_version="v1.0.0",
@@ -108,10 +108,10 @@ class TestInMemoryGrid(unittest.TestCase):
             bytes_recv=0,
             clientapp_runtime=0.0,
         )
-        self.state.get_run_info.return_value = [self.run]
+        self.state.get_run_info.return_value = [self.mock_run]
         state_factory = MagicMock(state=lambda: self.state)
         self.grid = InMemoryGrid(state_factory=state_factory)
-        self.grid.set_run(self.run)
+        self.grid.set_run(self.mock_run)
         self.grid.state = self.state
 
     def test_get_run(self) -> None:
@@ -132,7 +132,7 @@ class TestInMemoryGrid(unittest.TestCase):
         """Test `set_run` rejects runs that are not registered in state."""
         self.state.get_run_info.return_value = []
         with self.assertRaises(RuntimeError):
-            self.grid.set_run(self.run)
+            self.grid.set_run(self.mock_run)
 
     def test_get_nodes(self) -> None:
         """Test retrieval of nodes."""

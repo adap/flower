@@ -15,6 +15,8 @@
 """Tests for simulation startup."""
 
 
+from queue import Queue
+from typing import cast
 from unittest import TestCase
 from unittest.mock import MagicMock, Mock, patch
 
@@ -59,8 +61,8 @@ class TestMainLoop(TestCase):
 
         mock_thread = Mock()
 
-        def _run_serverapp_th_side_effect(*args: object, **kwargs: object) -> Mock:
-            ctx_queue = kwargs["ctx_queue"]
+        def _run_serverapp_th_side_effect(*_args: object, **kwargs: object) -> Mock:
+            ctx_queue = cast(Queue[Context], kwargs["ctx_queue"])
             ctx_queue.put(context)
             return mock_thread
 

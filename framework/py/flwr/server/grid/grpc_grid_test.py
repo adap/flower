@@ -54,14 +54,14 @@ class TestGrpcGrid(unittest.TestCase):
         """Initialize mock GrpcServerAppIoStub and Grid instance before each test."""
         self.mock_stub = Mock()
         self.mock_channel = Mock()
-        self.run = Run.create_empty(61016)
-        self.run.fab_id = "mock/mock"
-        self.run.fab_version = "v1.0.0"
-        self.run.fab_hash = "9f86d08"
+        self.mock_run = Run.create_empty(61016)
+        self.mock_run.fab_id = "mock/mock"
+        self.mock_run.fab_version = "v1.0.0"
+        self.mock_run.fab_hash = "9f86d08"
         self.grid = GrpcGrid()
         self.grid._grpc_stub = self.mock_stub  # pylint: disable=protected-access
         self.grid._channel = self.mock_channel  # pylint: disable=protected-access
-        self.grid.set_run(self.run)
+        self.grid.set_run(self.mock_run)
 
     def test_init_grpc_grid(self) -> None:
         """Test GrpcServerAppIoStub initialization."""

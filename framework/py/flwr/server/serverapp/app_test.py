@@ -88,11 +88,12 @@ class TestRunServerApp(TestCase):
         mock_heartbeat_sender = MagicMock()
         mock_heartbeat_sender_cls.return_value = mock_heartbeat_sender
 
-        mock_grid = MagicMock()
-        mock_grid._stub.PullAppInputs.return_value = Mock(
+        mock_stub = MagicMock()
+        mock_stub.PullAppInputs.return_value = Mock(
             context=object(), run=object(), fab=object()
         )
-        mock_grid._stub.PushAppOutputs.return_value = Mock()
+        mock_stub.PushAppOutputs.return_value = Mock()
+        mock_grid = MagicMock(**{"_stub": mock_stub})
         mock_grid_cls.return_value = mock_grid
 
         run_serverapp(
