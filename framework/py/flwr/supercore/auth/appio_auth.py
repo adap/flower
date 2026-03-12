@@ -158,11 +158,13 @@ class AuthDecisionEngine:
             ):
                 missing_by_method[method] = [required_mechanism]
         if invalid_policy_values or missing_by_method:
+            invalid_entries = invalid_policy_values or "None"
+            missing_entries = missing_by_method or "None"
             raise ValueError(
                 "Invalid method auth policies for AuthDecisionEngine.\n"
-                f"Entries with invalid policy objects: {invalid_policy_values or 'None'}\n"
+                f"Entries with invalid policy objects: {invalid_entries}\n"
                 "Entries referencing mechanisms without authenticators: "
-                f"{missing_by_method or 'None'}"
+                f"{missing_entries}"
             )
 
     @staticmethod

@@ -115,9 +115,7 @@ class TestAuthDecisionEngine(TestCase):
 
     def test_engine_fails_fast_when_policy_value_is_wrong_type(self) -> None:
         """Construction fails with actionable error for non-policy values."""
-        with self.assertRaisesRegex(
-            ValueError, "Entries with invalid policy objects"
-        ):
+        with self.assertRaisesRegex(ValueError, "Entries with invalid policy objects"):
             AuthDecisionEngine(
                 authenticators={},
                 method_auth_policies=cast(
@@ -231,7 +229,7 @@ class TestAuthDecisionEngine(TestCase):
             AuthDecisionFailureReason.NON_REQUIRED_MECHANISM_PRESENT,
         )
 
-    def test_token_required_denies_extra_signed_metadata_without_registered_authenticator(
+    def test_token_required_denies_extra_signed_metadata_without_authenticator(
         self,
     ) -> None:
         """Extra signed-metadata input is denied even without its authenticator."""
@@ -266,7 +264,7 @@ class TestAuthDecisionEngine(TestCase):
         state.get_run_id_by_token.assert_not_called()
         state.verify_token.assert_not_called()
 
-    def test_signed_metadata_required_denies_extra_token_without_registered_authenticator(
+    def test_signed_metadata_required_denies_extra_token_without_authenticator(
         self,
     ) -> None:
         """Extra token input is denied even without a token authenticator."""
