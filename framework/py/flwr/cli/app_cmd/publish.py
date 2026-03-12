@@ -17,7 +17,7 @@
 
 from contextlib import ExitStack
 from pathlib import Path
-from typing import IO, Annotated
+from typing import IO, Annotated, Any
 
 import click
 import requests
@@ -106,7 +106,8 @@ def _validate_description(description: Any) -> None:
     """Validate app description before publishing."""
     if not isinstance(description, str):
         raise click.ClickException(
-            "Missing or invalid app description. Please set `description` in [project] of pyproject.toml."
+            "Missing or invalid app description. "
+            "Please set `description` in [project] of pyproject.toml."
         )
 
     if description.strip() == "":
