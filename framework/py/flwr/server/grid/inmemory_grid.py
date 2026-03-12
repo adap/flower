@@ -71,7 +71,7 @@ class InMemoryGrid(Grid):
         runs = self.state.get_run_info(run_ids=[run.run_id])
         if not runs:
             raise RuntimeError(f"Cannot find the run with ID: {run.run_id}")
-        self._run = runs[0]
+        self._run = run
 
     @property
     def run(self) -> Run:
