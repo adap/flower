@@ -55,7 +55,7 @@ from flwr.proto.recorddict_pb2 import RecordDict as ProtoRecordDict
 
 # pylint: enable=E0611
 from flwr.server.superlink.linkstate import InMemoryLinkState, LinkState, SqlLinkState
-from flwr.supercore.constant import NOOP_FEDERATION, NodeStatus
+from flwr.supercore.constant import NOOP_FEDERATION, NodeStatus, RunType
 from flwr.supercore.corestate.corestate_test import StateTest as CoreStateTest
 from flwr.supercore.object_store.object_store_factory import ObjectStoreFactory
 from flwr.supercore.primitives.asymmetric import generate_key_pairs, public_key_to_bytes
@@ -101,6 +101,7 @@ class StateTest(CoreStateTest):
         assert run.federation == "health-federation"
         assert run.override_config["test_key"] == "test_value"
         assert run.flwr_aid == "i1r9f"
+        assert run.run_type == RunType.DEPLOYMENT
 
     def test_get_run_info_without_filters_returns_all_runs(self) -> None:
         """Test get_run_info returns all runs when no filter is provided."""
@@ -1688,19 +1689,31 @@ class StateTest(CoreStateTest):
         """Test that the recording and fetching of federation options works."""
         # Prepare
         state = self.state_factory()
-        # A run w/ federation options
         fed_options = ConfigRecord({"setting-a": 123, "setting-b": [4, 5, 6]})
-        run_id = create_dummy_run(state, federation_options=fed_options)
-        state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
+        simulation_run_id = create_dummy_run(state, federation_options=fed_options)
+        deployment_run_id = create_dummy_run(state)
+        state.update_run_status(simulation_run_id, RunStatus(Status.STARTING, "", ""))
 
         # Execute
-        fed_options_fetched = state.get_federation_options(run_id=run_id)
+        fed_options_fetched = state.get_federation_options(run_id=simulation_run_id)
+        runs = {
+            run.run_id: run
+            for run in state.get_run_info(
+                run_ids=[simulation_run_id, deployment_run_id]
+            )
+        }
 
         # Assert
         assert fed_options_fetched == fed_options
+        assert runs[simulation_run_id].run_type == RunType.SIMULATION
+        assert runs[deployment_run_id].run_type == RunType.DEPLOYMENT
 
         # Generate a run_id that doesn't exist. Then check None is returned
-        unique_int = next(num for num in range(0, 1) if num not in {run_id})
+        unique_int = next(
+            num
+            for num in range(0, 2)
+            if num not in {simulation_run_id, deployment_run_id}
+        )
         assert state.get_federation_options(run_id=unique_int) is None
 
     def test_set_linkstate_of_federation_manager(self) -> None:

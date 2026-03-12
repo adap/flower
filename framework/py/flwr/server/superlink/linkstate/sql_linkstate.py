@@ -50,7 +50,7 @@ from flwr.supercore.state.schema.linkstate_tables import create_linkstate_metada
 from flwr.supercore.utils import int64_to_uint64, uint64_to_int64
 from flwr.superlink.federation import FederationManager
 
-from .linkstate import LinkState
+from .linkstate import LinkState, determine_run_type_from_federation_options
 from .utils import (
     check_node_availability_for_in_message,
     configrecord_from_bytes,
@@ -944,6 +944,11 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
                 bytes_sent=row["bytes_sent"],
                 bytes_recv=row["bytes_recv"],
                 clientapp_runtime=row["clientapp_runtime"],
+                run_type=determine_run_type_from_federation_options(
+                    configrecord_from_bytes(row["federation_options"])
+                    if row["federation_options"]
+                    else ConfigRecord()
+                ),
             )
             for row in rows
         ]

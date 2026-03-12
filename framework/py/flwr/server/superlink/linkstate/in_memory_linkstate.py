@@ -39,7 +39,10 @@ from flwr.common.constant import (
 from flwr.common.record import ConfigRecord
 from flwr.common.typing import Run, RunStatus
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
-from flwr.server.superlink.linkstate.linkstate import LinkState
+from flwr.server.superlink.linkstate.linkstate import (
+    LinkState,
+    determine_run_type_from_federation_options,
+)
 from flwr.server.utils import validate_message
 from flwr.supercore.constant import NodeStatus
 from flwr.supercore.corestate.in_memory_corestate import InMemoryCoreState
@@ -572,6 +575,9 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
                         bytes_sent=0,
                         bytes_recv=0,
                         clientapp_runtime=0.0,
+                        run_type=determine_run_type_from_federation_options(
+                            federation_options
+                        ),
                     ),
                 )
                 self.run_ids[run_id] = run_record

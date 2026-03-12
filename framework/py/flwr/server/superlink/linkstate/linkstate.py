@@ -17,15 +17,26 @@
 
 import abc
 from collections.abc import Sequence
+from logging import INFO
 from typing import Literal
 
 from flwr.app.user_config import UserConfig
-from flwr.common import Context, Message
+from flwr.common import Context, Message, log
 from flwr.common.record import ConfigRecord
 from flwr.common.typing import Run, RunStatus
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
+from flwr.supercore.constant import RunType
 from flwr.supercore.corestate import CoreState
 from flwr.superlink.federation import FederationManager
+
+
+def determine_run_type_from_federation_options(
+    federation_options: ConfigRecord | None,
+) -> RunType:
+    """Determine the run type from federation options."""
+    tt = RunType.SIMULATION if federation_options else RunType.DEPLOYMENT
+    log(INFO, f"Determined run type: {tt}")
+    return tt
 
 
 class LinkState(CoreState):  # pylint: disable=R0904

@@ -41,6 +41,7 @@ from flwr.proto.transport_pb2 import (
     ServerMessage,
     Status,
 )
+from flwr.supercore.constant import RunType
 
 # pylint: enable=E0611
 from . import (
@@ -637,6 +638,7 @@ def run_to_proto(run: typing.Run) -> ProtoRun:
         bytes_sent=run.bytes_sent,
         bytes_recv=run.bytes_recv,
         clientapp_runtime=run.clientapp_runtime,
+        run_type=run.run_type.value if run.run_type else "",
     )
     return proto
 
@@ -659,6 +661,7 @@ def run_from_proto(run_proto: ProtoRun) -> typing.Run:
         bytes_sent=run_proto.bytes_sent,
         bytes_recv=run_proto.bytes_recv,
         clientapp_runtime=run_proto.clientapp_runtime,
+        run_type=RunType(run_proto.run_type) if run_proto.run_type else None,
     )
     return run
 

@@ -26,6 +26,7 @@ import numpy.typing as npt
 from flwr.app.user_config import UserConfig
 from flwr.proto.federation_pb2 import Member  # pylint: disable=E0611
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
+from flwr.supercore.constant import RunType
 
 NDArray = npt.NDArray[Any]
 NDArrayInt = npt.NDArray[np.int_]
@@ -238,6 +239,7 @@ class Run:  # pylint: disable=too-many-instance-attributes
     bytes_sent: int
     bytes_recv: int
     clientapp_runtime: float
+    run_type: RunType | None = None
 
     @classmethod
     def create_empty(cls, run_id: int) -> "Run":
