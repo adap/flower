@@ -134,7 +134,7 @@ class FederationManager(ABC):
     ) -> None:
         """Remove an account from a federation.
 
-        If ``target_account_name`` is ``None`` the caller removes themselves
+        If `target_account_name` is `None` the caller removes themselves
         (leave). Otherwise only the owner may remove another account. The
         owner can never be removed. All supernodes owned by the removed
         account are also soft-removed from the federation.
@@ -146,7 +146,7 @@ class FederationManager(ABC):
         federation : str
             The name of the federation.
         target_account_name : str | None
-            The name of the account to remove. If ``None``, the caller removes
+            The name of the account to remove. If `None`, the caller removes
             themselves from the federation. The owner cannot remove themselves.
 
         Raises
