@@ -20,6 +20,7 @@ import sys
 
 from git import Repo
 from packaging.version import InvalidVersion, Version
+from sphinx.application import Sphinx
 
 # Configuration file for the Sphinx documentation builder.
 #
@@ -135,7 +136,7 @@ copybutton_prompt_text = "$ "
 copybutton_line_continuation_character = "\\"
 
 
-def find_test_modules(package_path):
+def find_test_modules(package_path: str) -> list[str]:
     """Go through the python files and exclude every *_test.py file."""
     full_path_modules = []
     for root, dirs, files in os.walk(package_path):
@@ -368,3 +369,20 @@ mermaid_version = ""
 # Enable this option to link to headers (`#`, `##`, or `###`)
 myst_heading_anchors = 3
 myst_enable_extensions = ["colon_fence"]
+
+
+def _set_literal_default_role_for_ref_api(
+    app: Sphinx, docname: str, source: list[str]
+) -> None:
+    """Use literal as the default role only for generated API reference pages."""
+    if not docname.startswith("ref-api/"):
+        return
+
+    # Keep global reST behavior unchanged while making single backticks in
+    # API docstrings render as code literals.
+    source[0] = ".. default-role:: literal\n\n" + source[0]
+
+
+def setup(app: Sphinx) -> None:
+    """Register Sphinx hooks used by the framework docs build."""
+    app.connect("source-read", _set_literal_default_role_for_ref_api)
