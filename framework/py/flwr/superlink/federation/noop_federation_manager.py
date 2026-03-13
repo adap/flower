@@ -123,6 +123,14 @@ class NoOpFederationManager(FederationManager):
             "`remove_supernode` is not supported by NoOpFederationManager."
         )
 
+    def remove_account(
+        self, flwr_aid: str, federation: str, target_account_name: str | None
+    ) -> None:
+        """Remove an account from a federation."""
+        raise UnsupportedError(
+            "`remove_account` is not supported by NoOpFederationManager."
+        )
+
     def create_invitation(
         self, flwr_aid: str, federation: str, invitee_account_name: str
     ) -> None:
