@@ -194,7 +194,7 @@ def run_serverapp(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
 
         hash_run_id = get_sha256_hash(run.run_id)
 
-        grid.set_run(run.run_id)
+        grid.set_run(run)
 
         # Start log uploader for this run
         log_uploader = start_log_uploader(
