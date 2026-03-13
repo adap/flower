@@ -280,7 +280,7 @@ def _main_loop(
 
         # Initialize Grid
         grid = InMemoryGrid(state_factory=state_factory)
-        grid.set_run(run_id=run.run_id)
+        grid.set_run(run)
         output_context_queue: Queue[Context] = Queue()
 
         # Get and run ServerApp thread
