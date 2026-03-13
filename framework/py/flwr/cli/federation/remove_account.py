@@ -14,6 +14,7 @@
 # ==============================================================================
 """Flower command line interface `federation remove-account` command."""
 
+
 from typing import Annotated
 
 import typer
