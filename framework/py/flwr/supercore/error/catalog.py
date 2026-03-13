@@ -62,4 +62,16 @@ API_ERROR_MAP: Final[dict[int, ApiErrorSpec]] = {
         status_code=StatusCode.NOT_FOUND,
         public_message="Federation does not exist or no pending invitation found.",
     ),
+    ApiErrorCode.ACCOUNT_NOT_A_MEMBER: ApiErrorSpec(
+        status_code=StatusCode.FAILED_PRECONDITION,
+        public_message="Account is not a member of the federation.",
+    ),
+    ApiErrorCode.NO_PERMISSIONS: ApiErrorSpec(
+        status_code=StatusCode.PERMISSION_DENIED,
+        public_message="You do not have permission to perform this action.",
+    ),
+    ApiErrorCode.FORBIDDEN_ACTION: ApiErrorSpec(
+        status_code=StatusCode.FAILED_PRECONDITION,
+        public_message="This action cannot be performed.",
+    ),
 }
