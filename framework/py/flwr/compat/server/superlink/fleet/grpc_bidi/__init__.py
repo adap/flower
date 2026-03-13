@@ -12,4 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Server-side part of the gRPC transport layer."""
+"""Legacy components previously located in ``flwr.server.superlink.fleet.grpc_bidi``."""
