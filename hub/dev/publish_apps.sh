@@ -66,7 +66,7 @@ load_apps_from_arg() {
     fi
 
     if [[ -f "${value}" ]]; then
-        while IFS= read -r line || [[ -n "$line" ]]; do
+        while IFS= read -r line || [[ -n "${line:-}" ]]; do
             # Remove UTF-8 BOM on first line if present
             line="${line#$'\ufeff'}"
             # Remove Windows CR if present
