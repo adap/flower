@@ -30,7 +30,6 @@ from ..utils import cli_output_control_stub, flwr_cli_grpc_exc_handler
 
 
 def remove_account(
-    ctx: typer.Context,
     federation: Annotated[
         str,
         typer.Argument(help="Name of the federation to remove an account from."),
