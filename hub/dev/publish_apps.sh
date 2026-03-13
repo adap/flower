@@ -66,7 +66,7 @@ load_apps_from_arg() {
     fi
 
     if [[ -f "${value}" ]]; then
-        while IFS= read -r line || [[ -n "$line" ]]; do
+        while IFS= read -r line || [[ -n "${line:-}" ]]; do
             # Remove UTF-8 BOM on first line if present
             line="${line#$'\ufeff'}"
             # Remove Windows CR if present
@@ -119,9 +119,9 @@ publish_app() {
 }
 
 if [[ ${#selected_apps[@]} -eq 0 ]]; then
-    while IFS= read -r -d '' app_dir; do
+    while IFS= read -r app_dir; do
         publish_app "$(basename "${app_dir}")"
-    done < <(find "${APPS_DIR}" -mindepth 1 -maxdepth 1 -type d -print0 | sort -z)
+    done < <(find "${APPS_DIR}" -mindepth 1 -maxdepth 1 -type d | sort)
 else
     for app_name in "${selected_apps[@]}"; do
         publish_app "${app_name}"
