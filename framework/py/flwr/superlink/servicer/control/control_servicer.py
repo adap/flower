@@ -87,6 +87,8 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     RegisterNodeResponse,
     RejectInvitationRequest,
     RejectInvitationResponse,
+    RemoveAccountFromFederationRequest,
+    RemoveAccountFromFederationResponse,
     RemoveNodeFromFederationRequest,
     RemoveNodeFromFederationResponse,
     RevokeInvitationRequest,
@@ -724,6 +726,14 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             )
 
         return RemoveNodeFromFederationResponse()
+
+    def RemoveAccountFromFederation(
+        self, request: RemoveAccountFromFederationRequest, context: grpc.ServicerContext
+    ) -> RemoveAccountFromFederationResponse:
+        """Remove an account from a Federation."""
+        log(INFO, _ := self.RemoveAccountFromFederation.__qualname__)
+
+        raise NotImplementedError()
 
     def CreateInvitation(
         self, request: CreateInvitationRequest, context: grpc.ServicerContext

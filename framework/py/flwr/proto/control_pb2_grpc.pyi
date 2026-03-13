@@ -129,6 +129,12 @@ class ControlStub:
     ]
     """Remove SuperNode from Federation"""
 
+    RemoveAccountFromFederation: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.control_pb2.RemoveAccountFromFederationRequest,
+        flwr.proto.control_pb2.RemoveAccountFromFederationResponse,
+    ]
+    """Remove Account from Federation"""
+
     CreateInvitation: grpc.UnaryUnaryMultiCallable[
         flwr.proto.control_pb2.CreateInvitationRequest,
         flwr.proto.control_pb2.CreateInvitationResponse,
@@ -255,6 +261,12 @@ class ControlAsyncStub:
         flwr.proto.control_pb2.RemoveNodeFromFederationResponse,
     ]
     """Remove SuperNode from Federation"""
+
+    RemoveAccountFromFederation: grpc.aio.UnaryUnaryMultiCallable[
+        flwr.proto.control_pb2.RemoveAccountFromFederationRequest,
+        flwr.proto.control_pb2.RemoveAccountFromFederationResponse,
+    ]
+    """Remove Account from Federation"""
 
     CreateInvitation: grpc.aio.UnaryUnaryMultiCallable[
         flwr.proto.control_pb2.CreateInvitationRequest,
@@ -414,6 +426,14 @@ class ControlServicer(metaclass=abc.ABCMeta):
         context: _ServicerContext,
     ) -> typing.Union[flwr.proto.control_pb2.RemoveNodeFromFederationResponse, collections.abc.Awaitable[flwr.proto.control_pb2.RemoveNodeFromFederationResponse]]:
         """Remove SuperNode from Federation"""
+
+    @abc.abstractmethod
+    def RemoveAccountFromFederation(
+        self,
+        request: flwr.proto.control_pb2.RemoveAccountFromFederationRequest,
+        context: _ServicerContext,
+    ) -> typing.Union[flwr.proto.control_pb2.RemoveAccountFromFederationResponse, collections.abc.Awaitable[flwr.proto.control_pb2.RemoveAccountFromFederationResponse]]:
+        """Remove Account from Federation"""
 
     @abc.abstractmethod
     def CreateInvitation(
