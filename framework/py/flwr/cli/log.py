@@ -105,6 +105,7 @@ def stream_logs(
 
     latest_timestamp = 0.0
     res = None
+
     with flwr_cli_grpc_exc_handler():
         try:
             for res in stub.StreamLogs(req, timeout=duration):
