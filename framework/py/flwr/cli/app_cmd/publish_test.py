@@ -33,6 +33,7 @@ from .publish import (
     _collect_file_paths,
     _depth_of,
     _detect_mime,
+    _validate_description,
     _validate_files,
 )
 
@@ -263,3 +264,38 @@ def test_build_multipart_files_param(tmp_path: Path) -> None:
     # ExitStack closes the opened file object
     with pytest.raises(ValueError):
         fobj.read(1)  # closed file
+
+
+def test_validate_description_empty_raises() -> None:
+    """Test empty description raises ClickException."""
+    with pytest.raises(click.ClickException, match="can't be empty"):
+        _validate_description("")
+
+
+def test_validate_description_valid() -> None:
+    """Test valid description passes validation."""
+    _validate_description("A simple Flower federated learning app.")
+
+
+def test_validate_description_long_continue(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test long description continues when user confirms."""
+    monkeypatch.setattr("typer.confirm", lambda *args, **kwargs: True)
+
+    long_desc = "x" * 201
+    _validate_description(long_desc)
+
+
+def test_validate_description_long_cancel(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test long description cancels when user declines."""
+    monkeypatch.setattr("typer.confirm", lambda *args, **kwargs: False)
+
+    long_desc = "x" * 201
+    with pytest.raises(click.ClickException, match="cancelled"):
+        _validate_description(long_desc)
+
+
+@pytest.mark.parametrize("value", [None, 123, 3.14, [], {}])
+def test_validate_description_non_string_raises(value: object) -> None:
+    """Test non-string descriptions raise ClickException."""
+    with pytest.raises(click.ClickException):
+        _validate_description(value)
