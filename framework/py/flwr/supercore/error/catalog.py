@@ -64,7 +64,7 @@ API_ERROR_MAP: Final[dict[int, ApiErrorSpec]] = {
     ),
     ApiErrorCode.NO_PERMISSIONS: ApiErrorSpec(
         status_code=StatusCode.PERMISSION_DENIED,
-        public_message="Account does not have permission to perform this action.",
+        public_message="You do not have permission to perform this action.",
     ),
     ApiErrorCode.FORBIDDEN_ACTION: ApiErrorSpec(
         status_code=StatusCode.FAILED_PRECONDITION,
