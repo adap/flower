@@ -1,22 +1,20 @@
-name: UV Lock Check
+name: Check UV Lockfiles
 
 on:
   push:
     branches:
       - main
     paths:
-      - "dev/**"
-      - "datasets/**"
-      - "framework/**"
+      - "**/uv.lock"
+      - "**/pyproject.toml"
       - ".github/actions/bootstrap/**"
       - ".github/workflows/repo-check-uv-lock.yml"
   pull_request:
     branches:
       - main
     paths:
-      - "dev/**"
-      - "datasets/**"
-      - "framework/**"
+      - "**/uv.lock"
+      - "**/pyproject.toml"
       - ".github/actions/bootstrap/**"
       - ".github/workflows/repo-check-uv-lock.yml"
 
@@ -45,7 +43,33 @@ jobs:
           uv-skip: "false"
           poetry-skip: "true"
       - name: Verify lockfiles are up-to-date
+        shell: bash
         run: |
-          for project in dev datasets framework; do
-            uv lock --check --project "$project"
-          done
+          set -euo pipefail
+
+          # Look for all uv.lock files in the repository
+          lockfiles="$(find . -type f -name "uv.lock" -print | sed 's|^\./||' | sort)"
+
+          if [[ -z "$lockfiles" ]]; then
+            echo "::error::No uv.lock files found."
+            exit 1
+          fi
+
+          echo "Discovered uv.lock files:"
+          while IFS= read -r lockfile; do
+            printf ' - %s\n' "$lockfile"
+          done <<< "$lockfiles"
+
+          while IFS= read -r lockfile; do
+            project_dir="$(dirname "$lockfile")"
+            pyproject_path="$project_dir/pyproject.toml"
+
+            if [[ ! -f "$pyproject_path" ]]; then
+              echo "::error file=$lockfile::Missing $pyproject_path for discovered lockfile."
+              exit 1
+            fi
+
+            echo "::group::uv lock --check ($project_dir)"
+            uv lock --check --project "$project_dir"
+            echo "::endgroup::"
+          done <<< "$lockfiles"
