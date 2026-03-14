@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-12 00:10+0000\n"
+"POT-Creation-Date: 2026-03-14 01:12+0000\n"
 "PO-Revision-Date: 2024-08-23 13:09+0000\n"
 "Last-Translator: Seulki Yun <icstuckyi@gmail.com>\n"
 "Language: ko\n"
@@ -991,65 +991,6 @@ msgid ""
 msgstr ""
 "``pip install 'flwr[simulation]@git+https://github.com/adap/flower.git"
 "@branch-name'`` (extras 포함)"
-
-#: ../../source/contributor-how-to-install-development-versions.rst:64
-msgid "Open Jupyter Notebooks on Google Colab"
-msgstr "Google Colab에서 Jupyter Notebooks 열기"
-
-#: ../../source/contributor-how-to-install-development-versions.rst:66
-msgid "Open the notebook ``examples/flower-in-30-minutes/tutorial.ipynb``:"
-msgstr ""
-
-#: ../../source/contributor-how-to-install-development-versions.rst:68
-#, fuzzy
-msgid ""
-"https://colab.research.google.com/github/flwrlabs/flower/blob/main/examples"
-"/flower-in-30-minutes/tutorial.ipynb"
-msgstr ""
-"https://colab.research.google.com/github/adap/flower/blob/main/framework/docs/source"
-"/tutorial-series-get-started-with-flower-pytorch.ipynb"
-
-#: ../../source/contributor-how-to-install-development-versions.rst:70
-msgid ""
-"Open a development version of the same notebook from branch `branch-name`"
-" by changing ``main`` to ``branch-name`` (right after ``blob``):"
-msgstr ""
-"``main``을 ``branch-name``(``blob`` 바로 뒤)으로 변경하여 동일한 notebook의 개발 버전을 브랜치 "
-"`branch-name`에서 엽니다 :"
-
-#: ../../source/contributor-how-to-install-development-versions.rst:73
-#, fuzzy
-msgid ""
-"https://colab.research.google.com/github/flwrlabs/flower/blob/branch-"
-"name/examples/flower-in-30-minutes/tutorial.ipynb"
-msgstr ""
-"https://colab.research.google.com/github/adap/flower/blob/branch-"
-"name/framework/docs/source/tutorial-series-get-started-with-flower-"
-"pytorch.ipynb"
-
-#: ../../source/contributor-how-to-install-development-versions.rst:75
-msgid "Install a `whl` on Google Colab:"
-msgstr "Google Colab에서 `whl` 설치하기:"
-
-#: ../../source/contributor-how-to-install-development-versions.rst:77
-msgid ""
-"In the vertical icon grid on the left hand side, select ``Files`` > "
-"``Upload to session storage``"
-msgstr "왼쪽의 수직 아이콘 그리드에서 ``Files`` > ``Upload to session storage``를 선택하세요"
-
-#: ../../source/contributor-how-to-install-development-versions.rst:79
-msgid "Upload the whl (e.g., ``flwr-1.8.0-py3-none-any.whl``)"
-msgstr "whl (예:``flwr-1.8.0-py3-none-any.whl``)을 업로드하세요"
-
-#: ../../source/contributor-how-to-install-development-versions.rst:80
-msgid ""
-"Change ``!pip install -q 'flwr[simulation]' torch torchvision "
-"matplotlib`` to ``!pip install -q 'flwr-1.8.0-py3-none-"
-"any.whl[simulation]' torch torchvision matplotlib``"
-msgstr ""
-"``!pip install -q 'flwr[simulation]' torch torchvision matplotlib``를 "
-"``!pip install -q 'flwr-1.8.0-py3-none-any.whl[simulation]' torch "
-"torchvision matplotlib``로 바꾸세요"
 
 #: ../../source/contributor-how-to-migrate-database.rst:3
 msgid "Migrate Flower Database Schema"
@@ -14283,44 +14224,11 @@ msgstr ""
 msgid "For the highest performance, do not set ``options.backend.init-args``."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:262
-#, fuzzy
-msgid "Simulation in Colab/Jupyter"
-msgstr "CLI 시뮬레이션"
-
 #: ../../source/how-to-run-simulations.rst:264
-msgid ""
-"The preferred way of running simulations should always be "
-"|flwr_run_link|_. However, the core functionality of the ``Simulation "
-"Runtime`` can be used from within a Google Colab or Jupyter environment "
-"by means of `run_simulation <ref-api-"
-"flwr.html#flwr.simulation.run_simulation>`_."
-msgstr ""
-
-#: ../../source/how-to-run-simulations.rst:285
-msgid ""
-"With ``run_simulation``, you can also control the amount of resources for"
-" your ``ClientApp`` instances. Do so by setting ``backend_config``. If "
-"unset, the default resources are assigned (i.e., 2xCPUs per ``ClientApp``"
-" and no GPU)."
-msgstr ""
-
-#: ../../source/how-to-run-simulations.rst:296
-#, fuzzy
-msgid ""
-"Refer to the `30 minutes Federated AI Tutorial "
-"<https://colab.research.google.com/github/flwrlabs/flower/blob/main/examples"
-"/flower-in-30-minutes/tutorial.ipynb>`_ for a complete example on how to "
-"run Flower Simulations in Colab."
-msgstr ""
-"https://colab.research.google.com/github/adap/flower/blob/main/framework/docs/source"
-"/tutorial-series-get-started-with-flower-pytorch.ipynb"
-
-#: ../../source/how-to-run-simulations.rst:304
 msgid "Multi-node Flower simulations"
 msgstr "멀티 노드 Flower 시뮬레이션"
 
-#: ../../source/how-to-run-simulations.rst:306
+#: ../../source/how-to-run-simulations.rst:266
 #, fuzzy
 msgid ""
 "Flower's ``Simulation Runtime`` allows you to run FL simulations across "
@@ -14331,17 +14239,17 @@ msgstr ""
 "Flower의 :code:`VirtualClientEngine`을 사용하면 여러 컴퓨팅 노드에서 FL 시뮬레이션을 실행할 수 "
 "있습니다. 멀티 노드 시뮬레이션을 시작하기 전에 다음 사항을 확인하세요:"
 
-#: ../../source/how-to-run-simulations.rst:310
+#: ../../source/how-to-run-simulations.rst:270
 #, fuzzy
 msgid "Have the same Python environment on all nodes."
 msgstr "모든 노드에서 동일한 Python 환경을 유지합니다."
 
-#: ../../source/how-to-run-simulations.rst:311
+#: ../../source/how-to-run-simulations.rst:271
 #, fuzzy
 msgid "Have a copy of your code on all nodes."
 msgstr "모든 노드에 코드 사본(예: 전체 레포지토리)을 보관하세요."
 
-#: ../../source/how-to-run-simulations.rst:312
+#: ../../source/how-to-run-simulations.rst:272
 msgid ""
 "Have a copy of your dataset on all nodes. If you are using partitions "
 "from `Flower Datasets <https://flower.ai/docs/datasets>`_, ensure the "
@@ -14349,7 +14257,7 @@ msgid ""
 "is that the i-th dataset partition is identical in all nodes."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:316
+#: ../../source/how-to-run-simulations.rst:276
 #, fuzzy
 msgid ""
 "Start Ray on your head node: on the terminal, type ``ray start --head``. "
@@ -14359,7 +14267,7 @@ msgstr ""
 "헤드 노드에서 Ray 시작: 터미널에서 :code:`ray start --head`를 입력합니다. 이 명령은 몇 줄을 출력하며, 그"
 " 중 하나는 다른 노드를 헤드 노드에 연결하는 방법을 나타냅니다."
 
-#: ../../source/how-to-run-simulations.rst:319
+#: ../../source/how-to-run-simulations.rst:279
 #, fuzzy
 msgid ""
 "Attach other nodes to the head node: copy the command shown after "
@@ -14371,14 +14279,14 @@ msgstr ""
 "헤드 노드에 다른 노드 연결: 헤드를 시작한 후 표시된 명령어을 복사하여 새 노드의 터미널에서 실행합니다: 예: :code:`ray"
 " start --address='192.168.1.132:6379'`"
 
-#: ../../source/how-to-run-simulations.rst:324
+#: ../../source/how-to-run-simulations.rst:284
 #, fuzzy
 msgid ""
 "With all the above done, you can run your code from the head node as you "
 "would if the simulation were running on a single node. In other words:"
 msgstr "위의 모든 작업이 완료되면 단일 노드에서 시뮬레이션을 실행할 때와 마찬가지로 헤드 노드에서 코드를 실행할 수 있습니다."
 
-#: ../../source/how-to-run-simulations.rst:332
+#: ../../source/how-to-run-simulations.rst:292
 #, fuzzy
 msgid ""
 "Once your simulation is finished, if you'd like to dismantle your "
@@ -14388,7 +14296,7 @@ msgstr ""
 "시뮬레이션이 완료되면 클러스터를 해체하려면 각 노드(헤드 노드 포함)의 터미널에서 :code:`ray stop` 명령을 실행하기만 "
 "하면 됩니다."
 
-#: ../../source/how-to-run-simulations.rst:337
+#: ../../source/how-to-run-simulations.rst:297
 #, fuzzy
 msgid ""
 "When attaching a new node to the head, all its resources (i.e., all CPUs,"
@@ -14406,7 +14314,7 @@ msgstr ""
 "포함)에 `--num-cpus=<NUM_CPUS_FROM_NODE>` 및/또는 `--num-"
 "gpus=<NUM_GPUS_FROM_NODE>`를 추가하여 이 작업을 수행하면 됩니다"
 
-#: ../../source/how-to-run-simulations.rst:347
+#: ../../source/how-to-run-simulations.rst:307
 #, fuzzy
 msgid "FAQ for Simulations"
 msgstr "시뮬레이션 실행"
@@ -14415,7 +14323,7 @@ msgstr "시뮬레이션 실행"
 msgid "Can I make my ``ClientApp`` instances stateful?"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:351
+#: ../../source/how-to-run-simulations.rst:311
 msgid ""
 "Yes. Use the ``state`` attribute of the |context_link|_ object that is "
 "passed to the ``ClientApp`` to save variables, parameters, or results to "
@@ -14427,7 +14335,7 @@ msgstr ""
 msgid "Can I run multiple simulations on the same machine?"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:355
+#: ../../source/how-to-run-simulations.rst:315
 msgid ""
 "Yes, but bear in mind that each simulation isn't aware of the resource "
 "usage of the other. If your simulations make use of GPUs, consider "
@@ -14442,7 +14350,7 @@ msgid ""
 "compute/memory these make use of?"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:359
+#: ../../source/how-to-run-simulations.rst:319
 msgid ""
 "No. These resources are exclusively used by the simulation backend to "
 "control how many workers can be created on startup. Let's say N backend "
@@ -14456,35 +14364,35 @@ msgstr ""
 msgid "My ``ClientApp`` is triggering OOM on my GPU. What should I do?"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:363
+#: ../../source/how-to-run-simulations.rst:323
 msgid ""
 "It is likely that your `num_gpus` setting, which controls the number of "
 "``ClientApp`` instances that can share a GPU, is too low (meaning too "
 "many ``ClientApps`` share the same GPU). Try the following:"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:365
+#: ../../source/how-to-run-simulations.rst:325
 msgid ""
 "Set your ``num_gpus=1``. This will make a single ``ClientApp`` run on a "
 "GPU."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:366
+#: ../../source/how-to-run-simulations.rst:326
 msgid "Inspect how much VRAM is being used (use ``nvidia-smi`` for this)."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:367
+#: ../../source/how-to-run-simulations.rst:327
 msgid ""
 "Based on the VRAM you see your single ``ClientApp`` using, calculate how "
 "many more would fit within the remaining VRAM. One divided by the total "
 "number of ``ClientApps`` is the ``num_gpus`` value you should set."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:369
+#: ../../source/how-to-run-simulations.rst:329
 msgid "Refer to :ref:`clientappresources` for more details."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:371
+#: ../../source/how-to-run-simulations.rst:331
 msgid ""
 "If your ``ClientApp`` is using TensorFlow, make sure you are exporting "
 "``TF_FORCE_GPU_ALLOW_GROWTH=\"1\"`` before starting your simulation. For "
@@ -14497,7 +14405,7 @@ msgid ""
 "``ClientApp``?"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:375
+#: ../../source/how-to-run-simulations.rst:335
 msgid ""
 "A good practice is to start by running the simulation for a few rounds "
 "with higher ``num_cpus`` and ``num_gpus`` than what is really needed "
@@ -14509,7 +14417,7 @@ msgid ""
 "until you see a satisfactory system resource utilization."
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:377
+#: ../../source/how-to-run-simulations.rst:337
 msgid ""
 "Note that if the workload on your ``ClientApp`` instances is not "
 "homogeneous (i.e., some come with a larger compute or memory footprint), "
@@ -14521,7 +14429,7 @@ msgstr ""
 msgid "Can I assign different resources to each ``ClientApp`` instance?"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:381
+#: ../../source/how-to-run-simulations.rst:341
 msgid ""
 "No. All ``ClientApp`` objects are assumed to make use of the same "
 "``num_cpus`` and ``num_gpus``. When setting these values (refer to "
@@ -14536,7 +14444,7 @@ msgid ""
 "servers)?"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:385
+#: ../../source/how-to-run-simulations.rst:345
 msgid ""
 "Yes. If you are using the ``RayBackend`` (the *default* backend) you can "
 "first interconnect your nodes through Ray's cli and then launch the "
@@ -14551,7 +14459,7 @@ msgid ""
 "taken into account by the ``Simulation Runtime``?"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:389
+#: ../../source/how-to-run-simulations.rst:349
 msgid ""
 "No. The ``Simulation Runtime`` only manages ``ClientApps`` and therefore "
 "is only aware of the system resources they require. If your ``ServerApp``"
@@ -14565,7 +14473,7 @@ msgid ""
 "should run? Can I do resource placement?"
 msgstr ""
 
-#: ../../source/how-to-run-simulations.rst:393
+#: ../../source/how-to-run-simulations.rst:353
 msgid ""
 "Currently, the placement of ``ClientApp`` instances is managed by the "
 "``RayBackend`` (the only backend available as of ``flwr==1.13.0``) and "
@@ -16631,7 +16539,8 @@ msgstr "빌드 전달인자"
 
 #: ../../flwr accept:1 add-supernode:1 app archive:1 create:1 federation
 #: install:1 invite list:1 log:1 login:1 new:1 publish:1 pull:1 register:1
-#: reject:1 remove-supernode:1 revoke:1 run:1 stop:1 supernode unregister:1
+#: reject:1 remove-account:1 remove-supernode:1 revoke:1 run:1 stop:1 supernode
+#: unregister:1
 #, fuzzy
 msgid "Optional argument"
 msgstr "선택적 개선 사항"
@@ -16647,8 +16556,8 @@ msgid ""
 msgstr ""
 
 #: ../../flwr accept:1 add-supernode:1 app archive:1 create:1 federation invite
-#: log:1 pull:1 register:1 reject:1 remove-supernode:1 review:1 revoke:1 stop:1
-#: supernode unregister:1
+#: log:1 pull:1 register:1 reject:1 remove-account:1 remove-supernode:1
+#: review:1 revoke:1 stop:1 supernode unregister:1
 #, fuzzy
 msgid "Required argument"
 msgstr "빌드 전달인자"
@@ -16690,19 +16599,20 @@ msgid "List all SuperLink connections (alias: ls)."
 msgstr "서버(SuperLink)"
 
 #: ../../flwr accept:1 add-supernode:1 archive:1 config create:1 federation
-#: invite list:1 register:1 reject:1 remove-supernode:1 revoke:1 run:1 stop:1
-#: supernode unregister:1
+#: invite list:1 register:1 reject:1 remove-account:1 remove-supernode:1
+#: revoke:1 run:1 stop:1 supernode unregister:1
 msgid "Format output using 'default' view or 'json'"
 msgstr ""
 
 #: ../../flwr accept add-supernode archive config create federation invite list
-#: log register reject remove-supernode revoke run stop supernode unregister
+#: log register reject remove-account remove-supernode revoke run stop
+#: supernode unregister
 msgid "default"
 msgstr ""
 
 #: ../../flwr accept:1 add-supernode:1 archive:1 config create:1 federation
-#: invite list:1 register:1 reject:1 remove-supernode:1 revoke:1 run:1 stop:1
-#: supernode unregister:1
+#: invite list:1 register:1 reject:1 remove-account:1 remove-supernode:1
+#: revoke:1 run:1 stop:1 supernode unregister:1
 #, fuzzy
 msgid "``'default'``"
 msgstr "``flwr/base``"
@@ -16729,8 +16639,8 @@ msgid "Name of the federation."
 msgstr "flower 초연결"
 
 #: ../../flwr accept:1 add-supernode:1 archive:1 create:1 federation invite
-#: list:1 log:1 login:1 pull:1 register:1 reject:1 remove-supernode:1 revoke:1
-#: run:1 stop:1 supernode unregister:1
+#: list:1 log:1 login:1 pull:1 register:1 reject:1 remove-account:1
+#: remove-supernode:1 revoke:1 run:1 stop:1 supernode unregister:1
 #, fuzzy
 msgid "Name of the SuperLink connection."
 msgstr "flower 초연결"
@@ -16823,6 +16733,21 @@ msgstr "flower 초연결"
 #: ../../flwr federation list:1
 msgid "Show additional details, including archived federations."
 msgstr ""
+
+#: ../../flwr federation remove-account:1
+#, fuzzy
+msgid "Remove an account from an existing federation."
+msgstr "flower 초연결"
+
+#: ../../flwr federation remove-account:1
+#, fuzzy
+msgid "Name of the federation to remove an account from."
+msgstr "flower 초연결"
+
+#: ../../flwr federation remove-account:1
+#, fuzzy
+msgid "Name of the account to remove from the federation."
+msgstr "flower 초연결"
 
 #: ../../flwr federation remove-supernode:1
 #, fuzzy
@@ -19593,12 +19518,12 @@ msgstr ""
 
 #: ../../source/ref-api/flwr.serverapp.Grid.rst:41:<autosummary>:1
 #, fuzzy
-msgid ":py:obj:`set_run <flwr.serverapp.Grid.set_run>`\\ \\(run\\_id\\)"
+msgid ":py:obj:`set_run <flwr.serverapp.Grid.set_run>`\\ \\(run\\)"
 msgstr ":py:obj:`flwr.server <flwr.server>`\\"
 
 #: ../../source/ref-api/flwr.serverapp.Grid.rst:41:<autosummary>:1
 #: flwr.server.grid.grid.Grid.set_run:1 of
-msgid "Request a run to the SuperLink with a given ``run_id``."
+msgid "Set the run this ``Grid`` object operates in."
 msgstr ""
 
 #: flwr.server.grid.grid.Grid.create_message:1:<autosummary>:1 of
@@ -19714,14 +19639,7 @@ msgid ""
 msgstr ""
 
 #: flwr.server.grid.grid.Grid.set_run:3 of
-msgid ""
-"If a ``Run`` with the specified ``run_id`` exists, a local ``Run`` object"
-" will be created. It enables further functionality in the grid, such as "
-"sending ``Message`` objects."
-msgstr ""
-
-#: flwr.server.grid.grid.Grid.set_run:7 of
-msgid "The ``run_id`` of the ``Run`` this ``Grid`` object operates in."
+msgid "The ``Run`` this ``Grid`` object operates in."
 msgstr ""
 
 #: flwr.server.server_app.ServerApp:5 of
@@ -32824,30 +32742,10 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-faq.rst
-msgid ":fa:`eye,mr-1` Can Flower run on Jupyter Notebooks / Google Colab?"
-msgstr ""
-
-#: ../../source/ref-faq.rst:10
-msgid ""
-"Yes, it can! Flower even comes with a few under-the-hood optimizations to"
-" make it work even better on Colab. Here's a quickstart example:"
-msgstr ""
-
-#: ../../source/ref-faq.rst:12
-#, fuzzy
-msgid ""
-"`Flower 30-minute tutorial "
-"<https://colab.research.google.com/github/flwrlabs/flower/blob/main/examples"
-"/flower-in-30-minutes/tutorial.ipynb>`_"
-msgstr ""
-"https://colab.research.google.com/github/adap/flower/blob/main/framework/docs/source"
-"/tutorial-series-get-started-with-flower-pytorch.ipynb"
-
-#: ../../source/ref-faq.rst
 msgid ":fa:`eye,mr-1` How can I run Federated Learning on a Raspberry Pi?"
 msgstr ""
 
-#: ../../source/ref-faq.rst:16
+#: ../../source/ref-faq.rst:10
 msgid ""
 "Find the `blog post about federated learning on embedded device here "
 "<https://flower.ai/blog/2020-12-16-running_federated_learning_applications_on_embedded_devices_with_flower>`_"
@@ -32860,20 +32758,20 @@ msgstr ""
 msgid ":fa:`eye,mr-1` Does Flower support federated learning on Android devices?"
 msgstr ""
 
-#: ../../source/ref-faq.rst:20
+#: ../../source/ref-faq.rst:14
 msgid ""
 "Yes, it does. Please take a look at our `blog post "
 "<https://flower.ai/blog/2021-12-15-federated-learning-on-android-devices-"
 "with-flower>`_ or check out the code examples:"
 msgstr ""
 
-#: ../../source/ref-faq.rst:22
+#: ../../source/ref-faq.rst:16
 msgid ""
 "`Android Kotlin example <https://flower.ai/docs/examples/android-"
 "kotlin.html>`_"
 msgstr ""
 
-#: ../../source/ref-faq.rst:23
+#: ../../source/ref-faq.rst:17
 msgid "`Android Java example <https://flower.ai/docs/examples/android.html>`_"
 msgstr ""
 
@@ -32881,50 +32779,50 @@ msgstr ""
 msgid ":fa:`eye,mr-1` Can I combine federated learning with blockchain?"
 msgstr ""
 
-#: ../../source/ref-faq.rst:27
+#: ../../source/ref-faq.rst:21
 msgid ""
 "Yes, of course. A list of available examples using Flower within a "
 "blockchain environment is available here:"
 msgstr ""
 
-#: ../../source/ref-faq.rst:29
+#: ../../source/ref-faq.rst:23
 msgid "`FLock: A Decentralised AI Training Platform <https://www.flock.io/#/>`_."
 msgstr ""
 
-#: ../../source/ref-faq.rst:30
+#: ../../source/ref-faq.rst:24
 msgid "Contribute to on-chain training the model and earn rewards."
 msgstr ""
 
-#: ../../source/ref-faq.rst:31
+#: ../../source/ref-faq.rst:25
 msgid "Local blockchain with federated learning simulation."
 msgstr ""
 
-#: ../../source/ref-faq.rst:32
+#: ../../source/ref-faq.rst:26
 msgid ""
 "`Flower meets Nevermined GitHub Repository <https://github.com"
 "/nevermined-io/fl-demo/tree/master/image-classification-flower>`_."
 msgstr ""
 
-#: ../../source/ref-faq.rst:33
+#: ../../source/ref-faq.rst:27
 msgid ""
 "`Flower meets Nevermined YouTube video "
 "<https://www.youtube.com/watch?v=A0A9hSlPhKI>`_."
 msgstr ""
 
-#: ../../source/ref-faq.rst:34
+#: ../../source/ref-faq.rst:28
 msgid ""
 "`Flower meets KOSMoS <https://www.isw-sites.de/kosmos/wp-"
 "content/uploads/sites/13/2021/05/Talk-Flower-Summit-2021.pdf>`_."
 msgstr ""
 
-#: ../../source/ref-faq.rst:35
+#: ../../source/ref-faq.rst:29
 msgid ""
 "`Flower meets Talan blog post <https://www.linkedin.com/pulse/federated-"
 "learning-same-mask-different-faces-imen-"
 "ayari/?trackingId=971oIlxLQ9%2BA9RB0IQ73XQ%3D%3D>`_ ."
 msgstr ""
 
-#: ../../source/ref-faq.rst:36
+#: ../../source/ref-faq.rst:30
 msgid ""
 "`Flower meets Talan GitHub Repository "
 "<https://gitlab.com/Talan_Innovation_Factory/food-waste-prevention>`_ ."
@@ -32936,37 +32834,37 @@ msgid ""
 "on Windows. How do I fix this?"
 msgstr ""
 
-#: ../../source/ref-faq.rst:42
+#: ../../source/ref-faq.rst:36
 msgid "If you see output (ANSI escape sequences or broken emojis) like this:"
 msgstr ""
 
-#: ../../source/ref-faq.rst:44
+#: ../../source/ref-faq.rst:38
 msgid "``� □[32m□[1m``"
 msgstr ""
 
-#: ../../source/ref-faq.rst:45
+#: ../../source/ref-faq.rst:39
 msgid "``□[0m□[96m□[1m``"
 msgstr ""
 
-#: ../../source/ref-faq.rst:46
+#: ../../source/ref-faq.rst:40
 #, fuzzy
 msgid "``�``"
 msgstr "``DISTRO``"
 
-#: ../../source/ref-faq.rst:48
+#: ../../source/ref-faq.rst:42
 msgid ""
 "this is usually a terminal host issue. Make sure you have installed the "
 "latest `Windows Terminal <https://aka.ms/terminal>`_ **application** "
 "(Microsoft's terminal app), and then run Flower commands there."
 msgstr ""
 
-#: ../../source/ref-faq.rst:50
+#: ../../source/ref-faq.rst:44
 msgid ""
 "To quickly check whether your current PowerShell session is running in "
 "Windows Terminal:"
 msgstr ""
 
-#: ../../source/ref-faq.rst:56
+#: ../../source/ref-faq.rst:50
 msgid ""
 "If this prints a value (for example, ``b4c5f2c8-...``), you are in "
 "Windows Terminal. If it prints nothing, you are likely running in a non-"
@@ -69746,4 +69644,128 @@ msgstr ""
 #~ " round. Each round consists of three"
 #~ " distinct stages:"
 #~ msgstr ""
+
+#~ msgid "Open Jupyter Notebooks on Google Colab"
+#~ msgstr "Google Colab에서 Jupyter Notebooks 열기"
+
+#~ msgid "Open the notebook ``examples/flower-in-30-minutes/tutorial.ipynb``:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "https://colab.research.google.com/github/flwrlabs/flower/blob/main/examples"
+#~ "/flower-in-30-minutes/tutorial.ipynb"
+#~ msgstr ""
+#~ "https://colab.research.google.com/github/adap/flower/blob/main/framework/docs/source"
+#~ "/tutorial-series-get-started-with-"
+#~ "flower-pytorch.ipynb"
+
+#~ msgid ""
+#~ "Open a development version of the "
+#~ "same notebook from branch `branch-name`"
+#~ " by changing ``main`` to ``branch-"
+#~ "name`` (right after ``blob``):"
+#~ msgstr ""
+#~ "``main``을 ``branch-name``(``blob`` 바로 뒤)으로 "
+#~ "변경하여 동일한 notebook의 개발 버전을 브랜치 "
+#~ "`branch-name`에서 엽니다 :"
+
+#~ msgid ""
+#~ "https://colab.research.google.com/github/flwrlabs/flower/blob"
+#~ "/branch-name/examples/flower-in-30-minutes/tutorial.ipynb"
+#~ msgstr ""
+#~ "https://colab.research.google.com/github/adap/flower/blob/branch-"
+#~ "name/framework/docs/source/tutorial-series-get-"
+#~ "started-with-flower-pytorch.ipynb"
+
+#~ msgid "Install a `whl` on Google Colab:"
+#~ msgstr "Google Colab에서 `whl` 설치하기:"
+
+#~ msgid ""
+#~ "In the vertical icon grid on the"
+#~ " left hand side, select ``Files`` >"
+#~ " ``Upload to session storage``"
+#~ msgstr "왼쪽의 수직 아이콘 그리드에서 ``Files`` > ``Upload to session storage``를 선택하세요"
+
+#~ msgid "Upload the whl (e.g., ``flwr-1.8.0-py3-none-any.whl``)"
+#~ msgstr "whl (예:``flwr-1.8.0-py3-none-any.whl``)을 업로드하세요"
+
+#~ msgid ""
+#~ "Change ``!pip install -q 'flwr[simulation]'"
+#~ " torch torchvision matplotlib`` to ``!pip"
+#~ " install -q 'flwr-1.8.0-py3-none-"
+#~ "any.whl[simulation]' torch torchvision matplotlib``"
+#~ msgstr ""
+#~ "``!pip install -q 'flwr[simulation]' torch "
+#~ "torchvision matplotlib``를 ``!pip install -q"
+#~ " 'flwr-1.8.0-py3-none-any.whl[simulation]' torch "
+#~ "torchvision matplotlib``로 바꾸세요"
+
+#~ msgid "Simulation in Colab/Jupyter"
+#~ msgstr "CLI 시뮬레이션"
+
+#~ msgid ""
+#~ "The preferred way of running simulations"
+#~ " should always be |flwr_run_link|_. "
+#~ "However, the core functionality of the"
+#~ " ``Simulation Runtime`` can be used "
+#~ "from within a Google Colab or "
+#~ "Jupyter environment by means of "
+#~ "`run_simulation <ref-api-"
+#~ "flwr.html#flwr.simulation.run_simulation>`_."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "With ``run_simulation``, you can also "
+#~ "control the amount of resources for "
+#~ "your ``ClientApp`` instances. Do so by"
+#~ " setting ``backend_config``. If unset, the"
+#~ " default resources are assigned (i.e., "
+#~ "2xCPUs per ``ClientApp`` and no GPU)."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Refer to the `30 minutes Federated "
+#~ "AI Tutorial "
+#~ "<https://colab.research.google.com/github/flwrlabs/flower/blob/main/examples"
+#~ "/flower-in-30-minutes/tutorial.ipynb>`_ for a "
+#~ "complete example on how to run "
+#~ "Flower Simulations in Colab."
+#~ msgstr ""
+#~ "https://colab.research.google.com/github/adap/flower/blob/main/framework/docs/source"
+#~ "/tutorial-series-get-started-with-"
+#~ "flower-pytorch.ipynb"
+
+#~ msgid "Request a run to the SuperLink with a given ``run_id``."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "If a ``Run`` with the specified "
+#~ "``run_id`` exists, a local ``Run`` "
+#~ "object will be created. It enables "
+#~ "further functionality in the grid, such"
+#~ " as sending ``Message`` objects."
+#~ msgstr ""
+
+#~ msgid "The ``run_id`` of the ``Run`` this ``Grid`` object operates in."
+#~ msgstr ""
+
+#~ msgid ":fa:`eye,mr-1` Can Flower run on Jupyter Notebooks / Google Colab?"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Yes, it can! Flower even comes "
+#~ "with a few under-the-hood "
+#~ "optimizations to make it work even "
+#~ "better on Colab. Here's a quickstart "
+#~ "example:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "`Flower 30-minute tutorial "
+#~ "<https://colab.research.google.com/github/flwrlabs/flower/blob/main/examples"
+#~ "/flower-in-30-minutes/tutorial.ipynb>`_"
+#~ msgstr ""
+#~ "https://colab.research.google.com/github/adap/flower/blob/main/framework/docs/source"
+#~ "/tutorial-series-get-started-with-"
+#~ "flower-pytorch.ipynb"
 
