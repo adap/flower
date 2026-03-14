@@ -879,6 +879,7 @@ dev = [
     { name = "sphinxcontrib-youtube", specifier = "==1.4.1" },
     { name = "sphinxext-opengraph", specifier = "==0.9.1" },
     { name = "taplo", specifier = "==0.9.3" },
+    { name = "types-pyyaml", specifier = ">=6.0.2,<7.0.0" },
 ]
 
 [[package]]
