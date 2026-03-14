@@ -472,10 +472,6 @@ def start_client_internal(
                         reason = str(type(ex)) + ":<'" + str(ex) + "'>"
                         exc_entity = "ClientApp"
                         if isinstance(ex, LoadClientAppError):
-                            reason = (
-                                "An exception was raised when attempting to load "
-                                "`ClientApp`"
-                            )
                             e_code = ErrorCode.LOAD_CLIENT_APP_EXCEPTION
                             exc_entity = "SuperNode"
 
