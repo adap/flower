@@ -158,6 +158,17 @@ exclude = ["py/**/*_test.py"]
 [tool.poetry.group.dev.dependencies]
 devtool = { path = "./devtool", develop = true }
 
+[tool.devtool.protoc]
+proto_root = "proto"
+include_globs = ["flwr/**/*.proto"]
+include_paths = ["proto"]
+
+[tool.devtool.protoc.outputs]
+python = "py"
+grpc_python = "py"
+mypy = "py"
+mypy_grpc = "py"
+
 [tool.docstrfmt]
 extend_exclude = [
     "docs/source/conf.py",
@@ -169,7 +180,7 @@ extend_exclude = [
 
 [tool.isort]
 profile = "black"
-known_first_party = ["flwr", "flwr_tool"]
+known_first_party = ["flwr"]
 
 [tool.black]
 line-length = 88
@@ -184,7 +195,7 @@ data_file = ".pytest_cache/.coverage"
 [tool.pytest.ini_options]
 minversion = "6.2"
 addopts = "-qq"
-testpaths = ["py/flwr", "py/flwr_tool"]
+testpaths = ["py/flwr"]
 filterwarnings = "ignore::DeprecationWarning"
 
 [tool.pytest-watcher]
