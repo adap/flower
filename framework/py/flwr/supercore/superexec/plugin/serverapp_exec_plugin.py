@@ -15,6 +15,9 @@
 """Simple Flower SuperExec plugin for ServerApp."""
 
 
+import subprocess
+from typing import Any
+
 from .base_exec_plugin import BaseExecPlugin
 
 
@@ -26,3 +29,10 @@ class ServerAppExecPlugin(BaseExecPlugin):
 
     command = "flwr-serverapp"
     appio_api_address_arg = "--serverappio-api-address"
+
+    def get_popen_kwargs(self) -> dict[str, Any]:
+        """Isolate ServerApp stdio from the parent SuperLink process streams."""
+        return {
+            "stdout": subprocess.DEVNULL,
+            "stderr": subprocess.DEVNULL,
+        }

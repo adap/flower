@@ -17,6 +17,7 @@
 
 import argparse
 import asyncio
+import importlib
 import json
 import logging
 import platform
@@ -31,9 +32,11 @@ from flwr.cli.utils import get_sha256_hash
 from flwr.clientapp import ClientApp
 from flwr.common import Context, EventType, RecordDict, event, log, now
 from flwr.common.constant import RUN_ID_NUM_BYTES, Status
+from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.logger import (
     set_logger_propagation,
     update_console_handler,
+    warn_deprecated_feature,
     warn_deprecated_feature_with_example,
 )
 from flwr.common.typing import Run, RunStatus
@@ -65,7 +68,7 @@ def _replace_keys(d: Any, match: str, target: str) -> Any:
 
 
 def _check_ray_support(backend_name: str) -> None:
-    if backend_name.lower() == "ray":
+    if backend_name == "ray":
         if platform.system() == "Windows":
             log(
                 WARNING,
@@ -126,6 +129,12 @@ def run_simulation(
         When disabled, only INFO, WARNING and ERROR log messages will be shown. If
         enabled, DEBUG-level logs will be displayed.
     """
+    warn_deprecated_feature(
+        "The `run_simulation` function is deprecated and will be removed in a future "
+        "version of Flower. Please use `flwr run` in the CLI instead to run your "
+        "simulation. Refer to the Flower Tutorials "
+        "for more details: https://flower.ai/docs/framework/tutorial-quickstart-pytorch.html",
+    )
     event(
         EventType.PYTHON_API_RUN_SIMULATION_ENTER,
         event_details={"backend": backend_name, "num-supernodes": num_supernodes},
@@ -271,7 +280,7 @@ def _main_loop(
 
         # Initialize Grid
         grid = InMemoryGrid(state_factory=state_factory)
-        grid.set_run(run_id=run.run_id)
+        grid.set_run(run)
         output_context_queue: Queue[Context] = Queue()
 
         # Get and run ServerApp thread
@@ -357,6 +366,19 @@ def _run_simulation(
             BackendConfig, _replace_keys(backend_config, match="-", target="_")
         )
         log(DEBUG, "backend_config: %s", backend_config)
+
+    # Exit early if the `ray` dependency is missing
+    if backend_name == "ray":
+        if importlib.util.find_spec("ray") is None:
+            flwr_exit(
+                code=ExitCode.SIMULATION_MISSING_EXTRA,
+                message=(
+                    "`ray` backend selected for simulation, but `ray` is not "
+                    "installed."
+                ),
+                event_type=exit_event,
+                event_details={"success": False},
+            )
 
     # Set default init_args if not passed
     backend_config.setdefault("init_args", {})

@@ -36,22 +36,32 @@ from flwr.common.constant import (
     NOOP_ACCOUNT_NAME,
     PUBLIC_KEY_ALREADY_IN_USE_MESSAGE,
     PUBLIC_KEY_NOT_VALID,
-    SUPERLINK_DOES_NOT_SUPPORT_FED_MANAGEMENT_MESSAGE,
     Status,
     SubStatus,
 )
+from flwr.common.serde import user_config_to_proto
 from flwr.common.typing import Run, RunStatus
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
+    AcceptInvitationRequest,
+    AcceptInvitationResponse,
     AddNodeToFederationRequest,
     AddNodeToFederationResponse,
     ArchiveFederationRequest,
     CreateFederationRequest,
+    CreateInvitationRequest,
+    CreateInvitationResponse,
+    ListInvitationsRequest,
+    ListInvitationsResponse,
     ListNodesRequest,
     ListNodesResponse,
     ListRunsRequest,
     RegisterNodeRequest,
+    RejectInvitationRequest,
+    RejectInvitationResponse,
     RemoveNodeFromFederationRequest,
     RemoveNodeFromFederationResponse,
+    RevokeInvitationRequest,
+    RevokeInvitationResponse,
     ShowFederationRequest,
     ShowFederationResponse,
     StartRunRequest,
@@ -143,10 +153,15 @@ class TestControlServicer(unittest.TestCase):
         request.federation = NOOP_FEDERATION
 
         # Execute
-        with patch(
-            "flwr.superlink.servicer.control.control_servicer.get_fab_metadata"
-        ) as mock_get_fab_metadata:
-            mock_get_fab_metadata.return_value = (fab_id, fab_version)
+        with (
+            patch(
+                "flwr.superlink.servicer.control.control_servicer.get_fab_config"
+            ) as _,
+            patch(
+                "flwr.superlink.servicer.control.control_servicer.get_metadata_from_config"
+            ) as mock_get_metadata_from_config,
+        ):
+            mock_get_metadata_from_config.return_value = (fab_id, fab_version)
             response = self.servicer.StartRun(request, Mock())
         runs = self.state.get_run_info(run_ids=[response.run_id])
         run_info = runs[0] if runs else None
@@ -156,6 +171,79 @@ class TestControlServicer(unittest.TestCase):
         self.assertEqual(run_info.fab_hash, fab_hash)
         self.assertEqual(run_info.fab_id, fab_id)
         self.assertEqual(run_info.fab_version, fab_version)
+
+    def test_start_run_accepts_valid_nested_override_keys(self) -> None:
+        """Test StartRun accepts valid dotted override keys from nested FAB config."""
+        # Prepare
+        fab_content = b"test FAB content 654321"
+        fab_hash = hashlib.sha256(fab_content).hexdigest()
+        request = StartRunRequest()
+        request.fab.hash_str = fab_hash
+        request.fab.content = fab_content
+        request.federation = NOOP_FEDERATION
+        for key, value in user_config_to_proto(
+            {"train.lr": 0.01, "train.epochs": 3}
+        ).items():
+            request.override_config[key].CopyFrom(value)
+
+        # Execute
+        with (
+            patch(
+                "flwr.superlink.servicer.control.control_servicer.get_fab_config"
+            ) as mock_get_fab_config,
+            patch(
+                "flwr.superlink.servicer.control.control_servicer.get_metadata_from_config"
+            ) as mock_get_metadata_from_config,
+        ):
+            mock_get_fab_config.return_value = {
+                "tool": {
+                    "flwr": {"app": {"config": {"train": {"lr": 0.1, "epochs": 1}}}}
+                }
+            }
+            mock_get_metadata_from_config.return_value = ("flwr/demo", "v1.0.0")
+            response = self.servicer.StartRun(request, Mock())
+        runs = self.state.get_run_info(run_ids=[response.run_id])
+        run_info = runs[0] if runs else None
+
+        # Assert
+        assert run_info is not None
+        self.assertEqual(run_info.override_config["train.lr"], 0.01)
+        self.assertEqual(run_info.override_config["train.epochs"], 3)
+
+    def test_start_run_rejects_unknown_override_keys(self) -> None:
+        """Test StartRun rejects override keys not present in FAB config."""
+        # Prepare
+        fab_content = b"test FAB content 123456"
+        fab_hash = hashlib.sha256(fab_content).hexdigest()
+        request = StartRunRequest()
+        request.fab.hash_str = fab_hash
+        request.fab.content = fab_content
+        request.federation = NOOP_FEDERATION
+        for key, value in user_config_to_proto({"unknown.key": 10}).items():
+            request.override_config[key].CopyFrom(value)
+        context = Mock()
+        context.abort.side_effect = grpc.RpcError()
+
+        # Execute/Assert
+        with (
+            patch(
+                "flwr.superlink.servicer.control.control_servicer.get_fab_config"
+            ) as mock_get_fab_config,
+            patch(
+                "flwr.superlink.servicer.control.control_servicer.get_metadata_from_config"
+            ) as mock_get_metadata_from_config,
+            self.assertRaises(grpc.RpcError),
+        ):
+            mock_get_fab_config.return_value = {
+                "tool": {"flwr": {"app": {"config": {"train": {"lr": 0.1}}}}}
+            }
+            mock_get_metadata_from_config.return_value = ("flwr/demo", "v1.0.0")
+            self.servicer.StartRun(request, context)
+
+        context.abort.assert_called_once()
+        status_code, details = context.abort.call_args.args
+        self.assertEqual(status_code, grpc.StatusCode.FAILED_PRECONDITION)
+        self.assertIn("unknown.key", details)
 
     @parameterized.expand([(None,), (1,), (2,), (3,), (9,)])  # type: ignore
     def test_list_runs(self, limit: int | None) -> None:
@@ -398,11 +486,6 @@ class TestControlServicer(unittest.TestCase):
         with self.assertRaises(grpc.RpcError):
             self.servicer.CreateFederation(request, mock_context)
 
-        mock_context.abort.assert_called_once_with(
-            grpc.StatusCode.FAILED_PRECONDITION,
-            SUPERLINK_DOES_NOT_SUPPORT_FED_MANAGEMENT_MESSAGE,
-        )
-
     def test_archive_federation_success(self) -> None:
         """Test ArchiveFederation succeeds when federation_manager.archive_federation
         works."""
@@ -437,10 +520,105 @@ class TestControlServicer(unittest.TestCase):
         with self.assertRaises(grpc.RpcError):
             self.servicer.ArchiveFederation(request, mock_context)
 
-        mock_context.abort.assert_called_once_with(
-            grpc.StatusCode.FAILED_PRECONDITION,
-            SUPERLINK_DOES_NOT_SUPPORT_FED_MANAGEMENT_MESSAGE,
+
+class TestControlServicerInvitationRPCs(unittest.TestCase):
+    """Unit tests for invitation RPC success paths."""
+
+    def setUp(self) -> None:
+        """Set up test fixtures."""
+        self.flwr_aid = "test-flwr-aid"
+        self.state = Mock()
+        self.state.federation_manager = Mock()
+        self.linkstate_factory = Mock()
+        self.linkstate_factory.state.return_value = self.state
+        self.servicer = ControlServicer(
+            linkstate_factory=self.linkstate_factory,
+            ffs_factory=Mock(),
+            objectstore_factory=Mock(),
+            is_simulation=False,
+            authn_plugin=Mock(),
         )
+        self.get_current_account_info_patcher = patch(
+            "flwr.superlink.servicer.control.control_servicer.get_current_account_info",
+            return_value=SimpleNamespace(flwr_aid=self.flwr_aid),
+        )
+        self.get_current_account_info_patcher.start()
+        self.addCleanup(self.get_current_account_info_patcher.stop)
+
+    def test_create_invitation_success(self) -> None:
+        """Test CreateInvitation success path."""
+        request = CreateInvitationRequest(
+            invitee_account_name="invitee-aid",
+            federation_name="test-federation",
+        )
+        context = Mock()
+
+        response = self.servicer.CreateInvitation(request, context)
+
+        self.state.federation_manager.create_invitation.assert_called_once_with(
+            flwr_aid=self.flwr_aid,
+            federation="test-federation",
+            invitee_account_name="invitee-aid",
+        )
+        self.assertIsInstance(response, CreateInvitationResponse)
+
+    def test_list_invitations_success(self) -> None:
+        """Test ListInvitations success path."""
+        request = ListInvitationsRequest()
+        context = Mock()
+        self.state.federation_manager.list_invitations.return_value = ([], [])
+
+        response = self.servicer.ListInvitations(request, context)
+
+        self.state.federation_manager.list_invitations.assert_called_once_with(
+            self.flwr_aid
+        )
+        self.assertIsInstance(response, ListInvitationsResponse)
+        self.assertEqual(len(response.created_invitations), 0)
+        self.assertEqual(len(response.received_invitations), 0)
+
+    def test_accept_invitation_success(self) -> None:
+        """Test AcceptInvitation success path."""
+        request = AcceptInvitationRequest(federation_name="test-federation")
+        context = Mock()
+
+        response = self.servicer.AcceptInvitation(request, context)
+
+        self.state.federation_manager.accept_invitation.assert_called_once_with(
+            flwr_aid=self.flwr_aid,
+            federation="test-federation",
+        )
+        self.assertIsInstance(response, AcceptInvitationResponse)
+
+    def test_reject_invitation_success(self) -> None:
+        """Test RejectInvitation success path."""
+        request = RejectInvitationRequest(federation_name="test-federation")
+        context = Mock()
+
+        response = self.servicer.RejectInvitation(request, context)
+
+        self.state.federation_manager.reject_invitation.assert_called_once_with(
+            flwr_aid=self.flwr_aid,
+            federation="test-federation",
+        )
+        self.assertIsInstance(response, RejectInvitationResponse)
+
+    def test_revoke_invitation_success(self) -> None:
+        """Test RevokeInvitation success path."""
+        request = RevokeInvitationRequest(
+            invitee_account_name="invitee-aid",
+            federation_name="test-federation",
+        )
+        context = Mock()
+
+        response = self.servicer.RevokeInvitation(request, context)
+
+        self.state.federation_manager.revoke_invitation.assert_called_once_with(
+            flwr_aid=self.flwr_aid,
+            federation="test-federation",
+            invitee_account_name="invitee-aid",
+        )
+        self.assertIsInstance(response, RevokeInvitationResponse)
 
 
 class TestControlServicerAuth(unittest.TestCase):
@@ -688,7 +866,7 @@ class TestValidateFederationAndNodesInRequest(unittest.TestCase):
                 self.state, "wrong-aid", NOOP_FEDERATION, 1, ctx
             )
         ctx.abort.assert_called_once()
-        self.assertIn("not a member", str(cm.exception))
+        self.assertIn("does not exist", str(cm.exception))
 
     def test_validate_aborts_when_node_not_owned(self) -> None:
         """Test abort when a node is not owned by the requester."""

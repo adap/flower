@@ -590,6 +590,36 @@ class RemoveNodeFromFederationResponse(google.protobuf.message.Message):
 global___RemoveNodeFromFederationResponse = RemoveNodeFromFederationResponse
 
 @typing.final
+class RemoveAccountFromFederationRequest(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    FEDERATION_NAME_FIELD_NUMBER: builtins.int
+    ACCOUNT_NAME_FIELD_NUMBER: builtins.int
+    federation_name: builtins.str
+    account_name: builtins.str
+    def __init__(
+        self,
+        *,
+        federation_name: builtins.str = ...,
+        account_name: builtins.str | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing.Literal["_account_name", b"_account_name", "account_name", b"account_name"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing.Literal["_account_name", b"_account_name", "account_name", b"account_name", "federation_name", b"federation_name"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing.Literal["_account_name", b"_account_name"]) -> typing.Literal["account_name"] | None: ...
+
+global___RemoveAccountFromFederationRequest = RemoveAccountFromFederationRequest
+
+@typing.final
+class RemoveAccountFromFederationResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    def __init__(
+        self,
+    ) -> None: ...
+
+global___RemoveAccountFromFederationResponse = RemoveAccountFromFederationResponse
+
+@typing.final
 class CreateInvitationRequest(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
 

@@ -33,7 +33,7 @@ from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.message import make_message, remove_content_from_message
 from flwr.common.retry_invoker import make_simple_grpc_retry_invoker, wrap_stub
-from flwr.common.serde import message_to_proto, run_from_proto
+from flwr.common.serde import message_to_proto
 from flwr.common.typing import Run
 from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
     PullAppMessagesRequest,
@@ -45,7 +45,6 @@ from flwr.proto.message_pb2 import (  # pylint: disable=E0611
     ConfirmMessageReceivedRequest,
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
-from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
     GetNodesRequest,
     GetNodesResponse,
@@ -164,14 +163,12 @@ class GrpcGrid(Grid):
         channel.close()
         log(DEBUG, "[flwr-serverapp] Disconnected")
 
-    def set_run(self, run_id: int) -> None:
+    def set_run(self, run: Run) -> None:
         """Set the run."""
-        # Get the run info
-        req = GetRunRequest(run_id=run_id)
-        res: GetRunResponse = self._stub.GetRun(req)
-        if not res.HasField("run"):
-            raise RuntimeError(f"Cannot find the run with ID: {run_id}")
-        self._run = run_from_proto(res.run)
+        if not isinstance(run, Run):
+            run_type = type(run).__name__
+            raise TypeError(f"`run` must be an instance of Run, got {run_type}")
+        self._run = run
 
     @property
     def run(self) -> Run:

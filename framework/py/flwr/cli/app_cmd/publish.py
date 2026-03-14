@@ -17,13 +17,15 @@
 
 from contextlib import ExitStack
 from pathlib import Path
-from typing import IO, Annotated
+from typing import IO, Annotated, Any
 
 import click
 import requests
 import typer
 from requests import Response
 
+from flwr.cli.config_utils import load_and_validate
+from flwr.common.constant import FAB_CONFIG_FILE
 from flwr.supercore.constant import (
     APP_PUBLISH_ALLOWED_LICENSE_FILES,
     APP_PUBLISH_EXCLUDE_PATTERNS,
@@ -57,10 +59,10 @@ def publish(
         ),
     ] = Path("."),
 ) -> None:
-    """Publish a Flower App to the Flower Platform.
+    """Publish a Flower App to Flower Hub.
 
-    This command uploads your app project to the Flower Platform. Files are filtered
-    based on .gitignore patterns and allowed file extensions.
+    This command uploads your app project to Flower Hub. Files are filtered based on
+    .gitignore patterns and allowed file extensions.
     """
     auth_plugin = load_cli_auth_plugin_from_connection(SUPERGRID_ADDRESS)
     auth_plugin.load_tokens()
@@ -72,6 +74,10 @@ def publish(
 
     # Resolve app path
     app = app.expanduser().resolve()
+
+    # Validate app description from config
+    config, _ = load_and_validate(app / FAB_CONFIG_FILE, check_module=False)
+    _validate_description(config["project"].get("description", ""))
 
     # Collect & validate app files
     file_paths = _collect_file_paths(app)
@@ -94,6 +100,31 @@ def publish(
     if resp.text:
         msg += f": {resp.text}"
     raise click.ClickException(msg)
+
+
+def _validate_description(description: Any) -> None:
+    """Validate app description before publishing."""
+    if not isinstance(description, str):
+        raise click.ClickException(
+            "Missing or invalid app description. "
+            "Please set `description` in [project] of pyproject.toml."
+        )
+
+    if description.strip() == "":
+        raise click.ClickException(
+            "App description can't be empty. "
+            "Please provide one with fewer than 200 characters."
+        )
+
+    if len(description) > 200:
+        typer.secho(
+            "Warning: the app description is more than 200 characters.",
+            fg=typer.colors.YELLOW,
+            bold=True,
+        )
+        should_continue = typer.confirm("Do you want to continue publishing anyway?")
+        if not should_continue:
+            raise click.ClickException("Publishing cancelled by user.")
 
 
 def _depth_of(relative_path_to_root: Path) -> int:
