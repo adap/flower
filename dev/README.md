@@ -35,6 +35,7 @@ uv run python -m devtool.check_copyright ../framework/py/flwr
 uv run python -m devtool.fix_copyright ../framework/py/flwr
 uv run python -m devtool.update_html_themes
 uv run python -m devtool.build_example_docs
+uv run python -m devtool.protoc --project-dir ../framework
 ```
 
 ## Run Existing Dev Scripts with `uv`
