@@ -19,11 +19,6 @@ import sys
 from pathlib import Path
 from typing import Any, cast
 
-try:
-    import tomllib
-except ModuleNotFoundError:  # pragma: no cover - Python 3.10 fallback
-    import tomli as tomllib
-
 _toml: Any
 
 try:
