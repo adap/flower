@@ -116,8 +116,8 @@ def check_all_init_files(dir_list: list[str]) -> None:
 
 
 if __name__ == "__main__":
-    if len(sys.argv) == 0:
-        raise Exception(  # pylint: disable=W0719
+    if len(sys.argv) < 2:
+        raise ValueError(
             "Please provide at least one directory path relative "
             "to your current working directory."
         )

@@ -731,9 +731,19 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         self, request: RemoveAccountFromFederationRequest, context: grpc.ServicerContext
     ) -> RemoveAccountFromFederationResponse:
         """Remove an account from a Federation."""
-        log(INFO, _ := self.RemoveAccountFromFederation.__qualname__)
+        log(INFO, rpc_name := self.RemoveAccountFromFederation.__qualname__)
 
-        raise NotImplementedError()
+        state = self.linkstate_factory.state()
+
+        target_account = None if not request.account_name else request.account_name
+
+        with rpc_error_translator(context, rpc_name):
+            state.federation_manager.remove_account(
+                flwr_aid=_get_flwr_aid(context),
+                federation=request.federation_name,
+                target_account_name=target_account,
+            )
+        return RemoveAccountFromFederationResponse()
 
     def CreateInvitation(
         self, request: CreateInvitationRequest, context: grpc.ServicerContext
