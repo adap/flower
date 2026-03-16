@@ -21,6 +21,10 @@ dev = [
     "isort==5.13.2",
     "taplo==0.9.3",
     "docformatter==1.7.5",
+    "mypy==1.8.0",
+    "pylint==3.3.1",
+    "pytest==7.4.4",
+    "types-PyYAML>=6.0.2,<7.0.0",
     "rope==1.13.0",
     "semver==3.0.2",
     "sphinx==7.4.7",
@@ -73,6 +77,13 @@ known_third_party = ["datasets"]
 [tool.black]
 line-length = 88
 target-version = ["py39", "py310", "py311"]
+
+[tool.mypy]
+strict = true
+ignore_missing_imports = true
+
+[tool.pylint."MESSAGES CONTROL"]
+disable = "duplicate-code,too-few-public-methods,useless-import-alias"
 
 [tool.docformatter]
 wrap-summaries = 88
