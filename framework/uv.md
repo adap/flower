@@ -13,19 +13,19 @@ uv sync --python=3.10.19 --locked --all-extras --all-groups
 ## Compile Protos
 
 ```
-uv run --no-sync --python 3.10.19 ./dev/protoc.sh
+uv run --no-sync --python=3.10.19 ./dev/protoc.sh
 ```
 
 ## Format
 
 ```
-uv run --no-sync --python 3.10.19 ./dev/format.sh
+uv run --no-sync --python=3.10.19 ./dev/format.sh
 ```
 
 ## Test
 
 ```
-uv run --no-sync --python 3.10.19 ./dev/test.sh
+uv run --no-sync --python=3.10.19 ./dev/test.sh
 ```
 
 ## Build
