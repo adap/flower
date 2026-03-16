@@ -87,7 +87,7 @@ dev = [
 default-groups = ["dev"]
 
 [tool.uv.sources]
-devtool = { path = "devtool", editable = true }
+devtool = { path = "../dev", editable = true }
 
 [tool.hatch.build.targets.wheel]
 packages = ["flwr_datasets"]
