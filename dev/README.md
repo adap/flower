@@ -50,9 +50,9 @@ uv run ./test.sh
 uv run ./format.sh
 ```
 
-The `test-devtool.sh` and `format-devtool.sh` scripts target the `devtool`
-package, including its unit tests. The existing `test.sh` and `format.sh` scripts
-still target examples and benchmarks.
+The `test-devtool.sh` and `format-devtool.sh` scripts only target the `devtool`
+package. The existing `test.sh` and `format.sh` scripts still target examples and
+benchmarks.
 
 ## Updating Dependencies
 

@@ -24,6 +24,11 @@ try:
 except ModuleNotFoundError:  # pragma: no cover - Python 3.10 fallback
     import tomli as tomllib
 
+try:
+    import tomllib
+except ModuleNotFoundError:  # pragma: no cover - Python 3.10 fallback
+    import tomli as tomllib
+
 
 def _load_config() -> dict[str, Any]:
     config_path = Path(__file__).resolve().parent.parent / "changelog_config.toml"

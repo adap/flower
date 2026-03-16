@@ -149,14 +149,14 @@ dev = [
 default-groups = ["dev"]
 
 [tool.uv.sources]
-devtool = { path = "./devtool", editable = true }
+devtool = { path = "../dev", editable = true }
 
 [tool.poetry]
 packages = [{ include = "flwr", from = "py" }]
 exclude = ["py/**/*_test.py"]
 
 [tool.poetry.group.dev.dependencies]
-devtool = { path = "./devtool", develop = true }
+devtool = { path = "../dev", develop = true }
 
 [tool.docstrfmt]
 extend_exclude = [
