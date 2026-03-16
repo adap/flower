@@ -44,8 +44,8 @@ classifiers = [
 ]
 dependencies = [
     "numpy>=1.26.0,<3.0.0",
-    "grpcio>=1.70.0,<2.0.0",
-    "grpcio-health-checking>=1.70.0,<2.0.0",
+    "grpcio>=1.72.0,<2.0.0",
+    "grpcio-health-checking>=1.72.0,<2.0.0",
     "protobuf>=5.28.0,<7.0.0",
     "cryptography>=46.0.5,<47.0.0",
     "pycryptodome>=3.18.0,<4.0.0",
@@ -104,7 +104,7 @@ dev = [
     "pytest==7.4.4",
     "pytest-cov==4.1.0",
     "pytest-watcher==0.4.3",
-    "grpcio-tools==1.70.0",
+    "grpcio-tools==1.72.0",
     "mypy-protobuf==3.6.0",
     "jupyterlab==4.0.12",
     "rope==1.13.0",
