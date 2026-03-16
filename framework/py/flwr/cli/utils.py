@@ -54,12 +54,15 @@ from flwr.common.grpc import (
     on_channel_state_change,
 )
 from flwr.common.logger import print_json_error, redirect_output, restore_output
+from flwr.proto.control_pb2_grpc import ControlStub  # pylint: disable=E0611
 from flwr.supercore.credential_store import get_credential_store
 
 from .auth_plugin import CliAuthPlugin, get_cli_plugin_class
 from .cli_account_auth_interceptor import CliAccountAuthInterceptor
 from .config_utils import load_certificate_in_connection
 from .constant import AUTHN_TYPE_STORE_KEY
+from .flower_config import read_superlink_connection
+from .local_superlink import ensure_local_superlink
 
 
 def print_json_to_stdout(data: str | Any) -> None:
@@ -307,19 +310,6 @@ def get_executed_command() -> str:
     return " ".join(cmd_parts)
 
 
-def require_superlink_address(connection: SuperLinkConnection) -> str:
-    """Return the SuperLink address or exit if it is not configured."""
-    if connection.address is None:
-        cmd = get_executed_command()
-        raise click.ClickException(
-            f"`{cmd}` currently works with a SuperLink. Ensure that the "
-            "correct SuperLink (Control API) address is provided SuperLink connection "
-            "you are using. Check your Flower configuration file. You may use `flwr "
-            "config list` to see its location in the file system."
-        )
-    return connection.address
-
-
 def init_channel_from_connection(
     connection: SuperLinkConnection, auth_plugin: CliAuthPlugin | None = None
 ) -> grpc.Channel:
@@ -337,7 +327,8 @@ def init_channel_from_connection(
     grpc.Channel
         Configured gRPC channel with authentication interceptors.
     """
-    address = require_superlink_address(connection)
+    connection = ensure_local_superlink(connection)
+    address = cast(str, connection.address)
 
     root_certificates_bytes = load_certificate_in_connection(connection)
 
@@ -359,14 +350,48 @@ def init_channel_from_connection(
     return channel
 
 
-@contextmanager
-def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-branches
+@contextmanager  # docsig: disable=SIG503
+def cli_output_control_stub(
+    superlink: str | None,
+    output_format: str = CliOutputFormat.DEFAULT,
+) -> Iterator[tuple[ControlStub, bool]]:
+    """Manage CLI output handling and Control API stub lifecycle.
+
+    Parameters
+    ----------
+    superlink : str | None
+        Name of the SuperLink connection.
+    output_format : str
+        Output format for CLI rendering.
+
+    Yields
+    ------
+    tuple[ControlStub, bool]
+        A tuple of (ControlStub, is_json), where `is_json` indicates JSON output.
+    """
+    with cli_output_handler(output_format=output_format) as is_json:
+        superlink_connection = read_superlink_connection(superlink)
+        channel = init_channel_from_connection(superlink_connection)
+        try:
+            yield ControlStub(channel), is_json
+        finally:
+            channel.close()
+
+
+@contextmanager  # docsig: disable=SIG503
+def flwr_cli_grpc_exc_handler(  # pylint: disable=too-many-branches
+    custom_handler: Callable[[grpc.RpcError], None] | None = None,
+) -> Iterator[None]:
     """Context manager to handle specific gRPC errors.
 
-    Catches grpc.RpcError exceptions with UNAUTHENTICATED, UNIMPLEMENTED,
-    UNAVAILABLE, PERMISSION_DENIED, NOT_FOUND, and FAILED_PRECONDITION statuses,
-    informs the user, and exits the application. All other exceptions will be
-    allowed to escape.
+    Catches grpc.RpcError exceptions and translates them into user-friendly messages
+    based on the error code and details.
+
+    Parameters
+    ----------
+    custom_handler : Callable[[grpc.RpcError], None] | None (default: None)
+        Optional custom handler called with the caught gRPC error before applying
+        default Flower CLI error handling.
 
     Yields
     ------
@@ -376,13 +401,14 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-b
     Raises
     ------
     click.ClickException
-        On handled gRPC error statuses with appropriate exit code.
-    grpc.RpcError
-        For unhandled gRPC error statuses.
+        For handled gRPC errors, with user-friendly messages. Or raw gRPC error details
+        will be shown.
     """
     try:
         yield
     except grpc.RpcError as e:
+        if custom_handler is not None:
+            custom_handler(e)
         if e.code() == grpc.StatusCode.UNAUTHENTICATED:
             raise click.ClickException(
                 "Authentication failed. Please run `flwr login`"
@@ -397,14 +423,7 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-b
                 raise click.ClickException(
                     "The SuperLink does not support `flwr pull` command."
                 ) from None
-            raise click.ClickException(
-                "The SuperLink cannot process this request. Please verify that "
-                "you set the address to its Control API endpoint correctly in your "
-                "SuperLink connection in your Flower Configuration file. You may use "
-                "`flwr config list` to see its location in the file system. "
-                "Additonally, ensure that the Flower versions used by the CLI and "
-                "SuperLink are compatible."
-            ) from None
+            raise click.ClickException(e.details()) from None  # pylint: disable=E1101
         if e.code() == grpc.StatusCode.PERMISSION_DENIED:
             # pylint: disable-next=E1101
             raise click.ClickException(f"Permission denied.\n{e.details()}") from None
@@ -450,9 +469,8 @@ def flwr_cli_grpc_exc_handler() -> Iterator[None]:  # pylint: disable=too-many-b
                     "Please verify the federation name and try again."
                 ) from None
 
-            # Log details from grpc error directly
-            raise click.ClickException(f"{e.details()}") from None
-        raise
+        # Log details from grpc error directly
+        raise click.ClickException(f"{e.details()}") from None
 
 
 def build_pathspec(patterns: Iterable[str]) -> pathspec.PathSpec:

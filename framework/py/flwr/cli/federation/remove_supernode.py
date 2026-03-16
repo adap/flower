@@ -16,7 +16,6 @@
 
 from typing import Annotated
 
-import click
 import typer
 
 from flwr.cli.config_migration import migrate
@@ -32,6 +31,7 @@ from ..utils import (
     cli_output_handler,
     flwr_cli_grpc_exc_handler,
     init_channel_from_connection,
+    print_json_to_stdout,
 )
 
 
@@ -41,7 +41,7 @@ def remove_supernode(
         int,
         typer.Argument(help="ID of the SuperNode to remove."),
     ],
-    federation_name: Annotated[
+    federation: Annotated[
         str,
         typer.Argument(help="Name of the federation."),
     ],
@@ -72,7 +72,7 @@ def remove_supernode(
             stub = ControlStub(channel)
 
             request = RemoveNodeFromFederationRequest(
-                federation_name=federation_name,
+                federation_name=federation,
                 node_id=node_id,
             )
             _remove_supernode(stub=stub, request=request, is_json=is_json)
@@ -91,4 +91,7 @@ def _remove_supernode(  # pylint: disable=W0613
     with flwr_cli_grpc_exc_handler():
         _: RemoveNodeFromFederationResponse = stub.RemoveNodeFromFederation(request)
 
-    raise click.ClickException("Command not fully implemented.")
+    if is_json:
+        print_json_to_stdout({"success": True})
+    else:
+        typer.secho("✅ SuperNode removed from federation.")

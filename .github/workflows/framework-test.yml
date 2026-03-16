@@ -33,6 +33,9 @@ jobs:
           filters: |
             framework:
               - 'framework/**/*'
+              - 'dev/devtool/**'
+              - 'dev/pyproject.toml'
+              - 'dev/uv.lock'
               - '.github/workflows/framework-test.yml'
             ex_bench:
               - 'examples/**/*'
@@ -61,7 +64,7 @@ jobs:
         uses: ./.github/actions/bootstrap
         with:
           python-version: ${{ matrix.python }}
-      - name: Install dependencies (mandatory only)
+      - name: Install dependencies
         if: ${{ needs.changes.outputs.framework == 'true' || needs.changes.outputs.ex_bench == 'true' }}
         run: |
           cd framework 

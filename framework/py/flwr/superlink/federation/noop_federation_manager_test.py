@@ -92,11 +92,8 @@ def test_get_details_with_valid_federation() -> None:
     )
 
     # Configure mocks
-    mock_linkstate.get_run_ids.return_value = {run_id_1, run_id_2}
+    mock_linkstate.get_run_info.return_value = [mock_run_1, mock_run_2]
     mock_linkstate.get_node_info.return_value = [mock_node_1, mock_node_2]
-    mock_linkstate.get_run.side_effect = lambda run_id: (
-        mock_run_1 if run_id == run_id_1 else mock_run_2
-    )
 
     # Execute
     result = manager.get_details(NOOP_FEDERATION)
@@ -114,6 +111,7 @@ def test_get_details_with_valid_federation() -> None:
     assert mock_node_1 in result.nodes and mock_node_2 in result.nodes
     assert len(result.runs) == 2
     assert mock_run_1 in result.runs and mock_run_2 in result.runs
+    assert result.archived is False
 
 
 def test_get_details_with_invalid_federation() -> None:
@@ -137,7 +135,7 @@ def test_get_details_with_no_runs() -> None:
     manager.linkstate = mock_linkstate
 
     # Configure mocks for empty runs
-    mock_linkstate.get_run_ids.return_value = set()
+    mock_linkstate.get_run_info.return_value = []
     mock_linkstate.get_node_info.return_value = []
 
     # Execute
@@ -152,6 +150,7 @@ def test_get_details_with_no_runs() -> None:
     )
     assert len(result.nodes) == 0
     assert len(result.runs) == 0
+    assert result.archived is False
 
 
 def test_exists() -> None:
@@ -220,4 +219,7 @@ def test_get_federations() -> None:
 
     # Assert
     assert len(result) == 0
-    assert result2 == [(NOOP_FEDERATION, NOOP_FEDERATION_DESCRIPTION)]
+    assert len(result2) == 1
+    assert result2[0].name == NOOP_FEDERATION
+    assert result2[0].description == NOOP_FEDERATION_DESCRIPTION
+    assert result2[0].archived is False

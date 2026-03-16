@@ -19,6 +19,7 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
 from flwr.common.typing import Federation
+from flwr.proto.federation_pb2 import Invitation  # pylint: disable=E0611
 
 if TYPE_CHECKING:
     from flwr.server.superlink.linkstate.linkstate import LinkState
@@ -56,8 +57,11 @@ class FederationManager(ABC):
         """Given a node ID, check if it is in the federation."""
 
     @abstractmethod
-    def get_federations(self, flwr_aid: str) -> list[tuple[str, str]]:
-        """Get federations (name, description) of which the account is a member."""
+    def get_federations(self, flwr_aid: str) -> list[Federation]:
+        """Get federations of which the account is a member.
+
+        Only the name, description and whether the federation is archived are returned.
+        """
 
     @abstractmethod
     def get_details(self, federation: str) -> Federation:
@@ -122,4 +126,138 @@ class FederationManager(ABC):
             The name of the federation.
         node_id : int
             The ID of the SuperNode to remove.
+        """
+
+    @abstractmethod
+    def remove_account(
+        self, flwr_aid: str, federation: str, target_account_name: str | None
+    ) -> None:
+        """Remove an account from a federation.
+
+        If `target_account_name` is `None` the caller removes themselves
+        (leave). Otherwise only the owner may remove another account. The
+        owner can never be removed. All supernodes owned by the removed
+        account are also soft-removed from the federation.
+
+        Parameters
+        ----------
+        flwr_aid : str
+            The ID of the account initiating the removal (or leaving).
+        federation : str
+            The name of the federation.
+        target_account_name : str | None
+            The name of the account to remove. If `None`, the caller removes
+            themselves from the federation. The owner cannot remove themselves.
+
+        Raises
+        ------
+        FlowerError
+            If the federation does not exist, the target account is not a
+            member, the owner tries to remove themselves, or a non-owner
+            tries to remove another account.
+        """
+
+    @abstractmethod
+    def create_invitation(
+        self, flwr_aid: str, federation: str, invitee_account_name: str
+    ) -> None:
+        """Create an invitation for an account to join a federation.
+
+        Parameters
+        ----------
+        flwr_aid : str
+            The ID of the account creating the invitation (inviter).
+        federation : str
+            The name of the federation.
+        invitee_account_name : str
+            The name of the account being invited.
+
+        Raises
+        ------
+        ValueError
+            If the federation does not exist.
+        PermissionError
+            If the caller is not the owner, the invitee is already a member,
+            or a pending invitation already exists for the invitee.
+        """
+
+    @abstractmethod
+    def list_invitations(
+        self, flwr_aid: str
+    ) -> tuple[list[Invitation], list[Invitation]]:
+        """List all invitations visible to the given account.
+
+        Returns invitations split into those created by the account
+        (as inviter) and those received (as invitee). Each list is
+        ordered by creation time (oldest first).
+
+        Parameters
+        ----------
+        flwr_aid : str
+            The ID of the account listing invitations.
+
+        Returns
+        -------
+        tuple[list[Invitation], list[Invitation]]
+            A tuple of (created_invitations, received_invitations).
+        """
+
+    @abstractmethod
+    def accept_invitation(self, flwr_aid: str, federation: str) -> None:
+        """Accept a pending invitation and become a member of the federation.
+
+        Parameters
+        ----------
+        flwr_aid : str
+            The ID of the account accepting the invitation (invitee).
+        federation : str
+            The name of the federation.
+
+        Raises
+        ------
+        ValueError
+            If the federation does not exist, or no pending
+            invitation exists for the account in the federation.
+        """
+
+    @abstractmethod
+    def reject_invitation(self, flwr_aid: str, federation: str) -> None:
+        """Reject a pending invitation.
+
+        Parameters
+        ----------
+        flwr_aid : str
+            The ID of the account rejecting the invitation (invitee).
+        federation : str
+            The name of the federation.
+
+        Raises
+        ------
+        ValueError
+            If the federation does not exist, or no pending invitation exists
+            for the account in the federation.
+        """
+
+    @abstractmethod
+    def revoke_invitation(
+        self, flwr_aid: str, federation: str, invitee_account_name: str
+    ) -> None:
+        """Revoke a pending invitation.
+
+        Parameters
+        ----------
+        flwr_aid : str
+            The ID of the account revoking the invitation.
+        federation : str
+            The name of the federation.
+        invitee_account_name : str
+            The name of the account whose invitation is being revoked.
+
+        Raises
+        ------
+        ValueError
+            If the federation does not exist, or no pending invitation exists
+            for the invitee.
+        PermissionError
+            If the caller is not an owner of the federation.
         """

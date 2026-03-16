@@ -347,3 +347,4 @@ class Federation:
     members: list[Member]
     nodes: list[NodeInfo]
     runs: list[Run]
+    archived: bool = False

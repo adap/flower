@@ -16,8 +16,6 @@
 
 
 import hashlib
-import json
-import subprocess
 from pathlib import Path
 from typing import Annotated, Any
 
@@ -32,7 +30,7 @@ from flwr.cli.flower_config import (
     _serialize_simulation_options,
     read_superlink_connection,
 )
-from flwr.cli.typing import SuperLinkConnection, SuperLinkSimulationOptions
+from flwr.cli.typing import SuperLinkConnection
 from flwr.common.config import (
     flatten_dict,
     get_metadata_from_config,
@@ -143,23 +141,16 @@ def run(
                     bold=True,
                 )
 
-        if superlink_connection.address:
-            _run_with_control_api(
-                app,
-                config,
-                federation,
-                superlink_connection,
-                run_config_overrides,
-                stream,
-                is_json,
-                app_spec,
-            )
-        else:
-            _run_without_control_api(
-                app=app,
-                simulation_options=superlink_connection.options,  # type: ignore
-                config_overrides=run_config_overrides,
-            )
+        _run_with_control_api(
+            app,
+            config,
+            federation,
+            superlink_connection,
+            run_config_overrides,
+            stream,
+            is_json,
+            app_spec,
+        )
 
 
 # pylint: disable-next=R0913, R0914, R0917
@@ -247,39 +238,3 @@ def _run_with_control_api(
     finally:
         if channel:
             channel.close()
-
-
-def _run_without_control_api(
-    app: Path | None,
-    simulation_options: SuperLinkSimulationOptions,
-    config_overrides: list[str] | None,
-) -> None:
-
-    num_supernodes = simulation_options.num_supernodes
-    verbose = simulation_options.verbose or False
-
-    command = [
-        "flower-simulation",
-        "--app",
-        f"{app}",
-        "--num-supernodes",
-        f"{num_supernodes}",
-    ]
-
-    if simulation_options.backend:
-        # JSON-encode the backend configuration
-        backend_serial = _serialize_simulation_options(simulation_options)
-        command.extend(["--backend-config", json.dumps(backend_serial["backend"])])
-
-    if verbose:
-        command.extend(["--verbose"])
-
-    if config_overrides:
-        command.extend(["--run-config", f"{' '.join(config_overrides)}"])
-
-    # Run the simulation
-    subprocess.run(
-        command,
-        check=True,
-        text=True,
-    )

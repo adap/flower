@@ -21,7 +21,7 @@ import json
 from collections.abc import Sequence
 from datetime import datetime, timezone
 from logging import ERROR, WARNING
-from typing import Any
+from typing import Any, Literal
 
 from sqlalchemy import MetaData
 from sqlalchemy.exc import IntegrityError
@@ -838,32 +838,93 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
         log(ERROR, "Unexpected run creation failure.")
         return 0
 
-    def get_run_ids(self, flwr_aid: str | None) -> set[int]:
-        """Retrieve all run IDs if `flwr_aid` is not specified.
-
-        Otherwise, retrieve all run IDs for the specified `flwr_aid`.
-        """
-        if flwr_aid:
-            rows = self.query(
-                "SELECT run_id FROM run WHERE flwr_aid = :flwr_aid",
-                {"flwr_aid": flwr_aid},
-            )
-        else:
-            rows = self.query("SELECT run_id FROM run", {})
-        return {int64_to_uint64(row["run_id"]) for row in rows}
-
-    def get_run(self, run_id: int) -> Run | None:
-        """Retrieve information about the run with the specified `run_id`."""
+    def get_run_info(  # pylint: disable=too-many-arguments, too-many-branches
+        self,
+        *,
+        run_ids: Sequence[int] | None = None,
+        statuses: Sequence[str] | None = None,
+        flwr_aids: Sequence[str] | None = None,
+        federations: Sequence[str] | None = None,
+        order_by: Literal["pending_at"] | None = None,
+        ascending: bool = True,
+        limit: int | None = None,
+    ) -> Sequence[Run]:
+        """Retrieve information about runs based on the specified filters."""
         # Clean up expired tokens; this will flag inactive runs as needed
         self._cleanup_expired_tokens()
 
-        # Convert the uint64 value to sint64 for SQLite
-        sint64_run_id = uint64_to_int64(run_id)
-        query = "SELECT * FROM run WHERE run_id = :run_id"
-        rows = self.query(query, {"run_id": sint64_run_id})
-        if rows:
-            row = rows[0]
-            return Run(
+        # Build dynamic SQL filters:
+        # - OR within each individual filter
+        # - AND across different filters
+        conditions = []
+        params: dict[str, Any] = {}
+
+        # Filter by run_ids
+        if run_ids is not None:
+            if not run_ids:
+                return []
+            sint64_run_ids = [uint64_to_int64(run_id) for run_id in run_ids]
+            placeholders = ",".join([f":rid_{i}" for i in range(len(sint64_run_ids))])
+            conditions.append(f"run_id IN ({placeholders})")
+            params.update(
+                {f"rid_{i}": run_id for i, run_id in enumerate(sint64_run_ids)}
+            )
+
+        # Filter by statuses
+        # (maybe we should add a derived `status` column in the DB to simplify this?)
+        if statuses is not None:
+            if not statuses:
+                return []
+            status_conditions = []
+            # Map logical run status to persisted timestamp state.
+            if Status.PENDING in statuses:
+                status_conditions.append("starting_at = '' AND finished_at = ''")
+            if Status.STARTING in statuses:
+                status_conditions.append(
+                    "starting_at != '' AND running_at = '' AND finished_at = ''"
+                )
+            if Status.RUNNING in statuses:
+                status_conditions.append("running_at != '' AND finished_at = ''")
+            if Status.FINISHED in statuses:
+                status_conditions.append("finished_at != ''")
+            if not status_conditions:
+                return []
+            # SQL precedence: AND > OR, so A AND B OR C AND D == (A AND B) OR (C AND D)
+            conditions.append(f"({' OR '.join(status_conditions)})")
+
+        # Filter by Flower Account IDs
+        if flwr_aids is not None:
+            if not flwr_aids:
+                return []
+            placeholders = ",".join([f":aid_{i}" for i in range(len(flwr_aids))])
+            conditions.append(f"flwr_aid IN ({placeholders})")
+            params.update({f"aid_{i}": aid for i, aid in enumerate(flwr_aids)})
+
+        # Filter by federations
+        if federations is not None:
+            if not federations:
+                return []
+            placeholders = ",".join([f":fed_{i}" for i in range(len(federations))])
+            conditions.append(f"federation IN ({placeholders})")
+            params.update({f"fed_{i}": fed for i, fed in enumerate(federations)})
+
+        # Construct the final query
+        query = "SELECT * FROM run"
+        if conditions:
+            query += " WHERE " + " AND ".join(conditions)
+        if order_by is not None:
+            # `order_by` is a constrained Literal; safe to interpolate here.
+            # ISO format(YYYY-MM-DDTHH:MM:SS[.ffffff]+00:00) can be sorted
+            # lexicographically to achieve correct chronological order.
+            query += f" ORDER BY {order_by} {'ASC' if ascending else 'DESC'}"
+        if limit is not None:
+            query += " LIMIT :limit"
+            params["limit"] = limit
+
+        rows = self.query(query, params)
+        # Convert DB rows into domain-level `Run` objects.
+        return [
+            Run(
                 run_id=int64_to_uint64(row["run_id"]),
                 fab_id=row["fab_id"],
                 fab_version=row["fab_version"],
@@ -884,8 +945,8 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
                 bytes_recv=row["bytes_recv"],
                 clientapp_runtime=row["clientapp_runtime"],
             )
-        log(ERROR, "`run_id` does not exist.")
-        return None
+            for row in rows
+        ]
 
     def get_run_status(self, run_ids: set[int]) -> dict[int, RunStatus]:
         """Retrieve the statuses for the specified runs."""

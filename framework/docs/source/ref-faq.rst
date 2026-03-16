@@ -5,15 +5,9 @@
 This page collects answers to commonly asked questions about Federated Learning with
 Flower.
 
-.. dropdown:: :fa:`eye,mr-1` Can Flower run on Jupyter Notebooks / Google Colab?
-
-    Yes, it can! Flower even comes with a few under-the-hood optimizations to make it work even better on Colab. Here's a quickstart example:
-
-    * `Flower 30-minute tutorial <https://colab.research.google.com/github/adap/flower/blob/main/examples/flower-in-30-minutes/tutorial.ipynb>`_
-
 .. dropdown:: :fa:`eye,mr-1` How can I run Federated Learning on a Raspberry Pi?
 
-    Find the `blog post about federated learning on embedded device here <https://flower.ai/blog/2020-12-16-running_federated_learning_applications_on_embedded_devices_with_flower>`_ and the corresponding `GitHub code example <https://github.com/adap/flower/tree/main/examples/embedded-devices>`_.
+    Find the `blog post about federated learning on embedded device here <https://flower.ai/blog/2020-12-16-running_federated_learning_applications_on_embedded_devices_with_flower>`_ and the corresponding `GitHub code example <https://github.com/flwrlabs/flower/tree/main/examples/embedded-devices>`_.
 
 .. dropdown:: :fa:`eye,mr-1` Does Flower support federated learning on Android devices?
 
@@ -34,3 +28,24 @@ Flower.
     * `Flower meets KOSMoS <https://www.isw-sites.de/kosmos/wp-content/uploads/sites/13/2021/05/Talk-Flower-Summit-2021.pdf>`_.
     * `Flower meets Talan blog post <https://www.linkedin.com/pulse/federated-learning-same-mask-different-faces-imen-ayari/?trackingId=971oIlxLQ9%2BA9RB0IQ73XQ%3D%3D>`_ .
     * `Flower meets Talan GitHub Repository <https://gitlab.com/Talan_Innovation_Factory/food-waste-prevention>`_ .
+
+.. dropdown:: :fa:`eye,mr-1` I see unexpected terminal output (e.g.: ``� □[32m□[1m``) on Windows. How do I fix this?
+
+    .. _faq-windows-unexpected-output:
+
+    If you see output (ANSI escape sequences or broken emojis) like this:
+
+    - ``� □[32m□[1m``
+    - ``□[0m□[96m□[1m``
+    - ``�``
+
+    this is usually a terminal host issue. Make sure you have installed the latest `Windows Terminal <https://aka.ms/terminal>`_ **application** (Microsoft's terminal app), and then run Flower commands there.
+
+    To quickly check whether your current PowerShell session is running in Windows Terminal:
+
+    .. code-block:: powershell
+
+        echo $env:WT_SESSION
+
+    If this prints a value (for example, ``b4c5f2c8-...``), you are in Windows Terminal.
+    If it prints nothing, you are likely running in a non-Windows-Terminal host (for example, conhost), which can show raw ANSI escape codes or incorrect emoji rendering.

@@ -1,6 +1,6 @@
-:og:description: Guide to manage Flower federations using the Deployment Engine.
+:og:description: Guide to manage Flower federations using the Deployment Runtime.
 .. meta::
-    :description: Guide to manage Flower federations using the Deployment Engine.
+    :description: Guide to manage Flower federations using the Deployment Runtime.
 
 .. |flower_cli_federation_link| replace:: ``Flower CLI``
 

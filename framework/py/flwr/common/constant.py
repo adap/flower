@@ -83,6 +83,7 @@ FAB_INCLUDE_PATTERNS = (
     "**/*.py",
     "**/*.toml",
     "**/*.md",
+    "/LICENSE",
 )
 # FAB file exclude patterns (gitignore-style patterns)
 FAB_EXCLUDE_PATTERNS = (
@@ -146,8 +147,6 @@ GRPC_RETRY_MAX_DELAY = 20  # Maximum delay duration between two consecutive retr
 GC_THRESHOLD = 200_000_000  # 200 MB
 
 # Constants for Inflatable
-HEAD_BODY_DIVIDER = b"\x00"
-HEAD_VALUE_DIVIDER = " "
 FLWR_PRIVATE_MAX_ARRAY_CHUNK_SIZE = int(
     os.getenv("FLWR_PRIVATE_MAX_ARRAY_CHUNK_SIZE", "5242880")
 )  # 5 MB
@@ -157,19 +156,6 @@ INT64_MAX_VALUE = 9223372036854775807  # (1 << 63) - 1
 
 # Constants for `flwr-serverapp` and `flwr-clientapp` CLI commands
 FLWR_APP_TOKEN_LENGTH = 128  # Length of the token used
-
-# Constants for object pushing and pulling
-FLWR_PRIVATE_MAX_CONCURRENT_OBJ_PUSHES = int(
-    os.getenv("FLWR_PRIVATE_MAX_CONCURRENT_OBJ_PUSHES", "2")
-)  # Default maximum number of concurrent pushes
-FLWR_PRIVATE_MAX_CONCURRENT_OBJ_PULLS = int(
-    os.getenv("FLWR_PRIVATE_MAX_CONCURRENT_OBJ_PULLS", "2")
-)  # Default maximum number of concurrent pulls
-PULL_MAX_TIME = 7200  # Default maximum time to wait for pulling objects
-PULL_MAX_TRIES_PER_OBJECT = 500  # Default maximum number of tries to pull an object
-PULL_INITIAL_BACKOFF = 1  # Initial backoff time for pulling objects
-PULL_BACKOFF_CAP = 10  # Maximum backoff time for pulling objects
-
 
 # ControlServicer constants
 RUN_ID_NOT_FOUND_MESSAGE = "Run ID not found"
@@ -182,9 +168,6 @@ PUBLIC_KEY_NOT_VALID = "The provided public key is not valid"
 NODE_NOT_FOUND_MESSAGE = "Node ID not found for account"
 FEDERATION_NOT_SPECIFIED_MESSAGE = "No federation specified in the request"
 FEDERATION_NOT_FOUND_MESSAGE = "Federation '%s' does not exist"
-SUPERLINK_DOES_NOT_SUPPORT_FED_MANAGEMENT_MESSAGE = (
-    "SuperLink does not support federation management."
-)
 
 
 class MessageTypeLegacy:
