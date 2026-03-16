@@ -105,7 +105,7 @@ URLS: dict[str, str] = {
     "Oxford Flower-102": "https://www.robots.ox.ac.uk/~vgg/data/flowers/102/",
     "SpeechCommands": "https://huggingface.co/datasets/google/speech_commands",
     "Titanic": "https://www.kaggle.com/competitions/titanic",
-    ("Waltons"): (
+    "Waltons": (
         "https://lifelines.readthedocs.io/en/latest/"
         "lifelines.datasets.html#lifelines.datasets.load_waltons"
     ),
