@@ -26,7 +26,11 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.control_pb2_grpc import ControlStub
 
-from ..utils import cli_output_control_stub, flwr_cli_grpc_exc_handler
+from ..utils import (
+    cli_output_control_stub,
+    flwr_cli_grpc_exc_handler,
+    print_json_to_stdout,
+)
 
 
 def remove_account(
@@ -74,4 +78,14 @@ def _remove_account_from_federation(  # pylint: disable=W0613
             request
         )
 
-    raise NotImplementedError()
+    if is_json:
+        print_json_to_stdout({"success": True})
+    else:
+        message = (
+            f"✅ Removed account '{request.account_name}' from federation "
+            f"'{request.federation_name}'."
+            if request.account_name
+            else f"✅ Your account was removed from federation "
+            f"'{request.federation_name}'."
+        )
+        typer.secho(message)
