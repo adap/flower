@@ -17,12 +17,7 @@
 import re
 import sys
 from pathlib import Path
-from typing import Any, cast
-
-try:
-    import tomllib
-except ModuleNotFoundError:  # pragma: no cover - Python 3.10 fallback
-    import tomli as tomllib
+from typing import Any
 
 try:
     import tomllib
@@ -33,7 +28,8 @@ except ModuleNotFoundError:  # pragma: no cover - Python 3.10 fallback
 def _load_config() -> dict[str, Any]:
     config_path = Path(__file__).resolve().parent.parent / "changelog_config.toml"
     with config_path.open("rb") as file:
-        return cast(dict[str, Any], tomllib.load(file))
+        config: dict[str, Any] = tomllib.load(file)
+        return config
 
 
 def _validate_title(pr_title: str, config: dict[str, Any]) -> tuple[bool, str]:
