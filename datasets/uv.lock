@@ -616,7 +616,7 @@ wheels = [
 [[package]]
 name = "devtool"
 version = "0.0.0"
-source = { editable = "devtool" }
+source = { editable = "../dev" }
 dependencies = [
     { name = "black" },
     { name = "pyyaml" },
@@ -769,7 +769,7 @@ provides-extras = ["vision", "audio"]
 [package.metadata.requires-dev]
 dev = [
     { name = "black", extras = ["jupyter"], specifier = "==25.11.0" },
-    { name = "devtool", editable = "devtool" },
+    { name = "devtool", editable = "../dev" },
     { name = "docformatter", specifier = "==1.7.5" },
     { name = "isort", specifier = "==5.13.2" },
     { name = "mypy", specifier = "==1.8.0" },
