@@ -22,10 +22,16 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, cast
 
+_toml: Any
+
 try:
     import tomllib
-except ModuleNotFoundError:
-    import tomli as tomllib
+
+    _toml = tomllib
+except ModuleNotFoundError:  # pragma: no cover - Python 3.10 fallback
+    import tomli
+
+    _toml = tomli
 
 
 class ProtocConfigError(ValueError):
@@ -62,7 +68,7 @@ def _load_pyproject(project_dir: Path) -> dict[str, Any]:
     if not pyproject_path.is_file():
         raise ProtocConfigError(f"Missing pyproject.toml: {pyproject_path}")
     with pyproject_path.open("rb") as pyproject_file:
-        return cast(dict[str, Any], tomllib.load(pyproject_file))
+        return cast(dict[str, Any], _toml.load(pyproject_file))
 
 
 def _resolve_dir(project_dir: Path, value: str, *, field_name: str) -> Path:
