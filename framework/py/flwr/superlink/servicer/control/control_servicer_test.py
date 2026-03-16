@@ -58,6 +58,8 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     RegisterNodeRequest,
     RejectInvitationRequest,
     RejectInvitationResponse,
+    RemoveAccountFromFederationRequest,
+    RemoveAccountFromFederationResponse,
     RemoveNodeFromFederationRequest,
     RemoveNodeFromFederationResponse,
     RevokeInvitationRequest,
@@ -519,6 +521,27 @@ class TestControlServicer(unittest.TestCase):
         # Execute & Assert
         with self.assertRaises(grpc.RpcError):
             self.servicer.ArchiveFederation(request, mock_context)
+
+    def test_remove_account_from_federation_success(self) -> None:
+        """Test RemoveAccountFromFederation succeeds when manager call works."""
+        request = RemoveAccountFromFederationRequest(
+            federation_name="test-federation",
+            account_name="target-account",
+        )
+
+        with patch.object(
+            self.state.federation_manager,
+            "remove_account",
+            return_value=None,
+        ) as mock_remove_account:
+            response = self.servicer.RemoveAccountFromFederation(request, Mock())
+
+        mock_remove_account.assert_called_once_with(
+            flwr_aid=self.aid,
+            federation="test-federation",
+            target_account_name="target-account",
+        )
+        self.assertIsInstance(response, RemoveAccountFromFederationResponse)
 
 
 class TestControlServicerInvitationRPCs(unittest.TestCase):
