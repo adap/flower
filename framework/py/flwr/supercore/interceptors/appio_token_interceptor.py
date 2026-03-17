@@ -16,13 +16,14 @@
 
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
-from typing import Any, Protocol, cast
+from typing import Any, NoReturn, Protocol, cast
 
 import grpc
 from google.protobuf.message import Message as GrpcMessage
 
 APP_TOKEN_HEADER = "flwr-app-token"
 AUTHENTICATION_FAILED_MESSAGE = "Authentication failed."
+
 
 @dataclass(frozen=True)
 class MethodTokenPolicy:
@@ -50,11 +51,11 @@ class _TokenState(Protocol):
     def verify_token(self, run_id: int, token: str) -> bool:
         """Return whether token is valid for run_id."""
 
+
 _NO_AUTH = MethodTokenPolicy.no_auth()
 _TOKEN_REQUIRED = MethodTokenPolicy.token_required()
 
-# In a follow-up PR, create these explicit maps using a shared builder.
-# Also consider whether these should live here or in the individual API modules.
+# In a follow-up PR, create this explicit map using a shared builder.
 SERVERAPPIO_METHOD_AUTH_POLICY: dict[str, MethodTokenPolicy] = {
     "/flwr.proto.ServerAppIo/ListAppsToLaunch": _NO_AUTH,
     "/flwr.proto.ServerAppIo/RequestToken": _NO_AUTH,
@@ -72,34 +73,8 @@ SERVERAPPIO_METHOD_AUTH_POLICY: dict[str, MethodTokenPolicy] = {
     "/flwr.proto.ServerAppIo/GetNodes": _TOKEN_REQUIRED,
 }
 
-CLIENTAPPIO_METHOD_AUTH_POLICY: dict[str, MethodTokenPolicy] = {
-    "/flwr.proto.ClientAppIo/ListAppsToLaunch": _NO_AUTH,
-    "/flwr.proto.ClientAppIo/RequestToken": _NO_AUTH,
-    "/flwr.proto.ClientAppIo/GetRun": _NO_AUTH,
-    "/flwr.proto.ClientAppIo/SendAppHeartbeat": _TOKEN_REQUIRED,
-    "/flwr.proto.ClientAppIo/PullAppInputs": _TOKEN_REQUIRED,
-    "/flwr.proto.ClientAppIo/PushAppOutputs": _TOKEN_REQUIRED,
-    "/flwr.proto.ClientAppIo/PushObject": _TOKEN_REQUIRED,
-    "/flwr.proto.ClientAppIo/PullObject": _TOKEN_REQUIRED,
-    "/flwr.proto.ClientAppIo/ConfirmMessageReceived": _TOKEN_REQUIRED,
-    "/flwr.proto.ClientAppIo/PushMessage": _TOKEN_REQUIRED,
-    "/flwr.proto.ClientAppIo/PullMessage": _TOKEN_REQUIRED,
-}
 
-SIMULATIONIO_METHOD_AUTH_POLICY: dict[str, MethodTokenPolicy] = {
-    "/flwr.proto.SimulationIo/ListAppsToLaunch": _NO_AUTH,
-    "/flwr.proto.SimulationIo/RequestToken": _NO_AUTH,
-    "/flwr.proto.SimulationIo/GetRun": _NO_AUTH,
-    "/flwr.proto.SimulationIo/SendAppHeartbeat": _TOKEN_REQUIRED,
-    "/flwr.proto.SimulationIo/PullAppInputs": _TOKEN_REQUIRED,
-    "/flwr.proto.SimulationIo/PushAppOutputs": _TOKEN_REQUIRED,
-    "/flwr.proto.SimulationIo/UpdateRunStatus": _TOKEN_REQUIRED,
-    "/flwr.proto.SimulationIo/PushLogs": _TOKEN_REQUIRED,
-    "/flwr.proto.SimulationIo/GetFederationOptions": _TOKEN_REQUIRED,
-}
-
-
-def _abort_auth_denied(context: grpc.ServicerContext) -> None:
+def _abort_auth_denied(context: grpc.ServicerContext) -> NoReturn:
     context.abort(grpc.StatusCode.UNAUTHENTICATED, AUTHENTICATION_FAILED_MESSAGE)
     raise RuntimeError("Should not reach this point")
 
@@ -143,6 +118,7 @@ class AppIoTokenClientInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: ig
         client_call_details: grpc.ClientCallDetails,
         request: GrpcMessage,
     ) -> grpc.Call:
+        """Add/replace the App token metadata on outbound unary requests."""
         metadata = list(client_call_details.metadata or [])
         metadata = [(key, value) for key, value in metadata if key != APP_TOKEN_HEADER]
         metadata.append((APP_TOKEN_HEADER, self._token))
@@ -166,6 +142,7 @@ class AppIoTokenServerInterceptor(grpc.ServerInterceptor):  # type: ignore
         continuation: Callable[[Any], Any],
         handler_call_details: grpc.HandlerCallDetails,
     ) -> grpc.RpcMethodHandler:
+        """Enforce per-method token policy for incoming unary RPC calls."""
         method = handler_call_details.method
         policy = self._method_auth_policy.get(method)
         if policy is None:
@@ -175,7 +152,7 @@ class AppIoTokenServerInterceptor(grpc.ServerInterceptor):  # type: ignore
         if method_handler is None:
             return _unauthenticated_terminator()
 
-        # Future direction should be to have an abstraction such that we don't need to comprehend auth mechanism details here (e.g. tokens, signed meta-data, etc...)
+        # Future PR: lift mechanism-specific details into a shared auth abstraction.
         if not policy.requires_token:
             return method_handler
 
@@ -200,8 +177,7 @@ class AppIoTokenServerInterceptor(grpc.ServerInterceptor):  # type: ignore
 
             state = self._state_provider()
             run_id = state.get_run_id_by_token(token)
-            # we verify the token against the run_id to ensure that the token is valid and has not been revoked.
-            # though get_run_id_by_token implementations may check for expiry, it's not clear that this is a guarantee across implementations, so we do this additional check here to be safe.
+            # Validate both token->run lookup and run->token mapping.
             if run_id is None or not state.verify_token(run_id, token):
                 _abort_auth_denied(context)
 
@@ -221,24 +197,4 @@ def create_serverappio_token_auth_interceptor(
     return AppIoTokenServerInterceptor(
         state_provider=state_provider,
         method_auth_policy=SERVERAPPIO_METHOD_AUTH_POLICY,
-    )
-
-
-def create_clientappio_token_auth_interceptor(
-    state_provider: Callable[[], _TokenState],
-) -> AppIoTokenServerInterceptor:
-    """Create the default token interceptor for ClientAppIo."""
-    return AppIoTokenServerInterceptor(
-        state_provider=state_provider,
-        method_auth_policy=CLIENTAPPIO_METHOD_AUTH_POLICY,
-    )
-
-
-def create_simulationio_token_auth_interceptor(
-    state_provider: Callable[[], _TokenState],
-) -> AppIoTokenServerInterceptor:
-    """Create the default token interceptor for SimulationIo."""
-    return AppIoTokenServerInterceptor(
-        state_provider=state_provider,
-        method_auth_policy=SIMULATIONIO_METHOD_AUTH_POLICY,
     )

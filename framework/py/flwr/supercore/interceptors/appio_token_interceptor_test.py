@@ -27,20 +27,14 @@ from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
     PushAppMessagesRequest,
     PushAppOutputsRequest,
 )
-from flwr.proto.run_pb2 import GetFederationOptionsRequest  # pylint: disable=E0611
 from flwr.proto.serverappio_pb2 import GetNodesRequest  # pylint: disable=E0611
 from flwr.supercore.interceptors import (
     APP_TOKEN_HEADER,
     AUTHENTICATION_FAILED_MESSAGE,
-    CLIENTAPPIO_METHOD_AUTH_POLICY,
     SERVERAPPIO_METHOD_AUTH_POLICY,
-    SIMULATIONIO_METHOD_AUTH_POLICY,
     AppIoTokenClientInterceptor,
     AppIoTokenServerInterceptor,
-    MethodTokenPolicy,
-    create_clientappio_token_auth_interceptor,
     create_serverappio_token_auth_interceptor,
-    create_simulationio_token_auth_interceptor,
 )
 
 _ClientCallDetails = namedtuple(
@@ -64,9 +58,11 @@ class _TokenState:
         self._token_to_run_id = token_to_run_id
 
     def get_run_id_by_token(self, token: str) -> int | None:
+        """Return the run id for a token, if present."""
         return self._token_to_run_id.get(token)
 
     def verify_token(self, run_id: int, token: str) -> bool:
+        """Return whether the token is bound to the given run id."""
         return self._token_to_run_id.get(token) == run_id
 
 
@@ -227,15 +223,21 @@ class TestAppIoTokenServerInterceptor(TestCase):
     def test_request_token_preferred_over_metadata_token(self) -> None:
         """request.token should be authoritative when non-empty."""
         state = Mock()
-        state.get_run_id_by_token.side_effect = lambda token: {
+        token_to_run_id = {
             "request-token": 9,
             "metadata-token": 1,
-        }.get(token)
-        state.verify_token.side_effect = (
-            lambda run_id, token: (token, run_id) == ("request-token", 9)
-        )
+        }
+        state.get_run_id_by_token.side_effect = token_to_run_id.get
+
+        def _verify_token_side_effect(run_id: int, token: str) -> bool:
+            return (token, run_id) == ("request-token", 9)
+
+        def _state_provider() -> Mock:
+            return state
+
+        state.verify_token.side_effect = _verify_token_side_effect
         interceptor = AppIoTokenServerInterceptor(
-            state_provider=lambda: state,
+            state_provider=_state_provider,
             method_auth_policy=SERVERAPPIO_METHOD_AUTH_POLICY,
         )
 
@@ -324,7 +326,7 @@ class TestMethodPolicyMaps(TestCase):
     """Validate method auth policy map coverage and values."""
 
     def test_serverappio_policy_has_full_coverage(self) -> None:
-        # Ideally, we are able to generate these expected sets from the proto definitions or some shared source of truth, but for now we maintain them manually to ensure that any additions to the API are consciously added to the policy table with an explicit auth decision. The thought is that LLM assistance makes this easier.
+        """ServerAppIo policy map should cover all RPC methods exactly."""
         expected_methods = {
             "/flwr.proto.ServerAppIo/ListAppsToLaunch",
             "/flwr.proto.ServerAppIo/RequestToken",
@@ -343,63 +345,22 @@ class TestMethodPolicyMaps(TestCase):
         }
         self.assertEqual(set(SERVERAPPIO_METHOD_AUTH_POLICY), expected_methods)
 
-    def test_clientappio_policy_has_full_coverage(self) -> None:
-        # Ideally, we are able to generate these expected sets from the proto definitions or some shared source of truth, but for now we maintain them manually to ensure that any additions to the API are consciously added to the policy table with an explicit auth decision. The thought is that LLM assistance makes this easier.
-        expected_methods = {
-            "/flwr.proto.ClientAppIo/ListAppsToLaunch",
-            "/flwr.proto.ClientAppIo/RequestToken",
-            "/flwr.proto.ClientAppIo/GetRun",
-            "/flwr.proto.ClientAppIo/SendAppHeartbeat",
-            "/flwr.proto.ClientAppIo/PullAppInputs",
-            "/flwr.proto.ClientAppIo/PushAppOutputs",
-            "/flwr.proto.ClientAppIo/PushObject",
-            "/flwr.proto.ClientAppIo/PullObject",
-            "/flwr.proto.ClientAppIo/ConfirmMessageReceived",
-            "/flwr.proto.ClientAppIo/PushMessage",
-            "/flwr.proto.ClientAppIo/PullMessage",
-        }
-        self.assertEqual(set(CLIENTAPPIO_METHOD_AUTH_POLICY), expected_methods)
-
-    def test_simulationio_policy_has_full_coverage(self) -> None:
-        # Ideally, we are able to generate these expected sets from the proto definitions or some shared source of truth, but for now we maintain them manually to ensure that any additions to the API are consciously added to the policy table with an explicit auth decision. The thought is that LLM assistance makes this easier.
-        expected_methods = {
-            "/flwr.proto.SimulationIo/ListAppsToLaunch",
-            "/flwr.proto.SimulationIo/RequestToken",
-            "/flwr.proto.SimulationIo/GetRun",
-            "/flwr.proto.SimulationIo/SendAppHeartbeat",
-            "/flwr.proto.SimulationIo/PullAppInputs",
-            "/flwr.proto.SimulationIo/PushAppOutputs",
-            "/flwr.proto.SimulationIo/UpdateRunStatus",
-            "/flwr.proto.SimulationIo/PushLogs",
-            "/flwr.proto.SimulationIo/GetFederationOptions",
-        }
-        self.assertEqual(set(SIMULATIONIO_METHOD_AUTH_POLICY), expected_methods)
-
     def test_only_expected_no_auth_methods_exist(self) -> None:
+        """Only bootstrap methods should be marked no-auth in the policy table."""
         expected_suffixes = {"ListAppsToLaunch", "RequestToken", "GetRun"}
-        for policy_map in (
-            SERVERAPPIO_METHOD_AUTH_POLICY,
-            CLIENTAPPIO_METHOD_AUTH_POLICY,
-            SIMULATIONIO_METHOD_AUTH_POLICY,
-        ):
-            no_auth_methods = {
-                method.split("/")[-1]
-                for method, policy in policy_map.items()
-                if not policy.requires_token
-            }
-            self.assertEqual(no_auth_methods, expected_suffixes)
-            self.assertTrue(
-                all(
-                    isinstance(policy, MethodTokenPolicy)
-                    for policy in policy_map.values()
-                )
-            )
+        no_auth_methods = {
+            method.rsplit("/", maxsplit=1)[-1]
+            for method, policy in SERVERAPPIO_METHOD_AUTH_POLICY.items()
+            if not policy.requires_token
+        }
+        self.assertEqual(no_auth_methods, expected_suffixes)
 
 
 class TestFactoryFunctions(TestCase):
-    """Validate service-specific interceptor factory behavior."""
+    """Validate interceptor factory behavior."""
 
     def test_serverappio_factory_uses_server_policy(self) -> None:
+        """ServerAppIo factory should enforce ServerAppIo policy semantics."""
         state = _TokenState({"valid-token": 1})
         interceptor = create_serverappio_token_auth_interceptor(lambda: state)
 
@@ -412,40 +373,4 @@ class TestFactoryFunctions(TestCase):
         )
 
         response = cast(str, intercepted.unary_unary(GetNodesRequest(run_id=1), Mock()))
-        self.assertEqual(response, "ok")
-
-    def test_clientappio_factory_uses_client_policy(self) -> None:
-        state = _TokenState({"valid-token": 1})
-        interceptor = create_clientappio_token_auth_interceptor(lambda: state)
-
-        intercepted = interceptor.intercept_service(
-            lambda _: _make_unary_handler(),
-            _HandlerCallDetails(
-                "/flwr.proto.ClientAppIo/PushMessage",
-                invocation_metadata=((APP_TOKEN_HEADER, "valid-token"),),
-            ),
-        )
-
-        response = cast(
-            str,
-            intercepted.unary_unary(PushAppMessagesRequest(run_id=1), Mock()),
-        )
-        self.assertEqual(response, "ok")
-
-    def test_simulationio_factory_uses_simulation_policy(self) -> None:
-        state = _TokenState({"valid-token": 1})
-        interceptor = create_simulationio_token_auth_interceptor(lambda: state)
-
-        intercepted = interceptor.intercept_service(
-            lambda _: _make_unary_handler(),
-            _HandlerCallDetails(
-                "/flwr.proto.SimulationIo/GetFederationOptions",
-                invocation_metadata=((APP_TOKEN_HEADER, "valid-token"),),
-            ),
-        )
-
-        response = cast(
-            str,
-            intercepted.unary_unary(GetFederationOptionsRequest(run_id=1), Mock()),
-        )
         self.assertEqual(response, "ok")
