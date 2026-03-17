@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 packages = ["fedomop"]
 
 [project]
-name = "fedomop"
+name = "fed-omop"
 license = "Apache-2.0"
 version = "0.1.0"
 description = "Personalized Federated Framework for OMOP-CDM Multi-Hospital Data"
