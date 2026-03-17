@@ -144,18 +144,12 @@ class PrepocessConfig(SavableConfig):
             # warning
             print("Warning: Concatenate is set to True, this may lead to very wide feature vectors and potential memory issues. Make sure this is intentional.")
 
-    def save_to_json(self, path: str | None = None):
-        """Saves this config at `path` if provided, else in the same place as `self.out_path`"""
-        if path is None:
-            path, _ = splitext(self.out_path)
-
+    def save_to_json(self, path: str) -> None:
+        """Saves this config to the given base `path` (without extension)."""
         super().save_to_json(path + ".json")
 
-    def load_from_json(self, path: str | None = None):
-        """Loads this config from `path` if provided, else from the same place as `self.out_path`"""
-        if path is None:
-            path, _ = splitext(self.out_path)
-
+    def load_from_json(self, path: str) -> None:
+        """Loads this config from the given JSON file `path`."""
         super().load_from_json(path)
 
     # def print 
