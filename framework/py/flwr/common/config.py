@@ -272,7 +272,8 @@ class _FabFormatV1Rules(_FabFormatRules):
     def normalize_and_validate_metadata(
         self, config: dict[str, Any]
     ) -> FabFormatMetadata:
-        """Require and derive strict compatibility metadata for fab_format_version = 1."""
+        """Require and derive strict compatibility metadata for fab_format_version =
+        1."""
         app = _get_flwr_app_config(config)
         target_version = _parse_flwr_target_version(app)
         requirement = _get_flwr_requirement(config)
@@ -297,7 +298,7 @@ def _get_fab_format_rules(fab_format_version: int) -> _FabFormatRules:
     """Return the ruleset for a supported `fab_format_version`."""
     if fab_format_version not in _FAB_FORMAT_RULES:
         raise ValueError(
-            "Unsupported [tool.flwr.app].fab_format_version: " f"{fab_format_version}."
+            f"Unsupported [tool.flwr.app].fab_format_version: {fab_format_version}."
         )
 
     return _FAB_FORMAT_RULES[fab_format_version]
