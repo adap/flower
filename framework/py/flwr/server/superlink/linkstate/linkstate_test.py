@@ -1954,6 +1954,19 @@ class SqlFileBasedTest(StateTest, unittest.TestCase):
         state.initialize()
         return state
 
+    @staticmethod
+    def _count_successful_replies(results: list[list[Message] | None]) -> int:
+        """Count non-error reply Messages from concurrent pull results."""
+        count = 0
+        for message_list in results:
+            if message_list is None:
+                continue
+            typed_message_list: list[Message] = message_list
+            for message in typed_message_list:
+                if not message.has_error():
+                    count += 1
+        return count
+
     def test_get_message_ins_claim_is_unique_across_replicas(self) -> None:
         """Ensure concurrent replicas cannot both claim the same instruction."""
         with tempfile.NamedTemporaryFile() as shared_db:
@@ -2017,17 +2030,19 @@ class SqlFileBasedTest(StateTest, unittest.TestCase):
             state_1.initialize()
 
             node_id = create_dummy_node(state_0)
-            run_id = create_dummy_run(state_0)
-            msg_ins = message_from_proto(
-                create_ins_message(
-                    src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
+            assert state_0.store_message_ins(
+                message_from_proto(
+                    create_ins_message(
+                        src_node_id=SUPERLINK_NODE_ID,
+                        dst_node_id=node_id,
+                        run_id=create_dummy_run(state_0),
+                    )
                 )
             )
-            assert state_0.store_message_ins(msg_ins)
             pulled_ins = state_0.get_message_ins(node_id=node_id, limit=1)[0]
 
             msg_res = Message(RecordDict(), reply_to=pulled_ins)
-            msg_res.metadata._message_id = str(uuid4())  # type: ignore
+            msg_res.metadata.__dict__["_message_id"] = str(uuid4())
             assert state_0.store_message_res(msg_res)
 
             barrier = threading.Barrier(3)
@@ -2047,15 +2062,7 @@ class SqlFileBasedTest(StateTest, unittest.TestCase):
             for thread in threads:
                 thread.join()
 
-            successful_replies = 0
-            for messages in results:
-                if not messages:
-                    continue
-                for message in messages:
-                    if not message.has_error():
-                        successful_replies += 1
-
-            assert successful_replies == 1
+            assert self._count_successful_replies(results) == 1
 
     def test_get_message_ins_distributes_available_work_under_contention(self) -> None:
         """Ensure two replicas can each claim work when two Messages are available."""
