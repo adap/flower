@@ -563,11 +563,12 @@ class TestControlServicer(unittest.TestCase):
             federation_name="test-federation",
             account_name="target-account",
         )
+        target_flwr_aid = "target-aid"
 
         with patch.object(
             self.state.federation_manager,
             "remove_account",
-            return_value=None,
+            return_value=target_flwr_aid,
         ) as mock_remove_account:
             response = self.servicer.RemoveAccountFromFederation(request, Mock())
 
@@ -576,6 +577,40 @@ class TestControlServicer(unittest.TestCase):
             federation="test-federation",
             target_account_name="target-account",
         )
+        self.assertIsInstance(response, RemoveAccountFromFederationResponse)
+
+    def test_remove_account_from_federation_stops_removed_accounts_runs(self) -> None:
+        """Test removing an account stops that account's unfinished federation runs."""
+        request = RemoveAccountFromFederationRequest(
+            federation_name="test-federation",
+            account_name="target-account",
+        )
+        target_flwr_aid = "target-aid"
+        run_id = self.state.create_run(
+            "flwr/demo",
+            "v0.0.1",
+            "hash123",
+            {},
+            "test-federation",
+            ConfigRecord(),
+            target_flwr_aid,
+        )
+        token = self.state.create_token(run_id)
+        assert token is not None
+        _ = self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
+        _ = self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
+
+        with patch.object(
+            self.state.federation_manager,
+            "remove_account",
+            return_value=target_flwr_aid,
+        ):
+            response = self.servicer.RemoveAccountFromFederation(request, Mock())
+
+        run = self.state.get_run_info(run_ids=[run_id])[0]
+        self.assertEqual(run.status, RunStatus(Status.FINISHED, SubStatus.STOPPED, ""))
+        self.assertFalse(self.state.verify_token(run_id, token))
+        self.store.delete_objects_in_run.assert_called_once_with(run_id)
         self.assertIsInstance(response, RemoveAccountFromFederationResponse)
 
 

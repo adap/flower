@@ -734,11 +734,23 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         target_account = None if not request.account_name else request.account_name
 
         with rpc_error_translator(context, rpc_name):
-            state.federation_manager.remove_account(
+            removed_flwr_aid = state.federation_manager.remove_account(
                 flwr_aid=_get_flwr_aid(context),
                 federation=request.federation_name,
                 target_account_name=target_account,
             )
+            # Get runs from account that was removed
+            # and stop them.
+            for run in state.get_run_info(
+                federations=[request.federation_name],
+                flwr_aids=[removed_flwr_aid],
+            ):
+                if run.status.status != Status.FINISHED:
+                    _stop_run_in_linkstate(
+                        state=state,
+                        store=self.objectstore_factory.store(),
+                        run_id=run.run_id,
+                    )
         return RemoveAccountFromFederationResponse()
 
     def CreateInvitation(
