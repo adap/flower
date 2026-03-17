@@ -730,15 +730,24 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         log(INFO, rpc_name := self.RemoveAccountFromFederation.__qualname__)
 
         state = self.linkstate_factory.state()
+        store = self.objectstore_factory.store()
 
         target_account = None if not request.account_name else request.account_name
 
         with rpc_error_translator(context, rpc_name):
-            state.federation_manager.remove_account(
+            removed_flwr_aid = state.federation_manager.remove_account(
                 flwr_aid=_get_flwr_aid(context),
                 federation=request.federation_name,
                 target_account_name=target_account,
             )
+            # Get runs from account that was removed
+            # and stop them.
+            for run in state.get_run_info(
+                federations=[request.federation_name],
+                flwr_aids=[removed_flwr_aid],
+                statuses=[Status.PENDING, Status.STARTING, Status.RUNNING],
+            ):
+                _stop_run_in_linkstate(state=state, store=store, run_id=run.run_id)
         return RemoveAccountFromFederationResponse()
 
     def CreateInvitation(
