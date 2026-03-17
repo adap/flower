@@ -31,6 +31,7 @@ from .config import (
     fuse_dicts,
     get_project_config,
     get_project_dir,
+    normalize_and_validate_fab_format,
     parse_config_args,
     unflatten_dict,
     validate_config,
@@ -451,6 +452,213 @@ def test_validate_pyproject_toml() -> None:
     # Assert
     assert is_valid
     assert not errors
+    assert not warnings
+
+
+def test_validate_pyproject_toml_with_fab_format_version_derives_metadata() -> None:
+    """Test fab_format_version=1 succeeds without mutating authored metadata."""
+    config = {
+        "project": {
+            "name": "fedgpt",
+            "version": "1.0.0",
+            "description": "",
+            "license": "",
+            "dependencies": ["flwr[simulation]>=1.26.0,<=1.28.0"],
+        },
+        "tool": {
+            "flwr": {
+                "app": {
+                    "publisher": "flwrlabs",
+                    "fab_format_version": 1,
+                    "flwr_version_target": "1.27.0",
+                    "components": {
+                        "serverapp": "flwr.cli.run:run",
+                        "clientapp": "flwr.cli.run:run",
+                    },
+                },
+            },
+        },
+    }
+
+    is_valid, errors, warnings = validate_config(config)
+
+    assert is_valid
+    assert not errors
+    assert not warnings
+    assert config["tool"]["flwr"]["app"]["flwr_version_target"] == "1.27.0"
+    assert "flwr_version_min" not in config["tool"]["flwr"]["app"]
+    assert "flwr_version_max" not in config["tool"]["flwr"]["app"]
+
+
+def test_normalize_and_validate_fab_format_rejects_unsupported_version() -> None:
+    """Test unsupported fab_format_version values fail explicitly."""
+    config = {
+        "project": {
+            "name": "fedgpt",
+            "version": "1.0.0",
+        },
+        "tool": {
+            "flwr": {
+                "app": {
+                    "publisher": "flwrlabs",
+                    "fab_format_version": 2,
+                }
+            }
+        },
+    }
+
+    with pytest.raises(ValueError, match="Unsupported"):
+        normalize_and_validate_fab_format(config)
+
+
+def test_normalize_and_validate_fab_format_accepts_target_for_version_zero() -> None:
+    """Test flwr_version_target is accepted for fab_format_version=0."""
+    config = {
+        "project": {
+            "name": "fedgpt",
+            "version": "1.0.0",
+        },
+        "tool": {
+            "flwr": {
+                "app": {
+                    "publisher": "flwrlabs",
+                    "fab_format_version": 0,
+                    "flwr_version_target": "1.27.0",
+                }
+            }
+        },
+    }
+
+    metadata = normalize_and_validate_fab_format(config)
+
+    assert metadata.fab_format_version == 0
+    assert metadata.flwr_version_min is None
+    assert metadata.flwr_version_target == "1.27.0"
+    assert metadata.flwr_version_max is None
+    assert config["tool"]["flwr"]["app"]["flwr_version_target"] == "1.27.0"
+
+
+def test_normalize_and_validate_fab_format_derives_bounds_for_version_zero() -> None:
+    """Test fab_format_version=0 derives bounds when the flwr dependency is usable."""
+    config = {
+        "project": {
+            "name": "fedgpt",
+            "version": "1.0.0",
+            "dependencies": ["flwr>=1.26.0,<=1.28.0"],
+        },
+        "tool": {
+            "flwr": {
+                "app": {
+                    "publisher": "flwrlabs",
+                    "fab_format_version": 0,
+                    "flwr_version_target": "1.27.0",
+                }
+            }
+        },
+    }
+
+    metadata = normalize_and_validate_fab_format(config)
+
+    assert metadata.fab_format_version == 0
+    assert metadata.flwr_version_min == "1.26.0"
+    assert metadata.flwr_version_target == "1.27.0"
+    assert metadata.flwr_version_max == "1.28.0"
+    assert config["tool"]["flwr"]["app"]["flwr_version_target"] == "1.27.0"
+    assert "flwr_version_min" not in config["tool"]["flwr"]["app"]
+    assert "flwr_version_max" not in config["tool"]["flwr"]["app"]
+
+
+def test_normalize_and_validate_fab_format_skips_unsupported_bounds_for_version_zero() -> None:
+    """Test fab_format_version=0 ignores unrepresentable flwr dependency specifiers."""
+    config = {
+        "project": {
+            "name": "fedgpt",
+            "version": "1.0.0",
+            "dependencies": ["flwr>1.26.0"],
+        },
+        "tool": {
+            "flwr": {
+                "app": {
+                    "publisher": "flwrlabs",
+                    "fab_format_version": 0,
+                    "flwr_version_target": "1.27.0",
+                }
+            }
+        },
+    }
+
+    metadata = normalize_and_validate_fab_format(config)
+
+    assert metadata.fab_format_version == 0
+    assert metadata.flwr_version_min is None
+    assert metadata.flwr_version_target == "1.27.0"
+    assert metadata.flwr_version_max is None
+    assert "flwr_version_min" not in config["tool"]["flwr"]["app"]
+    assert config["tool"]["flwr"]["app"]["flwr_version_target"] == "1.27.0"
+    assert "flwr_version_max" not in config["tool"]["flwr"]["app"]
+
+
+def test_validate_pyproject_toml_with_fab_format_version_missing_flwr_dependency() -> None:
+    """Test fab_format_version=1 requires a flwr dependency."""
+    config = {
+        "project": {
+            "name": "fedgpt",
+            "version": "1.0.0",
+            "description": "",
+            "license": "",
+            "dependencies": ["numpy>=1.26.0"],
+        },
+        "tool": {
+            "flwr": {
+                "app": {
+                    "publisher": "flwrlabs",
+                    "fab_format_version": 1,
+                    "components": {
+                        "serverapp": "flwr.cli.run:run",
+                        "clientapp": "flwr.cli.run:run",
+                    },
+                },
+            },
+        },
+    }
+
+    is_valid, errors, warnings = validate_config(config)
+
+    assert not is_valid
+    assert len(errors) == 1
+    assert "Missing \"flwr\" dependency" in errors[0]
+    assert not warnings
+
+
+def test_validate_pyproject_toml_with_fab_format_version_rejects_exclusive_lower_bound() -> None:
+    """Test fab_format_version=1 rejects exclusive lower bounds."""
+    config = {
+        "project": {
+            "name": "fedgpt",
+            "version": "1.0.0",
+            "description": "",
+            "license": "",
+            "dependencies": ["flwr>1.26.0"],
+        },
+        "tool": {
+            "flwr": {
+                "app": {
+                    "publisher": "flwrlabs",
+                    "fab_format_version": 1,
+                    "components": {
+                        "serverapp": "flwr.cli.run:run",
+                        "clientapp": "flwr.cli.run:run",
+                    },
+                },
+            },
+        },
+    }
+
+    is_valid, errors, warnings = validate_config(config)
+
+    assert not is_valid
+    assert len(errors) == 1
+    assert "inclusive lower bound" in errors[0]
     assert not warnings
 
 
