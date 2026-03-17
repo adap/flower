@@ -739,6 +739,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 federation=request.federation_name,
                 target_account_name=target_account,
             )
+            store = self.objectstore_factory.store()
             # Get runs from account that was removed
             # and stop them.
             for run in state.get_run_info(
@@ -748,7 +749,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 if run.status.status != Status.FINISHED:
                     _stop_run_in_linkstate(
                         state=state,
-                        store=self.objectstore_factory.store(),
+                        store=store,
                         run_id=run.run_id,
                     )
         return RemoveAccountFromFederationResponse()
