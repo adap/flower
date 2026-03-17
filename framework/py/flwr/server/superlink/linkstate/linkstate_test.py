@@ -1994,10 +1994,14 @@ class SqlFileBasedTest(StateTest, unittest.TestCase):
 
             barrier = threading.Barrier(3)
             results: list[list[Message] | None] = [None, None]
+            exceptions: list[Exception] = []
 
             def pull_ins(idx: int, state: SqlLinkState) -> None:
-                barrier.wait()
-                results[idx] = state.get_message_ins(node_id=node_id, limit=1)
+                try:
+                    barrier.wait()
+                    results[idx] = state.get_message_ins(node_id=node_id, limit=1)
+                except Exception as ex:  # pylint: disable=broad-exception-caught
+                    exceptions.append(ex)
 
             threads = [
                 threading.Thread(target=pull_ins, args=(0, state_0)),
@@ -2009,6 +2013,9 @@ class SqlFileBasedTest(StateTest, unittest.TestCase):
             for thread in threads:
                 thread.join()
 
+            if exceptions:
+                raise exceptions[0]
+            assert all(message_list is not None for message_list in results)
             claimed = [msgs for msgs in results if msgs]
             assert len(claimed) == 1
             assert len(claimed[0]) == 1
@@ -2047,10 +2054,16 @@ class SqlFileBasedTest(StateTest, unittest.TestCase):
 
             barrier = threading.Barrier(3)
             results: list[list[Message] | None] = [None, None]
+            exceptions: list[Exception] = []
 
             def pull_res(idx: int, state: SqlLinkState) -> None:
-                barrier.wait()
-                results[idx] = state.get_message_res({pulled_ins.metadata.message_id})
+                try:
+                    barrier.wait()
+                    results[idx] = state.get_message_res(
+                        {pulled_ins.metadata.message_id}
+                    )
+                except Exception as ex:  # pylint: disable=broad-exception-caught
+                    exceptions.append(ex)
 
             threads = [
                 threading.Thread(target=pull_res, args=(0, state_0)),
@@ -2062,6 +2075,9 @@ class SqlFileBasedTest(StateTest, unittest.TestCase):
             for thread in threads:
                 thread.join()
 
+            if exceptions:
+                raise exceptions[0]
+            assert all(message_list is not None for message_list in results)
             assert self._count_successful_replies(results) == 1
 
     def test_get_message_ins_distributes_available_work_under_contention(self) -> None:
@@ -2097,10 +2113,14 @@ class SqlFileBasedTest(StateTest, unittest.TestCase):
 
             barrier = threading.Barrier(3)
             results: list[list[Message] | None] = [None, None]
+            exceptions: list[Exception] = []
 
             def pull_ins(idx: int, state: SqlLinkState) -> None:
-                barrier.wait()
-                results[idx] = state.get_message_ins(node_id=node_id, limit=1)
+                try:
+                    barrier.wait()
+                    results[idx] = state.get_message_ins(node_id=node_id, limit=1)
+                except Exception as ex:  # pylint: disable=broad-exception-caught
+                    exceptions.append(ex)
 
             threads = [
                 threading.Thread(target=pull_ins, args=(0, state_0)),
@@ -2112,6 +2132,9 @@ class SqlFileBasedTest(StateTest, unittest.TestCase):
             for thread in threads:
                 thread.join()
 
+            if exceptions:
+                raise exceptions[0]
+            assert all(message_list is not None for message_list in results)
             claimed_messages = [msgs for msgs in results if msgs]
             assert len(claimed_messages) == 2
             assert all(len(msgs) == 1 for msgs in claimed_messages)

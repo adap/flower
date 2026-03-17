@@ -278,7 +278,7 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
                         WHERE dst_node_id = :node_id
                         AND delivered_at = ''
                         AND (created_at + ttl) > CAST(strftime('%s', 'now') AS REAL)
-                        ORDER BY created_at, message_id
+                        ORDER BY rowid
                         LIMIT :limit
                     )
                     AND delivered_at = ''
@@ -298,6 +298,7 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
                     SELECT *
                     FROM message_ins
                     WHERE message_id IN ({placeholders})
+                    ORDER BY rowid
                 """
                 params = {f"mid_{i}": msg_id for i, msg_id in enumerate(message_ids)}
                 rows = self.query(query, params)
