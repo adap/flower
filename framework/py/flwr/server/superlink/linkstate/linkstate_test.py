@@ -2057,6 +2057,62 @@ class SqlFileBasedTest(StateTest, unittest.TestCase):
 
             assert successful_replies == 1
 
+    def test_get_message_ins_distributes_available_work_under_contention(self) -> None:
+        """Ensure two replicas can each claim work when two Messages are available."""
+        with tempfile.NamedTemporaryFile() as shared_db:
+            state_0 = SqlLinkState(
+                database_path=shared_db.name,
+                federation_manager=NoOpFederationManager(),
+                object_store=ObjectStoreFactory().store(),
+            )
+            state_1 = SqlLinkState(
+                database_path=shared_db.name,
+                federation_manager=NoOpFederationManager(),
+                object_store=ObjectStoreFactory().store(),
+            )
+            state_0.initialize()
+            state_1.initialize()
+
+            node_id = create_dummy_node(state_0)
+            run_id = create_dummy_run(state_0)
+            msg_0 = message_from_proto(
+                create_ins_message(
+                    src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
+                )
+            )
+            msg_1 = message_from_proto(
+                create_ins_message(
+                    src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
+                )
+            )
+            assert state_0.store_message_ins(message=msg_0)
+            assert state_0.store_message_ins(message=msg_1)
+
+            barrier = threading.Barrier(3)
+            results: list[list[Message] | None] = [None, None]
+
+            def pull_ins(idx: int, state: SqlLinkState) -> None:
+                barrier.wait()
+                results[idx] = state.get_message_ins(node_id=node_id, limit=1)
+
+            threads = [
+                threading.Thread(target=pull_ins, args=(0, state_0)),
+                threading.Thread(target=pull_ins, args=(1, state_1)),
+            ]
+            for thread in threads:
+                thread.start()
+            barrier.wait()
+            for thread in threads:
+                thread.join()
+
+            claimed_messages = [msgs for msgs in results if msgs]
+            assert len(claimed_messages) == 2
+            assert all(len(msgs) == 1 for msgs in claimed_messages)
+            assert (
+                claimed_messages[0][0].metadata.message_id
+                != claimed_messages[1][0].metadata.message_id
+            )
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
