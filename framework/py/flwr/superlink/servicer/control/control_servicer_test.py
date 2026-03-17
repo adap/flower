@@ -14,6 +14,7 @@
 # ==============================================================================
 """Test the Control API servicer."""
 
+# pylint: disable=too-many-lines
 
 import hashlib
 import json
@@ -47,6 +48,7 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     AddNodeToFederationRequest,
     AddNodeToFederationResponse,
     ArchiveFederationRequest,
+    ArchiveFederationResponse,
     CreateFederationRequest,
     CreateInvitationRequest,
     CreateInvitationResponse,
@@ -521,6 +523,39 @@ class TestControlServicer(unittest.TestCase):
         # Execute & Assert
         with self.assertRaises(grpc.RpcError):
             self.servicer.ArchiveFederation(request, mock_context)
+
+    def test_archive_federation_stops_active_runs(self) -> None:
+        """Test ArchiveFederation stops unfinished runs in the federation."""
+        request = ArchiveFederationRequest(federation_name="test-federation")
+        # Create an unfinished run in the federation and give it a live token,
+        # matching the state that StopRun would normally have to clean up.
+        run_id = self.state.create_run(
+            "flwr/demo",
+            "v0.0.1",
+            "hash123",
+            {},
+            "test-federation",
+            ConfigRecord(),
+            self.aid,
+        )
+        token = self.state.create_token(run_id)
+        assert token is not None
+        _ = self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
+        _ = self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
+
+        with patch.object(
+            self.state.federation_manager,
+            "archive_federation",
+            return_value=None,
+        ):
+            response = self.servicer.ArchiveFederation(request, Mock())
+
+        # Archiving should reuse the same stop-run cleanup path as StopRun.
+        run = self.state.get_run_info(run_ids=[run_id])[0]
+        self.assertEqual(run.status, RunStatus(Status.FINISHED, SubStatus.STOPPED, ""))
+        self.assertFalse(self.state.verify_token(run_id, token))
+        self.store.delete_objects_in_run.assert_called_once_with(run_id)
+        self.assertIsInstance(response, ArchiveFederationResponse)
 
     def test_remove_account_from_federation_success(self) -> None:
         """Test RemoveAccountFromFederation succeeds when manager call works."""

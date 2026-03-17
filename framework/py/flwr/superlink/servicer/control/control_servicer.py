@@ -110,7 +110,7 @@ from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
 from flwr.supercore.constant import NOOP_FEDERATION, PLATFORM_API_URL
 from flwr.supercore.error import rpc_error_translator
 from flwr.supercore.ffs import FfsFactory
-from flwr.supercore.object_store import ObjectStoreFactory
+from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
 from flwr.supercore.primitives.asymmetric import bytes_to_public_key, uses_nist_ec_curve
 from flwr.supercore.utils import parse_app_spec, request_download_link
 from flwr.superlink.artifact_provider import ArtifactProvider
@@ -363,23 +363,11 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 f"Run ID {run_id} is already finished",
             )
 
-        # Update run status to finished:stopped
-        update_success = state.update_run_status(
+        update_success = _stop_run_in_linkstate(
+            state=state,
+            store=self.objectstore_factory.store(),
             run_id=run_id,
-            new_status=RunStatus(Status.FINISHED, SubStatus.STOPPED, ""),
         )
-
-        # Delete the token associated with the run to stop further operations
-        state.delete_token(run_id)
-
-        if update_success:
-            message_ids: set[str] = state.get_message_ids_from_run_id(run_id)
-
-            # Delete Messages and their replies for the `run_id`
-            state.delete_messages(message_ids)
-
-            # Delete objects of the run from the object store
-            self.objectstore_factory.store().delete_objects_in_run(run_id)
 
         return StopRunResponse(success=update_success)
 
@@ -674,6 +662,14 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 flwr_aid=_get_flwr_aid(context),
                 name=request.federation_name,
             )
+            store = self.objectstore_factory.store()
+            for run in state.get_run_info(federations=[request.federation_name]):
+                if run.status.status != Status.FINISHED:
+                    _stop_run_in_linkstate(
+                        state=state,
+                        store=store,
+                        run_id=run.run_id,
+                    )
 
         return ArchiveFederationResponse()
 
@@ -901,6 +897,24 @@ def _check_flwr_aid_in_run(
             grpc.StatusCode.PERMISSION_DENIED,
             "⛔️ Run ID does not belong to the account",
         )
+
+
+def _stop_run_in_linkstate(state: LinkState, store: ObjectStore, run_id: int) -> bool:
+    """Stop a run and clean it up using LinkState methods."""
+    update_success = state.update_run_status(
+        run_id=run_id,
+        new_status=RunStatus(Status.FINISHED, SubStatus.STOPPED, ""),
+    )
+
+    # Always invalidate the run token so no further work can be scheduled.
+    state.delete_token(run_id)
+
+    if update_success:
+        message_ids: set[str] = state.get_message_ids_from_run_id(run_id)
+        state.delete_messages(message_ids)
+        store.delete_objects_in_run(run_id)
+
+    return update_success
 
 
 def _format_verification(verifications: list[dict[str, str]]) -> dict[str, str]:
