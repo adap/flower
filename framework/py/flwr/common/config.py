@@ -15,17 +15,17 @@
 """Provide functions for managing global Flower config."""
 
 
-from dataclasses import dataclass
 import re
 import zipfile
+from dataclasses import dataclass
 from io import BytesIO
 from pathlib import Path
 from typing import IO, Any, TypeVar, cast, get_args
 
 import click
+import tomli
 from packaging.requirements import InvalidRequirement, Requirement
 from packaging.version import InvalidVersion, Version
-import tomli
 
 from flwr.app.user_config import UserConfig, UserConfigValue
 from flwr.common.constant import APP_DIR, FAB_CONFIG_FILE, FAB_HASH_TRUNCATION
@@ -135,8 +135,9 @@ def _derive_flwr_version_bounds(
             raise ValueError(
                 'Unsupported "flwr" dependency specifier '
                 f'"{specifier}" in requirement "{requirement}". '
-                "For fab_format_version >= 1, use a single continuous range in one of "
-                'these forms: "flwr>=X" or "flwr>=X,<=Y".'
+                "For fab_format_version >= 1, use a single continuous range with an "
+                'inclusive lower bound in one of these forms: "flwr>=X" or '
+                '"flwr>=X,<=Y".'
             )
 
     if lower is None:
