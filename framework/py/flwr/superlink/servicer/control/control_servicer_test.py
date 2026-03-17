@@ -579,7 +579,7 @@ class TestControlServicer(unittest.TestCase):
         )
         self.assertIsInstance(response, RemoveAccountFromFederationResponse)
 
-    def test_remove_account_from_federation_stops_removed_accounts_runs(self) -> None:
+    def test_remove_account_from_federation_stops_removed_account_runs(self) -> None:
         """Test removing an account stops that account's unfinished federation runs."""
         request = RemoveAccountFromFederationRequest(
             federation_name="test-federation",
