@@ -133,9 +133,10 @@ def _derive_flwr_version_bounds(
             upper = version
         else:
             raise ValueError(
-                'Unsupported "flwr" dependency specifier: use a single continuous '
-                "range with an inclusive lower bound and an optional inclusive "
-                "upper bound."
+                'Unsupported "flwr" dependency specifier '
+                f'"{specifier}" in requirement "{requirement}". '
+                "For fab_format_version >= 1, use a single continuous range in one of "
+                'these forms: "flwr>=X" or "flwr>=X,<=Y".'
             )
 
     if lower is None:
