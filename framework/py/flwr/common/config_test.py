@@ -568,7 +568,9 @@ def test_normalize_and_validate_fab_format_derives_bounds_for_version_zero() -> 
     assert "flwr_version_max" not in config["tool"]["flwr"]["app"]
 
 
-def test_normalize_and_validate_fab_format_skips_unsupported_bounds_for_version_zero() -> None:
+def test_normalize_and_validate_fab_format_skips_unsupported_bounds_for_version_zero() -> (
+    None
+):
     """Test fab_format_version=0 ignores unrepresentable flwr dependency specifiers."""
     config = {
         "project": {
@@ -598,7 +600,9 @@ def test_normalize_and_validate_fab_format_skips_unsupported_bounds_for_version_
     assert "flwr_version_max" not in config["tool"]["flwr"]["app"]
 
 
-def test_validate_pyproject_toml_with_fab_format_version_missing_flwr_dependency() -> None:
+def test_validate_pyproject_toml_with_fab_format_version_missing_flwr_dependency() -> (
+    None
+):
     """Test fab_format_version=1 requires a flwr dependency."""
     config = {
         "project": {
@@ -626,11 +630,13 @@ def test_validate_pyproject_toml_with_fab_format_version_missing_flwr_dependency
 
     assert not is_valid
     assert len(errors) == 1
-    assert "Missing \"flwr\" dependency" in errors[0]
+    assert 'Missing "flwr" dependency' in errors[0]
     assert not warnings
 
 
-def test_validate_pyproject_toml_with_fab_format_version_rejects_exclusive_lower_bound() -> None:
+def test_validate_pyproject_toml_with_fab_format_version_rejects_exclusive_lower_bound() -> (
+    None
+):
     """Test fab_format_version=1 rejects exclusive lower bounds."""
     config = {
         "project": {
