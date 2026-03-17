@@ -518,7 +518,7 @@ class Generator():
 
         # Core dictionaries
         with open("./data/dict/dataDic", 'wb') as fp:
-            pickle.dump(dataDic, fp)
+            pickle.dump(datadic, fp)
 
         with open("./data/dict/hadmDic", 'wb') as fp:
             pickle.dump(self.hids, fp)
