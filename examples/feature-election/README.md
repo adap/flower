@@ -97,7 +97,7 @@ pip install -e .
 ### Quick Verification
 
 ```bash
-python test.py
+flwr run .
 ```
 
 ### Simulation (CPU)
