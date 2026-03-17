@@ -37,6 +37,7 @@ from flwr.supercore.superexec.plugin import (
     SimulationExecPlugin,
 )
 from flwr.supercore.superexec.run_superexec import run_superexec
+from flwr.supercore.version import package_version
 
 try:
     from flwr.ee import add_ee_args_superexec
@@ -108,6 +109,12 @@ def _parse_args() -> argparse.ArgumentParser:
     """Parse `flower-superexec` command line arguments."""
     parser = argparse.ArgumentParser(
         description="Run Flower SuperExec.",
+    )
+    parser.add_argument(
+        "-V",
+        "--version",
+        action="version",
+        version=f"Flower version: {package_version}",
     )
     parser.add_argument(
         "--appio-api-address", type=str, required=True, help="Address of the AppIO API"

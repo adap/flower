@@ -131,7 +131,7 @@ class FederationManager(ABC):
     @abstractmethod
     def remove_account(
         self, flwr_aid: str, federation: str, target_account_name: str | None
-    ) -> None:
+    ) -> str:
         """Remove an account from a federation.
 
         If `target_account_name` is `None` the caller removes themselves
@@ -148,6 +148,11 @@ class FederationManager(ABC):
         target_account_name : str | None
             The name of the account to remove. If `None`, the caller removes
             themselves from the federation. The owner cannot remove themselves.
+
+        Returns
+        -------
+        str
+            The Flower account ID (`flwr_aid`) of the removed account.
 
         Raises
         ------

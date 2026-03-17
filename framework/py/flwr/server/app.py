@@ -672,6 +672,12 @@ def _parse_args_run_superlink() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Start a Flower SuperLink",
     )
+    parser.add_argument(
+        "-V",
+        "--version",
+        action="version",
+        version=f"Flower version: {package_version}",
+    )
 
     _add_args_common(parser=parser)
     add_ee_args_superlink(parser=parser)
