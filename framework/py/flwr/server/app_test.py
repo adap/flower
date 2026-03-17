@@ -53,10 +53,13 @@ def test_parse_superlink_log_rotation_args_custom_values() -> None:
     assert args.log_rotation_backup_count == 14
 
 
-def test_parse_superlink_version_flag(capsys: pytest.CaptureFixture[str]) -> None:
-    """The version flag should print the package version and exit."""
+@pytest.mark.parametrize("flag", ["--version", "-V"])
+def test_parse_superlink_version_flag(
+    flag: str, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """The version flags should print the package version and exit."""
     with pytest.raises(SystemExit) as exc_info:
-        _parse_args_run_superlink().parse_args(["--version"])
+        _parse_args_run_superlink().parse_args([flag])
 
     assert exc_info.value.code == 0
     captured = capsys.readouterr()

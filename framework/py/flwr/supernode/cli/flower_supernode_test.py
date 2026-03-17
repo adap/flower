@@ -22,12 +22,13 @@ from flwr.supercore.version import package_version
 from .flower_supernode import _parse_args_run_supernode
 
 
+@pytest.mark.parametrize("flag", ["--version", "-V"])
 def test_parse_supernode_version_flag(
-    capsys: pytest.CaptureFixture[str],
+    flag: str, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    """The version flag should print the package version and exit."""
+    """The version flags should print the package version and exit."""
     with pytest.raises(SystemExit) as exc_info:
-        _parse_args_run_supernode().parse_args(["--version"])
+        _parse_args_run_supernode().parse_args([flag])
 
     assert exc_info.value.code == 0
     captured = capsys.readouterr()
