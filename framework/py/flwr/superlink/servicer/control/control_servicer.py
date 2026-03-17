@@ -745,13 +745,9 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             for run in state.get_run_info(
                 federations=[request.federation_name],
                 flwr_aids=[removed_flwr_aid],
+                statuses=[Status.PENDING, Status.STARTING, Status.RUNNING],
             ):
-                if run.status.status != Status.FINISHED:
-                    _stop_run_in_linkstate(
-                        state=state,
-                        store=store,
-                        run_id=run.run_id,
-                    )
+                _stop_run_in_linkstate(state=state, store=store, run_id=run.run_id)
         return RemoveAccountFromFederationResponse()
 
     def CreateInvitation(
