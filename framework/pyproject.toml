@@ -104,8 +104,6 @@ dev = [
     "pytest==7.4.4",
     "pytest-cov==4.1.0",
     "pytest-watcher==0.4.3",
-    "grpcio-tools==1.70.0",
-    "mypy-protobuf==3.6.0",
     "jupyterlab==4.0.12",
     "rope==1.13.0",
     "semver==3.0.2",

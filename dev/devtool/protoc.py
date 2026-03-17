@@ -22,6 +22,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, cast
 
+import grpc_tools
+from grpc_tools import protoc
+
 _toml: Any
 
 try:
@@ -184,21 +187,9 @@ def discover_proto_files(
     return discovered
 
 
-def _load_grpc_tools() -> tuple[Path, Any]:
-    try:
-        import grpc_tools  # pylint: disable=import-outside-toplevel
-        from grpc_tools import protoc  # pylint: disable=import-outside-toplevel
-    except ImportError as err:
-        raise ProtocExecutionError(
-            "grpcio-tools is required to run `python -m devtool.protoc`"
-        ) from err
-
-    return Path(grpc_tools.__path__[0]) / "_proto", protoc
-
-
 def build_protoc_command(config: ProtocConfig, proto_files: list[Path]) -> list[str]:
     """Build the `grpc_tools.protoc` invocation for the resolved config."""
-    bundled_proto_dir, _ = _load_grpc_tools()
+    bundled_proto_dir = Path(grpc_tools.__path__[0]) / "_proto"
     include_dirs: list[Path] = []
     for include_dir in (bundled_proto_dir, config.proto_root, *config.include_paths):
         if include_dir not in include_dirs:
@@ -223,7 +214,6 @@ def compile_project(project_dir: Path) -> None:
     config = load_protoc_config(project_dir)
     proto_files = discover_proto_files(config.proto_root, config.include_globs)
     command = build_protoc_command(config, proto_files)
-    _, protoc = _load_grpc_tools()
     exit_code = protoc.main(command)
     if exit_code != 0:
         raise ProtocExecutionError(

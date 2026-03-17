@@ -19,7 +19,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import grpc_tools
 import pytest
+from grpc_tools import protoc as grpc_protoc
 
 from devtool import protoc
 
@@ -124,16 +126,13 @@ def test_build_protoc_command_includes_expected_flags(
         ),
     )
 
-    monkeypatch.setattr(
-        protoc,
-        "_load_grpc_tools",
-        lambda: (tmp_path / "grpc" / "_proto", object()),
-    )
+    monkeypatch.setattr(grpc_tools, "__path__", [str(tmp_path / "grpc")])
 
     command = protoc.build_protoc_command(config, [proto_file])
 
     assert command[0] == "grpc_tools.protoc"
     assert any(flag.startswith("--proto_path=") for flag in command[1:4])
+    assert f"--proto_path={tmp_path / 'grpc' / '_proto'}" in command
     assert f"--proto_path={proto_root}" in command
     assert f"--proto_path={include_path}" in command
     assert f"--python_out={output_root}" in command
@@ -146,7 +145,7 @@ def test_build_protoc_command_includes_expected_flags(
 def test_compile_project_uses_loaded_protoc(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    """Project compilation should use the lazy compiler loader."""
+    """Project compilation should invoke the bundled grpc compiler."""
     project_dir = tmp_path / "project"
     (project_dir / "proto" / "flwr").mkdir(parents=True)
     (project_dir / "third_party" / "proto").mkdir(parents=True)
@@ -154,25 +153,21 @@ def test_compile_project_uses_loaded_protoc(
     _write_pyproject(project_dir)
     proto_file = project_dir / "proto" / "flwr" / "node.proto"
     proto_file.write_text("", encoding="utf-8")
-    grpc_include = tmp_path / "grpc" / "_proto"
-    grpc_include.mkdir(parents=True)
     calls: list[list[str]] = []
 
-    class DummyProtoc:
-        """Capture compiler invocations for assertions."""
+    def dummy_main(command: list[str]) -> int:
+        """Return success while recording the invocation."""
+        calls.append(command)
+        return 0
 
-        @staticmethod
-        def main(command: list[str]) -> int:
-            """Return success while recording the invocation."""
-            calls.append(command)
-            return 0
-
-    monkeypatch.setattr(protoc, "_load_grpc_tools", lambda: (grpc_include, DummyProtoc))
+    monkeypatch.setattr(grpc_tools, "__path__", [str(tmp_path / "grpc")])
+    monkeypatch.setattr(grpc_protoc, "main", dummy_main)
 
     protoc.compile_project(project_dir)
 
     assert len(calls) == 1
     assert calls[0][0] == "grpc_tools.protoc"
+    assert f"--proto_path={tmp_path / 'grpc' / '_proto'}" in calls[0]
     assert str(proto_file.resolve()) in calls[0]
 
 
