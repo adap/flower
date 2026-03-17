@@ -17,6 +17,7 @@
 
 
 import secrets
+import threading
 import tempfile
 import time
 import unittest
@@ -1952,6 +1953,109 @@ class SqlFileBasedTest(StateTest, unittest.TestCase):
         )
         state.initialize()
         return state
+
+    def test_get_message_ins_claim_is_unique_across_replicas(self) -> None:
+        """Ensure concurrent replicas cannot both claim the same instruction."""
+        with tempfile.NamedTemporaryFile() as shared_db:
+            state_0 = SqlLinkState(
+                database_path=shared_db.name,
+                federation_manager=NoOpFederationManager(),
+                object_store=ObjectStoreFactory().store(),
+            )
+            state_1 = SqlLinkState(
+                database_path=shared_db.name,
+                federation_manager=NoOpFederationManager(),
+                object_store=ObjectStoreFactory().store(),
+            )
+            state_0.initialize()
+            state_1.initialize()
+
+            node_id = create_dummy_node(state_0)
+            run_id = create_dummy_run(state_0)
+            msg = message_from_proto(
+                create_ins_message(
+                    src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
+                )
+            )
+            assert state_0.store_message_ins(message=msg)
+
+            barrier = threading.Barrier(3)
+            results: list[list[Message] | None] = [None, None]
+
+            def pull_ins(idx: int, state: SqlLinkState) -> None:
+                barrier.wait()
+                results[idx] = state.get_message_ins(node_id=node_id, limit=1)
+
+            threads = [
+                threading.Thread(target=pull_ins, args=(0, state_0)),
+                threading.Thread(target=pull_ins, args=(1, state_1)),
+            ]
+            for thread in threads:
+                thread.start()
+            barrier.wait()
+            for thread in threads:
+                thread.join()
+
+            claimed = [msgs for msgs in results if msgs]
+            assert len(claimed) == 1
+            assert len(claimed[0]) == 1
+
+    def test_get_message_res_claim_is_unique_across_replicas(self) -> None:
+        """Ensure concurrent replicas cannot both claim the same reply Message."""
+        with tempfile.NamedTemporaryFile() as shared_db:
+            state_0 = SqlLinkState(
+                database_path=shared_db.name,
+                federation_manager=NoOpFederationManager(),
+                object_store=ObjectStoreFactory().store(),
+            )
+            state_1 = SqlLinkState(
+                database_path=shared_db.name,
+                federation_manager=NoOpFederationManager(),
+                object_store=ObjectStoreFactory().store(),
+            )
+            state_0.initialize()
+            state_1.initialize()
+
+            node_id = create_dummy_node(state_0)
+            run_id = create_dummy_run(state_0)
+            msg_ins = message_from_proto(
+                create_ins_message(
+                    src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
+                )
+            )
+            assert state_0.store_message_ins(msg_ins)
+            pulled_ins = state_0.get_message_ins(node_id=node_id, limit=1)[0]
+
+            msg_res = Message(RecordDict(), reply_to=pulled_ins)
+            msg_res.metadata._message_id = str(uuid4())  # type: ignore
+            assert state_0.store_message_res(msg_res)
+
+            barrier = threading.Barrier(3)
+            results: list[list[Message] | None] = [None, None]
+
+            def pull_res(idx: int, state: SqlLinkState) -> None:
+                barrier.wait()
+                results[idx] = state.get_message_res({pulled_ins.metadata.message_id})
+
+            threads = [
+                threading.Thread(target=pull_res, args=(0, state_0)),
+                threading.Thread(target=pull_res, args=(1, state_1)),
+            ]
+            for thread in threads:
+                thread.start()
+            barrier.wait()
+            for thread in threads:
+                thread.join()
+
+            successful_replies = 0
+            for messages in results:
+                if not messages:
+                    continue
+                for message in messages:
+                    if not message.has_error():
+                        successful_replies += 1
+
+            assert successful_replies == 1
 
 
 if __name__ == "__main__":
