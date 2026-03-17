@@ -526,6 +526,8 @@ class TestControlServicer(unittest.TestCase):
     def test_archive_federation_stops_active_runs(self) -> None:
         """Test ArchiveFederation stops unfinished runs in the federation."""
         request = ArchiveFederationRequest(federation_name="test-federation")
+        # Create an unfinished run in the federation and give it a live token,
+        # matching the state that StopRun would normally have to clean up.
         run_id = self.state.create_run(
             "flwr/demo",
             "v0.0.1",
@@ -547,6 +549,7 @@ class TestControlServicer(unittest.TestCase):
         ):
             response = self.servicer.ArchiveFederation(request, Mock())
 
+        # Archiving should reuse the same stop-run cleanup path as StopRun.
         run = self.state.get_run_info(run_ids=[run_id])[0]
         self.assertEqual(run.status, RunStatus(Status.FINISHED, SubStatus.STOPPED, ""))
         self.assertFalse(self.state.verify_token(run_id, token))
