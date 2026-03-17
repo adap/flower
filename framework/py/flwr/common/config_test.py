@@ -457,7 +457,7 @@ def test_validate_pyproject_toml() -> None:
 
 def test_validate_pyproject_toml_with_fab_format_version_derives_metadata() -> None:
     """Test fab_format_version=1 succeeds without mutating authored metadata."""
-    config = {
+    config: dict[str, Any] = {
         "project": {
             "name": "fedgpt",
             "version": "1.0.0",
@@ -492,7 +492,7 @@ def test_validate_pyproject_toml_with_fab_format_version_derives_metadata() -> N
 
 def test_normalize_and_validate_fab_format_rejects_unsupported_version() -> None:
     """Test unsupported fab_format_version values fail explicitly."""
-    config = {
+    config: dict[str, Any] = {
         "project": {
             "name": "fedgpt",
             "version": "1.0.0",
@@ -513,7 +513,7 @@ def test_normalize_and_validate_fab_format_rejects_unsupported_version() -> None
 
 def test_normalize_and_validate_fab_format_accepts_target_for_version_zero() -> None:
     """Test flwr_version_target is accepted for fab_format_version=0."""
-    config = {
+    config: dict[str, Any] = {
         "project": {
             "name": "fedgpt",
             "version": "1.0.0",
@@ -540,7 +540,7 @@ def test_normalize_and_validate_fab_format_accepts_target_for_version_zero() -> 
 
 def test_normalize_and_validate_fab_format_derives_bounds_for_version_zero() -> None:
     """Test fab_format_version=0 derives bounds when the flwr dependency is usable."""
-    config = {
+    config: dict[str, Any] = {
         "project": {
             "name": "fedgpt",
             "version": "1.0.0",
@@ -570,7 +570,7 @@ def test_normalize_and_validate_fab_format_derives_bounds_for_version_zero() -> 
 
 def test_v0_fab_format_skips_unsupported_bounds() -> None:
     """Test fab_format_version=0 ignores unrepresentable flwr dependency specifiers."""
-    config = {
+    config: dict[str, Any] = {
         "project": {
             "name": "fedgpt",
             "version": "1.0.0",
