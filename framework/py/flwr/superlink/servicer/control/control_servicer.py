@@ -730,7 +730,6 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         log(INFO, rpc_name := self.RemoveAccountFromFederation.__qualname__)
 
         state = self.linkstate_factory.state()
-state = self.linkstate_factory.state()
         store = self.objectstore_factory.store()
         target_account = None if not request.account_name else request.account_name
 
