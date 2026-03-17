@@ -17,6 +17,8 @@
 
 import pytest
 
+from flwr.supercore.version import package_version
+
 from .app import _parse_args_run_superlink
 
 
@@ -49,6 +51,19 @@ def test_parse_superlink_log_rotation_args_custom_values() -> None:
     assert args.log_file == "/tmp/superlink.log"
     assert args.log_rotation_interval_hours == 12
     assert args.log_rotation_backup_count == 14
+
+
+@pytest.mark.parametrize("flag", ["--version", "-V"])
+def test_parse_superlink_version_flag(
+    flag: str, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """The version flags should print the package version and exit."""
+    with pytest.raises(SystemExit) as exc_info:
+        _parse_args_run_superlink().parse_args([flag])
+
+    assert exc_info.value.code == 0
+    captured = capsys.readouterr()
+    assert captured.out == f"Flower version: {package_version}\n"
 
 
 @pytest.mark.parametrize("value", ["0", "-1"])
