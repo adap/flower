@@ -40,6 +40,7 @@ from flwr.common.constant import (
 from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.logger import log
 from flwr.supercore.grpc_health import add_args_health
+from flwr.supercore.version import package_version
 from flwr.supernode.start_client_internal import start_client_internal
 
 
@@ -50,14 +51,6 @@ def flower_supernode() -> None:
     log(INFO, "Starting Flower SuperNode")
 
     event(EventType.RUN_SUPERNODE_ENTER)
-
-    # Check if both `--flwr-dir` and `--isolation` were set
-    if args.flwr_dir is not None and args.isolation is not None:
-        log(
-            WARN,
-            "Both `--flwr-dir` and `--isolation` were specified. "
-            "Ignoring `--flwr-dir`.",
-        )
 
     trusted_entities = _try_obtain_trusted_entities(args.trusted_entities)
     if trusted_entities:
@@ -85,7 +78,6 @@ def flower_supernode() -> None:
         node_config=parse_config_args(
             [args.node_config] if args.node_config else args.node_config
         ),
-        flwr_path=args.flwr_dir,
         isolation=args.isolation,
         clientappio_api_address=args.clientappio_api_address,
         health_server_address=args.health_server_address,
@@ -98,18 +90,13 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Start a Flower SuperNode",
     )
-    _parse_args_common(parser)
     parser.add_argument(
-        "--flwr-dir",
-        default=None,
-        help="""The path containing installed Flower Apps.
-        The default directory is:
-
-        - `$FLWR_HOME/` if `$FLWR_HOME` is defined
-        - `$XDG_DATA_HOME/.flwr/` if `$XDG_DATA_HOME` is defined
-        - `$HOME/.flwr/` in all other cases
-        """,
+        "-V",
+        "--version",
+        action="version",
+        version=f"Flower version: {package_version}",
     )
+    _parse_args_common(parser)
     parser.add_argument(
         "--isolation",
         default=ISOLATION_MODE_SUBPROCESS,

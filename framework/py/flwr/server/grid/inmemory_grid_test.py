@@ -91,7 +91,7 @@ class TestInMemoryGrid(unittest.TestCase):
             generate_rand_int_from_bytes(NODE_ID_NUM_BYTES)
             for _ in range(self.num_nodes)
         ]
-        self.state.get_run.return_value = Run(
+        self.mock_run = Run(
             run_id=61016,
             fab_id="mock/mock",
             fab_version="v1.0.0",
@@ -108,19 +108,31 @@ class TestInMemoryGrid(unittest.TestCase):
             bytes_recv=0,
             clientapp_runtime=0.0,
         )
+        self.state.get_run_info.return_value = [self.mock_run]
         state_factory = MagicMock(state=lambda: self.state)
         self.grid = InMemoryGrid(state_factory=state_factory)
-        self.grid.set_run(run_id=61016)
+        self.grid.set_run(self.mock_run)
         self.grid.state = self.state
 
     def test_get_run(self) -> None:
-        """Test the InMemoryGrid starting with run_id."""
+        """Test the InMemoryGrid starting with a `Run` object."""
         # Assert
         self.assertEqual(self.grid.run.run_id, 61016)
         self.assertEqual(self.grid.run.fab_id, "mock/mock")
         self.assertEqual(self.grid.run.fab_version, "v1.0.0")
         self.assertEqual(self.grid.run.fab_hash, "9f86d08")
         self.assertEqual(self.grid.run.override_config["test_key"], "test_value")
+
+    def test_set_run_rejects_non_run_type(self) -> None:
+        """Test `set_run` rejects invalid input types."""
+        with self.assertRaises(TypeError):
+            self.grid.set_run(61016)  # type: ignore[arg-type]
+
+    def test_set_run_rejects_missing_run(self) -> None:
+        """Test `set_run` rejects runs that are not registered in state."""
+        self.state.get_run_info.return_value = []
+        with self.assertRaises(RuntimeError):
+            self.grid.set_run(self.mock_run)
 
     def test_get_nodes(self) -> None:
         """Test retrieval of nodes."""
@@ -207,7 +219,9 @@ class TestInMemoryGrid(unittest.TestCase):
         ).state()
         run_id = state.create_run("", "", "", {}, NOOP_FEDERATION, ConfigRecord(), "")
         self.grid = InMemoryGrid(MagicMock(state=lambda: state))
-        self.grid.set_run(run_id=run_id)
+        runs = state.get_run_info(run_ids=[run_id])
+        self.assertEqual(len(runs), 1)
+        self.grid.set_run(runs[0])
         msg_ids, node_id = push_messages(self.grid, self.num_nodes)
         assert isinstance(state, SqlLinkState)
 
@@ -236,7 +250,9 @@ class TestInMemoryGrid(unittest.TestCase):
         state = state_factory.state()
         run_id = state.create_run("", "", "", {}, NOOP_FEDERATION, ConfigRecord(), "")
         self.grid = InMemoryGrid(state_factory)
-        self.grid.set_run(run_id=run_id)
+        runs = state.get_run_info(run_ids=[run_id])
+        self.assertEqual(len(runs), 1)
+        self.grid.set_run(runs[0])
         msg_ids, node_id = push_messages(self.grid, self.num_nodes)
         assert isinstance(state, InMemoryLinkState)
 

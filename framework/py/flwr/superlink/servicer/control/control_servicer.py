@@ -25,8 +25,13 @@ from typing import Any, cast
 import grpc
 import requests
 
-from flwr.cli.config_utils import get_fab_metadata
 from flwr.common import Context, RecordDict, now
+from flwr.common.config import (
+    flatten_dict,
+    fuse_dicts,
+    get_fab_config,
+    get_metadata_from_config,
+)
 from flwr.common.constant import (
     FAB_MAX_SIZE,
     FEDERATION_NOT_FOUND_MESSAGE,
@@ -40,7 +45,6 @@ from flwr.common.constant import (
     PUBLIC_KEY_NOT_VALID,
     PULL_UNFINISHED_RUN_MESSAGE,
     RUN_ID_NOT_FOUND_MESSAGE,
-    SUPERLINK_DOES_NOT_SUPPORT_FED_MANAGEMENT_MESSAGE,
     SUPERLINK_NODE_ID,
     TRANSPORT_TYPE_GRPC_ADAPTER,
     Status,
@@ -52,21 +56,27 @@ from flwr.common.serde import (
     run_to_proto,
     user_config_from_proto,
 )
-from flwr.common.typing import Fab, Run, RunStatus
+from flwr.common.typing import AccountInfo, Fab, Run, RunStatus
 from flwr.proto import control_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
+    AcceptInvitationRequest,
+    AcceptInvitationResponse,
     AddNodeToFederationRequest,
     AddNodeToFederationResponse,
     ArchiveFederationRequest,
     ArchiveFederationResponse,
     CreateFederationRequest,
     CreateFederationResponse,
+    CreateInvitationRequest,
+    CreateInvitationResponse,
     GetAuthTokensRequest,
     GetAuthTokensResponse,
     GetLoginDetailsRequest,
     GetLoginDetailsResponse,
     ListFederationsRequest,
     ListFederationsResponse,
+    ListInvitationsRequest,
+    ListInvitationsResponse,
     ListNodesRequest,
     ListNodesResponse,
     ListRunsRequest,
@@ -75,8 +85,14 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     PullArtifactsResponse,
     RegisterNodeRequest,
     RegisterNodeResponse,
+    RejectInvitationRequest,
+    RejectInvitationResponse,
+    RemoveAccountFromFederationRequest,
+    RemoveAccountFromFederationResponse,
     RemoveNodeFromFederationRequest,
     RemoveNodeFromFederationResponse,
+    RevokeInvitationRequest,
+    RevokeInvitationResponse,
     ShowFederationRequest,
     ShowFederationResponse,
     StartRunRequest,
@@ -92,6 +108,7 @@ from flwr.proto.federation_pb2 import Federation  # pylint: disable=E0611
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
 from flwr.supercore.constant import NOOP_FEDERATION, PLATFORM_API_URL
+from flwr.supercore.error import rpc_error_translator
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
 from flwr.supercore.primitives.asymmetric import bytes_to_public_key, uses_nist_ec_curve
@@ -102,6 +119,7 @@ from flwr.superlink.auth_plugin import ControlAuthnPlugin
 from .control_account_auth_interceptor import get_current_account_info
 
 
+# pylint: disable=too-many-public-methods
 class ControlServicer(control_pb2_grpc.ControlServicer):
     """Control API servicer."""
 
@@ -147,12 +165,16 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             )
             return StartRunResponse()
 
-        flwr_aid = get_current_account_info().flwr_aid
-        flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
+        flwr_aid = _get_flwr_aid(context)
         override_config = user_config_from_proto(request.override_config)
         federation_options = config_record_from_proto(request.federation_options)
 
         try:
+            # Validate user config overrides matches keys in run config in FAB
+            fab_config = get_fab_config(fab_file)
+            run_config = flatten_dict(fab_config["tool"]["flwr"]["app"].get("config"))
+            _ = fuse_dicts(run_config, override_config)
+
             # Check that num-supernodes is set
             if self.is_simulation and "num-supernodes" not in federation_options:
                 raise ValueError(
@@ -185,7 +207,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 raise ValueError(
                     f"FAB ({fab.hash_str}) hash from request doesn't match contents"
                 )
-            fab_id, fab_version = get_fab_metadata(fab.content)
+            fab_id, fab_version = get_metadata_from_config(fab_config)
 
             run_id = state.create_run(
                 fab_id,
@@ -234,15 +256,16 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
 
         # Retrieve run ID and run
         run_id = request.run_id
-        run = state.get_run(run_id)
+        runs = state.get_run_info(run_ids=[run_id])
 
         # Exit if `run_id` not found
-        if not run:
+        if not runs:
             context.abort(grpc.StatusCode.NOT_FOUND, RUN_ID_NOT_FOUND_MESSAGE)
+        run = runs[0]
 
         # Check if `flwr_aid` matches the run's `flwr_aid`
-        flwr_aid = get_current_account_info().flwr_aid
-        _check_flwr_aid_in_run(flwr_aid=flwr_aid, run=cast(Run, run), context=context)
+        flwr_aid = _get_flwr_aid(context)
+        _check_flwr_aid_in_run(flwr_aid=flwr_aid, run=run, context=context)
 
         after_timestamp = request.after_timestamp + 1e-6
         while context.is_active():
@@ -259,8 +282,8 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             # Wait for and continue to yield more log responses only if the
             # run isn't completed yet. If the run is finished, the entire log
             # is returned at this point and the server ends the stream.
-            run_status = state.get_run_status({run_id})[run_id]
-            if run_status.status == Status.FINISHED:
+            run = state.get_run_info(run_ids=[run_id])[0]
+            if run.status.status == Status.FINISHED:
                 log(INFO, "All logs for run ID `%s` returned", run_id)
 
                 # Delete objects of the run from the object store
@@ -273,36 +296,45 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         self, request: ListRunsRequest, context: grpc.ServicerContext
     ) -> ListRunsResponse:
         """Handle `flwr ls` command."""
-        log(INFO, "ControlServicer.List")
+        log(INFO, "ControlServicer.ListRuns")
         state = self.linkstate_factory.state()
 
+        flwr_aid = _get_flwr_aid(context)
         # Build a set of run IDs for `flwr ls --runs`
         if not request.HasField("run_id"):
             # If no `run_id` is specified and account auth is enabled,
             # return run IDs for the authenticated account
-            flwr_aid = get_current_account_info().flwr_aid
-            _check_flwr_aid_exists(flwr_aid, context)
-            run_ids = state.get_run_ids(flwr_aid=flwr_aid)
+            limit = request.limit if request.HasField("limit") else None
+            runs = state.get_run_info(
+                flwr_aids=[flwr_aid],
+                order_by="pending_at",
+                ascending=False,
+                limit=limit,
+            )
         # Build a set of run IDs for `flwr ls --run-id <run_id>`
         else:
             # Retrieve run ID and run
-            run_id = request.run_id
-            run = state.get_run(run_id)
+            runs = state.get_run_info(run_ids=[request.run_id])
 
             # Exit if `run_id` not found
-            if not run:
+            if not runs:
                 context.abort(grpc.StatusCode.NOT_FOUND, RUN_ID_NOT_FOUND_MESSAGE)
                 raise grpc.RpcError()  # This line is unreachable
 
             # Check if `flwr_aid` matches the run's `flwr_aid`
-            flwr_aid = get_current_account_info().flwr_aid
-            _check_flwr_aid_in_run(flwr_aid=flwr_aid, run=run, context=context)
+            _check_flwr_aid_in_run(flwr_aid=flwr_aid, run=runs[0], context=context)
 
-            run_ids = {run_id}
-
-        # Init the object store
+        # Clear objects of finished runs
         store = self.objectstore_factory.store()
-        return _create_list_runs_response(run_ids, state, store)
+        for run in runs:
+            if run.status.status == Status.FINISHED:
+                store.delete_objects_in_run(run.run_id)
+
+        # Construct and return response
+        return ListRunsResponse(
+            run_dict={run.run_id: run_to_proto(run) for run in runs},
+            now=now().isoformat(),
+        )
 
     def StopRun(
         self, request: StopRunRequest, context: grpc.ServicerContext
@@ -313,41 +345,29 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
 
         # Retrieve run ID and run
         run_id = request.run_id
-        run = state.get_run(run_id)
+        runs = state.get_run_info(run_ids=[run_id])
 
         # Exit if `run_id` not found
-        if not run:
+        if not runs:
             context.abort(grpc.StatusCode.NOT_FOUND, RUN_ID_NOT_FOUND_MESSAGE)
             raise grpc.RpcError()  # This line is unreachable
+        run = runs[0]
 
         # Check if `flwr_aid` matches the run's `flwr_aid`
         flwr_aid = get_current_account_info().flwr_aid
         _check_flwr_aid_in_run(flwr_aid=flwr_aid, run=run, context=context)
 
-        run_status = state.get_run_status({run_id})[run_id]
-        if run_status.status == Status.FINISHED:
+        if run.status.status == Status.FINISHED:
             context.abort(
                 grpc.StatusCode.FAILED_PRECONDITION,
                 f"Run ID {run_id} is already finished",
             )
 
-        # Update run status to finished:stopped
-        update_success = state.update_run_status(
+        update_success = _stop_run_in_linkstate(
+            state=state,
+            store=self.objectstore_factory.store(),
             run_id=run_id,
-            new_status=RunStatus(Status.FINISHED, SubStatus.STOPPED, ""),
         )
-
-        # Delete the token associated with the run to stop further operations
-        state.delete_token(run_id)
-
-        if update_success:
-            message_ids: set[str] = state.get_message_ids_from_run_id(run_id)
-
-            # Delete Messages and their replies for the `run_id`
-            state.delete_messages(message_ids)
-
-            # Delete objects of the run from the object store
-            self.objectstore_factory.store().delete_objects_in_run(run_id)
 
         return StopRunResponse(success=update_success)
 
@@ -421,12 +441,13 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
 
         # Retrieve run ID and run
         run_id = request.run_id
-        run = state.get_run(run_id)
+        runs = state.get_run_info(run_ids=[run_id])
 
         # Exit if `run_id` not found
-        if not run:
+        if not runs:
             context.abort(grpc.StatusCode.NOT_FOUND, RUN_ID_NOT_FOUND_MESSAGE)
             raise grpc.RpcError()  # This line is unreachable
+        run = runs[0]
 
         # Exit if the run is not finished yet
         if run.status.status != Status.FINISHED:
@@ -465,8 +486,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         state = self.linkstate_factory.state()
         node_id = 0
 
-        flwr_aid = get_current_account_info().flwr_aid
-        flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
+        flwr_aid = _get_flwr_aid(context)
         # Account name exists if `flwr_aid` exists
         account_name = cast(str, get_current_account_info().account_name)
         try:
@@ -496,8 +516,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         # Init link state
         state = self.linkstate_factory.state()
 
-        flwr_aid = get_current_account_info().flwr_aid
-        flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
+        flwr_aid = _get_flwr_aid(context)
         try:
             state.delete_node(owner_aid=flwr_aid, node_id=request.node_id)
         except ValueError:
@@ -524,10 +543,8 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         # Init link state
         state = self.linkstate_factory.state()
 
-        flwr_aid = get_current_account_info().flwr_aid
-        flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
         # Retrieve all nodes for the account
-        nodes_info = state.get_node_info(owner_aids=[flwr_aid])
+        nodes_info = state.get_node_info(owner_aids=[_get_flwr_aid(context)])
 
         return ListNodesResponse(nodes_info=nodes_info, now=now().isoformat())
 
@@ -540,14 +557,15 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         # Init link state
         state = self.linkstate_factory.state()
 
-        flwr_aid = get_current_account_info().flwr_aid
-        flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
-
         # Get federations the account is a member of
-        federations = state.federation_manager.get_federations(flwr_aid=flwr_aid)
+        federations = state.federation_manager.get_federations(_get_flwr_aid(context))
+
         return ListFederationsResponse(
             federations=[
-                Federation(name=fed[0], description=fed[1]) for fed in federations
+                Federation(
+                    name=fed.name, description=fed.description, archived=fed.archived
+                )
+                for fed in federations
             ]
         )
 
@@ -560,15 +578,10 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         # Init link state
         state = self.linkstate_factory.state()
 
-        flwr_aid = get_current_account_info().flwr_aid
-        flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
-
-        # Get federations the account is a member of
-        federations = state.federation_manager.get_federations(flwr_aid=flwr_aid)
-
         # Ensure flwr_aid is a member of the requested federation
+        flwr_aid = _get_flwr_aid(context)
         federation = request.federation_name
-        if federation not in [fed[0] for fed in federations]:
+        if not state.federation_manager.has_member(flwr_aid, federation):
             context.abort(
                 grpc.StatusCode.FAILED_PRECONDITION,
                 f"Federation '{federation}' does not exist or you are "
@@ -581,9 +594,11 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         # Build Federation proto object
         federation_proto = Federation(
             name=federation,
+            description=details.description,
             members=details.members,
             nodes=details.nodes,
             runs=[run_to_proto(run) for run in details.runs],
+            archived=details.archived,
         )
         return ShowFederationResponse(
             federation=federation_proto, now=now().isoformat()
@@ -593,7 +608,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         self, request: CreateFederationRequest, context: grpc.ServicerContext
     ) -> CreateFederationResponse:
         """Create a new Federation."""
-        log(INFO, "ControlServicer.CreateFederation")
+        log(INFO, rpc_name := self.CreateFederation.__qualname__)
 
         # Check that a federation is specified
         if not request.federation_name:
@@ -605,28 +620,17 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         # Init link state
         state = self.linkstate_factory.state()
 
-        account_info = get_current_account_info()
-        flwr_aid = _check_flwr_aid_exists(account_info.flwr_aid, context)
-
         # Construct federation name
-        federation_name = f"@{account_info.account_name}/{request.federation_name}"
+        account = _get_account(context)
+        federation_name = f"@{account.account_name}/{request.federation_name}"
 
         # Create federation
-        try:
+        with rpc_error_translator(context, rpc_name):
             federation = state.federation_manager.create_federation(
                 name=federation_name,
                 description=request.description,
-                flwr_aid=flwr_aid,
+                flwr_aid=cast(str, account.flwr_aid),
             )
-        except NotImplementedError as e:
-            log(ERROR, "Could not create federation: %s", str(e))
-            context.abort(
-                grpc.StatusCode.FAILED_PRECONDITION,
-                SUPERLINK_DOES_NOT_SUPPORT_FED_MANAGEMENT_MESSAGE,
-            )
-        except ValueError as e:
-            log(ERROR, "Could not create federation: %s", str(e))
-            context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(e))
 
         return CreateFederationResponse(
             federation=Federation(
@@ -640,7 +644,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         self, request: ArchiveFederationRequest, context: grpc.ServicerContext
     ) -> ArchiveFederationResponse:
         """Archive a Federation."""
-        log(INFO, "ControlServicer.ArchiveFederation")
+        log(INFO, rpc_name := self.ArchiveFederation.__qualname__)
 
         # Check that a federation is specified
         if not request.federation_name:
@@ -652,24 +656,20 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         # Init link state
         state = self.linkstate_factory.state()
 
-        flwr_aid = get_current_account_info().flwr_aid
-        flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
-
         # Archive federation
-        try:
+        with rpc_error_translator(context, rpc_name):
             state.federation_manager.archive_federation(
-                flwr_aid=flwr_aid,
+                flwr_aid=_get_flwr_aid(context),
                 name=request.federation_name,
             )
-        except NotImplementedError as e:
-            log(ERROR, "Could not archive federation: %s", str(e))
-            context.abort(
-                grpc.StatusCode.FAILED_PRECONDITION,
-                SUPERLINK_DOES_NOT_SUPPORT_FED_MANAGEMENT_MESSAGE,
-            )
-        except ValueError as e:
-            log(ERROR, "Could not archive federation: %s", str(e))
-            context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(e))
+            store = self.objectstore_factory.store()
+            for run in state.get_run_info(federations=[request.federation_name]):
+                if run.status.status != Status.FINISHED:
+                    _stop_run_in_linkstate(
+                        state=state,
+                        store=store,
+                        run_id=run.run_id,
+                    )
 
         return ArchiveFederationResponse()
 
@@ -677,31 +677,23 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         self, request: AddNodeToFederationRequest, context: grpc.ServicerContext
     ) -> AddNodeToFederationResponse:
         """Add a node to a Federation."""
-        log(INFO, "ControlServicer.AddNodeToFederation")
+        log(INFO, rpc_name := self.AddNodeToFederation.__qualname__)
 
         # Init link state
         state = self.linkstate_factory.state()
 
-        flwr_aid = get_current_account_info().flwr_aid
-        flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
-
         # Validate federation, node ID, and ownership
+        flwr_aid = _get_flwr_aid(context)
         _validate_federation_and_node_in_request(
             state, flwr_aid, request.federation_name, request.node_id, context
         )
 
         # Add node to the federation
-        try:
+        with rpc_error_translator(context, rpc_name):
             state.federation_manager.add_supernode(
                 flwr_aid=flwr_aid,
                 federation=request.federation_name,
                 node_id=request.node_id,
-            )
-        except NotImplementedError as e:
-            log(ERROR, "Could not add node to federation: %s", str(e))
-            context.abort(
-                grpc.StatusCode.FAILED_PRECONDITION,
-                SUPERLINK_DOES_NOT_SUPPORT_FED_MANAGEMENT_MESSAGE,
             )
 
         return AddNodeToFederationResponse()
@@ -710,34 +702,132 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         self, request: RemoveNodeFromFederationRequest, context: grpc.ServicerContext
     ) -> RemoveNodeFromFederationResponse:
         """Remove a node from a Federation."""
-        log(INFO, "ControlServicer.RemoveNodeFromFederation")
+        log(INFO, rpc_name := self.RemoveNodeFromFederation.__qualname__)
 
         # Init link state
         state = self.linkstate_factory.state()
 
-        flwr_aid = get_current_account_info().flwr_aid
-        flwr_aid = _check_flwr_aid_exists(flwr_aid, context)
-
         # Validate federation, node ID, and ownership
+        flwr_aid = _get_flwr_aid(context)
         _validate_federation_and_node_in_request(
             state, flwr_aid, request.federation_name, request.node_id, context
         )
 
         # Remove node from the federation
-        try:
+        with rpc_error_translator(context, rpc_name):
             state.federation_manager.remove_supernode(
                 flwr_aid=flwr_aid,
                 federation=request.federation_name,
                 node_id=request.node_id,
             )
-        except NotImplementedError as e:
-            log(ERROR, "Could not remove node from federation: %s", str(e))
-            context.abort(
-                grpc.StatusCode.FAILED_PRECONDITION,
-                SUPERLINK_DOES_NOT_SUPPORT_FED_MANAGEMENT_MESSAGE,
-            )
 
         return RemoveNodeFromFederationResponse()
+
+    def RemoveAccountFromFederation(
+        self, request: RemoveAccountFromFederationRequest, context: grpc.ServicerContext
+    ) -> RemoveAccountFromFederationResponse:
+        """Remove an account from a Federation."""
+        log(INFO, rpc_name := self.RemoveAccountFromFederation.__qualname__)
+
+        state = self.linkstate_factory.state()
+        store = self.objectstore_factory.store()
+
+        target_account = None if not request.account_name else request.account_name
+
+        with rpc_error_translator(context, rpc_name):
+            removed_flwr_aid = state.federation_manager.remove_account(
+                flwr_aid=_get_flwr_aid(context),
+                federation=request.federation_name,
+                target_account_name=target_account,
+            )
+            # Get runs from account that was removed
+            # and stop them.
+            for run in state.get_run_info(
+                federations=[request.federation_name],
+                flwr_aids=[removed_flwr_aid],
+                statuses=[Status.PENDING, Status.STARTING, Status.RUNNING],
+            ):
+                _stop_run_in_linkstate(state=state, store=store, run_id=run.run_id)
+        return RemoveAccountFromFederationResponse()
+
+    def CreateInvitation(
+        self, request: CreateInvitationRequest, context: grpc.ServicerContext
+    ) -> CreateInvitationResponse:
+        """Create an invitation."""
+        log(INFO, rpc_name := self.CreateInvitation.__qualname__)
+
+        state = self.linkstate_factory.state()
+
+        with rpc_error_translator(context, rpc_name):
+            state.federation_manager.create_invitation(
+                flwr_aid=_get_flwr_aid(context),
+                federation=request.federation_name,
+                invitee_account_name=request.invitee_account_name,
+            )
+        return CreateInvitationResponse()
+
+    def ListInvitations(
+        self, request: ListInvitationsRequest, context: grpc.ServicerContext
+    ) -> ListInvitationsResponse:
+        """List invitations."""
+        log(INFO, rpc_name := self.ListInvitations.__qualname__)
+
+        state = self.linkstate_factory.state()
+
+        with rpc_error_translator(context, rpc_name):
+            created_invitations, received_invitations = (
+                state.federation_manager.list_invitations(_get_flwr_aid(context))
+            )
+        return ListInvitationsResponse(
+            created_invitations=created_invitations,
+            received_invitations=received_invitations,
+        )
+
+    def AcceptInvitation(
+        self, request: AcceptInvitationRequest, context: grpc.ServicerContext
+    ) -> AcceptInvitationResponse:
+        """Accept an invitation."""
+        log(INFO, rpc_name := self.AcceptInvitation.__qualname__)
+
+        state = self.linkstate_factory.state()
+
+        with rpc_error_translator(context, rpc_name):
+            state.federation_manager.accept_invitation(
+                flwr_aid=_get_flwr_aid(context),
+                federation=request.federation_name,
+            )
+        return AcceptInvitationResponse()
+
+    def RejectInvitation(
+        self, request: RejectInvitationRequest, context: grpc.ServicerContext
+    ) -> RejectInvitationResponse:
+        """Reject an invitation."""
+        log(INFO, rpc_name := self.RejectInvitation.__qualname__)
+
+        state = self.linkstate_factory.state()
+
+        with rpc_error_translator(context, rpc_name):
+            state.federation_manager.reject_invitation(
+                flwr_aid=_get_flwr_aid(context),
+                federation=request.federation_name,
+            )
+        return RejectInvitationResponse()
+
+    def RevokeInvitation(
+        self, request: RevokeInvitationRequest, context: grpc.ServicerContext
+    ) -> RevokeInvitationResponse:
+        """Revoke an invitation."""
+        log(INFO, rpc_name := self.RevokeInvitation.__qualname__)
+
+        state = self.linkstate_factory.state()
+
+        with rpc_error_translator(context, rpc_name):
+            state.federation_manager.revoke_invitation(
+                flwr_aid=_get_flwr_aid(context),
+                federation=request.federation_name,
+                invitee_account_name=request.invitee_account_name,
+            )
+        return RevokeInvitationResponse()
 
 
 def _validate_federation_and_node_in_request(
@@ -767,54 +857,41 @@ def _validate_federation_and_node_in_request(
     if not state.federation_manager.has_member(flwr_aid, federation_name):
         context.abort(
             grpc.StatusCode.FAILED_PRECONDITION,
-            f"You are not a member of the federation '{federation_name}'.",
+            FEDERATION_NOT_FOUND_MESSAGE % federation_name,
         )
 
     # Ensure the requester owns the specified node
     # A node that does not exist or is not owned by the requester is
     # treated the same way.
     nodes_info = state.get_node_info(node_ids=[node_id])
-    owned_node_ids = {node.node_id for node in nodes_info if node.owner_aid == flwr_aid}
-    if node_id not in owned_node_ids:
+    if not nodes_info or nodes_info[0].owner_aid != flwr_aid:
         context.abort(
             grpc.StatusCode.FAILED_PRECONDITION,
             f"Node {node_id} not found or you are not its owner.",
         )
 
 
-def _create_list_runs_response(
-    run_ids: set[int], state: LinkState, store: ObjectStore
-) -> ListRunsResponse:
-    """Create response for `flwr ls --runs` and `flwr ls --run-id <run_id>`."""
-    run_dict = {run_id: run for run_id in run_ids if (run := state.get_run(run_id))}
-
-    # Delete objects of finished runs from the object store
-    for run_id, run in run_dict.items():
-        if run.status.status == Status.FINISHED:
-            store.delete_objects_in_run(run_id)
-
-    return ListRunsResponse(
-        run_dict={run_id: run_to_proto(run) for run_id, run in run_dict.items()},
-        now=now().isoformat(),
-    )
-
-
-def _check_flwr_aid_exists(flwr_aid: str | None, context: grpc.ServicerContext) -> str:
-    """Guard clause to check if `flwr_aid` exists."""
-    if flwr_aid is None:
+def _get_account(context: grpc.ServicerContext) -> AccountInfo:
+    """Guard clause to check if account information exists."""
+    account = get_current_account_info()
+    if account.flwr_aid is None:
         context.abort(
             grpc.StatusCode.PERMISSION_DENIED,
             "️⛔️ Failed to fetch the account information.",
         )
         raise RuntimeError  # This line is unreachable
-    return flwr_aid
+    return account
+
+
+def _get_flwr_aid(context: grpc.ServicerContext) -> str:
+    """Guard clause to check if `flwr_aid` exists."""
+    return cast(str, _get_account(context).flwr_aid)
 
 
 def _check_flwr_aid_in_run(
     flwr_aid: str | None, run: Run, context: grpc.ServicerContext
 ) -> None:
     """Guard clause to check if `flwr_aid` matches the run's `flwr_aid`."""
-    _check_flwr_aid_exists(flwr_aid, context)
     # `run.flwr_aid` must not be an empty string. Abort if it is empty.
     run_flwr_aid = run.flwr_aid
     if not run_flwr_aid:
@@ -829,6 +906,24 @@ def _check_flwr_aid_in_run(
             grpc.StatusCode.PERMISSION_DENIED,
             "⛔️ Run ID does not belong to the account",
         )
+
+
+def _stop_run_in_linkstate(state: LinkState, store: ObjectStore, run_id: int) -> bool:
+    """Stop a run and clean it up using LinkState methods."""
+    update_success = state.update_run_status(
+        run_id=run_id,
+        new_status=RunStatus(Status.FINISHED, SubStatus.STOPPED, ""),
+    )
+
+    # Always invalidate the run token so no further work can be scheduled.
+    state.delete_token(run_id)
+
+    if update_success:
+        message_ids: set[str] = state.get_message_ids_from_run_id(run_id)
+        state.delete_messages(message_ids)
+        store.delete_objects_in_run(run_id)
+
+    return update_success
 
 
 def _format_verification(verifications: list[dict[str, str]]) -> dict[str, str]:
@@ -850,12 +945,12 @@ def _get_remote_fab(
     app_spec: str,
     context: grpc.ServicerContext,
 ) -> tuple[bytes, dict[str, str]]:
-    """Get remote FAB from Flower platform API."""
+    """Get remote FAB from Flower Hub."""
     if fleet_api_type == TRANSPORT_TYPE_GRPC_ADAPTER:
         context.abort(
             grpc.StatusCode.FAILED_PRECONDITION,
             "The selected SuperLink transport type is not "
-            "supported for connecting to Flower Platform.",
+            "supported for connecting to Flower Hub.",
         )
 
     # Parse and validate app specification
@@ -886,7 +981,7 @@ def _get_remote_fab(
         else {"valid_license": ""}
     )
 
-    # Download FAB from Flower platform API
+    # Download FAB from Flower Hub
     try:
         r = requests.get(presigned_url, timeout=60)
         r.raise_for_status()
