@@ -80,6 +80,10 @@ service ServerAppIo {
   // Push ServerApp logs
   rpc PushLogs(PushLogsRequest) returns (PushLogsResponse) {}
 
+  // Get Federation Options
+  rpc GetFederationOptions(GetFederationOptionsRequest)
+      returns (GetFederationOptionsResponse) {}
+
   /////////////////////////////////////////////////////////////////////////////
   // Specific endpoints for ServerAppIo
   /////////////////////////////////////////////////////////////////////////////
