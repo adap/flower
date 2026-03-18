@@ -10,18 +10,13 @@ from flwr.common.constant import (
     HEARTBEAT_DEFAULT_INTERVAL,
     HEARTBEAT_PATIENCE,
     SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
-    SIMULATIONIO_API_DEFAULT_CLIENT_ADDRESS,
     Status,
     SubStatus,
 )
 
 use_sim = sys.argv[1] == "simulation" if len(sys.argv) > 1 else False
 plugin_type_arg = "simulation" if use_sim else "serverapp"
-address_arg = (
-    SIMULATIONIO_API_DEFAULT_CLIENT_ADDRESS
-    if use_sim
-    else SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS
-)
+address_arg = SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS
 app_cmd = "flwr-simulation" if use_sim else "flwr-serverapp"
 
 

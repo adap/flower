@@ -33,7 +33,7 @@ from .constant import (
     CONTROL_API_PROBE_INTERVAL,
     CONTROL_API_PROBE_TIMEOUT,
     LOCAL_CONTROL_API_ADDRESS,
-    LOCAL_SIMULATIONIO_API_ADDRESS,
+    LOCAL_SERVERAPPIO_API_ADDRESS,
     LOCAL_SUPERLINK_STARTUP_TIMEOUT,
 )
 from .typing import SuperLinkConnection
@@ -110,8 +110,8 @@ def _start_local_superlink() -> None:
         ISOLATION_MODE_SUBPROCESS,
         "--control-api-address",
         LOCAL_CONTROL_API_ADDRESS,
-        "--simulationio-api-address",
-        LOCAL_SIMULATIONIO_API_ADDRESS,
+        "--serverappio-api-address",
+        LOCAL_SERVERAPPIO_API_ADDRESS,
         "--database",
         str(database_path),
         "--storage-dir",

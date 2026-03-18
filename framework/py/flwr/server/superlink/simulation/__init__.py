@@ -12,4 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower SimulationIo service."""
+"""Flower simulation service compatibility helpers."""
