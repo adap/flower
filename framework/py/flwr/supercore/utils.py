@@ -395,7 +395,7 @@ def _start_flwr_update_check_refresh_thread(process_name: str | None = None) -> 
     thread = threading.Thread(
         target=_refresh_flwr_update_check_cache,
         args=(process_name,),
-        daemon=True,
+        daemon=False,
     )
     thread.start()
 
