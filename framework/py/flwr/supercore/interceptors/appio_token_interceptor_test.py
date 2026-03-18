@@ -14,6 +14,7 @@
 # ==============================================================================
 """Tests for short-term AppIo token interceptors."""
 
+
 from collections import namedtuple
 from typing import cast
 from unittest import TestCase
