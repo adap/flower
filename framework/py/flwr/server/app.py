@@ -175,7 +175,7 @@ def run_superlink() -> None:
             ExitCode.SUPERLINK_INVALID_ARGS,
             "The arguments `--executor`, `--executor-dir`, and `--executor-config` are "
             "deprecated and will be removed in a future release. To run SuperLink with "
-            "simulation runtime, please use `--simulation`.",
+            "the simulation runtime, please use `--simulation`.",
         )
 
     # Detect if both Control API and Exec API addresses were set explicitly
