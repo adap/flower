@@ -1038,9 +1038,7 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
             if not has_valid_sub_status(current_status):
                 log(
                     ERROR,
-                    'Invalid run status payload: sub_status="%s" is not valid for '
-                    'status="%s". For non-FINISHED statuses, sub_status must be '
-                    "empty.",
+                    'Invalid sub-status: sub_status="%s" is not valid for status="%s".',
                     current_status.sub_status,
                     current_status.status,
                 )
