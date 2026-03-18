@@ -2091,9 +2091,7 @@ class SqlFileBasedTest(StateTest, unittest.TestCase):
                 thread.join(timeout=5)
             alive_threads = [thread for thread in threads if thread.is_alive()]
             if alive_threads:
-                self.fail(
-                    "Timed out waiting for concurrent pull_res threads to finish"
-                )
+                self.fail("Timed out waiting for concurrent pull_res threads to finish")
 
             if exceptions:
                 raise exceptions[0]
@@ -2154,7 +2152,9 @@ class SqlFileBasedTest(StateTest, unittest.TestCase):
             for thread in threads:
                 thread.join(timeout=join_timeout)
                 if thread.is_alive():
-                    self.fail("Concurrent get_message_ins thread did not finish in time")
+                    self.fail(
+                        "Concurrent get_message_ins thread did not finish in time"
+                    )
 
             if exceptions:
                 raise exceptions[0]
