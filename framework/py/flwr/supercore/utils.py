@@ -26,6 +26,7 @@ from typing import Any
 import requests
 
 from flwr.common.constant import FLWR_DIR, FLWR_HOME
+from flwr.supercore.version import package_name as flwr_package_name
 from flwr.supercore.version import package_version as flwr_version
 
 from .constant import (
@@ -208,6 +209,7 @@ def request_download_link(
 def get_flwr_update_check_payload(process_name: str | None = None) -> dict[str, str]:
     """Return the runtime payload sent to the update-check endpoint."""
     payload = {
+        "package_name": flwr_package_name,
         "flwr_version": flwr_version,
         "python_version": platform.python_version(),
         "os": platform.system().lower(),

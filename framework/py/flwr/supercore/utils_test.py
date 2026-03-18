@@ -289,11 +289,13 @@ def test_get_flwr_update_check_payload(monkeypatch: pytest.MonkeyPatch) -> None:
     )
     monkeypatch.setattr("flwr.supercore.utils.platform.system", lambda: "Linux")
     monkeypatch.setattr("flwr.supercore.utils.platform.release", lambda: "6.8.0")
+    monkeypatch.setattr(utils, "flwr_package_name", "flwr-nightly")
     monkeypatch.setattr(utils, "flwr_version", "1.28.0")
 
     payload = get_flwr_update_check_payload(process_name="flower-superlink")
 
     assert payload == {
+        "package_name": "flwr-nightly",
         "flwr_version": "1.28.0",
         "python_version": "3.11.11",
         "os": "linux",
@@ -358,6 +360,7 @@ def test_warn_if_flwr_update_available_sends_expected_request(
 
     def _get_payload(process_name: str | None = None) -> dict[str, str]:
         return {
+            "package_name": "flwr-nightly",
             "flwr_version": "1.28.0",
             "python_version": "3.11.11",
             "os": "linux",
@@ -373,6 +376,7 @@ def test_warn_if_flwr_update_available_sends_expected_request(
     assert captured == {
         "url": FLWR_UPDATE_CHECK_URL,
         "json": {
+            "package_name": "flwr-nightly",
             "flwr_version": "1.28.0",
             "python_version": "3.11.11",
             "os": "linux",
