@@ -93,6 +93,7 @@ erDiagram
     VARCHAR override_config "nullable"
     VARCHAR pending_at "nullable"
     INTEGER run_id UK "nullable"
+    VARCHAR run_type
     VARCHAR running_at "nullable"
     VARCHAR starting_at "nullable"
     VARCHAR sub_status "nullable"
