@@ -22,12 +22,13 @@ import pytest
 import requests
 from parameterized import parameterized
 
+from . import utils
 from .constant import (
     FLWR_DISABLE_UPDATE_CHECK,
-    FLWR_UPDATE_CHECK_TIMEOUT_SECONDS,
+    FLWR_UPDATE_CHECK_CONNECT_TIMEOUT_SECONDS,
+    FLWR_UPDATE_CHECK_READ_TIMEOUT_SECONDS,
     FLWR_UPDATE_CHECK_URL,
 )
-from . import utils
 from .utils import (
     get_flwr_update_check_payload,
     humanize_bytes,
@@ -371,7 +372,10 @@ def test_warn_if_flwr_update_available_sends_expected_request(monkeypatch) -> No
             "os_version": "6.8.0",
             "process_name": "flower-superlink",
         },
-        "timeout": FLWR_UPDATE_CHECK_TIMEOUT_SECONDS,
+        "timeout": (
+            FLWR_UPDATE_CHECK_CONNECT_TIMEOUT_SECONDS,
+            FLWR_UPDATE_CHECK_READ_TIMEOUT_SECONDS,
+        ),
     }
 
 

@@ -32,7 +32,8 @@ from .constant import (
     APP_ID_PATTERN,
     APP_VERSION_PATTERN,
     FLWR_DISABLE_UPDATE_CHECK,
-    FLWR_UPDATE_CHECK_TIMEOUT_SECONDS,
+    FLWR_UPDATE_CHECK_CONNECT_TIMEOUT_SECONDS,
+    FLWR_UPDATE_CHECK_READ_TIMEOUT_SECONDS,
     FLWR_UPDATE_CHECK_URL,
 )
 
@@ -228,7 +229,10 @@ def warn_if_flwr_update_available(process_name: str | None = None) -> None:
         response = requests.post(
             FLWR_UPDATE_CHECK_URL,
             json=get_flwr_update_check_payload(process_name=process_name),
-            timeout=FLWR_UPDATE_CHECK_TIMEOUT_SECONDS,
+            timeout=(
+                FLWR_UPDATE_CHECK_CONNECT_TIMEOUT_SECONDS,
+                FLWR_UPDATE_CHECK_READ_TIMEOUT_SECONDS,
+            ),
         )
     except requests.RequestException:
         return
