@@ -16,6 +16,8 @@
 
 
 import json
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -289,11 +291,13 @@ def test_get_flwr_update_check_payload(monkeypatch: pytest.MonkeyPatch) -> None:
     )
     monkeypatch.setattr("flwr.supercore.utils.platform.system", lambda: "Linux")
     monkeypatch.setattr("flwr.supercore.utils.platform.release", lambda: "6.8.0")
+    monkeypatch.setattr(utils, "flwr_package_name", "flwr-nightly")
     monkeypatch.setattr(utils, "flwr_version", "1.28.0")
 
     payload = get_flwr_update_check_payload(process_name="flower-superlink")
 
     assert payload == {
+        "package_name": "flwr-nightly",
         "flwr_version": "1.28.0",
         "python_version": "3.11.11",
         "os": "linux",
@@ -309,55 +313,201 @@ def test_warn_if_flwr_update_available_disabled(
     monkeypatch.setenv(FLWR_DISABLE_UPDATE_CHECK, "1")
     called = False
 
-    def _post(*_args: Any, **_kwargs: Any) -> None:
+    def _start_thread(*_args: Any, **_kwargs: Any) -> None:
         nonlocal called
         called = True
 
-    monkeypatch.setattr("flwr.supercore.utils.requests.post", _post)
+    monkeypatch.setattr(utils, "_start_flwr_update_check_refresh_thread", _start_thread)
 
     warn_if_flwr_update_available(process_name="flower-superlink")
 
     assert called is False
 
 
-def test_warn_if_flwr_update_available_prints_message(
-    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+def _write_update_check_cache(tmp_path: Path, body: dict[str, Any]) -> None:
+    cache_dir = tmp_path / "cache"
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    (cache_dir / "update-check.json").write_text(json.dumps(body), encoding="utf-8")
+
+
+def _read_update_check_cache(tmp_path: Path) -> dict[str, Any] | None:
+    cache_path = tmp_path / "cache" / "update-check.json"
+    if not cache_path.exists():
+        return None
+
+    body = json.loads(cache_path.read_text(encoding="utf-8"))
+    return body if isinstance(body, dict) else None
+
+
+def test_warn_if_flwr_update_available_prints_cached_message(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    tmp_path: Path,
 ) -> None:
-    """The update message should be printed to stderr when outdated."""
-    response = _Response(
-        ok=True,
-        body={
-            "update_available": True,
-            "message": "A newer Flower version is available: 1.0.0 -> 1.1.0",
-        },
+    """The cached update message should be printed at most once per day."""
+    monkeypatch.delenv(FLWR_DISABLE_UPDATE_CHECK, raising=False)
+    monkeypatch.setattr(utils, "get_flwr_home", lambda: tmp_path)
+    monkeypatch.setattr(
+        utils,
+        "_start_flwr_update_check_refresh_thread",
+        lambda process_name=None: None,
     )
 
-    def _post(*_args: Any, **_kwargs: Any) -> _Response:
-        return response
-
-    monkeypatch.delenv(FLWR_DISABLE_UPDATE_CHECK, raising=False)
-    monkeypatch.setattr("flwr.supercore.utils.requests.post", _post)
+    now = datetime(2026, 3, 18, 15, 0, tzinfo=timezone.utc)
+    monkeypatch.setattr(utils, "_get_utcnow", lambda: now)
+    _write_update_check_cache(
+        tmp_path,
+        {
+            "package_name": "flwr-nightly",
+            "flwr_version": "1.28.0",
+            "update_available": True,
+            "message": "A newer Flower version is available: 1.0.0 -> 1.1.0",
+            "last_shown_at": (now - timedelta(days=2)).isoformat(),
+        },
+    )
+    monkeypatch.setattr(utils, "flwr_package_name", "flwr-nightly")
+    monkeypatch.setattr(utils, "flwr_version", "1.28.0")
 
     warn_if_flwr_update_available(process_name="flower-superlink")
 
     captured = capsys.readouterr()
     assert captured.err == "A newer Flower version is available: 1.0.0 -> 1.1.0\n"
+    cache = _read_update_check_cache(tmp_path)
+    assert cache is not None
+    assert cache["last_shown_at"] == now.isoformat()
 
 
-def test_warn_if_flwr_update_available_sends_expected_request(
+def test_warn_if_flwr_update_available_suppresses_recent_cached_message(
     monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    tmp_path: Path,
 ) -> None:
-    """The update check should call the correct endpoint with the runtime payload."""
+    """The cached message should not be shown again within one day."""
+    monkeypatch.delenv(FLWR_DISABLE_UPDATE_CHECK, raising=False)
+    monkeypatch.setattr(utils, "get_flwr_home", lambda: tmp_path)
+    monkeypatch.setattr(
+        utils,
+        "_start_flwr_update_check_refresh_thread",
+        lambda process_name=None: None,
+    )
+
+    now = datetime(2026, 3, 18, 15, 0, tzinfo=timezone.utc)
+    monkeypatch.setattr(utils, "_get_utcnow", lambda: now)
+    _write_update_check_cache(
+        tmp_path,
+        {
+            "package_name": "flwr-nightly",
+            "flwr_version": "1.28.0",
+            "update_available": True,
+            "message": "A newer Flower version is available: 1.0.0 -> 1.1.0",
+            "last_shown_at": (now - timedelta(hours=12)).isoformat(),
+        },
+    )
+    monkeypatch.setattr(utils, "flwr_package_name", "flwr-nightly")
+    monkeypatch.setattr(utils, "flwr_version", "1.28.0")
+
+    warn_if_flwr_update_available(process_name="flower-superlink")
+
+    captured = capsys.readouterr()
+    assert captured.err == ""
+
+
+def test_warn_if_flwr_update_available_skips_refresh_if_checked_today(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    """The cache should not refresh again within the same UTC calendar day."""
+    monkeypatch.delenv(FLWR_DISABLE_UPDATE_CHECK, raising=False)
+    monkeypatch.setattr(utils, "get_flwr_home", lambda: tmp_path)
+
+    called = False
+
+    def _start_thread(*_args: Any, **_kwargs: Any) -> None:
+        nonlocal called
+        called = True
+
+    now = datetime(2026, 3, 18, 15, 0, tzinfo=timezone.utc)
+    monkeypatch.setattr(utils, "_get_utcnow", lambda: now)
+    monkeypatch.setattr(utils, "_start_flwr_update_check_refresh_thread", _start_thread)
+    _write_update_check_cache(
+        tmp_path,
+        {
+            "package_name": "flwr",
+            "flwr_version": "1.28.0",
+            "update_available": False,
+            "last_checked_at": datetime(
+                2026, 3, 18, 1, 0, tzinfo=timezone.utc
+            ).isoformat(),
+        },
+    )
+    monkeypatch.setattr(utils, "flwr_package_name", "flwr")
+    monkeypatch.setattr(utils, "flwr_version", "1.28.0")
+
+    warn_if_flwr_update_available(process_name="flower-superlink")
+
+    assert called is False
+
+
+def test_warn_if_flwr_update_available_refreshes_on_new_utc_day(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    """The cache should refresh again after the UTC date changes."""
+    monkeypatch.delenv(FLWR_DISABLE_UPDATE_CHECK, raising=False)
+    monkeypatch.setattr(utils, "get_flwr_home", lambda: tmp_path)
+
+    called = False
+
+    def _start_thread(*_args: Any, **_kwargs: Any) -> None:
+        nonlocal called
+        called = True
+
+    now = datetime(2026, 3, 18, 0, 30, tzinfo=timezone.utc)
+    monkeypatch.setattr(utils, "_get_utcnow", lambda: now)
+    monkeypatch.setattr(utils, "_start_flwr_update_check_refresh_thread", _start_thread)
+    _write_update_check_cache(
+        tmp_path,
+        {
+            "package_name": "flwr",
+            "flwr_version": "1.28.0",
+            "update_available": False,
+            "last_checked_at": datetime(
+                2026, 3, 17, 23, 30, tzinfo=timezone.utc
+            ).isoformat(),
+        },
+    )
+    monkeypatch.setattr(utils, "flwr_package_name", "flwr")
+    monkeypatch.setattr(utils, "flwr_version", "1.28.0")
+
+    warn_if_flwr_update_available(process_name="flower-superlink")
+
+    assert called is True
+
+
+def test_refresh_flwr_update_check_cache_sends_expected_request_and_writes_cache(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    """The refresh helper should request and persist update-check state."""
     captured: dict[str, Any] = {}
 
     def _post(url: str, **kwargs: Any) -> _Response:
         captured["url"] = url
         captured["json"] = kwargs["json"]
         captured["timeout"] = kwargs["timeout"]
-        return _Response(ok=True, body={"update_available": False})
+        return _Response(
+            ok=True,
+            body={
+                "update_available": True,
+                "latest_version": "1.29.0",
+                "upgrade_hint": "python -m pip install -U flwr",
+                "message": "A newer Flower version is available: 1.28.0 -> 1.29.0",
+            },
+        )
 
     def _get_payload(process_name: str | None = None) -> dict[str, str]:
         return {
+            "package_name": "flwr-nightly",
             "flwr_version": "1.28.0",
             "python_version": "3.11.11",
             "os": "linux",
@@ -365,14 +515,29 @@ def test_warn_if_flwr_update_available_sends_expected_request(
             "process_name": process_name or "",
         }
 
+    class _ImmediateThread:
+        def __init__(self, target: Any, args: tuple[Any, ...], daemon: bool) -> None:
+            self._target = target
+            self._args = args
+            self.daemon = daemon
+
+        def start(self) -> None:
+            """Execute the target immediately instead of spawning a thread."""
+            self._target(*self._args)
+
+    monkeypatch.setattr(utils, "get_flwr_home", lambda: tmp_path)
     monkeypatch.setattr("flwr.supercore.utils.requests.post", _post)
     monkeypatch.setattr(utils, "get_flwr_update_check_payload", _get_payload)
+    monkeypatch.setattr(utils, "flwr_package_name", "flwr-nightly")
+    monkeypatch.setattr(utils, "flwr_version", "1.28.0")
+    monkeypatch.setattr("flwr.supercore.utils.threading.Thread", _ImmediateThread)
 
     warn_if_flwr_update_available(process_name="flower-superlink")
 
     assert captured == {
         "url": FLWR_UPDATE_CHECK_URL,
         "json": {
+            "package_name": "flwr-nightly",
             "flwr_version": "1.28.0",
             "python_version": "3.11.11",
             "os": "linux",
@@ -384,19 +549,39 @@ def test_warn_if_flwr_update_available_sends_expected_request(
             FLWR_UPDATE_CHECK_READ_TIMEOUT_SECONDS,
         ),
     }
+    cache = _read_update_check_cache(tmp_path)
+    assert cache is not None
+    assert cache["package_name"] == "flwr-nightly"
+    assert cache["update_available"] is True
+    assert cache["latest_version"] == "1.29.0"
+    assert cache["message"] == "A newer Flower version is available: 1.28.0 -> 1.29.0"
 
 
-def test_warn_if_flwr_update_available_swallows_request_errors(
+def test_refresh_flwr_update_check_cache_swallows_request_errors(
     monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
 ) -> None:
-    """The update check should fail open when the endpoint is unreachable."""
+    """The refresh helper should fail open when the endpoint is unreachable."""
 
     def _post(*_args: Any, **_kwargs: Any) -> _Response:
         raise requests.RequestException("offline")
 
+    class _ImmediateThread:
+        def __init__(self, target: Any, args: tuple[Any, ...], daemon: bool) -> None:
+            self._target = target
+            self._args = args
+            self.daemon = daemon
+
+        def start(self) -> None:
+            """Execute the target immediately instead of spawning a thread."""
+            self._target(*self._args)
+
+    monkeypatch.setattr(utils, "get_flwr_home", lambda: tmp_path)
     monkeypatch.setattr("flwr.supercore.utils.requests.post", _post)
+    monkeypatch.setattr("flwr.supercore.utils.threading.Thread", _ImmediateThread)
 
     warn_if_flwr_update_available(process_name="flower-superlink")
+    assert _read_update_check_cache(tmp_path) is None
 
 
 @parameterized.expand(  # type: ignore
