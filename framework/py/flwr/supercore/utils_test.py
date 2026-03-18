@@ -354,7 +354,7 @@ def test_warn_if_flwr_update_available_prints_cached_message(
     )
 
     now = datetime(2026, 3, 18, 15, 0, tzinfo=UTC)
-    monkeypatch.setattr(utils, "_utcnow", lambda: now)
+    monkeypatch.setattr(utils, "_get_utcnow", lambda: now)
     _write_update_check_cache(
         tmp_path,
         {
@@ -392,7 +392,7 @@ def test_warn_if_flwr_update_available_suppresses_recent_cached_message(
     )
 
     now = datetime(2026, 3, 18, 15, 0, tzinfo=UTC)
-    monkeypatch.setattr(utils, "_utcnow", lambda: now)
+    monkeypatch.setattr(utils, "_get_utcnow", lambda: now)
     _write_update_check_cache(
         tmp_path,
         {
@@ -427,7 +427,7 @@ def test_warn_if_flwr_update_available_skips_refresh_if_checked_today(
         called = True
 
     now = datetime(2026, 3, 18, 15, 0, tzinfo=UTC)
-    monkeypatch.setattr(utils, "_utcnow", lambda: now)
+    monkeypatch.setattr(utils, "_get_utcnow", lambda: now)
     monkeypatch.setattr(utils, "_start_flwr_update_check_refresh_thread", _start_thread)
     _write_update_check_cache(
         tmp_path,
@@ -461,7 +461,7 @@ def test_warn_if_flwr_update_available_refreshes_on_new_utc_day(
         called = True
 
     now = datetime(2026, 3, 18, 0, 30, tzinfo=UTC)
-    monkeypatch.setattr(utils, "_utcnow", lambda: now)
+    monkeypatch.setattr(utils, "_get_utcnow", lambda: now)
     monkeypatch.setattr(utils, "_start_flwr_update_check_refresh_thread", _start_thread)
     _write_update_check_cache(
         tmp_path,
