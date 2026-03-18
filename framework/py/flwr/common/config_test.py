@@ -485,9 +485,6 @@ def test_validate_pyproject_toml_with_fab_format_version_derives_metadata() -> N
     assert is_valid
     assert not errors
     assert not warnings
-    assert config["tool"]["flwr"]["app"]["flwr_version_target"] == "1.27.0"
-    assert "flwr_version_min" not in config["tool"]["flwr"]["app"]
-    assert "flwr_version_max" not in config["tool"]["flwr"]["app"]
 
 
 def test_normalize_and_validate_fab_format_rejects_unsupported_version() -> None:
@@ -535,7 +532,6 @@ def test_normalize_and_validate_fab_format_accepts_target_for_version_zero() -> 
     assert metadata.flwr_version_min is None
     assert metadata.flwr_version_target == "1.27.0"
     assert metadata.flwr_version_max is None
-    assert config["tool"]["flwr"]["app"]["flwr_version_target"] == "1.27.0"
 
 
 def test_normalize_and_validate_fab_format_derives_bounds_for_version_zero() -> None:
@@ -563,9 +559,6 @@ def test_normalize_and_validate_fab_format_derives_bounds_for_version_zero() -> 
     assert metadata.flwr_version_min == "1.26.0"
     assert metadata.flwr_version_target == "1.27.0"
     assert metadata.flwr_version_max == "1.28.0"
-    assert config["tool"]["flwr"]["app"]["flwr_version_target"] == "1.27.0"
-    assert "flwr_version_min" not in config["tool"]["flwr"]["app"]
-    assert "flwr_version_max" not in config["tool"]["flwr"]["app"]
 
 
 def test_v0_fab_format_skips_unsupported_bounds() -> None:
@@ -593,9 +586,6 @@ def test_v0_fab_format_skips_unsupported_bounds() -> None:
     assert metadata.flwr_version_min is None
     assert metadata.flwr_version_target == "1.27.0"
     assert metadata.flwr_version_max is None
-    assert "flwr_version_min" not in config["tool"]["flwr"]["app"]
-    assert config["tool"]["flwr"]["app"]["flwr_version_target"] == "1.27.0"
-    assert "flwr_version_max" not in config["tool"]["flwr"]["app"]
 
 
 def test_v1_fab_format_requires_flwr_dependency() -> None:

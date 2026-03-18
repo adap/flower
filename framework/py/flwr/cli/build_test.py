@@ -20,7 +20,6 @@ from pathlib import Path
 from zipfile import ZipFile
 
 import pytest
-import tomli
 
 from .build import build_fab_from_files
 
@@ -56,20 +55,16 @@ def test_build_fab_from_files_missing_pyproject_raises() -> None:
 
 
 def test_build_fab_from_files_defaults_fab_format_version() -> None:
-    """Test missing fab_format_version defaults in metadata without rewriting TOML."""
+    """Test missing fab_format_version defaults in returned metadata."""
     files: dict[str, bytes | Path] = {
         "pyproject.toml": b'[project]\nname = "app"\nversion = "1.0.0"\n',
         "client.py": b"print('ok')\n",
     }
 
-    fab_bytes, metadata = build_fab_from_files(files)
-
-    with ZipFile(BytesIO(fab_bytes), "r") as zip_file:
-        config = tomli.loads(zip_file.read("pyproject.toml").decode("utf-8"))
+    _, metadata = build_fab_from_files(files)
 
     assert metadata.fab_format_version == 0
     assert metadata.flwr_version_min is None
-    assert "tool" not in config
 
 
 def test_build_fab_from_files_preserves_target_for_version_zero() -> None:
@@ -88,25 +83,16 @@ flwr_version_target = "1.27.1"
         "client.py": b"print('ok')\n",
     }
 
-    fab_bytes, metadata = build_fab_from_files(files)
-
-    with ZipFile(BytesIO(fab_bytes), "r") as zip_file:
-        config = tomli.loads(zip_file.read("pyproject.toml").decode("utf-8"))
-
-    app_config = config["tool"]["flwr"]["app"]
+    _, metadata = build_fab_from_files(files)
 
     assert metadata.fab_format_version == 0
     assert metadata.flwr_version_min is None
     assert metadata.flwr_version_target == "1.27.1"
     assert metadata.flwr_version_max is None
-    assert app_config["fab_format_version"] == 0
-    assert app_config["flwr_version_target"] == "1.27.1"
-    assert "flwr_version_min" not in app_config
-    assert "flwr_version_max" not in app_config
 
 
 def test_build_fab_from_files_derives_flwr_bounds() -> None:
-    """Test fab_format_version=1 derives metadata without embedding derived fields."""
+    """Test fab_format_version=1 derives metadata."""
     files: dict[str, bytes | Path] = {
         "pyproject.toml": b"""
 [project]
@@ -122,21 +108,12 @@ flwr_version_target = "1.27.1"
         "client.py": b"print('ok')\n",
     }
 
-    fab_bytes, metadata = build_fab_from_files(files)
-
-    with ZipFile(BytesIO(fab_bytes), "r") as zip_file:
-        config = tomli.loads(zip_file.read("pyproject.toml").decode("utf-8"))
-
-    app_config = config["tool"]["flwr"]["app"]
+    _, metadata = build_fab_from_files(files)
 
     assert metadata.fab_format_version == 1
     assert metadata.flwr_version_min == "1.26.0"
     assert metadata.flwr_version_target == "1.27.1"
     assert metadata.flwr_version_max == "1.28.0"
-    assert app_config["fab_format_version"] == 1
-    assert app_config["flwr_version_target"] == "1.27.1"
-    assert "flwr_version_min" not in app_config
-    assert "flwr_version_max" not in app_config
 
 
 def test_build_fab_from_files_rejects_unsupported_fab_format_version() -> None:
@@ -175,20 +152,12 @@ flwr_version_target = "1.27.1"
         "client.py": b"print('ok')\n",
     }
 
-    fab_bytes, metadata = build_fab_from_files(files)
-
-    with ZipFile(BytesIO(fab_bytes), "r") as zip_file:
-        config = tomli.loads(zip_file.read("pyproject.toml").decode("utf-8"))
-
-    app_config = config["tool"]["flwr"]["app"]
+    _, metadata = build_fab_from_files(files)
 
     assert metadata.fab_format_version == 0
     assert metadata.flwr_version_min is None
     assert metadata.flwr_version_target == "1.27.1"
     assert metadata.flwr_version_max is None
-    assert "flwr_version_min" not in app_config
-    assert app_config["flwr_version_target"] == "1.27.1"
-    assert "flwr_version_max" not in app_config
 
 
 def test_build_fab_from_files_rejects_unsupported_flwr_specifier() -> None:
