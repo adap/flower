@@ -25,9 +25,6 @@ def run_superlink() -> subprocess.Popen:
     cmd = ["flower-superlink", "--insecure"]
     cmd += ["--database", "tmp.db"]
     cmd += ["--isolation", "process"]
-    if use_sim:
-        cmd += ["--simulation"]
-
     return subprocess.Popen(cmd)
 
 
@@ -115,9 +112,6 @@ def main() -> None:
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
     )
-
-    # Determine if the test is running in simulation mode
-    print(f"Running in {'simulation' if use_sim else 'deployment'} mode.")
 
     # Start the SuperLink
     print("Starting SuperLink...")
