@@ -21,7 +21,7 @@ import platform
 import re
 import sys
 import threading
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -227,7 +227,7 @@ def get_flwr_update_check_payload(process_name: str | None = None) -> dict[str, 
 
 def _get_utcnow() -> datetime:
     """Return the current UTC timestamp."""
-    return datetime.now(UTC)
+    return datetime.now(timezone.utc)
 
 
 def _get_flwr_update_check_cache_path() -> Path:
@@ -248,9 +248,9 @@ def _parse_flwr_update_check_timestamp(value: Any) -> datetime | None:
         return None
 
     if parsed.tzinfo is None:
-        return parsed.replace(tzinfo=UTC)
+        return parsed.replace(tzinfo=timezone.utc)
 
-    return parsed.astimezone(UTC)
+    return parsed.astimezone(timezone.utc)
 
 
 def _read_flwr_update_check_cache() -> dict[str, Any] | None:
