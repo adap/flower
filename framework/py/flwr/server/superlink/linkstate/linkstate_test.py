@@ -2124,12 +2124,14 @@ class SqlFileBasedTest(StateTest, unittest.TestCase):
             assert state_0.store_message_ins(message=msg_1)
 
             barrier = threading.Barrier(3)
+            barrier_timeout = 5.0
+            join_timeout = 5.0
             results: list[list[Message] | None] = [None, None]
             exceptions: list[Exception] = []
 
             def pull_ins(idx: int, state: SqlLinkState) -> None:
                 try:
-                    barrier.wait()
+                    barrier.wait(timeout=barrier_timeout)
                     results[idx] = state.get_message_ins(node_id=node_id, limit=1)
                 except Exception as ex:  # pylint: disable=broad-exception-caught
                     exceptions.append(ex)
@@ -2140,9 +2142,11 @@ class SqlFileBasedTest(StateTest, unittest.TestCase):
             ]
             for thread in threads:
                 thread.start()
-            barrier.wait()
+            barrier.wait(timeout=barrier_timeout)
             for thread in threads:
-                thread.join()
+                thread.join(timeout=join_timeout)
+                if thread.is_alive():
+                    self.fail("Concurrent get_message_ins thread did not finish in time")
 
             if exceptions:
                 raise exceptions[0]
