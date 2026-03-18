@@ -974,6 +974,36 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
         # Clean up expired tokens; this will flag inactive runs as needed
         self._cleanup_expired_tokens()
 
+        # Atomic claim path for STARTING -> RUNNING across replicas/processes.
+        if new_status.status == Status.RUNNING:
+            if not has_valid_sub_status(new_status):
+                log(
+                    ERROR,
+                    'Invalid sub-status "%s" for status "%s"',
+                    new_status.sub_status,
+                    new_status.status,
+                )
+                return False
+
+            sint64_run_id = uint64_to_int64(run_id)
+            query = """
+                UPDATE run
+                SET running_at = :timestamp, sub_status = :sub_status, details = :details
+                WHERE run_id = :run_id
+                AND starting_at != ''
+                AND running_at = ''
+                AND finished_at = ''
+                RETURNING run_id
+            """
+            params = {
+                "timestamp": now().isoformat(),
+                "sub_status": new_status.sub_status,
+                "details": new_status.details,
+                "run_id": sint64_run_id,
+            }
+            rows = self.query(query, params)
+            return len(rows) > 0
+
         with self.session():
             # Convert the uint64 value to sint64 for SQLite
             sint64_run_id = uint64_to_int64(run_id)
