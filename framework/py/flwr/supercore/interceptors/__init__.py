@@ -22,7 +22,7 @@ from .appio_token_interceptor import (
     AppIoTokenClientInterceptor,
     AppIoTokenServerInterceptor,
     MethodTokenPolicy,
-    create_serverappio_token_auth_interceptor,
+    create_serverappio_token_auth_server_interceptor,
 )
 
 __all__ = [
@@ -32,5 +32,5 @@ __all__ = [
     "AppIoTokenServerInterceptor",
     "MethodTokenPolicy",
     "SERVERAPPIO_METHOD_AUTH_POLICY",
-    "create_serverappio_token_auth_interceptor",
+    "create_serverappio_token_auth_server_interceptor",
 ]

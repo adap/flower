@@ -35,12 +35,12 @@ class MethodTokenPolicy:
     requires_token: bool
 
     @staticmethod
-    def no_auth() -> "MethodTokenPolicy":
+    def no_auth() -> MethodTokenPolicy:
         """Return policy for methods that should remain unauthenticated."""
         return MethodTokenPolicy(requires_token=False)
 
     @staticmethod
-    def token_required() -> "MethodTokenPolicy":
+    def token_required() -> MethodTokenPolicy:
         """Return policy for methods protected by App token auth."""
         return MethodTokenPolicy(requires_token=True)
 

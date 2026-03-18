@@ -35,7 +35,7 @@ from flwr.supercore.interceptors import (
     SERVERAPPIO_METHOD_AUTH_POLICY,
     AppIoTokenClientInterceptor,
     AppIoTokenServerInterceptor,
-    create_serverappio_token_auth_interceptor,
+    create_serverappio_token_auth_server_interceptor,
 )
 
 _ClientCallDetails = namedtuple(
@@ -128,7 +128,7 @@ class TestAppIoTokenServerInterceptor(TestCase):
         self, token_to_run_id: dict[str, int]
     ) -> AppIoTokenServerInterceptor:
         state = _TokenState(token_to_run_id)
-        return create_serverappio_token_auth_interceptor(lambda: state)
+        return create_serverappio_token_auth_server_interceptor(lambda: state)
 
     @staticmethod
     def _find_serverappio_method(*, requires_token: bool) -> str | None:
@@ -218,8 +218,12 @@ class TestAppIoTokenServerInterceptor(TestCase):
             ),
         )
 
-        response = cast(str, intercepted.unary_unary(GetNodesRequest(run_id=1), Mock()))
+        # Keep success-path test data aligned to avoid implying
+        # cross-run use is expected.
+        response = cast(str, intercepted.unary_unary(GetNodesRequest(run_id=7), Mock()))
         self.assertEqual(response, "ok")
+        # Run-id mismatch deny coverage belongs to the
+        # follow-up PR that enforces run binding.
 
     def test_request_token_preferred_over_metadata_token(self) -> None:
         """request.token should be authoritative when non-empty."""
@@ -363,7 +367,7 @@ class TestFactoryFunctions(TestCase):
     def test_serverappio_factory_uses_server_policy(self) -> None:
         """ServerAppIo factory should enforce ServerAppIo policy semantics."""
         state = _TokenState({"valid-token": 1})
-        interceptor = create_serverappio_token_auth_interceptor(lambda: state)
+        interceptor = create_serverappio_token_auth_server_interceptor(lambda: state)
 
         intercepted = interceptor.intercept_service(
             lambda _: _make_unary_handler(),
