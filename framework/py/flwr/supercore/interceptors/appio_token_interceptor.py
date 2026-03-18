@@ -193,7 +193,7 @@ class AppIoTokenServerInterceptor(grpc.ServerInterceptor):  # type: ignore
         )
 
 
-def create_serverappio_token_auth_interceptor(
+def create_serverappio_token_auth_server_interceptor(
     state_provider: Callable[[], _TokenState],
 ) -> AppIoTokenServerInterceptor:
     """Create the default token interceptor for ServerAppIo."""
