@@ -18,31 +18,15 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Mapping, Sequence
-from dataclasses import dataclass
 from typing import Any, NoReturn, Protocol, cast
 
 import grpc
 from google.protobuf.message import Message as GrpcMessage
 
+from flwr.supercore.auth import SERVERAPPIO_METHOD_AUTH_POLICY, MethodTokenPolicy
+
 APP_TOKEN_HEADER = "flwr-app-token"
 AUTHENTICATION_FAILED_MESSAGE = "Authentication failed."
-
-
-@dataclass(frozen=True)
-class MethodTokenPolicy:
-    """Token requirement for a single unary RPC method."""
-
-    requires_token: bool
-
-    @staticmethod
-    def no_auth() -> MethodTokenPolicy:
-        """Return policy for methods that should remain unauthenticated."""
-        return MethodTokenPolicy(requires_token=False)
-
-    @staticmethod
-    def token_required() -> MethodTokenPolicy:
-        """Return policy for methods protected by App token auth."""
-        return MethodTokenPolicy(requires_token=True)
 
 
 class _TokenState(Protocol):
@@ -53,28 +37,6 @@ class _TokenState(Protocol):
 
     def verify_token(self, run_id: int, token: str) -> bool:
         """Return whether token is valid for run_id."""
-
-
-_NO_AUTH = MethodTokenPolicy.no_auth()
-_TOKEN_REQUIRED = MethodTokenPolicy.token_required()
-
-# In a follow-up PR, create this explicit map using a shared builder.
-SERVERAPPIO_METHOD_AUTH_POLICY: dict[str, MethodTokenPolicy] = {
-    "/flwr.proto.ServerAppIo/ListAppsToLaunch": _NO_AUTH,
-    "/flwr.proto.ServerAppIo/RequestToken": _NO_AUTH,
-    "/flwr.proto.ServerAppIo/GetRun": _NO_AUTH,
-    "/flwr.proto.ServerAppIo/SendAppHeartbeat": _TOKEN_REQUIRED,
-    "/flwr.proto.ServerAppIo/PullAppInputs": _TOKEN_REQUIRED,
-    "/flwr.proto.ServerAppIo/PushAppOutputs": _TOKEN_REQUIRED,
-    "/flwr.proto.ServerAppIo/PushObject": _TOKEN_REQUIRED,
-    "/flwr.proto.ServerAppIo/PullObject": _TOKEN_REQUIRED,
-    "/flwr.proto.ServerAppIo/ConfirmMessageReceived": _TOKEN_REQUIRED,
-    "/flwr.proto.ServerAppIo/UpdateRunStatus": _TOKEN_REQUIRED,
-    "/flwr.proto.ServerAppIo/PushLogs": _TOKEN_REQUIRED,
-    "/flwr.proto.ServerAppIo/PushMessages": _TOKEN_REQUIRED,
-    "/flwr.proto.ServerAppIo/PullMessages": _TOKEN_REQUIRED,
-    "/flwr.proto.ServerAppIo/GetNodes": _TOKEN_REQUIRED,
-}
 
 
 def _abort_auth_denied(context: grpc.ServicerContext) -> NoReturn:

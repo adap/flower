@@ -29,10 +29,10 @@ from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
     PushAppOutputsRequest,
 )
 from flwr.proto.serverappio_pb2 import GetNodesRequest  # pylint: disable=E0611
+from flwr.supercore.auth import SERVERAPPIO_METHOD_AUTH_POLICY
 from flwr.supercore.interceptors import (
     APP_TOKEN_HEADER,
     AUTHENTICATION_FAILED_MESSAGE,
-    SERVERAPPIO_METHOD_AUTH_POLICY,
     AppIoTokenClientInterceptor,
     AppIoTokenServerInterceptor,
     create_serverappio_token_auth_server_interceptor,

@@ -12,21 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Shared gRPC interceptors used across supercore services."""
+"""Shared auth policy definitions."""
 
-
-from .appio_token_interceptor import (
-    APP_TOKEN_HEADER,
-    AUTHENTICATION_FAILED_MESSAGE,
-    AppIoTokenClientInterceptor,
-    AppIoTokenServerInterceptor,
-    create_serverappio_token_auth_server_interceptor,
-)
+from .policy import SERVERAPPIO_METHOD_AUTH_POLICY, MethodTokenPolicy
 
 __all__ = [
-    "APP_TOKEN_HEADER",
-    "AUTHENTICATION_FAILED_MESSAGE",
-    "AppIoTokenClientInterceptor",
-    "AppIoTokenServerInterceptor",
-    "create_serverappio_token_auth_server_interceptor",
+    "MethodTokenPolicy",
+    "SERVERAPPIO_METHOD_AUTH_POLICY",
 ]
