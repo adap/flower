@@ -1701,8 +1701,8 @@ class StateTest(CoreStateTest):
 
         # Assert
         assert fed_options_fetched == fed_options
-        assert run_info.run_type == RunType.SIMULATION.value
-        assert second_run_info.run_type == RunType.SERVER_APP.value
+        assert run_info.run_type == RunType.SIMULATION
+        assert second_run_info.run_type == RunType.SERVER_APP
 
         # Generate a run_id that doesn't exist. Then check None is returned
         unique_int = next(num for num in range(0, 1) if num not in {run_id})

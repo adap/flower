@@ -175,7 +175,7 @@ class TestControlServicer(unittest.TestCase):
         self.assertEqual(run_info.fab_hash, fab_hash)
         self.assertEqual(run_info.fab_id, fab_id)
         self.assertEqual(run_info.fab_version, fab_version)
-        self.assertEqual(run_info.run_type, RunType.SERVER_APP.value)
+        self.assertEqual(run_info.run_type, RunType.SERVER_APP)
 
     def test_start_run_sets_simulation_run_type(self) -> None:
         """Test StartRun marks runs with federation options as simulation runs."""
@@ -206,7 +206,7 @@ class TestControlServicer(unittest.TestCase):
 
         # Assert
         assert run_info is not None
-        self.assertEqual(run_info.run_type, RunType.SIMULATION.value)
+        self.assertEqual(run_info.run_type, RunType.SIMULATION)
 
     def test_start_run_accepts_valid_nested_override_keys(self) -> None:
         """Test StartRun accepts valid dotted override keys from nested FAB config."""

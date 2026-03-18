@@ -169,7 +169,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         override_config = user_config_from_proto(request.override_config)
         federation_options = config_record_from_proto(request.federation_options)
         run_type = (
-            RunType.SIMULATION.value if federation_options else RunType.SERVER_APP.value
+            RunType.SIMULATION if federation_options else RunType.SERVER_APP
         )
 
         try:

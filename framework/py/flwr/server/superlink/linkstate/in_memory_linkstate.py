@@ -547,7 +547,7 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
     ) -> int:
         """Create a new run."""
         inferred_run_type = (
-            RunType.SIMULATION.value if federation_options else RunType.SERVER_APP.value
+            RunType.SIMULATION if federation_options else RunType.SERVER_APP
         )
 
         # Sample a random int64 as run_id

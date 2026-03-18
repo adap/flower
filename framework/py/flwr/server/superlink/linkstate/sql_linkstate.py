@@ -945,9 +945,9 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
                 bytes_recv=row["bytes_recv"],
                 clientapp_runtime=row["clientapp_runtime"],
                 run_type=(
-                    RunType.SIMULATION.value
+                    RunType.SIMULATION
                     if configrecord_from_bytes(row["federation_options"])
-                    else RunType.SERVER_APP.value
+                    else RunType.SERVER_APP
                 ),
             )
             for row in rows
