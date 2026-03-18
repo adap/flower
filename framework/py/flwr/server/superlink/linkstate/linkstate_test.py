@@ -55,7 +55,7 @@ from flwr.proto.recorddict_pb2 import RecordDict as ProtoRecordDict
 
 # pylint: enable=E0611
 from flwr.server.superlink.linkstate import InMemoryLinkState, LinkState, SqlLinkState
-from flwr.supercore.constant import NOOP_FEDERATION, NodeStatus
+from flwr.supercore.constant import NOOP_FEDERATION, NodeStatus, RunType
 from flwr.supercore.corestate.corestate_test import StateTest as CoreStateTest
 from flwr.supercore.object_store.object_store_factory import ObjectStoreFactory
 from flwr.supercore.primitives.asymmetric import generate_key_pairs, public_key_to_bytes
@@ -1692,12 +1692,17 @@ class StateTest(CoreStateTest):
         fed_options = ConfigRecord({"setting-a": 123, "setting-b": [4, 5, 6]})
         run_id = create_dummy_run(state, federation_options=fed_options)
         state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
+        second_run_id = create_dummy_run(state)
 
         # Execute
         fed_options_fetched = state.get_federation_options(run_id=run_id)
+        run_info = state.get_run_info(run_ids=[run_id])[0]
+        second_run_info = state.get_run_info(run_ids=[second_run_id])[0]
 
         # Assert
         assert fed_options_fetched == fed_options
+        assert run_info.run_type == RunType.SIMULATION.value
+        assert second_run_info.run_type == RunType.SERVER_APP.value
 
         # Generate a run_id that doesn't exist. Then check None is returned
         unique_int = next(num for num in range(0, 1) if num not in {run_id})

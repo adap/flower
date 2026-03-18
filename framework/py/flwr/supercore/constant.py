@@ -132,3 +132,10 @@ class InvitationStatus(str, Enum):
     REJECTED = "rejected"
     REVOKED = "revoked"
     EXPIRED = "expired"
+
+
+class RunType(str, Enum):
+    """Supported run types."""
+
+    SERVER_APP = "serverapp"
+    SIMULATION = "simulation"

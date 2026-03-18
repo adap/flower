@@ -41,7 +41,7 @@ from flwr.common.typing import Run, RunStatus
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.server.superlink.linkstate.linkstate import LinkState
 from flwr.server.utils import validate_message
-from flwr.supercore.constant import NodeStatus
+from flwr.supercore.constant import NodeStatus, RunType
 from flwr.supercore.corestate.in_memory_corestate import InMemoryCoreState
 from flwr.supercore.object_store.object_store import ObjectStore
 from flwr.superlink.federation import FederationManager
@@ -544,8 +544,20 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
         federation: str,
         federation_options: ConfigRecord,
         flwr_aid: str | None,
+        run_type: str | None = None,
     ) -> int:
         """Create a new run."""
+        inferred_run_type = (
+            RunType.SIMULATION.value
+            if federation_options
+            else RunType.SERVER_APP.value
+        )
+        if run_type is not None and run_type != inferred_run_type:
+            raise ValueError(
+                f"run_type '{run_type}' does not match inferred type "
+                f"'{inferred_run_type}'."
+            )
+
         # Sample a random int64 as run_id
         with self.lock:
             run_id = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
@@ -572,6 +584,7 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
                         bytes_sent=0,
                         bytes_recv=0,
                         clientapp_runtime=0.0,
+                        run_type=inferred_run_type,
                     ),
                 )
                 self.run_ids[run_id] = run_record

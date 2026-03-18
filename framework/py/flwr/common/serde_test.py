@@ -488,6 +488,7 @@ def test_run_serialization_deserialization() -> None:
         bytes_sent=2048,
         bytes_recv=1024,
         clientapp_runtime=3.14,
+        run_type="simulation",
     )
 
     # Execute

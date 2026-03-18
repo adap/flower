@@ -40,7 +40,7 @@ from flwr.common.constant import (
     Status,
     SubStatus,
 )
-from flwr.common.serde import user_config_to_proto
+from flwr.common.serde import config_record_to_proto, user_config_to_proto
 from flwr.common.typing import Run, RunStatus
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     AcceptInvitationRequest,
@@ -76,7 +76,7 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.federation_pb2 import Account, Member  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkStateFactory
-from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME, NOOP_FEDERATION
+from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME, NOOP_FEDERATION, RunType
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.primitives.asymmetric import generate_key_pairs, public_key_to_bytes
 from flwr.superlink.auth_plugin import NoOpControlAuthnPlugin
@@ -175,6 +175,38 @@ class TestControlServicer(unittest.TestCase):
         self.assertEqual(run_info.fab_hash, fab_hash)
         self.assertEqual(run_info.fab_id, fab_id)
         self.assertEqual(run_info.fab_version, fab_version)
+        self.assertEqual(run_info.run_type, RunType.SERVER_APP.value)
+
+    def test_start_run_sets_simulation_run_type(self) -> None:
+        """Test StartRun marks runs with federation options as simulation runs."""
+        # Prepare
+        fab_content = b"test FAB content simulation"
+        fab_hash = hashlib.sha256(fab_content).hexdigest()
+        request = StartRunRequest()
+        request.fab.hash_str = fab_hash
+        request.fab.content = fab_content
+        request.federation = NOOP_FEDERATION
+        request.federation_options.CopyFrom(
+            config_record_to_proto(ConfigRecord({"num-supernodes": 3}))
+        )
+
+        # Execute
+        with (
+            patch(
+                "flwr.superlink.servicer.control.control_servicer.get_fab_config"
+            ) as _,
+            patch(
+                "flwr.superlink.servicer.control.control_servicer.get_metadata_from_config"
+            ) as mock_get_metadata_from_config,
+        ):
+            mock_get_metadata_from_config.return_value = ("flwr/demo", "v1.0.0")
+            response = self.servicer.StartRun(request, Mock())
+        runs = self.state.get_run_info(run_ids=[response.run_id])
+        run_info = runs[0] if runs else None
+
+        # Assert
+        assert run_info is not None
+        self.assertEqual(run_info.run_type, RunType.SIMULATION.value)
 
     def test_start_run_accepts_valid_nested_override_keys(self) -> None:
         """Test StartRun accepts valid dotted override keys from nested FAB config."""

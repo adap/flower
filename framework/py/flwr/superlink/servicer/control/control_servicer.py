@@ -107,7 +107,7 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
 from flwr.proto.federation_pb2 import Federation  # pylint: disable=E0611
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
-from flwr.supercore.constant import NOOP_FEDERATION, PLATFORM_API_URL
+from flwr.supercore.constant import NOOP_FEDERATION, PLATFORM_API_URL, RunType
 from flwr.supercore.error import rpc_error_translator
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
@@ -168,6 +168,11 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         flwr_aid = _get_flwr_aid(context)
         override_config = user_config_from_proto(request.override_config)
         federation_options = config_record_from_proto(request.federation_options)
+        run_type = (
+            RunType.SIMULATION.value
+            if federation_options
+            else RunType.SERVER_APP.value
+        )
 
         try:
             # Validate user config overrides matches keys in run config in FAB
@@ -217,6 +222,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 federation,
                 federation_options,
                 flwr_aid,
+                run_type,
             )
 
             # Initialize node config

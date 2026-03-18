@@ -42,7 +42,7 @@ from flwr.common.record import ConfigRecord
 from flwr.common.typing import Run, RunStatus
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.server.utils.validator import validate_message
-from flwr.supercore.constant import NodeStatus
+from flwr.supercore.constant import NodeStatus, RunType
 from flwr.supercore.corestate.sql_corestate import SqlCoreState
 from flwr.supercore.object_store.object_store import ObjectStore
 from flwr.supercore.state.schema.corestate_tables import create_corestate_metadata
@@ -789,8 +789,20 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
         federation: str,
         federation_options: ConfigRecord,
         flwr_aid: str | None,
+        run_type: str | None = None,
     ) -> int:
         """Create a new run."""
+        inferred_run_type = (
+            RunType.SIMULATION.value
+            if federation_options
+            else RunType.SERVER_APP.value
+        )
+        if run_type is not None and run_type != inferred_run_type:
+            raise ValueError(
+                f"run_type '{run_type}' does not match inferred type "
+                f"'{inferred_run_type}'."
+            )
+
         # Sample a random int64 as run_id
         uint64_run_id = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
 
@@ -944,6 +956,11 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
                 bytes_sent=row["bytes_sent"],
                 bytes_recv=row["bytes_recv"],
                 clientapp_runtime=row["clientapp_runtime"],
+                run_type=(
+                    RunType.SIMULATION.value
+                    if configrecord_from_bytes(row["federation_options"])
+                    else RunType.SERVER_APP.value
+                ),
             )
             for row in rows
         ]
