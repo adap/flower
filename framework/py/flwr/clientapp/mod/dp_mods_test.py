@@ -25,6 +25,7 @@ from flwr.common import (
     Context,
     Message,
     MetricRecord,
+    NDArray,
     RecordDict,
 )
 from flwr.common.differential_privacy_constants import KEY_CLIPPING_NORM, KEY_NORM_BIT
@@ -44,7 +45,7 @@ def _make_context() -> Context:
 
 
 def _make_train_message(
-    server_value: np.ndarray, clipping_norm: float | None = None
+    server_value: NDArray, clipping_norm: float | None = None
 ) -> Message:
     content = RecordDict(
         {
@@ -57,7 +58,7 @@ def _make_train_message(
 
 
 def _make_reply_message(
-    msg: Message, client_value: np.ndarray, include_metrics: bool = False
+    msg: Message, client_value: NDArray, include_metrics: bool = False
 ) -> Message:
     content = RecordDict({"arrays": ArrayRecord({"w": Array(client_value)})})
     if include_metrics:
