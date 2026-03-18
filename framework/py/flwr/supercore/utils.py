@@ -241,8 +241,11 @@ def warn_if_flwr_update_available(process_name: str | None = None) -> None:
         return
 
     try:
-        body: dict[str, Any] = response.json()
+        body: Any = response.json()
     except ValueError:
+        return
+
+    if not isinstance(body, dict):
         return
 
     if body.get("update_available") is not True:
