@@ -61,7 +61,7 @@ API_ERROR_MAP: Final[dict[int, ApiErrorSpec]] = {
     ApiErrorCode.FEDERATION_NOT_FOUND_OR_NO_PENDING_INVITE: ApiErrorSpec(
         status_code=StatusCode.NOT_FOUND,
         public_message="Federation does not exist, or it has been archived, "
-        "or no pending invitation found.",
+        "or no pending invitation was found.",
     ),
     ApiErrorCode.ACCOUNT_NOT_A_MEMBER: ApiErrorSpec(
         status_code=StatusCode.FAILED_PRECONDITION,
