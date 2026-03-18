@@ -544,9 +544,10 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
         federation: str,
         federation_options: ConfigRecord,
         flwr_aid: str | None,
+        run_type: str | None = None,
     ) -> int:
         """Create a new run."""
-        inferred_run_type = (
+        run_type = run_type or (
             RunType.SIMULATION if federation_options else RunType.SERVER_APP
         )
 
@@ -576,7 +577,7 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
                         bytes_sent=0,
                         bytes_recv=0,
                         clientapp_runtime=0.0,
-                        run_type=inferred_run_type,
+                        run_type=run_type,
                     ),
                 )
                 self.run_ids[run_id] = run_record

@@ -59,6 +59,7 @@ from flwr.supercore.constant import NOOP_FEDERATION, NodeStatus, RunType
 from flwr.supercore.corestate.corestate_test import StateTest as CoreStateTest
 from flwr.supercore.object_store.object_store_factory import ObjectStoreFactory
 from flwr.supercore.primitives.asymmetric import generate_key_pairs, public_key_to_bytes
+from flwr.supercore.utils import uint64_to_int64
 from flwr.superlink.federation import NoOpFederationManager
 
 
@@ -1890,6 +1891,7 @@ def create_dummy_run(  # pylint: disable=too-many-positional-arguments
     federation: str = NOOP_FEDERATION,
     federation_options: ConfigRecord | None = None,
     flwr_aid: str | None = "mock_flwr_aid",
+    run_type: str | None = None,
 ) -> int:
     """Create a dummy run."""
     return state.create_run(
@@ -1900,6 +1902,7 @@ def create_dummy_run(  # pylint: disable=too-many-positional-arguments
         federation=federation,
         federation_options=federation_options or ConfigRecord(),
         flwr_aid=flwr_aid,
+        run_type=run_type,
     )
 
 
@@ -1957,6 +1960,22 @@ class SqlFileBasedTest(StateTest, unittest.TestCase):
         )
         state.initialize()
         return state
+
+    def test_create_run_persists_run_type_column(self) -> None:
+        """Test that run_type is stored explicitly in the run table."""
+        state = self.state_factory()
+        run_id = create_dummy_run(
+            state,
+            federation_options=ConfigRecord({"num-supernodes": 3}),
+            run_type=RunType.SIMULATION,
+        )
+
+        row = state.query(
+            "SELECT run_type FROM run WHERE run_id = :run_id",
+            {"run_id": uint64_to_int64(run_id)},
+        )[0]
+
+        assert row["run_type"] == RunType.SIMULATION
 
 
 if __name__ == "__main__":

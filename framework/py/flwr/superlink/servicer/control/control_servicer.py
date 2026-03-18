@@ -168,9 +168,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         flwr_aid = _get_flwr_aid(context)
         override_config = user_config_from_proto(request.override_config)
         federation_options = config_record_from_proto(request.federation_options)
-        run_type = (
-            RunType.SIMULATION if federation_options else RunType.SERVER_APP
-        )
+        run_type = RunType.SIMULATION if federation_options else RunType.SERVER_APP
 
         try:
             # Validate user config overrides matches keys in run config in FAB
@@ -220,6 +218,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 federation,
                 federation_options,
                 flwr_aid,
+                run_type,
             )
 
             # Initialize node config
