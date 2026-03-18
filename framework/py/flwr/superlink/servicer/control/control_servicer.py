@@ -169,9 +169,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         override_config = user_config_from_proto(request.override_config)
         federation_options = config_record_from_proto(request.federation_options)
         run_type = (
-            RunType.SIMULATION.value
-            if federation_options
-            else RunType.SERVER_APP.value
+            RunType.SIMULATION.value if federation_options else RunType.SERVER_APP.value
         )
 
         try:
@@ -222,7 +220,6 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 federation,
                 federation_options,
                 flwr_aid,
-                run_type,
             )
 
             # Initialize node config
@@ -250,7 +247,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             log(ERROR, "Could not start run: %s", str(e))
             context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(e))
 
-        log(INFO, "Created run %s", str(run_id))
+        log(INFO, "Created %s run %s", run_type, str(run_id))
         return StartRunResponse(run_id=run_id)
 
     def StreamLogs(  # pylint: disable=C0103

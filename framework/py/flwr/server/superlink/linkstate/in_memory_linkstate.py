@@ -544,19 +544,11 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
         federation: str,
         federation_options: ConfigRecord,
         flwr_aid: str | None,
-        run_type: str | None = None,
     ) -> int:
         """Create a new run."""
         inferred_run_type = (
-            RunType.SIMULATION.value
-            if federation_options
-            else RunType.SERVER_APP.value
+            RunType.SIMULATION.value if federation_options else RunType.SERVER_APP.value
         )
-        if run_type is not None and run_type != inferred_run_type:
-            raise ValueError(
-                f"run_type '{run_type}' does not match inferred type "
-                f"'{inferred_run_type}'."
-            )
 
         # Sample a random int64 as run_id
         with self.lock:
