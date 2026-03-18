@@ -17,15 +17,22 @@
 
 import json
 import os
+import platform
 import re
+import sys
 from pathlib import Path
+from typing import Any
 
 import requests
 
 from flwr.common.constant import FLWR_DIR, FLWR_HOME
 from flwr.supercore.version import package_version as flwr_version
 
-from .constant import APP_ID_PATTERN, APP_VERSION_PATTERN
+from .constant import APP_ID_PATTERN, APP_VERSION_PATTERN, PLATFORM_API_URL
+
+FLWR_DISABLE_UPDATE_CHECK = "FLWR_DISABLE_UPDATE_CHECK"
+FLWR_UPDATE_CHECK_URL = f"{PLATFORM_API_URL}/update-check/flwr"
+FLWR_UPDATE_CHECK_TIMEOUT_SECONDS = 5
 
 
 def mask_string(value: str, head: int = 4, tail: int = 4) -> str:
@@ -193,6 +200,51 @@ def request_download_link(
     verifications = data["verifications"] if "verifications" in data else None
 
     return str(data[out_url]), verifications
+
+
+def get_flwr_update_check_payload(process_name: str | None = None) -> dict[str, str]:
+    """Return the runtime payload sent to the update-check endpoint."""
+    payload = {
+        "flwr_version": flwr_version,
+        "python_version": platform.python_version(),
+        "os": platform.system().lower(),
+        "os_version": platform.release(),
+    }
+    if process_name:
+        payload["process_name"] = process_name
+    return payload
+
+
+def warn_if_flwr_update_available(process_name: str | None = None) -> None:
+    """Print the update message to stderr if the runtime is outdated."""
+    if os.getenv(FLWR_DISABLE_UPDATE_CHECK) == "1":
+        return
+
+    # NOTE: The update check is advisory only, so any network, HTTP, or response-parsing
+    # failure must not interrupt the normal runtime startup flow.
+    try:
+        response = requests.post(
+            FLWR_UPDATE_CHECK_URL,
+            json=get_flwr_update_check_payload(process_name=process_name),
+            timeout=FLWR_UPDATE_CHECK_TIMEOUT_SECONDS,
+        )
+    except requests.RequestException:
+        return
+
+    if not response.ok:
+        return
+
+    try:
+        body: dict[str, Any] = response.json()
+    except ValueError:
+        return
+
+    if body.get("update_available") is not True:
+        return
+
+    message = body.get("message")
+    if isinstance(message, str) and message.strip():
+        print(message, file=sys.stderr)
 
 
 def humanize_duration(seconds: float) -> str:

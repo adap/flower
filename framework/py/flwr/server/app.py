@@ -64,7 +64,7 @@ from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.grpc_health import add_args_health, run_health_server_grpc_no_tls
 from flwr.supercore.object_store import ObjectStoreFactory
-from flwr.supercore.utils import get_flwr_home
+from flwr.supercore.utils import get_flwr_home, warn_if_flwr_update_available
 from flwr.supercore.version import package_version
 from flwr.superlink.artifact_provider import ArtifactProvider
 from flwr.superlink.auth_plugin import (
@@ -159,6 +159,8 @@ def get_federation_manager() -> FederationManager:
 def run_superlink() -> None:
     """Run Flower SuperLink (ServerAppIo API and Fleet API)."""
     args = _parse_args_run_superlink().parse_args()
+
+    warn_if_flwr_update_available(process_name="flower-superlink")
 
     if args.log_file:
         configure_superlink_log_file(

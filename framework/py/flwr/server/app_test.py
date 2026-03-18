@@ -15,10 +15,13 @@
 """Tests for Flower SuperLink app CLI argument parsing."""
 
 
+from types import SimpleNamespace
+
 import pytest
 
 from flwr.supercore.version import package_version
 
+from . import app as app_module
 from .app import _parse_args_run_superlink
 
 
@@ -82,3 +85,29 @@ def test_parse_superlink_log_rotation_backup_requires_positive_int(
     """The backup count must be a positive integer."""
     with pytest.raises(SystemExit):
         _parse_args_run_superlink().parse_args(["--log-rotation-backup-count", value])
+
+
+def test_run_superlink_checks_for_update(monkeypatch) -> None:
+    """SuperLink should run the startup update check after parsing arguments."""
+
+    class _SentinelError(Exception):
+        pass
+
+    class _Parser:
+        def parse_args(self) -> SimpleNamespace:
+            return SimpleNamespace()
+
+    captured: dict[str, str] = {}
+
+    def _raise_sentinel(process_name: str | None = None) -> None:
+        if process_name is not None:
+            captured["process_name"] = process_name
+        raise _SentinelError()
+
+    monkeypatch.setattr(app_module, "_parse_args_run_superlink", lambda: _Parser())
+    monkeypatch.setattr(app_module, "warn_if_flwr_update_available", _raise_sentinel)
+
+    with pytest.raises(_SentinelError):
+        app_module.run_superlink()
+
+    assert captured == {"process_name": "flower-superlink"}
