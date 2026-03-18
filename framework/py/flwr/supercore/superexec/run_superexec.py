@@ -53,7 +53,7 @@ def run_superexec(  # pylint: disable=R0913,R0914,R0917
     ----------
     plugin_class : type[ExecPlugin]
         The class of the SuperExec plugin to use.
-    stub_class : type[ClientAppIoStub]
+    stub_class : type[ClientAppIoStub] | type[ServerAppIoStub]
         The gRPC stub class for the AppIO API.
     appio_api_address : str
         The address of the AppIO API.

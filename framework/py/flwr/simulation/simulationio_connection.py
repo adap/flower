@@ -32,7 +32,7 @@ class SimulationIoConnection:
 
     Parameters
     ----------
-    simulationio_service_address : str (default: "127.0.0.1:9091")
+    serverappio_api_address : str (default: "127.0.0.1:9091")
         The address (URL, IPv6, IPv4) of the SuperLink ServerAppIo API service.
     root_certificates : Optional[bytes] (default: None)
         The PEM-encoded root certificates as a byte string.
@@ -42,10 +42,10 @@ class SimulationIoConnection:
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
-        simulationio_service_address: str = SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
+        serverappio_api_address: str = SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
         root_certificates: bytes | None = None,
     ) -> None:
-        self._addr = simulationio_service_address
+        self._addr = serverappio_api_address
         self._cert = root_certificates
         self._grpc_stub: ServerAppIoStub | None = None
         self._channel: grpc.Channel | None = None

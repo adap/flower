@@ -126,7 +126,7 @@ def make_app_heartbeat_fn_grpc(
 
     Parameters
     ----------
-    stub : Union[ServerAppIoStub, ClientAppIoStub]
+    stub : ServerAppIoStub | ClientAppIoStub
         gRPC stub to send the heartbeat.
     token : str
         The token to use in the heartbeat request.
