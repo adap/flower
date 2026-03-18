@@ -27,11 +27,6 @@ import tomli
 import tomli_w
 import typer
 
-from flwr.common.config import (
-    FabFormatMetadata,
-    normalize_and_validate_fab_format,
-    validate_fab_files_for_format,
-)
 from flwr.common.constant import (
     FAB_CONFIG_FILE,
     FAB_DATE,
@@ -39,6 +34,11 @@ from flwr.common.constant import (
     FAB_HASH_TRUNCATION,
     FAB_INCLUDE_PATTERNS,
     FAB_MAX_SIZE,
+)
+from flwr.supercore.fab_format_version import (
+    FabFormatMetadata,
+    normalize_and_validate_fab_format,
+    validate_fab_files_for_format,
 )
 
 from .config_utils import load_and_validate

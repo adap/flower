@@ -25,13 +25,13 @@ from unittest.mock import patch
 import pytest
 
 from flwr.app.user_config import UserConfig
+from flwr.supercore.fab_format_version import normalize_and_validate_fab_format
 
 from .config import (
     flatten_dict,
     fuse_dicts,
     get_project_config,
     get_project_dir,
-    normalize_and_validate_fab_format,
     parse_config_args,
     unflatten_dict,
     validate_config,
