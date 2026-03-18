@@ -87,7 +87,7 @@ def test_parse_superlink_log_rotation_backup_requires_positive_int(
         _parse_args_run_superlink().parse_args(["--log-rotation-backup-count", value])
 
 
-def test_run_superlink_checks_for_update(monkeypatch) -> None:
+def test_run_superlink_checks_for_update(monkeypatch: pytest.MonkeyPatch) -> None:
     """SuperLink should run the startup update check after parsing arguments."""
 
     class _SentinelError(Exception):

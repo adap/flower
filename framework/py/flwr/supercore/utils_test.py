@@ -282,11 +282,13 @@ class _Response:
         return self._body
 
 
-def test_get_flwr_update_check_payload(monkeypatch) -> None:
+def test_get_flwr_update_check_payload(monkeypatch: pytest.MonkeyPatch) -> None:
     """The payload should include the expected runtime metadata."""
-    monkeypatch.setattr(utils.platform, "python_version", lambda: "3.11.11")
-    monkeypatch.setattr(utils.platform, "system", lambda: "Linux")
-    monkeypatch.setattr(utils.platform, "release", lambda: "6.8.0")
+    monkeypatch.setattr(
+        "flwr.supercore.utils.platform.python_version", lambda: "3.11.11"
+    )
+    monkeypatch.setattr("flwr.supercore.utils.platform.system", lambda: "Linux")
+    monkeypatch.setattr("flwr.supercore.utils.platform.release", lambda: "6.8.0")
     monkeypatch.setattr(utils, "flwr_version", "1.28.0")
 
     payload = get_flwr_update_check_payload(process_name="flower-superlink")
@@ -300,7 +302,9 @@ def test_get_flwr_update_check_payload(monkeypatch) -> None:
     }
 
 
-def test_warn_if_flwr_update_available_disabled(monkeypatch) -> None:
+def test_warn_if_flwr_update_available_disabled(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     """The update check should not run when disabled via environment variable."""
     monkeypatch.setenv(FLWR_DISABLE_UPDATE_CHECK, "1")
     called = False
@@ -309,14 +313,16 @@ def test_warn_if_flwr_update_available_disabled(monkeypatch) -> None:
         nonlocal called
         called = True
 
-    monkeypatch.setattr(utils.requests, "post", _post)
+    monkeypatch.setattr("flwr.supercore.utils.requests.post", _post)
 
     warn_if_flwr_update_available(process_name="flower-superlink")
 
     assert called is False
 
 
-def test_warn_if_flwr_update_available_prints_message(monkeypatch, capsys) -> None:
+def test_warn_if_flwr_update_available_prints_message(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
     """The update message should be printed to stderr when outdated."""
     response = _Response(
         ok=True,
@@ -330,7 +336,7 @@ def test_warn_if_flwr_update_available_prints_message(monkeypatch, capsys) -> No
         return response
 
     monkeypatch.delenv(FLWR_DISABLE_UPDATE_CHECK, raising=False)
-    monkeypatch.setattr(utils.requests, "post", _post)
+    monkeypatch.setattr("flwr.supercore.utils.requests.post", _post)
 
     warn_if_flwr_update_available(process_name="flower-superlink")
 
@@ -338,7 +344,9 @@ def test_warn_if_flwr_update_available_prints_message(monkeypatch, capsys) -> No
     assert captured.err == "A newer Flower version is available: 1.0.0 -> 1.1.0\n"
 
 
-def test_warn_if_flwr_update_available_sends_expected_request(monkeypatch) -> None:
+def test_warn_if_flwr_update_available_sends_expected_request(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     """The update check should call the correct endpoint with the runtime payload."""
     captured: dict[str, Any] = {}
 
@@ -348,18 +356,17 @@ def test_warn_if_flwr_update_available_sends_expected_request(monkeypatch) -> No
         captured["timeout"] = kwargs["timeout"]
         return _Response(ok=True, body={"update_available": False})
 
-    monkeypatch.setattr(utils.requests, "post", _post)
-    monkeypatch.setattr(
-        utils,
-        "get_flwr_update_check_payload",
-        lambda process_name=None: {
+    def _get_payload(process_name: str | None = None) -> dict[str, str]:
+        return {
             "flwr_version": "1.28.0",
             "python_version": "3.11.11",
             "os": "linux",
             "os_version": "6.8.0",
             "process_name": process_name or "",
-        },
-    )
+        }
+
+    monkeypatch.setattr("flwr.supercore.utils.requests.post", _post)
+    monkeypatch.setattr(utils, "get_flwr_update_check_payload", _get_payload)
 
     warn_if_flwr_update_available(process_name="flower-superlink")
 
@@ -379,13 +386,15 @@ def test_warn_if_flwr_update_available_sends_expected_request(monkeypatch) -> No
     }
 
 
-def test_warn_if_flwr_update_available_swallows_request_errors(monkeypatch) -> None:
+def test_warn_if_flwr_update_available_swallows_request_errors(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     """The update check should fail open when the endpoint is unreachable."""
 
-    def _post(*args: Any, **kwargs: Any) -> _Response:
+    def _post(*_args: Any, **_kwargs: Any) -> _Response:
         raise requests.RequestException("offline")
 
-    monkeypatch.setattr(utils.requests, "post", _post)
+    monkeypatch.setattr("flwr.supercore.utils.requests.post", _post)
 
     warn_if_flwr_update_available(process_name="flower-superlink")
 

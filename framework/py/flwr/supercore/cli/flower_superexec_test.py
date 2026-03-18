@@ -40,7 +40,9 @@ def test_parse_superexec_version_flag(
     assert captured.out == f"Flower version: {package_version}\n"
 
 
-def test_flower_superexec_checks_for_update(monkeypatch) -> None:
+def test_flower_superexec_checks_for_update(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     """SuperExec should run the startup update check after parsing arguments."""
 
     class _SentinelError(Exception):
