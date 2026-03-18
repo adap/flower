@@ -14,6 +14,9 @@
 # ==============================================================================
 """Token-based AppIo interceptors for short-term auth coverage."""
 
+
+from __future__ import annotations
+
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any, NoReturn, Protocol, cast
