@@ -22,11 +22,13 @@ import pytest
 import requests
 from parameterized import parameterized
 
-from . import utils
-from .utils import (
+from .constant import (
     FLWR_DISABLE_UPDATE_CHECK,
     FLWR_UPDATE_CHECK_TIMEOUT_SECONDS,
     FLWR_UPDATE_CHECK_URL,
+)
+from . import utils
+from .utils import (
     get_flwr_update_check_payload,
     humanize_bytes,
     humanize_duration,

@@ -28,11 +28,13 @@ import requests
 from flwr.common.constant import FLWR_DIR, FLWR_HOME
 from flwr.supercore.version import package_version as flwr_version
 
-from .constant import APP_ID_PATTERN, APP_VERSION_PATTERN, PLATFORM_API_URL
-
-FLWR_DISABLE_UPDATE_CHECK = "FLWR_DISABLE_UPDATE_CHECK"
-FLWR_UPDATE_CHECK_URL = f"{PLATFORM_API_URL}/update-check/flwr"
-FLWR_UPDATE_CHECK_TIMEOUT_SECONDS = 5
+from .constant import (
+    APP_ID_PATTERN,
+    APP_VERSION_PATTERN,
+    FLWR_DISABLE_UPDATE_CHECK,
+    FLWR_UPDATE_CHECK_TIMEOUT_SECONDS,
+    FLWR_UPDATE_CHECK_URL,
+)
 
 
 def mask_string(value: str, head: int = 4, tail: int = 4) -> str:
