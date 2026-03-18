@@ -275,6 +275,7 @@ class _Response:
         self._body = body
 
     def json(self) -> dict[str, Any]:
+        """Return the mocked JSON response body."""
         return self._body
 
 
@@ -301,7 +302,7 @@ def test_warn_if_flwr_update_available_disabled(monkeypatch) -> None:
     monkeypatch.setenv(FLWR_DISABLE_UPDATE_CHECK, "1")
     called = False
 
-    def _post(*args: Any, **kwargs: Any) -> None:
+    def _post(*_args: Any, **_kwargs: Any) -> None:
         nonlocal called
         called = True
 
@@ -322,7 +323,7 @@ def test_warn_if_flwr_update_available_prints_message(monkeypatch, capsys) -> No
         },
     )
 
-    def _post(*args: Any, **kwargs: Any) -> _Response:
+    def _post(*_args: Any, **_kwargs: Any) -> _Response:
         return response
 
     monkeypatch.delenv(FLWR_DISABLE_UPDATE_CHECK, raising=False)
@@ -338,10 +339,10 @@ def test_warn_if_flwr_update_available_sends_expected_request(monkeypatch) -> No
     """The update check should call the correct endpoint with the runtime payload."""
     captured: dict[str, Any] = {}
 
-    def _post(url: str, json: dict[str, str], timeout: int) -> _Response:
+    def _post(url: str, **kwargs: Any) -> _Response:
         captured["url"] = url
-        captured["json"] = json
-        captured["timeout"] = timeout
+        captured["json"] = kwargs["json"]
+        captured["timeout"] = kwargs["timeout"]
         return _Response(ok=True, body={"update_available": False})
 
     monkeypatch.setattr(utils.requests, "post", _post)

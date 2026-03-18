@@ -24,9 +24,7 @@ from flwr.supercore.version import package_version
 
 from .flower_supernode import _parse_args_run_supernode
 
-flower_supernode_module = importlib.import_module(
-    "flwr.supernode.cli.flower_supernode"
-)
+flower_supernode_module = importlib.import_module("flwr.supernode.cli.flower_supernode")
 
 
 @pytest.mark.parametrize("flag", ["--version", "-V"])
@@ -50,7 +48,11 @@ def test_flower_supernode_checks_for_update(monkeypatch) -> None:
 
     class _Parser:
         def parse_args(self) -> SimpleNamespace:
+            """Return parsed arguments for the test path."""
             return SimpleNamespace()
+
+    def _parse_args() -> _Parser:
+        return _Parser()
 
     captured: dict[str, str] = {}
 
@@ -60,7 +62,7 @@ def test_flower_supernode_checks_for_update(monkeypatch) -> None:
         raise _SentinelError()
 
     monkeypatch.setattr(
-        flower_supernode_module, "_parse_args_run_supernode", lambda: _Parser()
+        flower_supernode_module, "_parse_args_run_supernode", _parse_args
     )
     monkeypatch.setattr(
         flower_supernode_module, "warn_if_flwr_update_available", _raise_sentinel

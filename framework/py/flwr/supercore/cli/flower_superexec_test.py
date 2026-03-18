@@ -24,9 +24,7 @@ from flwr.supercore.version import package_version
 
 from .flower_superexec import _parse_args
 
-flower_superexec_module = importlib.import_module(
-    "flwr.supercore.cli.flower_superexec"
-)
+flower_superexec_module = importlib.import_module("flwr.supercore.cli.flower_superexec")
 
 
 @pytest.mark.parametrize("flag", ["--version", "-V"])
@@ -50,7 +48,11 @@ def test_flower_superexec_checks_for_update(monkeypatch) -> None:
 
     class _Parser:
         def parse_args(self) -> SimpleNamespace:
+            """Return parsed arguments for the test path."""
             return SimpleNamespace(insecure=True)
+
+    def _parse_args() -> _Parser:
+        return _Parser()
 
     captured: dict[str, str] = {}
 
@@ -59,7 +61,7 @@ def test_flower_superexec_checks_for_update(monkeypatch) -> None:
             captured["process_name"] = process_name
         raise _SentinelError()
 
-    monkeypatch.setattr(flower_superexec_module, "_parse_args", lambda: _Parser())
+    monkeypatch.setattr(flower_superexec_module, "_parse_args", _parse_args)
     monkeypatch.setattr(
         flower_superexec_module, "warn_if_flwr_update_available", _raise_sentinel
     )

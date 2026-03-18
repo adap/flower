@@ -95,7 +95,11 @@ def test_run_superlink_checks_for_update(monkeypatch) -> None:
 
     class _Parser:
         def parse_args(self) -> SimpleNamespace:
+            """Return parsed arguments for the test path."""
             return SimpleNamespace()
+
+    def _parse_args() -> _Parser:
+        return _Parser()
 
     captured: dict[str, str] = {}
 
@@ -104,7 +108,7 @@ def test_run_superlink_checks_for_update(monkeypatch) -> None:
             captured["process_name"] = process_name
         raise _SentinelError()
 
-    monkeypatch.setattr(app_module, "_parse_args_run_superlink", lambda: _Parser())
+    monkeypatch.setattr(app_module, "_parse_args_run_superlink", _parse_args)
     monkeypatch.setattr(app_module, "warn_if_flwr_update_available", _raise_sentinel)
 
     with pytest.raises(_SentinelError):
