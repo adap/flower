@@ -174,8 +174,8 @@ def run_superlink() -> None:
         flwr_exit(
             ExitCode.SUPERLINK_INVALID_ARGS,
             "The arguments `--executor`, `--executor-dir`, and `--executor-config` are "
-            "deprecated and will be removed in a future release. To run SuperLink in "
-            "simulation mode, please use `--simulation`.",
+            "deprecated and will be removed in a future release. To run SuperLink with "
+            "simulation runtime, please use `--simulation`.",
         )
 
     # Detect if both Control API and Exec API addresses were set explicitly
@@ -334,86 +334,86 @@ def run_superlink() -> None:
     )
     grpc_servers.append(serverappio_server)
 
-    if not is_simulation:
-        # Start Fleet API
-        if not args.fleet_api_address:
-            if args.fleet_api_type in [
-                TRANSPORT_TYPE_GRPC_RERE,
-                TRANSPORT_TYPE_GRPC_ADAPTER,
-            ]:
-                args.fleet_api_address = FLEET_API_GRPC_RERE_DEFAULT_ADDRESS
-            elif args.fleet_api_type == TRANSPORT_TYPE_REST:
-                args.fleet_api_address = FLEET_API_REST_DEFAULT_ADDRESS
+    # Start Fleet API
+    if not args.fleet_api_address:
+        if args.fleet_api_type in [
+            TRANSPORT_TYPE_GRPC_RERE,
+            TRANSPORT_TYPE_GRPC_ADAPTER,
+        ]:
+            args.fleet_api_address = FLEET_API_GRPC_RERE_DEFAULT_ADDRESS
+        elif args.fleet_api_type == TRANSPORT_TYPE_REST:
+            args.fleet_api_address = FLEET_API_REST_DEFAULT_ADDRESS
 
-        fleet_address, host, port = _format_address(args.fleet_api_address)
+    fleet_address, host, port = _format_address(args.fleet_api_address)
 
-        num_workers = args.fleet_api_num_workers
-        if num_workers != 1:
-            log(
-                WARN,
-                "The Fleet API currently supports only 1 worker. "
-                "You have specified %d workers. "
-                "Support for multiple workers will be added in future releases. "
-                "Proceeding with a single worker.",
-                args.fleet_api_num_workers,
-            )
-            num_workers = 1
+    num_workers = args.fleet_api_num_workers
+    if num_workers != 1:
+        log(
+            WARN,
+            "The Fleet API currently supports only 1 worker. "
+            "You have specified %d workers. "
+            "Support for multiple workers will be added in future releases. "
+            "Proceeding with a single worker.",
+            args.fleet_api_num_workers,
+        )
+        num_workers = 1
 
-        if args.fleet_api_type == TRANSPORT_TYPE_REST:
-            if (
-                importlib.util.find_spec("requests")
-                and importlib.util.find_spec("starlette")
-                and importlib.util.find_spec("uvicorn")
-            ) is None:
-                flwr_exit(ExitCode.COMMON_MISSING_EXTRA_REST)
+    if args.fleet_api_type == TRANSPORT_TYPE_REST:
+        if (
+            importlib.util.find_spec("requests")
+            and importlib.util.find_spec("starlette")
+            and importlib.util.find_spec("uvicorn")
+        ) is None:
+            flwr_exit(ExitCode.COMMON_MISSING_EXTRA_REST)
 
-            fleet_thread = threading.Thread(
-                target=_run_fleet_api_rest,
-                args=(
-                    host,
-                    port,
-                    args.ssl_keyfile,
-                    args.ssl_certfile,
-                    state_factory,
-                    ffs_factory,
-                    objectstore_factory,
-                    num_workers,
-                ),
-                daemon=True,
-            )
-            fleet_thread.start()
-            bckg_threads.append(fleet_thread)
-        elif args.fleet_api_type == TRANSPORT_TYPE_GRPC_RERE:
+        fleet_thread = threading.Thread(
+            target=_run_fleet_api_rest,
+            args=(
+                host,
+                port,
+                args.ssl_keyfile,
+                args.ssl_certfile,
+                state_factory,
+                ffs_factory,
+                objectstore_factory,
+                num_workers,
+            ),
+            daemon=True,
+        )
+        fleet_thread.start()
+        bckg_threads.append(fleet_thread)
+    elif args.fleet_api_type == TRANSPORT_TYPE_GRPC_RERE:
 
-            interceptors = [NodeAuthServerInterceptor(state_factory)]
-            if getattr(args, "enable_event_log", None):
-                fleet_log_plugin = _try_obtain_fleet_event_log_writer_plugin()
-                if fleet_log_plugin is not None:
-                    interceptors.append(FleetEventLogInterceptor(fleet_log_plugin))
-                    log(INFO, "Flower Fleet event logging enabled")
+        interceptors = [NodeAuthServerInterceptor(state_factory)]
+        if getattr(args, "enable_event_log", None):
+            fleet_log_plugin = _try_obtain_fleet_event_log_writer_plugin()
+            if fleet_log_plugin is not None:
+                interceptors.append(FleetEventLogInterceptor(fleet_log_plugin))
+                log(INFO, "Flower Fleet event logging enabled")
 
-            fleet_server = _run_fleet_api_grpc_rere(
-                address=fleet_address,
-                state_factory=state_factory,
-                ffs_factory=ffs_factory,
-                objectstore_factory=objectstore_factory,
-                enable_supernode_auth=enable_supernode_auth,
-                certificates=certificates,
-                interceptors=interceptors,
-            )
-            grpc_servers.append(fleet_server)
-        elif args.fleet_api_type == TRANSPORT_TYPE_GRPC_ADAPTER:
-            fleet_server = _run_fleet_api_grpc_adapter(
-                address=fleet_address,
-                state_factory=state_factory,
-                ffs_factory=ffs_factory,
-                objectstore_factory=objectstore_factory,
-                certificates=certificates,
-            )
-            grpc_servers.append(fleet_server)
-        else:
-            raise ValueError(f"Unknown fleet_api_type: {args.fleet_api_type}")
+        fleet_server = _run_fleet_api_grpc_rere(
+            address=fleet_address,
+            state_factory=state_factory,
+            ffs_factory=ffs_factory,
+            objectstore_factory=objectstore_factory,
+            enable_supernode_auth=enable_supernode_auth,
+            certificates=certificates,
+            interceptors=interceptors,
+        )
+        grpc_servers.append(fleet_server)
+    elif args.fleet_api_type == TRANSPORT_TYPE_GRPC_ADAPTER:
+        fleet_server = _run_fleet_api_grpc_adapter(
+            address=fleet_address,
+            state_factory=state_factory,
+            ffs_factory=ffs_factory,
+            objectstore_factory=objectstore_factory,
+            certificates=certificates,
+        )
+        grpc_servers.append(fleet_server)
+    else:
+        raise ValueError(f"Unknown fleet_api_type: {args.fleet_api_type}")
 
+    # Launch SuperExec if isolation mode is subprocess
     if args.isolation == ISOLATION_MODE_SUBPROCESS:
         appio_address = resolve_bind_address(serverappio_address)
         command = ["flower-superexec", "--insecure"]
@@ -832,10 +832,9 @@ def _add_args_control_api(parser: argparse.ArgumentParser) -> None:
         help="This argument is deprecated and will be removed in a future release.",
         default=None,
     )
-    parser.add_argument(
+    parser.add_argument(  # To be removed in follow-up PRs
         "--simulation",
         action="store_true",
         default=False,
-        help="Enable simulation runtime behavior. The SuperLink always serves the "
-        "ServerAppIo API.",
+        help="Enable simulation runtime behavior.",
     )
