@@ -38,8 +38,8 @@ API_ERROR_MAP: Final[dict[int, ApiErrorSpec]] = {
     ),
     ApiErrorCode.FEDERATION_NOT_FOUND_OR_NO_PERMISSION: ApiErrorSpec(
         status_code=StatusCode.NOT_FOUND,
-        public_message="Federation not found or you do not have permission "
-        "to perform this action.",
+        public_message="Federation not found, the federation has been "
+        "archived, or you do not have permission to perform this action.",
     ),
     ApiErrorCode.ACCOUNT_ALREADY_MEMBER: ApiErrorSpec(
         status_code=StatusCode.FAILED_PRECONDITION,
