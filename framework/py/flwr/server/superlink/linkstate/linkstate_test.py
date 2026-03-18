@@ -2070,7 +2070,7 @@ class SqlFileBasedTest(StateTest, unittest.TestCase):
 
             def pull_res(idx: int, state: SqlLinkState) -> None:
                 try:
-                    barrier.wait()
+                    barrier.wait(timeout=5)
                     results[idx] = state.get_message_res(
                         {pulled_ins.metadata.message_id}
                     )
@@ -2083,9 +2083,17 @@ class SqlFileBasedTest(StateTest, unittest.TestCase):
             ]
             for thread in threads:
                 thread.start()
-            barrier.wait()
+            try:
+                barrier.wait(timeout=5)
+            except threading.BrokenBarrierError as ex:
+                exceptions.append(ex)
             for thread in threads:
-                thread.join()
+                thread.join(timeout=5)
+            alive_threads = [thread for thread in threads if thread.is_alive()]
+            if alive_threads:
+                self.fail(
+                    "Timed out waiting for concurrent pull_res threads to finish"
+                )
 
             if exceptions:
                 raise exceptions[0]
