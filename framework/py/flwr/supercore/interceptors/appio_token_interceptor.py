@@ -64,13 +64,6 @@ def _extract_token_from_metadata(
     return token
 
 
-def _extract_token_from_request(request: GrpcMessage) -> str | None:
-    token = getattr(request, "token", None)
-    if isinstance(token, str) and token != "":
-        return token
-    return None
-
-
 class AppIoTokenClientInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: ignore
     """Attach App token metadata to outbound unary RPCs."""
 
@@ -136,7 +129,7 @@ class AppIoTokenServerInterceptor(grpc.ServerInterceptor):  # type: ignore
             request: GrpcMessage,
             context: grpc.ServicerContext,
         ) -> GrpcMessage:
-            token = _extract_token_from_request(request) or metadata_token
+            token = metadata_token
             if token is None:
                 _abort_auth_denied(context)
 

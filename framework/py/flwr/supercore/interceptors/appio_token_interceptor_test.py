@@ -225,26 +225,9 @@ class TestAppIoTokenServerInterceptor(TestCase):
         # Run-id mismatch deny coverage belongs to the
         # follow-up PR that enforces run binding.
 
-    def test_request_token_preferred_over_metadata_token(self) -> None:
-        """request.token should be authoritative when non-empty."""
-        state = Mock()
-        token_to_run_id = {
-            "request-token": 9,
-            "metadata-token": 1,
-        }
-        state.get_run_id_by_token.side_effect = token_to_run_id.get
-
-        def _verify_token_side_effect(run_id: int, token: str) -> bool:
-            return (token, run_id) == ("request-token", 9)
-
-        def _state_provider() -> Mock:
-            return state
-
-        state.verify_token.side_effect = _verify_token_side_effect
-        interceptor = AppIoTokenServerInterceptor(
-            state_provider=_state_provider,
-            method_auth_policy=SERVERAPPIO_METHOD_AUTH_POLICY,
-        )
+    def test_metadata_token_used_even_when_request_has_token(self) -> None:
+        """Metadata token should be authoritative when both sources exist."""
+        interceptor = self._new_interceptor(token_to_run_id={"metadata-token": 5})
 
         intercepted = interceptor.intercept_service(
             lambda _: _make_unary_handler(),
@@ -257,14 +240,13 @@ class TestAppIoTokenServerInterceptor(TestCase):
         response = cast(
             str,
             intercepted.unary_unary(
-                PushAppOutputsRequest(token="request-token", run_id=9), Mock()
+                PushAppOutputsRequest(token="request-token", run_id=5), Mock()
             ),
         )
         self.assertEqual(response, "ok")
-        state.get_run_id_by_token.assert_called_once_with("request-token")
 
-    def test_metadata_fallback_when_request_token_missing(self) -> None:
-        """Metadata token should be used if request.token is missing/empty."""
+    def test_metadata_token_used_for_protected_method(self) -> None:
+        """Metadata token should be used for protected methods."""
         interceptor = self._new_interceptor(token_to_run_id={"metadata-token": 5})
 
         intercepted = interceptor.intercept_service(
@@ -280,6 +262,28 @@ class TestAppIoTokenServerInterceptor(TestCase):
             intercepted.unary_unary(PushAppMessagesRequest(run_id=5), Mock()),
         )
         self.assertEqual(response, "ok")
+
+    def test_request_token_without_metadata_is_denied(self) -> None:
+        """Request-body token alone should not satisfy auth."""
+        interceptor = self._new_interceptor(token_to_run_id={"request-token": 5})
+        context = Mock()
+        context.abort.side_effect = grpc.RpcError()
+
+        intercepted = interceptor.intercept_service(
+            lambda _: _make_unary_handler(),
+            _HandlerCallDetails(
+                "/flwr.proto.ServerAppIo/PushAppOutputs",
+                invocation_metadata=(),
+            ),
+        )
+
+        with self.assertRaises(grpc.RpcError):
+            intercepted.unary_unary(
+                PushAppOutputsRequest(token="request-token", run_id=5), context
+            )
+        context.abort.assert_called_once_with(
+            grpc.StatusCode.UNAUTHENTICATED, AUTHENTICATION_FAILED_MESSAGE
+        )
 
     def test_unknown_method_fails_closed(self) -> None:
         """Unknown methods should fail closed with UNAUTHENTICATED."""
