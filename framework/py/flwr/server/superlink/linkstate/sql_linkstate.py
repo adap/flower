@@ -979,7 +979,9 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
             if not has_valid_sub_status(new_status):
                 log(
                     ERROR,
-                    'Invalid sub-status "%s" for status "%s"',
+                    'Invalid run status payload: sub_status="%s" is not valid for '
+                    'status="%s". For non-FINISHED statuses, sub_status must be '
+                    "empty.",
                     new_status.sub_status,
                     new_status.status,
                 )
@@ -988,7 +990,8 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
             sint64_run_id = uint64_to_int64(run_id)
             query = """
                 UPDATE run
-                SET running_at = :timestamp, sub_status = :sub_status, details = :details
+                SET running_at = :timestamp,
+                sub_status = :sub_status, details = :details
                 WHERE run_id = :run_id
                 AND starting_at != ''
                 AND running_at = ''
@@ -1035,7 +1038,9 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
             if not has_valid_sub_status(current_status):
                 log(
                     ERROR,
-                    'Invalid sub-status "%s" for status "%s"',
+                    'Invalid run status payload: sub_status="%s" is not valid for '
+                    'status="%s". For non-FINISHED statuses, sub_status must be '
+                    "empty.",
                     current_status.sub_status,
                     current_status.status,
                 )
