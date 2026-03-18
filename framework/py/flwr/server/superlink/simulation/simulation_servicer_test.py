@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Simulation runtime tests served through ServerAppIo."""
+"""SimulationIoServicer tests."""
 
 
 import tempfile
@@ -23,7 +23,7 @@ import grpc
 from parameterized import parameterized
 
 from flwr.common import ConfigRecord, Context
-from flwr.common.constant import Status
+from flwr.common.constant import SIMULATIONIO_API_DEFAULT_SERVER_ADDRESS, Status
 from flwr.common.serde import context_to_proto, run_status_to_proto
 from flwr.common.serde_test import RecordMaker
 from flwr.common.typing import RunStatus
@@ -40,18 +40,16 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     UpdateRunStatusResponse,
 )
 from flwr.server.superlink.linkstate.linkstate_factory import LinkStateFactory
-from flwr.server.superlink.serverappio.serverappio_grpc import run_serverappio_api_grpc
+from flwr.server.superlink.simulation.simulationio_grpc import run_simulationio_api_grpc
 from flwr.server.superlink.utils import _STATUS_TO_MSG
 from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME, NOOP_FEDERATION
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStoreFactory
 from flwr.superlink.federation import NoOpFederationManager
 
-TEST_SERVERAPPIO_ADDRESS = "0.0.0.0:9096"
-
 
 class TestSimulationIoServicer(unittest.TestCase):  # pylint: disable=R0902
-    """Simulation runtime tests for shared ServerAppIo endpoints."""
+    """SimulationIoServicer tests for allowed RunStatuses."""
 
     def setUp(self) -> None:
         """Initialize mock stub and server interceptor."""
@@ -68,27 +66,26 @@ class TestSimulationIoServicer(unittest.TestCase):  # pylint: disable=R0902
 
         self.status_to_msg = _STATUS_TO_MSG
 
-        self._server: grpc.Server = run_serverappio_api_grpc(
-            TEST_SERVERAPPIO_ADDRESS,
+        self._server: grpc.Server = run_simulationio_api_grpc(
+            SIMULATIONIO_API_DEFAULT_SERVER_ADDRESS,
             state_factory,
             ffs_factory,
-            ObjectStoreFactory(),
             None,
         )
 
         self._channel = grpc.insecure_channel("localhost:9096")
         self._push_simulation_outputs = self._channel.unary_unary(
-            "/flwr.proto.ServerAppIo/PushAppOutputs",
+            "/flwr.proto.SimulationIo/PushAppOutputs",
             request_serializer=PushAppOutputsRequest.SerializeToString,
             response_deserializer=PushAppOutputsResponse.FromString,
         )
         self._update_run_status = self._channel.unary_unary(
-            "/flwr.proto.ServerAppIo/UpdateRunStatus",
+            "/flwr.proto.SimulationIo/UpdateRunStatus",
             request_serializer=UpdateRunStatusRequest.SerializeToString,
             response_deserializer=UpdateRunStatusResponse.FromString,
         )
         self._send_app_heartbeat = self._channel.unary_unary(
-            "/flwr.proto.ServerAppIo/SendAppHeartbeat",
+            "/flwr.proto.SimulationIo/SendAppHeartbeat",
             request_serializer=SendAppHeartbeatRequest.SerializeToString,
             response_deserializer=SendAppHeartbeatResponse.FromString,
         )
