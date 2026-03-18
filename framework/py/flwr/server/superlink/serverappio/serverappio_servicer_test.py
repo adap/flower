@@ -919,8 +919,10 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
             config_record_from_proto(response.federation_options) == federation_options
         )
 
-    def test_get_federation_options_not_successful_if_missing(self) -> None:
-        """Test `GetFederationOptions` failure when options are unavailable."""
+    def test_get_federation_options_not_successful_for_unknown_run_id(
+        self,
+    ) -> None:
+        """Test `GetFederationOptions` failure for an unknown run_id."""
         # Prepare
         request = GetFederationOptionsRequest(run_id=2**63 - 1)
 
