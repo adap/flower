@@ -1995,10 +1995,11 @@ class SqlFileBasedTest(StateTest, unittest.TestCase):
             barrier = threading.Barrier(3)
             results: list[list[Message] | None] = [None, None]
             exceptions: list[Exception] = []
+            join_timeout = 5.0
 
             def pull_ins(idx: int, state: SqlLinkState) -> None:
                 try:
-                    barrier.wait()
+                    barrier.wait(timeout=join_timeout)
                     results[idx] = state.get_message_ins(node_id=node_id, limit=1)
                 except Exception as ex:  # pylint: disable=broad-exception-caught
                     exceptions.append(ex)
@@ -2009,9 +2010,20 @@ class SqlFileBasedTest(StateTest, unittest.TestCase):
             ]
             for thread in threads:
                 thread.start()
-            barrier.wait()
+            try:
+                barrier.wait(timeout=join_timeout)
+            except threading.BrokenBarrierError as ex:
+                exceptions.append(ex)
             for thread in threads:
-                thread.join()
+                thread.join(timeout=join_timeout)
+
+            alive_threads = [thread for thread in threads if thread.is_alive()]
+            if alive_threads:
+                self.fail(
+                    f"Concurrent instruction claim test timed out; "
+                    f"{len(alive_threads)} thread(s) still alive after "
+                    f"{join_timeout} seconds."
+                )
 
             if exceptions:
                 raise exceptions[0]
