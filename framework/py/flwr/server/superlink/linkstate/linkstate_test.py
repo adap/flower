@@ -16,13 +16,13 @@
 # pylint: disable=invalid-name, too-many-lines, R0904, R0913
 
 
+import os
 import secrets
 import tempfile
 import threading
 import time
 import unittest
 from abc import abstractmethod
-import os
 from collections.abc import Callable
 from datetime import datetime, timedelta, timezone
 from unittest.mock import Mock, patch
