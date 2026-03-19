@@ -207,6 +207,8 @@ def build_fab_from_files(
     -------
     tuple[bytes, FabFormatMetadata]
         The FAB as bytes together with normalized compatibility metadata.
+        The metadata is consumed by platform-api during publish to persist
+        compatibility fields derived from this shared build validation logic.
 
     Examples
     --------
@@ -309,6 +311,7 @@ def build_fab_from_files(
             "via your `.gitignore` file or excluding them from the build."
         )
 
+    # Returned metadata is consumed by platform during publish.
     return fab_bytes, metadata
 
 

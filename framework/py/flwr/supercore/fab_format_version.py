@@ -247,7 +247,7 @@ def _normalize_and_validate_fab_format_v1(config: dict[str, Any]) -> FabFormatMe
 
 
 def _validate_fab_format_v0_contents(
-    config: dict[str, Any], filtered_paths: list[str]
+    _config: dict[str, Any], _filtered_paths: list[str]
 ) -> None:
     """Validate the final FAB contents for `fab_format_version = 0`."""
     # Reserved for future file-level FAB format rules.
@@ -255,7 +255,7 @@ def _validate_fab_format_v0_contents(
 
 
 def _validate_fab_format_v1_contents(
-    config: dict[str, Any], filtered_paths: list[str]
+    _config: dict[str, Any], _filtered_paths: list[str]
 ) -> None:
     """Validate the final FAB contents for `fab_format_version = 1`."""
     # Reserved for future file-level FAB format rules.
