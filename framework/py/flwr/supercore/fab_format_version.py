@@ -232,8 +232,8 @@ def _normalize_and_validate_fab_format_v1(config: dict[str, Any]) -> FabFormatMe
     - Optional `flwr_version_target` must fall within the derived range.
     - Unsupported specifier shapes are rejected.
     """
-    app = _get_flwr_app_config(config)
-    target_version = _parse_flwr_target_version(app)
+    app_config = _get_flwr_app_config(config)
+    target_version = _parse_flwr_target_version(app_config)
     requirement = _get_flwr_requirement(config)
     if requirement is None:
         raise ValueError(
