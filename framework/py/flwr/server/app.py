@@ -307,14 +307,12 @@ def run_superlink() -> None:
     ffs_factory = FfsFactory(args.storage_dir)
 
     # Start Control API
-    is_simulation = args.simulation
     control_server: grpc.Server = run_control_api_grpc(
         address=control_address,
         state_factory=state_factory,
         ffs_factory=ffs_factory,
         objectstore_factory=objectstore_factory,
         certificates=certificates,
-        is_simulation=is_simulation,
         authn_plugin=authn_plugin,
         authz_plugin=authz_plugin,
         event_log_plugin=event_log_plugin,
@@ -420,7 +418,7 @@ def run_superlink() -> None:
         command += ["--appio-api-address", appio_address]
         command += [
             "--plugin-type",
-            ExecPluginType.SIMULATION if is_simulation else ExecPluginType.SERVER_APP,
+            ExecPluginType.SIMULATION if args.simulation else ExecPluginType.SERVER_APP,
         ]
         command += ["--parent-pid", str(os.getpid())]
         # pylint: disable-next=consider-using-with
