@@ -59,7 +59,7 @@ class TestGrpcGrid(unittest.TestCase):
         self.mock_run.fab_id = "mock/mock"
         self.mock_run.fab_version = "v1.0.0"
         self.mock_run.fab_hash = "9f86d08"
-        self.grid = GrpcGrid()
+        self.grid = GrpcGrid(token="test-token")
         self.grid._grpc_stub = self.mock_stub  # pylint: disable=protected-access
         self.grid._channel = self.mock_channel  # pylint: disable=protected-access
         self.grid.set_run(self.mock_run)
@@ -283,23 +283,12 @@ class TestGrpcGrid(unittest.TestCase):
         self.assertEqual(len(interceptors), 1)
         self.assertIsInstance(interceptors[0], AppIoTokenClientInterceptor)
 
-    @patch("flwr.server.grid.grpc_grid.wrap_stub")
-    @patch("flwr.server.grid.grpc_grid.ServerAppIoStub")
-    @patch("flwr.server.grid.grpc_grid.create_channel")
-    def test_connect_omits_client_interceptor_when_token_is_unset(
+    def test_init_rejects_empty_token(
         self,
-        mock_create_channel: Mock,
-        _mock_serverappio_stub: Mock,
-        _mock_wrap_stub: Mock,
     ) -> None:
-        """`_connect` should not pass interceptors when token is unset."""
-        mock_create_channel.return_value = Mock()
-        grid = GrpcGrid()
-
-        grid._connect()  # pylint: disable=protected-access
-
-        kwargs = mock_create_channel.call_args.kwargs
-        self.assertIsNone(kwargs["interceptors"])
+        """`GrpcGrid` should reject empty token values."""
+        with self.assertRaises(ValueError):
+            GrpcGrid(token="")
 
     def test_simple_retry_mechanism_get_nodes(self) -> None:
         """Test retry mechanism with the get_node_ids method."""
