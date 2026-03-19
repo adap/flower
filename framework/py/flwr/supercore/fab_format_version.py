@@ -153,9 +153,9 @@ def _resolve_fab_format_version(app_config: dict[str, Any]) -> int:
     return fab_format_version
 
 
-def _parse_flwr_target_version(app: dict[str, Any]) -> Version | None:
+def _parse_flwr_target_version(app_config: dict[str, Any]) -> Version | None:
     """Parse optional `flwr_version_target` from app config."""
-    target_raw = app.get("flwr_version_target")
+    target_raw = app_config.get("flwr_version_target")
     if target_raw is not None and not isinstance(target_raw, str):
         raise ValueError(
             "Invalid [tool.flwr.app].flwr_version_target: expected a string."
