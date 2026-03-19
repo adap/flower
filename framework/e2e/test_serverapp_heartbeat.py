@@ -24,6 +24,9 @@ def run_superlink() -> subprocess.Popen:
     cmd = ["flower-superlink", "--insecure"]
     cmd += ["--database", "tmp.db"]
     cmd += ["--isolation", "process"]
+    if use_sim:
+        cmd += ["--simulation"]
+
     return subprocess.Popen(cmd)
 
 
