@@ -138,9 +138,9 @@ def _get_flwr_app_config(config: dict[str, Any]) -> dict[str, Any]:
     return app_config if isinstance(app_config, dict) else {}
 
 
-def _resolve_fab_format_version(app: dict[str, Any]) -> int:
+def _resolve_fab_format_version(app_config: dict[str, Any]) -> int:
     """Resolve and validate `fab_format_version` from app config."""
-    fab_format_version = app.get("fab_format_version", 0)
+    fab_format_version = app_config.get("fab_format_version", 0)
     if (
         not isinstance(fab_format_version, int)
         or isinstance(fab_format_version, bool)
