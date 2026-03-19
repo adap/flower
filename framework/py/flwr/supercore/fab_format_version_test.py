@@ -121,3 +121,47 @@ def test_v0_fab_format_skips_unsupported_bounds() -> None:
     assert metadata.flwr_version_min is None
     assert metadata.flwr_version_target == "1.27.0"
     assert metadata.flwr_version_max is None
+
+
+def test_v1_fab_format_rejects_duplicate_lower_bounds() -> None:
+    """Test fab_format_version=1 rejects multiple lower-bound specifiers."""
+    config: dict[str, Any] = {
+        "project": {
+            "name": "fedgpt",
+            "version": "1.0.0",
+            "dependencies": ["flwr>=1.26.0,>=1.27.0"],
+        },
+        "tool": {
+            "flwr": {
+                "app": {
+                    "publisher": "flwrlabs",
+                    "fab_format_version": 1,
+                }
+            }
+        },
+    }
+
+    with pytest.raises(ValueError, match="multiple lower bounds"):
+        normalize_and_validate_fab_format(config)
+
+
+def test_v1_fab_format_rejects_duplicate_upper_bounds() -> None:
+    """Test fab_format_version=1 rejects multiple upper-bound specifiers."""
+    config: dict[str, Any] = {
+        "project": {
+            "name": "fedgpt",
+            "version": "1.0.0",
+            "dependencies": ["flwr>=1.26.0,<=2.0.0,<=1.28.0"],
+        },
+        "tool": {
+            "flwr": {
+                "app": {
+                    "publisher": "flwrlabs",
+                    "fab_format_version": 1,
+                }
+            }
+        },
+    }
+
+    with pytest.raises(ValueError, match="multiple upper bounds"):
+        normalize_and_validate_fab_format(config)

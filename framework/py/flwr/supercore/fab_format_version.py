@@ -87,14 +87,14 @@ def _derive_flwr_version_bounds(
     for specifier in requirement.specifier:
         version = _parse_version(specifier.version, '"flwr" dependency specifier')
         if specifier.operator == ">=":
-            if lower is not None and lower != version:
+            if lower is not None:
                 raise ValueError(
                     'Unsupported "flwr" dependency specifier: multiple lower bounds '
                     "are not supported."
                 )
             lower = version
         elif specifier.operator == "<=":
-            if upper is not None and upper != version:
+            if upper is not None:
                 raise ValueError(
                     'Unsupported "flwr" dependency specifier: multiple upper bounds '
                     "are not supported."
@@ -104,7 +104,7 @@ def _derive_flwr_version_bounds(
             raise ValueError(
                 'Unsupported "flwr" dependency specifier '
                 f'"{specifier}" in requirement "{requirement}". '
-                "For fab_format_version >= 1, use a single continuous range with an "
+                "For fab_format_version = 1, use a single continuous range with an "
                 'inclusive lower bound in one of these forms: "flwr>=X" or '
                 '"flwr>=X,<=Y".'
             )
@@ -112,7 +112,7 @@ def _derive_flwr_version_bounds(
     if lower is None:
         raise ValueError(
             'Invalid "flwr" dependency specifier: an inclusive lower bound is '
-            "required for fab_format_version >= 1."
+            "required for fab_format_version = 1."
         )
 
     if upper is not None and upper < lower:
@@ -126,16 +126,16 @@ def _derive_flwr_version_bounds(
 
 def _get_flwr_app_config(config: dict[str, Any]) -> dict[str, Any]:
     """Return the `[tool.flwr.app]` table without mutating the parsed config."""
-    tool = config.get("tool")
-    if not isinstance(tool, dict):
+    tool_config = config.get("tool")
+    if not isinstance(tool_config, dict):
         return {}
 
-    flwr = tool.get("flwr")
-    if not isinstance(flwr, dict):
+    flwr_config = tool_config.get("flwr")
+    if not isinstance(flwr_config, dict):
         return {}
 
-    app = flwr.get("app")
-    return app if isinstance(app, dict) else {}
+    app_config = flwr_config.get("app")
+    return app_config if isinstance(app_config, dict) else {}
 
 
 def _resolve_fab_format_version(app: dict[str, Any]) -> int:
