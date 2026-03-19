@@ -14,6 +14,7 @@
 # ==============================================================================
 """Token auth policy definitions for AppIo interfaces."""
 
+
 from __future__ import annotations
 
 from dataclasses import dataclass
