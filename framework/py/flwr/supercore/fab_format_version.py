@@ -32,22 +32,6 @@ class FabFormatMetadata:
     flwr_version_max: str | None
 
 
-class _FabFormatRules:
-    """Base ruleset for a specific fab_format_version."""
-
-    def normalize_and_validate_metadata(
-        self, config: dict[str, Any]
-    ) -> FabFormatMetadata:
-        """Validate and derive metadata for this fab_format_version."""
-        raise NotImplementedError
-
-    def validate_fab_contents(
-        self, config: dict[str, Any], filtered_paths: list[str]
-    ) -> None:
-        """Validate the final set of files that will be written into the FAB."""
-        del config, filtered_paths
-
-
 def _parse_version(value: str, field_name: str) -> Version:
     """Parse a version string and raise a consistent config error if invalid."""
     try:
@@ -216,76 +200,64 @@ def _build_fab_metadata(
     )
 
 
-class _FabFormatV0Rules(_FabFormatRules):
-    """Legacy ruleset for fab_format_version 0.
+def _normalize_and_validate_fab_format_v0(config: dict[str, Any]) -> FabFormatMetadata:
+    """Derive best-effort compatibility metadata for `fab_format_version = 0`.
 
     - `flwr` dependency is optional.
     - `flwr_version_target` is optional.
     - Compatibility bounds are derived only when the declared `flwr` dependency
       can be represented as a single supported range.
     """
+    app = _get_flwr_app_config(config)
+    target_version = _parse_flwr_target_version(app)
+    requirement = _get_flwr_requirement(config)
+    lower: Version | None = None
+    upper: Version | None = None
 
-    def normalize_and_validate_metadata(
-        self, config: dict[str, Any]
-    ) -> FabFormatMetadata:
-        """Metadata derivation for legacy FABs."""
-        app = _get_flwr_app_config(config)
-        target_version = _parse_flwr_target_version(app)
-        requirement = _get_flwr_requirement(config)
-        lower: Version | None = None
-        upper: Version | None = None
+    if requirement is not None:
+        try:
+            lower, upper = _derive_flwr_version_bounds(requirement)
+        except ValueError:
+            lower, upper = None, None
 
-        if requirement is not None:
-            try:
-                lower, upper = _derive_flwr_version_bounds(requirement)
-            except ValueError:
-                lower, upper = None, None
-
-        _validate_target_within_bounds(target_version, lower, upper)
-        return _build_fab_metadata(0, target_version, lower, upper)
+    _validate_target_within_bounds(target_version, lower, upper)
+    return _build_fab_metadata(0, target_version, lower, upper)
 
 
-class _FabFormatV1Rules(_FabFormatRules):
-    """Strict ruleset for fab_format_version 1.
+def _normalize_and_validate_fab_format_v1(config: dict[str, Any]) -> FabFormatMetadata:
+    """Require and derive strict metadata for `fab_format_version = 1`.
 
     - `flwr` dependency is required.
     - The dependency must include an inclusive lower bound.
     - Optional `flwr_version_target` must fall within the derived range.
     - Unsupported specifier shapes are rejected.
     """
-
-    def normalize_and_validate_metadata(
-        self, config: dict[str, Any]
-    ) -> FabFormatMetadata:
-        """Require and derive strict metadata for `fab_format_version = 1`."""
-        app = _get_flwr_app_config(config)
-        target_version = _parse_flwr_target_version(app)
-        requirement = _get_flwr_requirement(config)
-        if requirement is None:
-            raise ValueError(
-                'Missing "flwr" dependency in [project].dependencies for '
-                "fab_format_version >= 1."
-            )
-
-        lower, upper = _derive_flwr_version_bounds(requirement)
-        _validate_target_within_bounds(target_version, lower, upper)
-        return _build_fab_metadata(1, target_version, lower, upper)
-
-
-_FAB_FORMAT_RULES: dict[int, _FabFormatRules] = {
-    0: _FabFormatV0Rules(),
-    1: _FabFormatV1Rules(),
-}
-
-
-def _get_fab_format_rules(fab_format_version: int) -> _FabFormatRules:
-    """Return the ruleset for a supported `fab_format_version`."""
-    if fab_format_version not in _FAB_FORMAT_RULES:
+    app = _get_flwr_app_config(config)
+    target_version = _parse_flwr_target_version(app)
+    requirement = _get_flwr_requirement(config)
+    if requirement is None:
         raise ValueError(
-            f"Unsupported [tool.flwr.app].fab_format_version: {fab_format_version}."
+            'Missing "flwr" dependency in [project].dependencies for '
+            "fab_format_version >= 1."
         )
 
-    return _FAB_FORMAT_RULES[fab_format_version]
+    lower, upper = _derive_flwr_version_bounds(requirement)
+    _validate_target_within_bounds(target_version, lower, upper)
+    return _build_fab_metadata(1, target_version, lower, upper)
+
+
+def _validate_fab_format_v0_contents(
+    config: dict[str, Any], filtered_paths: list[str]
+) -> None:
+    """Validate the final FAB contents for `fab_format_version = 0`."""
+    del config, filtered_paths
+
+
+def _validate_fab_format_v1_contents(
+    config: dict[str, Any], filtered_paths: list[str]
+) -> None:
+    """Validate the final FAB contents for `fab_format_version = 1`."""
+    del config, filtered_paths
 
 
 def normalize_and_validate_fab_format(
@@ -294,8 +266,13 @@ def normalize_and_validate_fab_format(
     """Normalize FAB metadata in config and validate `fab_format_version` rules."""
     app = _get_flwr_app_config(config)
     fab_format_version = _resolve_fab_format_version(app)
-    return _get_fab_format_rules(fab_format_version).normalize_and_validate_metadata(
-        config
+    if fab_format_version == 0:
+        return _normalize_and_validate_fab_format_v0(config)
+    if fab_format_version == 1:
+        return _normalize_and_validate_fab_format_v1(config)
+
+    raise ValueError(
+        f"Unsupported [tool.flwr.app].fab_format_version: {fab_format_version}."
     )
 
 
@@ -305,6 +282,13 @@ def validate_fab_files_for_format(
     """Validate the final FAB contents using the selected format ruleset."""
     app = _get_flwr_app_config(config)
     fab_format_version = _resolve_fab_format_version(app)
-    _get_fab_format_rules(fab_format_version).validate_fab_contents(
-        config, filtered_paths
+    if fab_format_version == 0:
+        _validate_fab_format_v0_contents(config, filtered_paths)
+        return
+    if fab_format_version == 1:
+        _validate_fab_format_v1_contents(config, filtered_paths)
+        return
+
+    raise ValueError(
+        f"Unsupported [tool.flwr.app].fab_format_version: {fab_format_version}."
     )
