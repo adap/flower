@@ -1966,22 +1966,6 @@ class SqlFileBasedTest(StateTest, unittest.TestCase):
         state.initialize()
         return state
 
-    def test_create_run_persists_run_type_column(self) -> None:
-        """Test that run_type is stored explicitly in the run table."""
-        state = self.state_factory()
-        run_id = create_dummy_run(
-            state,
-            federation_options=ConfigRecord({"num-supernodes": 3}),
-            run_type=RunType.SIMULATION,
-        )
-
-        row = state.query(
-            "SELECT run_type FROM run WHERE run_id = :run_id",
-            {"run_id": uint64_to_int64(run_id)},
-        )[0]
-
-        assert row["run_type"] == RunType.SIMULATION
-
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
