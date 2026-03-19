@@ -128,7 +128,6 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         linkstate_factory: LinkStateFactory,
         ffs_factory: FfsFactory,
         objectstore_factory: ObjectStoreFactory,
-        is_simulation: bool,
         authn_plugin: ControlAuthnPlugin,
         artifact_provider: ArtifactProvider | None = None,
         fleet_api_type: str | None = None,
@@ -136,7 +135,6 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         self.linkstate_factory = linkstate_factory
         self.ffs_factory = ffs_factory
         self.objectstore_factory = objectstore_factory
-        self.is_simulation = is_simulation
         self.authn_plugin = authn_plugin
         self.artifact_provider = artifact_provider
         self.fleet_api_type = fleet_api_type
@@ -174,12 +172,6 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             fab_config = get_fab_config(fab_file)
             run_config = flatten_dict(fab_config["tool"]["flwr"]["app"].get("config"))
             _ = fuse_dicts(run_config, override_config)
-
-            # Check that num-supernodes is set
-            if self.is_simulation and "num-supernodes" not in federation_options:
-                raise ValueError(
-                    "Federation options doesn't contain key `num-supernodes`."
-                )
 
             # Check (1) federation exists and (2) the flwr_aid is a member
             federation = request.federation or NOOP_FEDERATION
@@ -530,14 +522,6 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
     ) -> ListNodesResponse:
         """List all SuperNodes."""
         log(INFO, "ControlServicer.ListNodes")
-
-        if self.is_simulation:
-            log(ERROR, "ListNodes is not available in simulation mode.")
-            context.abort(
-                grpc.StatusCode.UNIMPLEMENTED,
-                "ListNodes is not available in simulation mode.",
-            )
-            raise grpc.RpcError()  # This line is unreachable
 
         nodes_info: Sequence[NodeInfo] = []
         # Init link state
