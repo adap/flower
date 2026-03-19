@@ -25,7 +25,6 @@ from unittest.mock import patch
 import pytest
 
 from flwr.app.user_config import UserConfig
-from flwr.supercore.fab_format_version import normalize_and_validate_fab_format
 
 from .config import (
     flatten_dict,
@@ -485,107 +484,6 @@ def test_validate_pyproject_toml_with_fab_format_version_derives_metadata() -> N
     assert is_valid
     assert not errors
     assert not warnings
-
-
-def test_normalize_and_validate_fab_format_rejects_unsupported_version() -> None:
-    """Test unsupported fab_format_version values fail explicitly."""
-    config: dict[str, Any] = {
-        "project": {
-            "name": "fedgpt",
-            "version": "1.0.0",
-        },
-        "tool": {
-            "flwr": {
-                "app": {
-                    "publisher": "flwrlabs",
-                    "fab_format_version": 2,
-                }
-            }
-        },
-    }
-
-    with pytest.raises(ValueError, match="Unsupported"):
-        normalize_and_validate_fab_format(config)
-
-
-def test_normalize_and_validate_fab_format_accepts_target_for_version_zero() -> None:
-    """Test flwr_version_target is accepted for fab_format_version=0."""
-    config: dict[str, Any] = {
-        "project": {
-            "name": "fedgpt",
-            "version": "1.0.0",
-        },
-        "tool": {
-            "flwr": {
-                "app": {
-                    "publisher": "flwrlabs",
-                    "fab_format_version": 0,
-                    "flwr_version_target": "1.27.0",
-                }
-            }
-        },
-    }
-
-    metadata = normalize_and_validate_fab_format(config)
-
-    assert metadata.fab_format_version == 0
-    assert metadata.flwr_version_min is None
-    assert metadata.flwr_version_target == "1.27.0"
-    assert metadata.flwr_version_max is None
-
-
-def test_normalize_and_validate_fab_format_derives_bounds_for_version_zero() -> None:
-    """Test fab_format_version=0 derives bounds when the flwr dependency is usable."""
-    config: dict[str, Any] = {
-        "project": {
-            "name": "fedgpt",
-            "version": "1.0.0",
-            "dependencies": ["flwr>=1.26.0,<=1.28.0"],
-        },
-        "tool": {
-            "flwr": {
-                "app": {
-                    "publisher": "flwrlabs",
-                    "fab_format_version": 0,
-                    "flwr_version_target": "1.27.0",
-                }
-            }
-        },
-    }
-
-    metadata = normalize_and_validate_fab_format(config)
-
-    assert metadata.fab_format_version == 0
-    assert metadata.flwr_version_min == "1.26.0"
-    assert metadata.flwr_version_target == "1.27.0"
-    assert metadata.flwr_version_max == "1.28.0"
-
-
-def test_v0_fab_format_skips_unsupported_bounds() -> None:
-    """Test fab_format_version=0 ignores unrepresentable flwr dependency specifiers."""
-    config: dict[str, Any] = {
-        "project": {
-            "name": "fedgpt",
-            "version": "1.0.0",
-            "dependencies": ["flwr>1.26.0"],
-        },
-        "tool": {
-            "flwr": {
-                "app": {
-                    "publisher": "flwrlabs",
-                    "fab_format_version": 0,
-                    "flwr_version_target": "1.27.0",
-                }
-            }
-        },
-    }
-
-    metadata = normalize_and_validate_fab_format(config)
-
-    assert metadata.fab_format_version == 0
-    assert metadata.flwr_version_min is None
-    assert metadata.flwr_version_target == "1.27.0"
-    assert metadata.flwr_version_max is None
 
 
 def test_v1_fab_format_requires_flwr_dependency() -> None:
