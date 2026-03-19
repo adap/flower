@@ -101,7 +101,7 @@ at once, or pull messages individually, for example:
 """
 
 
-class GrpcGrid(Grid):
+class GrpcGrid(Grid):  # pylint: disable=too-many-instance-attributes
     """`GrpcGrid` provides an interface to the ServerAppIo API.
 
     Parameters

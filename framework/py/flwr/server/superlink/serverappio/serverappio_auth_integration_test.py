@@ -111,6 +111,20 @@ class TestServerAppIoAuthIntegration(unittest.TestCase):
         assert err.exception.code() == grpc.StatusCode.UNAUTHENTICATED
         assert err.exception.details() == AUTHENTICATION_FAILED_MESSAGE
 
+    def test_get_nodes_allows_with_valid_metadata_token(self) -> None:
+        """Protected RPC should allow requests with a valid metadata token."""
+        run_id = self._create_running_run()
+        token = self.state.create_token(run_id)
+        assert token is not None
+
+        response, call = self._get_nodes.with_call(
+            request=GetNodesRequest(run_id=run_id),
+            metadata=((APP_TOKEN_HEADER, token),),
+        )
+
+        assert isinstance(response, GetNodesResponse)
+        assert call.code() == grpc.StatusCode.OK
+
     def test_list_apps_to_launch_allows_without_metadata_token(self) -> None:
         """No-auth RPC should be callable without metadata token."""
         response, call = self._list_apps_to_launch.with_call(

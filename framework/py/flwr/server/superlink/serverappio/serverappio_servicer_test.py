@@ -93,7 +93,7 @@ from flwr.supercore.inflatable.inflatable_object import (
     get_object_tree,
     iterate_object_tree,
 )
-from flwr.supercore.interceptors import AppIoTokenClientInterceptor
+from flwr.supercore.interceptors import APP_TOKEN_HEADER, AppIoTokenClientInterceptor
 from flwr.supercore.object_store import ObjectStoreFactory
 from flwr.superlink.federation import NoOpFederationManager
 
@@ -565,7 +565,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
             # Execute
             response, call = pull_messages_plain.with_call(
                 request=request,
-                metadata=(("flwr-app-token", token),),
+                metadata=((APP_TOKEN_HEADER, token),),
             )
 
             # Assert
