@@ -250,14 +250,16 @@ def _validate_fab_format_v0_contents(
     config: dict[str, Any], filtered_paths: list[str]
 ) -> None:
     """Validate the final FAB contents for `fab_format_version = 0`."""
-    del config, filtered_paths
+    # Reserved for future file-level FAB format rules.
+    return None
 
 
 def _validate_fab_format_v1_contents(
     config: dict[str, Any], filtered_paths: list[str]
 ) -> None:
     """Validate the final FAB contents for `fab_format_version = 1`."""
-    del config, filtered_paths
+    # Reserved for future file-level FAB format rules.
+    return None
 
 
 def normalize_and_validate_fab_format(
