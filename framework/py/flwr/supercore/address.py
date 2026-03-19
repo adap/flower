@@ -91,6 +91,7 @@ def is_port_in_use(address: str) -> bool:
         protocol = socket.AF_INET
 
     with socket.socket(protocol, socket.SOCK_STREAM) as s:
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         try:
             if is_v6:
                 # For IPv6, provide `flowinfo` and `scopeid` as 0
