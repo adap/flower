@@ -16,7 +16,6 @@
 
 
 from logging import DEBUG
-from threading import Lock
 
 from flwr.common.logger import log
 from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME
@@ -52,35 +51,33 @@ class LinkStateFactory:
     ) -> None:
         self.database = database
         self.state_instance: LinkState | None = None
-        self._state_lock = Lock()
         self.federation_manager = federation_manager
         self.objectstore_factory = objectstore_factory
 
     def state(self) -> LinkState:
         """Return a State instance and create it, if necessary."""
-        # Fast return cached state if it exists
+        # Return cached state if it exists
         if self.state_instance is not None:
-            return self.state_instance
-
-        with self._state_lock:
-            if self.state_instance is not None:
-                return self.state_instance
-
-            # Get the ObjectStore instance
-            object_store = self.objectstore_factory.store()
-
-            # InMemoryState
             if self.database == FLWR_IN_MEMORY_DB_NAME:
-                self.state_instance = InMemoryLinkState(
-                    self.federation_manager, object_store
-                )
-            # SqlLinkState
+                log(DEBUG, "Using InMemoryState")
             else:
-                state = SqlLinkState(
-                    self.database, self.federation_manager, object_store
-                )
-                state.initialize()
-                self.state_instance = state
-
-            log(DEBUG, "Using %s", type(self.state_instance).__name__)
+                log(DEBUG, "Using SqlLinkState")
             return self.state_instance
+
+        # Get the ObjectStore instance
+        object_store = self.objectstore_factory.store()
+
+        # InMemoryState
+        if self.database == FLWR_IN_MEMORY_DB_NAME:
+            self.state_instance = InMemoryLinkState(
+                self.federation_manager, object_store
+            )
+            log(DEBUG, "Using InMemoryState")
+            return self.state_instance
+
+        # SqlLinkState
+        state = SqlLinkState(self.database, self.federation_manager, object_store)
+        state.initialize()
+        self.state_instance = state
+        log(DEBUG, "Using SqlLinkState")
+        return state
