@@ -299,7 +299,9 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
                     WHERE message_id IN ({placeholders})
                     ORDER BY rowid
                 """
-                select_params = {f"mid_{i}": msg_id for i, msg_id in enumerate(claimed_ids)}
+                select_params = {
+                    f"mid_{i}": msg_id for i, msg_id in enumerate(claimed_ids)
+                }
                 rows = self.query(select_query, select_params)
 
             for row in rows:
@@ -452,7 +454,9 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
                 RETURNING *
             """
             claim_params = {"delivered_at": delivered_at}
-            claim_params.update({f"mid_{i}": str(mid) for i, mid in enumerate(message_ids)})
+            claim_params.update(
+                {f"mid_{i}": str(mid) for i, mid in enumerate(message_ids)}
+            )
             rows = self.query(claim_query, claim_params)
             for row in rows:
                 convert_sint64_values_in_dict_to_uint64(
