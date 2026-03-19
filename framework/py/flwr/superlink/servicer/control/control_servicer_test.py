@@ -119,7 +119,6 @@ class TestControlServicer(unittest.TestCase):
             ),
             ffs_factory=FfsFactory(self.tmp_dir.name),
             objectstore_factory=objectstore_factory,
-            is_simulation=False,
             authn_plugin=(authn_plugin := NoOpControlAuthnPlugin(Mock(), False)),
         )
         account_info = authn_plugin.validate_tokens_in_metadata([])[1]
@@ -632,7 +631,6 @@ class TestControlServicerInvitationRPCs(unittest.TestCase):
             linkstate_factory=self.linkstate_factory,
             ffs_factory=Mock(),
             objectstore_factory=Mock(),
-            is_simulation=False,
             authn_plugin=Mock(),
         )
         self.get_current_account_info_patcher = patch(
@@ -730,7 +728,6 @@ class TestControlServicerAuth(unittest.TestCase):
             ),
             ffs_factory=FfsFactory(self.tmp_dir.name),
             objectstore_factory=Mock(),
-            is_simulation=False,
             authn_plugin=Mock(),
         )
         self.state = self.servicer.linkstate_factory.state()
@@ -904,7 +901,6 @@ class TestValidateFederationAndNodesInRequest(unittest.TestCase):
             ),
             ffs_factory=FfsFactory(self.tmp_dir.name),
             objectstore_factory=objectstore_factory,
-            is_simulation=False,
             authn_plugin=(authn_plugin := NoOpControlAuthnPlugin(Mock(), False)),
         )
         account_info = authn_plugin.validate_tokens_in_metadata([])[1]

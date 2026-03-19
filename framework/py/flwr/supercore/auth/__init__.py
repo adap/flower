@@ -1,4 +1,4 @@
-# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2026 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,17 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Simple Flower SuperExec plugin for simulation processes."""
+"""Shared auth policy definitions."""
 
 
-from .base_exec_plugin import BaseExecPlugin
+from .policy import SERVERAPPIO_METHOD_AUTH_POLICY, MethodTokenPolicy
 
-
-class SimulationExecPlugin(BaseExecPlugin):
-    """Simple Flower SuperExec plugin for simulation processes.
-
-    The plugin always selects the first candidate run ID.
-    """
-
-    command = "flwr-simulation"
-    appio_api_address_arg = "--serverappio-api-address"
+__all__ = [
+    "MethodTokenPolicy",
+    "SERVERAPPIO_METHOD_AUTH_POLICY",
+]
