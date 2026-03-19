@@ -16,7 +16,6 @@ from flwr.common.constant import (
 
 use_sim = sys.argv[1] == "simulation" if len(sys.argv) > 1 else False
 plugin_type_arg = "simulation" if use_sim else "serverapp"
-address_arg = SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS
 app_cmd = "flwr-simulation" if use_sim else "flwr-serverapp"
 
 
@@ -31,7 +30,7 @@ def run_superlink() -> subprocess.Popen:
 def run_superexec() -> subprocess.Popen:
     """Run the SuperExec."""
     cmd = ["flower-superexec", "--insecure"]
-    cmd += ["--appio-api-address", address_arg]
+    cmd += ["--appio-api-address", SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS]
     cmd += ["--plugin-type", plugin_type_arg]
     return subprocess.Popen(cmd)
 
