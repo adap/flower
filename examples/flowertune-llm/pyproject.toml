@@ -40,10 +40,12 @@ model.quantization = 4
 model.gradient-checkpointing = true
 model.dtype = "bfloat16"
 model.device-map = ""
-model.lora.peft-lora-r = 32
-model.lora.peft-lora-alpha = 64
 profile.enabled = false
 aggregation.mode = "layerwise"
+aggregation.layers-per-message = 1
+aggregation.upload-target-message-size = 2048
+aggregation.download-target-message-size = 2048
+aggregation.layer-write-dir = ""
 aggregation.offload = false
 aggregation.offload-dir = ""
 train.save-every-round = 5
@@ -61,6 +63,16 @@ train.training-arguments.save-steps = 1000
 train.training-arguments.save-total-limit = 10
 train.training-arguments.gradient-checkpointing = true
 train.training-arguments.lr-scheduler-type = "constant"
+train.disable = false
+trainer.backend = "none"
+trainer.torchtitan.command = ""
+trainer.torchtitan.workdir = ""
+scheduler.backend = "local"
+scheduler.slurm.submit-command = "sbatch"
+scheduler.slurm.extra-args = ""
+scheduler.slurm.wait = true
+scheduler.flux.run-command = "flux run"
+scheduler.flux.extra-args = ""
 strategy.fraction-train = 0.1
 strategy.fraction-evaluate = 0.0
 num-server-rounds = 10
@@ -77,3 +89,15 @@ options.backend.client-resources.num-cpus = 8
 [tool.flwr.federations.remote-deployment]
 address = "0.0.0.0:9093"
 insecure = true
+
+[tool.flwr.federations.local-deployment]
+address = "127.0.0.1:9093"
+insecure = true
+
+
+
+#######################################################################
+# Compatibility note:
+# Keep [tool.flwr.federations] here for CLI versions that still read
+# SuperLink connection config from pyproject.toml.
+#######################################################################

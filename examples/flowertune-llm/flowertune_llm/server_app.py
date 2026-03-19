@@ -7,7 +7,6 @@ from flwr.app import ArrayRecord, ConfigRecord, Context, MetricRecord
 from flwr.common.config import unflatten_dict
 from flwr.serverapp import Grid, ServerApp
 from omegaconf import DictConfig
-from peft import get_peft_model_state_dict, set_peft_model_state_dict
 
 from flowertune_llm.dataset import replace_keys
 from flowertune_llm.models import get_model
@@ -43,10 +42,12 @@ def main(grid: Grid, context: Context) -> None:
     )
 
     # Start strategy, run FedAvg for `num_rounds`
+    train_cfg = dict(context.run_config)
+    train_cfg["save_path"] = save_path
     strategy.start(
         grid=grid,
         initial_arrays=arrays,
-        train_config=ConfigRecord({"save_path": save_path}),
+        train_config=ConfigRecord(train_cfg),
         num_rounds=num_rounds,
         evaluate_fn=get_evaluate_fn(
             cfg.model, cfg.train.save_every_round, num_rounds, save_path
@@ -66,7 +67,6 @@ def get_evaluate_fn(model_cfg, save_every_round, total_round, save_path):
         ):
             # Init model
             model = get_model(model_cfg)
-            #set_peft_model_state_dict(model, arrays.to_torch_state_dict())
             model.load_state_dict(arrays.to_torch_state_dict())
 
             model.save_pretrained(f"{save_path}/{server_round}")
