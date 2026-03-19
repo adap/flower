@@ -15,6 +15,7 @@
 """Tests for short-term AppIo token interceptors."""
 
 
+import inspect
 from collections import namedtuple
 from typing import cast
 from unittest import TestCase
@@ -29,6 +30,7 @@ from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
     PushAppOutputsRequest,
 )
 from flwr.proto.serverappio_pb2 import GetNodesRequest  # pylint: disable=E0611
+from flwr.proto.serverappio_pb2_grpc import ServerAppIoServicer
 from flwr.supercore.auth import SERVERAPPIO_METHOD_AUTH_POLICY
 from flwr.supercore.interceptors import (
     APP_TOKEN_HEADER,
@@ -334,24 +336,17 @@ class TestAppIoTokenServerInterceptor(TestCase):
 class TestMethodPolicyMaps(TestCase):
     """Validate method auth policy map coverage and values."""
 
+    @staticmethod
+    def _serverappio_rpc_methods() -> set[str]:
+        return {
+            f"/flwr.proto.ServerAppIo/{name}"
+            for name, ref in inspect.getmembers(ServerAppIoServicer)
+            if inspect.isfunction(ref) and not name.startswith("_")
+        }
+
     def test_serverappio_policy_has_full_coverage(self) -> None:
         """ServerAppIo policy map should cover all RPC methods exactly."""
-        expected_methods = {
-            "/flwr.proto.ServerAppIo/ListAppsToLaunch",
-            "/flwr.proto.ServerAppIo/RequestToken",
-            "/flwr.proto.ServerAppIo/GetRun",
-            "/flwr.proto.ServerAppIo/SendAppHeartbeat",
-            "/flwr.proto.ServerAppIo/PullAppInputs",
-            "/flwr.proto.ServerAppIo/PushAppOutputs",
-            "/flwr.proto.ServerAppIo/PushObject",
-            "/flwr.proto.ServerAppIo/PullObject",
-            "/flwr.proto.ServerAppIo/ConfirmMessageReceived",
-            "/flwr.proto.ServerAppIo/UpdateRunStatus",
-            "/flwr.proto.ServerAppIo/PushLogs",
-            "/flwr.proto.ServerAppIo/PushMessages",
-            "/flwr.proto.ServerAppIo/PullMessages",
-            "/flwr.proto.ServerAppIo/GetNodes",
-        }
+        expected_methods = self._serverappio_rpc_methods()
         self.assertEqual(set(SERVERAPPIO_METHOD_AUTH_POLICY), expected_methods)
 
     def test_only_expected_no_auth_methods_exist(self) -> None:

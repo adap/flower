@@ -52,6 +52,7 @@ SERVERAPPIO_METHOD_AUTH_POLICY: dict[str, MethodTokenPolicy] = {
     "/flwr.proto.ServerAppIo/ConfirmMessageReceived": _TOKEN_REQUIRED,
     "/flwr.proto.ServerAppIo/UpdateRunStatus": _TOKEN_REQUIRED,
     "/flwr.proto.ServerAppIo/PushLogs": _TOKEN_REQUIRED,
+    "/flwr.proto.ServerAppIo/GetFederationOptions": _TOKEN_REQUIRED,
     "/flwr.proto.ServerAppIo/PushMessages": _TOKEN_REQUIRED,
     "/flwr.proto.ServerAppIo/PullMessages": _TOKEN_REQUIRED,
     "/flwr.proto.ServerAppIo/GetNodes": _TOKEN_REQUIRED,
