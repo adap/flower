@@ -307,6 +307,7 @@ def run_superlink() -> None:
     ffs_factory = FfsFactory(args.storage_dir)
 
     # Start Control API
+    is_simulation = args.simulation
     control_server: grpc.Server = run_control_api_grpc(
         address=control_address,
         state_factory=state_factory,
@@ -333,7 +334,7 @@ def run_superlink() -> None:
     grpc_servers.append(serverappio_server)
 
     # Start Fleet API
-    if not args.simulation:
+    if not is_simulation:
         if not args.fleet_api_address:
             if args.fleet_api_type in [
                 TRANSPORT_TYPE_GRPC_RERE,
@@ -419,7 +420,7 @@ def run_superlink() -> None:
         command += ["--appio-api-address", appio_address]
         command += [
             "--plugin-type",
-            ExecPluginType.SIMULATION if args.simulation else ExecPluginType.SERVER_APP,
+            ExecPluginType.SIMULATION if is_simulation else ExecPluginType.SERVER_APP,
         ]
         command += ["--parent-pid", str(os.getpid())]
         # pylint: disable-next=consider-using-with
