@@ -15,9 +15,11 @@
 """Tests for factory class that creates ObjectStore instances."""
 
 
+import tempfile
 import threading
 import time
 import unittest
+from pathlib import Path
 from unittest.mock import patch
 
 from .in_memory_object_store import InMemoryObjectStore
@@ -43,32 +45,34 @@ class TestObjectStoreFactory(unittest.TestCase):
 
     def test_store_initializes_sql_store_once_under_concurrency(self) -> None:
         """Test that concurrent SQL store access initializes only one instance."""
-        factory = ObjectStoreFactory("state.db")
-        barrier = threading.Barrier(9)
-        init_calls = 0
-        init_calls_lock = threading.Lock()
-        returned_stores = []
+        with tempfile.TemporaryDirectory() as tmpdir:
+            db_path = Path(tmpdir) / "state.db"
+            factory = ObjectStoreFactory(str(db_path))
+            barrier = threading.Barrier(9)
+            init_calls = 0
+            init_calls_lock = threading.Lock()
+            returned_stores = []
 
-        def slow_initialize(_self: SqlObjectStore) -> None:
-            nonlocal init_calls
-            with init_calls_lock:
-                init_calls += 1
-            time.sleep(0.01)
+            def slow_initialize(_self: SqlObjectStore) -> None:
+                nonlocal init_calls
+                with init_calls_lock:
+                    init_calls += 1
+                time.sleep(0.01)
 
-        def worker() -> None:
-            barrier.wait()
-            returned_stores.append(factory.store())
+            def worker() -> None:
+                barrier.wait()
+                returned_stores.append(factory.store())
 
-        with patch.object(SqlObjectStore, "initialize", new=slow_initialize):
-            threads = [threading.Thread(target=worker) for _ in range(8)]
-            for thread in threads:
-                thread.start()
-            barrier.wait()
-            for thread in threads:
-                thread.join()
+            with patch.object(SqlObjectStore, "initialize", new=slow_initialize):
+                threads = [threading.Thread(target=worker) for _ in range(8)]
+                for thread in threads:
+                    thread.start()
+                barrier.wait()
+                for thread in threads:
+                    thread.join()
 
-        self.assertEqual(init_calls, 1)
-        self.assertEqual(len({id(store) for store in returned_stores}), 1)
+            self.assertEqual(init_calls, 1)
+            self.assertEqual(len({id(store) for store in returned_stores}), 1)
 
 
 if __name__ == "__main__":
