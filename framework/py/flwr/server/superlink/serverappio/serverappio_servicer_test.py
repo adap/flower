@@ -93,6 +93,7 @@ from flwr.supercore.inflatable.inflatable_object import (
     get_object_tree,
     iterate_object_tree,
 )
+from flwr.supercore.interceptors import AppIoTokenClientInterceptor
 from flwr.supercore.object_store import ObjectStoreFactory
 from flwr.superlink.federation import NoOpFederationManager
 
@@ -176,7 +177,24 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
             None,
         )
 
-        self._channel = grpc.insecure_channel("localhost:9091")
+        # Provide a valid metadata token on the default test channel so existing
+        # servicer behavior tests continue to exercise business logic paths.
+        self._auth_run_id = self.state.create_run(
+            "", "", "", {}, NOOP_FEDERATION, ConfigRecord(), ""
+        )
+        auth_token = self.state.create_token(self._auth_run_id)
+        assert auth_token is not None
+        self._auth_token = auth_token
+        _ = self.state.update_run_status(
+            self._auth_run_id, RunStatus(Status.STARTING, "", "")
+        )
+        _ = self.state.update_run_status(
+            self._auth_run_id, RunStatus(Status.RUNNING, "", "")
+        )
+        self._channel = grpc.intercept_channel(
+            grpc.insecure_channel("localhost:9091"),
+            AppIoTokenClientInterceptor(token=self._auth_token),
+        )
         self._get_nodes = self._channel.unary_unary(
             "/flwr.proto.ServerAppIo/GetNodes",
             request_serializer=GetNodesRequest.SerializeToString,
@@ -535,10 +553,20 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         with patch("datetime.datetime") as mock_dt:
             mock_dt.now.return_value = future_dt  # over TTL limit
 
+            token = self.state.create_token(run_id)
+            assert token is not None
             request = PullAppMessagesRequest(message_ids=[str(msg_id)], run_id=run_id)
+            pull_messages_plain = grpc.insecure_channel("localhost:9091").unary_unary(
+                "/flwr.proto.ServerAppIo/PullMessages",
+                request_serializer=PullAppMessagesRequest.SerializeToString,
+                response_deserializer=PullAppMessagesResponse.FromString,
+            )
 
             # Execute
-            response, call = self._pull_messages.with_call(request=request)
+            response, call = pull_messages_plain.with_call(
+                request=request,
+                metadata=(("flwr-app-token", token),),
+            )
 
             # Assert
             assert isinstance(response, PullAppMessagesResponse)

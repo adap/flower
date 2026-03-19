@@ -68,6 +68,7 @@ from flwr.supercore.inflatable.inflatable_utils import (
     pull_objects,
     push_objects,
 )
+from flwr.supercore.interceptors import AppIoTokenClientInterceptor
 
 from .grid import Grid
 
@@ -119,9 +120,10 @@ class GrpcGrid(Grid):
         self,
         serverappio_service_address: str = SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
         root_certificates: bytes | None = None,
+        token: str | None = None,
     ) -> None:
         self._addr = serverappio_service_address
-        self._cert = root_certificates
+        self._connection_auth = (root_certificates, token)
         self._run: Run | None = None
         self._grpc_stub: ServerAppIoStub | None = None
         self._channel: grpc.Channel | None = None
@@ -142,10 +144,16 @@ class GrpcGrid(Grid):
         if self._is_connected:
             log(WARNING, "Already connected")
             return
+        root_certificates, token = self._connection_auth
         self._channel = create_channel(
             server_address=self._addr,
-            insecure=(self._cert is None),
-            root_certificates=self._cert,
+            insecure=(root_certificates is None),
+            root_certificates=root_certificates,
+            interceptors=(
+                [AppIoTokenClientInterceptor(token=token)]
+                if token is not None
+                else None
+            ),
         )
         self._channel.subscribe(on_channel_state_change)
         self._grpc_stub = ServerAppIoStub(self._channel)
