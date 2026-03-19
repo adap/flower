@@ -257,7 +257,7 @@ class LinkState(CoreState):  # pylint: disable=R0904
         federation: str,
         federation_options: ConfigRecord,
         flwr_aid: str | None,
-        run_type: str | None = None,
+        run_type: str,
     ) -> int:
         """Create a new run.
 
@@ -278,9 +278,8 @@ class LinkState(CoreState):  # pylint: disable=R0904
             the simulation runtime.
         flwr_aid : Optional[str]
             Flower Account ID of the creator.
-        run_type : Optional[str]
-            The type of run being created. If not provided, implementations may
-            infer it from the available run metadata.
+        run_type : str
+            The type of run being created.
 
         Returns
         -------

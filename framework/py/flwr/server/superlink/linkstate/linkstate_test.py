@@ -91,6 +91,7 @@ class StateTest(CoreStateTest):
             "health-federation",
             ConfigRecord(),
             "i1r9f",
+            RunType.SERVER_APP,
         )
 
         # Execute
@@ -1691,7 +1692,11 @@ class StateTest(CoreStateTest):
         state = self.state_factory()
         # A run w/ federation options
         fed_options = ConfigRecord({"setting-a": 123, "setting-b": [4, 5, 6]})
-        run_id = create_dummy_run(state, federation_options=fed_options)
+        run_id = create_dummy_run(
+            state,
+            federation_options=fed_options,
+            run_type=RunType.SIMULATION,
+        )
         state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
         second_run_id = create_dummy_run(state)
 
@@ -1891,7 +1896,7 @@ def create_dummy_run(  # pylint: disable=too-many-positional-arguments
     federation: str = NOOP_FEDERATION,
     federation_options: ConfigRecord | None = None,
     flwr_aid: str | None = "mock_flwr_aid",
-    run_type: str | None = None,
+    run_type: str = RunType.SERVER_APP,
 ) -> int:
     """Create a dummy run."""
     return state.create_run(

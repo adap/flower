@@ -789,13 +789,9 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
         federation: str,
         federation_options: ConfigRecord,
         flwr_aid: str | None,
-        run_type: str | None = None,
+        run_type: str,
     ) -> int:
         """Create a new run."""
-        run_type = run_type or (
-            RunType.SIMULATION if federation_options else RunType.SERVER_APP
-        )
-
         # Sample a random int64 as run_id
         uint64_run_id = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
 

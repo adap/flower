@@ -142,6 +142,7 @@ class TestControlServicer(unittest.TestCase):
             NOOP_FEDERATION,
             ConfigRecord(),
             flwr_aid,
+            RunType.SERVER_APP,
         )
 
     def test_start_run(self) -> None:
@@ -569,6 +570,7 @@ class TestControlServicer(unittest.TestCase):
             "test-federation",
             ConfigRecord(),
             self.aid,
+            RunType.SERVER_APP,
         )
         token = self.state.create_token(run_id)
         assert token is not None
@@ -626,6 +628,7 @@ class TestControlServicer(unittest.TestCase):
             "test-federation",
             ConfigRecord(),
             target_flwr_aid,
+            RunType.SERVER_APP,
         )
         token = self.state.create_token(run_id)
         assert token is not None
@@ -776,6 +779,7 @@ class TestControlServicerAuth(unittest.TestCase):
             NOOP_FEDERATION,
             ConfigRecord(),
             flwr_aid,
+            RunType.SERVER_APP,
         )
 
     def make_context(self) -> MagicMock:
