@@ -266,8 +266,8 @@ def normalize_and_validate_fab_format(
     config: dict[str, Any],
 ) -> FabFormatMetadata:
     """Normalize FAB metadata in config and validate `fab_format_version` rules."""
-    app = _get_flwr_app_config(config)
-    fab_format_version = _resolve_fab_format_version(app)
+    app_config = _get_flwr_app_config(config)
+    fab_format_version = _resolve_fab_format_version(app_config)
     if fab_format_version == 0:
         return _normalize_and_validate_fab_format_v0(config)
     if fab_format_version == 1:
@@ -282,8 +282,8 @@ def validate_fab_files_for_format(
     config: dict[str, Any], filtered_paths: list[str]
 ) -> None:
     """Validate the final FAB contents using the selected format ruleset."""
-    app = _get_flwr_app_config(config)
-    fab_format_version = _resolve_fab_format_version(app)
+    app_config = _get_flwr_app_config(config)
+    fab_format_version = _resolve_fab_format_version(app_config)
     if fab_format_version == 0:
         _validate_fab_format_v0_contents(config, filtered_paths)
         return
