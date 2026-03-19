@@ -37,24 +37,22 @@ class MethodTokenPolicy:
         return MethodTokenPolicy(requires_token=True)
 
 
-_NO_AUTH = MethodTokenPolicy.no_auth()
-_TOKEN_REQUIRED = MethodTokenPolicy.token_required()
-
 # In a follow-up PR, create this explicit map using a shared builder.
 SERVERAPPIO_METHOD_AUTH_POLICY: dict[str, MethodTokenPolicy] = {
-    "/flwr.proto.ServerAppIo/ListAppsToLaunch": _NO_AUTH,
-    "/flwr.proto.ServerAppIo/RequestToken": _NO_AUTH,
-    "/flwr.proto.ServerAppIo/GetRun": _NO_AUTH,
-    "/flwr.proto.ServerAppIo/SendAppHeartbeat": _TOKEN_REQUIRED,
-    "/flwr.proto.ServerAppIo/PullAppInputs": _TOKEN_REQUIRED,
-    "/flwr.proto.ServerAppIo/PushAppOutputs": _TOKEN_REQUIRED,
-    "/flwr.proto.ServerAppIo/PushObject": _TOKEN_REQUIRED,
-    "/flwr.proto.ServerAppIo/PullObject": _TOKEN_REQUIRED,
-    "/flwr.proto.ServerAppIo/ConfirmMessageReceived": _TOKEN_REQUIRED,
-    "/flwr.proto.ServerAppIo/UpdateRunStatus": _TOKEN_REQUIRED,
-    "/flwr.proto.ServerAppIo/PushLogs": _TOKEN_REQUIRED,
-    "/flwr.proto.ServerAppIo/GetFederationOptions": _TOKEN_REQUIRED,
-    "/flwr.proto.ServerAppIo/PushMessages": _TOKEN_REQUIRED,
-    "/flwr.proto.ServerAppIo/PullMessages": _TOKEN_REQUIRED,
-    "/flwr.proto.ServerAppIo/GetNodes": _TOKEN_REQUIRED,
+    "/flwr.proto.ServerAppIo/ListAppsToLaunch": MethodTokenPolicy.no_auth(),
+    "/flwr.proto.ServerAppIo/RequestToken": MethodTokenPolicy.no_auth(),
+    "/flwr.proto.ServerAppIo/GetRun": MethodTokenPolicy.no_auth(),
+    "/flwr.proto.ServerAppIo/SendAppHeartbeat": MethodTokenPolicy.token_required(),
+    "/flwr.proto.ServerAppIo/PullAppInputs": MethodTokenPolicy.token_required(),
+    "/flwr.proto.ServerAppIo/PushAppOutputs": MethodTokenPolicy.token_required(),
+    "/flwr.proto.ServerAppIo/PushObject": MethodTokenPolicy.token_required(),
+    "/flwr.proto.ServerAppIo/PullObject": MethodTokenPolicy.token_required(),
+    # pylint: disable-next=line-too-long
+    "/flwr.proto.ServerAppIo/ConfirmMessageReceived": MethodTokenPolicy.token_required(),  # noqa: E501
+    "/flwr.proto.ServerAppIo/UpdateRunStatus": MethodTokenPolicy.token_required(),
+    "/flwr.proto.ServerAppIo/PushLogs": MethodTokenPolicy.token_required(),
+    "/flwr.proto.ServerAppIo/GetFederationOptions": MethodTokenPolicy.token_required(),
+    "/flwr.proto.ServerAppIo/PushMessages": MethodTokenPolicy.token_required(),
+    "/flwr.proto.ServerAppIo/PullMessages": MethodTokenPolicy.token_required(),
+    "/flwr.proto.ServerAppIo/GetNodes": MethodTokenPolicy.token_required(),
 }
