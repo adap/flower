@@ -208,8 +208,8 @@ def _normalize_and_validate_fab_format_v0(config: dict[str, Any]) -> FabFormatMe
     - Compatibility bounds are derived only when the declared `flwr` dependency
       can be represented as a single supported range.
     """
-    app = _get_flwr_app_config(config)
-    target_version = _parse_flwr_target_version(app)
+    app_config = _get_flwr_app_config(config)
+    target_version = _parse_flwr_target_version(app_config)
     requirement = _get_flwr_requirement(config)
     lower: Version | None = None
     upper: Version | None = None
