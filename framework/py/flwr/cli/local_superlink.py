@@ -17,7 +17,6 @@
 
 from __future__ import annotations
 
-import socket
 import subprocess
 import time
 from pathlib import Path
@@ -34,6 +33,7 @@ from .constant import (
     CONTROL_API_PROBE_INTERVAL,
     CONTROL_API_PROBE_TIMEOUT,
     LOCAL_CONTROL_API_ADDRESS,
+    LOCAL_SERVERAPPIO_API_ADDRESS,
     LOCAL_SUPERLINK_STARTUP_TIMEOUT,
 )
 from .typing import SuperLinkConnection
@@ -93,13 +93,6 @@ def _is_local_superlink_started() -> bool:
         channel.close()
 
 
-def _find_free_port() -> int:
-    """Return an ephemeral port number that is free on localhost."""
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-        sock.bind(("127.0.0.1", 0))
-        return int(sock.getsockname()[1])
-
-
 def _start_local_superlink() -> None:
     """Start a managed local SuperLink in simulation mode and wait for readiness."""
     database_path, storage_dir, log_file_path = _get_local_superlink_paths()
@@ -117,10 +110,8 @@ def _start_local_superlink() -> None:
         ISOLATION_MODE_SUBPROCESS,
         "--control-api-address",
         LOCAL_CONTROL_API_ADDRESS,
-        "--serverappio-api-address",
-        f"127.0.0.1:{_find_free_port()}",
-        "--fleet-api-address",
-        f"127.0.0.1:{_find_free_port()}",
+        "--simulationio-api-address",
+        LOCAL_SERVERAPPIO_API_ADDRESS,
         "--database",
         str(database_path),
         "--storage-dir",
