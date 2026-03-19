@@ -53,7 +53,7 @@ class TestObjectStoreFactory(unittest.TestCase):
             nonlocal init_calls
             with init_calls_lock:
                 init_calls += 1
-            time.sleep(0.05)
+            time.sleep(0.01)
 
         def worker() -> None:
             barrier.wait()

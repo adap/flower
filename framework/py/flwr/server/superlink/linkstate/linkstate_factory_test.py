@@ -44,13 +44,13 @@ class TestLinkStateFactory(unittest.TestCase):
         returned_states = []
 
         def fast_store_initialize(_self: SqlObjectStore) -> None:
-            time.sleep(0.01)
+            time.sleep(0.001)
 
         def slow_state_initialize(_self: SqlLinkState) -> None:
             nonlocal init_calls
             with init_calls_lock:
                 init_calls += 1
-            time.sleep(0.05)
+            time.sleep(0.01)
 
         def worker() -> None:
             barrier.wait()

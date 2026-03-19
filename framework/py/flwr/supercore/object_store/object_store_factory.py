@@ -43,13 +43,6 @@ class ObjectStoreFactory:
         self.store_instance: ObjectStore | None = None
         self._store_lock = Lock()
 
-    def _log_store_backend(self) -> None:
-        """Log which ObjectStore backend is in use."""
-        if self.database == FLWR_IN_MEMORY_DB_NAME:
-            log(DEBUG, "Using InMemoryObjectStore")
-        else:
-            log(DEBUG, "Using SqlObjectStore")
-
     def store(self) -> ObjectStore:
         """Return an ObjectStore instance and create it, if necessary.
 
@@ -58,25 +51,23 @@ class ObjectStoreFactory:
         ObjectStore
             An ObjectStore instance for storing objects by object_id.
         """
-        # Return cached store if it exists
+        # Fast return cached store if it exists
         if self.store_instance is not None:
-            self._log_store_backend()
             return self.store_instance
 
         with self._store_lock:
+            # Avoid re-initialization
             if self.store_instance is not None:
-                self._log_store_backend()
                 return self.store_instance
 
             # InMemoryObjectStore
             if self.database == FLWR_IN_MEMORY_DB_NAME:
                 self.store_instance = InMemoryObjectStore()
-                self._log_store_backend()
-                return self.store_instance
-
             # SqlObjectStore
-            store = SqlObjectStore(self.database)
-            store.initialize()
-            self.store_instance = store
-            self._log_store_backend()
-            return store
+            else:
+                store = SqlObjectStore(self.database)
+                store.initialize()
+                self.store_instance = store
+
+            log(DEBUG, "Using %s", type(self.store_instance).__name__)
+            return self.store_instance

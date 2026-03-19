@@ -56,23 +56,14 @@ class LinkStateFactory:
         self.federation_manager = federation_manager
         self.objectstore_factory = objectstore_factory
 
-    def _log_state_backend(self) -> None:
-        """Log which LinkState backend is in use."""
-        if self.database == FLWR_IN_MEMORY_DB_NAME:
-            log(DEBUG, "Using InMemoryState")
-        else:
-            log(DEBUG, "Using SqlLinkState")
-
     def state(self) -> LinkState:
         """Return a State instance and create it, if necessary."""
-        # Return cached state if it exists
+        # Fast return cached state if it exists
         if self.state_instance is not None:
-            self._log_state_backend()
             return self.state_instance
 
         with self._state_lock:
             if self.state_instance is not None:
-                self._log_state_backend()
                 return self.state_instance
 
             # Get the ObjectStore instance
@@ -83,12 +74,13 @@ class LinkStateFactory:
                 self.state_instance = InMemoryLinkState(
                     self.federation_manager, object_store
                 )
-                self._log_state_backend()
-                return self.state_instance
-
             # SqlLinkState
-            state = SqlLinkState(self.database, self.federation_manager, object_store)
-            state.initialize()
-            self.state_instance = state
-            self._log_state_backend()
-            return state
+            else:
+                state = SqlLinkState(
+                    self.database, self.federation_manager, object_store
+                )
+                state.initialize()
+                self.state_instance = state
+
+            log(DEBUG, "Using %s", type(self.state_instance).__name__)
+            return self.state_instance
