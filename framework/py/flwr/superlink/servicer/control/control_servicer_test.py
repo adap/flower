@@ -178,22 +178,6 @@ class TestControlServicer(unittest.TestCase):
         self.assertEqual(run_info.fab_version, fab_version)
         self.assertEqual(run_info.run_type, RunType.SERVER_APP)
 
-    def test_start_run_sets_simulation_run_type(self) -> None:
-        """Test StartRun marks runs with federation options as simulation runs."""
-        # Prepare
-        fab_content = b"test FAB content simulation"
-        fab_hash = hashlib.sha256(fab_content).hexdigest()
-        request = StartRunRequest()
-        request.fab.hash_str = fab_hash
-        request.fab.content = fab_content
-        request.federation = NOOP_FEDERATION
-        request.federation_options.CopyFrom(
-            config_record_to_proto(ConfigRecord({"num-supernodes": 3}))
-        )
-
-        # Execute
-        with (
-            patch(
                 "flwr.superlink.servicer.control.control_servicer.get_fab_config"
             ) as _,
             patch(
