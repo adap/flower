@@ -73,7 +73,3 @@ class TestLinkStateFactory(unittest.TestCase):
 
             self.assertEqual(init_calls, 1)
             self.assertEqual(len({id(state) for state in returned_states}), 1)
-
-
-if __name__ == "__main__":
-    unittest.main()
