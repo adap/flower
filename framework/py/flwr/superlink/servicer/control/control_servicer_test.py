@@ -40,7 +40,7 @@ from flwr.common.constant import (
     Status,
     SubStatus,
 )
-from flwr.common.serde import config_record_to_proto, user_config_to_proto
+from flwr.common.serde import user_config_to_proto
 from flwr.common.typing import Run, RunStatus
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     AcceptInvitationRequest,
