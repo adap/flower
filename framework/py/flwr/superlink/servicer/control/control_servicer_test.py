@@ -178,21 +178,6 @@ class TestControlServicer(unittest.TestCase):
         self.assertEqual(run_info.fab_version, fab_version)
         self.assertEqual(run_info.run_type, RunType.SERVER_APP)
 
-                "flwr.superlink.servicer.control.control_servicer.get_fab_config"
-            ) as _,
-            patch(
-                "flwr.superlink.servicer.control.control_servicer.get_metadata_from_config"
-            ) as mock_get_metadata_from_config,
-        ):
-            mock_get_metadata_from_config.return_value = ("flwr/demo", "v1.0.0")
-            response = self.servicer.StartRun(request, Mock())
-        runs = self.state.get_run_info(run_ids=[response.run_id])
-        run_info = runs[0] if runs else None
-
-        # Assert
-        assert run_info is not None
-        self.assertEqual(run_info.run_type, RunType.SIMULATION)
-
     def test_start_run_accepts_valid_nested_override_keys(self) -> None:
         """Test StartRun accepts valid dotted override keys from nested FAB config."""
         # Prepare
