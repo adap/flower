@@ -822,7 +822,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
     # ***************
     def StreamRunEvents(
         self, request: StreamRunEventsRequest, context: grpc.ServicerContext
-    ) -> StreamRunEventsResponse:
+    ) -> Generator[StreamRunEventsResponse, Any, None]:
         """Start run event stream."""
         _ = request, context
         raise NotImplementedError("StreamRunEvents is not implemented yet.")
