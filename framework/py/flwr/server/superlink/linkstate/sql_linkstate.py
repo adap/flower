@@ -1043,15 +1043,6 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
             self.query(query % timestamp_fld, params)
         return True
 
-    def get_pending_run_id(self) -> int | None:
-        """Get the `run_id` of a run with `Status.PENDING` status."""
-        # Fetch all runs with unset `starting_at` (i.e. they are in PENDING status)
-        query = "SELECT * FROM run WHERE starting_at = '' LIMIT 1"
-        rows = self.query(query, {})
-        if rows:
-            return int64_to_uint64(rows[0]["run_id"])
-        return None
-
     def get_federation_options(self, run_id: int) -> ConfigRecord | None:
         """Retrieve the federation options for the specified `run_id`."""
         # Convert the uint64 value to sint64 for SQLite
