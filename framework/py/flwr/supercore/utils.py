@@ -271,8 +271,7 @@ def _cache_matches_current_install(cache: dict[str, Any]) -> bool:
     cached_flwr_version = cache.get("flwr_version")
 
     return (
-        cached_package_name == flwr_package_name
-        and cached_flwr_version == flwr_version
+        cached_package_name == flwr_package_name and cached_flwr_version == flwr_version
     )
 
 
