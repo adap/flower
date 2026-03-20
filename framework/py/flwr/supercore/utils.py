@@ -28,6 +28,7 @@ from typing import Any
 import requests
 
 from flwr.common.constant import FLWR_DIR, FLWR_HOME
+from flwr.supercore.date import now as utcnow
 from flwr.supercore.version import package_name as flwr_package_name
 from flwr.supercore.version import package_version as flwr_version
 
@@ -225,11 +226,6 @@ def get_flwr_update_check_payload(process_name: str | None = None) -> dict[str, 
     return payload
 
 
-def _get_utcnow() -> datetime:
-    """Return the current UTC timestamp."""
-    return datetime.now(timezone.utc)
-
-
 def _get_flwr_update_check_cache_path() -> Path:
     """Return the local cache file path for update-check state."""
     return (
@@ -306,7 +302,7 @@ def _should_show_cached_flwr_update_message(cache: dict[str, Any]) -> bool:
     if last_shown_at is None:
         return True
 
-    return _get_utcnow() - last_shown_at >= timedelta(
+    return utcnow() - last_shown_at >= timedelta(
         seconds=FLWR_UPDATE_CHECK_SHOW_INTERVAL_SECONDS
     )
 
@@ -320,12 +316,12 @@ def _should_refresh_flwr_update_check_cache(cache: dict[str, Any] | None) -> boo
     if last_checked_at is None:
         return True
 
-    return last_checked_at.date() < _get_utcnow().date()
+    return last_checked_at.date() < utcnow().date()
 
 
 def _mark_cached_flwr_update_message_shown(cache: dict[str, Any]) -> None:
     """Update and persist the last time the cached message was shown."""
-    cache["last_shown_at"] = _get_utcnow().isoformat()
+    cache["last_shown_at"] = utcnow().isoformat()
     _write_flwr_update_check_cache(cache)
 
 
@@ -367,7 +363,7 @@ def _refresh_flwr_update_check_cache(process_name: str | None = None) -> None:
         "package_name": flwr_package_name,
         "flwr_version": flwr_version,
         "update_available": body.get("update_available") is True,
-        "last_checked_at": _get_utcnow().isoformat(),
+        "last_checked_at": utcnow().isoformat(),
     }
 
     if cache["update_available"]:
