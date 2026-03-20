@@ -25,6 +25,7 @@ from flwr.common.grpc import create_channel, on_channel_state_change
 from flwr.common.logger import log
 from flwr.common.retry_invoker import make_simple_grpc_retry_invoker, wrap_stub
 from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub  # pylint: disable=E0611
+from flwr.supercore.interceptors import AppIoTokenClientInterceptor
 
 
 class SimulationIoConnection:
@@ -38,15 +39,22 @@ class SimulationIoConnection:
         The PEM-encoded root certificates as a byte string.
         If provided, a secure connection using the certificates will be
         established to an SSL-enabled Flower server.
+    token : Optional[str] (default: None)
+        Executor token. If provided, it is attached to all outgoing RPCs via
+        metadata.
     """
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
         serverappio_api_address: str = SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
         root_certificates: bytes | None = None,
+        token: str | None = None,
     ) -> None:
+        if token == "":
+            raise ValueError("`token` must be a non-empty string when provided")
         self._addr = serverappio_api_address
         self._cert = root_certificates
+        self._token = token
         self._grpc_stub: ServerAppIoStub | None = None
         self._channel: grpc.Channel | None = None
         self._retry_invoker = make_simple_grpc_retry_invoker()
@@ -68,10 +76,16 @@ class SimulationIoConnection:
         if self._is_connected:
             log(WARNING, "Already connected")
             return
+        interceptors = (
+            [AppIoTokenClientInterceptor(token=self._token)]
+            if self._token is not None
+            else None
+        )
         self._channel = create_channel(
             server_address=self._addr,
             insecure=(self._cert is None),
             root_certificates=self._cert,
+            interceptors=interceptors,
         )
         self._channel.subscribe(on_channel_state_change)
         self._grpc_stub = ServerAppIoStub(self._channel)
