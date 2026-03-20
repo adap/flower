@@ -325,13 +325,13 @@ def test_warn_if_flwr_update_available_disabled(
 
 
 def _write_update_check_cache(tmp_path: Path, body: dict[str, Any]) -> None:
-    cache_dir = tmp_path / "cache"
+    cache_dir = tmp_path / ".cache"
     cache_dir.mkdir(parents=True, exist_ok=True)
     (cache_dir / "update-check.json").write_text(json.dumps(body), encoding="utf-8")
 
 
 def _read_update_check_cache(tmp_path: Path) -> dict[str, Any] | None:
-    cache_path = tmp_path / "cache" / "update-check.json"
+    cache_path = tmp_path / ".cache" / "update-check.json"
     if not cache_path.exists():
         return None
 
