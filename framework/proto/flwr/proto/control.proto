@@ -108,8 +108,8 @@ service Control {
   // ##############
 
   // Start run event stream
-  rpc StreamRunEvent(StreamRunEventRequest)
-      returns (stream StreamRunEventResponse) {}
+  rpc StreamRunEvents(StreamRunEventsRequest)
+      returns (stream StreamRunEventsResponse) {}
 }
 
 message StartRunRequest {
@@ -233,8 +233,8 @@ message RevokeInvitationResponse {}
 // ##############
 // Unused for now
 // ##############
-message StreamRunEventRequest { uint64 run_id = 1; }
-message StreamRunEventResponse {
+message StreamRunEventsRequest { uint64 run_id = 1; }
+message StreamRunEventsResponse {
   string event = 1;
   string data = 2;
 }

@@ -144,10 +144,10 @@ class ControlStub(object):
                 request_serializer=flwr_dot_proto_dot_control__pb2.RevokeInvitationRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_control__pb2.RevokeInvitationResponse.FromString,
                 _registered_method=True)
-        self.StreamRunEvent = channel.unary_stream(
-                '/flwr.proto.Control/StreamRunEvent',
-                request_serializer=flwr_dot_proto_dot_control__pb2.StreamRunEventRequest.SerializeToString,
-                response_deserializer=flwr_dot_proto_dot_control__pb2.StreamRunEventResponse.FromString,
+        self.StreamRunEvents = channel.unary_stream(
+                '/flwr.proto.Control/StreamRunEvents',
+                request_serializer=flwr_dot_proto_dot_control__pb2.StreamRunEventsRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_control__pb2.StreamRunEventsResponse.FromString,
                 _registered_method=True)
 
 
@@ -308,7 +308,7 @@ class ControlServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def StreamRunEvent(self, request, context):
+    def StreamRunEvents(self, request, context):
         """##############
         Unused for now
         ##############
@@ -432,10 +432,10 @@ def add_ControlServicer_to_server(servicer, server):
                     request_deserializer=flwr_dot_proto_dot_control__pb2.RevokeInvitationRequest.FromString,
                     response_serializer=flwr_dot_proto_dot_control__pb2.RevokeInvitationResponse.SerializeToString,
             ),
-            'StreamRunEvent': grpc.unary_stream_rpc_method_handler(
-                    servicer.StreamRunEvent,
-                    request_deserializer=flwr_dot_proto_dot_control__pb2.StreamRunEventRequest.FromString,
-                    response_serializer=flwr_dot_proto_dot_control__pb2.StreamRunEventResponse.SerializeToString,
+            'StreamRunEvents': grpc.unary_stream_rpc_method_handler(
+                    servicer.StreamRunEvents,
+                    request_deserializer=flwr_dot_proto_dot_control__pb2.StreamRunEventsRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_control__pb2.StreamRunEventsResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -1043,7 +1043,7 @@ class Control(object):
             _registered_method=True)
 
     @staticmethod
-    def StreamRunEvent(request,
+    def StreamRunEvents(request,
             target,
             options=(),
             channel_credentials=None,
@@ -1056,9 +1056,9 @@ class Control(object):
         return grpc.experimental.unary_stream(
             request,
             target,
-            '/flwr.proto.Control/StreamRunEvent',
-            flwr_dot_proto_dot_control__pb2.StreamRunEventRequest.SerializeToString,
-            flwr_dot_proto_dot_control__pb2.StreamRunEventResponse.FromString,
+            '/flwr.proto.Control/StreamRunEvents',
+            flwr_dot_proto_dot_control__pb2.StreamRunEventsRequest.SerializeToString,
+            flwr_dot_proto_dot_control__pb2.StreamRunEventsResponse.FromString,
             options,
             channel_credentials,
             insecure,

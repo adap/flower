@@ -101,8 +101,8 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     StopRunResponse,
     StreamLogsRequest,
     StreamLogsResponse,
-    StreamRunEventRequest,
-    StreamRunEventResponse,
+    StreamRunEventsRequest,
+    StreamRunEventsResponse,
     UnregisterNodeRequest,
     UnregisterNodeResponse,
 )
@@ -820,12 +820,12 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
     # ***************
     # Unused for now
     # ***************
-    def StreamRunEvent(
-        self, request: StreamRunEventRequest, context: grpc.ServicerContext
-    ) -> StreamRunEventResponse:
+    def StreamRunEvents(
+        self, request: StreamRunEventsRequest, context: grpc.ServicerContext
+    ) -> StreamRunEventsResponse:
         """Start run event stream."""
         _ = request, context
-        raise NotImplementedError("StreamRunEvent is not implemented yet.")
+        raise NotImplementedError("StreamRunEvents is not implemented yet.")
 
 
 def _validate_federation_and_node_in_request(
