@@ -421,6 +421,89 @@ def test_validate_pyproject_toml_fields() -> None:
     assert len(warnings) == 0
 
 
+def test_validate_pyproject_toml_fields_with_fab_patterns() -> None:
+    """Test that fab include/exclude pattern lists are accepted."""
+    config = {
+        "project": {
+            "name": "fedgpt",
+            "version": "1.0.0",
+            "description": "",
+            "license": "",
+            "authors": [],
+        },
+        "tool": {
+            "flwr": {
+                "app": {
+                    "publisher": "flwrlabs",
+                    "fab-include": ["**/*.py", "**/*.md"],
+                    "fab-exclude": ["tests/**"],
+                    "components": {"serverapp": "", "clientapp": ""},
+                },
+            },
+        },
+    }
+
+    is_valid, errors, warnings = validate_fields_in_config(config)
+
+    assert is_valid
+    assert len(errors) == 0
+    assert len(warnings) == 0
+
+
+def test_validate_pyproject_toml_fields_invalid_fab_include_type() -> None:
+    """Test fab-include must be a list of strings."""
+    config = {
+        "project": {
+            "name": "fedgpt",
+            "version": "1.0.0",
+            "description": "",
+            "license": "",
+            "authors": [],
+        },
+        "tool": {
+            "flwr": {
+                "app": {
+                    "publisher": "flwrlabs",
+                    "fab-include": "not-a-list",
+                    "components": {"serverapp": "", "clientapp": ""},
+                },
+            },
+        },
+    }
+
+    is_valid, errors, _ = validate_fields_in_config(config)
+
+    assert not is_valid
+    assert any("fab-include" in error for error in errors)
+
+
+def test_validate_pyproject_toml_fields_invalid_fab_exclude_item() -> None:
+    """Test fab-exclude entries must be non-empty strings."""
+    config = {
+        "project": {
+            "name": "fedgpt",
+            "version": "1.0.0",
+            "description": "",
+            "license": "",
+            "authors": [],
+        },
+        "tool": {
+            "flwr": {
+                "app": {
+                    "publisher": "flwrlabs",
+                    "fab-exclude": ["", 123],
+                    "components": {"serverapp": "", "clientapp": ""},
+                },
+            },
+        },
+    }
+
+    is_valid, errors, _ = validate_fields_in_config(config)
+
+    assert not is_valid
+    assert any("fab-exclude" in error for error in errors)
+
+
 def test_validate_pyproject_toml() -> None:
     """Test that validate_pyproject_toml succeeds correctly."""
     # Prepare

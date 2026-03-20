@@ -25,7 +25,13 @@ import click
 import tomli
 
 from flwr.app.user_config import UserConfig, UserConfigValue
-from flwr.common.constant import APP_DIR, FAB_CONFIG_FILE, FAB_HASH_TRUNCATION
+from flwr.common.constant import (
+    APP_DIR,
+    FAB_CONFIG_FILE,
+    FAB_EXCLUDE_KEY,
+    FAB_HASH_TRUNCATION,
+    FAB_INCLUDE_KEY,
+)
 from flwr.common.typing import Run
 from flwr.supercore.fab_format_version import normalize_and_validate_fab_format
 from flwr.supercore.utils import get_flwr_home
@@ -291,6 +297,25 @@ def _validate_run_config(config_dict: dict[str, Any], errors: list[str]) -> None
             )
 
 
+def _validate_pattern_list(
+    app_config: dict[str, Any], key: str, errors: list[str]
+) -> None:
+    """Validate optional list-of-string pattern fields in [tool.flwr.app]."""
+    if key not in app_config:
+        return
+
+    value = app_config[key]
+    if not isinstance(value, list):
+        errors.append(f'Property "{key}" in [tool.flwr.app] must be a list of strings.')
+        return
+
+    if any(not isinstance(pattern, str) or pattern.strip() == "" for pattern in value):
+        errors.append(
+            f'Property "{key}" in [tool.flwr.app] must be a list of non-empty '
+            "strings."
+        )
+
+
 # pylint: disable=too-many-branches
 def validate_fields_in_config(
     config: dict[str, Any],
@@ -320,6 +345,8 @@ def validate_fields_in_config(
     else:
         if "publisher" not in config["tool"]["flwr"]["app"]:
             errors.append('Property "publisher" missing in [tool.flwr.app]')
+        _validate_pattern_list(config["tool"]["flwr"]["app"], FAB_INCLUDE_KEY, errors)
+        _validate_pattern_list(config["tool"]["flwr"]["app"], FAB_EXCLUDE_KEY, errors)
         if "config" in config["tool"]["flwr"]["app"]:
             _validate_run_config(config["tool"]["flwr"]["app"]["config"], errors)
         if "components" not in config["tool"]["flwr"]["app"]:
