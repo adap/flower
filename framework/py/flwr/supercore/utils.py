@@ -21,7 +21,7 @@ import platform
 import re
 import sys
 import threading
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -235,18 +235,10 @@ def _get_flwr_update_check_cache_path() -> Path:
 
 def _parse_flwr_update_check_timestamp(value: Any) -> datetime | None:
     """Parse a timestamp from cache state."""
-    if not isinstance(value, str):
-        return None
-
     try:
-        parsed = datetime.fromisoformat(value)
-    except ValueError:
+        return datetime.fromisoformat(value)
+    except (TypeError, ValueError):
         return None
-
-    if parsed.tzinfo is None:
-        return parsed.replace(tzinfo=timezone.utc)
-
-    return parsed.astimezone(timezone.utc)
 
 
 def _read_flwr_update_check_cache() -> dict[str, Any] | None:
