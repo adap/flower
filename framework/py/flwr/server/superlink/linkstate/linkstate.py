@@ -371,17 +371,6 @@ class LinkState(CoreState):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
-    def get_pending_run_id(self) -> int | None:
-        """Get the `run_id` of a run with `Status.PENDING` status.
-
-        Returns
-        -------
-        Optional[int]
-            The `run_id` of a `Run` that is pending to be started; None if
-            there is no Run pending.
-        """
-
-    @abc.abstractmethod
     def get_federation_options(self, run_id: int) -> ConfigRecord | None:
         """Retrieve the federation options for the specified `run_id`.
 
