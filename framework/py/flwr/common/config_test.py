@@ -457,7 +457,7 @@ def test_validate_fab_pattern_field(key: str, value: Any, valid: bool) -> None:
             },
         },
     }
-  
+
     # Execute
     is_valid, errors, _ = validate_fields_in_config(config)
 
