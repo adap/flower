@@ -19,7 +19,7 @@ dependencies = [
 packages = ["."]
 
 [tool.flwr.app]
-publisher = "frauddetection"
+publisher = "mainthread"
 
 [tool.flwr.app.components]
 serverapp = "frauddetection.server_app:app"
