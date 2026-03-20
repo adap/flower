@@ -712,19 +712,6 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
             run_record.run.status = new_status
             return True
 
-    def get_pending_run_id(self) -> int | None:
-        """Get the `run_id` of a run with `Status.PENDING` status, if any."""
-        pending_run_id = None
-
-        # Loop through all registered runs
-        for run_id, run_rec in self.run_ids.items():
-            # Break once a pending run is found
-            if run_rec.run.status.status == Status.PENDING:
-                pending_run_id = run_id
-                break
-
-        return pending_run_id
-
     def get_federation_options(self, run_id: int) -> ConfigRecord | None:
         """Retrieve the federation options for the specified `run_id`."""
         with self.lock:
