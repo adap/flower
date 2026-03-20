@@ -93,20 +93,20 @@ FAB_EXCLUDE_PATTERNS = (
     "**/*_test.py",
     "**/test_*.py",
     # Distribution / packaging
-    "build/",
-    "eggs/",
-    ".eggs/",
-    "lib/",
-    "lib64/",
-    "parts/",
+    "build/**",
+    "eggs/**",
+    ".eggs/**",
+    "lib/**",
+    "lib64/**",
+    "parts/**",
     "*.egg",
     # Environments
-    ".venv",
-    "env/",
-    "venv/",
-    "ENV/",
-    "env.bak/",
-    "venv.bak/",
+    ".venv/**",
+    "env/**",
+    "venv/**",
+    "ENV/**",
+    "env.bak/**",
+    "venv.bak/**",
 )
 
 # Constant for SuperLink
