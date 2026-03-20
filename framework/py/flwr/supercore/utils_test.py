@@ -19,6 +19,7 @@ import json
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
+from unittest.mock import Mock
 
 import pytest
 import requests
@@ -311,17 +312,13 @@ def test_warn_if_flwr_update_available_disabled(
 ) -> None:
     """The update check should not run when disabled via environment variable."""
     monkeypatch.setenv(FLWR_DISABLE_UPDATE_CHECK, "1")
-    called = False
+    start_thread = Mock()
 
-    def _start_thread(*_args: Any, **_kwargs: Any) -> None:
-        nonlocal called
-        called = True
-
-    monkeypatch.setattr(utils, "_start_flwr_update_check_refresh_thread", _start_thread)
+    monkeypatch.setattr(utils, "_start_flwr_update_check_refresh_thread", start_thread)
 
     warn_if_flwr_update_available(process_name="flower-superlink")
 
-    assert called is False
+    start_thread.assert_not_called()
 
 
 def _write_update_check_cache(tmp_path: Path, body: dict[str, Any]) -> None:
@@ -419,16 +416,11 @@ def test_warn_if_flwr_update_available_skips_refresh_if_checked_today(
     """The cache should not refresh again within the same UTC calendar day."""
     monkeypatch.delenv(FLWR_DISABLE_UPDATE_CHECK, raising=False)
     monkeypatch.setattr(utils, "get_flwr_home", lambda: tmp_path)
-
-    called = False
-
-    def _start_thread(*_args: Any, **_kwargs: Any) -> None:
-        nonlocal called
-        called = True
+    start_thread = Mock()
 
     now = datetime(2026, 3, 18, 15, 0, tzinfo=timezone.utc)
     monkeypatch.setattr(utils, "utcnow", lambda: now)
-    monkeypatch.setattr(utils, "_start_flwr_update_check_refresh_thread", _start_thread)
+    monkeypatch.setattr(utils, "_start_flwr_update_check_refresh_thread", start_thread)
     _write_update_check_cache(
         tmp_path,
         {
@@ -445,7 +437,7 @@ def test_warn_if_flwr_update_available_skips_refresh_if_checked_today(
 
     warn_if_flwr_update_available(process_name="flower-superlink")
 
-    assert called is False
+    start_thread.assert_not_called()
 
 
 def test_warn_if_flwr_update_available_refreshes_on_new_utc_day(
@@ -455,16 +447,11 @@ def test_warn_if_flwr_update_available_refreshes_on_new_utc_day(
     """The cache should refresh again after the UTC date changes."""
     monkeypatch.delenv(FLWR_DISABLE_UPDATE_CHECK, raising=False)
     monkeypatch.setattr(utils, "get_flwr_home", lambda: tmp_path)
-
-    called = False
-
-    def _start_thread(*_args: Any, **_kwargs: Any) -> None:
-        nonlocal called
-        called = True
+    start_thread = Mock()
 
     now = datetime(2026, 3, 18, 0, 30, tzinfo=timezone.utc)
     monkeypatch.setattr(utils, "utcnow", lambda: now)
-    monkeypatch.setattr(utils, "_start_flwr_update_check_refresh_thread", _start_thread)
+    monkeypatch.setattr(utils, "_start_flwr_update_check_refresh_thread", start_thread)
     _write_update_check_cache(
         tmp_path,
         {
@@ -481,7 +468,7 @@ def test_warn_if_flwr_update_available_refreshes_on_new_utc_day(
 
     warn_if_flwr_update_available(process_name="flower-superlink")
 
-    assert called is True
+    start_thread.assert_called_once_with("flower-superlink")
 
 
 def test_refresh_flwr_update_check_cache_sends_expected_request_and_writes_cache(

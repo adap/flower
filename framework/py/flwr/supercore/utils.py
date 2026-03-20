@@ -297,8 +297,11 @@ def _should_show_cached_flwr_update_message(cache: dict[str, Any]) -> bool:
 
 
 def _should_refresh_flwr_update_check_cache(cache: dict[str, Any] | None) -> bool:
-    """Return True if the cache is missing, invalid, or not from today (UTC)."""
+    """Return True if cached state should be refreshed from the server."""
     if cache is None:
+        return True
+
+    if not _cache_matches_current_install(cache):
         return True
 
     last_checked_at = _parse_flwr_update_check_timestamp(cache.get("last_checked_at"))
