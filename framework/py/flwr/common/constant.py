@@ -281,7 +281,6 @@ class ExecPluginType:
 
     CLIENT_APP = "clientapp"
     SERVER_APP = "serverapp"
-    SIMULATION = "simulation"
 
     def __new__(cls) -> ExecPluginType:
         """Prevent instantiation."""

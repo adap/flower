@@ -20,13 +20,16 @@ from unittest.mock import patch
 
 from flwr.common.typing import Run
 from flwr.supercore.superexec.plugin.clientapp_exec_plugin import ClientAppExecPlugin
+from flwr.supercore.constant import RunType
 
 from .serverapp_exec_plugin import ServerAppExecPlugin
 
 
 def _get_run(_: int) -> Run:
     """Return a minimal dummy run."""
-    return Run.create_empty(run_id=1)
+    run = Run.create_empty(run_id=1)
+    run.run_type = RunType.SERVER_APP
+    return run
 
 
 def test_clientapp_launch_inherits_default_stdio() -> None:

@@ -18,6 +18,8 @@
 import subprocess
 from typing import Any
 
+from flwr.supercore.constant import RunType
+
 from .base_exec_plugin import BaseExecPlugin
 
 
@@ -27,7 +29,6 @@ class ServerAppExecPlugin(BaseExecPlugin):
     The plugin always selects the first candidate run ID.
     """
 
-    command = "flwr-serverapp"
     appio_api_address_arg = "--serverappio-api-address"
 
     def get_popen_kwargs(self) -> dict[str, Any]:
@@ -36,3 +37,17 @@ class ServerAppExecPlugin(BaseExecPlugin):
             "stdout": subprocess.DEVNULL,
             "stderr": subprocess.DEVNULL,
         }
+
+    def launch_app(self, token: str, run_id: int) -> None:
+        """Launch the application associated with a given run ID and token."""
+        # Determine the command to launch based on the run type
+        run = self.get_run(run_id)
+        if run.run_type == RunType.SERVER_APP:
+            self.command = "flwr-serverapp"
+        elif run.run_type == RunType.SIMULATION:
+            self.command = "flwr-simulation"
+        else:
+            raise ValueError(f"Unsupported run type: {run.run_type}")
+
+        # Launch the executor process
+        super().launch_app(token, run_id)

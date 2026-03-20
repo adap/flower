@@ -33,7 +33,6 @@ from flwr.supercore.superexec.plugin import (
     ClientAppExecPlugin,
     ExecPlugin,
     ServerAppExecPlugin,
-    SimulationExecPlugin,
 )
 from flwr.supercore.superexec.run_superexec import run_superexec
 from flwr.supercore.version import package_version
@@ -151,7 +150,6 @@ def _get_plugin_and_stub_class(
     mapping: dict[str, tuple[type[ExecPlugin], type[object]]] = {
         ExecPluginType.CLIENT_APP: (ClientAppExecPlugin, ClientAppIoStub),
         ExecPluginType.SERVER_APP: (ServerAppExecPlugin, ServerAppIoStub),
-        ExecPluginType.SIMULATION: (SimulationExecPlugin, ServerAppIoStub),
     }
     if plugin_type in mapping:
         return mapping[plugin_type]
