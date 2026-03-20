@@ -1,4 +1,4 @@
-# Copyright 2025 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2026 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,17 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Simple Flower SuperExec plugin for simulation processes."""
+"""Shared gRPC interceptors used across supercore services."""
 
 
-from .base_exec_plugin import BaseExecPlugin
+from .appio_token_interceptor import (
+    APP_TOKEN_HEADER,
+    AUTHENTICATION_FAILED_MESSAGE,
+    AppIoTokenClientInterceptor,
+    AppIoTokenServerInterceptor,
+    create_serverappio_token_auth_server_interceptor,
+)
 
-
-class SimulationExecPlugin(BaseExecPlugin):
-    """Simple Flower SuperExec plugin for simulation processes.
-
-    The plugin always selects the first candidate run ID.
-    """
-
-    command = "flwr-simulation"
-    appio_api_address_arg = "--serverappio-api-address"
+__all__ = [
+    "APP_TOKEN_HEADER",
+    "AUTHENTICATION_FAILED_MESSAGE",
+    "AppIoTokenClientInterceptor",
+    "AppIoTokenServerInterceptor",
+    "create_serverappio_token_auth_server_interceptor",
+]
