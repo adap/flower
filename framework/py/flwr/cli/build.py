@@ -428,11 +428,11 @@ def get_filtered_fab_paths(
     )
     messages.extend(
         _collect_pattern_conflict_messages(
-        user_include_spec=user_include_spec,
-        user_exclude_spec=user_exclude_spec,
-        candidate_paths=candidate_paths,
-        built_in_constrained_paths=built_in_constrained_paths,
-    )
+            user_include_spec=user_include_spec,
+            user_exclude_spec=user_exclude_spec,
+            candidate_paths=candidate_paths,
+            built_in_constrained_paths=built_in_constrained_paths,
+        )
     )
     _emit_filter_messages(messages)
     return final_paths
