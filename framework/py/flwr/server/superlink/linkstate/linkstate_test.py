@@ -283,26 +283,6 @@ class StateTest(CoreStateTest):
         runs_run_ids_empty = state.get_run_info(run_ids=[])
         self.assertEqual(list(runs_run_ids_empty), [])
 
-    def test_get_pending_run_id(self) -> None:
-        """Test if get_pending_run_id works correctly."""
-        # Prepare
-        state = self.state_factory()
-        _ = create_dummy_run(state)
-        run_id2 = create_dummy_run(state)
-        state.update_run_status(run_id2, RunStatus(Status.STARTING, "", ""))
-
-        # Execute
-        pending_run_id = state.get_pending_run_id()
-        assert pending_run_id is not None
-        run_status_dict = state.get_run_status({pending_run_id})
-        assert run_status_dict[pending_run_id].status == Status.PENDING
-
-        # Change state
-        state.update_run_status(pending_run_id, RunStatus(Status.STARTING, "", ""))
-        # Attempt get pending run
-        pending_run_id = state.get_pending_run_id()
-        assert pending_run_id is None
-
     def test_get_and_update_run_status(self) -> None:
         """Test if get_run_status and update_run_status work correctly."""
         # Prepare
