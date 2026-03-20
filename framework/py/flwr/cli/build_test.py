@@ -24,6 +24,11 @@ import pytest
 from .build import build_fab_from_files
 
 
+def _zip_entries(fab: bytes) -> set[str]:
+    with ZipFile(BytesIO(fab), "r") as zip_file:
+        return set(zip_file.namelist())
+
+
 def test_build_fab_from_files_includes_root_license_and_pyproject() -> None:
     """Test root LICENSE and pyproject.toml are included in FAB when present."""
     files: dict[str, bytes | Path] = {
@@ -178,3 +183,89 @@ fab_format_version = 1
 
     with pytest.raises(ValueError, match="inclusive lower bound"):
         build_fab_from_files(files)
+
+
+def test_build_fab_from_files_without_fab_include_uses_all_then_builtin() -> None:
+    """Test missing fab-include considers all files before built-in filtering."""
+    files: dict[str, bytes | Path] = {
+        "pyproject.toml": b'[project]\nname = "app"\nversion = "1.0.0"\n',
+        "client.py": b"print('ok')\n",
+        "README.md": b"# docs\n",
+        "notes.txt": b"not included",
+        "config.json": b'{"a": 1}',
+    }
+
+    fab, _ = build_fab_from_files(files)
+    entries = _zip_entries(fab)
+
+    assert "client.py" in entries
+    assert "README.md" in entries
+    assert "notes.txt" not in entries
+    assert "config.json" not in entries
+
+
+def test_build_fab_from_files_fab_include_is_constrained_by_builtin_include() -> None:
+    """Test fab-include cannot bypass built-in include constraints."""
+    files: dict[str, bytes | Path] = {
+        "pyproject.toml": b"""
+[project]
+name = "app"
+version = "1.0.0"
+
+[tool.flwr.app]
+fab-include = ["**/*.json"]
+""",
+        "client.py": b"print('ok')\n",
+        "config.json": b'{"a": 1}',
+    }
+
+    fab, _ = build_fab_from_files(files)
+    entries = _zip_entries(fab)
+
+    assert "config.json" not in entries
+    assert "client.py" not in entries
+    assert "pyproject.toml" in entries
+
+
+def test_build_fab_from_files_fab_exclude_only_removes_files() -> None:
+    """Test fab-exclude removes files selected by other steps."""
+    files: dict[str, bytes | Path] = {
+        "pyproject.toml": b"""
+[project]
+name = "app"
+version = "1.0.0"
+
+[tool.flwr.app]
+fab-exclude = ["**/*.md"]
+""",
+        "client.py": b"print('ok')\n",
+        "README.md": b"# docs\n",
+    }
+
+    fab, _ = build_fab_from_files(files)
+    entries = _zip_entries(fab)
+
+    assert "client.py" in entries
+    assert "README.md" not in entries
+
+
+def test_build_fab_from_files_empty_fab_include_equals_absent() -> None:
+    """Test empty fab-include behaves like absent fab-include."""
+    files: dict[str, bytes | Path] = {
+        "pyproject.toml": b"""
+[project]
+name = "app"
+version = "1.0.0"
+
+[tool.flwr.app]
+fab-include = []
+""",
+        "client.py": b"print('ok')\n",
+        "notes.txt": b"not included",
+    }
+
+    fab, _ = build_fab_from_files(files)
+    entries = _zip_entries(fab)
+
+    assert "client.py" in entries
+    assert "notes.txt" not in entries
