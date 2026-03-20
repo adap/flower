@@ -754,3 +754,41 @@ class RevokeInvitationResponse(google.protobuf.message.Message):
     ) -> None: ...
 
 global___RevokeInvitationResponse = RevokeInvitationResponse
+
+@typing.final
+class StreamRunEventRequest(google.protobuf.message.Message):
+    """##############
+    Unused for now
+    ##############
+    """
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    RUN_ID_FIELD_NUMBER: builtins.int
+    run_id: builtins.int
+    def __init__(
+        self,
+        *,
+        run_id: builtins.int = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing.Literal["run_id", b"run_id"]) -> None: ...
+
+global___StreamRunEventRequest = StreamRunEventRequest
+
+@typing.final
+class StreamRunEventResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    EVENT_FIELD_NUMBER: builtins.int
+    DATA_FIELD_NUMBER: builtins.int
+    event: builtins.str
+    data: builtins.str
+    def __init__(
+        self,
+        *,
+        event: builtins.str = ...,
+        data: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing.Literal["data", b"data", "event", b"event"]) -> None: ...
+
+global___StreamRunEventResponse = StreamRunEventResponse
