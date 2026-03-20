@@ -298,7 +298,7 @@ def _should_show_cached_flwr_update_message(cache: dict[str, Any]) -> bool:
 
 
 def _should_refresh_flwr_update_check_cache(cache: dict[str, Any] | None) -> bool:
-    """Return True if cached state should be refreshed from the server."""
+    """Return True if the cache is missing, invalid, or not from today (UTC)."""
     if cache is None:
         return True
 
