@@ -382,14 +382,26 @@ def get_filtered_fab_paths(
     user_exclude_spec = (
         build_pathspec(user_exclude_patterns) if user_exclude_patterns else None
     )
-    _warn_on_empty_pattern_list(has_include_key, user_include_patterns, FAB_INCLUDE_KEY)
-    _warn_on_empty_pattern_list(has_exclude_key, user_exclude_patterns, FAB_EXCLUDE_KEY)
-
-    _warn_on_unresolved_patterns(
-        user_include_patterns, normalized_paths, FAB_INCLUDE_KEY
+    messages: list[tuple[str, str]] = []
+    messages.extend(
+        _collect_empty_pattern_list_messages(
+            has_include_key, user_include_patterns, FAB_INCLUDE_KEY
+        )
     )
-    _warn_on_unresolved_patterns(
-        user_exclude_patterns, normalized_paths, FAB_EXCLUDE_KEY
+    messages.extend(
+        _collect_empty_pattern_list_messages(
+            has_exclude_key, user_exclude_patterns, FAB_EXCLUDE_KEY
+        )
+    )
+    messages.extend(
+        _collect_unresolved_pattern_messages(
+            user_include_patterns, normalized_paths, FAB_INCLUDE_KEY
+        )
+    )
+    messages.extend(
+        _collect_unresolved_pattern_messages(
+            user_exclude_patterns, normalized_paths, FAB_EXCLUDE_KEY
+        )
     )
 
     # Candidate set: user include matches, or all files if no include patterns provided.
@@ -414,66 +426,69 @@ def get_filtered_fab_paths(
         if user_exclude_spec
         else list(built_in_constrained_paths)
     )
-    _warn_on_pattern_conflicts(
+    messages.extend(
+        _collect_pattern_conflict_messages(
         user_include_spec=user_include_spec,
         user_exclude_spec=user_exclude_spec,
         candidate_paths=candidate_paths,
         built_in_constrained_paths=built_in_constrained_paths,
     )
+    )
+    _emit_filter_messages(messages)
     return final_paths
 
 
-def _warn_on_empty_pattern_list(
+def _collect_empty_pattern_list_messages(
     has_key: bool, patterns: list[str], key_name: str
-) -> None:
-    """Warn when user explicitly sets an empty include/exclude list."""
+) -> list[tuple[str, str]]:
+    """Collect note messages for explicitly empty include/exclude lists."""
     if has_key and not patterns:
-        typer.secho(
+        return [
             (
-                f'Note: "{key_name}" is set to an empty list. '
-                "Default built-in include/exclude constraints are used."
-            ),
-            fg=typer.colors.YELLOW,
-            bold=True,
-        )
+                "Note",
+                f'"{key_name}" is set to an empty list. '
+                "Default built-in include/exclude constraints are used.",
+            )
+        ]
+    return []
 
 
-def _warn_on_unresolved_patterns(
+def _collect_unresolved_pattern_messages(
     patterns: list[str], file_paths: list[str], key_name: str
-) -> None:
-    """Warn when user-defined include/exclude patterns don't resolve."""
+) -> list[tuple[str, str]]:
+    """Collect warning messages for unresolved user-defined patterns."""
+    messages: list[tuple[str, str]] = []
     for pattern in patterns:
         try:
             pattern_spec = build_pathspec([pattern])
         except Exception as err:  # pylint: disable=broad-except
-            typer.secho(
+            messages.append(
                 (
-                    f'Warning: ignoring unresolved pattern in "{key_name}": '
-                    f'"{pattern}" ({err})'
-                ),
-                fg=typer.colors.YELLOW,
-                bold=True,
+                    "Warning",
+                    f'ignoring unresolved pattern in "{key_name}": '
+                    f'"{pattern}" ({err})',
+                )
             )
             continue
 
         if not any(pattern_spec.match_file(path) for path in file_paths):
-            typer.secho(
+            messages.append(
                 (
-                    f'Warning: pattern in "{key_name}" did not match any files: '
-                    f'"{pattern}"'
-                ),
-                fg=typer.colors.YELLOW,
-                bold=True,
+                    "Warning",
+                    f'pattern in "{key_name}" did not match any files: "{pattern}"',
+                )
             )
+    return messages
 
 
-def _warn_on_pattern_conflicts(
+def _collect_pattern_conflict_messages(
     user_include_spec: pathspec.PathSpec | None,
     user_exclude_spec: pathspec.PathSpec | None,
     candidate_paths: list[str],
     built_in_constrained_paths: list[str],
-) -> None:
-    """Warn when user include/exclude intent conflicts with filtering outcomes."""
+) -> list[tuple[str, str]]:
+    """Collect warning messages for include/exclude and built-in conflicts."""
+    messages: list[tuple[str, str]] = []
     if user_include_spec and user_exclude_spec:
         overlap = [
             path
@@ -481,22 +496,31 @@ def _warn_on_pattern_conflicts(
             if user_include_spec.match_file(path) and user_exclude_spec.match_file(path)
         ]
         if overlap:
-            typer.secho(
+            messages.append(
                 (
-                    f'Warning: "{FAB_INCLUDE_KEY}" and "{FAB_EXCLUDE_KEY}" overlap for '
-                    f"{len(overlap)} file(s); exclusion takes precedence."
-                ),
-                fg=typer.colors.YELLOW,
-                bold=True,
+                    "Warning",
+                    f'"{FAB_INCLUDE_KEY}" and "{FAB_EXCLUDE_KEY}" overlap for '
+                    f"{len(overlap)} file(s); exclusion takes precedence.",
+                )
             )
 
     built_in_removed = len(candidate_paths) - len(built_in_constrained_paths)
     if user_include_spec and built_in_removed > 0:
-        typer.secho(
+        messages.append(
             (
-                f'Warning: {built_in_removed} file(s) matched "{FAB_INCLUDE_KEY}" but '
-                "were removed by non-overridable built-in FAB constraints."
-            ),
+                "Warning",
+                f'{built_in_removed} file(s) matched "{FAB_INCLUDE_KEY}" but '
+                "were removed by non-overridable built-in FAB constraints.",
+            )
+        )
+    return messages
+
+
+def _emit_filter_messages(messages: list[tuple[str, str]]) -> None:
+    """Emit filter notes/warnings with consistent CLI formatting."""
+    for level, message in messages:
+        typer.secho(
+            f"{level}: {message}",
             fg=typer.colors.YELLOW,
             bold=True,
         )
