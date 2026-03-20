@@ -104,8 +104,6 @@ FAB_EXCLUDE_PATTERNS = (
     "parts/",
     "*.egg",
     # Environments
-    ".env",
-    ".envrc",
     ".venv",
     "env/",
     "venv/",
