@@ -93,6 +93,25 @@ FAB_EXCLUDE_PATTERNS = (
     f"{FLWR_DIR}/**",  # Exclude the .flwr directory
     "**/__pycache__/**",
     FAB_CONFIG_FILE,  # Exclude the original pyproject.toml
+    "**/*_test.py",
+    "**/test_*.py",
+    # Distribution / packaging
+    "build/",
+    "eggs/",
+    ".eggs/",
+    "lib/",
+    "lib64/",
+    "parts/",
+    "*.egg",
+    # Environments
+    ".env",
+    ".envrc",
+    ".venv",
+    "env/",
+    "venv/",
+    "ENV/",
+    "env.bak/",
+    "venv.bak/",
 )
 
 # Constant for SuperLink

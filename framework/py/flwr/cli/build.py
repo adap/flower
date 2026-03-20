@@ -326,11 +326,13 @@ def get_fab_exclude_pathspec() -> pathspec.PathSpec:
     return build_pathspec(FAB_EXCLUDE_PATTERNS)
 
 
-def get_user_fab_patterns(config: dict[str, Any]) -> tuple[list[str], list[str]]:
-    """Return validated user-defined FAB include/exclude patterns from config."""
+def get_user_fab_patterns(
+    config: dict[str, Any],
+) -> tuple[list[str], bool, list[str], bool]:
+    """Return user-defined FAB include/exclude patterns and presence flags."""
     app_conf = config.get("tool", {}).get("flwr", {}).get("app", {})
     if not isinstance(app_conf, dict):
-        return [], []
+        return [], False, [], False
 
     def _get_pattern_list(key: str) -> list[str]:
         value = app_conf.get(key, [])
@@ -349,7 +351,14 @@ def get_user_fab_patterns(config: dict[str, Any]) -> tuple[list[str], list[str]]
             )
         return value
 
-    return _get_pattern_list(FAB_INCLUDE_KEY), _get_pattern_list(FAB_EXCLUDE_KEY)
+    has_include_key = FAB_INCLUDE_KEY in app_conf
+    has_exclude_key = FAB_EXCLUDE_KEY in app_conf
+    return (
+        _get_pattern_list(FAB_INCLUDE_KEY),
+        has_include_key,
+        _get_pattern_list(FAB_EXCLUDE_KEY),
+        has_exclude_key,
+    )
 
 
 def get_filtered_fab_paths(
@@ -361,12 +370,26 @@ def get_filtered_fab_paths(
     built_in_include_spec = get_fab_include_pathspec()
     built_in_exclude_spec = get_fab_exclude_pathspec()
 
-    user_include_patterns, user_exclude_patterns = get_user_fab_patterns(config)
+    (
+        user_include_patterns,
+        has_include_key,
+        user_exclude_patterns,
+        has_exclude_key,
+    ) = get_user_fab_patterns(config)
     user_include_spec = (
         build_pathspec(user_include_patterns) if user_include_patterns else None
     )
     user_exclude_spec = (
         build_pathspec(user_exclude_patterns) if user_exclude_patterns else None
+    )
+    _warn_on_empty_pattern_list(has_include_key, user_include_patterns, FAB_INCLUDE_KEY)
+    _warn_on_empty_pattern_list(has_exclude_key, user_exclude_patterns, FAB_EXCLUDE_KEY)
+
+    _warn_on_unresolved_patterns(
+        user_include_patterns, normalized_paths, FAB_INCLUDE_KEY
+    )
+    _warn_on_unresolved_patterns(
+        user_exclude_patterns, normalized_paths, FAB_EXCLUDE_KEY
     )
 
     # Candidate set: user include matches, or all files if no include patterns provided.
@@ -376,10 +399,104 @@ def get_filtered_fab_paths(
         else normalized_paths
     )
 
-    return [
+    built_in_constrained_paths = [
         path
         for path in candidate_paths
         if built_in_include_spec.match_file(path)
         and not built_in_exclude_spec.match_file(path)
-        and not (user_exclude_spec and user_exclude_spec.match_file(path))
     ]
+    final_paths = (
+        [
+            path
+            for path in built_in_constrained_paths
+            if not user_exclude_spec.match_file(path)
+        ]
+        if user_exclude_spec
+        else list(built_in_constrained_paths)
+    )
+    _warn_on_pattern_conflicts(
+        user_include_spec=user_include_spec,
+        user_exclude_spec=user_exclude_spec,
+        candidate_paths=candidate_paths,
+        built_in_constrained_paths=built_in_constrained_paths,
+    )
+    return final_paths
+
+
+def _warn_on_empty_pattern_list(
+    has_key: bool, patterns: list[str], key_name: str
+) -> None:
+    """Warn when user explicitly sets an empty include/exclude list."""
+    if has_key and not patterns:
+        typer.secho(
+            (
+                f'Note: "{key_name}" is set to an empty list. '
+                "Default built-in include/exclude constraints are used."
+            ),
+            fg=typer.colors.YELLOW,
+            bold=True,
+        )
+
+
+def _warn_on_unresolved_patterns(
+    patterns: list[str], file_paths: list[str], key_name: str
+) -> None:
+    """Warn when user-defined include/exclude patterns don't resolve."""
+    for pattern in patterns:
+        try:
+            pattern_spec = build_pathspec([pattern])
+        except Exception as err:  # pylint: disable=broad-except
+            typer.secho(
+                (
+                    f'Warning: ignoring unresolved pattern in "{key_name}": '
+                    f'"{pattern}" ({err})'
+                ),
+                fg=typer.colors.YELLOW,
+                bold=True,
+            )
+            continue
+
+        if not any(pattern_spec.match_file(path) for path in file_paths):
+            typer.secho(
+                (
+                    f'Warning: pattern in "{key_name}" did not match any files: '
+                    f'"{pattern}"'
+                ),
+                fg=typer.colors.YELLOW,
+                bold=True,
+            )
+
+
+def _warn_on_pattern_conflicts(
+    user_include_spec: pathspec.PathSpec | None,
+    user_exclude_spec: pathspec.PathSpec | None,
+    candidate_paths: list[str],
+    built_in_constrained_paths: list[str],
+) -> None:
+    """Warn when user include/exclude intent conflicts with filtering outcomes."""
+    if user_include_spec and user_exclude_spec:
+        overlap = [
+            path
+            for path in candidate_paths
+            if user_include_spec.match_file(path) and user_exclude_spec.match_file(path)
+        ]
+        if overlap:
+            typer.secho(
+                (
+                    f'Warning: "{FAB_INCLUDE_KEY}" and "{FAB_EXCLUDE_KEY}" overlap for '
+                    f"{len(overlap)} file(s); exclusion takes precedence."
+                ),
+                fg=typer.colors.YELLOW,
+                bold=True,
+            )
+
+    built_in_removed = len(candidate_paths) - len(built_in_constrained_paths)
+    if user_include_spec and built_in_removed > 0:
+        typer.secho(
+            (
+                f'Warning: {built_in_removed} file(s) matched "{FAB_INCLUDE_KEY}" but '
+                "were removed by non-overridable built-in FAB constraints."
+            ),
+            fg=typer.colors.YELLOW,
+            bold=True,
+        )

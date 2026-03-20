@@ -269,3 +269,111 @@ fab-include = []
 
     assert "client.py" in entries
     assert "notes.txt" not in entries
+
+
+def test_build_fab_from_files_warns_on_unresolved_fab_include(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Test warning is emitted when fab-include pattern matches no files."""
+    files: dict[str, bytes | Path] = {
+        "pyproject.toml": b"""
+[project]
+name = "app"
+version = "1.0.0"
+
+[tool.flwr.app]
+fab-include = ["no_such_dir/**/*.py"]
+""",
+        "client.py": b"print('ok')\n",
+    }
+
+    build_fab_from_files(files)
+    captured = capsys.readouterr()
+    assert 'pattern in "fab-include" did not match any files' in captured.out
+
+
+def test_build_fab_from_files_warns_on_unresolved_fab_exclude(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Test warning is emitted when fab-exclude pattern matches no files."""
+    files: dict[str, bytes | Path] = {
+        "pyproject.toml": b"""
+[project]
+name = "app"
+version = "1.0.0"
+
+[tool.flwr.app]
+fab-exclude = ["no_such_dir/**/*.py"]
+""",
+        "client.py": b"print('ok')\n",
+    }
+
+    build_fab_from_files(files)
+    captured = capsys.readouterr()
+    assert 'pattern in "fab-exclude" did not match any files' in captured.out
+
+
+def test_build_fab_from_files_notes_on_empty_fab_lists(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Test note is emitted when empty fab include/exclude lists are configured."""
+    files: dict[str, bytes | Path] = {
+        "pyproject.toml": b"""
+[project]
+name = "app"
+version = "1.0.0"
+
+[tool.flwr.app]
+fab-include = []
+fab-exclude = []
+""",
+        "client.py": b"print('ok')\n",
+    }
+
+    build_fab_from_files(files)
+    captured = capsys.readouterr()
+    assert '"fab-include" is set to an empty list' in captured.out
+    assert '"fab-exclude" is set to an empty list' in captured.out
+
+
+def test_build_fab_from_files_warns_on_include_exclude_conflict(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Test warning is emitted when user include and exclude overlap."""
+    files: dict[str, bytes | Path] = {
+        "pyproject.toml": b"""
+[project]
+name = "app"
+version = "1.0.0"
+
+[tool.flwr.app]
+fab-include = ["**/*.py"]
+fab-exclude = ["client.py"]
+""",
+        "client.py": b"print('ok')\n",
+    }
+
+    build_fab_from_files(files)
+    captured = capsys.readouterr()
+    assert '"fab-include" and "fab-exclude" overlap' in captured.out
+
+
+def test_build_fab_from_files_warns_when_include_hits_builtin_constraints(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Test warning when fab-include matches files blocked by built-in constraints."""
+    files: dict[str, bytes | Path] = {
+        "pyproject.toml": b"""
+[project]
+name = "app"
+version = "1.0.0"
+
+[tool.flwr.app]
+fab-include = ["**/*.json"]
+""",
+        "config.json": b'{"a": 1}',
+    }
+
+    build_fab_from_files(files)
+    captured = capsys.readouterr()
+    assert 'matched "fab-include" but were removed by non-overridable' in captured.out
