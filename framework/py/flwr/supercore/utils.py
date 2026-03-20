@@ -281,7 +281,7 @@ def _should_show_cached_flwr_update_message(cache: dict[str, Any]) -> bool:
     if not _cache_matches_current_install(cache):
         return False
 
-    if cache.get("update_available") is not True:
+    if not cache.get("update_available"):
         return False
 
     message = cache.get("message")
