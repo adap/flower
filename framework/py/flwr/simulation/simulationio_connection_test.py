@@ -29,7 +29,7 @@ class TestSimulationIoConnection(unittest.TestCase):
     @patch("flwr.simulation.simulationio_connection.wrap_stub")
     @patch("flwr.simulation.simulationio_connection.ServerAppIoStub")
     @patch("flwr.simulation.simulationio_connection.create_channel")
-    def test_connect_adds_client_interceptor_when_token_is_set(
+    def test_connect_adds_client_interceptor(
         self,
         mock_create_channel: Mock,
         _mock_serverappio_stub: Mock,
@@ -48,23 +48,11 @@ class TestSimulationIoConnection(unittest.TestCase):
         self.assertEqual(len(interceptors), 1)
         self.assertIsInstance(interceptors[0], AppIoTokenClientInterceptor)
 
-    @patch("flwr.simulation.simulationio_connection.wrap_stub")
-    @patch("flwr.simulation.simulationio_connection.ServerAppIoStub")
-    @patch("flwr.simulation.simulationio_connection.create_channel")
-    def test_connect_uses_no_interceptor_when_token_is_absent(
-        self,
-        mock_create_channel: Mock,
-        _mock_serverappio_stub: Mock,
-        _mock_wrap_stub: Mock,
-    ) -> None:
-        """`_connect` should not pass interceptors if token is absent."""
-        mock_create_channel.return_value = Mock()
-        conn = SimulationIoConnection()
-
-        conn._connect()  # pylint: disable=protected-access
-
-        kwargs = mock_create_channel.call_args.kwargs
-        self.assertIsNone(kwargs["interceptors"])
+    def test_init_requires_token(self) -> None:
+        """`SimulationIoConnection` should require token values."""
+        with self.assertRaises(TypeError):
+            # pylint: disable-next=missing-kwoa
+            SimulationIoConnection()  # type: ignore[call-arg]
 
     def test_init_rejects_empty_token(self) -> None:
         """`SimulationIoConnection` should reject empty token values."""

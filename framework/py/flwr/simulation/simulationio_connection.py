@@ -39,19 +39,19 @@ class SimulationIoConnection:
         The PEM-encoded root certificates as a byte string.
         If provided, a secure connection using the certificates will be
         established to an SSL-enabled Flower server.
-    token : Optional[str] (default: None)
-        Executor token. If provided, it is attached to all outgoing RPCs via
-        metadata.
+    token : str
+        Executor token attached to all outgoing RPCs via metadata.
     """
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
         serverappio_api_address: str = SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
         root_certificates: bytes | None = None,
-        token: str | None = None,
+        *,
+        token: str,
     ) -> None:
         if token == "":
-            raise ValueError("`token` must be a non-empty string when provided")
+            raise ValueError("`token` must be a non-empty string")
         self._addr = serverappio_api_address
         self._cert = root_certificates
         self._token = token
@@ -76,16 +76,11 @@ class SimulationIoConnection:
         if self._is_connected:
             log(WARNING, "Already connected")
             return
-        interceptors = (
-            [AppIoTokenClientInterceptor(token=self._token)]
-            if self._token is not None
-            else None
-        )
         self._channel = create_channel(
             server_address=self._addr,
             insecure=(self._cert is None),
             root_certificates=self._cert,
-            interceptors=interceptors,
+            interceptors=[AppIoTokenClientInterceptor(token=self._token)],
         )
         self._channel.subscribe(on_channel_state_change)
         self._grpc_stub = ServerAppIoStub(self._channel)
