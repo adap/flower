@@ -394,9 +394,9 @@ def warn_if_flwr_update_available(process_name: str | None = None) -> None:
     cache = _read_flwr_update_check_cache()
     if cache is not None and _should_show_cached_flwr_update_message(cache):
         message = cache.get("message")
-        assert isinstance(message, str)
-        print(message, file=sys.stderr)
-        _mark_cached_flwr_update_message_shown(cache)
+        if isinstance(message, str):
+            print(message, file=sys.stderr)
+            _mark_cached_flwr_update_message_shown(cache)
 
     if _should_refresh_flwr_update_check_cache(cache):
         _start_flwr_update_check_refresh_thread(process_name)
