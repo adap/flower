@@ -30,8 +30,10 @@ import typer
 from flwr.common.constant import (
     FAB_CONFIG_FILE,
     FAB_DATE,
+    FAB_EXCLUDE_KEY,
     FAB_EXCLUDE_PATTERNS,
     FAB_HASH_TRUNCATION,
+    FAB_INCLUDE_KEY,
     FAB_INCLUDE_PATTERNS,
     FAB_MAX_SIZE,
 )
@@ -42,7 +44,7 @@ from flwr.supercore.fab_format_version import (
 )
 
 from .config_utils import load_and_validate
-from .utils import build_pathspec, is_valid_project_name, load_gitignore_patterns
+from .utils import build_pathspec, is_valid_project_name
 
 
 def write_to_zip(
@@ -268,21 +270,8 @@ def build_fab_from_files(
     ):
         del config["tool"]["flwr"]["federations"]
 
-    # Extract and load .gitignore if present
-    gitignore_content = None
-    if ".gitignore" in files:
-        gitignore_content = _to_bytes(files[".gitignore"])
-
-    # Get exclude and include specs
-    exclude_spec = get_fab_exclude_pathspec(gitignore_content)
-    include_spec = get_fab_include_pathspec()
-
-    # Filter files based on include/exclude specs
-    filtered_paths = [
-        path.replace("\\", "/")  # Ensure consistent path separators across platforms
-        for path in files.keys()
-        if include_spec.match_file(path) and not exclude_spec.match_file(path)
-    ]
+    # Filter files based on user patterns and built-in constraints.
+    filtered_paths = get_filtered_fab_paths(files, config)
     filtered_paths.sort()  # Sort for deterministic output
     validate_fab_files_for_format(config, filtered_paths)
 
@@ -307,8 +296,8 @@ def build_fab_from_files(
     if len(fab_bytes) > FAB_MAX_SIZE:
         raise ValueError(
             f"FAB size exceeds maximum allowed size of {FAB_MAX_SIZE:,} bytes. "
-            "To reduce the package size, consider ignoring unnecessary files "
-            "via your `.gitignore` file or excluding them from the build."
+            f"To reduce package size, narrow `{FAB_INCLUDE_KEY}` or add "
+            f"`{FAB_EXCLUDE_KEY}` patterns in [tool.flwr.app]."
         )
 
     # Returned metadata is consumed by platform during publish.
@@ -326,23 +315,71 @@ def get_fab_include_pathspec() -> pathspec.PathSpec:
     return build_pathspec(FAB_INCLUDE_PATTERNS)
 
 
-def get_fab_exclude_pathspec(gitignore_content: bytes | None) -> pathspec.PathSpec:
+def get_fab_exclude_pathspec() -> pathspec.PathSpec:
     """Get the PathSpec for files to exclude from a FAB.
-
-    If gitignore_content is provided, its patterns will be combined with the default
-    exclude patterns.
-
-    Parameters
-    ----------
-    gitignore_content : bytes | None
-        Optional gitignore file content as bytes.
 
     Returns
     -------
     PathSpec
-        PathSpec object with combined exclude patterns.
+        PathSpec object with default exclude patterns.
     """
-    patterns = list(FAB_EXCLUDE_PATTERNS)
-    if gitignore_content:
-        patterns += load_gitignore_patterns(gitignore_content)
-    return pathspec.PathSpec.from_lines("gitwildmatch", patterns)
+    return build_pathspec(FAB_EXCLUDE_PATTERNS)
+
+
+def get_user_fab_patterns(config: dict[str, Any]) -> tuple[list[str], list[str]]:
+    """Return validated user-defined FAB include/exclude patterns from config."""
+    app_conf = config.get("tool", {}).get("flwr", {}).get("app", {})
+    if not isinstance(app_conf, dict):
+        return [], []
+
+    def _get_pattern_list(key: str) -> list[str]:
+        value = app_conf.get(key, [])
+        if value is None:
+            return []
+        if not isinstance(value, list):
+            raise ValueError(
+                f'Property "{key}" in [tool.flwr.app] must be a list of strings.'
+            )
+        if any(
+            not isinstance(pattern, str) or pattern.strip() == "" for pattern in value
+        ):
+            raise ValueError(
+                f'Property "{key}" in [tool.flwr.app] must be a list of non-empty '
+                "strings."
+            )
+        return value
+
+    return _get_pattern_list(FAB_INCLUDE_KEY), _get_pattern_list(FAB_EXCLUDE_KEY)
+
+
+def get_filtered_fab_paths(
+    files: dict[str, bytes | Path],
+    config: dict[str, Any],
+) -> list[str]:
+    """Compute final FAB file list using user patterns and non-overridable defaults."""
+    normalized_paths = [path.replace("\\", "/") for path in files.keys()]
+    built_in_include_spec = get_fab_include_pathspec()
+    built_in_exclude_spec = get_fab_exclude_pathspec()
+
+    user_include_patterns, user_exclude_patterns = get_user_fab_patterns(config)
+    user_include_spec = (
+        build_pathspec(user_include_patterns) if user_include_patterns else None
+    )
+    user_exclude_spec = (
+        build_pathspec(user_exclude_patterns) if user_exclude_patterns else None
+    )
+
+    # Candidate set: user include matches, or all files if no include patterns provided.
+    candidate_paths = (
+        [path for path in normalized_paths if user_include_spec.match_file(path)]
+        if user_include_spec
+        else normalized_paths
+    )
+
+    return [
+        path
+        for path in candidate_paths
+        if built_in_include_spec.match_file(path)
+        and not built_in_exclude_spec.match_file(path)
+        and not (user_exclude_spec and user_exclude_spec.match_file(path))
+    ]
