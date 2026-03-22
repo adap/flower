@@ -111,7 +111,6 @@ from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
 from flwr.supercore.constant import NOOP_FEDERATION, PLATFORM_API_URL, RunType
 from flwr.supercore.error import rpc_error_translator
-from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
 from flwr.supercore.primitives.asymmetric import bytes_to_public_key, uses_nist_ec_curve
 from flwr.supercore.utils import parse_app_spec, request_download_link
@@ -128,14 +127,12 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
     def __init__(  # pylint: disable=R0913, R0917
         self,
         linkstate_factory: LinkStateFactory,
-        ffs_factory: FfsFactory,
         objectstore_factory: ObjectStoreFactory,
         authn_plugin: ControlAuthnPlugin,
         artifact_provider: ArtifactProvider | None = None,
         fleet_api_type: str | None = None,
     ) -> None:
         self.linkstate_factory = linkstate_factory
-        self.ffs_factory = ffs_factory
         self.objectstore_factory = objectstore_factory
         self.authn_plugin = authn_plugin
         self.artifact_provider = artifact_provider
@@ -147,7 +144,6 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         """Create run ID."""
         log(INFO, "ControlServicer.StartRun")
         state = self.linkstate_factory.state()
-        ffs = self.ffs_factory.ffs()
 
         verification_dict: dict[str, str] = {}
         if request.app_spec:
@@ -196,7 +192,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 fab_file,
                 verification_dict,
             )
-            fab_hash = ffs.put(fab.content, fab.verifications)
+            fab_hash = state.store_fab(fab)
 
             if fab_hash != fab.hash_str:
                 raise ValueError(

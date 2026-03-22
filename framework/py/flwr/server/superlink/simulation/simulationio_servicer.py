@@ -31,7 +31,7 @@ from flwr.common.serde import (
     run_status_from_proto,
     run_to_proto,
 )
-from flwr.common.typing import Fab, RunStatus
+from flwr.common.typing import RunStatus
 from flwr.proto import simulationio_pb2_grpc
 from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
     ListAppsToLaunchRequest,
@@ -61,17 +61,13 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
 )
 from flwr.server.superlink.linkstate import LinkStateFactory
 from flwr.server.superlink.utils import abort_if
-from flwr.supercore.ffs import FfsFactory
 
 
 class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
     """SimulationIo API servicer."""
 
-    def __init__(
-        self, state_factory: LinkStateFactory, ffs_factory: FfsFactory
-    ) -> None:
+    def __init__(self, state_factory: LinkStateFactory) -> None:
         self.state_factory = state_factory
-        self.ffs_factory = ffs_factory
         self.lock = threading.RLock()
 
     def ListAppsToLaunch(
@@ -137,9 +133,8 @@ class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
     ) -> PullAppInputsResponse:
         """Pull SimultionIo process inputs."""
         log(DEBUG, "SimultionIoServicer.SimultionIoInputs")
-        # Init access to LinkState and Ffs
+        # Init access to LinkState
         state = self.state_factory.state()
-        ffs = self.ffs_factory.ffs()
 
         # Validate the token
         run_id = self._verify_token(request.token, context)
@@ -150,10 +145,7 @@ class SimulationIoServicer(simulationio_pb2_grpc.SimulationIoServicer):
             serverapp_ctxt = state.get_serverapp_context(run_id)
             runs = state.get_run_info(run_ids=[run_id])
             run = runs[0] if runs else None
-            fab = None
-            if run and run.fab_hash:
-                if result := ffs.get(run.fab_hash):
-                    fab = Fab(run.fab_hash, result[0], result[1])
+            fab = state.get_fab(run.fab_hash) if run and run.fab_hash else None
             if run and fab and serverapp_ctxt:
                 # Update run status to RUNNING
                 if state.update_run_status(run_id, RunStatus(Status.RUNNING, "", "")):

@@ -83,7 +83,6 @@ def test_start_local_superlink_uses_builtin_log_rotation(tmp_path: Path) -> None
     """Start command should include built-in SuperLink log rotation flags."""
     # Prepare
     database = tmp_path / "flwr-local-superlink-state.db"
-    storage = tmp_path / "flwr-local-superlink-storage"
     log_file = tmp_path / "flwr-local-superlink.log"
     process = MagicMock()
     process.poll.return_value = None
@@ -92,7 +91,7 @@ def test_start_local_superlink_uses_builtin_log_rotation(tmp_path: Path) -> None
     with (
         patch(
             "flwr.cli.local_superlink._get_local_superlink_paths",
-            return_value=(database, storage, log_file),
+            return_value=(database, log_file),
         ),
         patch(_IS_STARTED_PATH, return_value=True),
         patch(
@@ -109,5 +108,6 @@ def test_start_local_superlink_uses_builtin_log_rotation(tmp_path: Path) -> None
     assert "24" in cmd
     assert "--log-rotation-backup-count" in cmd
     assert "7" in cmd
+    assert "--storage-dir" not in cmd
     assert popen.call_args.kwargs["stdout"] is subprocess.DEVNULL
     assert popen.call_args.kwargs["stderr"] is subprocess.DEVNULL
