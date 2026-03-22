@@ -349,9 +349,7 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
                 if not fab.verifications.get("valid_license", ""):
                     log(
                         ERROR,
-                        "FAB verification failed: trusted-entity verification was "
-                        "requested, but the connected SuperLink did not return "
-                        "verification metadata. An error reply has been generated.",
+                        "App verification is not supported by the connected SuperLink.",
                     )
                     reply = Message(FAB_VERIFICATION_ERROR, reply_to=message)
                     _insert_message(reply, state, object_store)
