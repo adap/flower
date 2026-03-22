@@ -27,6 +27,7 @@ import tomli
 from flwr.app.user_config import UserConfig, UserConfigValue
 from flwr.common.constant import APP_DIR, FAB_CONFIG_FILE, FAB_HASH_TRUNCATION
 from flwr.common.typing import Run
+from flwr.supercore.fab_format_version import normalize_and_validate_fab_format
 from flwr.supercore.utils import get_flwr_home
 
 from . import ConfigRecord, object_ref
@@ -346,6 +347,11 @@ def validate_config(
 
     if not is_valid:
         return False, errors, warnings
+
+    try:
+        normalize_and_validate_fab_format(config)
+    except ValueError as err:
+        return False, [str(err)], warnings
 
     # Validate serverapp
     serverapp_ref = config["tool"]["flwr"]["app"]["components"]["serverapp"]

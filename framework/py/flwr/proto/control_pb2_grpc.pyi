@@ -165,6 +165,17 @@ class ControlStub:
     ]
     """Revoke Invitation"""
 
+    StreamRunEvents: grpc.UnaryStreamMultiCallable[
+        flwr.proto.control_pb2.StreamRunEventsRequest,
+        flwr.proto.control_pb2.StreamRunEventsResponse,
+    ]
+    """##############
+    Unused for now
+    ##############
+
+    Start run event stream
+    """
+
 class ControlAsyncStub:
     StartRun: grpc.aio.UnaryUnaryMultiCallable[
         flwr.proto.control_pb2.StartRunRequest,
@@ -297,6 +308,17 @@ class ControlAsyncStub:
         flwr.proto.control_pb2.RevokeInvitationResponse,
     ]
     """Revoke Invitation"""
+
+    StreamRunEvents: grpc.aio.UnaryStreamMultiCallable[
+        flwr.proto.control_pb2.StreamRunEventsRequest,
+        flwr.proto.control_pb2.StreamRunEventsResponse,
+    ]
+    """##############
+    Unused for now
+    ##############
+
+    Start run event stream
+    """
 
 class ControlServicer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
@@ -474,5 +496,18 @@ class ControlServicer(metaclass=abc.ABCMeta):
         context: _ServicerContext,
     ) -> typing.Union[flwr.proto.control_pb2.RevokeInvitationResponse, collections.abc.Awaitable[flwr.proto.control_pb2.RevokeInvitationResponse]]:
         """Revoke Invitation"""
+
+    @abc.abstractmethod
+    def StreamRunEvents(
+        self,
+        request: flwr.proto.control_pb2.StreamRunEventsRequest,
+        context: _ServicerContext,
+    ) -> typing.Union[collections.abc.Iterator[flwr.proto.control_pb2.StreamRunEventsResponse], collections.abc.AsyncIterator[flwr.proto.control_pb2.StreamRunEventsResponse]]:
+        """##############
+        Unused for now
+        ##############
+
+        Start run event stream
+        """
 
 def add_ControlServicer_to_server(servicer: ControlServicer, server: typing.Union[grpc.Server, grpc.aio.Server]) -> None: ...

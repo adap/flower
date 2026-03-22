@@ -76,7 +76,7 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.federation_pb2 import Account, Member  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkStateFactory
-from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME, NOOP_FEDERATION
+from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME, NOOP_FEDERATION, RunType
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.primitives.asymmetric import generate_key_pairs, public_key_to_bytes
 from flwr.superlink.auth_plugin import NoOpControlAuthnPlugin
@@ -119,7 +119,6 @@ class TestControlServicer(unittest.TestCase):
             ),
             ffs_factory=FfsFactory(self.tmp_dir.name),
             objectstore_factory=objectstore_factory,
-            is_simulation=False,
             authn_plugin=(authn_plugin := NoOpControlAuthnPlugin(Mock(), False)),
         )
         account_info = authn_plugin.validate_tokens_in_metadata([])[1]
@@ -142,6 +141,7 @@ class TestControlServicer(unittest.TestCase):
             NOOP_FEDERATION,
             ConfigRecord(),
             flwr_aid,
+            RunType.SERVER_APP,
         )
 
     def test_start_run(self) -> None:
@@ -175,6 +175,7 @@ class TestControlServicer(unittest.TestCase):
         self.assertEqual(run_info.fab_hash, fab_hash)
         self.assertEqual(run_info.fab_id, fab_id)
         self.assertEqual(run_info.fab_version, fab_version)
+        self.assertEqual(run_info.run_type, RunType.SERVER_APP)
 
     def test_start_run_accepts_valid_nested_override_keys(self) -> None:
         """Test StartRun accepts valid dotted override keys from nested FAB config."""
@@ -537,6 +538,7 @@ class TestControlServicer(unittest.TestCase):
             "test-federation",
             ConfigRecord(),
             self.aid,
+            RunType.SERVER_APP,
         )
         token = self.state.create_token(run_id)
         assert token is not None
@@ -594,6 +596,7 @@ class TestControlServicer(unittest.TestCase):
             "test-federation",
             ConfigRecord(),
             target_flwr_aid,
+            RunType.SERVER_APP,
         )
         token = self.state.create_token(run_id)
         assert token is not None
@@ -628,7 +631,6 @@ class TestControlServicerInvitationRPCs(unittest.TestCase):
             linkstate_factory=self.linkstate_factory,
             ffs_factory=Mock(),
             objectstore_factory=Mock(),
-            is_simulation=False,
             authn_plugin=Mock(),
         )
         self.get_current_account_info_patcher = patch(
@@ -726,7 +728,6 @@ class TestControlServicerAuth(unittest.TestCase):
             ),
             ffs_factory=FfsFactory(self.tmp_dir.name),
             objectstore_factory=Mock(),
-            is_simulation=False,
             authn_plugin=Mock(),
         )
         self.state = self.servicer.linkstate_factory.state()
@@ -744,6 +745,7 @@ class TestControlServicerAuth(unittest.TestCase):
             NOOP_FEDERATION,
             ConfigRecord(),
             flwr_aid,
+            RunType.SERVER_APP,
         )
 
     def make_context(self) -> MagicMock:
@@ -899,7 +901,6 @@ class TestValidateFederationAndNodesInRequest(unittest.TestCase):
             ),
             ffs_factory=FfsFactory(self.tmp_dir.name),
             objectstore_factory=objectstore_factory,
-            is_simulation=False,
             authn_plugin=(authn_plugin := NoOpControlAuthnPlugin(Mock(), False)),
         )
         account_info = authn_plugin.validate_tokens_in_metadata([])[1]
