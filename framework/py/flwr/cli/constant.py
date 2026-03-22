@@ -35,7 +35,7 @@ RUN_CONFIG_HELP_MESSAGE = CONFIG_HELP_MESSAGE.format(
     "run-config",
     " | --run-config <path/to/your/toml>",
     "[tool.flwr.app.config]",
-    " Alternatively, provide a TOML file containing overrides.",
+    " Alternatively, provide a TOML file containing key-value pair overrides.",
 )
 
 # The help message for `--federation-config` option
@@ -119,11 +119,9 @@ REFRESH_TOKEN_STORE_KEY = "flower.account-auth.%s.oidc-refresh-token"
 
 # Local SuperLink configuration
 LOCAL_CONTROL_API_PORT = os.environ.get("FLWR_LOCAL_CONTROL_API_PORT", "39093")
-LOCAL_SIMULATIONIO_API_PORT = os.environ.get(
-    "FLWR_LOCAL_SIMULATIONIO_API_PORT", "39094"
-)
+LOCAL_SERVERAPPIO_API_PORT = os.environ.get("FLWR_LOCAL_SERVERAPPIO_API_PORT", "39094")
 LOCAL_CONTROL_API_ADDRESS = f"127.0.0.1:{LOCAL_CONTROL_API_PORT}"
-LOCAL_SIMULATIONIO_API_ADDRESS = f"127.0.0.1:{LOCAL_SIMULATIONIO_API_PORT}"
+LOCAL_SERVERAPPIO_API_ADDRESS = f"127.0.0.1:{LOCAL_SERVERAPPIO_API_PORT}"
 LOCAL_SUPERLINK_STARTUP_TIMEOUT = 15.0
 CONTROL_API_PROBE_TIMEOUT = 0.4
 CONTROL_API_PROBE_INTERVAL = 0.2

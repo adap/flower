@@ -83,12 +83,30 @@ FAB_INCLUDE_PATTERNS = (
     "**/*.py",
     "**/*.toml",
     "**/*.md",
+    "/LICENSE",
 )
 # FAB file exclude patterns (gitignore-style patterns)
 FAB_EXCLUDE_PATTERNS = (
     f"{FLWR_DIR}/**",  # Exclude the .flwr directory
     "**/__pycache__/**",
     FAB_CONFIG_FILE,  # Exclude the original pyproject.toml
+    "**/*_test.py",
+    "**/test_*.py",
+    # Distribution / packaging
+    "build/**",
+    "eggs/**",
+    ".eggs/**",
+    "lib/**",
+    "lib64/**",
+    "parts/**",
+    "*.egg",
+    # Environments
+    ".venv/**",
+    "env/**",
+    "venv/**",
+    "ENV/**",
+    "env.bak/**",
+    "venv.bak/**",
 )
 
 # Constant for SuperLink
@@ -167,9 +185,6 @@ PUBLIC_KEY_NOT_VALID = "The provided public key is not valid"
 NODE_NOT_FOUND_MESSAGE = "Node ID not found for account"
 FEDERATION_NOT_SPECIFIED_MESSAGE = "No federation specified in the request"
 FEDERATION_NOT_FOUND_MESSAGE = "Federation '%s' does not exist"
-SUPERLINK_DOES_NOT_SUPPORT_FED_MANAGEMENT_MESSAGE = (
-    "SuperLink does not support federation management."
-)
 
 
 class MessageTypeLegacy:

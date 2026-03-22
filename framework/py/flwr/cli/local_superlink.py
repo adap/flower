@@ -33,7 +33,7 @@ from .constant import (
     CONTROL_API_PROBE_INTERVAL,
     CONTROL_API_PROBE_TIMEOUT,
     LOCAL_CONTROL_API_ADDRESS,
-    LOCAL_SIMULATIONIO_API_ADDRESS,
+    LOCAL_SERVERAPPIO_API_ADDRESS,
     LOCAL_SUPERLINK_STARTUP_TIMEOUT,
 )
 from .typing import SuperLinkConnection
@@ -111,22 +111,27 @@ def _start_local_superlink() -> None:
         "--control-api-address",
         LOCAL_CONTROL_API_ADDRESS,
         "--simulationio-api-address",
-        LOCAL_SIMULATIONIO_API_ADDRESS,
+        LOCAL_SERVERAPPIO_API_ADDRESS,
         "--database",
         str(database_path),
         "--storage-dir",
         str(storage_dir),
+        "--log-file",
+        str(log_file_path),
+        "--log-rotation-interval-hours",
+        "24",
+        "--log-rotation-backup-count",
+        "7",
     ]
 
-    # Keep process detached and route stdout/stderr to a persistent log file.
+    # Keep process detached and rely on SuperLink's file logging/rotation.
     try:
-        with log_file_path.open("ab") as log_file:
-            process = subprocess.Popen(  # pylint: disable=consider-using-with
-                command,
-                stdout=log_file,
-                stderr=subprocess.STDOUT,
-                start_new_session=True,
-            )
+        process = subprocess.Popen(  # pylint: disable=consider-using-with
+            command,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            start_new_session=True,
+        )
     except OSError as exc:
         raise click.ClickException(
             f"Unable to launch `flower-superlink` for local simulation: {exc}"

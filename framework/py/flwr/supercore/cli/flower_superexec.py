@@ -27,7 +27,6 @@ from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.logger import log
 from flwr.proto.clientappio_pb2_grpc import ClientAppIoStub
 from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub
-from flwr.proto.simulationio_pb2_grpc import SimulationIoStub
 from flwr.supercore.constant import EXEC_PLUGIN_SECTION
 from flwr.supercore.grpc_health import add_args_health
 from flwr.supercore.superexec.plugin import (
@@ -37,6 +36,7 @@ from flwr.supercore.superexec.plugin import (
     SimulationExecPlugin,
 )
 from flwr.supercore.superexec.run_superexec import run_superexec
+from flwr.supercore.version import package_version
 
 try:
     from flwr.ee import add_ee_args_superexec
@@ -99,7 +99,6 @@ def flower_superexec() -> None:
         stub_class=stub_class,  # type: ignore
         appio_api_address=args.appio_api_address,
         plugin_config=plugin_config,
-        flwr_dir=args.flwr_dir,
         parent_pid=args.parent_pid,
         health_server_address=args.health_server_address,
     )
@@ -109,6 +108,12 @@ def _parse_args() -> argparse.ArgumentParser:
     """Parse `flower-superexec` command line arguments."""
     parser = argparse.ArgumentParser(
         description="Run Flower SuperExec.",
+    )
+    parser.add_argument(
+        "-V",
+        "--version",
+        action="version",
+        version=f"Flower version: {package_version}",
     )
     parser.add_argument(
         "--appio-api-address", type=str, required=True, help="Address of the AppIO API"
@@ -126,17 +131,6 @@ def _parse_args() -> argparse.ArgumentParser:
         help="Connect to the AppIO API without TLS. "
         "Data transmitted between the client and server is not encrypted. "
         "Use this flag only if you understand the risks.",
-    )
-    parser.add_argument(
-        "--flwr-dir",
-        default=None,
-        help="""The path containing installed Flower Apps.
-        By default, this value is equal to:
-
-            - `$FLWR_HOME/` if `$FLWR_HOME` is defined
-            - `$XDG_DATA_HOME/.flwr/` if `$XDG_DATA_HOME` is defined
-            - `$HOME/.flwr/` in all other cases
-        """,
     )
     parser.add_argument(
         "--parent-pid",
@@ -157,7 +151,7 @@ def _get_plugin_and_stub_class(
     mapping: dict[str, tuple[type[ExecPlugin], type[object]]] = {
         ExecPluginType.CLIENT_APP: (ClientAppExecPlugin, ClientAppIoStub),
         ExecPluginType.SERVER_APP: (ServerAppExecPlugin, ServerAppIoStub),
-        ExecPluginType.SIMULATION: (SimulationExecPlugin, SimulationIoStub),
+        ExecPluginType.SIMULATION: (SimulationExecPlugin, ServerAppIoStub),
     }
     if plugin_type in mapping:
         return mapping[plugin_type]

@@ -39,9 +39,9 @@ using the Flower framework, Flower Datasets, and PyTorch.
 
 .. tip::
 
-    `Star Flower on GitHub <https://github.com/adap/flower>`__ ⭐️ and join the Flower
-    community on Flower Discuss and the Flower Slack to connect, ask questions, and get
-    help:
+    `Star Flower on GitHub <https://github.com/flwrlabs/flower>`__ ⭐️ and join the
+    Flower community on Flower Discuss and the Flower Slack to connect, ask questions,
+    and get help:
 
     - `Join Flower Discuss <https://discuss.flower.ai/>`__ We'd love to hear from you in
       the ``Introduction`` topic! If anything is unclear, post in ``Flower Help -
@@ -155,7 +155,7 @@ Next, run the training with the following command:
 
 .. code-block:: shell
 
-    $ flwr run .
+    $ flwr run . --stream
 
 **************************************
  Server-side parameter **evaluation**
@@ -253,7 +253,7 @@ Finally, we run the simulation.
 
 .. code-block:: shell
 
-    $ flwr run .
+    $ flwr run . --stream
 
 You'll note that the server logs the metrics returned by the callback after each round.
 Also, at the end of the run, note the ``ServerApp-side Evaluate Metrics`` shown:
@@ -317,7 +317,7 @@ rounds to 15 to see the learning rate decay in action.
 
 .. code-block:: shell
 
-    $ flwr run . --run-config="num-server-rounds=15"
+    $ flwr run . --stream --run-config="num-server-rounds=15"
 
 You'll note that in the ``configure_train`` stage of rounds 5 and 10, the learning rate
 is decreased by a factor of 0.5 and the new learning rate is printed to the terminal.
@@ -412,7 +412,7 @@ Finally, run the simulation with the following command:
 
 .. code-block:: shell
 
-    $ flwr run .
+    $ flwr run . --stream
 
 *******
  Recap
@@ -425,9 +425,8 @@ so little code, right?
 
 In the later sections, we've seen how we can communicate arbitrary values between server
 and clients to fully customize client-side execution. With that capability, we built a
-large-scale Federated Learning simulation using the Flower Virtual Client Engine and ran
-an experiment involving 1000 clients in the same workload — all in the same Flower
-project!
+large-scale Federated Learning simulation using the Flower Simulation Runtime and ran an
+experiment involving 1000 clients in the same workload — all in the same Flower project!
 
 ************
  Next steps

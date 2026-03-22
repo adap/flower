@@ -789,6 +789,7 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
         federation: str,
         federation_options: ConfigRecord,
         flwr_aid: str | None,
+        run_type: str,
     ) -> int:
         """Create a new run."""
         # Sample a random int64 as run_id
@@ -805,11 +806,12 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
                 query = """
                     INSERT INTO run
                     (run_id, fab_id, fab_version,
-                    fab_hash, override_config, federation, federation_options,
+                    fab_hash, override_config, federation, federation_options, run_type,
                     pending_at, starting_at, running_at, finished_at, sub_status,
                     details, flwr_aid, bytes_sent, bytes_recv, clientapp_runtime)
                     VALUES (:run_id, :fab_id, :fab_version, :fab_hash, :override_config,
-                    :federation, :federation_options, :pending_at, :starting_at,
+                    :federation, :federation_options, :run_type, :pending_at,
+                    :starting_at,
                     :running_at, :finished_at, :sub_status, :details, :flwr_aid,
                     :bytes_sent, :bytes_recv, :clientapp_runtime)
                 """
@@ -822,6 +824,7 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
                     "override_config": override_config_json,
                     "federation": federation,
                     "federation_options": configrecord_to_bytes(federation_options),
+                    "run_type": run_type,
                     "pending_at": now().isoformat(),
                     "starting_at": "",
                     "running_at": "",
@@ -837,55 +840,6 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
                 return uint64_run_id
         log(ERROR, "Unexpected run creation failure.")
         return 0
-
-    def get_run_ids(self, flwr_aid: str | None) -> set[int]:
-        """Retrieve all run IDs if `flwr_aid` is not specified.
-
-        Otherwise, retrieve all run IDs for the specified `flwr_aid`.
-        """
-        if flwr_aid:
-            rows = self.query(
-                "SELECT run_id FROM run WHERE flwr_aid = :flwr_aid",
-                {"flwr_aid": flwr_aid},
-            )
-        else:
-            rows = self.query("SELECT run_id FROM run", {})
-        return {int64_to_uint64(row["run_id"]) for row in rows}
-
-    def get_run(self, run_id: int) -> Run | None:
-        """Retrieve information about the run with the specified `run_id`."""
-        # Clean up expired tokens; this will flag inactive runs as needed
-        self._cleanup_expired_tokens()
-
-        # Convert the uint64 value to sint64 for SQLite
-        sint64_run_id = uint64_to_int64(run_id)
-        query = "SELECT * FROM run WHERE run_id = :run_id"
-        rows = self.query(query, {"run_id": sint64_run_id})
-        if rows:
-            row = rows[0]
-            return Run(
-                run_id=int64_to_uint64(row["run_id"]),
-                fab_id=row["fab_id"],
-                fab_version=row["fab_version"],
-                fab_hash=row["fab_hash"],
-                override_config=json.loads(row["override_config"]),
-                pending_at=row["pending_at"],
-                starting_at=row["starting_at"],
-                running_at=row["running_at"],
-                finished_at=row["finished_at"],
-                status=RunStatus(
-                    status=determine_run_status(row),
-                    sub_status=row["sub_status"],
-                    details=row["details"],
-                ),
-                flwr_aid=row["flwr_aid"],
-                federation=row["federation"],
-                bytes_sent=row["bytes_sent"],
-                bytes_recv=row["bytes_recv"],
-                clientapp_runtime=row["clientapp_runtime"],
-            )
-        log(ERROR, "`run_id` does not exist.")
-        return None
 
     def get_run_info(  # pylint: disable=too-many-arguments, too-many-branches
         self,
@@ -993,6 +947,7 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
                 bytes_sent=row["bytes_sent"],
                 bytes_recv=row["bytes_recv"],
                 clientapp_runtime=row["clientapp_runtime"],
+                run_type=row["run_type"],
             )
             for row in rows
         ]
@@ -1087,15 +1042,6 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
             }
             self.query(query % timestamp_fld, params)
         return True
-
-    def get_pending_run_id(self) -> int | None:
-        """Get the `run_id` of a run with `Status.PENDING` status."""
-        # Fetch all runs with unset `starting_at` (i.e. they are in PENDING status)
-        query = "SELECT * FROM run WHERE starting_at = '' LIMIT 1"
-        rows = self.query(query, {})
-        if rows:
-            return int64_to_uint64(rows[0]["run_id"])
-        return None
 
     def get_federation_options(self, run_id: int) -> ConfigRecord | None:
         """Retrieve the federation options for the specified `run_id`."""

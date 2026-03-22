@@ -29,7 +29,6 @@ from flwr.app.user_config import UserConfig
 from .config import (
     flatten_dict,
     fuse_dicts,
-    get_flwr_dir,
     get_project_config,
     get_project_dir,
     parse_config_args,
@@ -40,30 +39,6 @@ from .config import (
 
 # Mock constants
 FAB_CONFIG_FILE = "pyproject.toml"
-
-
-def test_get_flwr_dir_with_provided_path() -> None:
-    """Test get_flwr_dir with a provided valid path."""
-    provided_path = "."
-    assert get_flwr_dir(provided_path) == Path(provided_path).absolute()
-
-
-def test_get_flwr_dir_without_provided_path() -> None:
-    """Test get_flwr_dir without a provided path, using default home directory."""
-    with patch.dict(os.environ, {"HOME": "/home/user"}):
-        assert get_flwr_dir() == Path("/home/user/.flwr")
-
-
-def test_get_flwr_dir_with_flwr_home() -> None:
-    """Test get_flwr_dir with FLWR_HOME environment variable set."""
-    with patch.dict(os.environ, {"FLWR_HOME": "/custom/flwr/home"}):
-        assert get_flwr_dir() == Path("/custom/flwr/home")
-
-
-def test_get_flwr_dir_with_xdg_data_home() -> None:
-    """Test get_flwr_dir with FLWR_HOME environment variable set."""
-    with patch.dict(os.environ, {"XDG_DATA_HOME": "/custom/data/home"}):
-        assert get_flwr_dir() == Path("/custom/data/home/.flwr")
 
 
 def test_get_project_dir_invalid_fab_id() -> None:
@@ -78,13 +53,13 @@ def test_get_project_dir_invalid_fab_id() -> None:
 
 def test_get_project_dir_valid() -> None:
     """Test get_project_dir with an valid fab_id and version."""
-    app_path = get_project_dir(
-        "app_name/user",
-        "1.0.0",
-        "03840e932bf61247c1231f0aec9e8ec5f041ed5516fb23638f24d25f3a007acd",
-        flwr_dir=".",
-    )
-    assert app_path == Path("apps") / "app_name.user.1.0.0.03840e93"
+    with patch.dict(os.environ, {"FLWR_HOME": "/test_home"}):
+        app_path = get_project_dir(
+            "app_name/user",
+            "1.0.0",
+            "03840e932bf61247c1231f0aec9e8ec5f041ed5516fb23638f24d25f3a007acd",
+        )
+    assert app_path == Path("/test_home") / "apps" / "app_name.user.1.0.0.03840e93"
 
 
 def test_get_project_config_file_not_found() -> None:
@@ -476,6 +451,102 @@ def test_validate_pyproject_toml() -> None:
     # Assert
     assert is_valid
     assert not errors
+    assert not warnings
+
+
+def test_validate_pyproject_toml_with_fab_format_version_derives_metadata() -> None:
+    """Test fab_format_version=1 succeeds without mutating authored metadata."""
+    config: dict[str, Any] = {
+        "project": {
+            "name": "fedgpt",
+            "version": "1.0.0",
+            "description": "",
+            "license": "",
+            "dependencies": ["flwr[simulation]>=1.26.0,<=1.28.0"],
+        },
+        "tool": {
+            "flwr": {
+                "app": {
+                    "publisher": "flwrlabs",
+                    "fab_format_version": 1,
+                    "flwr_version_target": "1.27.0",
+                    "components": {
+                        "serverapp": "flwr.cli.run:run",
+                        "clientapp": "flwr.cli.run:run",
+                    },
+                },
+            },
+        },
+    }
+
+    is_valid, errors, warnings = validate_config(config)
+
+    assert is_valid
+    assert not errors
+    assert not warnings
+
+
+def test_v1_fab_format_requires_flwr_dependency() -> None:
+    """Test fab_format_version=1 requires a flwr dependency."""
+    config = {
+        "project": {
+            "name": "fedgpt",
+            "version": "1.0.0",
+            "description": "",
+            "license": "",
+            "dependencies": ["numpy>=1.26.0"],
+        },
+        "tool": {
+            "flwr": {
+                "app": {
+                    "publisher": "flwrlabs",
+                    "fab_format_version": 1,
+                    "components": {
+                        "serverapp": "flwr.cli.run:run",
+                        "clientapp": "flwr.cli.run:run",
+                    },
+                },
+            },
+        },
+    }
+
+    is_valid, errors, warnings = validate_config(config)
+
+    assert not is_valid
+    assert len(errors) == 1
+    assert 'Missing "flwr" dependency' in errors[0]
+    assert not warnings
+
+
+def test_v1_fab_format_rejects_exclusive_lower_bound() -> None:
+    """Test fab_format_version=1 rejects exclusive lower bounds."""
+    config = {
+        "project": {
+            "name": "fedgpt",
+            "version": "1.0.0",
+            "description": "",
+            "license": "",
+            "dependencies": ["flwr>1.26.0"],
+        },
+        "tool": {
+            "flwr": {
+                "app": {
+                    "publisher": "flwrlabs",
+                    "fab_format_version": 1,
+                    "components": {
+                        "serverapp": "flwr.cli.run:run",
+                        "clientapp": "flwr.cli.run:run",
+                    },
+                },
+            },
+        },
+    }
+
+    is_valid, errors, warnings = validate_config(config)
+
+    assert not is_valid
+    assert len(errors) == 1
+    assert "inclusive lower bound" in errors[0]
     assert not warnings
 
 

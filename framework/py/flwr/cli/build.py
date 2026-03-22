@@ -35,6 +35,11 @@ from flwr.common.constant import (
     FAB_INCLUDE_PATTERNS,
     FAB_MAX_SIZE,
 )
+from flwr.supercore.fab_format_version import (
+    FabFormatMetadata,
+    normalize_and_validate_fab_format,
+    validate_fab_files_for_format,
+)
 
 from .config_utils import load_and_validate
 from .utils import build_pathspec, is_valid_project_name, load_gitignore_patterns
@@ -177,11 +182,14 @@ def build_fab_from_disk(app: Path) -> bytes:
     }
 
     # Build FAB from the files dict
-    return build_fab_from_files(files_dict)
+    fab_bytes, _ = build_fab_from_files(files_dict)
+    return fab_bytes
 
 
-def build_fab_from_files(files: dict[str, bytes | Path]) -> bytes:
-    r"""Build a FAB from in-memory files and return the FAB as bytes.
+def build_fab_from_files(
+    files: dict[str, bytes | Path],
+) -> tuple[bytes, FabFormatMetadata]:
+    r"""Build a FAB from in-memory files and return the FAB plus metadata.
 
     This is the core FAB building function that works with in-memory data.
     It accepts either bytes or Path objects as file contents, applies filtering
@@ -197,8 +205,10 @@ def build_fab_from_files(files: dict[str, bytes | Path]) -> bytes:
 
     Returns
     -------
-    bytes
-        The FAB as bytes.
+    tuple[bytes, FabFormatMetadata]
+        The FAB as bytes together with normalized compatibility metadata.
+        The metadata is consumed by platform-api during publish to persist
+        compatibility fields derived from this shared build validation logic.
 
     Examples
     --------
@@ -211,17 +221,44 @@ def build_fab_from_files(files: dict[str, bytes | Path]) -> bytes:
             "src/server.py": b"print('hello')",
             "README.md": b"# My App\n",
         }
-        fab_bytes = build_fab_from_files(files)
+        fab_bytes, metadata = build_fab_from_files(files)
     """
 
-    def to_bytes(content: bytes | Path) -> bytes:
+    def _to_bytes(content: bytes | Path) -> bytes:
         return content.read_bytes() if isinstance(content, Path) else content
+
+    def _add_to_fab(
+        fab_file: zipfile.ZipFile,
+        path: str,
+        content: bytes,
+    ) -> str:
+        """Write a file to the FAB and return its CONTENT manifest line.
+
+        Parameters
+        ----------
+        fab_file : zipfile.ZipFile
+            The ZipFile object to write to.
+        path : str
+            The file path within the FAB.
+        content : bytes
+            The file contents as bytes.
+
+        Returns
+        -------
+        str
+            A CONTENT manifest line: "path,sha256,size_bits"
+        """
+        write_to_zip(fab_file, path, content)
+        sha256_hash = hashlib.sha256(content).hexdigest()
+        file_size_bits = len(content) * 8
+        return f"{path},{sha256_hash},{file_size_bits}"
 
     # Extract, load, and parse pyproject.toml
     if FAB_CONFIG_FILE not in files:
         raise ValueError(f"{FAB_CONFIG_FILE} not found in files")
-    pyproject_content = to_bytes(files[FAB_CONFIG_FILE])
+    pyproject_content = _to_bytes(files[FAB_CONFIG_FILE])
     config = tomli.loads(pyproject_content.decode("utf-8"))
+    metadata = normalize_and_validate_fab_format(config)
 
     # Remove the 'federations' field if it exists
     if (
@@ -234,7 +271,7 @@ def build_fab_from_files(files: dict[str, bytes | Path]) -> bytes:
     # Extract and load .gitignore if present
     gitignore_content = None
     if ".gitignore" in files:
-        gitignore_content = to_bytes(files[".gitignore"])
+        gitignore_content = _to_bytes(files[".gitignore"])
 
     # Get exclude and include specs
     exclude_spec = get_fab_exclude_pathspec(gitignore_content)
@@ -247,30 +284,22 @@ def build_fab_from_files(files: dict[str, bytes | Path]) -> bytes:
         if include_spec.match_file(path) and not exclude_spec.match_file(path)
     ]
     filtered_paths.sort()  # Sort for deterministic output
+    validate_fab_files_for_format(config, filtered_paths)
 
-    # Create a zip file in memory
-    list_file_content = ""
-
+    # Build FAB with CONTENT manifest
     fab_buffer = BytesIO()
     with zipfile.ZipFile(fab_buffer, "w", zipfile.ZIP_DEFLATED) as fab_file:
-        # Add pyproject.toml
-        write_to_zip(fab_file, FAB_CONFIG_FILE, tomli_w.dumps(config))
+        # Add pyproject.toml and collect manifest entries
+        pyproject_bytes = tomli_w.dumps(config).encode("utf-8")
+        manifest_lines = [_add_to_fab(fab_file, FAB_CONFIG_FILE, pyproject_bytes)]
 
+        # Add remaining files and collect their manifest entries
         for file_path in filtered_paths:
+            file_content = _to_bytes(files[file_path])
+            manifest_lines.append(_add_to_fab(fab_file, file_path, file_content))
 
-            # Get file contents as bytes
-            file_content = to_bytes(files[file_path])
-
-            # Write file to FAB
-            write_to_zip(fab_file, file_path, file_content)
-
-            # Calculate file info for CONTENT manifest
-            sha256_hash = hashlib.sha256(file_content).hexdigest()
-            file_size_bits = len(file_content) * 8  # size in bits
-            list_file_content += f"{file_path},{sha256_hash},{file_size_bits}\n"
-
-        # Add CONTENT manifest to the zip file
-        write_to_zip(fab_file, ".info/CONTENT", list_file_content)
+        # Write CONTENT manifest to the zip file
+        write_to_zip(fab_file, ".info/CONTENT", "\n".join(manifest_lines))
 
     fab_bytes = fab_buffer.getvalue()
 
@@ -282,7 +311,8 @@ def build_fab_from_files(files: dict[str, bytes | Path]) -> bytes:
             "via your `.gitignore` file or excluding them from the build."
         )
 
-    return fab_bytes
+    # Returned metadata is consumed by platform during publish.
+    return fab_bytes, metadata
 
 
 def get_fab_include_pathspec() -> pathspec.PathSpec:

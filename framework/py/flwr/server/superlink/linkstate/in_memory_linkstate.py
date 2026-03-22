@@ -544,6 +544,7 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
         federation: str,
         federation_options: ConfigRecord,
         flwr_aid: str | None,
+        run_type: str,
     ) -> int:
         """Create a new run."""
         # Sample a random int64 as run_id
@@ -572,6 +573,7 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
                         bytes_sent=0,
                         bytes_recv=0,
                         clientapp_runtime=0.0,
+                        run_type=run_type,
                     ),
                 )
                 self.run_ids[run_id] = run_record
@@ -584,28 +586,6 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
                 return run_id
         log(ERROR, "Unexpected run creation failure.")
         return 0
-
-    def get_run_ids(self, flwr_aid: str | None) -> set[int]:
-        """Retrieve all run IDs if `flwr_aid` is not specified.
-
-        Otherwise, retrieve all run IDs for the specified `flwr_aid`.
-        """
-        with self.lock:
-            if flwr_aid is not None:
-                # Return run IDs for the specified flwr_aid
-                return set(self.flwr_aid_to_run_ids.get(flwr_aid, ()))
-            return set(self.run_ids.keys())
-
-    def get_run(self, run_id: int) -> Run | None:
-        """Retrieve information about the run with the specified `run_id`."""
-        # Clean up expired tokens; this will flag inactive runs as needed
-        self._cleanup_expired_tokens()
-
-        with self.lock:
-            if run_id not in self.run_ids:
-                log(ERROR, "`run_id` is invalid")
-                return None
-            return self.run_ids[run_id].run
 
     def get_run_info(
         self,
@@ -733,19 +713,6 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
                 run_record.run.finished_at = current.isoformat()
             run_record.run.status = new_status
             return True
-
-    def get_pending_run_id(self) -> int | None:
-        """Get the `run_id` of a run with `Status.PENDING` status, if any."""
-        pending_run_id = None
-
-        # Loop through all registered runs
-        for run_id, run_rec in self.run_ids.items():
-            # Break once a pending run is found
-            if run_rec.run.status.status == Status.PENDING:
-                pending_run_id = run_id
-                break
-
-        return pending_run_id
 
     def get_federation_options(self, run_id: int) -> ConfigRecord | None:
         """Retrieve the federation options for the specified `run_id`."""
