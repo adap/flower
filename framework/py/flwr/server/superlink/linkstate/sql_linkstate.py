@@ -17,6 +17,7 @@
 
 # pylint: disable=too-many-lines
 
+import hashlib
 import json
 from collections.abc import Sequence
 from datetime import datetime, timezone
@@ -39,7 +40,7 @@ from flwr.common.constant import (
     SubStatus,
 )
 from flwr.common.record import ConfigRecord
-from flwr.common.typing import Run, RunStatus
+from flwr.common.typing import Fab, Run, RunStatus
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.server.utils.validator import validate_message
 from flwr.supercore.constant import NodeStatus
@@ -98,6 +99,41 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
     def federation_manager(self) -> FederationManager:
         """Return the FederationManager instance."""
         return self._federation_manager
+
+    def store_fab(self, fab: Fab) -> str:
+        """Store a FAB."""
+        fab_hash = hashlib.sha256(fab.content).hexdigest()
+        params = {
+            "fab_hash": fab_hash,
+            "content": fab.content,
+            "verifications": json.dumps(fab.verifications),
+        }
+        query = """
+            INSERT INTO fab (fab_hash, content, verifications)
+            VALUES (:fab_hash, :content, :verifications)
+            ON CONFLICT(fab_hash) DO UPDATE SET
+                content = excluded.content,
+                verifications = excluded.verifications
+        """
+        self.query(query, params)
+        return fab_hash
+
+    def get_fab(self, fab_hash: str) -> Fab | None:
+        """Return a FAB by hash."""
+        query = """
+            SELECT fab_hash, content, verifications
+            FROM fab
+            WHERE fab_hash = :fab_hash
+        """
+        rows = self.query(query, {"fab_hash": fab_hash})
+        if not rows:
+            return None
+        row = rows[0]
+        return Fab(
+            hash_str=row["fab_hash"],
+            content=row["content"],
+            verifications=json.loads(row["verifications"]),
+        )
 
     def store_message_ins(self, message: Message) -> str | None:
         """Store one Message."""

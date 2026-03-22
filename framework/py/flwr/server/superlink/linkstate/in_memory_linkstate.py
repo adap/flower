@@ -15,6 +15,7 @@
 """In-memory LinkState implementation."""
 
 
+import hashlib
 import threading
 from bisect import bisect_right
 from collections import defaultdict
@@ -37,7 +38,7 @@ from flwr.common.constant import (
     SubStatus,
 )
 from flwr.common.record import ConfigRecord
-from flwr.common.typing import Run, RunStatus
+from flwr.common.typing import Fab, Run, RunStatus
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.server.superlink.linkstate.linkstate import LinkState
 from flwr.server.utils import validate_message
@@ -83,6 +84,7 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
         self.run_ids: dict[int, RunRecord] = {}
         self.contexts: dict[int, Context] = {}
         self.federation_options: dict[int, ConfigRecord] = {}
+        self.fab_store: dict[str, Fab] = {}
         self.message_ins_store: dict[str, Message] = {}
         self.message_res_store: dict[str, Message] = {}
         self.message_ins_id_to_message_res_id: dict[str, str] = {}
@@ -100,6 +102,29 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
     def federation_manager(self) -> FederationManager:
         """Get the FederationManager instance."""
         return self._federation_manager
+
+    def store_fab(self, fab: Fab) -> str:
+        """Store a FAB."""
+        fab_hash = hashlib.sha256(fab.content).hexdigest()
+        with self.lock:
+            self.fab_store[fab_hash] = Fab(
+                hash_str=fab_hash,
+                content=fab.content,
+                verifications=dict(fab.verifications),
+            )
+        return fab_hash
+
+    def get_fab(self, fab_hash: str) -> Fab | None:
+        """Return a FAB by hash."""
+        with self.lock:
+            fab = self.fab_store.get(fab_hash)
+            if fab is None:
+                return None
+            return Fab(
+                hash_str=fab.hash_str,
+                content=fab.content,
+                verifications=dict(fab.verifications),
+            )
 
     def store_message_ins(self, message: Message) -> str | None:
         """Store one Message."""

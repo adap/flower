@@ -24,7 +24,7 @@ from parameterized import parameterized
 from flwr.common import ConfigRecord, Context, Message, Metadata, RecordDict, now
 from flwr.common.constant import ErrorCode
 from flwr.common.message import make_message
-from flwr.common.typing import Run
+from flwr.common.typing import Fab, Run
 from flwr.supercore.corestate.corestate_test import StateTest as CoreStateTest
 from flwr.supercore.object_store import ObjectStoreFactory
 
@@ -75,6 +75,34 @@ class StateTest(CoreStateTest):
 
         # Assert
         self.assertEqual(retrieved, run)
+
+    def test_store_and_get_fab(self) -> None:
+        """Test storing and retrieving a FAB."""
+        fab = Fab("ignored", b"fab-content", {"meta": "data"})
+
+        fab_hash = self.state.store_fab(fab)
+        retrieved = self.state.get_fab(fab_hash)
+
+        self.assertIsNotNone(retrieved)
+        assert retrieved is not None
+        self.assertEqual(retrieved.hash_str, fab_hash)
+        self.assertEqual(retrieved.content, fab.content)
+        self.assertEqual(retrieved.verifications, fab.verifications)
+
+    def test_store_fab_deduplicates_by_hash(self) -> None:
+        """Test storing the same FAB content reuses the same hash."""
+        fab_hash = self.state.store_fab(Fab("a", b"fab-content", {"meta": "data"}))
+        other_hash = self.state.store_fab(Fab("b", b"fab-content", {"meta": "next"}))
+        retrieved = self.state.get_fab(fab_hash)
+
+        self.assertEqual(fab_hash, other_hash)
+        self.assertIsNotNone(retrieved)
+        assert retrieved is not None
+        self.assertEqual(retrieved.verifications, {"meta": "next"})
+
+    def test_get_fab_missing_returns_none(self) -> None:
+        """Test missing FAB retrieval."""
+        self.assertIsNone(self.state.get_fab("missing-fab-hash"))
 
     def test_store_and_get_context(self) -> None:
         """Test storing and retrieving a context."""

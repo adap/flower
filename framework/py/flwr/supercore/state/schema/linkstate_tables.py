@@ -89,6 +89,17 @@ def create_linkstate_metadata() -> MetaData:
     )
 
     # --------------------------------------------------------------------------
+    #  Table: fab
+    # --------------------------------------------------------------------------
+    Table(
+        "fab",
+        metadata,
+        Column("fab_hash", String, primary_key=True),
+        Column("content", LargeBinary, nullable=False),
+        Column("verifications", String, nullable=False),
+    )
+
+    # --------------------------------------------------------------------------
     #  Table: logs
     # --------------------------------------------------------------------------
     Table(
