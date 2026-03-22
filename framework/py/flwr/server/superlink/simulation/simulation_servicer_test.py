@@ -15,7 +15,6 @@
 """SimulationIoServicer tests."""
 
 
-import tempfile
 import unittest
 from unittest.mock import Mock
 
@@ -43,7 +42,6 @@ from flwr.server.superlink.linkstate.linkstate_factory import LinkStateFactory
 from flwr.server.superlink.simulation.simulationio_grpc import run_simulationio_api_grpc
 from flwr.server.superlink.utils import _STATUS_TO_MSG
 from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME, NOOP_FEDERATION, RunType
-from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStoreFactory
 from flwr.superlink.federation import NoOpFederationManager
 
@@ -53,23 +51,16 @@ class TestSimulationIoServicer(unittest.TestCase):  # pylint: disable=R0902
 
     def setUp(self) -> None:
         """Initialize mock stub and server interceptor."""
-        # Create a temporary directory
-        self.temp_dir = tempfile.TemporaryDirectory()  # pylint: disable=R1732
-        self.addCleanup(self.temp_dir.cleanup)  # Ensures cleanup after test
-
         state_factory = LinkStateFactory(
             FLWR_IN_MEMORY_DB_NAME, NoOpFederationManager(), ObjectStoreFactory()
         )
         self.state = state_factory.state()
-        ffs_factory = FfsFactory(self.temp_dir.name)
-        self.ffs = ffs_factory.ffs()
 
         self.status_to_msg = _STATUS_TO_MSG
 
         self._server: grpc.Server = run_simulationio_api_grpc(
             SIMULATIONIO_API_DEFAULT_SERVER_ADDRESS,
             state_factory,
-            ffs_factory,
             None,
         )
 

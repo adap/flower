@@ -15,7 +15,6 @@
 """Flower FleetServicer tests."""
 
 
-import tempfile
 import unittest
 from unittest.mock import Mock, patch
 
@@ -32,7 +31,7 @@ from flwr.common.constant import (
 )
 from flwr.common.message import get_message_to_descendant_id_mapping
 from flwr.common.serde import message_from_proto
-from flwr.common.typing import RunStatus
+from flwr.common.typing import Fab, RunStatus
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     ActivateNodeRequest,
@@ -72,7 +71,6 @@ from flwr.supercore.constant import (
     NodeStatus,
     RunType,
 )
-from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.inflatable.inflatable_object import (
     get_all_nested_objects,
     get_object_id,
@@ -90,17 +88,11 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902, R0904
 
     def setUp(self) -> None:
         """Initialize mock stub and server interceptor."""
-        # Create a temporary directory
-        self.temp_dir = tempfile.TemporaryDirectory()  # pylint: disable=R1732
-        self.addCleanup(self.temp_dir.cleanup)  # Ensures cleanup after test
-
         objectstore_factory = ObjectStoreFactory()
         state_factory = LinkStateFactory(
             FLWR_IN_MEMORY_DB_NAME, NoOpFederationManager(), objectstore_factory
         )
         self.state = state_factory.state()
-        ffs_factory = FfsFactory(self.temp_dir.name)
-        self.ffs = ffs_factory.ffs()
         self.store = objectstore_factory.store()
         self.node_pk = b"fake public key"
 
@@ -109,7 +101,6 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902, R0904
         self._server: grpc.Server = _run_fleet_api_grpc_rere(
             FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
             state_factory,
-            ffs_factory,
             objectstore_factory,
             self.enable_node_auth,
             None,
@@ -509,7 +500,9 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902, R0904
         # Prepare
         node_id = self._create_dummy_node()
         fab_content = b"content"
-        fab_hash = self.ffs.put(fab_content, {"meta": "data"})
+        fab_hash = self.state.store_fab(
+            Fab(hash_str="ignored", content=fab_content, verifications={"meta": "data"})
+        )
         run_id = self._create_dummy_run(fab_hash=fab_hash)
 
         # Transition status to running. GetFab RPC is only allowed in running status.
@@ -550,7 +543,9 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902, R0904
         # Prepare
         node_id = self._create_dummy_node()
         fab_content = b"content"
-        fab_hash = self.ffs.put(fab_content, {"meta": "data"})
+        fab_hash = self.state.store_fab(
+            Fab(hash_str="ignored", content=fab_content, verifications={"meta": "data"})
+        )
         run_id = self._create_dummy_run(running=False, fab_hash=fab_hash)
 
         self._transition_run_status(run_id, num_transitions)
@@ -563,7 +558,9 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902, R0904
         # Prepare
         node_id = self._create_dummy_node()
         fab_content = b"content"
-        fab_hash = self.ffs.put(fab_content, {"meta": "data"})
+        fab_hash = self.state.store_fab(
+            Fab(hash_str="ignored", content=fab_content, verifications={"meta": "data"})
+        )
         run_id = self._create_dummy_run(fab_hash=fab_hash)
 
         # Mock federation manager to exclude the node
@@ -579,6 +576,25 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902, R0904
             self._get_fab.with_call(request=request)
 
         assert e.exception.code() == grpc.StatusCode.PERMISSION_DENIED
+
+    def test_get_fab_permission_denied_if_hash_mismatches_run(self) -> None:
+        """Test `GetFab` rejects hashes that do not match the run FAB hash."""
+        node_id = self._create_dummy_node()
+        fab_hash = self.state.store_fab(
+            Fab(hash_str="ignored", content=b"content", verifications={"meta": "data"})
+        )
+        run_id = self._create_dummy_run(fab_hash=fab_hash)
+        wrong_hash = "0" * len(fab_hash)
+
+        request = GetFabRequest(
+            node=Node(node_id=node_id), hash_str=wrong_hash, run_id=run_id
+        )
+
+        with self.assertRaises(grpc.RpcError) as e:
+            self._get_fab.with_call(request=request)
+
+        assert e.exception.code() == grpc.StatusCode.PERMISSION_DENIED
+        assert "does not match run FAB hash" in e.exception.details()
 
     def test_push_object_succesful(self) -> None:
         """Test `PushObject`."""
