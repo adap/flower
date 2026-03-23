@@ -35,6 +35,7 @@ from flwr.supercore.superexec.plugin import (
     ServerAppExecPlugin,
 )
 from flwr.supercore.superexec.run_superexec import run_superexec
+from flwr.supercore.update_check import warn_if_flwr_update_available
 from flwr.supercore.version import package_version
 
 try:
@@ -65,6 +66,9 @@ except ImportError:
 def flower_superexec() -> None:
     """Run `flower-superexec` command."""
     args = _parse_args().parse_args()
+
+    warn_if_flwr_update_available(process_name="flower-superexec")
+
     if not args.insecure:
         flwr_exit(
             ExitCode.COMMON_TLS_NOT_SUPPORTED,
