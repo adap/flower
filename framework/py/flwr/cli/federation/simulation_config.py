@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower command line interface `federation add-supernode` command."""
+"""Flower command line interface `federation simulation-config` command."""
 
 
 from typing import Annotated
