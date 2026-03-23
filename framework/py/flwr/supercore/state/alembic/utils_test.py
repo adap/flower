@@ -65,15 +65,15 @@ class TestAlembicRun(unittest.TestCase):
         try:
             # Execute & Assert
             # Initially, there should be no alembic_version table or revision.
-            self.assertIsNone(get_current_revision(engine))
+            self.assertEqual(get_current_revisions(engine), set())
             self.assertTrue(check_migrations_pending(engine))
 
             run_migrations(engine)
 
-            # After migration, alembic_version should be set to the latest head.
-            current = get_current_revision(engine)
+            # After migration, alembic_version should be set to the latest heads.
+            current = get_current_revisions(engine)
             script = ScriptDirectory.from_config(build_alembic_config(engine))
-            self.assertIn(current, script.get_heads())
+            self.assertEqual(current, set(script.get_heads()))
             # No pending migrations should remain.
             self.assertFalse(check_migrations_pending(engine))
         finally:
@@ -112,16 +112,16 @@ class TestAlembicRun(unittest.TestCase):
             # construction, there is no alembic_version table or revision.
             baseline_metadata = _get_baseline_metadata()
             baseline_metadata.create_all(engine)
-            self.assertIsNone(get_current_revision(engine))
+            self.assertEqual(get_current_revisions(engine), set())
             self.assertFalse(inspect(engine).has_table(ALEMBIC_VERSION_TABLE))
 
             run_migrations(engine)
 
-            # After migration, alembic_version should be set to the latest head with
+            # After migration, alembic_version should be set to the latest heads with
             # no pending migrations.
-            current = get_current_revision(engine)
+            current = get_current_revisions(engine)
             script = ScriptDirectory.from_config(build_alembic_config(engine))
-            self.assertIn(current, script.get_heads())
+            self.assertEqual(current, set(script.get_heads()))
             self.assertFalse(check_migrations_pending(engine))
         finally:
             engine.dispose()
@@ -221,30 +221,30 @@ class TestAlembicRun(unittest.TestCase):
             # Execute: should succeed and stamp/upgrade successfully
             run_migrations(engine)
 
-            current = get_current_revision(engine)
+            current = get_current_revisions(engine)
             script = ScriptDirectory.from_config(build_alembic_config(engine))
             # Assert
-            self.assertIn(current, script.get_heads())
+            self.assertEqual(current, set(script.get_heads()))
             self.assertFalse(check_migrations_pending(engine))
         finally:
             engine.dispose()
 
 
-def get_current_revision(engine: Engine) -> str | None:
-    """Return the current Alembic revision for the given database."""
+def get_current_revisions(engine: Engine) -> set[str]:
+    """Return the current Alembic revisions for the given database."""
     with engine.connect() as connection:
         context = MigrationContext.configure(connection)
-        return context.get_current_revision()
+        return set(context.get_current_heads())
 
 
 def check_migrations_pending(engine: Engine) -> bool:
-    """Return True if the database is not on the latest migration head."""
-    current = get_current_revision(engine)
+    """Return True if the database is not on the latest migration heads."""
+    current = get_current_revisions(engine)
     script = ScriptDirectory.from_config(build_alembic_config(engine))
     heads = set(script.get_heads())
-    if current is None:
+    if not current:
         return True
-    return current not in heads
+    return current != heads
 
 
 class TestMetadataProviderRegistry(unittest.TestCase):
