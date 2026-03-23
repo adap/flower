@@ -101,13 +101,15 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     StopRunResponse,
     StreamLogsRequest,
     StreamLogsResponse,
+    StreamRunEventsRequest,
+    StreamRunEventsResponse,
     UnregisterNodeRequest,
     UnregisterNodeResponse,
 )
 from flwr.proto.federation_pb2 import Federation  # pylint: disable=E0611
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
-from flwr.supercore.constant import NOOP_FEDERATION, PLATFORM_API_URL
+from flwr.supercore.constant import NOOP_FEDERATION, PLATFORM_API_URL, RunType
 from flwr.supercore.error import rpc_error_translator
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
@@ -166,6 +168,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         flwr_aid = _get_flwr_aid(context)
         override_config = user_config_from_proto(request.override_config)
         federation_options = config_record_from_proto(request.federation_options)
+        run_type = RunType.SIMULATION if federation_options else RunType.SERVER_APP
 
         try:
             # Validate user config overrides matches keys in run config in FAB
@@ -209,6 +212,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 federation,
                 federation_options,
                 flwr_aid,
+                run_type,
             )
 
             # Initialize node config
@@ -236,7 +240,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             log(ERROR, "Could not start run: %s", str(e))
             context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(e))
 
-        log(INFO, "Created run %s", str(run_id))
+        log(INFO, "Created %s run %s", run_type, str(run_id))
         return StartRunResponse(run_id=run_id)
 
     def StreamLogs(  # pylint: disable=C0103
@@ -812,6 +816,16 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 invitee_account_name=request.invitee_account_name,
             )
         return RevokeInvitationResponse()
+
+    # ***************
+    # Unused for now
+    # ***************
+    def StreamRunEvents(
+        self, request: StreamRunEventsRequest, context: grpc.ServicerContext
+    ) -> Generator[StreamRunEventsResponse, Any, None]:
+        """Start run event stream."""
+        _ = request, context
+        raise NotImplementedError("StreamRunEvents is not implemented yet.")
 
 
 def _validate_federation_and_node_in_request(
