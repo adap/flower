@@ -38,6 +38,7 @@ from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH
 
 from .utils import (
     build_pathspec,
+    depth_of,
     flwr_cli_grpc_exc_handler,
     get_executed_command,
     get_sha256_hash,
@@ -250,3 +251,17 @@ def test_custom_grpc_err_handler() -> None:
             raise grpc_error
 
     mock_handler.assert_called_once_with(grpc_error)
+
+
+@pytest.mark.parametrize(
+    ("rel", "expected"),
+    [
+        (Path("a.py"), 0),
+        (Path("d1/file.txt"), 1),
+        (Path("d1/d2/d3/f.txt"), 3),
+        (Path("d1/d2/d3/d4/d5/x"), 5),
+    ],
+)
+def test_depth_of(rel: Path, expected: int) -> None:
+    """Test the directory depth detection."""
+    assert depth_of(rel) == expected

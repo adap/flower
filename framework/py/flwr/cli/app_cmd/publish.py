@@ -43,11 +43,7 @@ from flwr.supercore.version import package_version as flwr_version
 
 from ..auth_plugin.oidc_cli_plugin import OidcCliPlugin
 from ..config_utils import load as load_toml
-from ..utils import (
-    build_pathspec,
-    load_cli_auth_plugin_from_connection,
-    load_gitignore_patterns,
-)
+from ..utils import collect_project_files, load_cli_auth_plugin_from_connection
 
 
 # pylint: disable=too-many-locals
@@ -127,16 +123,6 @@ def _validate_description(description: Any) -> None:
             raise click.ClickException("Publishing cancelled by user.")
 
 
-def _depth_of(relative_path_to_root: Path) -> int:
-    """Return depth that is number of parts (directories) in the relative path
-    (excluding filename).
-
-    Example: "a/b/c.py" -> depth 2
-    Interpret "directory depth" as number of directories: len(parts) - 1
-    """
-    return max(0, len(relative_path_to_root.parts) - 1)
-
-
 def _detect_mime(path: Path) -> str:
     """Detect files' MIME."""
     return MIME_MAP.get(path.suffix.lower(), "text/plain; charset=utf-8")
@@ -186,35 +172,15 @@ def _collect_file_paths(root: Path) -> list[Path]:
     """Return list of file paths that match include/exclude patterns."""
     declared_license_file = _get_declared_license_file(root)
 
-    # Build include/exclude pathspecs
-    # Note: This should be a temporary solution until we have a complete mechanism
-    # for configurable inclusion and exclusion rules.
-    # Note: Unlike Git, we do not support nested .gitignore files in subdirectories.
-    gitignore_patterns = tuple(load_gitignore_patterns(root / ".gitignore"))
-    exclude_pathspec = build_pathspec(gitignore_patterns + APP_PUBLISH_EXCLUDE_PATTERNS)
-    include_pathspec = build_pathspec(APP_PUBLISH_INCLUDE_PATTERNS)
-
-    # Walk the directory tree
-    file_paths: list[Path] = []
-    for path in root.rglob("*"):
-        if not path.is_file():
-            continue
-
-        # Skip excluded or not included files
-        # Note: pathspec requires POSIX style relative paths
-        relative_path = path.relative_to(root)
-        posix = relative_path.as_posix()
-        if exclude_pathspec.match_file(posix) or not include_pathspec.match_file(posix):
-            typer.echo(typer.style(f"Skip: {path}", fg=typer.colors.YELLOW))
-            continue
-
-        # Check max depth
-        if _depth_of(relative_path) > MAX_DIR_DEPTH:
-            raise click.ClickException(
-                f"'{path}' exceeds the maximum directory depth of {MAX_DIR_DEPTH}."
-            )
-
-        file_paths.append(path)
+    try:
+        file_paths = collect_project_files(
+            root,
+            include_patterns=APP_PUBLISH_INCLUDE_PATTERNS,
+            exclude_patterns=APP_PUBLISH_EXCLUDE_PATTERNS,
+            max_depth=MAX_DIR_DEPTH,
+        )
+    except ValueError as err:
+        raise click.ClickException(str(err)) from err
 
     if declared_license_file and declared_license_file not in file_paths:
         raise click.ClickException(
@@ -222,8 +188,6 @@ def _collect_file_paths(root: Path) -> list[Path]:
             "excluded by `.gitignore` or publish exclude rules."
         )
 
-    # Sort for deterministic ordering
-    file_paths.sort(key=lambda path: path.as_posix())
     return file_paths
 
 

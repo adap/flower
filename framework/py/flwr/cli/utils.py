@@ -518,6 +518,96 @@ def load_gitignore_patterns(file: Path | bytes) -> list[str]:
         return []
 
 
+def depth_of(relative_path: Path) -> int:
+    """Return the directory depth of a relative path.
+
+    The depth is the number of parent directory components, excluding the
+    filename itself.
+
+    Parameters
+    ----------
+    relative_path : Path
+        A relative path from the project root to the file.
+
+    Returns
+    -------
+    int
+        Number of parent directory parts. E.g. ``"a/b/c.py"`` has depth 2.
+
+    Examples
+    --------
+    >>> depth_of(Path("file.py"))
+    0
+    >>> depth_of(Path("a/b/c.py"))
+    2
+    """
+    return max(0, len(relative_path.parts) - 1)
+
+
+def collect_project_files(
+    root: Path,
+    include_patterns: tuple[str, ...],
+    exclude_patterns: tuple[str, ...],
+    max_depth: int | None = None,
+) -> list[Path]:
+    """Walk a project directory and return filtered file paths.
+
+    Files are included or excluded based on gitignore-style patterns.
+    Patterns from the project's ``.gitignore`` are merged with the
+    caller-supplied ``exclude_patterns`` before matching.
+
+    Parameters
+    ----------
+    root : Path
+        Absolute path to the project root directory.
+    include_patterns : tuple[str, ...]
+        Gitignore-style patterns for files to include.  A file must
+        match at least one include pattern to be accepted.
+    exclude_patterns : tuple[str, ...]
+        Gitignore-style patterns for files to exclude.  These are
+        combined with any patterns found in ``root/.gitignore``.
+    max_depth : int | None
+        If set, raise ``ValueError`` for any file whose relative path
+        has a directory depth (see :func:`depth_of`) exceeding this
+        value.
+
+    Returns
+    -------
+    list[Path]
+        Absolute ``Path`` objects for every accepted file, sorted by
+        their POSIX-style relative path for deterministic ordering.
+
+    Raises
+    ------
+    ValueError
+        If any file exceeds ``max_depth``.
+    """
+    gitignore_patterns = tuple(load_gitignore_patterns(root / ".gitignore"))
+    exclude_spec = build_pathspec(gitignore_patterns + exclude_patterns)
+    include_spec = build_pathspec(include_patterns)
+
+    file_paths: list[Path] = []
+    for path in root.rglob("*"):
+        if not path.is_file():
+            continue
+
+        relative_path = path.relative_to(root)
+        posix = relative_path.as_posix()
+
+        if exclude_spec.match_file(posix) or not include_spec.match_file(posix):
+            continue
+
+        if max_depth is not None and depth_of(relative_path) > max_depth:
+            raise ValueError(
+                f"'{path}' exceeds the maximum directory depth of {max_depth}."
+            )
+
+        file_paths.append(path)
+
+    file_paths.sort(key=lambda p: p.relative_to(root).as_posix())
+    return file_paths
+
+
 def validate_credentials_content(creds_path: Path) -> str:
     """Load and validate the credentials file content.
 
