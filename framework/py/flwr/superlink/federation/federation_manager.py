@@ -69,7 +69,11 @@ class FederationManager(ABC):
 
     @abstractmethod
     def create_federation(
-        self, flwr_aid: str, name: str, description: str
+        self,
+        flwr_aid: str,
+        name: str,
+        description: str,
+        simulation: bool = False,
     ) -> Federation:
         """Create a new federation.
 
@@ -81,6 +85,8 @@ class FederationManager(ABC):
             The unique name of the federation.
         description : str
             A human-readable description of the federation.
+        simulation : bool
+            Whether this federation is intended for simulation.
 
         Returns
         -------

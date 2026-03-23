@@ -98,7 +98,11 @@ class NoOpFederationManager(FederationManager):
         )
 
     def create_federation(
-        self, flwr_aid: str, name: str, description: str
+        self,
+        flwr_aid: str,
+        name: str,
+        description: str,
+        simulation: bool = False,
     ) -> Federation:
         """Create a new federation."""
         raise UnsupportedError(
