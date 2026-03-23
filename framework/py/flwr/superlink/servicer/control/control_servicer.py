@@ -618,6 +618,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 name=federation_name,
                 description=request.description,
                 flwr_aid=cast(str, account.flwr_aid),
+                simulation=request.simulation,
             )
 
         return CreateFederationResponse(
