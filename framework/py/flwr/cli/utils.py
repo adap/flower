@@ -549,6 +549,7 @@ def collect_project_files(
     include_patterns: tuple[str, ...],
     exclude_patterns: tuple[str, ...],
     max_depth: int | None = None,
+    on_skip: Callable[[Path], None] | None = None,
 ) -> list[Path]:
     """Walk a project directory and return filtered file paths.
 
@@ -570,6 +571,9 @@ def collect_project_files(
         If set, raise ``ValueError`` for any file whose relative path
         has a directory depth (see :func:`depth_of`) exceeding this
         value.
+    on_skip : Callable[[Path], None] | None
+        If provided, called with each file path that is skipped by
+        the include/exclude filters.
 
     Returns
     -------
@@ -582,21 +586,31 @@ def collect_project_files(
     ValueError
         If any file exceeds ``max_depth``.
     """
+    # Build include/exclude pathspecs
+    # Note: This should be a temporary solution until we have a complete mechanism
+    # for configurable inclusion and exclusion rules.
+    # Note: Unlike Git, we do not support nested .gitignore files in subdirectories.
     gitignore_patterns = tuple(load_gitignore_patterns(root / ".gitignore"))
     exclude_spec = build_pathspec(gitignore_patterns + exclude_patterns)
     include_spec = build_pathspec(include_patterns)
 
+    # Walk the directory tree
     file_paths: list[Path] = []
     for path in root.rglob("*"):
         if not path.is_file():
             continue
 
+        # Skip excluded or not included files
+        # Note: pathspec requires POSIX style relative paths
         relative_path = path.relative_to(root)
         posix = relative_path.as_posix()
 
         if exclude_spec.match_file(posix) or not include_spec.match_file(posix):
+            if on_skip is not None:
+                on_skip(path)
             continue
 
+        # Check max depth
         if max_depth is not None and depth_of(relative_path) > max_depth:
             raise ValueError(
                 f"'{path}' exceeds the maximum directory depth of {max_depth}."
@@ -604,6 +618,7 @@ def collect_project_files(
 
         file_paths.append(path)
 
+    # Sort for deterministic ordering
     file_paths.sort(key=lambda p: p.relative_to(root).as_posix())
     return file_paths
 

@@ -178,6 +178,9 @@ def _collect_file_paths(root: Path) -> list[Path]:
             include_patterns=APP_PUBLISH_INCLUDE_PATTERNS,
             exclude_patterns=APP_PUBLISH_EXCLUDE_PATTERNS,
             max_depth=MAX_DIR_DEPTH,
+            on_skip=lambda p: typer.echo(
+                typer.style(f"Skip: {p}", fg=typer.colors.YELLOW)
+            ),
         )
     except ValueError as err:
         raise click.ClickException(str(err)) from err
