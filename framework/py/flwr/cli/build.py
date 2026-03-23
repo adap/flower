@@ -331,7 +331,7 @@ def get_user_fab_patterns(
         return [], False, [], False
 
     def _get_pattern_list(key: str) -> list[str]:
-        value = app_conf.get(key, [])
+        value: list[str] = app_conf.get(key, [])
         if value is None:
             return []
         error = check_pattern_list_value(value, key)
