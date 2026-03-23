@@ -23,6 +23,7 @@ import time
 import unittest
 from abc import abstractmethod
 from datetime import datetime, timedelta, timezone
+from typing import cast
 from unittest.mock import Mock, patch
 from uuid import uuid4
 
@@ -155,10 +156,10 @@ class StateTest(CoreStateTest):
         if isinstance(state, InMemoryLinkState):
             with state.lock:
                 content, _ = state.fab_artifacts[fab_hash]
-                # Intentional invalid value type.
-                state.fab_artifacts[fab_hash] = (  # type: ignore[assignment]
+                # Intentional runtime-invalid metadata shape.
+                state.fab_artifacts[fab_hash] = (
                     content,
-                    {"publisher": 123},
+                    cast(dict[str, str], {"publisher": 123}),
                 )
         elif isinstance(state, SqlLinkState):
             state.query(

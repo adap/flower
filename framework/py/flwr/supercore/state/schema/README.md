@@ -15,6 +15,13 @@ erDiagram
     BLOB context "nullable"
   }
 
+  fab_artifact {
+    VARCHAR fab_hash PK
+    BLOB content
+    VARCHAR created_at
+    VARCHAR verifications
+  }
+
   logs {
     INTEGER run_id FK "nullable"
     VARCHAR log "nullable"
