@@ -301,18 +301,19 @@ def _validate_pattern_list(
     app_config: dict[str, Any], key: str, errors: list[str]
 ) -> None:
     """Validate optional list-of-string pattern fields in [tool.flwr.app]."""
+    # FAB include/exclude keys are optional, so if not present, we can skip validation
     if key not in app_config:
         return
 
     value = app_config[key]
     if not isinstance(value, list):
-        errors.append(f'Property "{key}" in [tool.flwr.app] must be a list of strings')
+        errors.append(f'Property "{key}" in [tool.flwr.app] must be a list of strings.')
         return
 
     if any(not isinstance(pattern, str) or pattern.strip() == "" for pattern in value):
         errors.append(
             f'Property "{key}" in [tool.flwr.app] must be a list of non-empty '
-            "strings"
+            "strings."
         )
 
 
