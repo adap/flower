@@ -41,7 +41,7 @@ _version_locations: list[Path] = []
 
 ALEMBIC_DIR = Path(__file__).resolve().parent
 ALEMBIC_VERSION_TABLE = "alembic_version"
-FLWR_STATE_BASELINE_REVISION = "c8f4f6e2c1ad"
+FLWR_STATE_BASELINE_REVISION = "8e65d8ae60b0"
 FLWR_STATE_LATEST_REVISIONS = "heads"
 
 
