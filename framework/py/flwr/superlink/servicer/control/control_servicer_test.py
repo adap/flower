@@ -107,7 +107,7 @@ FLWR_AID_MISMATCH_CASES = (
 )
 
 
-class TestControlServicer(unittest.TestCase):
+class TestControlServicer(unittest.TestCase):  # pylint: disable=R0904
     """Test the Control API servicer."""
 
     def setUp(self) -> None:

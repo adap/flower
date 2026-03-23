@@ -182,7 +182,7 @@ def _to_table(federations: list[Federation]) -> Table:
     return table
 
 
-def _to_json(
+def _to_json(  # pylint: disable=R0913,R0917
     federations: list[Federation] | None = None,
     members: list[Member] | None = None,
     nodes: list[NodeInfo] | None = None,
