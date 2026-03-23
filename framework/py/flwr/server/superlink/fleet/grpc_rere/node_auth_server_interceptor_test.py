@@ -16,7 +16,6 @@
 
 
 import datetime
-import tempfile
 import unittest
 from collections.abc import Callable
 from typing import Any
@@ -70,7 +69,6 @@ from flwr.server.app import _run_fleet_api_grpc_rere
 from flwr.server.superlink.linkstate.linkstate_factory import LinkStateFactory
 from flwr.server.superlink.linkstate.linkstate_test import create_res_message
 from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME, NOOP_FEDERATION, RunType
-from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStoreFactory
 from flwr.supercore.primitives.asymmetric import (
     generate_key_pairs,
@@ -97,16 +95,12 @@ class TestNodeAuthServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             FLWR_IN_MEMORY_DB_NAME, NoOpFederationManager(), objectstore_factory
         )
         self.state = state_factory.state()
-        self.tmp_dir = tempfile.TemporaryDirectory()  # pylint: disable=R1732
-        ffs_factory = FfsFactory(self.tmp_dir.name)
-        self.ffs = ffs_factory.ffs()
         self.store = objectstore_factory.store()
 
         self._server_interceptor = NodeAuthServerInterceptor(state_factory)
         self._server: grpc.Server = _run_fleet_api_grpc_rere(
             FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
             state_factory,
-            ffs_factory,
             objectstore_factory,
             self.enable_node_auth,
             None,
@@ -172,9 +166,7 @@ class TestNodeAuthServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
 
     def tearDown(self) -> None:
         """Clean up grpc server."""
-        self._server.stop(None)
-        # Cleanup the temp directory
-        self.tmp_dir.cleanup()
+        self._server.stop(None).wait(timeout=2)
 
     def _make_metadata(self) -> list[Any]:
         """Create metadata with signature and timestamp."""
@@ -316,7 +308,7 @@ class TestNodeAuthServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
 
     def _test_get_fab(self, metadata: list[Any]) -> Any:
         """Test GetFab."""
-        fab_hash = self.ffs.put(b"mock fab content", {})
+        fab_hash = self.state.put_fab(b"mock fab content", {})
         node_id = self._create_node_in_linkstate()
         run_id = self._create_dummy_run()
         req = GetFabRequest(

@@ -152,4 +152,16 @@ def create_linkstate_metadata() -> MetaData:
         Column("error", LargeBinary, nullable=True),
     )
 
+    # --------------------------------------------------------------------------
+    #  Table: fab_artifact
+    # --------------------------------------------------------------------------
+    Table(
+        "fab_artifact",
+        metadata,
+        Column("fab_hash", String, primary_key=True),
+        Column("content", LargeBinary, nullable=False),
+        Column("verifications", String, nullable=False),
+        Column("created_at", String, nullable=False),
+    )
+
     return metadata

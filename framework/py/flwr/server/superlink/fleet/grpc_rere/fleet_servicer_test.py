@@ -15,7 +15,6 @@
 """Flower FleetServicer tests."""
 
 
-import tempfile
 import unittest
 from unittest.mock import Mock, patch
 
@@ -72,7 +71,6 @@ from flwr.supercore.constant import (
     NodeStatus,
     RunType,
 )
-from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.inflatable.inflatable_object import (
     get_all_nested_objects,
     get_object_id,
@@ -90,17 +88,11 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902, R0904
 
     def setUp(self) -> None:
         """Initialize mock stub and server interceptor."""
-        # Create a temporary directory
-        self.temp_dir = tempfile.TemporaryDirectory()  # pylint: disable=R1732
-        self.addCleanup(self.temp_dir.cleanup)  # Ensures cleanup after test
-
         objectstore_factory = ObjectStoreFactory()
         state_factory = LinkStateFactory(
             FLWR_IN_MEMORY_DB_NAME, NoOpFederationManager(), objectstore_factory
         )
         self.state = state_factory.state()
-        ffs_factory = FfsFactory(self.temp_dir.name)
-        self.ffs = ffs_factory.ffs()
         self.store = objectstore_factory.store()
         self.node_pk = b"fake public key"
 
@@ -109,7 +101,6 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902, R0904
         self._server: grpc.Server = _run_fleet_api_grpc_rere(
             FLEET_API_GRPC_RERE_DEFAULT_ADDRESS,
             state_factory,
-            ffs_factory,
             objectstore_factory,
             self.enable_node_auth,
             None,
@@ -175,7 +166,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902, R0904
 
     def tearDown(self) -> None:
         """Clean up grpc server."""
-        self._server.stop(None)
+        self._server.stop(None).wait(timeout=2)
 
     def _create_dummy_node(self, activate: bool = True) -> int:
         """Create a dummy node."""
@@ -509,7 +500,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902, R0904
         # Prepare
         node_id = self._create_dummy_node()
         fab_content = b"content"
-        fab_hash = self.ffs.put(fab_content, {"meta": "data"})
+        fab_hash = self.state.put_fab(fab_content, {"meta": "data"})
         run_id = self._create_dummy_run(fab_hash=fab_hash)
 
         # Transition status to running. GetFab RPC is only allowed in running status.
@@ -550,7 +541,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902, R0904
         # Prepare
         node_id = self._create_dummy_node()
         fab_content = b"content"
-        fab_hash = self.ffs.put(fab_content, {"meta": "data"})
+        fab_hash = self.state.put_fab(fab_content, {"meta": "data"})
         run_id = self._create_dummy_run(running=False, fab_hash=fab_hash)
 
         self._transition_run_status(run_id, num_transitions)
@@ -563,7 +554,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902, R0904
         # Prepare
         node_id = self._create_dummy_node()
         fab_content = b"content"
-        fab_hash = self.ffs.put(fab_content, {"meta": "data"})
+        fab_hash = self.state.put_fab(fab_content, {"meta": "data"})
         run_id = self._create_dummy_run(fab_hash=fab_hash)
 
         # Mock federation manager to exclude the node

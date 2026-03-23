@@ -37,6 +37,38 @@ class LinkState(CoreState):  # pylint: disable=R0904
         """Return the FederationManager instance."""
 
     @abc.abstractmethod
+    def put_fab(self, content: bytes, verifications: dict[str, str]) -> str:
+        """Store FAB content and verifications and return FAB hash.
+
+        Parameters
+        ----------
+        content : bytes
+            FAB payload bytes.
+        verifications : dict[str, str]
+            Verification metadata to associate with the FAB payload.
+
+        Returns
+        -------
+        str
+            SHA256 hex hash of `content`.
+        """
+
+    @abc.abstractmethod
+    def get_fab(self, fab_hash: str) -> tuple[bytes, dict[str, str]] | None:
+        """Retrieve FAB content and verifications by hash.
+
+        Parameters
+        ----------
+        fab_hash : str
+            SHA256 hash string of FAB content.
+
+        Returns
+        -------
+        tuple[bytes, dict[str, str]] | None
+            Stored FAB content and verification metadata, if present.
+        """
+
+    @abc.abstractmethod
     def store_message_ins(self, message: Message) -> str | None:
         """Store one Message.
 

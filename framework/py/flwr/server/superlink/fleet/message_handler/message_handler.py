@@ -62,7 +62,6 @@ from flwr.proto.message_pb2 import (  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkState
 from flwr.server.superlink.utils import check_abort
-from flwr.supercore.ffs import Ffs
 from flwr.supercore.inflatable.inflatable_object import UnexpectedObjectContentError
 from flwr.supercore.object_store import NoObjectInStoreError, ObjectStore
 
@@ -250,7 +249,7 @@ def get_run(
 
 
 def get_fab(
-    request: GetFabRequest, ffs: Ffs, state: LinkState, store: ObjectStore
+    request: GetFabRequest, state: LinkState, store: ObjectStore
 ) -> GetFabResponse:
     """Get FAB."""
     # Validate that the requesting SuperNode is part of the federation
@@ -266,7 +265,7 @@ def get_fab(
     if abort_msg:
         raise InvalidRunStatusException(abort_msg)
 
-    if result := ffs.get(request.hash_str):
+    if result := state.get_fab(request.hash_str):
         fab = Fab(request.hash_str, result[0], result[1])
         return GetFabResponse(fab=fab_to_proto(fab))
 
