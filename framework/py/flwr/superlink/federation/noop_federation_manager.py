@@ -102,7 +102,7 @@ class NoOpFederationManager(FederationManager):
         flwr_aid: str,
         name: str,
         description: str,
-        simulation: bool = False,
+        simulation: bool | None = None,
     ) -> Federation:
         """Create a new federation."""
         raise UnsupportedError(
