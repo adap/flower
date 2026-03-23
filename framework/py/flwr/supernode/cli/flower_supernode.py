@@ -40,7 +40,7 @@ from flwr.common.constant import (
 from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.logger import log
 from flwr.supercore.grpc_health import add_args_health
-from flwr.supercore.utils import warn_if_flwr_update_available
+from flwr.supercore.update_check import warn_if_flwr_update_available
 from flwr.supercore.version import package_version
 from flwr.supernode.start_client_internal import start_client_internal
 

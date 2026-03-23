@@ -36,7 +36,7 @@ from flwr.supercore.superexec.plugin import (
     SimulationExecPlugin,
 )
 from flwr.supercore.superexec.run_superexec import run_superexec
-from flwr.supercore.utils import warn_if_flwr_update_available
+from flwr.supercore.update_check import warn_if_flwr_update_available
 from flwr.supercore.version import package_version
 
 try:

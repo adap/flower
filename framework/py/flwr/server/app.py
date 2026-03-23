@@ -63,7 +63,8 @@ from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.grpc_health import add_args_health, run_health_server_grpc_no_tls
 from flwr.supercore.object_store import ObjectStoreFactory
-from flwr.supercore.utils import get_flwr_home, warn_if_flwr_update_available
+from flwr.supercore.update_check import warn_if_flwr_update_available
+from flwr.supercore.utils import get_flwr_home
 from flwr.supercore.version import package_version
 from flwr.superlink.artifact_provider import ArtifactProvider
 from flwr.superlink.auth_plugin import (
