@@ -103,6 +103,10 @@ service Control {
   rpc RevokeInvitation(RevokeInvitationRequest)
       returns (RevokeInvitationResponse) {}
 
+  // Set Simulation Configuration
+  rpc ConfigureFederationForSimulation(ConfigureFederationForSimulationRequest)
+      returns (ConfigureFederationForSimulationResponse) {}
+
   // ##############
   // Unused for now
   // ##############
@@ -230,6 +234,12 @@ message RevokeInvitationRequest {
   string federation_name = 2;
 }
 message RevokeInvitationResponse {}
+
+message ConfigureFederationForSimulationRequest {
+  string federation_name = 1;
+  SimulationConfig config = 2;
+}
+message ConfigureFederationForSimulationResponse {}
 
 // ##############
 // Unused for now

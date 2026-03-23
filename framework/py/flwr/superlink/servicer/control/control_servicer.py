@@ -65,6 +65,8 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     AddNodeToFederationResponse,
     ArchiveFederationRequest,
     ArchiveFederationResponse,
+    ConfigureFederationForSimulationRequest,
+    ConfigureFederationForSimulationResponse,
     CreateFederationRequest,
     CreateFederationResponse,
     CreateInvitationRequest,
@@ -822,6 +824,16 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 invitee_account_name=request.invitee_account_name,
             )
         return RevokeInvitationResponse()
+
+    def ConfigureFederationForSimulation(
+        self,
+        request: ConfigureFederationForSimulationRequest,
+        context: grpc.ServicerContext,
+    ) -> ConfigureFederationForSimulationResponse:
+        """Configure a federation for simulation."""
+        log(INFO, _ := self.ConfigureFederationForSimulation.__qualname__)
+
+        return ConfigureFederationForSimulationResponse()
 
     # ***************
     # Unused for now

@@ -1,0 +1,158 @@
+# Copyright 2026 Flower Labs GmbH. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ==============================================================================
+"""Flower command line interface `federation add-supernode` command."""
+
+
+from typing import Annotated
+
+import typer
+
+from flwr.cli.utils import cli_output_control_stub, flwr_cli_grpc_exc_handler
+from flwr.common.constant import CliOutputFormat
+from flwr.proto.control_pb2 import (  # pylint: disable=E0611
+    ConfigureFederationForSimulationRequest,
+    ConfigureFederationForSimulationResponse,
+)
+from flwr.proto.control_pb2_grpc import ControlStub
+from flwr.proto.federation_pb2 import SimulationConfig  # pylint: disable=E0611
+
+from .error_handlers import handle_invite_grpc_error
+
+
+def simulation_config(
+    federation: Annotated[
+        str,
+        typer.Argument(help="Name of the federation."),
+    ],
+    superlink: Annotated[
+        str | None,
+        typer.Argument(help="Name of the SuperLink connection."),
+    ] = None,
+    output_format: Annotated[
+        str,
+        typer.Option(
+            "--format",
+            case_sensitive=False,
+            help="Format output using 'default' view or 'json'",
+        ),
+    ] = CliOutputFormat.DEFAULT,
+    num_supernodes: Annotated[
+        int,
+        typer.Option(
+            "--num-supernodes",
+            case_sensitive=False,
+            help="The number of virtual SuperNodes in the simulation",
+        ),
+    ] = 10,
+    client_resources_num_cpus: Annotated[
+        int,
+        typer.Option(
+            "--client-resources-num-cpus",
+            case_sensitive=False,
+            help="CPUs assigned to the execution of each ClientApp",
+        ),
+    ] = 2,
+    client_resources_num_gpus: Annotated[
+        float,
+        typer.Option(
+            "--client-resources-num-gpus",
+            case_sensitive=False,
+            help="Ratio of a GPU VRAM assigned to the execution of each ClientApp",
+        ),
+    ] = 0.0,
+    verbose: Annotated[
+        bool,
+        typer.Option(
+            "--verbose",
+            case_sensitive=False,
+            help="Run the Simulation Runtime with verbose logs",
+        ),
+    ] = False,
+    backend_name: Annotated[
+        str,
+        typer.Option(
+            "--backend-name",
+            case_sensitive=False,
+            help="Choice of backend name.",
+        ),
+    ] = "ray",
+    init_args_num_cpus: Annotated[
+        int | None,
+        typer.Option(
+            "--init-args-num-cpus",
+            case_sensitive=False,
+            help="Number of CPUs to make available to the Simulation Runtime.",
+        ),
+    ] = None,
+    init_args_num_gpus: Annotated[
+        int | None,
+        typer.Option(
+            "--init-args-num-gpus",
+            case_sensitive=False,
+            help="Number of GPUs to make available to the Simulation Runtime",
+        ),
+    ] = None,
+    init_args_logging_level: Annotated[
+        str | None,
+        typer.Option(
+            "--init-args-logging-level",
+            case_sensitive=False,
+            help="Control logging level in Simulation Runtime.",
+        ),
+    ] = None,
+    init_args_log_to_driver: Annotated[
+        bool,
+        typer.Option(
+            "--init-args-log-to-driver",
+            case_sensitive=False,
+            help="Whether to propagate logs from Simulation Runtime upwards.",
+        ),
+    ] = True,
+) -> None:
+    """Configure a Federation using the Simulation Runtime."""
+    with cli_output_control_stub(superlink, output_format) as (stub, is_json):
+        request = ConfigureFederationForSimulationRequest(
+            federation_name=federation,
+            config=SimulationConfig(
+                num_supernodes=num_supernodes,
+                client_resources_num_cpus=client_resources_num_cpus,
+                client_resources_num_gpus=client_resources_num_gpus,
+                verbose=verbose,
+                init_args_num_cpus=init_args_num_cpus,
+                init_args_num_gpus=init_args_num_gpus,
+                init_args_logging_level=init_args_logging_level,
+                init_args_log_to_driver=init_args_log_to_driver,
+            ),
+        )
+        _ = is_json
+        _configure_federation_for_simulation(
+            stub=stub,
+            request=request,
+        )
+
+
+def _configure_federation_for_simulation(
+    stub: ControlStub,
+    request: ConfigureFederationForSimulationRequest,
+) -> None:
+    """Send a list invitations request."""
+    with flwr_cli_grpc_exc_handler(handle_invite_grpc_error):
+        _: ConfigureFederationForSimulationResponse = (
+            stub.ConfigureFederationForSimulation(request)
+        )
+
+    raise NotImplementedError(
+        "Federation simulation configuration is not implemented yet."
+    )

@@ -47,3 +47,15 @@ message Invitation {
   string created_at = 5;
   string status_changed_at = 6;
 }
+
+message SimulationConfig {
+  uint64 num_supernodes = 1;
+  uint64 client_resources_num_cpus = 2;
+  float client_resources_num_gpus = 3;
+  bool verbose = 4;
+  string backend_name = 5;
+  optional uint64 init_args_num_cpus = 6;
+  optional float init_args_num_gpus = 7;
+  optional string init_args_logging_level = 8;
+  optional bool init_args_log_to_driver = 9;
+}

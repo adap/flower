@@ -165,6 +165,12 @@ class ControlStub:
     ]
     """Revoke Invitation"""
 
+    ConfigureFederationForSimulation: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.control_pb2.ConfigureFederationForSimulationRequest,
+        flwr.proto.control_pb2.ConfigureFederationForSimulationResponse,
+    ]
+    """Set Simulation Configuration"""
+
     StreamRunEvents: grpc.UnaryStreamMultiCallable[
         flwr.proto.control_pb2.StreamRunEventsRequest,
         flwr.proto.control_pb2.StreamRunEventsResponse,
@@ -308,6 +314,12 @@ class ControlAsyncStub:
         flwr.proto.control_pb2.RevokeInvitationResponse,
     ]
     """Revoke Invitation"""
+
+    ConfigureFederationForSimulation: grpc.aio.UnaryUnaryMultiCallable[
+        flwr.proto.control_pb2.ConfigureFederationForSimulationRequest,
+        flwr.proto.control_pb2.ConfigureFederationForSimulationResponse,
+    ]
+    """Set Simulation Configuration"""
 
     StreamRunEvents: grpc.aio.UnaryStreamMultiCallable[
         flwr.proto.control_pb2.StreamRunEventsRequest,
@@ -496,6 +508,14 @@ class ControlServicer(metaclass=abc.ABCMeta):
         context: _ServicerContext,
     ) -> typing.Union[flwr.proto.control_pb2.RevokeInvitationResponse, collections.abc.Awaitable[flwr.proto.control_pb2.RevokeInvitationResponse]]:
         """Revoke Invitation"""
+
+    @abc.abstractmethod
+    def ConfigureFederationForSimulation(
+        self,
+        request: flwr.proto.control_pb2.ConfigureFederationForSimulationRequest,
+        context: _ServicerContext,
+    ) -> typing.Union[flwr.proto.control_pb2.ConfigureFederationForSimulationResponse, collections.abc.Awaitable[flwr.proto.control_pb2.ConfigureFederationForSimulationResponse]]:
+        """Set Simulation Configuration"""
 
     @abc.abstractmethod
     def StreamRunEvents(
