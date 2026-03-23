@@ -551,7 +551,10 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         return ListFederationsResponse(
             federations=[
                 Federation(
-                    name=fed.name, description=fed.description, archived=fed.archived
+                    name=fed.name,
+                    description=fed.description,
+                    archived=fed.archived,
+                    simulation=fed.simulation,
                 )
                 for fed in federations
             ]
@@ -587,6 +590,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             nodes=details.nodes,
             runs=[run_to_proto(run) for run in details.runs],
             archived=details.archived,
+            simulation=details.simulation,
         )
         return ShowFederationResponse(
             federation=federation_proto, now=now().isoformat()
@@ -618,6 +622,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 name=federation_name,
                 description=request.description,
                 flwr_aid=cast(str, account.flwr_aid),
+                simulation=request.simulation,
             )
 
         return CreateFederationResponse(
@@ -625,6 +630,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 name=federation.name,
                 description=federation.description,
                 members=federation.members,
+                simulation=federation.simulation,
             )
         )
 
