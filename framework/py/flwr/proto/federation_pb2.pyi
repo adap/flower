@@ -147,8 +147,8 @@ class SimulationConfig(google.protobuf.message.Message):
     NUM_SUPERNODES_FIELD_NUMBER: builtins.int
     CLIENT_RESOURCES_NUM_CPUS_FIELD_NUMBER: builtins.int
     CLIENT_RESOURCES_NUM_GPUS_FIELD_NUMBER: builtins.int
-    VERBOSE_FIELD_NUMBER: builtins.int
     BACKEND_NAME_FIELD_NUMBER: builtins.int
+    VERBOSE_FIELD_NUMBER: builtins.int
     INIT_ARGS_NUM_CPUS_FIELD_NUMBER: builtins.int
     INIT_ARGS_NUM_GPUS_FIELD_NUMBER: builtins.int
     INIT_ARGS_LOGGING_LEVEL_FIELD_NUMBER: builtins.int
@@ -156,10 +156,10 @@ class SimulationConfig(google.protobuf.message.Message):
     num_supernodes: builtins.int
     client_resources_num_cpus: builtins.int
     client_resources_num_gpus: builtins.float
-    verbose: builtins.bool
     backend_name: builtins.str
+    verbose: builtins.bool
     init_args_num_cpus: builtins.int
-    init_args_num_gpus: builtins.float
+    init_args_num_gpus: builtins.int
     init_args_logging_level: builtins.str
     init_args_log_to_driver: builtins.bool
     def __init__(
@@ -168,10 +168,10 @@ class SimulationConfig(google.protobuf.message.Message):
         num_supernodes: builtins.int = ...,
         client_resources_num_cpus: builtins.int = ...,
         client_resources_num_gpus: builtins.float = ...,
-        verbose: builtins.bool = ...,
         backend_name: builtins.str = ...,
+        verbose: builtins.bool = ...,
         init_args_num_cpus: builtins.int | None = ...,
-        init_args_num_gpus: builtins.float | None = ...,
+        init_args_num_gpus: builtins.int | None = ...,
         init_args_logging_level: builtins.str | None = ...,
         init_args_log_to_driver: builtins.bool | None = ...,
     ) -> None: ...
