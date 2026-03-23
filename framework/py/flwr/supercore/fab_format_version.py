@@ -1,0 +1,296 @@
+# Copyright 2026 Flower Labs GmbH. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ==============================================================================
+"""FAB format version validation and derived metadata helpers."""
+
+
+from dataclasses import dataclass
+from typing import Any
+
+from packaging.requirements import InvalidRequirement, Requirement
+from packaging.version import InvalidVersion, Version
+
+
+@dataclass(frozen=True)
+class FabFormatMetadata:
+    """Normalized metadata derived during FAB build and returned to callers."""
+
+    fab_format_version: int
+    flwr_version_min: str | None
+    flwr_version_target: str | None
+    flwr_version_max: str | None
+
+
+def _parse_version(value: str, field_name: str) -> Version:
+    """Parse a version string and raise a consistent config error if invalid."""
+    try:
+        return Version(value)
+    except InvalidVersion as err:
+        raise ValueError(f"Invalid {field_name}: expected a valid version.") from err
+
+
+def _get_flwr_requirement(config: dict[str, Any]) -> Requirement | None:
+    """Return the unique `flwr` dependency declared in `[project].dependencies`."""
+    dependencies = config.get("project", {}).get("dependencies")
+    if dependencies is None:
+        return None
+
+    if not isinstance(dependencies, list):
+        raise ValueError(
+            'Invalid [project].dependencies: expected a list containing a "flwr" '
+            "dependency declaration."
+        )
+
+    flwr_requirements: list[Requirement] = []
+    for dependency in dependencies:
+        if not isinstance(dependency, str):
+            raise ValueError(
+                "Invalid [project].dependencies: dependency entries must be strings."
+            )
+        try:
+            requirement = Requirement(dependency)
+        except InvalidRequirement as err:
+            raise ValueError(
+                f'Invalid dependency declaration "{dependency}": {err}'
+            ) from err
+
+        if requirement.name == "flwr":
+            flwr_requirements.append(requirement)
+
+    if not flwr_requirements:
+        return None
+
+    if len(flwr_requirements) > 1:
+        raise ValueError('Multiple "flwr" dependency declarations are not supported.')
+
+    return flwr_requirements[0]
+
+
+def _derive_flwr_version_bounds(
+    requirement: Requirement,
+) -> tuple[Version, Version | None]:
+    """Derive supported Flower version bounds from the `flwr` dependency."""
+    lower: Version | None = None
+    upper: Version | None = None
+
+    for specifier in requirement.specifier:
+        version = _parse_version(specifier.version, '"flwr" dependency specifier')
+        if specifier.operator == ">=":
+            if lower is not None:
+                raise ValueError(
+                    'Unsupported "flwr" dependency specifier: multiple lower bounds '
+                    "are not supported."
+                )
+            lower = version
+        elif specifier.operator == "<=":
+            if upper is not None:
+                raise ValueError(
+                    'Unsupported "flwr" dependency specifier: multiple upper bounds '
+                    "are not supported."
+                )
+            upper = version
+        else:
+            raise ValueError(
+                'Unsupported "flwr" dependency specifier '
+                f'"{specifier}" in requirement "{requirement}". '
+                "For fab_format_version = 1, use a single continuous range with an "
+                'inclusive lower bound in one of these forms: "flwr>=X" or '
+                '"flwr>=X,<=Y".'
+            )
+
+    if lower is None:
+        raise ValueError(
+            'Invalid "flwr" dependency specifier: an inclusive lower bound is '
+            "required for fab_format_version = 1."
+        )
+
+    if upper is not None and upper < lower:
+        raise ValueError(
+            'Invalid "flwr" dependency specifier: the upper bound must not be '
+            "smaller than the lower bound."
+        )
+
+    return lower, upper
+
+
+def _get_flwr_app_config(config: dict[str, Any]) -> dict[str, Any]:
+    """Return the `[tool.flwr.app]` table without mutating the parsed config."""
+    tool_config = config.get("tool")
+    if not isinstance(tool_config, dict):
+        return {}
+
+    flwr_config = tool_config.get("flwr")
+    if not isinstance(flwr_config, dict):
+        return {}
+
+    app_config = flwr_config.get("app")
+    return app_config if isinstance(app_config, dict) else {}
+
+
+def _resolve_fab_format_version(app_config: dict[str, Any]) -> int:
+    """Resolve and validate `fab_format_version` from app config."""
+    fab_format_version = app_config.get("fab_format_version", 0)
+    if (
+        not isinstance(fab_format_version, int)
+        or isinstance(fab_format_version, bool)
+        or fab_format_version < 0
+    ):
+        raise ValueError(
+            "Invalid [tool.flwr.app].fab_format_version: expected a non-negative "
+            "integer."
+        )
+    return fab_format_version
+
+
+def _parse_flwr_target_version(app_config: dict[str, Any]) -> Version | None:
+    """Parse optional `flwr_version_target` from app config."""
+    target_raw = app_config.get("flwr_version_target")
+    if target_raw is not None and not isinstance(target_raw, str):
+        raise ValueError(
+            "Invalid [tool.flwr.app].flwr_version_target: expected a string."
+        )
+
+    if isinstance(target_raw, str):
+        return _parse_version(
+            target_raw,
+            "[tool.flwr.app].flwr_version_target",
+        )
+    return None
+
+
+def _validate_target_within_bounds(
+    target_version: Version | None,
+    lower: Version | None,
+    upper: Version | None,
+) -> None:
+    """Ensure `flwr_version_target` falls within the derived range, if any."""
+    if target_version is None or lower is None:
+        return
+
+    if target_version < lower or (upper is not None and target_version > upper):
+        raise ValueError(
+            "Invalid [tool.flwr.app].flwr_version_target: must fall within the "
+            'declared "flwr" dependency range.'
+        )
+
+
+def _build_fab_metadata(
+    fab_format_version: int,
+    target_version: Version | None,
+    lower: Version | None,
+    upper: Version | None,
+) -> FabFormatMetadata:
+    """Create normalized metadata from parsed versions."""
+    return FabFormatMetadata(
+        fab_format_version=fab_format_version,
+        flwr_version_min=str(lower) if lower is not None else None,
+        flwr_version_target=str(target_version) if target_version is not None else None,
+        flwr_version_max=str(upper) if upper is not None else None,
+    )
+
+
+def _normalize_and_validate_fab_format_v0(config: dict[str, Any]) -> FabFormatMetadata:
+    """Derive best-effort compatibility metadata for `fab_format_version = 0`.
+
+    - `flwr` dependency is optional.
+    - `flwr_version_target` is optional.
+    - Compatibility bounds are derived only when the declared `flwr` dependency
+      can be represented as a single supported range.
+    """
+    app_config = _get_flwr_app_config(config)
+    target_version = _parse_flwr_target_version(app_config)
+    requirement = _get_flwr_requirement(config)
+    lower: Version | None = None
+    upper: Version | None = None
+
+    if requirement is not None:
+        try:
+            lower, upper = _derive_flwr_version_bounds(requirement)
+        except ValueError:
+            lower, upper = None, None
+
+    _validate_target_within_bounds(target_version, lower, upper)
+    return _build_fab_metadata(0, target_version, lower, upper)
+
+
+def _normalize_and_validate_fab_format_v1(config: dict[str, Any]) -> FabFormatMetadata:
+    """Require and derive strict metadata for `fab_format_version = 1`.
+
+    - `flwr` dependency is required.
+    - The dependency must include an inclusive lower bound.
+    - Optional `flwr_version_target` must fall within the derived range.
+    - Unsupported specifier shapes are rejected.
+    """
+    app_config = _get_flwr_app_config(config)
+    target_version = _parse_flwr_target_version(app_config)
+    requirement = _get_flwr_requirement(config)
+    if requirement is None:
+        raise ValueError(
+            'Missing "flwr" dependency in [project].dependencies for '
+            "fab_format_version >= 1."
+        )
+
+    lower, upper = _derive_flwr_version_bounds(requirement)
+    _validate_target_within_bounds(target_version, lower, upper)
+    return _build_fab_metadata(1, target_version, lower, upper)
+
+
+def _validate_fab_format_v0_contents(
+    _config: dict[str, Any], _filtered_paths: list[str]
+) -> None:
+    """Validate the final FAB contents for `fab_format_version = 0`."""
+    # Reserved for future file-level FAB format rules.
+    return None
+
+
+def _validate_fab_format_v1_contents(
+    _config: dict[str, Any], _filtered_paths: list[str]
+) -> None:
+    """Validate the final FAB contents for `fab_format_version = 1`."""
+    # Reserved for future file-level FAB format rules.
+    return None
+
+
+def normalize_and_validate_fab_format(
+    config: dict[str, Any],
+) -> FabFormatMetadata:
+    """Normalize FAB metadata in config and validate `fab_format_version` rules."""
+    app_config = _get_flwr_app_config(config)
+    fab_format_version = _resolve_fab_format_version(app_config)
+    if fab_format_version == 0:
+        return _normalize_and_validate_fab_format_v0(config)
+    if fab_format_version == 1:
+        return _normalize_and_validate_fab_format_v1(config)
+
+    raise ValueError(
+        f"Unsupported [tool.flwr.app].fab_format_version: {fab_format_version}."
+    )
+
+
+def validate_fab_files_for_format(
+    config: dict[str, Any], filtered_paths: list[str]
+) -> None:
+    """Validate the final FAB contents using the selected format ruleset."""
+    app_config = _get_flwr_app_config(config)
+    fab_format_version = _resolve_fab_format_version(app_config)
+    if fab_format_version == 0:
+        _validate_fab_format_v0_contents(config, filtered_paths)
+        return
+    if fab_format_version == 1:
+        _validate_fab_format_v1_contents(config, filtered_paths)
+        return
+
+    raise ValueError(
+        f"Unsupported [tool.flwr.app].fab_format_version: {fab_format_version}."
+    )

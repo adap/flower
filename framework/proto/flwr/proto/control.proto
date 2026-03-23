@@ -102,6 +102,14 @@ service Control {
   // Revoke Invitation
   rpc RevokeInvitation(RevokeInvitationRequest)
       returns (RevokeInvitationResponse) {}
+
+  // ##############
+  // Unused for now
+  // ##############
+
+  // Start run event stream
+  rpc StreamRunEvents(StreamRunEventsRequest)
+      returns (stream StreamRunEventsResponse) {}
 }
 
 message StartRunRequest {
@@ -221,3 +229,12 @@ message RevokeInvitationRequest {
   string federation_name = 2;
 }
 message RevokeInvitationResponse {}
+
+// ##############
+// Unused for now
+// ##############
+message StreamRunEventsRequest { uint64 run_id = 1; }
+message StreamRunEventsResponse {
+  string event = 1;
+  string data = 2;
+}
