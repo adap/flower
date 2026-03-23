@@ -444,6 +444,7 @@ class TestControlServicer(unittest.TestCase):
         request = CreateFederationRequest(
             federation_name=name,
             description=description,
+            simulation=True,
         )
         mock_members = [
             Member(account=Account(id=self.aid), role="owner"),
@@ -467,6 +468,7 @@ class TestControlServicer(unittest.TestCase):
             name=expected_name,
             description=description,
             flwr_aid=self.aid,
+            simulation=True,
         )
         self.assertEqual(response.federation.name, expected_name)
         self.assertEqual(response.federation.description, description)
