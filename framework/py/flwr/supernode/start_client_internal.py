@@ -349,7 +349,8 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments
                 if not fab.verifications.get("valid_license", ""):
                     log(
                         ERROR,
-                        "App verification is not supported by the connected SuperLink.",
+                        "The FAB could not be verified. App verification is "
+                        "not supported by the connected SuperLink.",
                     )
                     reply = Message(FAB_VERIFICATION_ERROR, reply_to=message)
                     _insert_message(reply, state, object_store)
