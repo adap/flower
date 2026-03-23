@@ -341,7 +341,7 @@ def test_warn_if_flwr_update_available_prints_cached_message(
     capsys: pytest.CaptureFixture[str],
     tmp_path: Path,
 ) -> None:
-    """The cached update message should be printed at most once per day."""
+    """The cached update message should be printed at most once every 12 hours."""
     monkeypatch.delenv(FLWR_DISABLE_UPDATE_CHECK, raising=False)
     monkeypatch.setattr(utils, "get_flwr_home", lambda: tmp_path)
     monkeypatch.setattr(
@@ -379,7 +379,7 @@ def test_warn_if_flwr_update_available_suppresses_recent_cached_message(
     capsys: pytest.CaptureFixture[str],
     tmp_path: Path,
 ) -> None:
-    """The cached message should not be shown again within one day."""
+    """The cached message should not be shown again within 12 hours."""
     monkeypatch.delenv(FLWR_DISABLE_UPDATE_CHECK, raising=False)
     monkeypatch.setattr(utils, "get_flwr_home", lambda: tmp_path)
     monkeypatch.setattr(
@@ -397,7 +397,7 @@ def test_warn_if_flwr_update_available_suppresses_recent_cached_message(
             "flwr_version": "1.28.0",
             "update_available": True,
             "message": "A newer Flower version is available: 1.0.0 -> 1.1.0",
-            "last_shown_at": (now - timedelta(hours=12)).isoformat(),
+            "last_shown_at": (now - timedelta(hours=6)).isoformat(),
         },
     )
     monkeypatch.setattr(utils, "flwr_package_name", "flwr-nightly")
