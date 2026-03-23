@@ -350,3 +350,4 @@ class Federation:
     nodes: list[NodeInfo]
     runs: list[Run]
     archived: bool = False
+    simulation: bool = False
