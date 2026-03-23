@@ -27,7 +27,6 @@ from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.logger import log
 from flwr.proto.clientappio_pb2_grpc import ClientAppIoStub
 from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub
-from flwr.proto.simulationio_pb2_grpc import SimulationIoStub
 from flwr.supercore.constant import EXEC_PLUGIN_SECTION
 from flwr.supercore.grpc_health import add_args_health
 from flwr.supercore.superexec.plugin import (
@@ -37,7 +36,7 @@ from flwr.supercore.superexec.plugin import (
     SimulationExecPlugin,
 )
 from flwr.supercore.superexec.run_superexec import run_superexec
-from flwr.supercore.utils import warn_if_flwr_update_available
+from flwr.supercore.update_check import warn_if_flwr_update_available
 from flwr.supercore.version import package_version
 
 try:
@@ -156,7 +155,7 @@ def _get_plugin_and_stub_class(
     mapping: dict[str, tuple[type[ExecPlugin], type[object]]] = {
         ExecPluginType.CLIENT_APP: (ClientAppExecPlugin, ClientAppIoStub),
         ExecPluginType.SERVER_APP: (ServerAppExecPlugin, ServerAppIoStub),
-        ExecPluginType.SIMULATION: (SimulationExecPlugin, SimulationIoStub),
+        ExecPluginType.SIMULATION: (SimulationExecPlugin, ServerAppIoStub),
     }
     if plugin_type in mapping:
         return mapping[plugin_type]

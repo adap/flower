@@ -25,4 +25,4 @@ class SimulationExecPlugin(BaseExecPlugin):
     """
 
     command = "flwr-simulation"
-    appio_api_address_arg = "--simulationio-api-address"
+    appio_api_address_arg = "--serverappio-api-address"

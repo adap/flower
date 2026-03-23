@@ -10,18 +10,12 @@ from flwr.common.constant import (
     HEARTBEAT_DEFAULT_INTERVAL,
     HEARTBEAT_PATIENCE,
     SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
-    SIMULATIONIO_API_DEFAULT_CLIENT_ADDRESS,
     Status,
     SubStatus,
 )
 
 use_sim = sys.argv[1] == "simulation" if len(sys.argv) > 1 else False
 plugin_type_arg = "simulation" if use_sim else "serverapp"
-address_arg = (
-    SIMULATIONIO_API_DEFAULT_CLIENT_ADDRESS
-    if use_sim
-    else SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS
-)
 app_cmd = "flwr-simulation" if use_sim else "flwr-serverapp"
 
 
@@ -39,7 +33,7 @@ def run_superlink() -> subprocess.Popen:
 def run_superexec() -> subprocess.Popen:
     """Run the SuperExec."""
     cmd = ["flower-superexec", "--insecure"]
-    cmd += ["--appio-api-address", address_arg]
+    cmd += ["--appio-api-address", SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS]
     cmd += ["--plugin-type", plugin_type_arg]
     return subprocess.Popen(cmd)
 
@@ -120,9 +114,6 @@ def main() -> None:
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
     )
-
-    # Determine if the test is running in simulation mode
-    print(f"Running in {'simulation' if use_sim else 'deployment'} mode.")
 
     # Start the SuperLink
     print("Starting SuperLink...")

@@ -35,6 +35,11 @@ from flwr.common.constant import (
     FAB_INCLUDE_PATTERNS,
     FAB_MAX_SIZE,
 )
+from flwr.supercore.fab_format_version import (
+    FabFormatMetadata,
+    normalize_and_validate_fab_format,
+    validate_fab_files_for_format,
+)
 
 from .config_utils import load_and_validate
 from .utils import build_pathspec, is_valid_project_name, load_gitignore_patterns
@@ -177,11 +182,14 @@ def build_fab_from_disk(app: Path) -> bytes:
     }
 
     # Build FAB from the files dict
-    return build_fab_from_files(files_dict)
+    fab_bytes, _ = build_fab_from_files(files_dict)
+    return fab_bytes
 
 
-def build_fab_from_files(files: dict[str, bytes | Path]) -> bytes:
-    r"""Build a FAB from in-memory files and return the FAB as bytes.
+def build_fab_from_files(
+    files: dict[str, bytes | Path],
+) -> tuple[bytes, FabFormatMetadata]:
+    r"""Build a FAB from in-memory files and return the FAB plus metadata.
 
     This is the core FAB building function that works with in-memory data.
     It accepts either bytes or Path objects as file contents, applies filtering
@@ -197,8 +205,10 @@ def build_fab_from_files(files: dict[str, bytes | Path]) -> bytes:
 
     Returns
     -------
-    bytes
-        The FAB as bytes.
+    tuple[bytes, FabFormatMetadata]
+        The FAB as bytes together with normalized compatibility metadata.
+        The metadata is consumed by platform-api during publish to persist
+        compatibility fields derived from this shared build validation logic.
 
     Examples
     --------
@@ -211,7 +221,7 @@ def build_fab_from_files(files: dict[str, bytes | Path]) -> bytes:
             "src/server.py": b"print('hello')",
             "README.md": b"# My App\n",
         }
-        fab_bytes = build_fab_from_files(files)
+        fab_bytes, metadata = build_fab_from_files(files)
     """
 
     def _to_bytes(content: bytes | Path) -> bytes:
@@ -248,6 +258,7 @@ def build_fab_from_files(files: dict[str, bytes | Path]) -> bytes:
         raise ValueError(f"{FAB_CONFIG_FILE} not found in files")
     pyproject_content = _to_bytes(files[FAB_CONFIG_FILE])
     config = tomli.loads(pyproject_content.decode("utf-8"))
+    metadata = normalize_and_validate_fab_format(config)
 
     # Remove the 'federations' field if it exists
     if (
@@ -273,6 +284,7 @@ def build_fab_from_files(files: dict[str, bytes | Path]) -> bytes:
         if include_spec.match_file(path) and not exclude_spec.match_file(path)
     ]
     filtered_paths.sort()  # Sort for deterministic output
+    validate_fab_files_for_format(config, filtered_paths)
 
     # Build FAB with CONTENT manifest
     fab_buffer = BytesIO()
@@ -299,7 +311,8 @@ def build_fab_from_files(files: dict[str, bytes | Path]) -> bytes:
             "via your `.gitignore` file or excluding them from the build."
         )
 
-    return fab_bytes
+    # Returned metadata is consumed by platform during publish.
+    return fab_bytes, metadata
 
 
 def get_fab_include_pathspec() -> pathspec.PathSpec:

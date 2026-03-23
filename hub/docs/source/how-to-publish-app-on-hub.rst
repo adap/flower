@@ -132,8 +132,8 @@ Rules:
    The :code:`name` **cannot be changed** after the first publication, so make sure it is final before releasing your app.
 
 .. note::
-   Flower Hub currently supports the following file formats: :code:`.py`, :code:`.toml`, and :code:`.md`.  
-   As a special case for licensing, a root-level :code:`LICENSE` file is also supported.
+   Flower Hub currently supports the following *content* file formats: :code:`.py`, :code:`.toml`, :code:`.md`, :code:`.yaml`, :code:`.yml`, :code:`.json`, and :code:`.jsonl`.
+   In addition, certain non-content files are supported, including root-level license files :code:`LICENSE` and :code:`LICENSE.md`, as well as common dotfiles such as :code:`.gitignore` and :code:`.editorconfig`.
    Before publishing, ensure that all required files for your app (e.g., source code, metadata, README) are included in the app directory.
 
    Support for additional file formats is planned for future releases.
