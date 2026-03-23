@@ -27,6 +27,7 @@ import tomli
 import tomli_w
 import typer
 
+from flwr.common.config import check_pattern_list_value
 from flwr.common.constant import (
     FAB_CONFIG_FILE,
     FAB_DATE,
@@ -316,17 +317,9 @@ def get_user_fab_patterns(
         value = app_conf.get(key, [])
         if value is None:
             return []
-        if not isinstance(value, list):
-            raise ValueError(
-                f'Property "{key}" in [tool.flwr.app] must be a list of strings.'
-            )
-        if any(
-            not isinstance(pattern, str) or pattern.strip() == "" for pattern in value
-        ):
-            raise ValueError(
-                f'Property "{key}" in [tool.flwr.app] must be a list of non-empty '
-                "strings."
-            )
+        error = check_pattern_list_value(value, key)
+        if error:
+            raise ValueError(error)
         return value
 
     has_include_key = FAB_INCLUDE_KEY in app_conf
