@@ -305,6 +305,7 @@ def run_superlink() -> None:
     state_factory = LinkStateFactory(
         args.database, federation_manager, objectstore_factory
     )
+    state_factory.state()  # Force initialization before starting servers
 
     # Initialize FfsFactory
     ffs_factory = FfsFactory(args.storage_dir)
