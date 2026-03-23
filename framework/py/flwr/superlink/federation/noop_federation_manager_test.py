@@ -112,6 +112,7 @@ def test_get_details_with_valid_federation() -> None:
     assert len(result.runs) == 2
     assert mock_run_1 in result.runs and mock_run_2 in result.runs
     assert result.archived is False
+    assert result.simulation is False
 
 
 def test_get_details_with_invalid_federation() -> None:
@@ -151,6 +152,7 @@ def test_get_details_with_no_runs() -> None:
     assert len(result.nodes) == 0
     assert len(result.runs) == 0
     assert result.archived is False
+    assert result.simulation is False
 
 
 def test_exists() -> None:
@@ -223,3 +225,19 @@ def test_get_federations() -> None:
     assert result2[0].name == NOOP_FEDERATION
     assert result2[0].description == NOOP_FEDERATION_DESCRIPTION
     assert result2[0].archived is False
+    assert result2[0].simulation is False
+
+
+def test_simulation_runtime_flag_is_reflected() -> None:
+    """Test simulation flag is reflected by NoOpFederationManager responses."""
+    manager = NoOpFederationManager(simulation=True)
+    mock_linkstate = Mock()
+    mock_linkstate.get_run_info.return_value = []
+    mock_linkstate.get_node_info.return_value = []
+    manager.linkstate = mock_linkstate
+
+    federations = manager.get_federations(NOOP_FLWR_AID)
+    details = manager.get_details(NOOP_FEDERATION)
+
+    assert federations[0].simulation is True
+    assert details.simulation is True

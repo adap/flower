@@ -62,6 +62,7 @@ from flwr.supercore.address import parse_address, resolve_bind_address
 from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME
 from flwr.supercore.grpc_health import add_args_health, run_health_server_grpc_no_tls
 from flwr.supercore.object_store import ObjectStoreFactory
+from flwr.supercore.update_check import warn_if_flwr_update_available
 from flwr.supercore.utils import get_flwr_home
 from flwr.supercore.version import package_version
 from flwr.superlink.artifact_provider import ArtifactProvider
@@ -143,19 +144,21 @@ def get_control_authz_plugins() -> dict[str, type[ControlAuthzPlugin]]:
     return ee_dict | {AuthzType.NOOP: NoOpControlAuthzPlugin}
 
 
-def get_federation_manager() -> FederationManager:
+def get_federation_manager(is_simulation: bool = False) -> FederationManager:
     """Return the FederationManager."""
     try:
         federation_manager: FederationManager = get_ee_federation_manager()
         return federation_manager
     except NotImplementedError:
-        return NoOpFederationManager()
+        return NoOpFederationManager(simulation=is_simulation)
 
 
 # pylint: disable=too-many-branches, too-many-locals, too-many-statements
 def run_superlink() -> None:
     """Run Flower SuperLink (ServerAppIo API and Fleet API)."""
     args = _parse_args_run_superlink().parse_args()
+
+    warn_if_flwr_update_available(process_name="flower-superlink")
 
     if args.log_file:
         configure_superlink_log_file(
@@ -292,7 +295,7 @@ def run_superlink() -> None:
         )
 
     # Load Federation Manager
-    federation_manager = get_federation_manager()
+    federation_manager = get_federation_manager(is_simulation=args.simulation)
 
     # Initialize ObjectStoreFactory
     objectstore_factory = ObjectStoreFactory(args.database)
@@ -301,6 +304,7 @@ def run_superlink() -> None:
     state_factory = LinkStateFactory(
         args.database, federation_manager, objectstore_factory
     )
+    state_factory.state()  # Force initialization before starting servers
 
     if "--storage-dir" in explicit_args:
         log(
@@ -569,7 +573,9 @@ def _run_fleet_api_grpc_rere(  # pylint: disable=R0913, R0917
     )
 
     log(
-        INFO, "Flower Deployment Runtime: Starting Fleet API (gRPC-rere) on %s", address
+        INFO,
+        "Flower Deployment Runtime: Starting Fleet API (gRPC-rere) on %s",
+        fleet_grpc_server.bound_address,
     )
     fleet_grpc_server.start()
 
@@ -601,7 +607,7 @@ def _run_fleet_api_grpc_adapter(
     log(
         INFO,
         "Flower Deployment Runtime: Starting Fleet API (GrpcAdapter) on %s",
-        address,
+        fleet_grpc_server.bound_address,
     )
     fleet_grpc_server.start()
 
