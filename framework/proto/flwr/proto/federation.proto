@@ -36,6 +36,7 @@ message Federation {
   string description = 4;      // Added in v1.26.0
   repeated Member members = 5; // Added in v1.27.0
   bool archived = 6;           // Added in v1.27.0
+  bool simulation = 7;         // Added in v1.28.0
 }
 
 message Invitation {

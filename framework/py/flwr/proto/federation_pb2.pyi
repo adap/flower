@@ -76,11 +76,14 @@ class Federation(google.protobuf.message.Message):
     DESCRIPTION_FIELD_NUMBER: builtins.int
     MEMBERS_FIELD_NUMBER: builtins.int
     ARCHIVED_FIELD_NUMBER: builtins.int
+    SIMULATION_FIELD_NUMBER: builtins.int
     name: builtins.str
     description: builtins.str
     """Added in v1.26.0"""
     archived: builtins.bool
     """Added in v1.27.0"""
+    simulation: builtins.bool
+    """Added in v1.28.0"""
     @property
     def nodes(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[flwr.proto.node_pb2.NodeInfo]: ...
     @property
@@ -98,8 +101,9 @@ class Federation(google.protobuf.message.Message):
         description: builtins.str = ...,
         members: collections.abc.Iterable[global___Member] | None = ...,
         archived: builtins.bool = ...,
+        simulation: builtins.bool = ...,
     ) -> None: ...
-    def ClearField(self, field_name: typing.Literal["archived", b"archived", "description", b"description", "members", b"members", "name", b"name", "nodes", b"nodes", "runs", b"runs"]) -> None: ...
+    def ClearField(self, field_name: typing.Literal["archived", b"archived", "description", b"description", "members", b"members", "name", b"name", "nodes", b"nodes", "runs", b"runs", "simulation", b"simulation"]) -> None: ...
 
 global___Federation = Federation
 
