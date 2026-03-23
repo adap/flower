@@ -62,6 +62,7 @@ def run_serverappio_api_grpc(
         interceptors=[auth_interceptor],
     )
 
+    address = serverappio_grpc_server.bound_address
     log(INFO, "Flower Deployment Runtime: Starting ServerAppIo API on %s", address)
     serverappio_grpc_server.start()
 

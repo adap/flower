@@ -643,6 +643,7 @@ def run_clientappio_api_grpc(
         certificates=certificates,
         interceptors=[auth_interceptor],
     )
+    address = clientappio_grpc_server.bound_address
     log(INFO, "Flower Deployment Runtime: Starting ClientAppIo API on %s", address)
     clientappio_grpc_server.start()
     return clientappio_grpc_server
