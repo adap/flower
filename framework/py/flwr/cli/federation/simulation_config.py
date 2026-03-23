@@ -129,6 +129,7 @@ def simulation_config(  # pylint: disable=R0913,R0917,W0613
                 num_supernodes=num_supernodes,
                 client_resources_num_cpus=client_resources_num_cpus,
                 client_resources_num_gpus=client_resources_num_gpus,
+                backend_name=backend_name,
                 verbose=verbose,
                 init_args_num_cpus=init_args_num_cpus,
                 init_args_num_gpus=init_args_num_gpus,
@@ -147,7 +148,7 @@ def _configure_federation_for_simulation(
     stub: ControlStub,
     request: ConfigureFederationForSimulationRequest,
 ) -> None:
-    """Send a list invitations request."""
+    """Send a request to configure a federation for simulation."""
     with flwr_cli_grpc_exc_handler(handle_invite_grpc_error):
         _: ConfigureFederationForSimulationResponse = (
             stub.ConfigureFederationForSimulation(request)
