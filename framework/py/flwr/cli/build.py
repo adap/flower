@@ -304,28 +304,6 @@ def build_fab_from_files(
     return fab_bytes, metadata
 
 
-def get_fab_include_pathspec() -> pathspec.PathSpec:
-    """Get the PathSpec for files to include in a FAB.
-
-    Returns
-    -------
-    PathSpec
-        PathSpec object with default include patterns for FAB files.
-    """
-    return build_pathspec(FAB_INCLUDE_PATTERNS)
-
-
-def get_fab_exclude_pathspec() -> pathspec.PathSpec:
-    """Get the PathSpec for files to exclude from a FAB.
-
-    Returns
-    -------
-    PathSpec
-        PathSpec object with default exclude patterns.
-    """
-    return build_pathspec(FAB_EXCLUDE_PATTERNS)
-
-
 def get_user_fab_patterns(
     config: dict[str, Any],
 ) -> tuple[list[str], bool, list[str], bool]:
@@ -367,8 +345,8 @@ def get_filtered_fab_paths(
 ) -> list[str]:
     """Compute final FAB file list using user patterns and non-overridable defaults."""
     normalized_paths = [path.replace("\\", "/") for path in files.keys()]
-    built_in_include_spec = get_fab_include_pathspec()
-    built_in_exclude_spec = get_fab_exclude_pathspec()
+    built_in_include_spec = build_pathspec(FAB_INCLUDE_PATTERNS)
+    built_in_exclude_spec = build_pathspec(FAB_EXCLUDE_PATTERNS)
 
     (
         user_include_patterns,
