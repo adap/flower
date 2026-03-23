@@ -25,6 +25,7 @@ from sqlalchemy import (
     PrimaryKeyConstraint,
     String,
     Table,
+    Text,
 )
 
 
@@ -85,6 +86,17 @@ def create_objectstore_metadata() -> MetaData:
             nullable=False,
         ),
         PrimaryKeyConstraint("run_id", "object_id"),
+    )
+
+    # --------------------------------------------------------------------------
+    #  Table: fab_objects
+    # --------------------------------------------------------------------------
+    Table(
+        "fab_objects",
+        metadata,
+        Column("fab_hash", String, primary_key=True, nullable=False),
+        Column("content", LargeBinary, nullable=False),
+        Column("verifications_json", Text, nullable=False),
     )
 
     return metadata

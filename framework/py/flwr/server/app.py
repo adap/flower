@@ -60,7 +60,7 @@ from flwr.proto.grpcadapter_pb2_grpc import add_GrpcAdapterServicer_to_server
 from flwr.server.fleet_event_log_interceptor import FleetEventLogInterceptor
 from flwr.supercore.address import parse_address, resolve_bind_address
 from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME
-from flwr.supercore.ffs import FfsFactory
+from flwr.supercore.ffs import FfsFactory, ObjectStoreFfsFactory
 from flwr.supercore.grpc_health import add_args_health, run_health_server_grpc_no_tls
 from flwr.supercore.object_store import ObjectStoreFactory
 from flwr.supercore.utils import get_flwr_home
@@ -303,8 +303,15 @@ def run_superlink() -> None:
         args.database, federation_manager, objectstore_factory
     )
 
+    if str(args.storage_dir) != str(BASE_DIR):
+        log(
+            WARN,
+            "The `--storage-dir` flag is ignored for SuperLink FAB storage. "
+            "SuperLink now persists FABs in the ObjectStore-backed backend.",
+        )
+
     # Initialize FfsFactory
-    ffs_factory = FfsFactory(args.storage_dir)
+    ffs_factory = ObjectStoreFfsFactory(args.database)
 
     # Start Control API
     is_simulation = args.simulation
@@ -725,7 +732,8 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
     )
     parser.add_argument(
         "--storage-dir",
-        help="The base directory to store the objects for the Flower File System.",
+        help="Deprecated for SuperLink FAB storage (ignored, retained for "
+        "compatibility).",
         default=BASE_DIR,
     )
     parser.add_argument(
