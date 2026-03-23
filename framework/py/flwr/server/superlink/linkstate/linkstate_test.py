@@ -1961,7 +1961,9 @@ class SqlFileBasedTest(StateTest, unittest.TestCase):
         return count
 
     @staticmethod
-    def _create_shared_sql_states(database_path: str) -> tuple[SqlLinkState, SqlLinkState]:
+    def _create_shared_sql_states(
+        database_path: str,
+    ) -> tuple[SqlLinkState, SqlLinkState]:
         """Create two SqlLinkState replicas sharing the same SQLite file."""
         state_0 = SqlLinkState(
             database_path=database_path,
@@ -2010,8 +2012,9 @@ class SqlFileBasedTest(StateTest, unittest.TestCase):
             thread.join(timeout=timeout)
         alive_threads = [thread for thread in threads if thread.is_alive()]
         if alive_threads:
+            alive_count = len(alive_threads)
             raise AssertionError(
-                f"Concurrent test timed out; {len(alive_threads)} thread(s) still alive "
+                f"Concurrent test timed out; {alive_count} thread(s) still alive "
                 f"after {timeout} seconds."
             )
 
