@@ -14,6 +14,8 @@
 # ==============================================================================
 """Control API servicer."""
 
+# pylint: disable=too-many-lines
+
 
 import hashlib
 import json

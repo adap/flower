@@ -31,7 +31,7 @@ from flwr.proto.federation_pb2 import SimulationConfig  # pylint: disable=E0611
 from .error_handlers import handle_invite_grpc_error
 
 
-def simulation_config(
+def simulation_config(  # pylint: disable=R0913,R0917,W0613
     federation: Annotated[
         str,
         typer.Argument(help="Name of the federation."),

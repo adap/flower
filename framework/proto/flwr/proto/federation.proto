@@ -49,12 +49,12 @@ message Invitation {
 }
 
 message SimulationConfig {
-  uint64 num_supernodes = 1;
-  uint64 client_resources_num_cpus = 2;
+  uint32 num_supernodes = 1;
+  uint32 client_resources_num_cpus = 2;
   float client_resources_num_gpus = 3;
   bool verbose = 4;
   string backend_name = 5;
-  optional uint64 init_args_num_cpus = 6;
+  optional uint32 init_args_num_cpus = 6;
   optional float init_args_num_gpus = 7;
   optional string init_args_logging_level = 8;
   optional bool init_args_log_to_driver = 9;
