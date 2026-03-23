@@ -442,7 +442,7 @@ def test_validate_fab_pattern_field(key: str, value: Any, valid: bool) -> None:
     config = {
         "project": {
             "name": "fedgpt",
-            "version": "1.0.0",
+            "version": "1.0.1",
             "description": "",
             "license": "",
             "authors": [],
