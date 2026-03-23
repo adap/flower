@@ -297,6 +297,18 @@ def _validate_run_config(config_dict: dict[str, Any], errors: list[str]) -> None
             )
 
 
+def check_pattern_list_value(value: Any, key: str) -> str | None:
+    """Validate a pattern list value and return an error message or ``None``."""
+    if not isinstance(value, list):
+        return f'Property "{key}" in [tool.flwr.app] must be a list of strings.'
+    if any(not isinstance(pattern, str) or pattern.strip() == "" for pattern in value):
+        return (
+            f'Property "{key}" in [tool.flwr.app] must be a list of non-empty '
+            "strings."
+        )
+    return None
+
+
 def _validate_pattern_list(
     app_config: dict[str, Any], key: str, errors: list[str]
 ) -> None:
@@ -305,16 +317,9 @@ def _validate_pattern_list(
     if key not in app_config:
         return
 
-    value = app_config[key]
-    if not isinstance(value, list):
-        errors.append(f'Property "{key}" in [tool.flwr.app] must be a list of strings.')
-        return
-
-    if any(not isinstance(pattern, str) or pattern.strip() == "" for pattern in value):
-        errors.append(
-            f'Property "{key}" in [tool.flwr.app] must be a list of non-empty '
-            "strings."
-        )
+    error = check_pattern_list_value(app_config[key], key)
+    if error:
+        errors.append(error)
 
 
 # pylint: disable=too-many-branches
