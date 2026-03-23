@@ -38,6 +38,11 @@ from flwr.common.constant import (
     FAB_INCLUDE_PATTERNS,
     FAB_MAX_SIZE,
 )
+from flwr.supercore.constant import (
+    APP_PUBLISH_EXCLUDE_PATTERNS,
+    APP_PUBLISH_INCLUDE_PATTERNS,
+    MAX_DIR_DEPTH,
+)
 from flwr.supercore.fab_format_version import (
     FabFormatMetadata,
     normalize_and_validate_fab_format,
@@ -45,7 +50,7 @@ from flwr.supercore.fab_format_version import (
 )
 
 from .config_utils import load_and_validate
-from .utils import build_pathspec, is_valid_project_name
+from .utils import build_pathspec, collect_project_files, is_valid_project_name
 
 
 def write_to_zip(
@@ -174,15 +179,27 @@ def build_fab_from_disk(app: Path) -> bytes:
     """
     app = app.resolve()
 
-    # Collect all files recursively (including pyproject.toml and .gitignore)
-    all_files = [f for f in app.rglob("*") if f.is_file()]
+    # Collect files using publish-style rules (Layer 1):
+    # .gitignore exclusion, broad file-type include, depth limit.
+    # build_fab_from_files applies a second layer of FAB-specific filtering.
+    try:
+        file_paths = collect_project_files(
+            app,
+            include_patterns=APP_PUBLISH_INCLUDE_PATTERNS,
+            exclude_patterns=APP_PUBLISH_EXCLUDE_PATTERNS,
+            max_depth=MAX_DIR_DEPTH,
+        )
+    except ValueError as err:
+        raise click.ClickException(str(err)) from err
 
-    # Create dict mapping relative paths to Path objects
+    # Create dict mapping relative POSIX paths to Path objects
     files_dict: dict[str, bytes | Path] = {
-        # Ensure consistent path separators across platforms
-        str(file_path.relative_to(app)).replace("\\", "/"): file_path
-        for file_path in all_files
+        file_path.relative_to(app).as_posix(): file_path for file_path in file_paths
     }
+
+    # Always include pyproject.toml — required by build_fab_from_files
+    pyproject = app / FAB_CONFIG_FILE
+    files_dict.setdefault(FAB_CONFIG_FILE, pyproject)
 
     # Build FAB from the files dict
     fab_bytes, _ = build_fab_from_files(files_dict)
