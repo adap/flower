@@ -573,7 +573,9 @@ def _run_fleet_api_grpc_rere(  # pylint: disable=R0913, R0917
     )
 
     log(
-        INFO, "Flower Deployment Runtime: Starting Fleet API (gRPC-rere) on %s", address
+        INFO,
+        "Flower Deployment Runtime: Starting Fleet API (gRPC-rere) on %s",
+        fleet_grpc_server.bound_address,
     )
     fleet_grpc_server.start()
 
@@ -607,7 +609,7 @@ def _run_fleet_api_grpc_adapter(
     log(
         INFO,
         "Flower Deployment Runtime: Starting Fleet API (GrpcAdapter) on %s",
-        address,
+        fleet_grpc_server.bound_address,
     )
     fleet_grpc_server.start()
 
