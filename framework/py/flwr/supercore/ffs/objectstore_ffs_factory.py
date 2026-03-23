@@ -35,8 +35,8 @@ class ObjectStoreFfsFactory(FfsFactory):
     """
 
     def __init__(self, database: str = FLWR_IN_MEMORY_DB_NAME) -> None:
+        super().__init__(database)
         self.database = database
-        self.ffs_instance: Ffs | None = None
 
     def ffs(self) -> Ffs:
         """Return an ObjectStoreFfs instance and create it, if necessary."""

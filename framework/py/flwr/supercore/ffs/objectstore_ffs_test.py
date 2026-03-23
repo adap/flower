@@ -16,6 +16,7 @@
 
 
 import os
+import sqlite3
 import tempfile
 
 import pytest
@@ -95,12 +96,12 @@ def test_get_returns_none_for_corrupted_sql_verifications() -> None:
         content = b"fab-content"
         key = ffs.put(content, {"issuer": "ok"})
 
-        sql_impl = ffs._impl  # type: ignore[attr-defined]
-        sql_impl.query(
-            "UPDATE fab_objects SET verifications_json = :verifications_json "
-            "WHERE fab_hash = :fab_hash",
-            {"verifications_json": "not-json", "fab_hash": key},
-        )
+        with sqlite3.connect(db_path) as conn:
+            conn.execute(
+                "UPDATE fab_objects SET verifications_json = ? WHERE fab_hash = ?",
+                ("not-json", key),
+            )
+            conn.commit()
 
         assert ffs.get(key) is None
 
@@ -113,11 +114,12 @@ def test_get_returns_none_for_corrupted_sql_content_hash() -> None:
 
         key = ffs.put(b"fab-content", {"issuer": "ok"})
 
-        sql_impl = ffs._impl  # type: ignore[attr-defined]
-        sql_impl.query(
-            "UPDATE fab_objects SET content = :content WHERE fab_hash = :fab_hash",
-            {"content": b"different-content", "fab_hash": key},
-        )
+        with sqlite3.connect(db_path) as conn:
+            conn.execute(
+                "UPDATE fab_objects SET content = ? WHERE fab_hash = ?",
+                (b"different-content", key),
+            )
+            conn.commit()
 
         assert ffs.get(key) is None
 
