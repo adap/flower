@@ -257,6 +257,7 @@ class LinkState(CoreState):  # pylint: disable=R0904
         federation: str,
         federation_options: ConfigRecord,
         flwr_aid: str | None,
+        run_type: str,
     ) -> int:
         """Create a new run.
 
@@ -277,6 +278,8 @@ class LinkState(CoreState):  # pylint: disable=R0904
             the simulation runtime.
         flwr_aid : Optional[str]
             Flower Account ID of the creator.
+        run_type : str
+            The type of run being created.
 
         Returns
         -------
@@ -365,17 +368,6 @@ class LinkState(CoreState):  # pylint: disable=R0904
         -------
         bool
             True if the status update is successful; False otherwise.
-        """
-
-    @abc.abstractmethod
-    def get_pending_run_id(self) -> int | None:
-        """Get the `run_id` of a run with `Status.PENDING` status.
-
-        Returns
-        -------
-        Optional[int]
-            The `run_id` of a `Run` that is pending to be started; None if
-            there is no Run pending.
         """
 
     @abc.abstractmethod

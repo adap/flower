@@ -101,13 +101,15 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     StopRunResponse,
     StreamLogsRequest,
     StreamLogsResponse,
+    StreamRunEventsRequest,
+    StreamRunEventsResponse,
     UnregisterNodeRequest,
     UnregisterNodeResponse,
 )
 from flwr.proto.federation_pb2 import Federation  # pylint: disable=E0611
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
-from flwr.supercore.constant import NOOP_FEDERATION, PLATFORM_API_URL
+from flwr.supercore.constant import NOOP_FEDERATION, PLATFORM_API_URL, RunType
 from flwr.supercore.error import rpc_error_translator
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStore, ObjectStoreFactory
@@ -128,7 +130,6 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         linkstate_factory: LinkStateFactory,
         ffs_factory: FfsFactory,
         objectstore_factory: ObjectStoreFactory,
-        is_simulation: bool,
         authn_plugin: ControlAuthnPlugin,
         artifact_provider: ArtifactProvider | None = None,
         fleet_api_type: str | None = None,
@@ -136,7 +137,6 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         self.linkstate_factory = linkstate_factory
         self.ffs_factory = ffs_factory
         self.objectstore_factory = objectstore_factory
-        self.is_simulation = is_simulation
         self.authn_plugin = authn_plugin
         self.artifact_provider = artifact_provider
         self.fleet_api_type = fleet_api_type
@@ -168,18 +168,13 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         flwr_aid = _get_flwr_aid(context)
         override_config = user_config_from_proto(request.override_config)
         federation_options = config_record_from_proto(request.federation_options)
+        run_type = RunType.SIMULATION if federation_options else RunType.SERVER_APP
 
         try:
             # Validate user config overrides matches keys in run config in FAB
             fab_config = get_fab_config(fab_file)
             run_config = flatten_dict(fab_config["tool"]["flwr"]["app"].get("config"))
             _ = fuse_dicts(run_config, override_config)
-
-            # Check that num-supernodes is set
-            if self.is_simulation and "num-supernodes" not in federation_options:
-                raise ValueError(
-                    "Federation options doesn't contain key `num-supernodes`."
-                )
 
             # Check (1) federation exists and (2) the flwr_aid is a member
             federation = request.federation or NOOP_FEDERATION
@@ -217,6 +212,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 federation,
                 federation_options,
                 flwr_aid,
+                run_type,
             )
 
             # Initialize node config
@@ -244,7 +240,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             log(ERROR, "Could not start run: %s", str(e))
             context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(e))
 
-        log(INFO, "Created run %s", str(run_id))
+        log(INFO, "Created %s run %s", run_type, str(run_id))
         return StartRunResponse(run_id=run_id)
 
     def StreamLogs(  # pylint: disable=C0103
@@ -531,14 +527,6 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         """List all SuperNodes."""
         log(INFO, "ControlServicer.ListNodes")
 
-        if self.is_simulation:
-            log(ERROR, "ListNodes is not available in simulation mode.")
-            context.abort(
-                grpc.StatusCode.UNIMPLEMENTED,
-                "ListNodes is not available in simulation mode.",
-            )
-            raise grpc.RpcError()  # This line is unreachable
-
         nodes_info: Sequence[NodeInfo] = []
         # Init link state
         state = self.linkstate_factory.state()
@@ -563,7 +551,10 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         return ListFederationsResponse(
             federations=[
                 Federation(
-                    name=fed.name, description=fed.description, archived=fed.archived
+                    name=fed.name,
+                    description=fed.description,
+                    archived=fed.archived,
+                    simulation=fed.simulation,
                 )
                 for fed in federations
             ]
@@ -599,6 +590,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             nodes=details.nodes,
             runs=[run_to_proto(run) for run in details.runs],
             archived=details.archived,
+            simulation=details.simulation,
         )
         return ShowFederationResponse(
             federation=federation_proto, now=now().isoformat()
@@ -630,6 +622,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 name=federation_name,
                 description=request.description,
                 flwr_aid=cast(str, account.flwr_aid),
+                simulation=request.simulation,
             )
 
         return CreateFederationResponse(
@@ -637,6 +630,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 name=federation.name,
                 description=federation.description,
                 members=federation.members,
+                simulation=federation.simulation,
             )
         )
 
@@ -828,6 +822,16 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 invitee_account_name=request.invitee_account_name,
             )
         return RevokeInvitationResponse()
+
+    # ***************
+    # Unused for now
+    # ***************
+    def StreamRunEvents(
+        self, request: StreamRunEventsRequest, context: grpc.ServicerContext
+    ) -> Generator[StreamRunEventsResponse, Any, None]:
+        """Start run event stream."""
+        _ = request, context
+        raise NotImplementedError("StreamRunEvents is not implemented yet.")
 
 
 def _validate_federation_and_node_in_request(

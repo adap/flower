@@ -41,7 +41,6 @@ from flwr.common.constant import (
     ISOLATION_MODE_PROCESS,
     ISOLATION_MODE_SUBPROCESS,
     SERVERAPPIO_API_DEFAULT_SERVER_ADDRESS,
-    SIMULATIONIO_API_DEFAULT_SERVER_ADDRESS,
     TRANSPORT_TYPE_GRPC_ADAPTER,
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
@@ -64,6 +63,7 @@ from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.grpc_health import add_args_health, run_health_server_grpc_no_tls
 from flwr.supercore.object_store import ObjectStoreFactory
+from flwr.supercore.update_check import warn_if_flwr_update_available
 from flwr.supercore.utils import get_flwr_home
 from flwr.supercore.version import package_version
 from flwr.superlink.artifact_provider import ArtifactProvider
@@ -83,7 +83,6 @@ from .superlink.fleet.grpc_rere.node_auth_server_interceptor import (
 )
 from .superlink.linkstate import LinkStateFactory
 from .superlink.serverappio.serverappio_grpc import run_serverappio_api_grpc
-from .superlink.simulation.simulationio_grpc import run_simulationio_api_grpc
 
 BASE_DIR = get_flwr_home() / "superlink" / "ffs"
 P = TypeVar("P", ControlAuthnPlugin, ControlAuthzPlugin)
@@ -146,19 +145,21 @@ def get_control_authz_plugins() -> dict[str, type[ControlAuthzPlugin]]:
     return ee_dict | {AuthzType.NOOP: NoOpControlAuthzPlugin}
 
 
-def get_federation_manager() -> FederationManager:
+def get_federation_manager(is_simulation: bool = False) -> FederationManager:
     """Return the FederationManager."""
     try:
         federation_manager: FederationManager = get_ee_federation_manager()
         return federation_manager
     except NotImplementedError:
-        return NoOpFederationManager()
+        return NoOpFederationManager(simulation=is_simulation)
 
 
 # pylint: disable=too-many-branches, too-many-locals, too-many-statements
 def run_superlink() -> None:
     """Run Flower SuperLink (ServerAppIo API and Fleet API)."""
     args = _parse_args_run_superlink().parse_args()
+
+    warn_if_flwr_update_available(process_name="flower-superlink")
 
     if args.log_file:
         configure_superlink_log_file(
@@ -177,7 +178,7 @@ def run_superlink() -> None:
             ExitCode.SUPERLINK_INVALID_ARGS,
             "The arguments `--executor`, `--executor-dir`, and `--executor-config` are "
             "deprecated and will be removed in a future release. To run SuperLink with "
-            "the SimulationIo API, please use `--simulation`.",
+            "the simulation runtime, please use `--simulation`.",
         )
 
     # Detect if both Control API and Exec API addresses were set explicitly
@@ -211,7 +212,6 @@ def run_superlink() -> None:
     # Parse IP addresses
     serverappio_address, _, _ = _format_address(args.serverappio_api_address)
     control_address, _, _ = _format_address(args.control_api_address)
-    simulationio_address, _, _ = _format_address(args.simulationio_api_address)
     health_server_address = None
     if args.health_server_address is not None:
         health_server_address, _, _ = _format_address(args.health_server_address)
@@ -271,7 +271,7 @@ def run_superlink() -> None:
         if args.simulation:
             log(
                 WARN,
-                "SuperNode authentication is not applicable with the simulation, "
+                "SuperNode authentication is not applicable with the simulation "
                 "runtime as no SuperNodes can connect to this SuperLink. "
                 "Proceeding...",
             )
@@ -296,7 +296,7 @@ def run_superlink() -> None:
         )
 
     # Load Federation Manager
-    federation_manager = get_federation_manager()
+    federation_manager = get_federation_manager(is_simulation=args.simulation)
 
     # Initialize ObjectStoreFactory
     objectstore_factory = ObjectStoreFactory(args.database)
@@ -305,6 +305,7 @@ def run_superlink() -> None:
     state_factory = LinkStateFactory(
         args.database, federation_manager, objectstore_factory
     )
+    state_factory.state()  # Force initialization before starting servers
 
     # Initialize FfsFactory
     ffs_factory = FfsFactory(args.storage_dir)
@@ -317,7 +318,6 @@ def run_superlink() -> None:
         ffs_factory=ffs_factory,
         objectstore_factory=objectstore_factory,
         certificates=certificates,
-        is_simulation=is_simulation,
         authn_plugin=authn_plugin,
         authz_plugin=authz_plugin,
         event_log_plugin=event_log_plugin,
@@ -327,27 +327,18 @@ def run_superlink() -> None:
     grpc_servers = [control_server]
     bckg_threads: list[threading.Thread] = []
 
-    if is_simulation:
-        simulationio_server: grpc.Server = run_simulationio_api_grpc(
-            address=simulationio_address,
-            state_factory=state_factory,
-            ffs_factory=ffs_factory,
-            certificates=None,  # SimulationAppIo API doesn't support SSL yet
-        )
-        grpc_servers.append(simulationio_server)
+    # Start ServerAppIo API for both deployment and simulation runtimes.
+    serverappio_server: grpc.Server = run_serverappio_api_grpc(
+        address=serverappio_address,
+        state_factory=state_factory,
+        ffs_factory=ffs_factory,
+        objectstore_factory=objectstore_factory,
+        certificates=None,  # ServerAppIo API doesn't support SSL yet
+    )
+    grpc_servers.append(serverappio_server)
 
-    else:
-        # Start ServerAppIo API
-        serverappio_server: grpc.Server = run_serverappio_api_grpc(
-            address=serverappio_address,
-            state_factory=state_factory,
-            ffs_factory=ffs_factory,
-            objectstore_factory=objectstore_factory,
-            certificates=None,  # ServerAppIo API doesn't support SSL yet
-        )
-        grpc_servers.append(serverappio_server)
-
-        # Start Fleet API
+    # Start Fleet API
+    if not is_simulation:
         if not args.fleet_api_address:
             if args.fleet_api_type in [
                 TRANSPORT_TYPE_GRPC_RERE,
@@ -426,10 +417,9 @@ def run_superlink() -> None:
         else:
             raise ValueError(f"Unknown fleet_api_type: {args.fleet_api_type}")
 
+    # Launch SuperExec if isolation mode is subprocess
     if args.isolation == ISOLATION_MODE_SUBPROCESS:
-        appio_address = resolve_bind_address(
-            simulationio_address if is_simulation else serverappio_address
-        )
+        appio_address = resolve_bind_address(serverappio_address)
         command = ["flower-superexec", "--insecure"]
         command += ["--appio-api-address", appio_address]
         command += [
@@ -587,7 +577,9 @@ def _run_fleet_api_grpc_rere(  # pylint: disable=R0913, R0917
     )
 
     log(
-        INFO, "Flower Deployment Runtime: Starting Fleet API (gRPC-rere) on %s", address
+        INFO,
+        "Flower Deployment Runtime: Starting Fleet API (gRPC-rere) on %s",
+        fleet_grpc_server.bound_address,
     )
     fleet_grpc_server.start()
 
@@ -621,7 +613,7 @@ def _run_fleet_api_grpc_adapter(
     log(
         INFO,
         "Flower Deployment Runtime: Starting Fleet API (GrpcAdapter) on %s",
-        address,
+        fleet_grpc_server.bound_address,
     )
     fleet_grpc_server.start()
 
@@ -684,7 +676,6 @@ def _parse_args_run_superlink() -> argparse.ArgumentParser:
     _add_args_serverappio_api(parser=parser)
     _add_args_fleet_api(parser=parser)
     _add_args_control_api(parser=parser)
-    _add_args_simulationio_api(parser=parser)
     add_args_health(parser=parser)
 
     return parser
@@ -777,8 +768,11 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
 def _add_args_serverappio_api(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--serverappio-api-address",
+        "--simulationio-api-address",
+        dest="serverappio_api_address",
         default=SERVERAPPIO_API_DEFAULT_SERVER_ADDRESS,
         help="ServerAppIo API (gRPC) server address (IPv4, IPv6, or a domain name). "
+        "`--simulationio-api-address` is accepted as a deprecated alias. "
         f"By default, it is set to {SERVERAPPIO_API_DEFAULT_SERVER_ADDRESS}.",
     )
 
@@ -844,19 +838,9 @@ def _add_args_control_api(parser: argparse.ArgumentParser) -> None:
         help="This argument is deprecated and will be removed in a future release.",
         default=None,
     )
-    parser.add_argument(
+    parser.add_argument(  # To be removed in follow-up PRs
         "--simulation",
         action="store_true",
         default=False,
-        help="Launch the SimulationIo API server in place of "
-        "the ServerAppIo API server.",
-    )
-
-
-def _add_args_simulationio_api(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument(
-        "--simulationio-api-address",
-        default=SIMULATIONIO_API_DEFAULT_SERVER_ADDRESS,
-        help="SimulationIo API (gRPC) server address (IPv4, IPv6, or a domain name)."
-        f"By default, it is set to {SIMULATIONIO_API_DEFAULT_SERVER_ADDRESS}.",
+        help="Enable simulation runtime behavior.",
     )
