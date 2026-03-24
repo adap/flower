@@ -42,7 +42,7 @@ def simulation_config(  # pylint: disable=R0913,R0917,W0613
         typer.Argument(help="Name of the SuperLink connection."),
     ] = None,
     output_format: Annotated[
-        str,
+        Literal["default", "json"],
         typer.Option(
             "--format",
             case_sensitive=False,
