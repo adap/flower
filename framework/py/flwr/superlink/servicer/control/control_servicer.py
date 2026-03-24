@@ -595,6 +595,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             runs=[run_to_proto(run) for run in details.runs],
             archived=details.archived,
             simulation=details.simulation,
+            config=details.config,
         )
         return ShowFederationResponse(
             federation=federation_proto, now=now().isoformat()
