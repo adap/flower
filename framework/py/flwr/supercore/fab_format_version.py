@@ -321,7 +321,6 @@ def _validate_fab_format_v1_contents(
             "fab_format_version = 1 requires the declared [project].license.file "
             "to be included in the FAB."
         )
-    return None
 
 
 def normalize_and_validate_fab_format(

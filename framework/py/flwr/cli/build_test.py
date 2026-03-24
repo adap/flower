@@ -177,6 +177,7 @@ publisher = "alice"
 fab_format_version = 1
 """,
         "client.py": b"print('ok')\n",
+        "LICENSE": b"Apache-2.0\n",
     }
 
     with pytest.raises(ValueError, match="inclusive lower bound"):
