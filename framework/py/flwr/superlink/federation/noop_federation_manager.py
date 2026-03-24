@@ -23,11 +23,14 @@ from flwr.proto.federation_pb2 import (  # pylint: disable=E0611
     Member,
     SimulationConfig,
 )
-from flwr.supercore.constant import NOOP_FEDERATION, NOOP_FEDERATION_DESCRIPTION
+from flwr.supercore.constant import (
+    DEFAULT_SIMULATION_CONFIG,
+    NOOP_FEDERATION,
+    NOOP_FEDERATION_DESCRIPTION,
+)
 from flwr.supercore.error import ApiErrorCode, FlowerError
 
 from .federation_manager import FederationManager
-from .utils import get_default_simulation_config
 
 
 class UnsupportedError(FlowerError):
@@ -50,7 +53,7 @@ class NoOpFederationManager(FederationManager):
     def _get_effective_simulation_config(self) -> SimulationConfig:
         """Return the stored simulation configuration or the default copy."""
         config = SimulationConfig()
-        config.CopyFrom(self._simulation_config or get_default_simulation_config())
+        config.CopyFrom(self._simulation_config or DEFAULT_SIMULATION_CONFIG)
         return config
 
     def exists(self, federation: str) -> bool:

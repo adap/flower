@@ -34,7 +34,6 @@ from flwr.supercore.constant import (
 )
 
 from .noop_federation_manager import NoOpFederationManager
-from .utils import get_default_simulation_config
 
 
 def test_get_details_with_valid_federation() -> None:
@@ -250,8 +249,8 @@ def test_simulation_runtime_flag_is_reflected() -> None:
 
     assert federations[0].simulation is True
     assert details.simulation is True
-    assert federations[0].config == get_default_simulation_config()
-    assert details.config == get_default_simulation_config()
+    assert federations[0].config == DEFAULT_SIMULATION_CONFIG
+    assert details.config == DEFAULT_SIMULATION_CONFIG
 
 
 def test_simulation_config_is_stored_in_memory() -> None:
@@ -284,7 +283,7 @@ def test_get_simulation_config_returns_defaults_when_unset() -> None:
 
     stored = manager.get_simulation_config(NOOP_FLWR_AID, NOOP_FEDERATION)
 
-    assert stored == get_default_simulation_config()
+    assert stored == DEFAULT_SIMULATION_CONFIG
     assert stored.num_supernodes == DEFAULT_SIMULATION_CONFIG.num_supernodes
     assert (
         stored.client_resources_num_cpus

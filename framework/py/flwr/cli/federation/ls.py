@@ -291,12 +291,32 @@ def _show_federation(
     )
 
 
-def _simulation_config_to_json(config: SimulationConfig | None) -> dict[str, Any] | None:
+def _simulation_config_to_json(
+    config: SimulationConfig | None,
+) -> dict[str, Any] | None:
     """Convert a simulation config protobuf to a JSON-serializable dictionary."""
     if config is None:
         return None
 
-    return dict(MessageToDict(config, preserving_proto_field_name=True))
+    # Get fields with set values
+    payload = dict(
+        MessageToDict(
+            config,
+            always_print_fields_with_no_presence=True,
+            preserving_proto_field_name=True,
+        )
+    )
+
+    # Ensure unset fields are also accounted for
+    for field in config.DESCRIPTOR.fields:
+        if (
+            field.has_presence
+            and field.name not in payload
+            and not config.HasField(field.name)
+        ):
+            payload[field.name] = None
+
+    return payload
 
 
 def _to_members_table(members: list[Member]) -> Table:
