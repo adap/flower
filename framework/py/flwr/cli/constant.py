@@ -107,7 +107,7 @@ default = "local"
 address = "{SUPERGRID_ADDRESS}"
 
 [superlink.local]
-options.num-supernodes = "{DEFAULT_SIMULATION_CONFIG.num_supernodes}"
+options.num-supernodes = {DEFAULT_SIMULATION_CONFIG.num_supernodes}
 options.backend.client-resources.num-cpus = \
 {DEFAULT_SIMULATION_CONFIG.client_resources_num_cpus}
 options.backend.client-resources.num-gpus = \
