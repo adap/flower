@@ -346,7 +346,6 @@ def get_filtered_fab_paths(
     user_exclude_spec = (
         build_pathspec(user_exclude_patterns) if user_exclude_patterns else None
     )
-    messages: list[tuple[str, str]] = []
     _raise_on_unresolved_patterns(
         user_include_patterns or [], normalized_paths, FAB_INCLUDE_KEY
     )
@@ -376,22 +375,20 @@ def get_filtered_fab_paths(
         if user_exclude_spec
         else list(built_in_constrained_paths)
     )
-    messages.extend(
-        _collect_pattern_conflict_messages(
-            user_include_spec=user_include_spec,
-            user_exclude_spec=user_exclude_spec,
-            candidate_paths=candidate_paths,
-            built_in_constrained_paths=built_in_constrained_paths,
-        )
+    _raise_on_pattern_conflicts(
+        user_include_spec=user_include_spec,
+        user_exclude_spec=user_exclude_spec,
+        candidate_paths=candidate_paths,
+        built_in_constrained_paths=built_in_constrained_paths,
     )
-    _emit_filter_messages(messages)
     return final_paths
 
 
 def _raise_on_unresolved_patterns(
     patterns: list[str], file_paths: list[str], key_name: str
 ) -> None:
-    """Raise ValueError for any user-defined pattern that is invalid or matches nothing."""
+    """Raise ValueError for any user-defined pattern that is invalid or matches
+    nothing."""
     for pattern in patterns:
         try:
             pattern_spec = build_pathspec([pattern])
@@ -407,14 +404,13 @@ def _raise_on_unresolved_patterns(
             )
 
 
-def _collect_pattern_conflict_messages(
+def _raise_on_pattern_conflicts(
     user_include_spec: pathspec.PathSpec | None,
     user_exclude_spec: pathspec.PathSpec | None,
     candidate_paths: list[str],
     built_in_constrained_paths: list[str],
-) -> list[tuple[str, str]]:
-    """Collect warning messages for include/exclude and built-in conflicts."""
-    messages: list[tuple[str, str]] = []
+) -> None:
+    """Raise ValueError for include/exclude and built-in conflicts."""
     if user_include_spec and user_exclude_spec:
         overlap = [
             path
@@ -422,31 +418,15 @@ def _collect_pattern_conflict_messages(
             if user_include_spec.match_file(path) and user_exclude_spec.match_file(path)
         ]
         if overlap:
-            messages.append(
-                (
-                    "Warning",
-                    f'"{FAB_INCLUDE_KEY}" and "{FAB_EXCLUDE_KEY}" overlap for '
-                    f"{len(overlap)} file(s); exclusion takes precedence.",
-                )
+            raise ValueError(
+                f'"{FAB_INCLUDE_KEY}" and "{FAB_EXCLUDE_KEY}" overlap for '
+                f"{len(overlap)} file(s). Remove the conflicting patterns."
             )
 
     built_in_removed = len(candidate_paths) - len(built_in_constrained_paths)
     if user_include_spec and built_in_removed > 0:
-        messages.append(
-            (
-                "Warning",
-                f'{built_in_removed} file(s) matched "{FAB_INCLUDE_KEY}" but '
-                "were removed by non-overridable built-in FAB constraints.",
-            )
-        )
-    return messages
-
-
-def _emit_filter_messages(messages: list[tuple[str, str]]) -> None:
-    """Emit filter notes/warnings with consistent CLI formatting."""
-    for level, message in messages:
-        typer.secho(
-            f"{level}: {message}",
-            fg=typer.colors.YELLOW,
-            bold=True,
+        raise ValueError(
+            f'{built_in_removed} file(s) matched "{FAB_INCLUDE_KEY}" but were '
+            "removed by non-overridable built-in FAB constraints. "
+            f'Remove the conflicting patterns from "{FAB_INCLUDE_KEY}".'
         )

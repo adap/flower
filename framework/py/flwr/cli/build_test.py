@@ -167,16 +167,14 @@ def test_build_fab_from_files_without_fab_include_uses_all_then_builtin() -> Non
 
 
 def test_build_fab_from_files_fab_include_is_constrained_by_builtin_include() -> None:
-    """Test fab-include cannot bypass built-in include constraints."""
+    """Test fab-include that only matches built-in-excluded files raises ValueError."""
     files = _make_files(
         '\n[tool.flwr.app]\nfab-include = ["**/*.json"]\n',
         **{"client.py": _DUMMY_PY, "config.json": b'{"a": 1}'},
     )
-    entries = _build_entries(files)
 
-    assert "config.json" not in entries
-    assert "client.py" not in entries
-    assert "pyproject.toml" in entries
+    with pytest.raises(ValueError, match="non-overridable built-in FAB constraints"):
+        build_fab_from_files(files)
 
 
 def test_build_fab_from_files_fab_exclude_only_removes_files() -> None:
@@ -205,7 +203,7 @@ def test_build_fab_from_files_empty_fab_pattern_raises(key: str) -> None:
 
 @pytest.mark.parametrize("key", ["fab-include", "fab-exclude"])
 def test_build_fab_from_files_raises_on_unresolved_pattern(key: str) -> None:
-    """Test build fails when a fab pattern matches no files."""
+    """Test build fails when a FAB pattern matches no files."""
     files = _make_files(
         f'\n[tool.flwr.app]\n{key} = ["no_such_dir/**/*.py"]\n',
         **{"client.py": _DUMMY_PY},
@@ -215,30 +213,24 @@ def test_build_fab_from_files_raises_on_unresolved_pattern(key: str) -> None:
         build_fab_from_files(files)
 
 
-def test_build_fab_from_files_warns_on_include_exclude_conflict(
-    capsys: pytest.CaptureFixture[str],
-) -> None:
-    """Test warning is emitted when user include and exclude overlap."""
+def test_build_fab_from_files_raises_on_include_exclude_conflict() -> None:
+    """Test build fails when user include and exclude overlap."""
     files = _make_files(
         '\n[tool.flwr.app]\nfab-include = ["**/*.py"]\nfab-exclude = ["client.py"]\n',
         **{"client.py": _DUMMY_PY},
     )
 
-    build_fab_from_files(files)
-    assert '"fab-include" and "fab-exclude" overlap' in capsys.readouterr().out
+    with pytest.raises(ValueError, match='"fab-include" and "fab-exclude" overlap'):
+        build_fab_from_files(files)
 
 
-def test_build_fab_from_files_warns_when_include_hits_builtin_constraints(
-    capsys: pytest.CaptureFixture[str],
-) -> None:
-    """Test warning when fab-include matches files blocked by built-in constraints."""
+def test_build_fab_from_files_raises_when_include_hits_builtin_constraints() -> None:
+    """Test build fails when fab-include matches files blocked by built-in
+    constraints."""
     files = _make_files(
         '\n[tool.flwr.app]\nfab-include = ["**/*.json"]\n',
         **{"config.json": b'{"a": 1}'},
     )
 
-    build_fab_from_files(files)
-    assert (
-        'matched "fab-include" but were removed by non-overridable'
-        in capsys.readouterr().out
-    )
+    with pytest.raises(ValueError, match="non-overridable built-in FAB constraints"):
+        build_fab_from_files(files)
