@@ -204,17 +204,15 @@ def test_build_fab_from_files_empty_fab_pattern_raises(key: str) -> None:
 
 
 @pytest.mark.parametrize("key", ["fab-include", "fab-exclude"])
-def test_build_fab_from_files_warns_on_unresolved_pattern(
-    key: str, capsys: pytest.CaptureFixture[str]
-) -> None:
-    """Test warning is emitted when a fab pattern matches no files."""
+def test_build_fab_from_files_raises_on_unresolved_pattern(key: str) -> None:
+    """Test build fails when a fab pattern matches no files."""
     files = _make_files(
         f'\n[tool.flwr.app]\n{key} = ["no_such_dir/**/*.py"]\n',
         **{"client.py": _DUMMY_PY},
     )
 
-    build_fab_from_files(files)
-    assert f'pattern in "{key}" did not match any files' in capsys.readouterr().out
+    with pytest.raises(ValueError, match="did not match any files"):
+        build_fab_from_files(files)
 
 
 def test_build_fab_from_files_warns_on_include_exclude_conflict(

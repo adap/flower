@@ -347,15 +347,11 @@ def get_filtered_fab_paths(
         build_pathspec(user_exclude_patterns) if user_exclude_patterns else None
     )
     messages: list[tuple[str, str]] = []
-    messages.extend(
-        _collect_unresolved_pattern_messages(
-            user_include_patterns or [], normalized_paths, FAB_INCLUDE_KEY
-        )
+    _raise_on_unresolved_patterns(
+        user_include_patterns or [], normalized_paths, FAB_INCLUDE_KEY
     )
-    messages.extend(
-        _collect_unresolved_pattern_messages(
-            user_exclude_patterns or [], normalized_paths, FAB_EXCLUDE_KEY
-        )
+    _raise_on_unresolved_patterns(
+        user_exclude_patterns or [], normalized_paths, FAB_EXCLUDE_KEY
     )
 
     # Candidate set: user include matches, or all files if no include patterns provided.
@@ -392,32 +388,23 @@ def get_filtered_fab_paths(
     return final_paths
 
 
-def _collect_unresolved_pattern_messages(
+def _raise_on_unresolved_patterns(
     patterns: list[str], file_paths: list[str], key_name: str
-) -> list[tuple[str, str]]:
-    """Collect warning messages for unresolved user-defined patterns."""
-    messages: list[tuple[str, str]] = []
+) -> None:
+    """Raise ValueError for any user-defined pattern that is invalid or matches nothing."""
     for pattern in patterns:
         try:
             pattern_spec = build_pathspec([pattern])
         except Exception as err:  # pylint: disable=broad-except
-            messages.append(
-                (
-                    "Warning",
-                    f'ignoring unresolved pattern in "{key_name}": '
-                    f'"{pattern}" ({err})',
-                )
-            )
-            continue
+            raise ValueError(
+                f'Invalid pattern in "{key_name}": "{pattern}" ({err})'
+            ) from err
 
         if not any(pattern_spec.match_file(path) for path in file_paths):
-            messages.append(
-                (
-                    "Warning",
-                    f'pattern in "{key_name}" did not match any files: "{pattern}"',
-                )
+            raise ValueError(
+                f'Pattern in "{key_name}" did not match any files: "{pattern}". '
+                "Correct the pattern or remove it."
             )
-    return messages
 
 
 def _collect_pattern_conflict_messages(
