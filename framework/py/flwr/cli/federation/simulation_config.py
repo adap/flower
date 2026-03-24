@@ -70,7 +70,6 @@ def simulation_config(  # pylint: disable=R0913,R0917,W0613
             "--client-resources-num-gpus",
             help="Ratio of a GPU VRAM assigned to the execution of each ClientApp",
             min=0.0,
-            max=1.0,
         ),
     ] = 0.0,
     verbose: Annotated[
