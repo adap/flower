@@ -51,7 +51,11 @@ from flwr.server.superlink.linkstate.utils import generate_rand_int_from_bytes
 from flwr.simulation.ray_transport.utils import (
     enable_tf_gpu_growth as enable_gpu_growth,
 )
-from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME, NOOP_FEDERATION
+from flwr.supercore.constant import (
+    DEFAULT_SIMULATION_CONFIG,
+    FLWR_IN_MEMORY_DB_NAME,
+    NOOP_FEDERATION,
+)
 from flwr.supercore.object_store import ObjectStoreFactory
 from flwr.superlink.federation import NoOpFederationManager
 
@@ -383,7 +387,13 @@ def _run_simulation(
     # Set default init_args if not passed
     backend_config.setdefault("init_args", {})
     # Set default client_resources if not passed
-    backend_config.setdefault("client_resources", {"num_cpus": 2, "num_gpus": 0})
+    backend_config.setdefault(
+        "client_resources",
+        {
+            "num_cpus": DEFAULT_SIMULATION_CONFIG.client_resources_num_cpus,
+            "num_gpus": DEFAULT_SIMULATION_CONFIG.client_resources_num_gpus,
+        },
+    )
     # Initialization of backend config to enable GPU growth globally when set
     backend_config.setdefault("actor", {"tensorflow": 0})
 
@@ -393,8 +403,12 @@ def _run_simulation(
         update_console_handler(level=DEBUG, timestamps=True, colored=True)
     else:
         init_args = backend_config["init_args"]
-        init_args.setdefault("logging_level", WARNING)
-        init_args.setdefault("log_to_driver", True)
+        init_args.setdefault(
+            "logging_level", DEFAULT_SIMULATION_CONFIG.init_args_logging_level
+        )
+        init_args.setdefault(
+            "log_to_driver", DEFAULT_SIMULATION_CONFIG.init_args_log_to_driver
+        )
 
     if enable_tf_gpu_growth:
         # Check that Backend config has also enabled using GPU growth
