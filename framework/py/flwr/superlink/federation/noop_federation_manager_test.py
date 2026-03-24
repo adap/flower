@@ -30,7 +30,7 @@ from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.supercore.constant import (
     NOOP_FEDERATION,
     NOOP_FEDERATION_DESCRIPTION,
-    SIMULATION_CONFIG_DEFAULTS,
+    DEFAULT_SIMULATION_CONFIG,
 )
 
 from .noop_federation_manager import NoOpFederationManager
@@ -283,18 +283,18 @@ def test_load_simulation_config_returns_defaults_when_unset() -> None:
     stored = manager.load_simulation_config(NOOP_FLWR_AID, NOOP_FEDERATION)
 
     assert stored == get_default_simulation_config()
-    assert stored.num_supernodes == SIMULATION_CONFIG_DEFAULTS.num_supernodes
+    assert stored.num_supernodes == DEFAULT_SIMULATION_CONFIG.num_supernodes
     assert (
         stored.client_resources_num_cpus
-        == SIMULATION_CONFIG_DEFAULTS.client_resources_num_cpus
+        == DEFAULT_SIMULATION_CONFIG.client_resources_num_cpus
     )
     assert (
         stored.client_resources_num_gpus
-        == SIMULATION_CONFIG_DEFAULTS.client_resources_num_gpus
+        == DEFAULT_SIMULATION_CONFIG.client_resources_num_gpus
     )
-    assert stored.backend_name == SIMULATION_CONFIG_DEFAULTS.backend_name
-    assert stored.verbose is SIMULATION_CONFIG_DEFAULTS.verbose
+    assert stored.backend_name == DEFAULT_SIMULATION_CONFIG.backend_name
+    assert stored.verbose is DEFAULT_SIMULATION_CONFIG.verbose
     assert (
         stored.init_args_log_to_driver
-        is SIMULATION_CONFIG_DEFAULTS.init_args_log_to_driver
+        is DEFAULT_SIMULATION_CONFIG.init_args_log_to_driver
     )
