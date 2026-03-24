@@ -307,29 +307,26 @@ def build_fab_from_files(
 
 def get_user_fab_patterns(
     config: dict[str, Any],
-) -> tuple[list[str], bool, list[str], bool]:
-    """Return user-defined FAB include/exclude patterns and presence flags."""
+) -> tuple[list[str] | None, list[str] | None]:
+    """Return user-defined FAB include/exclude patterns.
+
+    Returns ``None`` for a key that is absent from the config, ``[]`` for a
+    key that is explicitly set to an empty list, or the pattern list itself.
+    """
     app_conf = config.get("tool", {}).get("flwr", {}).get("app", {})
     if not isinstance(app_conf, dict):
-        return [], False, [], False
+        return None, None
 
-    def _get_pattern_list(key: str) -> list[str]:
-        value: list[str] = app_conf.get(key, [])
-        if value is None:
-            return []
+    def _get_pattern_list(key: str) -> list[str] | None:
+        if key not in app_conf:
+            return None
+        value: list[str] = app_conf[key]
         error = check_pattern_list_value(value, key)
         if error:
             raise ValueError(error)
         return value
 
-    has_include_key = FAB_INCLUDE_KEY in app_conf
-    has_exclude_key = FAB_EXCLUDE_KEY in app_conf
-    return (
-        _get_pattern_list(FAB_INCLUDE_KEY),
-        has_include_key,
-        _get_pattern_list(FAB_EXCLUDE_KEY),
-        has_exclude_key,
-    )
+    return (_get_pattern_list(FAB_INCLUDE_KEY), _get_pattern_list(FAB_EXCLUDE_KEY))
 
 
 def get_filtered_fab_paths(
@@ -341,12 +338,7 @@ def get_filtered_fab_paths(
     built_in_include_spec = build_pathspec(FAB_INCLUDE_PATTERNS)
     built_in_exclude_spec = build_pathspec(FAB_EXCLUDE_PATTERNS)
 
-    (
-        user_include_patterns,
-        has_include_key,
-        user_exclude_patterns,
-        has_exclude_key,
-    ) = get_user_fab_patterns(config)
+    user_include_patterns, user_exclude_patterns = get_user_fab_patterns(config)
     user_include_spec = (
         build_pathspec(user_include_patterns) if user_include_patterns else None
     )
@@ -355,23 +347,19 @@ def get_filtered_fab_paths(
     )
     messages: list[tuple[str, str]] = []
     messages.extend(
-        _collect_empty_pattern_list_messages(
-            has_include_key, user_include_patterns, FAB_INCLUDE_KEY
-        )
+        _collect_empty_pattern_list_messages(user_include_patterns, FAB_INCLUDE_KEY)
     )
     messages.extend(
-        _collect_empty_pattern_list_messages(
-            has_exclude_key, user_exclude_patterns, FAB_EXCLUDE_KEY
+        _collect_empty_pattern_list_messages(user_exclude_patterns, FAB_EXCLUDE_KEY)
+    )
+    messages.extend(
+        _collect_unresolved_pattern_messages(
+            user_include_patterns or [], normalized_paths, FAB_INCLUDE_KEY
         )
     )
     messages.extend(
         _collect_unresolved_pattern_messages(
-            user_include_patterns, normalized_paths, FAB_INCLUDE_KEY
-        )
-    )
-    messages.extend(
-        _collect_unresolved_pattern_messages(
-            user_exclude_patterns, normalized_paths, FAB_EXCLUDE_KEY
+            user_exclude_patterns or [], normalized_paths, FAB_EXCLUDE_KEY
         )
     )
 
@@ -410,10 +398,10 @@ def get_filtered_fab_paths(
 
 
 def _collect_empty_pattern_list_messages(
-    has_key: bool, patterns: list[str], key_name: str
+    patterns: list[str] | None, key_name: str
 ) -> list[tuple[str, str]]:
     """Collect note messages for explicitly empty include/exclude lists."""
-    if has_key and not patterns:
+    if patterns == []:
         return [
             (
                 "Note",
