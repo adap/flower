@@ -230,15 +230,16 @@ def test_build_fab_from_files_raises_on_unresolved_pattern(key: str) -> None:
         build_fab_from_files(files)
 
 
-def test_build_fab_from_files_raises_on_include_exclude_conflict() -> None:
-    """Test build fails when user include and exclude overlap."""
+def test_build_fab_from_files_exclude_prevails_over_include() -> None:
+    """Test user-defined exclude prevails when it overlaps with include."""
     files = _make_files(
         '\n[tool.flwr.app]\nfab-include = ["**/*.py"]\nfab-exclude = ["client.py"]\n',
-        **{"client.py": _DUMMY_PY},
+        **{"client.py": _DUMMY_PY, "server.py": _DUMMY_PY},
     )
+    entries = _build_entries(files)
 
-    with pytest.raises(ValueError, match='"fab-include" and "fab-exclude" overlap'):
-        build_fab_from_files(files)
+    assert "server.py" in entries
+    assert "client.py" not in entries
 
 
 def test_build_fab_from_files_raises_when_include_hits_builtin_constraints() -> None:

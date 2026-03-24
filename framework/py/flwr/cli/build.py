@@ -367,7 +367,6 @@ def get_filtered_fab_paths(
         candidate_paths = [
             path for path in normalized_paths if user_include_spec.match_file(path)
         ]
-        _raise_on_user_exclude_include_overlap(candidate_paths, user_exclude_spec)
 
     # Apply built-in constraints and validate against user patterns
     built_in_constrained_paths = [
@@ -379,7 +378,8 @@ def get_filtered_fab_paths(
     if user_include_spec:
         _raise_on_built_in_pattern_conflicts(candidate_paths, built_in_include_spec)
 
-    # Build final file list by applying user exclude patterns
+    # Build final file list by applying user exclude patterns.
+    # User-defined excludes prevail over user-defined includes when both match.
     final_paths = built_in_constrained_paths
     if user_exclude_spec:
         final_paths = [
@@ -408,23 +408,6 @@ def _raise_on_unresolved_patterns(
                 f'Pattern in "{key_name}" did not match any files: "{pattern}". '
                 "Correct the pattern or remove it."
             )
-
-
-def _raise_on_user_exclude_include_overlap(
-    candidate_paths: list[str],
-    user_exclude_spec: pathspec.PathSpec | None,
-) -> None:
-    """Raise ValueError if user-defined exclude patterns overlap with included files."""
-    if not user_exclude_spec:
-        return
-
-    if overlap := set(user_exclude_spec.match_files(candidate_paths)):
-        files_list = "\n".join(f"- {file}" for file in overlap)
-        raise ValueError(
-            f'"{FAB_INCLUDE_KEY}" and "{FAB_EXCLUDE_KEY}" overlap for '
-            f"{len(overlap)} file(s). Remove the conflicting patterns.\n\n"
-            f"Affected files:\n{files_list}"
-        )
 
 
 def _raise_on_built_in_pattern_conflicts(
