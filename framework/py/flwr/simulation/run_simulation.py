@@ -15,7 +15,6 @@
 """Flower Simulation."""
 
 
-import argparse
 import asyncio
 import importlib
 import json
