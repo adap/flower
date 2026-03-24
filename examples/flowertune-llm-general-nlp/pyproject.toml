@@ -47,6 +47,7 @@ model.gradient-checkpointing = true
 model.lora.peft-lora-r = 32
 model.lora.peft-lora-alpha = 64
 train.save-every-round = 5
+train.dynamic-data-seed = false
 train.learning-rate-max = 5e-5
 train.learning-rate-min = 1e-6
 train.seq-length = 512
