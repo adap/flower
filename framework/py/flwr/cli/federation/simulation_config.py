@@ -81,12 +81,13 @@ def simulation_config(  # pylint: disable=R0913,R0917,W0613
         ),
     ] = DEFAULT_SIMULATION_CONFIG.verbose,
     backend: Annotated[
-        str,
+        Literal["ray"],
         typer.Option(
             "--backend-name",
+            case_sensitive=False,
             help="Choice of backend name (Currently, only 'ray' is supported).",
         ),
-    ] = DEFAULT_SIMULATION_CONFIG.backend_name,
+    ] = DEFAULT_SIMULATION_CONFIG.backend_name,  # type: ignore
     init_args_num_cpus: Annotated[
         int | None,
         typer.Option(
