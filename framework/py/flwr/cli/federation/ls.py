@@ -18,7 +18,6 @@
 from typing import Annotated, Any, Literal
 
 import typer
-from google.protobuf.json_format import MessageToDict
 from rich.console import Console
 from rich.table import Table
 from rich.text import Text
@@ -41,7 +40,7 @@ from flwr.proto.federation_pb2 import (  # pylint: disable=E0611
     SimulationConfig,
 )
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
-from flwr.supercore.utils import humanize_duration
+from flwr.supercore.utils import humanize_duration, simulation_config_to_json
 
 from ..run_utils import RunRow, format_runs
 from ..utils import (
@@ -250,9 +249,7 @@ def _to_json(  # pylint: disable=R0913,R0917
             "runs": runs_list,
             "archived": archived,
             "simulation": simulation,
-            "simulation-config": (
-                _simulation_config_to_json(config) if simulation else None
-            ),
+            "simulation-config": simulation_config_to_json(config),
         }
     }
 
@@ -291,27 +288,6 @@ def _show_federation(
         fed_proto.simulation,
         fed_proto.config,
     )
-
-
-def _simulation_config_to_json(
-    config: SimulationConfig | None,
-) -> dict[str, Any] | None:
-    """Convert a simulation config protobuf to a JSON-serializable dictionary."""
-    if config is None:
-        return None
-
-    # Get fields with set values
-    payload = MessageToDict(
-        config,
-        always_print_fields_with_no_presence=True,
-        preserving_proto_field_name=True,
-    )
-
-    # Ensure unset fields are also accounted for
-    for field in config.DESCRIPTOR.fields:
-        if field.name not in payload:
-            payload[field.name] = None
-    return payload
 
 
 def _to_members_table(members: list[Member]) -> Table:
