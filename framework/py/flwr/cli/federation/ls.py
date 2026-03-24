@@ -309,13 +309,8 @@ def _simulation_config_to_json(
 
     # Ensure unset fields are also accounted for
     for field in config.DESCRIPTOR.fields:
-        if (
-            field.has_presence
-            and field.name not in payload
-            and not config.HasField(field.name)
-        ):
+        if field.name not in payload:
             payload[field.name] = None
-
     return payload
 
 
