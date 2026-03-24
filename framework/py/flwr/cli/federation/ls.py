@@ -411,7 +411,7 @@ def _to_simulation_config_table(config: SimulationConfig) -> Table:
         show_lines=True,
     )
 
-    table.add_column(Text("Field", justify="center"), style="bright_black")
+    table.add_column(Text("Setting", justify="center"), style="bright_black")
     table.add_column(Text("Value", justify="center"))
 
     rows = [
