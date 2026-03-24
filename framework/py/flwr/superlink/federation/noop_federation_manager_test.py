@@ -28,9 +28,9 @@ from flwr.proto.federation_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.supercore.constant import (
+    DEFAULT_SIMULATION_CONFIG,
     NOOP_FEDERATION,
     NOOP_FEDERATION_DESCRIPTION,
-    DEFAULT_SIMULATION_CONFIG,
 )
 
 from .noop_federation_manager import NoOpFederationManager
@@ -250,6 +250,8 @@ def test_simulation_runtime_flag_is_reflected() -> None:
 
     assert federations[0].simulation is True
     assert details.simulation is True
+    assert federations[0].config == get_default_simulation_config()
+    assert details.config == get_default_simulation_config()
 
 
 def test_simulation_config_is_stored_in_memory() -> None:
@@ -263,24 +265,24 @@ def test_simulation_config_is_stored_in_memory() -> None:
         verbose=True,
     )
 
-    manager.store_simulation_config(NOOP_FLWR_AID, NOOP_FEDERATION, config)
-    stored = manager.load_simulation_config(NOOP_FLWR_AID, NOOP_FEDERATION)
+    manager.set_simulation_config(NOOP_FLWR_AID, NOOP_FEDERATION, config)
+    stored = manager.get_simulation_config(NOOP_FLWR_AID, NOOP_FEDERATION)
 
     assert stored == config
 
     config.num_supernodes = 1
 
     assert (
-        manager.load_simulation_config(NOOP_FLWR_AID, NOOP_FEDERATION).num_supernodes
+        manager.get_simulation_config(NOOP_FLWR_AID, NOOP_FEDERATION).num_supernodes
         == 8
     )
 
 
-def test_load_simulation_config_returns_defaults_when_unset() -> None:
-    """Test load_simulation_config returns shared defaults when unset."""
+def test_get_simulation_config_returns_defaults_when_unset() -> None:
+    """Test get_simulation_config returns shared defaults when unset."""
     manager = NoOpFederationManager()
 
-    stored = manager.load_simulation_config(NOOP_FLWR_AID, NOOP_FEDERATION)
+    stored = manager.get_simulation_config(NOOP_FLWR_AID, NOOP_FEDERATION)
 
     assert stored == get_default_simulation_config()
     assert stored.num_supernodes == DEFAULT_SIMULATION_CONFIG.num_supernodes
@@ -298,3 +300,43 @@ def test_load_simulation_config_returns_defaults_when_unset() -> None:
         stored.init_args_log_to_driver
         is DEFAULT_SIMULATION_CONFIG.init_args_log_to_driver
     )
+
+
+def test_get_details_returns_stored_simulation_config() -> None:
+    """Test get_details returns the stored simulation config."""
+    manager = NoOpFederationManager(simulation=True)
+    mock_linkstate = Mock()
+    mock_linkstate.get_run_info.return_value = []
+    mock_linkstate.get_node_info.return_value = []
+    manager.linkstate = mock_linkstate
+    config = SimulationConfig(
+        num_supernodes=12,
+        client_resources_num_cpus=3,
+        client_resources_num_gpus=1.0,
+        backend_name="ray",
+        verbose=True,
+    )
+
+    manager.set_simulation_config(NOOP_FLWR_AID, NOOP_FEDERATION, config)
+
+    details = manager.get_details(NOOP_FEDERATION)
+
+    assert details.config == config
+
+
+def test_get_federations_returns_stored_simulation_config() -> None:
+    """Test get_federations returns the stored simulation config."""
+    manager = NoOpFederationManager(simulation=True)
+    config = SimulationConfig(
+        num_supernodes=12,
+        client_resources_num_cpus=3,
+        client_resources_num_gpus=1.0,
+        backend_name="ray",
+        verbose=True,
+    )
+
+    manager.set_simulation_config(NOOP_FLWR_AID, NOOP_FEDERATION, config)
+
+    federations = manager.get_federations(NOOP_FLWR_AID)
+
+    assert federations[0].config == config

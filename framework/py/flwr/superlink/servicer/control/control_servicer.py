@@ -839,7 +839,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         state = self.linkstate_factory.state()
 
         with rpc_error_translator(context, rpc_name):
-            state.federation_manager.store_simulation_config(
+            state.federation_manager.set_simulation_config(
                 flwr_aid=_get_flwr_aid(context),
                 federation=request.federation_name,
                 config=request.config,

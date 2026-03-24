@@ -71,9 +71,7 @@ class FederationManager(ABC):
         """Get details of the federation."""
 
     @abstractmethod
-    def load_simulation_config(
-        self, flwr_aid: str, federation: str
-    ) -> SimulationConfig:
+    def get_simulation_config(self, flwr_aid: str, federation: str) -> SimulationConfig:
         """Get the simulation configuration for a federation.
 
         Parameters
@@ -97,7 +95,7 @@ class FederationManager(ABC):
         """
 
     @abstractmethod
-    def store_simulation_config(
+    def set_simulation_config(
         self, flwr_aid: str, federation: str, config: SimulationConfig
     ) -> None:
         """Set the simulation configuration for a federation.
