@@ -347,46 +347,41 @@ def get_filtered_fab_paths(
     user_include_spec = None
     user_exclude_spec = None
 
-    # Build user specs and validate
+    # Load and validate user patterns, and build user specs
     user_include_patterns, user_exclude_patterns = get_user_fab_patterns(config)
-    if user_include_patterns:
-        user_include_spec = build_pathspec(user_include_patterns)
+    if user_include_patterns is not None:
         _raise_on_unresolved_patterns(
             user_include_patterns, normalized_paths, FAB_INCLUDE_KEY
         )
-    if user_exclude_patterns:
-        user_exclude_spec = build_pathspec(user_exclude_patterns)
+        user_include_spec = build_pathspec(user_include_patterns)
+    if user_exclude_patterns is not None:
         _raise_on_unresolved_patterns(
             user_exclude_patterns, normalized_paths, FAB_EXCLUDE_KEY
         )
+        user_exclude_spec = build_pathspec(user_exclude_patterns)
+    has_user_rules = bool(user_include_spec or user_exclude_spec)
 
-    # Build and validate the candidate set of files to include in the FAB
-    # Candidate set: user include matches, or all files if no include patterns provided.
+    # Build the candidate set of files based on user-defined patterns,
+    # or all files if no user patterns are defined.
     candidate_paths = normalized_paths
     if user_include_spec:
-        candidate_paths = [
-            path for path in normalized_paths if user_include_spec.match_file(path)
-        ]
+        candidate_paths = list(
+            user_include_spec.match_files(candidate_paths)  # type: ignore
+        )
+    if user_exclude_spec:
+        candidate_paths = list(
+            user_exclude_spec.match_files(candidate_paths, negate=True)  # type: ignore
+        )
 
     # Apply built-in constraints and validate against user patterns
-    built_in_constrained_paths = [
+    if has_user_rules:
+        _raise_on_built_in_pattern_conflicts(candidate_paths, built_in_include_spec)
+    final_paths = [
         path
         for path in candidate_paths
         if built_in_include_spec.match_file(path)
         and not built_in_exclude_spec.match_file(path)
     ]
-    if user_include_spec:
-        _raise_on_built_in_pattern_conflicts(candidate_paths, built_in_include_spec)
-
-    # Build final file list by applying user exclude patterns.
-    # User-defined excludes prevail over user-defined includes when both match.
-    final_paths = built_in_constrained_paths
-    if user_exclude_spec:
-        final_paths = [
-            path
-            for path in built_in_constrained_paths
-            if not user_exclude_spec.match_file(path)
-        ]
     return final_paths
 
 

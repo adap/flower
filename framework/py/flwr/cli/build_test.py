@@ -154,7 +154,7 @@ def test_build_fab_from_files_without_fab_include_uses_all_then_builtin() -> Non
         **{
             "client.py": _DUMMY_PY,
             "README.md": b"# docs\n",
-            "notes.txt": b"not included",
+            "data.mock": b"not included",
             "config.json": b'{"a": 1}',
         },
     )
@@ -162,15 +162,15 @@ def test_build_fab_from_files_without_fab_include_uses_all_then_builtin() -> Non
 
     assert "client.py" in entries
     assert "README.md" in entries
-    assert "notes.txt" not in entries
-    assert "config.json" not in entries
+    assert "data.mock" not in entries
+    assert "config.json" in entries
 
 
 def test_build_fab_from_files_fab_include_is_constrained_by_builtin_include() -> None:
     """Test fab-include that only matches built-in-excluded files raises ValueError."""
     files = _make_files(
-        '\n[tool.flwr.app]\nfab-include = ["**/*.json"]\n',
-        **{"client.py": _DUMMY_PY, "config.json": b'{"a": 1}'},
+        '\n[tool.flwr.app]\nfab-include = ["**/*.mock"]\n',
+        **{"client.py": _DUMMY_PY, "data.mock": b"not included"},
     )
 
     with pytest.raises(ValueError, match="non-overridable built-in FAB constraints"):
@@ -246,8 +246,8 @@ def test_build_fab_from_files_raises_when_include_hits_builtin_constraints() -> 
     """Test build fails when fab-include matches files blocked by built-in
     constraints."""
     files = _make_files(
-        '\n[tool.flwr.app]\nfab-include = ["**/*.json"]\n',
-        **{"config.json": b'{"a": 1}'},
+        '\n[tool.flwr.app]\nfab-include = ["**/*.mock"]\n',
+        **{"data.mock": b"not included"},
     )
 
     with pytest.raises(ValueError, match="non-overridable built-in FAB constraints"):
