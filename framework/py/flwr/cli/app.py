@@ -15,6 +15,7 @@
 """Flower command line interface."""
 
 
+import sys
 from typing import Any, TypedDict
 
 import typer
@@ -137,6 +138,16 @@ app.add_typer(config_app, name="config")
 typer_click_object = get_command(app)
 
 
+def _should_skip_update_check(argv: list[str]) -> bool:
+    """Return True if the CLI invocation requests machine readable JSON output."""
+    for idx, arg in enumerate(argv):
+        if arg == "--format" and idx + 1 < len(argv):
+            return argv[idx + 1].lower() == "json"
+        if arg.startswith("--format="):
+            return arg.split("=", 1)[1].lower() == "json"
+    return False
+
+
 @app.callback(invoke_without_command=True)
 def main(
     version: bool = typer.Option(
@@ -148,7 +159,8 @@ def main(
     ),
 ) -> None:
     """Flower CLI."""
-    warn_if_flwr_update_available(process_name="flwr")
+    if not _should_skip_update_check(sys.argv[1:]):
+        warn_if_flwr_update_available(process_name="flwr")
 
     if version:
         typer.secho(f"Flower version: {package_version}", fg="blue")

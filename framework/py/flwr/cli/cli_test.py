@@ -140,6 +140,27 @@ def test_flwr_callback_checks_for_update(monkeypatch: pytest.MonkeyPatch) -> Non
     assert captured == {"process_name": "flwr"}
 
 
+@pytest.mark.parametrize(
+    "argv", [["flwr", "ls", "--format", "json"], ["flwr", "ls", "--format=json"]]
+)
+def test_flwr_callback_skips_update_check_for_json_format(
+    monkeypatch: pytest.MonkeyPatch, argv: list[str]
+) -> None:
+    """The top-level flwr callback should skip update checks for JSON output."""
+    monkeypatch.setattr("flwr.cli.app.sys.argv", argv)
+    called = False
+
+    def _warn(*_args: Any, **_kwargs: Any) -> None:
+        nonlocal called
+        called = True
+
+    monkeypatch.setattr(app_module, "warn_if_flwr_update_available", _warn)
+
+    app_module.main(version=False)
+
+    assert called is False
+
+
 def test_invalid_command() -> None:
     """Test CLI behavior with invalid commands and arguments."""
     # Test unknown command
