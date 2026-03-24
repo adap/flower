@@ -84,6 +84,7 @@ def simulation_config(  # pylint: disable=R0913,R0917,W0613
         Literal["ray"],
         typer.Option(
             "--backend-name",
+            case_sensitive=False,
             help="Choice of backend name (Currently, only 'ray' is supported).",
         ),
     ] = DEFAULT_SIMULATION_CONFIG.backend_name,  # type: ignore
