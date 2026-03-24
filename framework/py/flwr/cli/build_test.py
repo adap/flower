@@ -23,25 +23,35 @@ import pytest
 
 from .build import build_fab_from_files
 
+_DUMMY_PY = b"print('ok')\n"
 
-def _zip_entries(fab: bytes) -> set[str]:
-    with ZipFile(BytesIO(fab), "r") as zip_file:
-        return set(zip_file.namelist())
+
+def _make_files(
+    app_toml: str = "",
+    /,
+    **extra_files: bytes,
+) -> dict[str, bytes | Path]:
+    """Build a minimal files dict with the given [tool.flwr.app] fragment."""
+    pyproject = f'[project]\nname = "app"\nversion = "1.0.0"\n{app_toml}'
+    return {"pyproject.toml": pyproject.encode(), **extra_files}
+
+
+def _build_entries(files: dict[str, bytes | Path]) -> set[str]:
+    """Build a FAB and return the set of archive entry names."""
+    fab, _ = build_fab_from_files(files)
+    with ZipFile(BytesIO(fab), "r") as zf:
+        return set(zf.namelist())
 
 
 def test_build_fab_from_files_includes_root_license_and_pyproject() -> None:
     """Test root LICENSE and pyproject.toml are included in FAB when present."""
-    files: dict[str, bytes | Path] = {
-        "pyproject.toml": b'[project]\nname = "app"\nversion = "1.0.0"\n',
-        "client.py": b"print('ok')\n",
-        "LICENSE": b"Apache-2.0\n",
-    }
+    files = _make_files(**{"client.py": _DUMMY_PY, "LICENSE": b"Apache-2.0\n"})
 
     fab, _ = build_fab_from_files(files)
 
-    with ZipFile(BytesIO(fab), "r") as zip_file:
-        names = set(zip_file.namelist())
-        content_manifest = zip_file.read(".info/CONTENT").decode("utf-8")
+    with ZipFile(BytesIO(fab), "r") as zf:
+        names = set(zf.namelist())
+        content_manifest = zf.read(".info/CONTENT").decode("utf-8")
 
     assert "LICENSE" in names
     assert "LICENSE," in content_manifest
@@ -51,20 +61,13 @@ def test_build_fab_from_files_includes_root_license_and_pyproject() -> None:
 
 def test_build_fab_from_files_missing_pyproject_raises() -> None:
     """Test that missing pyproject.toml raises ValueError."""
-    files: dict[str, bytes | Path] = {
-        "client.py": b"print('ok')\n",
-    }
-
     with pytest.raises(ValueError, match="pyproject.toml"):
-        build_fab_from_files(files)
+        build_fab_from_files({"client.py": _DUMMY_PY})
 
 
 def test_build_fab_from_files_defaults_fab_format_version() -> None:
     """Test missing fab_format_version defaults in returned metadata."""
-    files: dict[str, bytes | Path] = {
-        "pyproject.toml": b'[project]\nname = "app"\nversion = "1.0.0"\n',
-        "client.py": b"print('ok')\n",
-    }
+    files = _make_files(**{"client.py": _DUMMY_PY})
 
     _, metadata = build_fab_from_files(files)
 
@@ -74,19 +77,11 @@ def test_build_fab_from_files_defaults_fab_format_version() -> None:
 
 def test_build_fab_from_files_preserves_target_for_version_zero() -> None:
     """Test fab_format_version=0 accepts flwr_version_target without bounds."""
-    files: dict[str, bytes | Path] = {
-        "pyproject.toml": b"""
-[project]
-name = "app"
-version = "1.0.0"
-
-[tool.flwr.app]
-publisher = "alice"
-fab_format_version = 0
-flwr_version_target = "1.27.1"
-""",
-        "client.py": b"print('ok')\n",
-    }
+    files = _make_files(
+        '\n[tool.flwr.app]\npublisher = "alice"\n'
+        'fab_format_version = 0\nflwr_version_target = "1.27.1"\n',
+        **{"client.py": _DUMMY_PY},
+    )
 
     _, metadata = build_fab_from_files(files)
 
@@ -98,20 +93,12 @@ flwr_version_target = "1.27.1"
 
 def test_build_fab_from_files_derives_flwr_bounds() -> None:
     """Test fab_format_version=1 derives metadata."""
-    files: dict[str, bytes | Path] = {
-        "pyproject.toml": b"""
-[project]
-name = "app"
-version = "1.0.0"
-dependencies = ["flwr[simulation]>=1.26.0,<=1.28.0", "numpy>=1.0.0"]
-
-[tool.flwr.app]
-publisher = "alice"
-fab_format_version = 1
-flwr_version_target = "1.27.1"
-""",
-        "client.py": b"print('ok')\n",
-    }
+    files = _make_files(
+        'dependencies = ["flwr[simulation]>=1.26.0,<=1.28.0", "numpy>=1.0.0"]\n'
+        '\n[tool.flwr.app]\npublisher = "alice"\n'
+        'fab_format_version = 1\nflwr_version_target = "1.27.1"\n',
+        **{"client.py": _DUMMY_PY},
+    )
 
     _, metadata = build_fab_from_files(files)
 
@@ -123,18 +110,10 @@ flwr_version_target = "1.27.1"
 
 def test_build_fab_from_files_rejects_unsupported_fab_format_version() -> None:
     """Test build fails for unsupported fab_format_version values."""
-    files: dict[str, bytes | Path] = {
-        "pyproject.toml": b"""
-[project]
-name = "app"
-version = "1.0.0"
-
-[tool.flwr.app]
-publisher = "alice"
-fab_format_version = 2
-""",
-        "client.py": b"print('ok')\n",
-    }
+    files = _make_files(
+        '\n[tool.flwr.app]\npublisher = "alice"\nfab_format_version = 2\n',
+        **{"client.py": _DUMMY_PY},
+    )
 
     with pytest.raises(ValueError, match="Unsupported"):
         build_fab_from_files(files)
@@ -142,20 +121,12 @@ fab_format_version = 2
 
 def test_build_fab_from_files_skips_unsupported_bounds_for_version_zero() -> None:
     """Test fab_format_version=0 keeps target metadata without derivation fallback."""
-    files: dict[str, bytes | Path] = {
-        "pyproject.toml": b"""
-[project]
-name = "app"
-version = "1.0.0"
-dependencies = ["flwr>1.26.0"]
-
-[tool.flwr.app]
-publisher = "alice"
-fab_format_version = 0
-flwr_version_target = "1.27.1"
-""",
-        "client.py": b"print('ok')\n",
-    }
+    files = _make_files(
+        'dependencies = ["flwr>1.26.0"]\n'
+        '\n[tool.flwr.app]\npublisher = "alice"\n'
+        'fab_format_version = 0\nflwr_version_target = "1.27.1"\n',
+        **{"client.py": _DUMMY_PY},
+    )
 
     _, metadata = build_fab_from_files(files)
 
@@ -167,19 +138,11 @@ flwr_version_target = "1.27.1"
 
 def test_build_fab_from_files_rejects_unsupported_flwr_specifier() -> None:
     """Test build fails for fab_format_version=1 with an exclusive lower bound."""
-    files: dict[str, bytes | Path] = {
-        "pyproject.toml": b"""
-[project]
-name = "app"
-version = "1.0.0"
-dependencies = ["flwr>1.26.0"]
-
-[tool.flwr.app]
-publisher = "alice"
-fab_format_version = 1
-""",
-        "client.py": b"print('ok')\n",
-    }
+    files = _make_files(
+        'dependencies = ["flwr>1.26.0"]\n'
+        '\n[tool.flwr.app]\npublisher = "alice"\nfab_format_version = 1\n',
+        **{"client.py": _DUMMY_PY},
+    )
 
     with pytest.raises(ValueError, match="inclusive lower bound"):
         build_fab_from_files(files)
@@ -187,16 +150,15 @@ fab_format_version = 1
 
 def test_build_fab_from_files_without_fab_include_uses_all_then_builtin() -> None:
     """Test missing fab-include considers all files before built-in filtering."""
-    files: dict[str, bytes | Path] = {
-        "pyproject.toml": b'[project]\nname = "app"\nversion = "1.0.0"\n',
-        "client.py": b"print('ok')\n",
-        "README.md": b"# docs\n",
-        "notes.txt": b"not included",
-        "config.json": b'{"a": 1}',
-    }
-
-    fab, _ = build_fab_from_files(files)
-    entries = _zip_entries(fab)
+    files = _make_files(
+        **{
+            "client.py": _DUMMY_PY,
+            "README.md": b"# docs\n",
+            "notes.txt": b"not included",
+            "config.json": b'{"a": 1}',
+        },
+    )
+    entries = _build_entries(files)
 
     assert "client.py" in entries
     assert "README.md" in entries
@@ -206,21 +168,11 @@ def test_build_fab_from_files_without_fab_include_uses_all_then_builtin() -> Non
 
 def test_build_fab_from_files_fab_include_is_constrained_by_builtin_include() -> None:
     """Test fab-include cannot bypass built-in include constraints."""
-    files: dict[str, bytes | Path] = {
-        "pyproject.toml": b"""
-[project]
-name = "app"
-version = "1.0.0"
-
-[tool.flwr.app]
-fab-include = ["**/*.json"]
-""",
-        "client.py": b"print('ok')\n",
-        "config.json": b'{"a": 1}',
-    }
-
-    fab, _ = build_fab_from_files(files)
-    entries = _zip_entries(fab)
+    files = _make_files(
+        '\n[tool.flwr.app]\nfab-include = ["**/*.json"]\n',
+        **{"client.py": _DUMMY_PY, "config.json": b'{"a": 1}'},
+    )
+    entries = _build_entries(files)
 
     assert "config.json" not in entries
     assert "client.py" not in entries
@@ -229,151 +181,66 @@ fab-include = ["**/*.json"]
 
 def test_build_fab_from_files_fab_exclude_only_removes_files() -> None:
     """Test fab-exclude removes files selected by other steps."""
-    files: dict[str, bytes | Path] = {
-        "pyproject.toml": b"""
-[project]
-name = "app"
-version = "1.0.0"
-
-[tool.flwr.app]
-fab-exclude = ["**/*.md"]
-""",
-        "client.py": b"print('ok')\n",
-        "README.md": b"# docs\n",
-    }
-
-    fab, _ = build_fab_from_files(files)
-    entries = _zip_entries(fab)
+    files = _make_files(
+        '\n[tool.flwr.app]\nfab-exclude = ["**/*.md"]\n',
+        **{"client.py": _DUMMY_PY, "README.md": b"# docs\n"},
+    )
+    entries = _build_entries(files)
 
     assert "client.py" in entries
     assert "README.md" not in entries
 
 
-def test_build_fab_from_files_empty_fab_include_equals_absent() -> None:
-    """Test empty fab-include behaves like absent fab-include."""
-    files: dict[str, bytes | Path] = {
-        "pyproject.toml": b"""
-[project]
-name = "app"
-version = "1.0.0"
+@pytest.mark.parametrize("key", ["fab-include", "fab-exclude"])
+def test_build_fab_from_files_empty_fab_pattern_raises(key: str) -> None:
+    """Test empty fab-include/fab-exclude raises ValueError."""
+    files = _make_files(
+        f"\n[tool.flwr.app]\n{key} = []\n",
+        **{"client.py": _DUMMY_PY},
+    )
 
-[tool.flwr.app]
-fab-include = []
-""",
-        "client.py": b"print('ok')\n",
-        "notes.txt": b"not included",
-    }
-
-    fab, _ = build_fab_from_files(files)
-    entries = _zip_entries(fab)
-
-    assert "client.py" in entries
-    assert "notes.txt" not in entries
+    with pytest.raises(ValueError, match="must not be an empty list"):
+        build_fab_from_files(files)
 
 
-def test_build_fab_from_files_warns_on_unresolved_fab_include(
-    capsys: pytest.CaptureFixture[str],
+@pytest.mark.parametrize("key", ["fab-include", "fab-exclude"])
+def test_build_fab_from_files_warns_on_unresolved_pattern(
+    key: str, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    """Test warning is emitted when fab-include pattern matches no files."""
-    files: dict[str, bytes | Path] = {
-        "pyproject.toml": b"""
-[project]
-name = "app"
-version = "1.0.0"
-
-[tool.flwr.app]
-fab-include = ["no_such_dir/**/*.py"]
-""",
-        "client.py": b"print('ok')\n",
-    }
+    """Test warning is emitted when a fab pattern matches no files."""
+    files = _make_files(
+        f'\n[tool.flwr.app]\n{key} = ["no_such_dir/**/*.py"]\n',
+        **{"client.py": _DUMMY_PY},
+    )
 
     build_fab_from_files(files)
-    captured = capsys.readouterr()
-    assert 'pattern in "fab-include" did not match any files' in captured.out
-
-
-def test_build_fab_from_files_warns_on_unresolved_fab_exclude(
-    capsys: pytest.CaptureFixture[str],
-) -> None:
-    """Test warning is emitted when fab-exclude pattern matches no files."""
-    files: dict[str, bytes | Path] = {
-        "pyproject.toml": b"""
-[project]
-name = "app"
-version = "1.0.0"
-
-[tool.flwr.app]
-fab-exclude = ["no_such_dir/**/*.py"]
-""",
-        "client.py": b"print('ok')\n",
-    }
-
-    build_fab_from_files(files)
-    captured = capsys.readouterr()
-    assert 'pattern in "fab-exclude" did not match any files' in captured.out
-
-
-def test_build_fab_from_files_notes_on_empty_fab_lists(
-    capsys: pytest.CaptureFixture[str],
-) -> None:
-    """Test note is emitted when empty fab include/exclude lists are configured."""
-    files: dict[str, bytes | Path] = {
-        "pyproject.toml": b"""
-[project]
-name = "app"
-version = "1.0.0"
-
-[tool.flwr.app]
-fab-include = []
-fab-exclude = []
-""",
-        "client.py": b"print('ok')\n",
-    }
-
-    build_fab_from_files(files)
-    captured = capsys.readouterr()
-    assert '"fab-include" is set to an empty list' in captured.out
-    assert '"fab-exclude" is set to an empty list' in captured.out
+    assert f'pattern in "{key}" did not match any files' in capsys.readouterr().out
 
 
 def test_build_fab_from_files_warns_on_include_exclude_conflict(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     """Test warning is emitted when user include and exclude overlap."""
-    files: dict[str, bytes | Path] = {
-        "pyproject.toml": b"""
-[project]
-name = "app"
-version = "1.0.0"
-
-[tool.flwr.app]
-fab-include = ["**/*.py"]
-fab-exclude = ["client.py"]
-""",
-        "client.py": b"print('ok')\n",
-    }
+    files = _make_files(
+        '\n[tool.flwr.app]\nfab-include = ["**/*.py"]\nfab-exclude = ["client.py"]\n',
+        **{"client.py": _DUMMY_PY},
+    )
 
     build_fab_from_files(files)
-    captured = capsys.readouterr()
-    assert '"fab-include" and "fab-exclude" overlap' in captured.out
+    assert '"fab-include" and "fab-exclude" overlap' in capsys.readouterr().out
 
 
 def test_build_fab_from_files_warns_when_include_hits_builtin_constraints(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     """Test warning when fab-include matches files blocked by built-in constraints."""
-    files: dict[str, bytes | Path] = {
-        "pyproject.toml": b"""
-[project]
-name = "app"
-version = "1.0.0"
-
-[tool.flwr.app]
-fab-include = ["**/*.json"]
-""",
-        "config.json": b'{"a": 1}',
-    }
+    files = _make_files(
+        '\n[tool.flwr.app]\nfab-include = ["**/*.json"]\n',
+        **{"config.json": b'{"a": 1}'},
+    )
 
     build_fab_from_files(files)
-    captured = capsys.readouterr()
-    assert 'matched "fab-include" but were removed by non-overridable' in captured.out
+    assert (
+        'matched "fab-include" but were removed by non-overridable'
+        in capsys.readouterr().out
+    )

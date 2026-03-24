@@ -310,8 +310,9 @@ def get_user_fab_patterns(
 ) -> tuple[list[str] | None, list[str] | None]:
     """Return user-defined FAB include/exclude patterns.
 
-    Returns ``None`` for a key that is absent from the config, ``[]`` for a
-    key that is explicitly set to an empty list, or the pattern list itself.
+    Returns ``None`` for a key that is absent from the config, or the
+    non-empty pattern list itself. Raises ``ValueError`` if a key is
+    present but set to an empty list.
     """
     app_conf = config.get("tool", {}).get("flwr", {}).get("app", {})
     if not isinstance(app_conf, dict):
@@ -346,12 +347,6 @@ def get_filtered_fab_paths(
         build_pathspec(user_exclude_patterns) if user_exclude_patterns else None
     )
     messages: list[tuple[str, str]] = []
-    messages.extend(
-        _collect_empty_pattern_list_messages(user_include_patterns, FAB_INCLUDE_KEY)
-    )
-    messages.extend(
-        _collect_empty_pattern_list_messages(user_exclude_patterns, FAB_EXCLUDE_KEY)
-    )
     messages.extend(
         _collect_unresolved_pattern_messages(
             user_include_patterns or [], normalized_paths, FAB_INCLUDE_KEY
@@ -395,21 +390,6 @@ def get_filtered_fab_paths(
     )
     _emit_filter_messages(messages)
     return final_paths
-
-
-def _collect_empty_pattern_list_messages(
-    patterns: list[str] | None, key_name: str
-) -> list[tuple[str, str]]:
-    """Collect note messages for explicitly empty include/exclude lists."""
-    if patterns == []:
-        return [
-            (
-                "Note",
-                f'"{key_name}" is set to an empty list. '
-                "Default built-in include/exclude constraints are used.",
-            )
-        ]
-    return []
 
 
 def _collect_unresolved_pattern_messages(
