@@ -16,7 +16,7 @@
 
 
 import argparse
-from logging import INFO
+from logging import INFO, WARN
 from typing import Any
 
 import yaml
@@ -96,6 +96,15 @@ def flower_superexec() -> None:
             )
 
     # Get the plugin class and stub class based on the plugin type
+    if args.plugin_type == ExecPluginType.SIMULATION:
+        log(
+            WARN,
+            "The '%s' plugin type is deprecated and will be removed in a future "
+            "release. Please use '%s' plugin type instead.",
+            ExecPluginType.SIMULATION,
+            ExecPluginType.SERVER_APP,
+        )
+        args.plugin_type = ExecPluginType.SERVER_APP
     plugin_class, stub_class = _get_plugin_and_stub_class(args.plugin_type)
     run_superexec(
         plugin_class=plugin_class,
