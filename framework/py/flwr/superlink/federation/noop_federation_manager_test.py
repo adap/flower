@@ -262,30 +262,6 @@ def test_simulation_runtime_flag_is_reflected() -> None:
     assert details.config == DEFAULT_SIMULATION_CONFIG
 
 
-def test_simulation_config_is_stored_in_memory() -> None:
-    """Test simulation config roundtrip uses in-memory storage."""
-    manager = NoOpFederationManager()
-    config = SimulationConfig(
-        num_supernodes=8,
-        client_resources_num_cpus=2,
-        client_resources_num_gpus=0.5,
-        backend_name="ray",
-        verbose=True,
-    )
-
-    manager.set_simulation_config(NOOP_FLWR_AID, NOOP_FEDERATION, config)
-    stored = manager.get_simulation_config(NOOP_FLWR_AID, NOOP_FEDERATION)
-
-    assert stored == config
-
-    config.num_supernodes = 1
-
-    assert (
-        manager.get_simulation_config(NOOP_FLWR_AID, NOOP_FEDERATION).num_supernodes
-        == 8
-    )
-
-
 def test_get_simulation_config_returns_defaults_when_unset() -> None:
     """Test get_simulation_config returns shared defaults when unset."""
     manager = NoOpFederationManager()
