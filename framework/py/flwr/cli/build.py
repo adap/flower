@@ -332,7 +332,7 @@ def get_user_fab_patterns(
             raise ValueError(error)
         return value
 
-    return (_get_pattern_list(FAB_INCLUDE_KEY), _get_pattern_list(FAB_EXCLUDE_KEY))
+    return _get_pattern_list(FAB_INCLUDE_KEY), _get_pattern_list(FAB_EXCLUDE_KEY)
 
 
 def get_filtered_fab_paths(
@@ -340,52 +340,53 @@ def get_filtered_fab_paths(
     config: dict[str, Any],
 ) -> list[str]:
     """Compute final FAB file list using user patterns and non-overridable defaults."""
+    # Build built-in spec
     normalized_paths = list(files.keys())
     built_in_include_spec = build_pathspec(FAB_INCLUDE_PATTERNS)
     built_in_exclude_spec = build_pathspec(FAB_EXCLUDE_PATTERNS)
+    user_include_spec = None
+    user_exclude_spec = None
 
+    # Build user specs and validate
     user_include_patterns, user_exclude_patterns = get_user_fab_patterns(config)
-    user_include_spec = (
-        build_pathspec(user_include_patterns) if user_include_patterns else None
-    )
-    user_exclude_spec = (
-        build_pathspec(user_exclude_patterns) if user_exclude_patterns else None
-    )
-    _raise_on_unresolved_patterns(
-        user_include_patterns or [], normalized_paths, FAB_INCLUDE_KEY
-    )
-    _raise_on_unresolved_patterns(
-        user_exclude_patterns or [], normalized_paths, FAB_EXCLUDE_KEY
-    )
+    if user_include_patterns:
+        user_include_spec = build_pathspec(user_include_patterns)
+        _raise_on_unresolved_patterns(
+            user_include_patterns, normalized_paths, FAB_INCLUDE_KEY
+        )
+    if user_exclude_patterns:
+        user_exclude_spec = build_pathspec(user_exclude_patterns)
+        _raise_on_unresolved_patterns(
+            user_exclude_patterns, normalized_paths, FAB_EXCLUDE_KEY
+        )
 
+    # Build and validate the candidate set of files to include in the FAB
     # Candidate set: user include matches, or all files if no include patterns provided.
-    candidate_paths = (
-        [path for path in normalized_paths if user_include_spec.match_file(path)]
-        if user_include_spec
-        else normalized_paths
-    )
+    candidate_paths = normalized_paths
+    if user_include_spec:
+        candidate_paths = [
+            path for path in normalized_paths if user_include_spec.match_file(path)
+        ]
+        _raise_on_user_exclude_include_overlap(candidate_paths, user_exclude_spec)
 
+    # Apply built-in constraints and validate against user patterns
     built_in_constrained_paths = [
         path
         for path in candidate_paths
         if built_in_include_spec.match_file(path)
         and not built_in_exclude_spec.match_file(path)
     ]
-    final_paths = (
-        [
+    if user_include_spec:
+        _raise_on_built_in_pattern_conflicts(candidate_paths, built_in_include_spec)
+
+    # Build final file list by applying user exclude patterns
+    final_paths = built_in_constrained_paths
+    if user_exclude_spec:
+        final_paths = [
             path
             for path in built_in_constrained_paths
             if not user_exclude_spec.match_file(path)
         ]
-        if user_exclude_spec
-        else list(built_in_constrained_paths)
-    )
-    _raise_on_pattern_conflicts(
-        user_include_spec=user_include_spec,
-        user_exclude_spec=user_exclude_spec,
-        candidate_paths=candidate_paths,
-        built_in_include_spec=built_in_include_spec,
-    )
     return final_paths
 
 
@@ -409,35 +410,38 @@ def _raise_on_unresolved_patterns(
             )
 
 
-def _raise_on_pattern_conflicts(
-    user_include_spec: pathspec.PathSpec | None,
+def _raise_on_user_exclude_include_overlap(
+    candidate_paths: list[str],
     user_exclude_spec: pathspec.PathSpec | None,
+) -> None:
+    """Raise ValueError if user-defined exclude patterns overlap with included files."""
+    if not user_exclude_spec:
+        return
+
+    if overlap := set(user_exclude_spec.match_files(candidate_paths)):
+        files_list = "\n".join(f"- {file}" for file in overlap)
+        raise ValueError(
+            f'"{FAB_INCLUDE_KEY}" and "{FAB_EXCLUDE_KEY}" overlap for '
+            f"{len(overlap)} file(s). Remove the conflicting patterns.\n\n"
+            f"Affected files:\n{files_list}"
+        )
+
+
+def _raise_on_built_in_pattern_conflicts(
     candidate_paths: list[str],
     built_in_include_spec: pathspec.PathSpec,
 ) -> None:
-    """Raise ValueError for include/exclude and built-in conflicts."""
-    if user_include_spec and user_exclude_spec:
-        overlap = [
-            path
-            for path in candidate_paths
-            if user_include_spec.match_file(path) and user_exclude_spec.match_file(path)
-        ]
-        if overlap:
-            raise ValueError(
-                f'"{FAB_INCLUDE_KEY}" and "{FAB_EXCLUDE_KEY}" overlap for '
-                f"{len(overlap)} file(s). Remove the conflicting patterns."
-            )
-
+    """Raise ValueError for user-defined rules and built-in rules conflicts."""
     # Only count files whose type is not supported by built-in include patterns
     # (e.g. .txt files). Files that match built-in includes but are removed by
     # built-in excludes (e.g. .toml inside .venv/, pyproject.toml) are expected
     # removals and should not be flagged.
-    built_in_removed = sum(
-        1 for path in candidate_paths if not built_in_include_spec.match_file(path)
-    )
-    if user_include_spec and built_in_removed > 0:
+    removed_files = set(built_in_include_spec.match_files(candidate_paths, negate=True))
+    if removed_files:
+        files_list = "\n".join(f"- {file}" for file in removed_files)
         raise ValueError(
-            f'{built_in_removed} file(s) matched "{FAB_INCLUDE_KEY}" but were '
+            f'{len(removed_files)} file(s) matched "{FAB_INCLUDE_KEY}" but were '
             "removed by non-overridable built-in FAB constraints. "
-            f'Remove the conflicting patterns from "{FAB_INCLUDE_KEY}".'
+            f'Remove the conflicting patterns from "{FAB_INCLUDE_KEY}".\n\n'
+            f"Affected files:\n{files_list}"
         )
