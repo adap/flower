@@ -102,7 +102,7 @@ NOOP_FEDERATION_DESCRIPTION = "A federation for testing and development purposes
 
 
 @dataclass(frozen=True)
-class SimulationConfigDefaults:  # pytlint: disable=R0902
+class SimulationConfigDefaults:  # pylint: disable=R0902
     """Default values for federation simulation configuration."""
 
     num_supernodes: int = 10
