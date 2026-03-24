@@ -141,7 +141,10 @@ def build(
         )
 
     # Build FAB
-    fab_bytes = build_fab_from_disk(app)
+    try:
+        fab_bytes = build_fab_from_disk(app)
+    except ValueError as e:
+        raise click.ClickException(str(e)) from None
 
     # Calculate hash for filename
     fab_hash = hashlib.sha256(fab_bytes).hexdigest()
@@ -381,7 +384,7 @@ def get_filtered_fab_paths(
         user_include_spec=user_include_spec,
         user_exclude_spec=user_exclude_spec,
         candidate_paths=candidate_paths,
-        built_in_constrained_paths=built_in_constrained_paths,
+        built_in_include_spec=built_in_include_spec,
     )
     return final_paths
 
@@ -410,7 +413,7 @@ def _raise_on_pattern_conflicts(
     user_include_spec: pathspec.PathSpec | None,
     user_exclude_spec: pathspec.PathSpec | None,
     candidate_paths: list[str],
-    built_in_constrained_paths: list[str],
+    built_in_include_spec: pathspec.PathSpec,
 ) -> None:
     """Raise ValueError for include/exclude and built-in conflicts."""
     if user_include_spec and user_exclude_spec:
@@ -425,11 +428,13 @@ def _raise_on_pattern_conflicts(
                 f"{len(overlap)} file(s). Remove the conflicting patterns."
             )
 
-    built_in_removed = len(candidate_paths) - len(built_in_constrained_paths)
-    # pyproject.toml is unconditionally included in the FAB via a separate rewrite
-    # path, so exclude it from this count to avoid a false/misleading error.
-    if user_include_spec and FAB_CONFIG_FILE in candidate_paths:
-        built_in_removed -= 1
+    # Only count files whose type is not supported by built-in include patterns
+    # (e.g. .txt files). Files that match built-in includes but are removed by
+    # built-in excludes (e.g. .toml inside .venv/, pyproject.toml) are expected
+    # removals and should not be flagged.
+    built_in_removed = sum(
+        1 for path in candidate_paths if not built_in_include_spec.match_file(path)
+    )
     if user_include_spec and built_in_removed > 0:
         raise ValueError(
             f'{built_in_removed} file(s) matched "{FAB_INCLUDE_KEY}" but were '
