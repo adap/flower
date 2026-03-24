@@ -78,6 +78,9 @@ FAB_HASH_TRUNCATION = 8
 FAB_MAX_SIZE = 10 * 1024 * 1024  # 10 MB
 FLWR_DIR = ".flwr"  # The default Flower directory: ~/.flwr/
 FLWR_HOME = "FLWR_HOME"  # If set, override the default Flower directory
+# FAB include and exclude keys in pyproject.toml
+FAB_INCLUDE_KEY = "fab-include"
+FAB_EXCLUDE_KEY = "fab-exclude"
 # FAB file include patterns (gitignore-style patterns)
 FAB_INCLUDE_PATTERNS = (
     "**/*.py",
