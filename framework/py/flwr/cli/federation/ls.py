@@ -301,13 +301,11 @@ def _simulation_config_to_json(
         return None
 
     # Get fields with set values
-    payload = dict(
-        MessageToDict(
+    payload = MessageToDict(
             config,
             always_print_fields_with_no_presence=True,
             preserving_proto_field_name=True,
         )
-    )
 
     # Ensure unset fields are also accounted for
     for field in config.DESCRIPTOR.fields:
