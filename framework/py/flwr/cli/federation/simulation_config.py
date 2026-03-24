@@ -81,7 +81,7 @@ def simulation_config(  # pylint: disable=R0913,R0917,W0613
         ),
     ] = DEFAULT_SIMULATION_CONFIG.verbose,
     backend: Annotated[
-        str | None,
+        str,
         typer.Option(
             "--backend-name",
             help="Choice of backend name (Currently, only 'ray' is supported).",
