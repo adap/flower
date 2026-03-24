@@ -48,10 +48,6 @@ FEDERATION_CONFIG_HELP_MESSAGE = CONFIG_HELP_MESSAGE.format(
 )
 
 
-# Default simulation backend name
-DEFAULT_SIMULATION_BACKEND_NAME = DEFAULT_SIMULATION_CONFIG.backend_name
-
-
 class SuperLinkConnectionTomlKey:
     """TOML keys for SuperLink connection configuration."""
 

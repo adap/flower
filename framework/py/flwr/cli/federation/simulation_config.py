@@ -15,7 +15,7 @@
 """Flower command line interface `federation simulation-config` command."""
 
 
-from typing import Annotated, Literal
+from typing import Annotated, Literal, cast
 
 import typer
 
@@ -30,6 +30,8 @@ from flwr.proto.federation_pb2 import SimulationConfig  # pylint: disable=E0611
 from flwr.supercore.constant import DEFAULT_SIMULATION_CONFIG
 
 from .error_handlers import handle_invite_grpc_error
+
+DEFAULT_BACKEND_NAME = cast(Literal["ray"], DEFAULT_SIMULATION_CONFIG.backend_name)
 
 
 def simulation_config(  # pylint: disable=R0913,R0917,W0613
@@ -87,7 +89,7 @@ def simulation_config(  # pylint: disable=R0913,R0917,W0613
             help="Choice of backend name.",
             case_sensitive=False,
         ),
-    ] = Literal[DEFAULT_SIMULATION_CONFIG.backend_name],
+    ] = DEFAULT_BACKEND_NAME,
     init_args_num_cpus: Annotated[
         int | None,
         typer.Option(
