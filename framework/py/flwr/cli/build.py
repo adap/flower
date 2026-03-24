@@ -27,14 +27,11 @@ import tomli
 import tomli_w
 import typer
 
-from flwr.common.config import check_pattern_list_value
 from flwr.common.constant import (
     FAB_CONFIG_FILE,
     FAB_DATE,
-    FAB_EXCLUDE_KEY,
     FAB_EXCLUDE_PATTERNS,
     FAB_HASH_TRUNCATION,
-    FAB_INCLUDE_KEY,
     FAB_INCLUDE_PATTERNS,
     FAB_MAX_SIZE,
 )
@@ -45,7 +42,7 @@ from flwr.supercore.fab_format_version import (
 )
 
 from .config_utils import load_and_validate
-from .utils import build_pathspec, is_valid_project_name
+from .utils import build_pathspec, is_valid_project_name, load_gitignore_patterns
 
 
 def write_to_zip(
@@ -271,8 +268,21 @@ def build_fab_from_files(
     ):
         del config["tool"]["flwr"]["federations"]
 
-    # Filter files based on user patterns and built-in constraints.
-    filtered_paths = get_filtered_fab_paths(files, config)
+    # Extract and load .gitignore if present
+    gitignore_content = None
+    if ".gitignore" in files:
+        gitignore_content = _to_bytes(files[".gitignore"])
+
+    # Get exclude and include specs
+    exclude_spec = get_fab_exclude_pathspec(gitignore_content)
+    include_spec = get_fab_include_pathspec()
+
+    # Filter files based on include/exclude specs
+    filtered_paths = [
+        path.replace("\\", "/")  # Ensure consistent path separators across platforms
+        for path in files.keys()
+        if include_spec.match_file(path) and not exclude_spec.match_file(path)
+    ]
     filtered_paths.sort()  # Sort for deterministic output
     validate_fab_files_for_format(config, filtered_paths)
 
@@ -297,201 +307,42 @@ def build_fab_from_files(
     if len(fab_bytes) > FAB_MAX_SIZE:
         raise ValueError(
             f"FAB size exceeds maximum allowed size of {FAB_MAX_SIZE:,} bytes. "
-            f"To reduce package size, narrow `{FAB_INCLUDE_KEY}` or add "
-            f"`{FAB_EXCLUDE_KEY}` patterns in [tool.flwr.app]."
+            "To reduce the package size, consider ignoring unnecessary files "
+            "via your `.gitignore` file or excluding them from the build."
         )
 
     # Returned metadata is consumed by platform during publish.
     return fab_bytes, metadata
 
 
-def get_user_fab_patterns(
-    config: dict[str, Any],
-) -> tuple[list[str], bool, list[str], bool]:
-    """Return user-defined FAB include/exclude patterns and presence flags."""
-    app_conf = config.get("tool", {}).get("flwr", {}).get("app", {})
-    if not isinstance(app_conf, dict):
-        return [], False, [], False
+def get_fab_include_pathspec() -> pathspec.PathSpec:
+    """Get the PathSpec for files to include in a FAB.
 
-    def _get_pattern_list(key: str) -> list[str]:
-        value: list[str] = app_conf.get(key, [])
-        if value is None:
-            return []
-        error = check_pattern_list_value(value, key)
-        if error:
-            raise ValueError(error)
-        return value
-
-    has_include_key = FAB_INCLUDE_KEY in app_conf
-    has_exclude_key = FAB_EXCLUDE_KEY in app_conf
-    return (
-        _get_pattern_list(FAB_INCLUDE_KEY),
-        has_include_key,
-        _get_pattern_list(FAB_EXCLUDE_KEY),
-        has_exclude_key,
-    )
+    Returns
+    -------
+    PathSpec
+        PathSpec object with default include patterns for FAB files.
+    """
+    return build_pathspec(FAB_INCLUDE_PATTERNS)
 
 
-def get_filtered_fab_paths(
-    files: dict[str, bytes | Path],
-    config: dict[str, Any],
-) -> list[str]:
-    """Compute final FAB file list using user patterns and non-overridable defaults."""
-    normalized_paths = [path.replace("\\", "/") for path in files.keys()]
-    built_in_include_spec = build_pathspec(FAB_INCLUDE_PATTERNS)
-    built_in_exclude_spec = build_pathspec(FAB_EXCLUDE_PATTERNS)
+def get_fab_exclude_pathspec(gitignore_content: bytes | None) -> pathspec.PathSpec:
+    """Get the PathSpec for files to exclude from a FAB.
 
-    (
-        user_include_patterns,
-        has_include_key,
-        user_exclude_patterns,
-        has_exclude_key,
-    ) = get_user_fab_patterns(config)
-    user_include_spec = (
-        build_pathspec(user_include_patterns) if user_include_patterns else None
-    )
-    user_exclude_spec = (
-        build_pathspec(user_exclude_patterns) if user_exclude_patterns else None
-    )
-    messages: list[tuple[str, str]] = []
-    messages.extend(
-        _collect_empty_pattern_list_messages(
-            has_include_key, user_include_patterns, FAB_INCLUDE_KEY
-        )
-    )
-    messages.extend(
-        _collect_empty_pattern_list_messages(
-            has_exclude_key, user_exclude_patterns, FAB_EXCLUDE_KEY
-        )
-    )
-    messages.extend(
-        _collect_unresolved_pattern_messages(
-            user_include_patterns, normalized_paths, FAB_INCLUDE_KEY
-        )
-    )
-    messages.extend(
-        _collect_unresolved_pattern_messages(
-            user_exclude_patterns, normalized_paths, FAB_EXCLUDE_KEY
-        )
-    )
+    If gitignore_content is provided, its patterns will be combined with the default
+    exclude patterns.
 
-    # Candidate set: user include matches, or all files if no include patterns provided.
-    candidate_paths = (
-        [path for path in normalized_paths if user_include_spec.match_file(path)]
-        if user_include_spec
-        else normalized_paths
-    )
+    Parameters
+    ----------
+    gitignore_content : bytes | None
+        Optional gitignore file content as bytes.
 
-    built_in_constrained_paths = [
-        path
-        for path in candidate_paths
-        if built_in_include_spec.match_file(path)
-        and not built_in_exclude_spec.match_file(path)
-    ]
-    final_paths = (
-        [
-            path
-            for path in built_in_constrained_paths
-            if not user_exclude_spec.match_file(path)
-        ]
-        if user_exclude_spec
-        else list(built_in_constrained_paths)
-    )
-    messages.extend(
-        _collect_pattern_conflict_messages(
-            user_include_spec=user_include_spec,
-            user_exclude_spec=user_exclude_spec,
-            candidate_paths=candidate_paths,
-            built_in_constrained_paths=built_in_constrained_paths,
-        )
-    )
-    _emit_filter_messages(messages)
-    return final_paths
-
-
-def _collect_empty_pattern_list_messages(
-    has_key: bool, patterns: list[str], key_name: str
-) -> list[tuple[str, str]]:
-    """Collect note messages for explicitly empty include/exclude lists."""
-    if has_key and not patterns:
-        return [
-            (
-                "Note",
-                f'"{key_name}" is set to an empty list. '
-                "Default built-in include/exclude constraints are used.",
-            )
-        ]
-    return []
-
-
-def _collect_unresolved_pattern_messages(
-    patterns: list[str], file_paths: list[str], key_name: str
-) -> list[tuple[str, str]]:
-    """Collect warning messages for unresolved user-defined patterns."""
-    messages: list[tuple[str, str]] = []
-    for pattern in patterns:
-        try:
-            pattern_spec = build_pathspec([pattern])
-        except Exception as err:  # pylint: disable=broad-except
-            messages.append(
-                (
-                    "Warning",
-                    f'ignoring unresolved pattern in "{key_name}": '
-                    f'"{pattern}" ({err})',
-                )
-            )
-            continue
-
-        if not any(pattern_spec.match_file(path) for path in file_paths):
-            messages.append(
-                (
-                    "Warning",
-                    f'pattern in "{key_name}" did not match any files: "{pattern}"',
-                )
-            )
-    return messages
-
-
-def _collect_pattern_conflict_messages(
-    user_include_spec: pathspec.PathSpec | None,
-    user_exclude_spec: pathspec.PathSpec | None,
-    candidate_paths: list[str],
-    built_in_constrained_paths: list[str],
-) -> list[tuple[str, str]]:
-    """Collect warning messages for include/exclude and built-in conflicts."""
-    messages: list[tuple[str, str]] = []
-    if user_include_spec and user_exclude_spec:
-        overlap = [
-            path
-            for path in candidate_paths
-            if user_include_spec.match_file(path) and user_exclude_spec.match_file(path)
-        ]
-        if overlap:
-            messages.append(
-                (
-                    "Warning",
-                    f'"{FAB_INCLUDE_KEY}" and "{FAB_EXCLUDE_KEY}" overlap for '
-                    f"{len(overlap)} file(s); exclusion takes precedence.",
-                )
-            )
-
-    built_in_removed = len(candidate_paths) - len(built_in_constrained_paths)
-    if user_include_spec and built_in_removed > 0:
-        messages.append(
-            (
-                "Warning",
-                f'{built_in_removed} file(s) matched "{FAB_INCLUDE_KEY}" but '
-                "were removed by non-overridable built-in FAB constraints.",
-            )
-        )
-    return messages
-
-
-def _emit_filter_messages(messages: list[tuple[str, str]]) -> None:
-    """Emit filter notes/warnings with consistent CLI formatting."""
-    for level, message in messages:
-        typer.secho(
-            f"{level}: {message}",
-            fg=typer.colors.YELLOW,
-            bold=True,
-        )
+    Returns
+    -------
+    PathSpec
+        PathSpec object with combined exclude patterns.
+    """
+    patterns = list(FAB_EXCLUDE_PATTERNS)
+    if gitignore_content:
+        patterns += load_gitignore_patterns(gitignore_content)
+    return pathspec.PathSpec.from_lines("gitwildmatch", patterns)

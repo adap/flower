@@ -421,55 +421,6 @@ def test_validate_pyproject_toml_fields() -> None:
     assert len(warnings) == 0
 
 
-@pytest.mark.parametrize("key", ["fab-include", "fab-exclude"])
-@pytest.mark.parametrize(
-    "value, valid",
-    [
-        (["**/*.py", "**/*.md"], True),
-        (["tests/**"], True),
-        ("not-a-list", False),
-        (123, False),
-        ({"a": "b"}, False),
-        (["valid", ""], False),
-        (["valid", "  "], False),
-        (["valid", 123], False),
-        ([None], False),
-    ],
-)
-def test_validate_fab_pattern_field(key: str, value: Any, valid: bool) -> None:
-    """Test fab-include/fab-exclude validation for valid and invalid values."""
-    # Prepare
-    config = {
-        "project": {
-            "name": "fedgpt",
-            "version": "1.0.1",
-            "description": "",
-            "license": "",
-            "authors": [],
-        },
-        "tool": {
-            "flwr": {
-                "app": {
-                    "publisher": "flwrlabs",
-                    key: value,
-                    "components": {"serverapp": "", "clientapp": ""},
-                },
-            },
-        },
-    }
-
-    # Execute
-    is_valid, errors, _ = validate_fields_in_config(config)
-
-    # Assert
-    if valid:
-        assert is_valid
-        assert not any(key in e for e in errors)
-    else:
-        assert not is_valid
-        assert any(key in e for e in errors)
-
-
 def test_validate_pyproject_toml() -> None:
     """Test that validate_pyproject_toml succeeds correctly."""
     # Prepare
