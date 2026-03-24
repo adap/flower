@@ -70,7 +70,6 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches, R0913, R0917
         typer.Option(
             "--limit",
             help="Maximum number of runs to display",
-            min=1,
         ),
     ] = None,
     output_format: Annotated[
@@ -106,7 +105,9 @@ def ls(  # pylint: disable=too-many-locals, too-many-branches, R0913, R0917
         superlink_connection = read_superlink_connection(superlink)
         channel = None
 
-        # Check `--limit` is not used together with `--run-id`
+        # Check `--limit` is positive and not used together with `--run-id`
+        if limit is not None and limit <= 0:
+            raise ValueError("The option '--limit' must be an integer greater than 0.")
         if limit is not None and run_id is not None:
             raise ValueError(
                 "The options '--run-id' and '--limit' cannot be used together."
