@@ -15,7 +15,7 @@
 """Flower command line interface `federation simulation-config` command."""
 
 
-from typing import Annotated
+from typing import Annotated, Literal
 
 import typer
 
@@ -53,6 +53,7 @@ def simulation_config(  # pylint: disable=R0913,R0917,W0613
         typer.Option(
             "--num-supernodes",
             help="The number of virtual SuperNodes in the simulation",
+            min=1,
         ),
     ] = 10,
     client_resources_num_cpus: Annotated[
@@ -60,6 +61,7 @@ def simulation_config(  # pylint: disable=R0913,R0917,W0613
         typer.Option(
             "--client-resources-num-cpus",
             help="CPUs assigned to the execution of each ClientApp",
+            min=1,
         ),
     ] = 2,
     client_resources_num_gpus: Annotated[
@@ -67,6 +69,8 @@ def simulation_config(  # pylint: disable=R0913,R0917,W0613
         typer.Option(
             "--client-resources-num-gpus",
             help="Ratio of a GPU VRAM assigned to the execution of each ClientApp",
+            min=0.0,
+            max=1.0,
         ),
     ] = 0.0,
     verbose: Annotated[
@@ -76,11 +80,12 @@ def simulation_config(  # pylint: disable=R0913,R0917,W0613
             help="Run the Simulation Runtime with verbose logs",
         ),
     ] = False,
-    backend_name: Annotated[
+    backend: Annotated[
         Literal["ray"],
         typer.Option(
             "--backend-name",
             help="Choice of backend name.",
+            case_sensitive=False,
         ),
     ] = "ray",
     init_args_num_cpus: Annotated[
@@ -88,6 +93,7 @@ def simulation_config(  # pylint: disable=R0913,R0917,W0613
         typer.Option(
             "--init-args-num-cpus",
             help="Number of CPUs to make available to the Simulation Runtime.",
+            min=1,
         ),
     ] = None,
     init_args_num_gpus: Annotated[
@@ -95,6 +101,7 @@ def simulation_config(  # pylint: disable=R0913,R0917,W0613
         typer.Option(
             "--init-args-num-gpus",
             help="Number of GPUs to make available to the Simulation Runtime",
+            min=0,
         ),
     ] = None,
     init_args_logging_level: Annotated[
@@ -120,7 +127,7 @@ def simulation_config(  # pylint: disable=R0913,R0917,W0613
                 num_supernodes=num_supernodes,
                 client_resources_num_cpus=client_resources_num_cpus,
                 client_resources_num_gpus=client_resources_num_gpus,
-                backend_name=backend_name,
+                backend_name=backend,
                 verbose=verbose,
                 init_args_num_cpus=init_args_num_cpus,
                 init_args_num_gpus=init_args_num_gpus,
