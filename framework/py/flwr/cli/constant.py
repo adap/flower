@@ -17,7 +17,7 @@
 
 import os
 
-from flwr.supercore.constant import SUPERGRID_ADDRESS
+from flwr.supercore.constant import DEFAULT_SIMULATION_CONFIG, SUPERGRID_ADDRESS
 
 # General help message for config overrides
 CONFIG_HELP_MESSAGE = (
@@ -46,10 +46,6 @@ FEDERATION_CONFIG_HELP_MESSAGE = CONFIG_HELP_MESSAGE.format(
     "[tool.flwr.federations.<YOUR-FEDERATION>]",
     "",
 )
-
-
-# Default simulation backend name
-DEFAULT_SIMULATION_BACKEND_NAME = "ray"
 
 
 class SuperLinkConnectionTomlKey:
@@ -107,9 +103,11 @@ default = "local"
 address = "{SUPERGRID_ADDRESS}"
 
 [superlink.local]
-options.num-supernodes = 10
-options.backend.client-resources.num-cpus = 1
-options.backend.client-resources.num-gpus = 0
+options.num-supernodes = {DEFAULT_SIMULATION_CONFIG.num_supernodes}
+options.backend.client-resources.num-cpus = \
+{DEFAULT_SIMULATION_CONFIG.client_resources_num_cpus}
+options.backend.client-resources.num-gpus = \
+{DEFAULT_SIMULATION_CONFIG.client_resources_num_gpus}
 """
 
 # Keys for storing account auth credentials in the credential store
