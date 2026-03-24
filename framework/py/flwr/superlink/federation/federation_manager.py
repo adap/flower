@@ -69,7 +69,11 @@ class FederationManager(ABC):
 
     @abstractmethod
     def create_federation(
-        self, flwr_aid: str, name: str, description: str
+        self,
+        flwr_aid: str,
+        name: str,
+        description: str,
+        simulation: bool | None = None,
     ) -> Federation:
         """Create a new federation.
 
@@ -81,6 +85,9 @@ class FederationManager(ABC):
             The unique name of the federation.
         description : str
             A human-readable description of the federation.
+        simulation : bool | None
+            Whether this federation is intended for simulation. If unset
+            (``None``), the manager assumes a deployment runtime should be used.
 
         Returns
         -------
@@ -126,6 +133,40 @@ class FederationManager(ABC):
             The name of the federation.
         node_id : int
             The ID of the SuperNode to remove.
+        """
+
+    @abstractmethod
+    def remove_account(
+        self, flwr_aid: str, federation: str, target_account_name: str | None
+    ) -> str:
+        """Remove an account from a federation.
+
+        If `target_account_name` is `None` the caller removes themselves
+        (leave). Otherwise only the owner may remove another account. The
+        owner can never be removed. All supernodes owned by the removed
+        account are also soft-removed from the federation.
+
+        Parameters
+        ----------
+        flwr_aid : str
+            The ID of the account initiating the removal (or leaving).
+        federation : str
+            The name of the federation.
+        target_account_name : str | None
+            The name of the account to remove. If `None`, the caller removes
+            themselves from the federation. The owner cannot remove themselves.
+
+        Returns
+        -------
+        str
+            The Flower account ID (`flwr_aid`) of the removed account.
+
+        Raises
+        ------
+        FlowerError
+            If the federation does not exist, the target account is not a
+            member, the owner tries to remove themselves, or a non-owner
+            tries to remove another account.
         """
 
     @abstractmethod

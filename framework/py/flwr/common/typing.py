@@ -238,6 +238,7 @@ class Run:  # pylint: disable=too-many-instance-attributes
     bytes_sent: int
     bytes_recv: int
     clientapp_runtime: float
+    run_type: str = ""
 
     @classmethod
     def create_empty(cls, run_id: int) -> "Run":
@@ -258,6 +259,7 @@ class Run:  # pylint: disable=too-many-instance-attributes
             bytes_sent=0,
             bytes_recv=0,
             clientapp_runtime=0.0,
+            run_type="",
         )
 
 
@@ -348,3 +350,4 @@ class Federation:
     nodes: list[NodeInfo]
     runs: list[Run]
     archived: bool = False
+    simulation: bool = False

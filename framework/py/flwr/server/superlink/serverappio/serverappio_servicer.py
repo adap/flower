@@ -15,7 +15,6 @@
 """ServerAppIo API servicer."""
 
 
-import threading
 from logging import DEBUG, ERROR, INFO
 
 import grpc
@@ -24,6 +23,7 @@ from flwr.common import Message
 from flwr.common.constant import SUPERLINK_NODE_ID, Status
 from flwr.common.logger import log
 from flwr.common.serde import (
+    config_record_to_proto,
     context_from_proto,
     context_to_proto,
     fab_to_proto,
@@ -66,6 +66,8 @@ from flwr.proto.message_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
+    GetFederationOptionsRequest,
+    GetFederationOptionsResponse,
     GetRunRequest,
     GetRunResponse,
     UpdateRunStatusRequest,
@@ -100,7 +102,6 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         self.state_factory = state_factory
         self.ffs_factory = ffs_factory
         self.objectstore_factory = objectstore_factory
-        self.lock = threading.RLock()
 
     def ListAppsToLaunch(
         self,
@@ -320,28 +321,26 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         # Validate the token
         run_id = self._verify_token(request.token, context)
 
-        # Lock access to LinkState, preventing obtaining the same pending run_id
-        with self.lock:
-            # Init access to Ffs
-            ffs = self.ffs_factory.ffs()
+        # Init access to Ffs
+        ffs = self.ffs_factory.ffs()
 
-            # Retrieve Context, Run and Fab for the run_id
-            serverapp_ctxt = state.get_serverapp_context(run_id)
-            runs = state.get_run_info(run_ids=[run_id])
-            run = runs[0] if runs else None
-            fab = None
-            if run and run.fab_hash:
-                if result := ffs.get(run.fab_hash):
-                    fab = Fab(run.fab_hash, result[0], result[1])
-            if run and fab and serverapp_ctxt:
-                # Update run status to RUNNING
-                if state.update_run_status(run_id, RunStatus(Status.RUNNING, "", "")):
-                    log(INFO, "Starting run %d", run_id)
-                    return PullAppInputsResponse(
-                        context=context_to_proto(serverapp_ctxt),
-                        run=run_to_proto(run),
-                        fab=fab_to_proto(fab),
-                    )
+        # Retrieve Context, Run and Fab for the run_id
+        serverapp_ctxt = state.get_serverapp_context(run_id)
+        runs = state.get_run_info(run_ids=[run_id])
+        run = runs[0] if runs else None
+        fab = None
+        if run and run.fab_hash:
+            if result := ffs.get(run.fab_hash):
+                fab = Fab(run.fab_hash, result[0], result[1])
+        if run and fab and serverapp_ctxt:
+            # Update run status to RUNNING
+            if state.update_run_status(run_id, RunStatus(Status.RUNNING, "", "")):
+                log(INFO, "Starting run %d", run_id)
+                return PullAppInputsResponse(
+                    context=context_to_proto(serverapp_ctxt),
+                    run=run_to_proto(run),
+                    fab=fab_to_proto(fab),
+                )
 
         # Raise an exception if the Run or Fab is not found,
         # or if the status cannot be updated to RUNNING
@@ -415,6 +414,24 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         merged_logs = "".join(request.logs)
         state.add_serverapp_log(request.run_id, merged_logs)
         return PushLogsResponse()
+
+    def GetFederationOptions(
+        self, request: GetFederationOptionsRequest, context: grpc.ServicerContext
+    ) -> GetFederationOptionsResponse:
+        """Get Federation Options associated with a run."""
+        log(DEBUG, "ServerAppIoServicer.GetFederationOptions")
+        state = self.state_factory.state()
+
+        federation_options = state.get_federation_options(request.run_id)
+        if federation_options is None:
+            context.abort(
+                grpc.StatusCode.FAILED_PRECONDITION,
+                "Expected federation options to be set, but none available.",
+            )
+            return GetFederationOptionsResponse()
+        return GetFederationOptionsResponse(
+            federation_options=config_record_to_proto(federation_options)
+        )
 
     def SendAppHeartbeat(
         self, request: SendAppHeartbeatRequest, context: grpc.ServicerContext

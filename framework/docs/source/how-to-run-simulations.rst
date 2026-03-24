@@ -257,46 +257,6 @@ For a complete list of settings you can configure, check the `ray.init
 
 For the highest performance, do not set ``options.backend.init-args``.
 
-*****************************
- Simulation in Colab/Jupyter
-*****************************
-
-The preferred way of running simulations should always be |flwr_run_link|_. However, the
-core functionality of the ``Simulation Runtime`` can be used from within a Google Colab
-or Jupyter environment by means of `run_simulation
-<ref-api-flwr.html#flwr.simulation.run_simulation>`_.
-
-.. code-block:: python
-
-    from flwr.simulation import run_simulation
-
-    # Construct the ClientApp passing the client generation function
-    client_app = ClientApp(client_fn=client_fn)
-
-    # Create your ServerApp passing the server generation function
-    server_app = ServerApp(server_fn=server_fn)
-
-    run_simulation(
-        server_app=server_app,
-        client_app=client_app,
-        num_supernodes=10,  # equivalent to setting `num-supernodes` in the Flower Configuration
-    )
-
-With ``run_simulation``, you can also control the amount of resources for your
-``ClientApp`` instances. Do so by setting ``backend_config``. If unset, the default
-resources are assigned (i.e., 2xCPUs per ``ClientApp`` and no GPU).
-
-.. code-block:: python
-
-    run_simulation(
-        # ...
-        backend_config={"client_resources": {"num_cpus": 2, "num_gpus": 0.25}}
-    )
-
-Refer to the `30 minutes Federated AI Tutorial
-<https://colab.research.google.com/github/flwrlabs/flower/blob/main/examples/flower-in-30-minutes/tutorial.ipynb>`_
-for a complete example on how to run Flower Simulations in Colab.
-
 .. _multinodesimulations:
 
 *******************************

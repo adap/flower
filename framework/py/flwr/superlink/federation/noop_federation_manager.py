@@ -41,6 +41,9 @@ class UnsupportedError(FlowerError):
 class NoOpFederationManager(FederationManager):
     """No-Op FederationManager implementation."""
 
+    def __init__(self, simulation: bool = False) -> None:
+        self._simulation = simulation
+
     def exists(self, federation: str) -> bool:
         """Check if a federation exists."""
         return federation == NOOP_FEDERATION
@@ -75,6 +78,7 @@ class NoOpFederationManager(FederationManager):
                 nodes=[],
                 runs=[],
                 archived=False,
+                simulation=self._simulation,
             )
         ]
 
@@ -95,10 +99,15 @@ class NoOpFederationManager(FederationManager):
             nodes=nodes,
             runs=runs,
             archived=False,
+            simulation=self._simulation,
         )
 
     def create_federation(
-        self, flwr_aid: str, name: str, description: str
+        self,
+        flwr_aid: str,
+        name: str,
+        description: str,
+        simulation: bool | None = None,
     ) -> Federation:
         """Create a new federation."""
         raise UnsupportedError(
@@ -121,6 +130,14 @@ class NoOpFederationManager(FederationManager):
         """Remove a SuperNode from a federation."""
         raise UnsupportedError(
             "`remove_supernode` is not supported by NoOpFederationManager."
+        )
+
+    def remove_account(
+        self, flwr_aid: str, federation: str, target_account_name: str | None
+    ) -> str:
+        """Remove an account from a federation."""
+        raise UnsupportedError(
+            "`remove_account` is not supported by NoOpFederationManager."
         )
 
     def create_invitation(

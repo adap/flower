@@ -78,6 +78,9 @@ FAB_HASH_TRUNCATION = 8
 FAB_MAX_SIZE = 10 * 1024 * 1024  # 10 MB
 FLWR_DIR = ".flwr"  # The default Flower directory: ~/.flwr/
 FLWR_HOME = "FLWR_HOME"  # If set, override the default Flower directory
+# FAB include and exclude keys in pyproject.toml
+FAB_INCLUDE_KEY = "fab-include"
+FAB_EXCLUDE_KEY = "fab-exclude"
 # FAB file include patterns (gitignore-style patterns)
 FAB_INCLUDE_PATTERNS = (
     "**/*.py",
@@ -90,6 +93,23 @@ FAB_EXCLUDE_PATTERNS = (
     f"{FLWR_DIR}/**",  # Exclude the .flwr directory
     "**/__pycache__/**",
     FAB_CONFIG_FILE,  # Exclude the original pyproject.toml
+    "**/*_test.py",
+    "**/test_*.py",
+    # Distribution / packaging
+    "build/**",
+    "eggs/**",
+    ".eggs/**",
+    "lib/**",
+    "lib64/**",
+    "parts/**",
+    "*.egg",
+    # Environments
+    ".venv/**",
+    "env/**",
+    "venv/**",
+    "ENV/**",
+    "env.bak/**",
+    "venv.bak/**",
 )
 
 # Constant for SuperLink

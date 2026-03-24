@@ -40,12 +40,16 @@ from flwr.common.constant import (
 from flwr.common.exit import ExitCode, flwr_exit
 from flwr.common.logger import log
 from flwr.supercore.grpc_health import add_args_health
+from flwr.supercore.update_check import warn_if_flwr_update_available
+from flwr.supercore.version import package_version
 from flwr.supernode.start_client_internal import start_client_internal
 
 
 def flower_supernode() -> None:
     """Run Flower SuperNode."""
     args = _parse_args_run_supernode().parse_args()
+
+    warn_if_flwr_update_available(process_name="flower-supernode")
 
     log(INFO, "Starting Flower SuperNode")
 
@@ -88,6 +92,12 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
     """Parse flower-supernode command line arguments."""
     parser = argparse.ArgumentParser(
         description="Start a Flower SuperNode",
+    )
+    parser.add_argument(
+        "-V",
+        "--version",
+        action="version",
+        version=f"Flower version: {package_version}",
     )
     _parse_args_common(parser)
     parser.add_argument(

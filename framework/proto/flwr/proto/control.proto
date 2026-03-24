@@ -79,6 +79,10 @@ service Control {
   rpc RemoveNodeFromFederation(RemoveNodeFromFederationRequest)
       returns (RemoveNodeFromFederationResponse) {}
 
+  // Remove Account from Federation
+  rpc RemoveAccountFromFederation(RemoveAccountFromFederationRequest)
+      returns (RemoveAccountFromFederationResponse) {}
+
   // Create Invitation
   rpc CreateInvitation(CreateInvitationRequest)
       returns (CreateInvitationResponse) {}
@@ -98,6 +102,18 @@ service Control {
   // Revoke Invitation
   rpc RevokeInvitation(RevokeInvitationRequest)
       returns (RevokeInvitationResponse) {}
+
+  // Set Simulation Configuration
+  rpc ConfigureSimulationFederation(ConfigureSimulationFederationRequest)
+      returns (ConfigureSimulationFederationResponse) {}
+
+  // ##############
+  // Unused for now
+  // ##############
+
+  // Start run event stream
+  rpc StreamRunEvents(StreamRunEventsRequest)
+      returns (stream StreamRunEventsResponse) {}
 }
 
 message StartRunRequest {
@@ -170,6 +186,7 @@ message ShowFederationResponse {
 message CreateFederationRequest {
   string federation_name = 1;
   string description = 2;
+  bool simulation = 3;
 }
 message CreateFederationResponse { Federation federation = 1; }
 
@@ -187,6 +204,12 @@ message RemoveNodeFromFederationRequest {
   uint64 node_id = 2;
 }
 message RemoveNodeFromFederationResponse {}
+
+message RemoveAccountFromFederationRequest {
+  string federation_name = 1;
+  optional string account_name = 2;
+}
+message RemoveAccountFromFederationResponse {}
 
 message CreateInvitationRequest {
   string invitee_account_name = 1;
@@ -211,3 +234,18 @@ message RevokeInvitationRequest {
   string federation_name = 2;
 }
 message RevokeInvitationResponse {}
+
+message ConfigureSimulationFederationRequest {
+  string federation_name = 1;
+  SimulationConfig config = 2;
+}
+message ConfigureSimulationFederationResponse {}
+
+// ##############
+// Unused for now
+// ##############
+message StreamRunEventsRequest { uint64 run_id = 1; }
+message StreamRunEventsResponse {
+  string event = 1;
+  string data = 2;
+}
