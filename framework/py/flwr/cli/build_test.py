@@ -98,6 +98,7 @@ def test_build_fab_from_files_derives_flwr_bounds() -> None:
 [project]
 name = "app"
 version = "1.0.0"
+license = { file = "LICENSE" }
 dependencies = ["flwr[simulation]>=1.26.0,<=1.28.0", "numpy>=1.0.0"]
 
 [tool.flwr.app]
@@ -106,6 +107,7 @@ fab_format_version = 1
 flwr_version_target = "1.27.1"
 """,
         "client.py": b"print('ok')\n",
+        "LICENSE": b"Apache-2.0\n",
     }
 
     _, metadata = build_fab_from_files(files)
@@ -167,6 +169,7 @@ def test_build_fab_from_files_rejects_unsupported_flwr_specifier() -> None:
 [project]
 name = "app"
 version = "1.0.0"
+license = { file = "LICENSE" }
 dependencies = ["flwr>1.26.0"]
 
 [tool.flwr.app]
@@ -178,3 +181,91 @@ fab_format_version = 1
 
     with pytest.raises(ValueError, match="inclusive lower bound"):
         build_fab_from_files(files)
+
+
+def test_build_fab_from_files_rejects_v1_without_license_file_reference() -> None:
+    """Test fab_format_version=1 requires [project].license.file."""
+    files: dict[str, bytes | Path] = {
+        "pyproject.toml": b"""
+[project]
+name = "app"
+version = "1.0.0"
+dependencies = ["flwr>=1.26.0"]
+
+[tool.flwr.app]
+publisher = "alice"
+fab_format_version = 1
+""",
+        "client.py": b"print('ok')\n",
+    }
+
+    with pytest.raises(ValueError, match=r"\[project\]\.license"):
+        build_fab_from_files(files)
+
+
+def test_build_fab_from_files_rejects_v1_when_license_file_missing() -> None:
+    """Test fab_format_version=1 requires the declared license file in the FAB."""
+    files: dict[str, bytes | Path] = {
+        "pyproject.toml": b"""
+[project]
+name = "app"
+version = "1.0.0"
+license = { file = "LICENSE" }
+dependencies = ["flwr>=1.26.0"]
+
+[tool.flwr.app]
+publisher = "alice"
+fab_format_version = 1
+""",
+        "client.py": b"print('ok')\n",
+    }
+
+    with pytest.raises(ValueError, match="included in the FAB"):
+        build_fab_from_files(files)
+
+
+def test_build_fab_from_files_rejects_v1_when_license_file_is_excluded() -> None:
+    """Test fab_format_version=1 fails when .gitignore excludes the license file."""
+    files: dict[str, bytes | Path] = {
+        "pyproject.toml": b"""
+[project]
+name = "app"
+version = "1.0.0"
+license = { file = "LICENSE" }
+dependencies = ["flwr>=1.26.0"]
+
+[tool.flwr.app]
+publisher = "alice"
+fab_format_version = 1
+""",
+        ".gitignore": b"LICENSE\n",
+        "client.py": b"print('ok')\n",
+        "LICENSE": b"Apache-2.0\n",
+    }
+
+    with pytest.raises(ValueError, match="included in the FAB"):
+        build_fab_from_files(files)
+
+
+def test_build_fab_from_files_accepts_v1_with_license_md() -> None:
+    """Test fab_format_version=1 accepts LICENSE.md as the declared license file."""
+    files: dict[str, bytes | Path] = {
+        "pyproject.toml": b"""
+[project]
+name = "app"
+version = "1.0.0"
+license = { file = "LICENSE.md" }
+dependencies = ["flwr>=1.26.0"]
+
+[tool.flwr.app]
+publisher = "alice"
+fab_format_version = 1
+""",
+        "client.py": b"print('ok')\n",
+        "LICENSE.md": b"# Apache-2.0\n",
+    }
+
+    _, metadata = build_fab_from_files(files)
+
+    assert metadata.fab_format_version == 1
+    assert metadata.flwr_version_min == "1.26.0"
