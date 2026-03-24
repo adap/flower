@@ -14,6 +14,8 @@
 # ==============================================================================
 """Control API servicer."""
 
+# pylint: disable=too-many-lines
+
 
 import hashlib
 import json
@@ -65,6 +67,8 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     AddNodeToFederationResponse,
     ArchiveFederationRequest,
     ArchiveFederationResponse,
+    ConfigureSimulationFederationRequest,
+    ConfigureSimulationFederationResponse,
     CreateFederationRequest,
     CreateFederationResponse,
     CreateInvitationRequest,
@@ -551,7 +555,10 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         return ListFederationsResponse(
             federations=[
                 Federation(
-                    name=fed.name, description=fed.description, archived=fed.archived
+                    name=fed.name,
+                    description=fed.description,
+                    archived=fed.archived,
+                    simulation=fed.simulation,
                 )
                 for fed in federations
             ]
@@ -587,6 +594,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             nodes=details.nodes,
             runs=[run_to_proto(run) for run in details.runs],
             archived=details.archived,
+            simulation=details.simulation,
         )
         return ShowFederationResponse(
             federation=federation_proto, now=now().isoformat()
@@ -618,6 +626,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 name=federation_name,
                 description=request.description,
                 flwr_aid=cast(str, account.flwr_aid),
+                simulation=request.simulation,
             )
 
         return CreateFederationResponse(
@@ -625,6 +634,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 name=federation.name,
                 description=federation.description,
                 members=federation.members,
+                simulation=federation.simulation,
             )
         )
 
@@ -816,6 +826,16 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 invitee_account_name=request.invitee_account_name,
             )
         return RevokeInvitationResponse()
+
+    def ConfigureSimulationFederation(
+        self,
+        request: ConfigureSimulationFederationRequest,
+        context: grpc.ServicerContext,
+    ) -> ConfigureSimulationFederationResponse:
+        """Configure a federation for simulation."""
+        log(INFO, _ := self.ConfigureSimulationFederation.__qualname__)
+
+        return ConfigureSimulationFederationResponse()
 
     # ***************
     # Unused for now

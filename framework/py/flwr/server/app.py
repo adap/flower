@@ -145,13 +145,13 @@ def get_control_authz_plugins() -> dict[str, type[ControlAuthzPlugin]]:
     return ee_dict | {AuthzType.NOOP: NoOpControlAuthzPlugin}
 
 
-def get_federation_manager() -> FederationManager:
+def get_federation_manager(is_simulation: bool = False) -> FederationManager:
     """Return the FederationManager."""
     try:
         federation_manager: FederationManager = get_ee_federation_manager()
         return federation_manager
     except NotImplementedError:
-        return NoOpFederationManager()
+        return NoOpFederationManager(simulation=is_simulation)
 
 
 # pylint: disable=too-many-branches, too-many-locals, too-many-statements
@@ -296,7 +296,7 @@ def run_superlink() -> None:
         )
 
     # Load Federation Manager
-    federation_manager = get_federation_manager()
+    federation_manager = get_federation_manager(is_simulation=args.simulation)
 
     # Initialize ObjectStoreFactory
     objectstore_factory = ObjectStoreFactory(args.database)
@@ -305,6 +305,7 @@ def run_superlink() -> None:
     state_factory = LinkStateFactory(
         args.database, federation_manager, objectstore_factory
     )
+    state_factory.state()  # Force initialization before starting servers
 
     # Initialize FfsFactory
     ffs_factory = FfsFactory(args.storage_dir)
@@ -421,10 +422,7 @@ def run_superlink() -> None:
         appio_address = resolve_bind_address(serverappio_address)
         command = ["flower-superexec", "--insecure"]
         command += ["--appio-api-address", appio_address]
-        command += [
-            "--plugin-type",
-            ExecPluginType.SIMULATION if is_simulation else ExecPluginType.SERVER_APP,
-        ]
+        command += ["--plugin-type", ExecPluginType.SERVER_APP]
         command += ["--parent-pid", str(os.getpid())]
         # pylint: disable-next=consider-using-with
         subprocess.Popen(command)

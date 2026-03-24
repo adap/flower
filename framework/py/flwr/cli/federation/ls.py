@@ -15,7 +15,7 @@
 """Flower command line interface `federation list` command."""
 
 
-from typing import Annotated, Any
+from typing import Annotated, Any, Literal
 
 import typer
 from rich.console import Console
@@ -54,7 +54,7 @@ def ls(  # pylint: disable=R0914, R0913, R0917, R0912
         typer.Argument(help="Name of the SuperLink connection."),
     ] = None,
     output_format: Annotated[
-        str,
+        Literal["default", "json"],
         typer.Option(
             "--format",
             case_sensitive=False,
@@ -92,7 +92,9 @@ def ls(  # pylint: disable=R0914, R0913, R0917, R0912
 
             if federation:
                 # Show specific federation details
-                members, nodes, runs, archived = _show_federation(stub, federation)
+                members, nodes, runs, archived, simulation = _show_federation(
+                    stub, federation
+                )
                 archived_str = (
                     "[bold yellow]ARCHIVED[/bold yellow] " if archived else ""
                 )
@@ -104,7 +106,11 @@ def ls(  # pylint: disable=R0914, R0913, R0917, R0912
                 if is_json:
                     print_json_to_stdout(
                         _to_json(
-                            members=members, nodes=nodes, runs=runs, archived=archived
+                            members=members,
+                            nodes=nodes,
+                            runs=runs,
+                            archived=archived,
+                            simulation=simulation,
                         )
                     )
                 else:
@@ -151,6 +157,9 @@ def _to_table(federations: list[Federation]) -> Table:
         Text("Description", justify="center"), style="bright_black", no_wrap=True
     )
     table.add_column(
+        Text("Runtime", justify="center"), style="bright_black", no_wrap=True
+    )
+    table.add_column(
         Text("Status", justify="center"), style="bright_black", no_wrap=True
     )
 
@@ -161,17 +170,25 @@ def _to_table(federations: list[Federation]) -> Table:
         else:
             style = ""
             status = "[green]active[/green]"
-        table.add_row(federation.name, federation.description, status, style=style)
+        runtime = "simulation" if federation.simulation else "deployment"
+        table.add_row(
+            federation.name,
+            federation.description,
+            runtime,
+            status,
+            style=style,
+        )
 
     return table
 
 
-def _to_json(
+def _to_json(  # pylint: disable=R0913,R0917
     federations: list[Federation] | None = None,
     members: list[Member] | None = None,
     nodes: list[NodeInfo] | None = None,
     runs: list[RunRow] | None = None,
     archived: bool | None = None,
+    simulation: bool | None = None,
 ) -> dict[str, Any]:
     """Format the provided federations list to JSON serializable format."""
     if federations is not None:
@@ -181,6 +198,7 @@ def _to_json(
                     "name": federation.name,
                     "description": federation.description,
                     "archived": federation.archived,
+                    "simulation": federation.simulation,
                 }
                 for federation in federations
             ]
@@ -221,13 +239,14 @@ def _to_json(
             "nodes": nodes_list,
             "runs": runs_list,
             "archived": archived,
+            "simulation": simulation,
         }
     }
 
 
 def _show_federation(
     stub: ControlStub, federation: str
-) -> tuple[list[Member], list[NodeInfo], list[RunRow], bool]:
+) -> tuple[list[Member], list[NodeInfo], list[RunRow], bool, bool]:
     """Show federation details.
 
     Parameters
@@ -239,8 +258,8 @@ def _show_federation(
 
     Returns
     -------
-    tuple[list[Member], list[NodeInfo], list[RunRow]]
-        A tuple containing (members, nodes, runs).
+    tuple[list[Member], list[NodeInfo], list[RunRow], bool, bool]
+        A tuple containing (members, nodes, runs, archived, simulation).
     """
     with flwr_cli_grpc_exc_handler():
         res: ShowFederationResponse = stub.ShowFederation(
@@ -256,6 +275,7 @@ def _show_federation(
         list(fed_proto.nodes),
         formatted_runs,
         fed_proto.archived,
+        fed_proto.simulation,
     )
 
 

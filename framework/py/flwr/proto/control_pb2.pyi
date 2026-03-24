@@ -479,15 +479,18 @@ class CreateFederationRequest(google.protobuf.message.Message):
 
     FEDERATION_NAME_FIELD_NUMBER: builtins.int
     DESCRIPTION_FIELD_NUMBER: builtins.int
+    SIMULATION_FIELD_NUMBER: builtins.int
     federation_name: builtins.str
     description: builtins.str
+    simulation: builtins.bool
     def __init__(
         self,
         *,
         federation_name: builtins.str = ...,
         description: builtins.str = ...,
+        simulation: builtins.bool = ...,
     ) -> None: ...
-    def ClearField(self, field_name: typing.Literal["description", b"description", "federation_name", b"federation_name"]) -> None: ...
+    def ClearField(self, field_name: typing.Literal["description", b"description", "federation_name", b"federation_name", "simulation", b"simulation"]) -> None: ...
 
 global___CreateFederationRequest = CreateFederationRequest
 
@@ -754,6 +757,36 @@ class RevokeInvitationResponse(google.protobuf.message.Message):
     ) -> None: ...
 
 global___RevokeInvitationResponse = RevokeInvitationResponse
+
+@typing.final
+class ConfigureSimulationFederationRequest(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    FEDERATION_NAME_FIELD_NUMBER: builtins.int
+    CONFIG_FIELD_NUMBER: builtins.int
+    federation_name: builtins.str
+    @property
+    def config(self) -> flwr.proto.federation_pb2.SimulationConfig: ...
+    def __init__(
+        self,
+        *,
+        federation_name: builtins.str = ...,
+        config: flwr.proto.federation_pb2.SimulationConfig | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing.Literal["config", b"config"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing.Literal["config", b"config", "federation_name", b"federation_name"]) -> None: ...
+
+global___ConfigureSimulationFederationRequest = ConfigureSimulationFederationRequest
+
+@typing.final
+class ConfigureSimulationFederationResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    def __init__(
+        self,
+    ) -> None: ...
+
+global___ConfigureSimulationFederationResponse = ConfigureSimulationFederationResponse
 
 @typing.final
 class StreamRunEventsRequest(google.protobuf.message.Message):
