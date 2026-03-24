@@ -104,8 +104,8 @@ service Control {
       returns (RevokeInvitationResponse) {}
 
   // Set Simulation Configuration
-  rpc ConfigureFederationForSimulation(ConfigureFederationForSimulationRequest)
-      returns (ConfigureFederationForSimulationResponse) {}
+  rpc ConfigureSimulationFederation(ConfigureSimulationFederationRequest)
+      returns (ConfigureSimulationFederationResponse) {}
 
   // ##############
   // Unused for now
