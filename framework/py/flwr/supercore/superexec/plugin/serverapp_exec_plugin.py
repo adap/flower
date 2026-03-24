@@ -16,8 +16,10 @@
 
 
 import subprocess
+from logging import ERROR
 from typing import Any
 
+from flwr.common.logger import log
 from flwr.supercore.constant import RunType
 
 from .base_exec_plugin import BaseExecPlugin
@@ -47,7 +49,8 @@ class ServerAppExecPlugin(BaseExecPlugin):
         elif run.run_type == RunType.SIMULATION:
             self.command = "flwr-simulation"
         else:
-            raise ValueError(f"Unsupported run type: {run.run_type}")
+            log(ERROR, "Unknown run type '%s' for run_id %d.", run.run_type, run_id)
+            return
 
         # Launch the executor process
         super().launch_app(token, run_id)
