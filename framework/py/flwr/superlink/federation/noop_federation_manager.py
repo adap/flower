@@ -15,6 +15,8 @@
 """NoOp implementation of FederationManager."""
 
 
+from typing import cast
+
 from flwr.common.constant import NOOP_ACCOUNT_NAME, NOOP_FLWR_AID
 from flwr.common.typing import Federation
 from flwr.proto.federation_pb2 import (  # pylint: disable=E0611
@@ -48,8 +50,9 @@ class NoOpFederationManager(FederationManager):
 
     def __init__(self, simulation: bool = False) -> None:
         self._simulation = simulation
-        self._simulation_config = SimulationConfig()
-        self._simulation_config.CopyFrom(DEFAULT_SIMULATION_CONFIG)
+        self._simulation_config: SimulationConfig | None = None
+        if self._simulation:
+            self._simulation_config = DEFAULT_SIMULATION_CONFIG
 
     def exists(self, federation: str) -> bool:
         """Check if a federation exists."""
@@ -86,7 +89,11 @@ class NoOpFederationManager(FederationManager):
                 runs=[],
                 archived=False,
                 simulation=self._simulation,
-                config=self.get_simulation_config(NOOP_FEDERATION),
+                config=(
+                    self.get_simulation_config(NOOP_FEDERATION)
+                    if self._simulation
+                    else SimulationConfig()
+                ),
             )
         ]
 
@@ -108,13 +115,23 @@ class NoOpFederationManager(FederationManager):
             runs=runs,
             archived=False,
             simulation=self._simulation,
-            config=self.get_simulation_config(NOOP_FEDERATION),
+            config=(
+                self.get_simulation_config(NOOP_FEDERATION)
+                if self._simulation
+                else SimulationConfig()
+            ),
         )
 
     def get_simulation_config(self, federation: str) -> SimulationConfig:
         """Get the simulation configuration."""
+        if federation != NOOP_FEDERATION or not self._simulation:
+            raise FlowerError(
+                ApiErrorCode.FEDERATION_NOT_FOUND_OR_NO_PERMISSION,
+                f"Simulation configuration unavailable for federation '{federation}'.",
+            ) from None
+
         config = SimulationConfig()
-        config.CopyFrom(self._simulation_config)
+        config.CopyFrom(cast(SimulationConfig, self._simulation_config))
         return config
 
     def set_simulation_config(
@@ -122,10 +139,10 @@ class NoOpFederationManager(FederationManager):
     ) -> None:
         """Set the simulation configuration."""
         _ = flwr_aid
-        if federation != NOOP_FEDERATION:
+        if federation != NOOP_FEDERATION or not self._simulation:
             raise FlowerError(
                 ApiErrorCode.FEDERATION_NOT_FOUND_OR_NO_PERMISSION,
-                f"Federation '{federation}' does not exist.",
+                f"Cannot set simulation configuration for federation '{federation}'.",
             ) from None
         self._simulation_config = SimulationConfig()
         self._simulation_config.CopyFrom(config)
