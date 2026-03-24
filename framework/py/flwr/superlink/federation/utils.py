@@ -16,19 +16,11 @@
 
 
 from flwr.proto.federation_pb2 import SimulationConfig  # pylint: disable=E0611
-from flwr.supercore.constant import SIMULATION_CONFIG_DEFAULTS
+from flwr.supercore.constant import DEFAULT_SIMULATION_CONFIG
 
 
 def get_default_simulation_config() -> SimulationConfig:
     """Return the default simulation configuration."""
-    return SimulationConfig(
-        num_supernodes=SIMULATION_CONFIG_DEFAULTS.num_supernodes,
-        client_resources_num_cpus=SIMULATION_CONFIG_DEFAULTS.client_resources_num_cpus,
-        client_resources_num_gpus=SIMULATION_CONFIG_DEFAULTS.client_resources_num_gpus,
-        backend_name=SIMULATION_CONFIG_DEFAULTS.backend_name,
-        verbose=SIMULATION_CONFIG_DEFAULTS.verbose,
-        init_args_num_cpus=SIMULATION_CONFIG_DEFAULTS.init_args_num_cpus,
-        init_args_num_gpus=SIMULATION_CONFIG_DEFAULTS.init_args_num_gpus,
-        init_args_logging_level=SIMULATION_CONFIG_DEFAULTS.init_args_logging_level,
-        init_args_log_to_driver=SIMULATION_CONFIG_DEFAULTS.init_args_log_to_driver,
-    )
+    config = SimulationConfig()
+    config.CopyFrom(DEFAULT_SIMULATION_CONFIG)
+    return config
