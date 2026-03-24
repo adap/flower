@@ -306,7 +306,6 @@ def test_simulation_config_from_json_preserves_falsey_optional_values() -> None:
 
     config = simulation_config_from_json(payload)
 
-    assert config is not None
     assert config.num_supernodes == 5
     assert config.client_resources_num_cpus == 1
     assert config.client_resources_num_gpus == 0.0
@@ -336,7 +335,6 @@ def test_simulation_config_json_round_trip_preserves_presence() -> None:
     restored = simulation_config_from_json(simulation_config_to_json(original))
 
     assert restored == original
-    assert restored is not None
     assert not restored.HasField("init_args_num_cpus")
     assert restored.HasField("init_args_num_gpus")
     assert not restored.HasField("init_args_logging_level")

@@ -197,13 +197,8 @@ def request_download_link(
     return str(data[out_url]), verifications
 
 
-def simulation_config_to_json(
-    config: SimulationConfig | None,
-) -> dict[str, Any] | None:
+def simulation_config_to_json(config: SimulationConfig) -> dict[str, Any]:
     """Convert a simulation config protobuf to a JSON-serializable dictionary."""
-    if config is None:
-        return None
-
     payload: dict[str, Any] = {}
     for field in config.DESCRIPTOR.fields:
         if field.has_presence and not config.HasField(field.name):
@@ -214,13 +209,8 @@ def simulation_config_to_json(
     return payload
 
 
-def simulation_config_from_json(
-    payload: dict[str, Any] | None,
-) -> SimulationConfig | None:
+def simulation_config_from_json(payload: dict[str, Any]) -> SimulationConfig:
     """Convert a JSON payload into a simulation config protobuf."""
-    if payload is None:
-        return None
-
     config = SimulationConfig()
     valid_fields = {field.name for field in config.DESCRIPTOR.fields}
     unknown_fields = set(payload) - valid_fields

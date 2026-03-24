@@ -249,7 +249,7 @@ def _to_json(  # pylint: disable=R0913,R0917
             "runs": runs_list,
             "archived": archived,
             "simulation": simulation,
-            "simulation-config": simulation_config_to_json(config),
+            "simulation-config": simulation_config_to_json(config) if config else None,
         }
     }
 
