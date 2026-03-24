@@ -48,13 +48,8 @@ class NoOpFederationManager(FederationManager):
 
     def __init__(self, simulation: bool = False) -> None:
         self._simulation = simulation
-        self._simulation_config: SimulationConfig | None = None
-
-    def _get_effective_simulation_config(self) -> SimulationConfig:
-        """Return the stored simulation configuration or the default copy."""
-        config = SimulationConfig()
-        config.CopyFrom(self._simulation_config or DEFAULT_SIMULATION_CONFIG)
-        return config
+        self._simulation_config = SimulationConfig()
+        self._simulation_config.CopyFrom(DEFAULT_SIMULATION_CONFIG)
 
     def exists(self, federation: str) -> bool:
         """Check if a federation exists."""
@@ -91,7 +86,7 @@ class NoOpFederationManager(FederationManager):
                 runs=[],
                 archived=False,
                 simulation=self._simulation,
-                config=self._get_effective_simulation_config(),
+                config=self.get_simulation_config(NOOP_FEDERATION),
             )
         ]
 
@@ -113,12 +108,14 @@ class NoOpFederationManager(FederationManager):
             runs=runs,
             archived=False,
             simulation=self._simulation,
-            config=self._get_effective_simulation_config(),
+            config=self.get_simulation_config(NOOP_FEDERATION),
         )
 
     def get_simulation_config(self, federation: str) -> SimulationConfig:
         """Get the simulation configuration."""
-        return self._get_effective_simulation_config()
+        config = SimulationConfig()
+        config.CopyFrom(self._simulation_config)
+        return config
 
     def set_simulation_config(
         self, flwr_aid: str, federation: str, config: SimulationConfig
