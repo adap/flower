@@ -20,6 +20,7 @@ from typing import Any, TypedDict
 import typer
 from typer.main import get_command
 
+from flwr.supercore.update_check import warn_if_flwr_update_available
 from flwr.supercore.version import package_version
 
 from .app_cmd import publish as app_publish
@@ -147,6 +148,8 @@ def main(
     ),
 ) -> None:
     """Flower CLI."""
+    warn_if_flwr_update_available(process_name="flwr")
+
     if version:
         typer.secho(f"Flower version: {package_version}", fg="blue")
         raise typer.Exit()
