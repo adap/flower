@@ -27,6 +27,7 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.control_pb2_grpc import ControlStub
 from flwr.proto.federation_pb2 import SimulationConfig  # pylint: disable=E0611
+from flwr.supercore.constant import SIMULATION_CONFIG_DEFAULTS
 
 from .error_handlers import handle_invite_grpc_error
 
@@ -55,7 +56,7 @@ def simulation_config(  # pylint: disable=R0913,R0917,W0613
             help="The number of virtual SuperNodes in the simulation",
             min=1,
         ),
-    ] = 10,
+    ] = SIMULATION_CONFIG_DEFAULTS.num_supernodes,
     client_resources_num_cpus: Annotated[
         int,
         typer.Option(
@@ -63,7 +64,7 @@ def simulation_config(  # pylint: disable=R0913,R0917,W0613
             help="CPUs assigned to the execution of each ClientApp",
             min=1,
         ),
-    ] = 2,
+    ] = SIMULATION_CONFIG_DEFAULTS.client_resources_num_cpus,
     client_resources_num_gpus: Annotated[
         float,
         typer.Option(
@@ -71,14 +72,14 @@ def simulation_config(  # pylint: disable=R0913,R0917,W0613
             help="Ratio of a GPU VRAM assigned to the execution of each ClientApp",
             min=0.0,
         ),
-    ] = 0.0,
+    ] = SIMULATION_CONFIG_DEFAULTS.client_resources_num_gpus,
     verbose: Annotated[
         bool,
         typer.Option(
             "--verbose",
             help="Run the Simulation Runtime with verbose logs",
         ),
-    ] = False,
+    ] = SIMULATION_CONFIG_DEFAULTS.verbose,
     backend: Annotated[
         Literal["ray"],
         typer.Option(
@@ -86,7 +87,7 @@ def simulation_config(  # pylint: disable=R0913,R0917,W0613
             help="Choice of backend name.",
             case_sensitive=False,
         ),
-    ] = "ray",
+    ] = SIMULATION_CONFIG_DEFAULTS.backend_name,
     init_args_num_cpus: Annotated[
         int | None,
         typer.Option(
@@ -94,7 +95,7 @@ def simulation_config(  # pylint: disable=R0913,R0917,W0613
             help="Number of CPUs to make available to the Simulation Runtime.",
             min=1,
         ),
-    ] = None,
+    ] = SIMULATION_CONFIG_DEFAULTS.init_args_num_cpus,
     init_args_num_gpus: Annotated[
         int | None,
         typer.Option(
@@ -102,21 +103,21 @@ def simulation_config(  # pylint: disable=R0913,R0917,W0613
             help="Number of GPUs to make available to the Simulation Runtime",
             min=0,
         ),
-    ] = None,
+    ] = SIMULATION_CONFIG_DEFAULTS.init_args_num_gpus,
     init_args_logging_level: Annotated[
         str | None,
         typer.Option(
             "--init-args-logging-level",
             help="Control logging level in Simulation Runtime.",
         ),
-    ] = None,
+    ] = SIMULATION_CONFIG_DEFAULTS.init_args_logging_level,
     init_args_log_to_driver: Annotated[
         bool,
         typer.Option(
             "--init-args-log-to-driver",
             help="Whether to propagate logs from Simulation Runtime upwards.",
         ),
-    ] = True,
+    ] = SIMULATION_CONFIG_DEFAULTS.init_args_log_to_driver,
 ) -> None:
     """Configure a Federation using the Simulation Runtime."""
     with cli_output_control_stub(superlink, output_format) as (stub, is_json):
