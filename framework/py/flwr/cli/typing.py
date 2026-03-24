@@ -18,10 +18,8 @@
 from dataclasses import dataclass
 from pathlib import Path
 
-from flwr.cli.constant import (
-    DEFAULT_SIMULATION_BACKEND_NAME,
-    SuperLinkConnectionTomlKey,
-)
+from flwr.cli.constant import SuperLinkConnectionTomlKey
+from flwr.supercore.constant import DEFAULT_SIMULATION_CONFIG
 from flwr.supercore.utils import check_federation_format
 
 _ERROR_MSG_FMT = "SuperLinkConnection.%s is None"
@@ -69,7 +67,7 @@ class SimulationBackendConfig:
 
     client_resources: SimulationClientResources | None = None
     init_args: SimulationInitArgs | None = None
-    name: str = DEFAULT_SIMULATION_BACKEND_NAME
+    name: str = DEFAULT_SIMULATION_CONFIG.backend_name
 
     def __post_init__(self) -> None:
         """Validate backend configuration."""
