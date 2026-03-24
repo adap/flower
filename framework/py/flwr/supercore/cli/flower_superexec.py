@@ -100,7 +100,8 @@ def flower_superexec() -> None:
         log(
             WARN,
             "The '%s' plugin type is deprecated and will be removed in a future "
-            "release. Please use '%s' plugin type instead.",
+            "release. Please use '%s' instead, which supports both simulation "
+            "and deployment."
             ExecPluginType.SIMULATION,
             ExecPluginType.SERVER_APP,
         )
