@@ -52,7 +52,6 @@ def simulation_config(  # pylint: disable=R0913,R0917,W0613
         int,
         typer.Option(
             "--num-supernodes",
-            case_sensitive=False,
             help="The number of virtual SuperNodes in the simulation",
         ),
     ] = 10,
@@ -60,7 +59,6 @@ def simulation_config(  # pylint: disable=R0913,R0917,W0613
         int,
         typer.Option(
             "--client-resources-num-cpus",
-            case_sensitive=False,
             help="CPUs assigned to the execution of each ClientApp",
         ),
     ] = 2,
@@ -68,7 +66,6 @@ def simulation_config(  # pylint: disable=R0913,R0917,W0613
         float,
         typer.Option(
             "--client-resources-num-gpus",
-            case_sensitive=False,
             help="Ratio of a GPU VRAM assigned to the execution of each ClientApp",
         ),
     ] = 0.0,
@@ -76,7 +73,6 @@ def simulation_config(  # pylint: disable=R0913,R0917,W0613
         bool,
         typer.Option(
             "--verbose",
-            case_sensitive=False,
             help="Run the Simulation Runtime with verbose logs",
         ),
     ] = False,
@@ -84,7 +80,6 @@ def simulation_config(  # pylint: disable=R0913,R0917,W0613
         str,
         typer.Option(
             "--backend-name",
-            case_sensitive=False,
             help="Choice of backend name.",
         ),
     ] = "ray",
@@ -92,7 +87,6 @@ def simulation_config(  # pylint: disable=R0913,R0917,W0613
         int | None,
         typer.Option(
             "--init-args-num-cpus",
-            case_sensitive=False,
             help="Number of CPUs to make available to the Simulation Runtime.",
         ),
     ] = None,
@@ -100,7 +94,6 @@ def simulation_config(  # pylint: disable=R0913,R0917,W0613
         int | None,
         typer.Option(
             "--init-args-num-gpus",
-            case_sensitive=False,
             help="Number of GPUs to make available to the Simulation Runtime",
         ),
     ] = None,
@@ -108,7 +101,6 @@ def simulation_config(  # pylint: disable=R0913,R0917,W0613
         str | None,
         typer.Option(
             "--init-args-logging-level",
-            case_sensitive=False,
             help="Control logging level in Simulation Runtime.",
         ),
     ] = None,
@@ -116,7 +108,6 @@ def simulation_config(  # pylint: disable=R0913,R0917,W0613
         bool,
         typer.Option(
             "--init-args-log-to-driver",
-            case_sensitive=False,
             help="Whether to propagate logs from Simulation Runtime upwards.",
         ),
     ] = True,
