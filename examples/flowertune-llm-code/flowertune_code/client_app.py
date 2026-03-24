@@ -46,7 +46,11 @@ def train(msg: Message, context: Context):
     training_arguments = TrainingArguments(**cfg.train.training_arguments)
 
     if cfg.train.get("dynamic_data_seed", False):
-        base_seed = int(training_arguments.data_seed or training_arguments.seed)
+        base_seed = int(
+            training_arguments.data_seed
+            if training_arguments.data_seed is not None
+            else training_arguments.seed
+        )
         # Keep the partition fixed but change the sampling order each round.
         training_arguments.data_seed = base_seed + server_round - 1
 
