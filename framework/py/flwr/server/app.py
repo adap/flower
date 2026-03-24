@@ -422,10 +422,7 @@ def run_superlink() -> None:
         appio_address = resolve_bind_address(serverappio_address)
         command = ["flower-superexec", "--insecure"]
         command += ["--appio-api-address", appio_address]
-        command += [
-            "--plugin-type",
-            ExecPluginType.SIMULATION if is_simulation else ExecPluginType.SERVER_APP,
-        ]
+        command += ["--plugin-type", ExecPluginType.SERVER_APP]
         command += ["--parent-pid", str(os.getpid())]
         # pylint: disable-next=consider-using-with
         subprocess.Popen(command)

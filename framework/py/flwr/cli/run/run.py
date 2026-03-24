@@ -17,7 +17,7 @@
 
 import hashlib
 from pathlib import Path
-from typing import Annotated, Any
+from typing import Annotated, Any, Literal
 
 import click
 import typer
@@ -98,7 +98,7 @@ def run(
         ),
     ] = False,
     output_format: Annotated[
-        str,
+        Literal["default", "json"],
         typer.Option(
             "--format",
             case_sensitive=False,
