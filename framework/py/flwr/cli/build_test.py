@@ -177,6 +177,23 @@ def test_build_fab_from_files_fab_include_is_constrained_by_builtin_include() ->
         build_fab_from_files(files)
 
 
+def test_build_fab_from_files_fab_include_toml_does_not_raise_for_pyproject() -> None:
+    """Test fab-include matching pyproject.toml does not raise a false conflict error.
+
+    pyproject.toml is excluded by built-in constraints but always re-added to the FAB
+    via a separate rewrite path, so it must not count toward the built_in_removed total.
+    """
+    files = _make_files(
+        '\n[tool.flwr.app]\nfab-include = ["**/*.toml"]\n',
+        **{"client.py": _DUMMY_PY},
+    )
+
+    # Should not raise even though pyproject.toml matches fab-include and is in
+    # FAB_EXCLUDE_PATTERNS, because it is unconditionally included in the FAB.
+    entries = _build_entries(files)
+    assert "pyproject.toml" in entries
+
+
 def test_build_fab_from_files_fab_exclude_only_removes_files() -> None:
     """Test fab-exclude removes files selected by other steps."""
     files = _make_files(
@@ -234,3 +251,18 @@ def test_build_fab_from_files_raises_when_include_hits_builtin_constraints() -> 
 
     with pytest.raises(ValueError, match="non-overridable built-in FAB constraints"):
         build_fab_from_files(files)
+
+
+def test_build_fab_from_files_normalizes_windows_path_separators() -> None:
+    """Test that Windows-style backslash keys are normalized to forward slashes."""
+    files: dict[str, bytes | Path] = {
+        "pyproject.toml": b'[project]\nname = "app"\nversion = "1.0.0"\n',
+        "src\\client.py": _DUMMY_PY,
+        "src\\utils\\helpers.py": _DUMMY_PY,
+    }
+
+    entries = _build_entries(files)
+
+    assert "src/client.py" in entries
+    assert "src/utils/helpers.py" in entries
+    assert "src\\client.py" not in entries

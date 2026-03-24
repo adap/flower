@@ -257,6 +257,8 @@ def build_fab_from_files(
         return f"{path},{sha256_hash},{file_size_bits}"
 
     # Extract, load, and parse pyproject.toml
+    # Normalise path separators up-front so all subsequent lookups are consistent.
+    files = {k.replace("\\", "/"): v for k, v in files.items()}
     if FAB_CONFIG_FILE not in files:
         raise ValueError(f"{FAB_CONFIG_FILE} not found in files")
     pyproject_content = _to_bytes(files[FAB_CONFIG_FILE])
@@ -335,7 +337,7 @@ def get_filtered_fab_paths(
     config: dict[str, Any],
 ) -> list[str]:
     """Compute final FAB file list using user patterns and non-overridable defaults."""
-    normalized_paths = [path.replace("\\", "/") for path in files.keys()]
+    normalized_paths = list(files.keys())
     built_in_include_spec = build_pathspec(FAB_INCLUDE_PATTERNS)
     built_in_exclude_spec = build_pathspec(FAB_EXCLUDE_PATTERNS)
 
@@ -424,6 +426,10 @@ def _raise_on_pattern_conflicts(
             )
 
     built_in_removed = len(candidate_paths) - len(built_in_constrained_paths)
+    # pyproject.toml is unconditionally included in the FAB via a separate rewrite
+    # path, so exclude it from this count to avoid a false/misleading error.
+    if user_include_spec and FAB_CONFIG_FILE in candidate_paths:
+        built_in_removed -= 1
     if user_include_spec and built_in_removed > 0:
         raise ValueError(
             f'{built_in_removed} file(s) matched "{FAB_INCLUDE_KEY}" but were '
