@@ -25,7 +25,9 @@ patch: 1.2.3 -> 1.2.4
 
 import argparse
 import sys
+from collections.abc import Iterator
 from pathlib import Path
+
 from tomlkit.toml_file import TOMLFile
 
 ROOT_DIR = Path(__file__).parents[2]
@@ -33,6 +35,7 @@ APPS_DIR = ROOT_DIR / "hub" / "apps"
 
 
 def bump_version(version: str, level: str) -> str:
+    """Bump the version string according to the specified level."""
     parts = version.split(".")
     if len(parts) != 3 or not all(part.isdigit() for part in parts):
         raise ValueError(f"Invalid version format: {version!r}")
@@ -54,7 +57,10 @@ def bump_version(version: str, level: str) -> str:
     return f"{major}.{minor}.{patch}"
 
 
-def update_pyproject_version(pyproject_path: Path, level: str) -> tuple[str, str] | None:
+def update_pyproject_version(
+    pyproject_path: Path, level: str
+) -> tuple[str, str] | None:
+    """Update the version in the given pyproject.toml file."""
     toml_file = TOMLFile(pyproject_path)
     doc = toml_file.read()
 
@@ -76,6 +82,7 @@ def update_pyproject_version(pyproject_path: Path, level: str) -> tuple[str, str
 
 
 def parse_apps_arg(apps_arg: str | None) -> list[str] | None:
+    """Parse the --apps argument, which can be a comma-separated list or a file path."""
     if not apps_arg:
         return None
 
@@ -92,7 +99,10 @@ def parse_apps_arg(apps_arg: str | None) -> list[str] | None:
     return apps or None
 
 
-def iter_target_app_dirs(apps_dir: Path, selected_apps: list[str] | None):
+def iter_target_app_dirs(
+    apps_dir: Path, selected_apps: list[str] | None
+) -> Iterator[Path]:
+    """Iterate over the target app directories."""
     if not apps_dir.is_dir():
         raise FileNotFoundError(f"Apps directory does not exist: {apps_dir}")
 
@@ -107,6 +117,7 @@ def iter_target_app_dirs(apps_dir: Path, selected_apps: list[str] | None):
 
 
 def main() -> int:
+    """Main function to bump app versions."""
     parser = argparse.ArgumentParser(
         description="Bump project.version in hub/apps/*/pyproject.toml"
     )
@@ -119,7 +130,7 @@ def main() -> int:
     )
     parser.add_argument(
         "--apps",
-        help="Comma-separated app names OR a file containing app names (one per line). " \
+        help="Comma-separated app names OR a file containing app names (one per line). "
         "If not provided, all apps will be updated.",
     )
     args = parser.parse_args()
@@ -153,7 +164,7 @@ def main() -> int:
             print(f"OK    {app_dir.name}: {old_version} -> {new_version}")
             updated += 1
 
-        except Exception as exc:
+        except Exception as exc:  # pylint: disable=broad-exception-caught
             print(f"ERROR {app_dir.name}: {exc}", file=sys.stderr)
             failed += 1
 
