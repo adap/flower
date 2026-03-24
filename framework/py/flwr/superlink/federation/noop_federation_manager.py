@@ -21,11 +21,13 @@ from flwr.proto.federation_pb2 import (  # pylint: disable=E0611
     Account,
     Invitation,
     Member,
+    SimulationConfig,
 )
 from flwr.supercore.constant import NOOP_FEDERATION, NOOP_FEDERATION_DESCRIPTION
 from flwr.supercore.error import ApiErrorCode, FlowerError
 
 from .federation_manager import FederationManager
+from .utils import get_default_simulation_config
 
 
 class UnsupportedError(FlowerError):
@@ -41,8 +43,9 @@ class UnsupportedError(FlowerError):
 class NoOpFederationManager(FederationManager):
     """No-Op FederationManager implementation."""
 
-    def __init__(self, simulation: bool = False) -> None:
+    def __init__(self, simulation: bool) -> None:
         self._simulation = simulation
+        self._simulation_config: SimulationConfig | None = None
 
     def exists(self, federation: str) -> bool:
         """Check if a federation exists."""
@@ -101,6 +104,27 @@ class NoOpFederationManager(FederationManager):
             archived=False,
             simulation=self._simulation,
         )
+
+    def load_simulation_config(
+        self, flwr_aid: str, federation: str
+    ) -> SimulationConfig:
+        """Get the simulation configuration."""
+        _ = flwr_aid
+        if federation != NOOP_FEDERATION:
+            raise ValueError(f"Federation '{federation}' does not exist.")
+        config = SimulationConfig()
+        config.CopyFrom(self._simulation_config or get_default_simulation_config())
+        return config
+
+    def store_simulation_config(
+        self, flwr_aid: str, federation: str, config: SimulationConfig
+    ) -> None:
+        """Set the simulation configuration."""
+        _ = flwr_aid
+        if federation != NOOP_FEDERATION:
+            raise ValueError(f"Federation '{federation}' does not exist.")
+        self._simulation_config = SimulationConfig()
+        self._simulation_config.CopyFrom(config)
 
     def create_federation(
         self,

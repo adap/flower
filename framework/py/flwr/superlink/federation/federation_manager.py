@@ -19,7 +19,10 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
 from flwr.common.typing import Federation
-from flwr.proto.federation_pb2 import Invitation  # pylint: disable=E0611
+from flwr.proto.federation_pb2 import (  # pylint: disable=E0611
+    Invitation,
+    SimulationConfig,
+)
 
 if TYPE_CHECKING:
     from flwr.server.superlink.linkstate.linkstate import LinkState
@@ -66,6 +69,54 @@ class FederationManager(ABC):
     @abstractmethod
     def get_details(self, federation: str) -> Federation:
         """Get details of the federation."""
+
+    @abstractmethod
+    def load_simulation_config(
+        self, flwr_aid: str, federation: str
+    ) -> SimulationConfig:
+        """Get the simulation configuration for a federation.
+
+        Parameters
+        ----------
+        flwr_aid : str
+            The ID of the account requesting the simulation configuration.
+        federation : str
+            The name of the federation.
+
+        Returns
+        -------
+        SimulationConfig
+            The simulation configuration stored for the federation. If the
+            configuration hasn't been set, it returns a default configuration.
+
+        Raises
+        ------
+        FlowerError
+            If the federation does not exist or the caller account is not a
+            member.
+        """
+
+    @abstractmethod
+    def store_simulation_config(
+        self, flwr_aid: str, federation: str, config: SimulationConfig
+    ) -> None:
+        """Set the simulation configuration for a federation.
+
+        Parameters
+        ----------
+        flwr_aid : str
+            The ID of the account setting the simulation configuration.
+        federation : str
+            The name of the federation.
+        config : SimulationConfig
+            The simulation configuration to store for the federation.
+
+        Raises
+        ------
+        FlowerError
+            If the federation does not exist or the caller account is not a
+            member.
+        """
 
     @abstractmethod
     def create_federation(

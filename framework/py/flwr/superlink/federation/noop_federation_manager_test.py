@@ -21,11 +21,20 @@ import pytest
 
 from flwr.common.constant import NOOP_ACCOUNT_NAME, NOOP_FLWR_AID
 from flwr.common.typing import Federation, Run, RunStatus
-from flwr.proto.federation_pb2 import Account, Member  # pylint: disable=E0611
+from flwr.proto.federation_pb2 import (  # pylint: disable=E0611
+    Account,
+    Member,
+    SimulationConfig,
+)
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
-from flwr.supercore.constant import NOOP_FEDERATION, NOOP_FEDERATION_DESCRIPTION
+from flwr.supercore.constant import (
+    NOOP_FEDERATION,
+    NOOP_FEDERATION_DESCRIPTION,
+    SIMULATION_CONFIG_DEFAULTS,
+)
 
 from .noop_federation_manager import NoOpFederationManager
+from .utils import get_default_simulation_config
 
 
 def test_get_details_with_valid_federation() -> None:
@@ -241,3 +250,51 @@ def test_simulation_runtime_flag_is_reflected() -> None:
 
     assert federations[0].simulation is True
     assert details.simulation is True
+
+
+def test_simulation_config_is_stored_in_memory() -> None:
+    """Test simulation config roundtrip uses in-memory storage."""
+    manager = NoOpFederationManager()
+    config = SimulationConfig(
+        num_supernodes=8,
+        client_resources_num_cpus=2,
+        client_resources_num_gpus=0.5,
+        backend_name="ray",
+        verbose=True,
+    )
+
+    manager.store_simulation_config(NOOP_FLWR_AID, NOOP_FEDERATION, config)
+    stored = manager.load_simulation_config(NOOP_FLWR_AID, NOOP_FEDERATION)
+
+    assert stored == config
+
+    config.num_supernodes = 1
+
+    assert (
+        manager.load_simulation_config(NOOP_FLWR_AID, NOOP_FEDERATION).num_supernodes
+        == 8
+    )
+
+
+def test_load_simulation_config_returns_defaults_when_unset() -> None:
+    """Test load_simulation_config returns shared defaults when unset."""
+    manager = NoOpFederationManager()
+
+    stored = manager.load_simulation_config(NOOP_FLWR_AID, NOOP_FEDERATION)
+
+    assert stored == get_default_simulation_config()
+    assert stored.num_supernodes == SIMULATION_CONFIG_DEFAULTS.num_supernodes
+    assert (
+        stored.client_resources_num_cpus
+        == SIMULATION_CONFIG_DEFAULTS.client_resources_num_cpus
+    )
+    assert (
+        stored.client_resources_num_gpus
+        == SIMULATION_CONFIG_DEFAULTS.client_resources_num_gpus
+    )
+    assert stored.backend_name == SIMULATION_CONFIG_DEFAULTS.backend_name
+    assert stored.verbose is SIMULATION_CONFIG_DEFAULTS.verbose
+    assert (
+        stored.init_args_log_to_driver
+        is SIMULATION_CONFIG_DEFAULTS.init_args_log_to_driver
+    )

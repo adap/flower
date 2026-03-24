@@ -833,7 +833,16 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         context: grpc.ServicerContext,
     ) -> ConfigureSimulationFederationResponse:
         """Configure a federation for simulation."""
-        log(INFO, _ := self.ConfigureSimulationFederation.__qualname__)
+        log(INFO, rpc_name := self.ConfigureSimulationFederation.__qualname__)
+
+        state = self.linkstate_factory.state()
+
+        with rpc_error_translator(context, rpc_name):
+            state.federation_manager.store_simulation_config(
+                flwr_aid=_get_flwr_aid(context),
+                federation=request.federation_name,
+                config=request.config,
+            )
 
         return ConfigureSimulationFederationResponse()
 

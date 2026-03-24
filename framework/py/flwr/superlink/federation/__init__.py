@@ -17,8 +17,10 @@
 
 from .federation_manager import FederationManager
 from .noop_federation_manager import NoOpFederationManager
+from .utils import get_default_simulation_config
 
 __all__ = [
     "FederationManager",
     "NoOpFederationManager",
+    "get_default_simulation_config",
 ]

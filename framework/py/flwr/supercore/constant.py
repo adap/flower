@@ -18,6 +18,7 @@
 from __future__ import annotations
 
 import os
+from dataclasses import dataclass
 from enum import Enum
 
 from flwr.common.constant import FLWR_DIR, NOOP_ACCOUNT_NAME
@@ -97,6 +98,24 @@ MIME_MAP = {
 # Constants for federations
 NOOP_FEDERATION = f"@{NOOP_ACCOUNT_NAME}/default"
 NOOP_FEDERATION_DESCRIPTION = "A federation for testing and development purposes."
+
+
+@dataclass(frozen=True)
+class SimulationConfigDefaults:
+    """Default values for federation simulation configuration."""
+
+    num_supernodes: int = 10
+    client_resources_num_cpus: int = 2
+    client_resources_num_gpus: float = 0.0
+    backend_name: str = "ray"
+    verbose: bool = False
+    init_args_num_cpus: int | None = None
+    init_args_num_gpus: int | None = None
+    init_args_logging_level: str | None = None
+    init_args_log_to_driver: bool = True
+
+
+SIMULATION_CONFIG_DEFAULTS = SimulationConfigDefaults()
 
 # Constants for exit handling
 FORCE_EXIT_TIMEOUT_SECONDS = 5  # Used in `flwr_exit` function
