@@ -15,7 +15,7 @@
 """Flower command line interface `federation simulation-config` command."""
 
 
-from typing import Annotated
+from typing import Annotated, Literal
 
 import typer
 
@@ -42,7 +42,7 @@ def simulation_config(  # pylint: disable=R0913,R0917,W0613
         typer.Argument(help="Name of the SuperLink connection."),
     ] = None,
     output_format: Annotated[
-        str,
+        Literal["default", "json"],
         typer.Option(
             "--format",
             case_sensitive=False,
@@ -53,63 +53,61 @@ def simulation_config(  # pylint: disable=R0913,R0917,W0613
         int,
         typer.Option(
             "--num-supernodes",
-            case_sensitive=False,
             help="The number of virtual SuperNodes in the simulation",
+            min=1,
         ),
     ] = SIMULATION_CONFIG_DEFAULTS.num_supernodes,
     client_resources_num_cpus: Annotated[
         int,
         typer.Option(
             "--client-resources-num-cpus",
-            case_sensitive=False,
             help="CPUs assigned to the execution of each ClientApp",
+            min=1,
         ),
     ] = SIMULATION_CONFIG_DEFAULTS.client_resources_num_cpus,
     client_resources_num_gpus: Annotated[
         float,
         typer.Option(
             "--client-resources-num-gpus",
-            case_sensitive=False,
             help="Ratio of a GPU VRAM assigned to the execution of each ClientApp",
+            min=0.0,
         ),
     ] = SIMULATION_CONFIG_DEFAULTS.client_resources_num_gpus,
     verbose: Annotated[
         bool,
         typer.Option(
             "--verbose",
-            case_sensitive=False,
             help="Run the Simulation Runtime with verbose logs",
         ),
     ] = SIMULATION_CONFIG_DEFAULTS.verbose,
-    backend_name: Annotated[
-        str,
+    backend: Annotated[
+        Literal["ray"],
         typer.Option(
             "--backend-name",
-            case_sensitive=False,
             help="Choice of backend name.",
+            case_sensitive=False,
         ),
     ] = SIMULATION_CONFIG_DEFAULTS.backend_name,
     init_args_num_cpus: Annotated[
         int | None,
         typer.Option(
             "--init-args-num-cpus",
-            case_sensitive=False,
             help="Number of CPUs to make available to the Simulation Runtime.",
+            min=1,
         ),
     ] = SIMULATION_CONFIG_DEFAULTS.init_args_num_cpus,
     init_args_num_gpus: Annotated[
         int | None,
         typer.Option(
             "--init-args-num-gpus",
-            case_sensitive=False,
             help="Number of GPUs to make available to the Simulation Runtime",
+            min=0,
         ),
     ] = SIMULATION_CONFIG_DEFAULTS.init_args_num_gpus,
     init_args_logging_level: Annotated[
         str | None,
         typer.Option(
             "--init-args-logging-level",
-            case_sensitive=False,
             help="Control logging level in Simulation Runtime.",
         ),
     ] = SIMULATION_CONFIG_DEFAULTS.init_args_logging_level,
@@ -117,7 +115,6 @@ def simulation_config(  # pylint: disable=R0913,R0917,W0613
         bool,
         typer.Option(
             "--init-args-log-to-driver",
-            case_sensitive=False,
             help="Whether to propagate logs from Simulation Runtime upwards.",
         ),
     ] = SIMULATION_CONFIG_DEFAULTS.init_args_log_to_driver,
@@ -130,7 +127,7 @@ def simulation_config(  # pylint: disable=R0913,R0917,W0613
                 num_supernodes=num_supernodes,
                 client_resources_num_cpus=client_resources_num_cpus,
                 client_resources_num_gpus=client_resources_num_gpus,
-                backend_name=backend_name,
+                backend_name=backend,
                 verbose=verbose,
                 init_args_num_cpus=init_args_num_cpus,
                 init_args_num_gpus=init_args_num_gpus,

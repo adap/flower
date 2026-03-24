@@ -20,6 +20,7 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass
 from enum import Enum
+from typing import Literal
 
 from flwr.common.constant import FLWR_DIR, NOOP_ACCOUNT_NAME
 
@@ -101,13 +102,13 @@ NOOP_FEDERATION_DESCRIPTION = "A federation for testing and development purposes
 
 
 @dataclass(frozen=True)
-class SimulationConfigDefaults:
+class SimulationConfigDefaults:  # pylint: disable=R0902
     """Default values for federation simulation configuration."""
 
     num_supernodes: int = 10
     client_resources_num_cpus: int = 2
     client_resources_num_gpus: float = 0.0
-    backend_name: str = "ray"
+    backend_name: Literal["ray"] = "ray"
     verbose: bool = False
     init_args_num_cpus: int | None = None
     init_args_num_gpus: int | None = None
