@@ -425,7 +425,6 @@ def _raise_on_user_exclude_include_overlap(
             f"{len(overlap)} file(s). Remove the conflicting patterns.\n\n"
             f"Affected files:\n{files_list}"
         )
-    
 
 
 def _raise_on_built_in_pattern_conflicts(
