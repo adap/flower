@@ -759,7 +759,7 @@ class RevokeInvitationResponse(google.protobuf.message.Message):
 global___RevokeInvitationResponse = RevokeInvitationResponse
 
 @typing.final
-class ConfigureFederationForSimulationRequest(google.protobuf.message.Message):
+class ConfigureSimulationFederationRequest(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
 
     FEDERATION_NAME_FIELD_NUMBER: builtins.int
@@ -776,17 +776,17 @@ class ConfigureFederationForSimulationRequest(google.protobuf.message.Message):
     def HasField(self, field_name: typing.Literal["config", b"config"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing.Literal["config", b"config", "federation_name", b"federation_name"]) -> None: ...
 
-global___ConfigureFederationForSimulationRequest = ConfigureFederationForSimulationRequest
+global___ConfigureSimulationFederationRequest = ConfigureSimulationFederationRequest
 
 @typing.final
-class ConfigureFederationForSimulationResponse(google.protobuf.message.Message):
+class ConfigureSimulationFederationResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
 
     def __init__(
         self,
     ) -> None: ...
 
-global___ConfigureFederationForSimulationResponse = ConfigureFederationForSimulationResponse
+global___ConfigureSimulationFederationResponse = ConfigureSimulationFederationResponse
 
 @typing.final
 class StreamRunEventsRequest(google.protobuf.message.Message):

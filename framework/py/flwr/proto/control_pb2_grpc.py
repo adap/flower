@@ -144,10 +144,10 @@ class ControlStub(object):
                 request_serializer=flwr_dot_proto_dot_control__pb2.RevokeInvitationRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_control__pb2.RevokeInvitationResponse.FromString,
                 _registered_method=True)
-        self.ConfigureFederationForSimulation = channel.unary_unary(
-                '/flwr.proto.Control/ConfigureFederationForSimulation',
-                request_serializer=flwr_dot_proto_dot_control__pb2.ConfigureFederationForSimulationRequest.SerializeToString,
-                response_deserializer=flwr_dot_proto_dot_control__pb2.ConfigureFederationForSimulationResponse.FromString,
+        self.ConfigureSimulationFederation = channel.unary_unary(
+                '/flwr.proto.Control/ConfigureSimulationFederation',
+                request_serializer=flwr_dot_proto_dot_control__pb2.ConfigureSimulationFederationRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_control__pb2.ConfigureSimulationFederationResponse.FromString,
                 _registered_method=True)
         self.StreamRunEvents = channel.unary_stream(
                 '/flwr.proto.Control/StreamRunEvents',
@@ -313,7 +313,7 @@ class ControlServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def ConfigureFederationForSimulation(self, request, context):
+    def ConfigureSimulationFederation(self, request, context):
         """Set Simulation Configuration
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -444,10 +444,10 @@ def add_ControlServicer_to_server(servicer, server):
                     request_deserializer=flwr_dot_proto_dot_control__pb2.RevokeInvitationRequest.FromString,
                     response_serializer=flwr_dot_proto_dot_control__pb2.RevokeInvitationResponse.SerializeToString,
             ),
-            'ConfigureFederationForSimulation': grpc.unary_unary_rpc_method_handler(
-                    servicer.ConfigureFederationForSimulation,
-                    request_deserializer=flwr_dot_proto_dot_control__pb2.ConfigureFederationForSimulationRequest.FromString,
-                    response_serializer=flwr_dot_proto_dot_control__pb2.ConfigureFederationForSimulationResponse.SerializeToString,
+            'ConfigureSimulationFederation': grpc.unary_unary_rpc_method_handler(
+                    servicer.ConfigureSimulationFederation,
+                    request_deserializer=flwr_dot_proto_dot_control__pb2.ConfigureSimulationFederationRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_control__pb2.ConfigureSimulationFederationResponse.SerializeToString,
             ),
             'StreamRunEvents': grpc.unary_stream_rpc_method_handler(
                     servicer.StreamRunEvents,
@@ -1060,7 +1060,7 @@ class Control(object):
             _registered_method=True)
 
     @staticmethod
-    def ConfigureFederationForSimulation(request,
+    def ConfigureSimulationFederation(request,
             target,
             options=(),
             channel_credentials=None,
@@ -1073,9 +1073,9 @@ class Control(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/flwr.proto.Control/ConfigureFederationForSimulation',
-            flwr_dot_proto_dot_control__pb2.ConfigureFederationForSimulationRequest.SerializeToString,
-            flwr_dot_proto_dot_control__pb2.ConfigureFederationForSimulationResponse.FromString,
+            '/flwr.proto.Control/ConfigureSimulationFederation',
+            flwr_dot_proto_dot_control__pb2.ConfigureSimulationFederationRequest.SerializeToString,
+            flwr_dot_proto_dot_control__pb2.ConfigureSimulationFederationResponse.FromString,
             options,
             channel_credentials,
             insecure,

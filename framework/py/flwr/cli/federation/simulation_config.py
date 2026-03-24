@@ -22,8 +22,8 @@ import typer
 from flwr.cli.utils import cli_output_control_stub, flwr_cli_grpc_exc_handler
 from flwr.common.constant import CliOutputFormat
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
-    ConfigureFederationForSimulationRequest,
-    ConfigureFederationForSimulationResponse,
+    ConfigureSimulationFederationRequest,
+    ConfigureSimulationFederationResponse,
 )
 from flwr.proto.control_pb2_grpc import ControlStub
 from flwr.proto.federation_pb2 import SimulationConfig  # pylint: disable=E0611
@@ -123,7 +123,7 @@ def simulation_config(  # pylint: disable=R0913,R0917,W0613
 ) -> None:
     """Configure a Federation using the Simulation Runtime."""
     with cli_output_control_stub(superlink, output_format) as (stub, is_json):
-        request = ConfigureFederationForSimulationRequest(
+        request = ConfigureSimulationFederationRequest(
             federation_name=federation,
             config=SimulationConfig(
                 num_supernodes=num_supernodes,
@@ -146,12 +146,12 @@ def simulation_config(  # pylint: disable=R0913,R0917,W0613
 
 def _configure_federation_for_simulation(
     stub: ControlStub,
-    request: ConfigureFederationForSimulationRequest,
+    request: ConfigureSimulationFederationRequest,
 ) -> None:
     """Send a request to configure a federation for simulation."""
     with flwr_cli_grpc_exc_handler(handle_invite_grpc_error):
-        _: ConfigureFederationForSimulationResponse = (
-            stub.ConfigureFederationForSimulation(request)
+        _: ConfigureSimulationFederationResponse = stub.ConfigureSimulationFederation(
+            request
         )
 
     raise NotImplementedError(

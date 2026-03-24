@@ -235,11 +235,11 @@ message RevokeInvitationRequest {
 }
 message RevokeInvitationResponse {}
 
-message ConfigureFederationForSimulationRequest {
+message ConfigureSimulationFederationRequest {
   string federation_name = 1;
   SimulationConfig config = 2;
 }
-message ConfigureFederationForSimulationResponse {}
+message ConfigureSimulationFederationResponse {}
 
 // ##############
 // Unused for now
