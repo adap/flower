@@ -161,6 +161,31 @@ def test_flwr_callback_skips_update_check_for_json_format(
     assert called is False
 
 
+@pytest.mark.parametrize(
+    ("argv", "should_call"),
+    [
+        (["flwr", "ls", "--format", "default", "--format", "json"], False),
+        (["flwr", "ls", "--format", "json", "--format", "default"], True),
+    ],
+)
+def test_flwr_callback_uses_last_format_value(
+    monkeypatch: pytest.MonkeyPatch, argv: list[str], should_call: bool
+) -> None:
+    """The last provided --format value should decide update-check suppression."""
+    monkeypatch.setattr("flwr.cli.app.sys.argv", argv)
+    called = False
+
+    def _warn(*_args: Any, **_kwargs: Any) -> None:
+        nonlocal called
+        called = True
+
+    monkeypatch.setattr(app_module, "warn_if_flwr_update_available", _warn)
+
+    app_module.main(version=False)
+
+    assert called is should_call
+
+
 def test_invalid_command() -> None:
     """Test CLI behavior with invalid commands and arguments."""
     # Test unknown command

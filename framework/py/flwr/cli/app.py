@@ -140,12 +140,20 @@ typer_click_object = get_command(app)
 
 def _should_skip_update_check(argv: list[str]) -> bool:
     """Return True if the CLI invocation requests machine readable JSON output."""
-    for idx, arg in enumerate(argv):
+    format_value: str | None = None
+    idx = 0
+
+    while idx < len(argv):
+        arg = argv[idx]
         if arg == "--format" and idx + 1 < len(argv):
-            return argv[idx + 1].lower() == "json"
+            format_value = argv[idx + 1].lower()
+            idx += 2
+            continue
         if arg.startswith("--format="):
-            return arg.split("=", 1)[1].lower() == "json"
-    return False
+            format_value = arg.split("=", 1)[1].lower()
+        idx += 1
+
+    return format_value == "json"
 
 
 @app.callback(invoke_without_command=True)
