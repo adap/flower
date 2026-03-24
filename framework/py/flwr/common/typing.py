@@ -342,7 +342,7 @@ class LogEntry:
 
 
 @dataclass
-class Federation:
+class Federation: # pylint: disable=R0902
     """Federation details."""
 
     name: str
