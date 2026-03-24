@@ -413,10 +413,10 @@ def _to_simulation_config_table(config: SimulationConfig) -> Table:
     table.add_column(Text("Value", justify="center"))
 
     rows = [
-        ("num_supernodes", str(config.num_supernodes)),
-        ("client_resources_num_cpus", str(config.client_resources_num_cpus)),
-        ("client_resources_num_gpus", str(config.client_resources_num_gpus)),
-        ("backend_name", config.backend_name),
+        ("Number of Simulated SuperNodes", str(config.num_supernodes)),
+        ("Client Resources (CPUs)", str(config.client_resources_num_cpus)),
+        ("Client Resources (GPUs)", str(config.client_resources_num_gpus)),
+        ("Backend Name", config.backend_name),
     ]
 
     for field, value in rows:

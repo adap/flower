@@ -42,6 +42,14 @@ def test_get_details_with_valid_federation() -> None:
     manager = NoOpFederationManager()
     mock_linkstate = Mock()
     manager.linkstate = mock_linkstate
+    config = SimulationConfig(
+        num_supernodes=12,
+        client_resources_num_cpus=3,
+        client_resources_num_gpus=1.0,
+        backend_name="ray",
+        verbose=True,
+    )
+    manager.set_simulation_config(NOOP_FLWR_AID, NOOP_FEDERATION, config)
 
     # Mock data
     run_id_1 = 123
@@ -121,6 +129,7 @@ def test_get_details_with_valid_federation() -> None:
     assert mock_run_1 in result.runs and mock_run_2 in result.runs
     assert result.archived is False
     assert result.simulation is False
+    assert result.config == config
 
 
 def test_get_details_with_invalid_federation() -> None:
@@ -299,28 +308,6 @@ def test_get_simulation_config_returns_defaults_when_unset() -> None:
         stored.init_args_log_to_driver
         is DEFAULT_SIMULATION_CONFIG.init_args_log_to_driver
     )
-
-
-def test_get_details_returns_stored_simulation_config() -> None:
-    """Test get_details returns the stored simulation config."""
-    manager = NoOpFederationManager(simulation=True)
-    mock_linkstate = Mock()
-    mock_linkstate.get_run_info.return_value = []
-    mock_linkstate.get_node_info.return_value = []
-    manager.linkstate = mock_linkstate
-    config = SimulationConfig(
-        num_supernodes=12,
-        client_resources_num_cpus=3,
-        client_resources_num_gpus=1.0,
-        backend_name="ray",
-        verbose=True,
-    )
-
-    manager.set_simulation_config(NOOP_FLWR_AID, NOOP_FEDERATION, config)
-
-    details = manager.get_details(NOOP_FEDERATION)
-
-    assert details.config == config
 
 
 def test_get_federations_returns_stored_simulation_config() -> None:
