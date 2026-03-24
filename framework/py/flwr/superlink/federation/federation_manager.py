@@ -71,13 +71,12 @@ class FederationManager(ABC):
         """Get details of the federation."""
 
     @abstractmethod
-    def get_simulation_config(self, flwr_aid: str, federation: str) -> SimulationConfig:
-        """Get the simulation configuration for a federation.
+    def get_simulation_config(self, federation: str) -> SimulationConfig:
+        """Get the simulation configuration for a federation. This method is called by
+        the SuperLink only.
 
         Parameters
         ----------
-        flwr_aid : str
-            The ID of the account requesting the simulation configuration.
         federation : str
             The name of the federation.
 
@@ -86,12 +85,6 @@ class FederationManager(ABC):
         SimulationConfig
             The simulation configuration stored for the federation. If the
             configuration hasn't been set, it returns a default configuration.
-
-        Raises
-        ------
-        FlowerError
-            If the federation does not exist or the caller account is not a
-            member.
         """
 
     @abstractmethod

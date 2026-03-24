@@ -266,7 +266,7 @@ def test_get_simulation_config_returns_defaults_when_unset() -> None:
     """Test get_simulation_config returns shared defaults when unset."""
     manager = NoOpFederationManager()
 
-    stored = manager.get_simulation_config(NOOP_FLWR_AID, NOOP_FEDERATION)
+    stored = manager.get_simulation_config(NOOP_FEDERATION)
 
     assert stored == DEFAULT_SIMULATION_CONFIG
     assert stored.num_supernodes == DEFAULT_SIMULATION_CONFIG.num_supernodes
