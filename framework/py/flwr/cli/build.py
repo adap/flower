@@ -328,12 +328,7 @@ def _apply_publish_filter(
     files: dict[str, bytes | Path],
     to_bytes: Callable[[bytes | Path], bytes],
 ) -> dict[str, bytes | Path]:
-    """Pre-filter files using publish-style rules.
-
-    Applies ``.gitignore`` patterns and ``APP_PUBLISH_INCLUDE/EXCLUDE_PATTERNS``
-    to narrow the file set before FAB-specific filtering.  ``pyproject.toml``
-    is always preserved.
-    """
+    """Pre-filter files using publish-style rules."""
     # Load .gitignore patterns (handles both bytes and Path values)
     gitignore_content = files.get(".gitignore")
     if gitignore_content is not None:

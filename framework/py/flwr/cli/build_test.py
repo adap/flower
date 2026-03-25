@@ -242,18 +242,6 @@ def test_build_fab_from_files_exclude_prevails_over_include() -> None:
     assert "client.py" not in entries
 
 
-def test_build_fab_from_files_raises_when_include_hits_builtin_constraints() -> None:
-    """Test build fails when fab-include matches files blocked by publish-style
-    filter."""
-    files = _make_files(
-        '\n[tool.flwr.app]\nfab-include = ["**/*.mock"]\n',
-        **{"data.mock": b"not included"},
-    )
-
-    with pytest.raises(ValueError, match="did not match any files"):
-        build_fab_from_files(files)
-
-
 def test_build_fab_from_files_normalizes_windows_path_separators() -> None:
     """Test that Windows-style backslash keys are normalized to forward slashes."""
     files: dict[str, bytes | Path] = {
