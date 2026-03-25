@@ -16,6 +16,7 @@
 # pylint: disable=invalid-name, too-many-lines, R0904, R0913
 
 
+import os
 import secrets
 import tempfile
 import threading
@@ -2026,8 +2027,9 @@ class SqlFileBasedTest(StateTest, unittest.TestCase):
     # pylint: disable-next=too-many-locals
     def test_get_message_ins_claim_is_unique_across_replicas(self) -> None:
         """Ensure concurrent replicas cannot both claim the same instruction."""
-        with tempfile.NamedTemporaryFile() as shared_db:
-            state_0, state_1 = self._create_shared_sql_states(shared_db.name)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            db_path = os.path.join(tmpdir, "shared.db")
+            state_0, state_1 = self._create_shared_sql_states(db_path)
 
             node_id = create_dummy_node(state_0)
             run_id = create_dummy_run(state_0)
