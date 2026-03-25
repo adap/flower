@@ -17,6 +17,7 @@
 
 # pylint: disable=too-many-lines
 
+import hashlib
 import json
 from collections.abc import Sequence
 from datetime import datetime, timezone
@@ -98,6 +99,67 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
     def federation_manager(self) -> FederationManager:
         """Return the FederationManager instance."""
         return self._federation_manager
+
+    def put_fab(self, content: bytes, verifications: dict[str, str]) -> str:
+        """Store FAB content and verifications and return FAB hash."""
+        fab_hash = hashlib.sha256(content).hexdigest()
+
+        if any(
+            not isinstance(key, str) or not isinstance(value, str)
+            for key, value in verifications.items()
+        ):
+            raise ValueError("`verifications` must be a dict[str, str]")
+
+        with self.session():
+            self.query(
+                """
+                INSERT INTO fab_artifact (fab_hash, content, verifications, created_at)
+                VALUES (:fab_hash, :content, :verifications, :created_at)
+                ON CONFLICT(fab_hash) DO NOTHING
+                """,
+                {
+                    "fab_hash": fab_hash,
+                    "content": content,
+                    "verifications": json.dumps(verifications),
+                    "created_at": now().isoformat(),
+                },
+            )
+
+        return fab_hash
+
+    def get_fab(self, fab_hash: str) -> tuple[bytes, dict[str, str]] | None:
+        """Retrieve FAB content and verifications by hash."""
+        rows = self.query(
+            """
+            SELECT content, verifications
+            FROM fab_artifact
+            WHERE fab_hash = :fab_hash
+            """,
+            {"fab_hash": fab_hash},
+        )
+        if not rows:
+            return None
+
+        content = bytes(rows[0]["content"])
+        if hashlib.sha256(content).hexdigest() != fab_hash:
+            log(ERROR, "Corrupt FAB artifact in LinkState for hash %s", fab_hash)
+            return None
+
+        verifications_raw = rows[0]["verifications"]
+        try:
+            verifications = json.loads(verifications_raw)
+        except json.JSONDecodeError:
+            log(ERROR, "Invalid FAB verification metadata for hash %s", fab_hash)
+            return None
+
+        if not isinstance(verifications, dict) or not all(
+            isinstance(key, str) and isinstance(value, str)
+            for key, value in verifications.items()
+        ):
+            log(ERROR, "Invalid FAB verification metadata for hash %s", fab_hash)
+            return None
+
+        return content, verifications
 
     def store_message_ins(self, message: Message) -> str | None:
         """Store one Message."""

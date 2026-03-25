@@ -19,7 +19,6 @@
 import hashlib
 import json
 import os
-import tempfile
 import time
 import unittest
 from datetime import datetime
@@ -79,7 +78,6 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
 from flwr.proto.federation_pb2 import Account, Member  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkStateFactory
 from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME, NOOP_FEDERATION, RunType
-from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.primitives.asymmetric import generate_key_pairs, public_key_to_bytes
 from flwr.superlink.auth_plugin import NoOpControlAuthnPlugin
 from flwr.superlink.federation import NoOpFederationManager
@@ -113,13 +111,11 @@ class TestControlServicer(unittest.TestCase):  # pylint: disable=R0904
     def setUp(self) -> None:
         """Set up test fixtures."""
         self.store = Mock()
-        self.tmp_dir = tempfile.TemporaryDirectory()  # pylint: disable=R1732
         objectstore_factory = Mock(store=Mock(return_value=self.store))
         self.servicer = ControlServicer(
             linkstate_factory=LinkStateFactory(
                 FLWR_IN_MEMORY_DB_NAME, NoOpFederationManager(), objectstore_factory
             ),
-            ffs_factory=FfsFactory(self.tmp_dir.name),
             objectstore_factory=objectstore_factory,
             authn_plugin=(authn_plugin := NoOpControlAuthnPlugin(Mock(), False)),
         )
@@ -129,10 +125,6 @@ class TestControlServicer(unittest.TestCase):  # pylint: disable=R0904
         self.aid: str = account_info.flwr_aid
         shared_account_info.set(account_info)
         self.state = self.servicer.linkstate_factory.state()
-
-    def tearDown(self) -> None:
-        """Clean up after tests."""
-        self.tmp_dir.cleanup()
 
     def _create_dummy_run(self, flwr_aid: str | None) -> int:
         return self.state.create_run(
@@ -657,7 +649,6 @@ class TestControlServicerInvitationRPCs(unittest.TestCase):
         self.linkstate_factory.state.return_value = self.state
         self.servicer = ControlServicer(
             linkstate_factory=self.linkstate_factory,
-            ffs_factory=Mock(),
             objectstore_factory=Mock(),
             authn_plugin=Mock(),
         )
@@ -749,20 +740,14 @@ class TestControlServicerAuth(unittest.TestCase):
 
     def setUp(self) -> None:
         """Set up test fixtures."""
-        self.tmp_dir = tempfile.TemporaryDirectory()  # pylint: disable=R1732
         self.servicer = ControlServicer(
             linkstate_factory=LinkStateFactory(
                 FLWR_IN_MEMORY_DB_NAME, NoOpFederationManager(), Mock()
             ),
-            ffs_factory=FfsFactory(self.tmp_dir.name),
             objectstore_factory=Mock(),
             authn_plugin=Mock(),
         )
         self.state = self.servicer.linkstate_factory.state()
-
-    def tearDown(self) -> None:
-        """Clean up after tests."""
-        self.tmp_dir.cleanup()
 
     def _create_dummy_run(self, flwr_aid: str | None) -> int:
         return self.state.create_run(
@@ -921,13 +906,11 @@ class TestValidateFederationAndNodesInRequest(unittest.TestCase):
 
     def setUp(self) -> None:
         """Set up test fixtures."""
-        self.tmp_dir = tempfile.TemporaryDirectory()  # pylint: disable=R1732
         objectstore_factory = Mock(store=Mock(return_value=Mock()))
         self.servicer = ControlServicer(
             linkstate_factory=LinkStateFactory(
                 FLWR_IN_MEMORY_DB_NAME, NoOpFederationManager(), objectstore_factory
             ),
-            ffs_factory=FfsFactory(self.tmp_dir.name),
             objectstore_factory=objectstore_factory,
             authn_plugin=(authn_plugin := NoOpControlAuthnPlugin(Mock(), False)),
         )
@@ -937,10 +920,6 @@ class TestValidateFederationAndNodesInRequest(unittest.TestCase):
         self.aid: str = account_info.flwr_aid
         shared_account_info.set(account_info)
         self.state = self.servicer.linkstate_factory.state()
-
-    def tearDown(self) -> None:
-        """Clean up after tests."""
-        self.tmp_dir.cleanup()
 
     def _make_context(self) -> MagicMock:
         """Create a mock gRPC context that raises on abort."""

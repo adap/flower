@@ -15,7 +15,6 @@
 """ServerAppIoServicer tests."""
 
 
-import tempfile
 import unittest
 from datetime import timedelta
 from unittest.mock import Mock, patch
@@ -86,7 +85,6 @@ from flwr.server.superlink.serverappio.serverappio_servicer import _raise_if
 from flwr.server.superlink.utils import _STATUS_TO_MSG
 from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME, NOOP_FEDERATION, RunType
 from flwr.supercore.date import now
-from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.inflatable.inflatable_object import (
     get_all_nested_objects,
     get_object_id,
@@ -148,17 +146,11 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
 
     def setUp(self) -> None:
         """Initialize mock stub and server interceptor."""
-        # Create a temporary directory
-        self.temp_dir = tempfile.TemporaryDirectory()  # pylint: disable=R1732
-        self.addCleanup(self.temp_dir.cleanup)  # Ensures cleanup after test
-
         objectstore_factory = ObjectStoreFactory()
         state_factory = LinkStateFactory(
             FLWR_IN_MEMORY_DB_NAME, NoOpFederationManager(), objectstore_factory
         )
         self.state = state_factory.state()
-        ffs_factory = FfsFactory(self.temp_dir.name)
-        self.ffs = ffs_factory.ffs()
         self.store = objectstore_factory.store()
         self.node_pk = b"fake public key"
         self.node_id = self.state.create_node(
@@ -171,7 +163,6 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         self._server: grpc.Server = run_serverappio_api_grpc(
             SERVERAPPIO_API_DEFAULT_SERVER_ADDRESS,
             state_factory,
-            ffs_factory,
             objectstore_factory,
             None,
         )
@@ -245,7 +236,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
 
     def tearDown(self) -> None:
         """Clean up grpc server."""
-        self._server.stop(None)
+        self._server.stop(None).wait(timeout=2)
 
     def _transition_run_status(self, run_id: int, num_transitions: int) -> None:
         if num_transitions > 0:
@@ -953,7 +944,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         """Test `RequestToken` and `PullAppInputs` transitions run status from PENDING
         to STARTING to RUNNING."""
         # Prepare: Create a run with FAB
-        fab_hash = self.ffs.put(b"mock fab content", {})
+        fab_hash = self.state.put_fab(b"mock fab content", {})
         run_id = self._create_dummy_run(running=False, fab_hash=fab_hash)
 
         # Set serverapp context

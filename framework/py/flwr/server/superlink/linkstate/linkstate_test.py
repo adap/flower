@@ -16,12 +16,14 @@
 # pylint: disable=invalid-name, too-many-lines, R0904, R0913
 
 
+import hashlib
 import secrets
 import tempfile
 import time
 import unittest
 from abc import abstractmethod
 from datetime import datetime, timedelta, timezone
+from typing import cast
 from unittest.mock import Mock, patch
 from uuid import uuid4
 
@@ -54,7 +56,12 @@ from flwr.proto.message_pb2 import Metadata as ProtoMetadata
 from flwr.proto.recorddict_pb2 import RecordDict as ProtoRecordDict
 
 # pylint: enable=E0611
-from flwr.server.superlink.linkstate import InMemoryLinkState, LinkState, SqlLinkState
+from flwr.server.superlink.linkstate import (
+    InMemoryLinkState,
+    LinkState,
+    LinkStateFactory,
+    SqlLinkState,
+)
 from flwr.supercore.constant import NOOP_FEDERATION, NodeStatus, RunType
 from flwr.supercore.corestate.corestate_test import StateTest as CoreStateTest
 from flwr.supercore.object_store.object_store_factory import ObjectStoreFactory
@@ -77,6 +84,94 @@ class StateTest(CoreStateTest):
         """Create a P-384 public key for node creation."""
         _, public_key = generate_key_pairs()
         return public_key_to_bytes(public_key)
+
+    def test_put_and_get_fab(self) -> None:
+        """Test storing and retrieving FAB content."""
+        state = self.state_factory()
+        content = b"fab-content"
+        verifications = {"publisher": "flwr"}
+        expected_hash = hashlib.sha256(content).hexdigest()
+
+        fab_hash = state.put_fab(content, verifications)
+        result = state.get_fab(fab_hash)
+
+        self.assertEqual(fab_hash, expected_hash)
+        self.assertIsNotNone(result)
+        assert result is not None
+        self.assertEqual(result[0], content)
+        self.assertEqual(result[1], verifications)
+
+    def test_put_fab_is_idempotent(self) -> None:
+        """Test repeated puts of the same FAB content are idempotent."""
+        state = self.state_factory()
+        content = b"fab-content"
+        verifications = {"publisher": "flwr"}
+
+        fab_hash_1 = state.put_fab(content, verifications)
+        fab_hash_2 = state.put_fab(content, verifications)
+
+        self.assertEqual(fab_hash_1, fab_hash_2)
+        result = state.get_fab(fab_hash_1)
+        self.assertIsNotNone(result)
+        assert result is not None
+        self.assertEqual(result[0], content)
+        self.assertEqual(result[1], verifications)
+
+        if isinstance(state, InMemoryLinkState):
+            self.assertEqual(len(state.fab_artifacts), 1)
+        elif isinstance(state, SqlLinkState):
+            rows = state.query(
+                "SELECT COUNT(*) AS count FROM fab_artifact WHERE fab_hash = :fab_hash",
+                {"fab_hash": fab_hash_1},
+            )
+            self.assertEqual(rows[0]["count"], 1)
+
+    def test_get_fab_missing_returns_none(self) -> None:
+        """Test missing FAB returns None."""
+        state = self.state_factory()
+        self.assertIsNone(state.get_fab("does-not-exist"))
+
+    def test_get_fab_returns_none_for_corrupt_content(self) -> None:
+        """Test corrupt FAB payload fails integrity validation."""
+        state = self.state_factory()
+        fab_hash = state.put_fab(b"fab-content", {"publisher": "flwr"})
+
+        if isinstance(state, InMemoryLinkState):
+            with state.lock:
+                _, verifications = state.fab_artifacts[fab_hash]
+                state.fab_artifacts[fab_hash] = (b"tampered-content", verifications)
+        elif isinstance(state, SqlLinkState):
+            state.query(
+                "UPDATE fab_artifact SET content = :content WHERE fab_hash = :fab_hash",
+                {"content": b"tampered-content", "fab_hash": fab_hash},
+            )
+
+        self.assertIsNone(state.get_fab(fab_hash))
+
+    def test_get_fab_returns_none_for_corrupt_verifications(self) -> None:
+        """Test corrupt FAB verification metadata fails validation."""
+        state = self.state_factory()
+        fab_hash = state.put_fab(b"fab-content", {"publisher": "flwr"})
+
+        if isinstance(state, InMemoryLinkState):
+            with state.lock:
+                content, _ = state.fab_artifacts[fab_hash]
+                # Intentional runtime-invalid metadata shape.
+                state.fab_artifacts[fab_hash] = (
+                    content,
+                    cast(dict[str, str], {"publisher": 123}),
+                )
+        elif isinstance(state, SqlLinkState):
+            state.query(
+                """
+                UPDATE fab_artifact
+                SET verifications = :verifications
+                WHERE fab_hash = :fab_hash
+                """,
+                {"verifications": '{"publisher": 123}', "fab_hash": fab_hash},
+            )
+
+        self.assertIsNone(state.get_fab(fab_hash))
 
     def test_create_and_get_run_info(self) -> None:
         """Test if create_run and get_run_info work correctly."""
@@ -1944,6 +2039,49 @@ class SqlFileBasedTest(StateTest, unittest.TestCase):
         )
         state.initialize()
         return state
+
+    def test_fab_retrievable_across_state_factories(self) -> None:
+        """Test FAB persisted by one SQL state is readable by another."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            database_path = f"{tmp_dir}/state.db"
+            objectstore_factory = ObjectStoreFactory(database_path)
+
+            state_factory_a = LinkStateFactory(
+                database_path,
+                NoOpFederationManager(),
+                objectstore_factory,
+            )
+            state_a = state_factory_a.state()
+
+            content = b"fab-content"
+            verifications = {"publisher": "flwr"}
+            fab_hash = state_a.put_fab(content, verifications)
+            run_id = state_a.create_run(
+                "flwr/demo",
+                "v1.0.0",
+                fab_hash,
+                {},
+                NOOP_FEDERATION,
+                ConfigRecord(),
+                "test-aid",
+                RunType.SERVER_APP,
+            )
+
+            state_factory_b = LinkStateFactory(
+                database_path,
+                NoOpFederationManager(),
+                objectstore_factory,
+            )
+            state_b = state_factory_b.state()
+            runs = state_b.get_run_info(run_ids=[run_id])
+
+            self.assertTrue(runs)
+            self.assertEqual(runs[0].fab_hash, fab_hash)
+            result = state_b.get_fab(fab_hash)
+            self.assertIsNotNone(result)
+            assert result is not None
+            self.assertEqual(result[0], content)
+            self.assertEqual(result[1], verifications)
 
 
 if __name__ == "__main__":

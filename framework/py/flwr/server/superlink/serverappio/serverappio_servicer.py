@@ -80,7 +80,6 @@ from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
 from flwr.server.superlink.utils import abort_if
 from flwr.server.utils.validator import validate_message
-from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.inflatable.inflatable_object import (
     UnexpectedObjectContentError,
     get_all_nested_objects,
@@ -96,11 +95,9 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     def __init__(
         self,
         state_factory: LinkStateFactory,
-        ffs_factory: FfsFactory,
         objectstore_factory: ObjectStoreFactory,
     ) -> None:
         self.state_factory = state_factory
-        self.ffs_factory = ffs_factory
         self.objectstore_factory = objectstore_factory
 
     def ListAppsToLaunch(
@@ -321,16 +318,13 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         # Validate the token
         run_id = self._verify_token(request.token, context)
 
-        # Init access to Ffs
-        ffs = self.ffs_factory.ffs()
-
         # Retrieve Context, Run and Fab for the run_id
         serverapp_ctxt = state.get_serverapp_context(run_id)
         runs = state.get_run_info(run_ids=[run_id])
         run = runs[0] if runs else None
         fab = None
         if run and run.fab_hash:
-            if result := ffs.get(run.fab_hash):
+            if result := state.get_fab(run.fab_hash):
                 fab = Fab(run.fab_hash, result[0], result[1])
         if run and fab and serverapp_ctxt:
             # Update run status to RUNNING

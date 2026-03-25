@@ -26,7 +26,6 @@ from flwr.proto.serverappio_pb2_grpc import (  # pylint: disable=E0611
     add_ServerAppIoServicer_to_server,
 )
 from flwr.server.superlink.linkstate import LinkStateFactory
-from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.object_store import ObjectStoreFactory
 
 from .serverappio_servicer import ServerAppIoServicer
@@ -35,7 +34,6 @@ from .serverappio_servicer import ServerAppIoServicer
 def run_serverappio_api_grpc(
     address: str,
     state_factory: LinkStateFactory,
-    ffs_factory: FfsFactory,
     objectstore_factory: ObjectStoreFactory,
     certificates: tuple[bytes, bytes, bytes] | None,
 ) -> grpc.Server:
@@ -43,7 +41,6 @@ def run_serverappio_api_grpc(
     # Create ServerAppIo API gRPC server
     serverappio_servicer: grpc.Server = ServerAppIoServicer(
         state_factory=state_factory,
-        ffs_factory=ffs_factory,
         objectstore_factory=objectstore_factory,
     )
     serverappio_add_servicer_to_server_fn = add_ServerAppIoServicer_to_server

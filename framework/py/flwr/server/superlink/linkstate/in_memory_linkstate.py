@@ -15,6 +15,7 @@
 """In-memory LinkState implementation."""
 
 
+import hashlib
 import threading
 from bisect import bisect_right
 from collections import defaultdict
@@ -91,6 +92,7 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
         self.flwr_aid_to_run_ids: dict[str, set[int]] = defaultdict(set)
 
         self.node_public_keys: set[bytes] = set()
+        self.fab_artifacts: dict[str, tuple[bytes, dict[str, str]]] = {}
 
         self.lock = threading.RLock()
         federation_manager.linkstate = self
@@ -100,6 +102,34 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
     def federation_manager(self) -> FederationManager:
         """Get the FederationManager instance."""
         return self._federation_manager
+
+    def put_fab(self, content: bytes, verifications: dict[str, str]) -> str:
+        """Store FAB content and verifications and return FAB hash."""
+        fab_hash = hashlib.sha256(content).hexdigest()
+        with self.lock:
+            self.fab_artifacts.setdefault(
+                fab_hash,
+                (content, dict(verifications)),
+            )
+        return fab_hash
+
+    def get_fab(self, fab_hash: str) -> tuple[bytes, dict[str, str]] | None:
+        """Retrieve FAB content and verifications by hash."""
+        with self.lock:
+            entry = self.fab_artifacts.get(fab_hash)
+            if entry is None:
+                return None
+            content, verifications = entry
+            if hashlib.sha256(content).hexdigest() != fab_hash:
+                log(ERROR, "Corrupt FAB artifact in LinkState for hash %s", fab_hash)
+                return None
+            if not all(
+                isinstance(key, str) and isinstance(value, str)
+                for key, value in verifications.items()
+            ):
+                log(ERROR, "Invalid FAB verification metadata for hash %s", fab_hash)
+                return None
+            return content, dict(verifications)
 
     def store_message_ins(self, message: Message) -> str | None:
         """Store one Message."""
