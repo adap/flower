@@ -19,12 +19,9 @@ from io import BytesIO
 from pathlib import Path
 from zipfile import ZipFile
 
-import click
 import pytest
 
-from flwr.supercore.constant import MAX_DIR_DEPTH
-
-from .build import build_fab_from_disk, build_fab_from_files
+from .build import build_fab_from_files
 
 _DUMMY_PY = b"print('ok')\n"
 
@@ -170,13 +167,13 @@ def test_build_fab_from_files_without_fab_include_uses_all_then_builtin() -> Non
 
 
 def test_build_fab_from_files_fab_include_is_constrained_by_builtin_include() -> None:
-    """Test fab-include that only matches built-in-excluded files raises ValueError."""
+    """Test fab-include that only matches publish-excluded files raises ValueError."""
     files = _make_files(
         '\n[tool.flwr.app]\nfab-include = ["**/*.mock"]\n',
         **{"client.py": _DUMMY_PY, "data.mock": b"not included"},
     )
 
-    with pytest.raises(ValueError, match="non-overridable built-in FAB constraints"):
+    with pytest.raises(ValueError, match="did not match any files"):
         build_fab_from_files(files)
 
 
@@ -246,14 +243,14 @@ def test_build_fab_from_files_exclude_prevails_over_include() -> None:
 
 
 def test_build_fab_from_files_raises_when_include_hits_builtin_constraints() -> None:
-    """Test build fails when fab-include matches files blocked by built-in
-    constraints."""
+    """Test build fails when fab-include matches files blocked by publish-style
+    filter."""
     files = _make_files(
         '\n[tool.flwr.app]\nfab-include = ["**/*.mock"]\n',
         **{"data.mock": b"not included"},
     )
 
-    with pytest.raises(ValueError, match="non-overridable built-in FAB constraints"):
+    with pytest.raises(ValueError, match="did not match any files"):
         build_fab_from_files(files)
 
 
@@ -270,21 +267,3 @@ def test_build_fab_from_files_normalizes_windows_path_separators() -> None:
     assert "src/client.py" in entries
     assert "src/utils/helpers.py" in entries
     assert "src\\client.py" not in entries
-
-
-def test_build_fab_from_disk_wraps_depth_error_as_click_exception(
-    tmp_path: Path,
-) -> None:
-    """Test that exceeding max directory depth raises ClickException."""
-    (tmp_path / "pyproject.toml").write_text(
-        '[project]\nname = "app"\nversion = "1.0.0"\n'
-    )
-    # Create a file nested beyond MAX_DIR_DEPTH (10)
-    deep = tmp_path
-    for i in range(MAX_DIR_DEPTH + 1):
-        deep = deep / f"d{i}"
-    deep.mkdir(parents=True)
-    (deep / "deep.py").write_bytes(_DUMMY_PY)
-
-    with pytest.raises(click.ClickException, match="exceeds the maximum"):
-        build_fab_from_disk(tmp_path)

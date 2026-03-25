@@ -17,6 +17,7 @@
 
 import hashlib
 import zipfile
+from collections.abc import Callable
 from io import BytesIO
 from pathlib import Path
 from typing import Annotated, Any
@@ -50,7 +51,12 @@ from flwr.supercore.fab_format_version import (
 )
 
 from .config_utils import load_and_validate
-from .utils import build_pathspec, collect_project_files, is_valid_project_name
+from .utils import (
+    build_pathspec,
+    filter_paths,
+    is_valid_project_name,
+    load_gitignore_patterns,
+)
 
 
 def write_to_zip(
@@ -168,8 +174,7 @@ def build(
 def build_fab_from_disk(app: Path) -> bytes:
     """Build a FAB from files on disk and return the FAB as bytes.
 
-    This function reads files from disk using publish-style rules and bundles them into
-    a FAB.
+    This function reads files from disk and bundles them into a FAB.
 
     Parameters
     ----------
@@ -183,22 +188,14 @@ def build_fab_from_disk(app: Path) -> bytes:
     """
     app = app.resolve()
 
-    # Collect files using publish-style rules (.gitignore exclusion, broad file-type
-    # include, depth limit). build_fab_from_files applies a second layer of FAB-specific
-    # filtering.
-    try:
-        file_paths = collect_project_files(
-            app,
-            include_patterns=APP_PUBLISH_INCLUDE_PATTERNS,
-            exclude_patterns=APP_PUBLISH_EXCLUDE_PATTERNS,
-            max_depth=MAX_DIR_DEPTH,
-        )
-    except ValueError as err:
-        raise click.ClickException(str(err)) from err
+    # Collect all files recursively (including pyproject.toml and .gitignore)
+    all_files = [f for f in app.rglob("*") if f.is_file()]
 
-    # Create dict mapping relative POSIX paths to Path objects
+    # Create dict mapping relative paths to Path objects
     files_dict: dict[str, bytes | Path] = {
-        file_path.relative_to(app).as_posix(): file_path for file_path in file_paths
+        # Ensure consistent path separators across platforms
+        file_path.relative_to(app).as_posix(): file_path
+        for file_path in all_files
     }
 
     # Build FAB from the files dict
@@ -290,7 +287,10 @@ def build_fab_from_files(
     ):
         del config["tool"]["flwr"]["federations"]
 
-    # Filter files based on user patterns and built-in constraints.
+    # Stage 1: Apply publish-style rules (.gitignore + publish include/exclude).
+    files = _apply_publish_filter(files, _to_bytes)
+
+    # Stage 2: Apply FAB include/exclude rules (user patterns + built-in).
     filtered_paths = get_filtered_fab_paths(files, config)
     filtered_paths.sort()  # Sort for deterministic output
     validate_fab_files_for_format(config, filtered_paths)
@@ -322,6 +322,40 @@ def build_fab_from_files(
 
     # Returned metadata is consumed by platform during publish.
     return fab_bytes, metadata
+
+
+def _apply_publish_filter(
+    files: dict[str, bytes | Path],
+    to_bytes: Callable[[bytes | Path], bytes],
+) -> dict[str, bytes | Path]:
+    """Pre-filter files using publish-style rules.
+
+    Applies ``.gitignore`` patterns and ``APP_PUBLISH_INCLUDE/EXCLUDE_PATTERNS``
+    to narrow the file set before FAB-specific filtering.  ``pyproject.toml``
+    is always preserved.
+    """
+    # Load .gitignore patterns (handles both bytes and Path values)
+    gitignore_content = files.get(".gitignore")
+    if gitignore_content is not None:
+        gitignore_patterns = load_gitignore_patterns(to_bytes(gitignore_content))
+    else:
+        gitignore_patterns = []
+
+    # Delegate to shared filtering engine
+    accepted = set(
+        filter_paths(
+            files.keys(),
+            gitignore_patterns,
+            APP_PUBLISH_INCLUDE_PATTERNS,
+            APP_PUBLISH_EXCLUDE_PATTERNS,
+            max_depth=MAX_DIR_DEPTH,
+        )
+    )
+
+    # Always keep pyproject.toml (processed separately downstream)
+    accepted.add(FAB_CONFIG_FILE)
+
+    return {path: content for path, content in files.items() if path in accepted}
 
 
 def get_user_fab_patterns(

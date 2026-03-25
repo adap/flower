@@ -523,6 +523,63 @@ def depth_of(relative_path: Path) -> int:
     return max(0, len(relative_path.parts) - 1)
 
 
+def filter_paths(
+    paths: Iterable[str],
+    gitignore_patterns: Iterable[str],
+    include_patterns: tuple[str, ...],
+    exclude_patterns: tuple[str, ...],
+    max_depth: int | None = None,
+) -> list[str]:
+    """Filter POSIX-style relative paths using gitignore-style pattern rules.
+
+    This is the shared filtering function used by both :func:`collect_project_files`
+    (disk-based) and the FAB build pipeline (in-memory dict keys).
+
+    Parameters
+    ----------
+    paths : Iterable[str]
+        POSIX-style relative file paths to filter.
+    gitignore_patterns : Iterable[str]
+        Patterns loaded from ``.gitignore`` (already parsed, no comments).
+    include_patterns : tuple[str, ...]
+        Gitignore-style patterns for files to include.
+    exclude_patterns : tuple[str, ...]
+        Gitignore-style patterns for files to exclude.  Combined with
+        ``gitignore_patterns``.
+    max_depth : int | None
+        If set, raise ``ValueError`` for any path whose directory depth
+        exceeds this value.
+
+    Returns
+    -------
+    list[str]
+        Filtered POSIX-style paths that match include rules and do not
+        match exclude rules.
+
+    Raises
+    ------
+    ValueError
+        If any path exceeds ``max_depth``.
+    """
+    exclude_spec = build_pathspec(tuple(gitignore_patterns) + exclude_patterns)
+    include_spec = build_pathspec(include_patterns)
+
+    accepted_posix_paths: list[str] = []
+    for path in paths:
+        if exclude_spec.match_file(path) or not include_spec.match_file(path):
+            continue
+
+        # Check max depth
+        if max_depth is not None and depth_of(Path(path)) > max_depth:
+            raise ValueError(
+                f"'{path}' exceeds the maximum directory depth of {max_depth}."
+            )
+
+        accepted_posix_paths.append(path)
+
+    return accepted_posix_paths
+
+
 def collect_project_files(
     root: Path,
     include_patterns: tuple[str, ...],
@@ -569,12 +626,10 @@ def collect_project_files(
     # Note: This should be a temporary solution until we have a complete mechanism
     # for configurable inclusion and exclusion rules.
     # Note: Unlike Git, we do not support nested .gitignore files in subdirectories.
-    gitignore_patterns = tuple(load_gitignore_patterns(root / ".gitignore"))
-    exclude_spec = build_pathspec(gitignore_patterns + exclude_patterns)
-    include_spec = build_pathspec(include_patterns)
+    gitignore_patterns = load_gitignore_patterns(root / ".gitignore")
 
-    # Walk the directory tree
-    file_paths: list[Path] = []
+    # Collect candidate paths, skipping non-files and symlinks outside root
+    candidates: dict[str, Path] = {}
     for path in root.rglob("*"):
         if not path.is_file():
             continue
@@ -585,26 +640,35 @@ def collect_project_files(
                 on_skip(path)
             continue
 
-        # Skip excluded or not included files
         # Note: pathspec requires POSIX style relative paths
-        relative_path = path.relative_to(root)
-        posix = relative_path.as_posix()
+        candidates[path.relative_to(root).as_posix()] = path
 
-        if exclude_spec.match_file(posix) or not include_spec.match_file(posix):
-            if on_skip is not None:
-                on_skip(path)
-            continue
+    # Delegate filtering to shared engine
+    try:
+        accepted_posix = filter_paths(
+            candidates.keys(),
+            gitignore_patterns,
+            include_patterns,
+            exclude_patterns,
+            max_depth=max_depth,
+        )
+    except ValueError as err:
+        # Re-raise with absolute path for user-facing messages
+        msg = str(err)
+        for posix, abs_path in candidates.items():
+            msg = msg.replace(f"'{posix}'", f"'{abs_path}'")
+        raise ValueError(msg) from err
 
-        # Check max depth
-        if max_depth is not None and depth_of(relative_path) > max_depth:
-            raise ValueError(
-                f"'{path}' exceeds the maximum directory depth of {max_depth}."
-            )
-
-        file_paths.append(path)
+    # Notify skipped paths
+    if on_skip is not None:
+        accepted_set = set(accepted_posix)
+        for posix, abs_path in candidates.items():
+            if posix not in accepted_set:
+                on_skip(abs_path)
 
     # Sort for deterministic ordering
-    file_paths.sort(key=lambda p: p.relative_to(root).as_posix())
+    file_paths = [candidates[p] for p in accepted_posix]
+    file_paths.sort()
     return file_paths
 
 
