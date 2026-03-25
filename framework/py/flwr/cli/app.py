@@ -20,6 +20,7 @@ from typing import Any, TypedDict
 import typer
 from typer.main import get_command
 
+from flwr.supercore.update_check import warn_if_flwr_update_available
 from flwr.supercore.version import package_version
 
 from .app_cmd import publish as app_publish
@@ -37,6 +38,9 @@ from .federation.invite import create as federation_invite_create
 from .federation.invite import ls as federation_invite_list
 from .federation.invite import reject as federation_invite_reject
 from .federation.invite import revoke as federation_invite_revoke
+from .federation.simulation_config import (
+    simulation_config as federation_simulation_config,
+)
 from .install import install
 from .log import log
 from .login import login
@@ -108,6 +112,7 @@ federation_app.command(
 )(federation_add_supernode)
 federation_app.command("remove-supernode")(federation_remove_supernode)
 federation_app.command("remove-account")(federation_remove_account)
+federation_app.command("simulation-config")(federation_simulation_config)
 # Create federation invite command group
 federation_invite_app = typer.Typer(help="Manage Federation Invitations")
 # Make it appear as "list"
@@ -143,6 +148,8 @@ def main(
     ),
 ) -> None:
     """Flower CLI."""
+    warn_if_flwr_update_available(process_name="flwr")
+
     if version:
         typer.secho(f"Flower version: {package_version}", fg="blue")
         raise typer.Exit()
