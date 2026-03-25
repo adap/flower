@@ -87,6 +87,10 @@ FAB_INCLUDE_PATTERNS = (
     "**/*.py",
     "**/*.toml",
     "**/*.md",
+    "**/*.yaml",
+    "**/*.yml",
+    "**/*.json",
+    "**/*.jsonl",
     "/LICENSE",
 )
 # FAB file exclude patterns (gitignore-style patterns)
