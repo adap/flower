@@ -963,8 +963,8 @@ class TestValidateFederationAndNodesInRequest(unittest.TestCase):
 
     # --- _validate_federation_and_node_in_request tests ---
 
-    def test_validate_aborts_when_federation_not_specified(self) -> None:
-        """Test abort when federation name is empty."""
+    def test_validate_raises_when_federation_not_specified(self) -> None:
+        """Test raises FlowerError when federation name is empty."""
         ctx = self._make_context()
         with self.assertRaises(FlowerError) as cm:
             _validate_federation_and_node_in_request(self.state, self.aid, "", 1, ctx)
