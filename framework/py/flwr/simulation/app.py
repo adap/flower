@@ -69,7 +69,7 @@ from flwr.simulation.run_simulation import _run_simulation
 from flwr.simulation.simulationio_connection import SimulationIoConnection
 from flwr.supercore.app_utils import start_parent_process_monitor
 from flwr.supercore.heartbeat import HeartbeatSender, make_app_heartbeat_fn_grpc
-from flwr.supercore.superexec.plugin import SimulationExecPlugin
+from flwr.supercore.superexec.plugin import ServerAppExecPlugin
 from flwr.supercore.superexec.run_superexec import run_with_deprecation_warning
 
 
@@ -91,8 +91,8 @@ def flwr_simulation() -> None:
     if args.token is None:
         run_with_deprecation_warning(
             cmd="flwr-simulation",
-            plugin_type=ExecPluginType.SIMULATION,
-            plugin_class=SimulationExecPlugin,
+            plugin_type=ExecPluginType.SERVER_APP,
+            plugin_class=ServerAppExecPlugin,
             stub_class=ServerAppIoStub,
             appio_api_address=args.serverappio_api_address,
             parent_pid=args.parent_pid,
