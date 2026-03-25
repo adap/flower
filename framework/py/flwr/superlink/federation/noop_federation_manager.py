@@ -80,6 +80,9 @@ class NoOpFederationManager(FederationManager):
         """Get federations of which the account is a member."""
         if flwr_aid != NOOP_FLWR_AID:
             return []
+        sim_cfg = SimulationConfig()
+        if self._simulation:
+            sim_cfg.CopyFrom(cast(SimulationConfig, self._simulation_config))
         return [
             Federation(
                 name=NOOP_FEDERATION,
@@ -89,11 +92,7 @@ class NoOpFederationManager(FederationManager):
                 runs=[],
                 archived=False,
                 simulation=self._simulation,
-                config=(
-                    self.get_simulation_config(NOOP_FEDERATION)
-                    if self._simulation
-                    else SimulationConfig()
-                ),
+                config=sim_cfg,
             )
         ]
 
@@ -105,6 +104,9 @@ class NoOpFederationManager(FederationManager):
         runs = list(self.linkstate.get_run_info(flwr_aids=[NOOP_FLWR_AID]))
         nodes = list(self.linkstate.get_node_info(owner_aids=[NOOP_FLWR_AID]))
         only_account = Account(id=NOOP_FLWR_AID, name=NOOP_ACCOUNT_NAME)
+        sim_cfg = SimulationConfig()
+        if self._simulation:
+            sim_cfg.CopyFrom(cast(SimulationConfig, self._simulation_config))
         return Federation(
             name=NOOP_FEDERATION,
             description=NOOP_FEDERATION_DESCRIPTION,
@@ -115,11 +117,7 @@ class NoOpFederationManager(FederationManager):
             runs=runs,
             archived=False,
             simulation=self._simulation,
-            config=(
-                self.get_simulation_config(NOOP_FEDERATION)
-                if self._simulation
-                else SimulationConfig()
-            ),
+            config=sim_cfg,
         )
 
     def get_simulation_config(self, federation: str) -> SimulationConfig | None:
