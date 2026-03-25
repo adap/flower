@@ -38,6 +38,8 @@ from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH
 
 from .utils import (
     build_pathspec,
+    collect_project_files,
+    depth_of,
     flwr_cli_grpc_exc_handler,
     get_executed_command,
     get_sha256_hash,
@@ -250,3 +252,138 @@ def test_custom_grpc_err_handler() -> None:
             raise grpc_error
 
     mock_handler.assert_called_once_with(grpc_error)
+
+
+@pytest.mark.parametrize(
+    ("rel", "expected"),
+    [
+        (Path("a.py"), 0),
+        (Path("d1/file.txt"), 1),
+        (Path("d1/d2/d3/f.txt"), 3),
+        (Path("d1/d2/d3/d4/d5/x"), 5),
+    ],
+)
+def test_depth_of(rel: Path, expected: int) -> None:
+    """Test the directory depth detection."""
+    assert depth_of(rel) == expected
+
+
+# === collect_project_files tests ===
+
+
+def _make_files(root: Path, names: list[str]) -> None:
+    """Create empty files under root, creating parent dirs as needed."""
+    for name in names:
+        p = root / name
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.touch()
+
+
+def _rel(root: Path, paths: list[Path]) -> list[str]:
+    """Return relative POSIX paths from a list of absolute paths."""
+    return [p.relative_to(root).as_posix() for p in paths]
+
+
+def test_collect_project_files_basic_include(tmp_path: Path) -> None:
+    """Only files matching include patterns are returned."""
+    _make_files(tmp_path, ["app.py", "utils.py", "readme.md", "data.csv"])
+    paths = collect_project_files(
+        tmp_path, include_patterns=("*.py",), exclude_patterns=()
+    )
+    assert _rel(tmp_path, paths) == ["app.py", "utils.py"]
+
+
+def test_collect_project_files_exclude_patterns(tmp_path: Path) -> None:
+    """Files matching exclude patterns are filtered out."""
+    _make_files(tmp_path, ["app.py", "test.py", "secret.key"])
+    paths = collect_project_files(
+        tmp_path, include_patterns=("*",), exclude_patterns=("*.key",)
+    )
+    assert _rel(tmp_path, paths) == ["app.py", "test.py"]
+
+
+def test_collect_project_files_gitignore_respected(tmp_path: Path) -> None:
+    """Patterns in .gitignore are merged with exclude patterns."""
+    _make_files(tmp_path, ["app.py", "debug.log", "build/output.bin"])
+    (tmp_path / ".gitignore").write_text("*.log\nbuild/\n", encoding="utf-8")
+    paths = collect_project_files(
+        tmp_path, include_patterns=("*",), exclude_patterns=()
+    )
+    assert _rel(tmp_path, paths) == [".gitignore", "app.py"]
+
+
+def test_collect_project_files_max_depth_ok(tmp_path: Path) -> None:
+    """Files within max_depth are accepted."""
+    _make_files(tmp_path, ["root.py", "a/nested.py"])
+    paths = collect_project_files(
+        tmp_path, include_patterns=("*.py",), exclude_patterns=(), max_depth=1
+    )
+    assert _rel(tmp_path, paths) == ["a/nested.py", "root.py"]
+
+
+def test_collect_project_files_max_depth_exceeded(tmp_path: Path) -> None:
+    """ValueError is raised when a file exceeds max_depth."""
+    _make_files(tmp_path, ["a/b/deep.py"])
+    with pytest.raises(ValueError, match="exceeds the maximum directory depth"):
+        collect_project_files(
+            tmp_path, include_patterns=("*.py",), exclude_patterns=(), max_depth=1
+        )
+
+
+def test_collect_project_files_on_skip_called(tmp_path: Path) -> None:
+    """on_skip callback is invoked for excluded files."""
+    _make_files(tmp_path, ["keep.py", "skip.txt"])
+    skipped: list[Path] = []
+    collect_project_files(
+        tmp_path,
+        include_patterns=("*.py",),
+        exclude_patterns=(),
+        on_skip=skipped.append,
+    )
+    assert _rel(tmp_path, skipped) == ["skip.txt"]
+
+
+def test_collect_project_files_sorted_deterministic(tmp_path: Path) -> None:
+    """Results are sorted by POSIX relative path."""
+    _make_files(tmp_path, ["z.py", "a.py", "m/b.py"])
+    paths = collect_project_files(
+        tmp_path, include_patterns=("*.py",), exclude_patterns=()
+    )
+    rel = _rel(tmp_path, paths)
+    assert rel == sorted(rel)
+
+
+def test_collect_project_files_empty_directory(tmp_path: Path) -> None:
+    """An empty directory returns no files."""
+    paths = collect_project_files(
+        tmp_path, include_patterns=("*",), exclude_patterns=()
+    )
+    assert not paths
+
+
+def test_collect_project_files_subdirectory_patterns(tmp_path: Path) -> None:
+    """Include/exclude with subdirectory glob patterns."""
+    _make_files(tmp_path, ["src/app.py", "src/test.py", "docs/guide.md"])
+    paths = collect_project_files(
+        tmp_path, include_patterns=("src/**",), exclude_patterns=("src/test.py",)
+    )
+    assert _rel(tmp_path, paths) == ["src/app.py"]
+
+
+def test_collect_project_files_symlink_outside_root_excluded(tmp_path: Path) -> None:
+    """Symlinks pointing outside root are excluded and trigger on_skip."""
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    (outside / "secret.txt").write_text("sensitive data", encoding="utf-8")
+
+    project = tmp_path / "project"
+    project.mkdir()
+    _make_files(project, ["app.py"])
+    (project / "link.txt").symlink_to(outside / "secret.txt")
+
+    skipped: list[Path] = []
+    paths = collect_project_files(
+        project, include_patterns=("*",), exclude_patterns=(), on_skip=skipped.append
+    )
+    assert _rel(project, paths) == ["app.py"]
+    assert _rel(project, skipped) == ["link.txt"]

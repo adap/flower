@@ -26,7 +26,6 @@ import typer
 
 from flwr.cli.constant import (
     DEFAULT_FLOWER_CONFIG_TOML,
-    DEFAULT_SIMULATION_BACKEND_NAME,
     FLOWER_CONFIG_FILE,
     SimulationBackendConfigTomlKey,
     SimulationClientResourcesTomlKey,
@@ -42,6 +41,7 @@ from flwr.cli.typing import (
     SuperLinkSimulationOptions,
 )
 from flwr.common.config import flatten_dict
+from flwr.supercore.constant import DEFAULT_SIMULATION_CONFIG
 from flwr.supercore.utils import get_flwr_home
 
 
@@ -85,7 +85,8 @@ def _parse_simulation_options(options: dict[str, Any]) -> SuperLinkSimulationOpt
 
         simulation_backend = SimulationBackendConfig(
             name=backend_dict.get(
-                SimulationBackendConfigTomlKey.NAME, DEFAULT_SIMULATION_BACKEND_NAME
+                SimulationBackendConfigTomlKey.NAME,
+                DEFAULT_SIMULATION_CONFIG.backend_name,
             ),
             client_resources=client_resources,
             init_args=init_args,
