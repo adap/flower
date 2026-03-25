@@ -581,6 +581,8 @@ def collect_project_files(
 
         # Skip if the file is outside the root directory (e.g. via symlink)
         if not path.resolve().is_relative_to(root.resolve()):
+            if on_skip is not None:
+                on_skip(path)
             continue
 
         # Skip excluded or not included files

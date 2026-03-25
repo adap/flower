@@ -370,8 +370,8 @@ def test_collect_project_files_subdirectory_patterns(tmp_path: Path) -> None:
     assert _rel(tmp_path, paths) == ["src/app.py"]
 
 
-def test_collect_project_files_symlink_outside_root_included(tmp_path: Path) -> None:
-    """Symlinks pointing outside root are currently followed (pre-fix behavior)."""
+def test_collect_project_files_symlink_outside_root_excluded(tmp_path: Path) -> None:
+    """Symlinks pointing outside root are excluded and trigger on_skip."""
     outside = tmp_path / "outside"
     outside.mkdir()
     (outside / "secret.txt").write_text("sensitive data", encoding="utf-8")
@@ -381,6 +381,9 @@ def test_collect_project_files_symlink_outside_root_included(tmp_path: Path) -> 
     _make_files(project, ["app.py"])
     (project / "link.txt").symlink_to(outside / "secret.txt")
 
-    paths = collect_project_files(project, include_patterns=("*",), exclude_patterns=())
-    # Current behavior: symlink is included (this is the security concern)
-    assert _rel(project, paths) == ["app.py", "link.txt"]
+    skipped: list[Path] = []
+    paths = collect_project_files(
+        project, include_patterns=("*",), exclude_patterns=(), on_skip=skipped.append
+    )
+    assert _rel(project, paths) == ["app.py"]
+    assert _rel(project, skipped) == ["link.txt"]
