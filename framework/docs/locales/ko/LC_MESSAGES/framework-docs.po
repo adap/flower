@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-15 01:23+0000\n"
+"POT-Creation-Date: 2026-03-25 01:17+0000\n"
 "PO-Revision-Date: 2024-08-23 13:09+0000\n"
 "Last-Translator: Seulki Yun <icstuckyi@gmail.com>\n"
 "Language: ko\n"
@@ -16539,8 +16539,8 @@ msgstr "빌드 전달인자"
 
 #: ../../flwr accept:1 add-supernode:1 app archive:1 create:1 federation
 #: install:1 invite list:1 log:1 login:1 new:1 publish:1 pull:1 register:1
-#: reject:1 remove-account:1 remove-supernode:1 revoke:1 run:1 stop:1 supernode
-#: unregister:1
+#: reject:1 remove-account:1 remove-supernode:1 revoke:1 run:1
+#: simulation-config:1 stop:1 supernode unregister:1
 #, fuzzy
 msgid "Optional argument"
 msgstr "선택적 개선 사항"
@@ -16557,7 +16557,7 @@ msgstr ""
 
 #: ../../flwr accept:1 add-supernode:1 app archive:1 create:1 federation invite
 #: log:1 pull:1 register:1 reject:1 remove-account:1 remove-supernode:1
-#: review:1 revoke:1 stop:1 supernode unregister:1
+#: review:1 revoke:1 simulation-config:1 stop:1 supernode unregister:1
 #, fuzzy
 msgid "Required argument"
 msgstr "빌드 전달인자"
@@ -16600,22 +16600,36 @@ msgstr "서버(SuperLink)"
 
 #: ../../flwr accept:1 add-supernode:1 archive:1 config create:1 federation
 #: invite list:1 register:1 reject:1 remove-account:1 remove-supernode:1
-#: revoke:1 run:1 stop:1 supernode unregister:1
+#: revoke:1 run:1 simulation-config:1 stop:1 supernode unregister:1
 msgid "Format output using 'default' view or 'json'"
 msgstr ""
 
 #: ../../flwr accept add-supernode archive config create federation invite list
-#: log register reject remove-account remove-supernode revoke run stop
-#: supernode unregister
+#: log register reject remove-account remove-supernode revoke run
+#: simulation-config stop supernode unregister
 msgid "default"
 msgstr ""
 
 #: ../../flwr accept:1 add-supernode:1 archive:1 config create:1 federation
 #: invite list:1 register:1 reject:1 remove-account:1 remove-supernode:1
-#: revoke:1 run:1 stop:1 supernode unregister:1
+#: revoke:1 run:1 simulation-config:1 stop:1 supernode unregister:1
 #, fuzzy
 msgid "``'default'``"
 msgstr "``flwr/base``"
+
+#: ../../flwr accept add-supernode archive config create federation invite list
+#: register reject remove-account remove-supernode revoke run simulation-config
+#: stop supernode unregister
+#, fuzzy
+msgid "options"
+msgstr "해결법"
+
+#: ../../flwr accept:1 add-supernode:1 archive:1 config create:1 federation
+#: invite list:1 register:1 reject:1 remove-account:1 remove-supernode:1
+#: revoke:1 run:1 simulation-config:1 stop:1 supernode unregister:1
+#, fuzzy
+msgid "default | json"
+msgstr "설명"
 
 #: ../../flwr federation:1
 #, fuzzy
@@ -16633,14 +16647,15 @@ msgid "ID of the SuperNode to add."
 msgstr "서버(SuperLink)"
 
 #: ../../flwr accept:1 add-supernode:1 create:1 federation invite reject:1
-#: remove-supernode:1 revoke:1
+#: remove-supernode:1 revoke:1 simulation-config:1
 #, fuzzy
 msgid "Name of the federation."
 msgstr "flower 초연결"
 
 #: ../../flwr accept:1 add-supernode:1 archive:1 create:1 federation invite
 #: list:1 log:1 login:1 pull:1 register:1 reject:1 remove-account:1
-#: remove-supernode:1 revoke:1 run:1 stop:1 supernode unregister:1
+#: remove-supernode:1 revoke:1 run:1 simulation-config:1 stop:1 supernode
+#: unregister:1
 #, fuzzy
 msgid "Name of the SuperLink connection."
 msgstr "flower 초연결"
@@ -16664,6 +16679,17 @@ msgstr "새 페이지 만들기"
 #, fuzzy
 msgid "Description of the federation."
 msgstr "flower 초연결"
+
+#: ../../flwr create:1 federation
+#, fuzzy
+msgid "Create this federation for simulation use."
+msgstr "구성 값"
+
+#: ../../flwr create:1 federation invite list:1 run:1 simulation-config:1
+#: supernode
+#, fuzzy
+msgid "``False``"
+msgstr "``flwr/base``"
 
 #: ../../flwr create:1 federation
 #, fuzzy
@@ -16699,11 +16725,6 @@ msgstr ""
 #: ../../flwr federation invite list:1
 msgid "Show non-pending invitations."
 msgstr ""
-
-#: ../../flwr federation invite list:1 run:1 supernode
-#, fuzzy
-msgid "``False``"
-msgstr "``flwr/base``"
 
 #: ../../flwr federation invite reject:1
 #, fuzzy
@@ -16758,6 +16779,89 @@ msgstr "flower 초연결"
 #, fuzzy
 msgid "ID of the SuperNode to remove."
 msgstr "서버(SuperLink)"
+
+#: ../../flwr federation simulation-config:1
+#, fuzzy
+msgid "Configure a Federation using the Simulation Runtime."
+msgstr "멀티 노드 Flower 시뮬레이션"
+
+#: ../../flwr federation simulation-config:1
+msgid "The number of virtual SuperNodes in the simulation"
+msgstr ""
+
+#: ../../flwr federation simulation-config:1
+#, fuzzy
+msgid "``10``"
+msgstr "``DISTRO``"
+
+#: ../../flwr federation simulation-config:1
+msgid "CPUs assigned to the execution of each ClientApp"
+msgstr ""
+
+#: ../../flwr federation simulation-config:1
+#, fuzzy
+msgid "``2``"
+msgstr "``DISTRO``"
+
+#: ../../flwr federation simulation-config:1
+msgid "Ratio of a GPU VRAM assigned to the execution of each ClientApp"
+msgstr ""
+
+#: ../../flwr federation simulation-config:1
+#, fuzzy
+msgid "``0.0``"
+msgstr "``1.0.0b0``"
+
+#: ../../flwr federation simulation-config:1
+#, fuzzy
+msgid "Run the Simulation Runtime with verbose logs"
+msgstr "VirtualClientEngine 리소스"
+
+#: ../../flwr federation simulation-config:1
+msgid "Choice of backend name (Currently, only 'ray' is supported)."
+msgstr ""
+
+#: ../../flwr federation simulation-config:1
+#, fuzzy
+msgid "``'ray'``"
+msgstr "``flwr/base``"
+
+#: ../../flwr federation simulation-config:1
+#, fuzzy
+msgid "ray"
+msgstr "배열"
+
+#: ../../flwr federation simulation-config:1
+msgid "Number of CPUs to make available to the Simulation Runtime."
+msgstr ""
+
+#: ../../flwr federation simulation-config:1
+#, fuzzy
+msgid "``0``"
+msgstr "``DISTRO``"
+
+#: ../../flwr federation simulation-config:1
+msgid "Number of GPUs to make available to the Simulation Runtime"
+msgstr ""
+
+#: ../../flwr federation simulation-config:1
+#, fuzzy
+msgid "Control logging level in Simulation Runtime."
+msgstr "멀티 노드 Flower 시뮬레이션"
+
+#: ../../flwr federation simulation-config:1
+#, fuzzy
+msgid "``'WARNING'``"
+msgstr "``flwr/base``"
+
+#: ../../flwr federation simulation-config:1
+msgid "Whether to propagate logs from Simulation Runtime upwards."
+msgstr ""
+
+#: ../../flwr federation log:1 simulation-config:1
+#, fuzzy
+msgid "``True``"
+msgstr "``DISTRO``"
 
 #: ../../flwr install:1
 #, fuzzy
@@ -16852,11 +16956,6 @@ msgstr ""
 #: ../../flwr log:1
 msgid "Flag to stream or print logs from the Flower run"
 msgstr ""
-
-#: ../../flwr log:1
-#, fuzzy
-msgid "``True``"
-msgstr "``DISTRO``"
 
 #: ../../flwr log:1
 #, fuzzy
