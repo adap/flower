@@ -172,9 +172,30 @@ dependencies = ["flwr>1.26.0"]
 [tool.flwr.app]
 publisher = "alice"
 fab_format_version = 1
+flwr_version_target = "1.27.1"
 """,
         "client.py": b"print('ok')\n",
     }
 
     with pytest.raises(ValueError, match="inclusive lower bound"):
+        build_fab_from_files(files)
+
+
+def test_build_fab_from_files_requires_target_for_version_one() -> None:
+    """Test build fails for fab_format_version=1 without flwr_version_target."""
+    files: dict[str, bytes | Path] = {
+        "pyproject.toml": b"""
+[project]
+name = "app"
+version = "1.0.0"
+dependencies = ["flwr>=1.26.0,<=1.28.0"]
+
+[tool.flwr.app]
+publisher = "alice"
+fab_format_version = 1
+""",
+        "client.py": b"print('ok')\n",
+    }
+
+    with pytest.raises(ValueError, match="flwr_version_target"):
         build_fab_from_files(files)

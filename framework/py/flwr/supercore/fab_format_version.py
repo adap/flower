@@ -169,6 +169,17 @@ def _parse_flwr_target_version(app_config: dict[str, Any]) -> Version | None:
     return None
 
 
+def _require_flwr_target_version(app_config: dict[str, Any]) -> Version:
+    """Parse required `flwr_version_target` from app config."""
+    target_version = _parse_flwr_target_version(app_config)
+    if target_version is None:
+        raise ValueError(
+            "Missing [tool.flwr.app].flwr_version_target for "
+            "fab_format_version >= 1."
+        )
+    return target_version
+
+
 def _validate_target_within_bounds(
     target_version: Version | None,
     lower: Version | None,
@@ -229,11 +240,11 @@ def _normalize_and_validate_fab_format_v1(config: dict[str, Any]) -> FabFormatMe
 
     - `flwr` dependency is required.
     - The dependency must include an inclusive lower bound.
-    - Optional `flwr_version_target` must fall within the derived range.
+    - `flwr_version_target` is required and must fall within the derived range.
     - Unsupported specifier shapes are rejected.
     """
     app_config = _get_flwr_app_config(config)
-    target_version = _parse_flwr_target_version(app_config)
+    target_version = _require_flwr_target_version(app_config)
     requirement = _get_flwr_requirement(config)
     if requirement is None:
         raise ValueError(
