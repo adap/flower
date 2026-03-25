@@ -201,10 +201,6 @@ def build_fab_from_disk(app: Path) -> bytes:
         file_path.relative_to(app).as_posix(): file_path for file_path in file_paths
     }
 
-    # Ensure pyproject.toml is present even if excluded by .gitignore
-    pyproject = app / FAB_CONFIG_FILE
-    files_dict.setdefault(FAB_CONFIG_FILE, pyproject)
-
     # Build FAB from the files dict
     fab_bytes, _ = build_fab_from_files(files_dict)
     return fab_bytes

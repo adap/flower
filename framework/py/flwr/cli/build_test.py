@@ -22,6 +22,8 @@ from zipfile import ZipFile
 import click
 import pytest
 
+from flwr.supercore.constant import MAX_DIR_DEPTH
+
 from .build import build_fab_from_disk, build_fab_from_files
 
 _DUMMY_PY = b"print('ok')\n"
@@ -270,25 +272,6 @@ def test_build_fab_from_files_normalizes_windows_path_separators() -> None:
     assert "src\\client.py" not in entries
 
 
-def test_build_fab_from_disk_includes_pyproject_when_gitignored(
-    tmp_path: Path,
-) -> None:
-    """Test build_fab_from_disk includes pyproject.toml if .gitignore excludes it."""
-    (tmp_path / "pyproject.toml").write_text(
-        '[project]\nname = "app"\nversion = "1.0.0"\n'
-    )
-    (tmp_path / "client.py").write_bytes(_DUMMY_PY)
-    (tmp_path / ".gitignore").write_text("pyproject.toml\n")
-
-    fab_bytes = build_fab_from_disk(tmp_path)
-
-    with ZipFile(BytesIO(fab_bytes), "r") as zf:
-        names = set(zf.namelist())
-
-    assert "pyproject.toml" in names
-    assert "client.py" in names
-
-
 def test_build_fab_from_disk_wraps_depth_error_as_click_exception(
     tmp_path: Path,
 ) -> None:
@@ -298,7 +281,7 @@ def test_build_fab_from_disk_wraps_depth_error_as_click_exception(
     )
     # Create a file nested beyond MAX_DIR_DEPTH (10)
     deep = tmp_path
-    for i in range(12):
+    for i in range(MAX_DIR_DEPTH + 1):
         deep = deep / f"d{i}"
     deep.mkdir(parents=True)
     (deep / "deep.py").write_bytes(_DUMMY_PY)
