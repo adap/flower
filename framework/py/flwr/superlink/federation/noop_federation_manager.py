@@ -89,11 +89,7 @@ class NoOpFederationManager(FederationManager):
                 runs=[],
                 archived=False,
                 simulation=self._simulation,
-                config=(
-                    self.get_simulation_config(NOOP_FEDERATION)
-                    if self._simulation
-                    else SimulationConfig()
-                ),
+                config=self._simulation_config,
             )
         ]
 
@@ -115,20 +111,19 @@ class NoOpFederationManager(FederationManager):
             runs=runs,
             archived=False,
             simulation=self._simulation,
-            config=(
-                self.get_simulation_config(NOOP_FEDERATION)
-                if self._simulation
-                else SimulationConfig()
-            ),
+            config=self._simulation_config,
         )
 
-    def get_simulation_config(self, federation: str) -> SimulationConfig:
+    def get_simulation_config(self, federation: str) -> SimulationConfig | None:
         """Get the simulation configuration."""
-        if federation != NOOP_FEDERATION or not self._simulation:
+        if federation != NOOP_FEDERATION:
             raise FlowerError(
                 ApiErrorCode.FEDERATION_NOT_FOUND_OR_NO_PERMISSION,
                 f"Simulation configuration unavailable for federation '{federation}'.",
             ) from None
+
+        if not self._simulation:
+            return None
 
         config = SimulationConfig()
         config.CopyFrom(cast(SimulationConfig, self._simulation_config))
