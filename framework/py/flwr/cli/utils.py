@@ -519,28 +519,7 @@ def load_gitignore_patterns(file: Path | bytes) -> list[str]:
 
 
 def depth_of(relative_path: Path) -> int:
-    """Return the directory depth of a relative path.
-
-    The depth is the number of parent directory components, excluding the
-    filename itself.
-
-    Parameters
-    ----------
-    relative_path : Path
-        A relative path from the project root to the file.
-
-    Returns
-    -------
-    int
-        Number of parent directory parts. E.g. ``"a/b/c.py"`` has depth 2.
-
-    Examples
-    --------
-    >>> depth_of(Path("file.py"))
-    0
-    >>> depth_of(Path("a/b/c.py"))
-    2
-    """
+    """Return the directory depth of a relative path."""
     return max(0, len(relative_path.parts) - 1)
 
 
@@ -598,6 +577,12 @@ def collect_project_files(
     file_paths: list[Path] = []
     for path in root.rglob("*"):
         if not path.is_file():
+            continue
+
+        # Skip if the file is outside the root directory (e.g. via symlink)
+        if not path.resolve().is_relative_to(root.resolve()):
+            if on_skip is not None:
+                on_skip(path)
             continue
 
         # Skip excluded or not included files

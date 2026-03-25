@@ -146,7 +146,10 @@ def build(
         )
 
     # Build FAB
-    fab_bytes = build_fab_from_disk(app)
+    try:
+        fab_bytes = build_fab_from_disk(app)
+    except ValueError as e:
+        raise click.ClickException(str(e)) from None
 
     # Calculate hash for filename
     fab_hash = hashlib.sha256(fab_bytes).hexdigest()
@@ -274,6 +277,8 @@ def build_fab_from_files(
         return f"{path},{sha256_hash},{file_size_bits}"
 
     # Extract, load, and parse pyproject.toml
+    # Normalise path separators up-front so all subsequent lookups are consistent.
+    files = {k.replace("\\", "/"): v for k, v in files.items()}
     if FAB_CONFIG_FILE not in files:
         raise ValueError(f"{FAB_CONFIG_FILE} not found in files")
     pyproject_content = _to_bytes(files[FAB_CONFIG_FILE])
@@ -324,29 +329,27 @@ def build_fab_from_files(
 
 def get_user_fab_patterns(
     config: dict[str, Any],
-) -> tuple[list[str], bool, list[str], bool]:
-    """Return user-defined FAB include/exclude patterns and presence flags."""
+) -> tuple[list[str] | None, list[str] | None]:
+    """Return user-defined FAB include/exclude patterns.
+
+    Returns ``None`` for a key that is absent from the config, or the
+    non-empty pattern list itself. Raises ``ValueError`` if a key is
+    present but set to an empty list.
+    """
     app_conf = config.get("tool", {}).get("flwr", {}).get("app", {})
     if not isinstance(app_conf, dict):
-        return [], False, [], False
+        return None, None
 
-    def _get_pattern_list(key: str) -> list[str]:
-        value: list[str] = app_conf.get(key, [])
-        if value is None:
-            return []
+    def _get_pattern_list(key: str) -> list[str] | None:
+        if key not in app_conf:
+            return None
+        value: list[str] = app_conf[key]
         error = check_pattern_list_value(value, key)
         if error:
             raise ValueError(error)
         return value
 
-    has_include_key = FAB_INCLUDE_KEY in app_conf
-    has_exclude_key = FAB_EXCLUDE_KEY in app_conf
-    return (
-        _get_pattern_list(FAB_INCLUDE_KEY),
-        has_include_key,
-        _get_pattern_list(FAB_EXCLUDE_KEY),
-        has_exclude_key,
-    )
+    return _get_pattern_list(FAB_INCLUDE_KEY), _get_pattern_list(FAB_EXCLUDE_KEY)
 
 
 def get_filtered_fab_paths(
@@ -354,161 +357,86 @@ def get_filtered_fab_paths(
     config: dict[str, Any],
 ) -> list[str]:
     """Compute final FAB file list using user patterns and non-overridable defaults."""
-    normalized_paths = [path.replace("\\", "/") for path in files.keys()]
+    # Build built-in spec
+    normalized_paths = list(files.keys())
     built_in_include_spec = build_pathspec(FAB_INCLUDE_PATTERNS)
     built_in_exclude_spec = build_pathspec(FAB_EXCLUDE_PATTERNS)
+    user_include_spec = None
+    user_exclude_spec = None
 
-    (
-        user_include_patterns,
-        has_include_key,
-        user_exclude_patterns,
-        has_exclude_key,
-    ) = get_user_fab_patterns(config)
-    user_include_spec = (
-        build_pathspec(user_include_patterns) if user_include_patterns else None
-    )
-    user_exclude_spec = (
-        build_pathspec(user_exclude_patterns) if user_exclude_patterns else None
-    )
-    messages: list[tuple[str, str]] = []
-    messages.extend(
-        _collect_empty_pattern_list_messages(
-            has_include_key, user_include_patterns, FAB_INCLUDE_KEY
-        )
-    )
-    messages.extend(
-        _collect_empty_pattern_list_messages(
-            has_exclude_key, user_exclude_patterns, FAB_EXCLUDE_KEY
-        )
-    )
-    messages.extend(
-        _collect_unresolved_pattern_messages(
+    # Load and validate user patterns, and build user specs
+    user_include_patterns, user_exclude_patterns = get_user_fab_patterns(config)
+    if user_include_patterns is not None:
+        _raise_on_unresolved_patterns(
             user_include_patterns, normalized_paths, FAB_INCLUDE_KEY
         )
-    )
-    messages.extend(
-        _collect_unresolved_pattern_messages(
+        user_include_spec = build_pathspec(user_include_patterns)
+    if user_exclude_patterns is not None:
+        _raise_on_unresolved_patterns(
             user_exclude_patterns, normalized_paths, FAB_EXCLUDE_KEY
         )
-    )
+        user_exclude_spec = build_pathspec(user_exclude_patterns)
+    has_user_rules = bool(user_include_spec or user_exclude_spec)
 
-    # Candidate set: user include matches, or all files if no include patterns provided.
-    candidate_paths = (
-        [path for path in normalized_paths if user_include_spec.match_file(path)]
-        if user_include_spec
-        else normalized_paths
-    )
+    # Build the candidate set of files based on user-defined patterns,
+    # or all files if no user patterns are defined.
+    candidate_paths = normalized_paths
+    if user_include_spec:
+        candidate_paths = list(
+            user_include_spec.match_files(candidate_paths)  # type: ignore
+        )
+    if user_exclude_spec:
+        candidate_paths = list(
+            user_exclude_spec.match_files(candidate_paths, negate=True)  # type: ignore
+        )
 
-    built_in_constrained_paths = [
+    # Apply built-in constraints and validate against user patterns
+    if has_user_rules:
+        _raise_on_built_in_pattern_conflicts(candidate_paths, built_in_include_spec)
+    final_paths = [
         path
         for path in candidate_paths
         if built_in_include_spec.match_file(path)
         and not built_in_exclude_spec.match_file(path)
     ]
-    final_paths = (
-        [
-            path
-            for path in built_in_constrained_paths
-            if not user_exclude_spec.match_file(path)
-        ]
-        if user_exclude_spec
-        else list(built_in_constrained_paths)
-    )
-    messages.extend(
-        _collect_pattern_conflict_messages(
-            user_include_spec=user_include_spec,
-            user_exclude_spec=user_exclude_spec,
-            candidate_paths=candidate_paths,
-            built_in_constrained_paths=built_in_constrained_paths,
-        )
-    )
-    _emit_filter_messages(messages)
     return final_paths
 
 
-def _collect_empty_pattern_list_messages(
-    has_key: bool, patterns: list[str], key_name: str
-) -> list[tuple[str, str]]:
-    """Collect note messages for explicitly empty include/exclude lists."""
-    if has_key and not patterns:
-        return [
-            (
-                "Note",
-                f'"{key_name}" is set to an empty list. '
-                "Default built-in include/exclude constraints are used.",
-            )
-        ]
-    return []
-
-
-def _collect_unresolved_pattern_messages(
+def _raise_on_unresolved_patterns(
     patterns: list[str], file_paths: list[str], key_name: str
-) -> list[tuple[str, str]]:
-    """Collect warning messages for unresolved user-defined patterns."""
-    messages: list[tuple[str, str]] = []
+) -> None:
+    """Raise ValueError for any user-defined pattern that is invalid or matches
+    nothing."""
     for pattern in patterns:
         try:
             pattern_spec = build_pathspec([pattern])
         except Exception as err:  # pylint: disable=broad-except
-            messages.append(
-                (
-                    "Warning",
-                    f'ignoring unresolved pattern in "{key_name}": '
-                    f'"{pattern}" ({err})',
-                )
-            )
-            continue
+            raise ValueError(
+                f'Invalid pattern in "{key_name}": "{pattern}" ({err})'
+            ) from err
 
         if not any(pattern_spec.match_file(path) for path in file_paths):
-            messages.append(
-                (
-                    "Warning",
-                    f'pattern in "{key_name}" did not match any files: "{pattern}"',
-                )
+            raise ValueError(
+                f'Pattern in "{key_name}" did not match any files: "{pattern}". '
+                "Correct the pattern or remove it."
             )
-    return messages
 
 
-def _collect_pattern_conflict_messages(
-    user_include_spec: pathspec.PathSpec | None,
-    user_exclude_spec: pathspec.PathSpec | None,
+def _raise_on_built_in_pattern_conflicts(
     candidate_paths: list[str],
-    built_in_constrained_paths: list[str],
-) -> list[tuple[str, str]]:
-    """Collect warning messages for include/exclude and built-in conflicts."""
-    messages: list[tuple[str, str]] = []
-    if user_include_spec and user_exclude_spec:
-        overlap = [
-            path
-            for path in candidate_paths
-            if user_include_spec.match_file(path) and user_exclude_spec.match_file(path)
-        ]
-        if overlap:
-            messages.append(
-                (
-                    "Warning",
-                    f'"{FAB_INCLUDE_KEY}" and "{FAB_EXCLUDE_KEY}" overlap for '
-                    f"{len(overlap)} file(s); exclusion takes precedence.",
-                )
-            )
-
-    built_in_removed = len(candidate_paths) - len(built_in_constrained_paths)
-    if user_include_spec and built_in_removed > 0:
-        messages.append(
-            (
-                "Warning",
-                f'{built_in_removed} file(s) matched "{FAB_INCLUDE_KEY}" but '
-                "were removed by non-overridable built-in FAB constraints.",
-            )
-        )
-    return messages
-
-
-def _emit_filter_messages(messages: list[tuple[str, str]]) -> None:
-    """Emit filter notes/warnings with consistent CLI formatting."""
-    for level, message in messages:
-        typer.secho(
-            f"{level}: {message}",
-            fg=typer.colors.YELLOW,
-            bold=True,
+    built_in_include_spec: pathspec.PathSpec,
+) -> None:
+    """Raise ValueError for user-defined rules and built-in rules conflicts."""
+    # Only count files whose type is not supported by built-in include patterns
+    # (e.g. .txt files). Files that match built-in includes but are removed by
+    # built-in excludes (e.g. .toml inside .venv/, pyproject.toml) are expected
+    # removals and should not be flagged.
+    removed_files = set(built_in_include_spec.match_files(candidate_paths, negate=True))
+    if removed_files:
+        files_list = "\n".join(f"- {file}" for file in removed_files)
+        raise ValueError(
+            f'{len(removed_files)} file(s) matched "{FAB_INCLUDE_KEY}" but were '
+            "removed by non-overridable built-in FAB constraints. "
+            f'Remove the conflicting patterns from "{FAB_INCLUDE_KEY}".\n\n'
+            f"Affected files:\n{files_list}"
         )

@@ -21,9 +21,18 @@ import pytest
 
 from flwr.common.constant import NOOP_ACCOUNT_NAME, NOOP_FLWR_AID
 from flwr.common.typing import Federation, Run, RunStatus
-from flwr.proto.federation_pb2 import Account, Member  # pylint: disable=E0611
+from flwr.proto.federation_pb2 import (  # pylint: disable=E0611
+    Account,
+    Member,
+    SimulationConfig,
+)
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
-from flwr.supercore.constant import NOOP_FEDERATION, NOOP_FEDERATION_DESCRIPTION
+from flwr.supercore.constant import (
+    DEFAULT_SIMULATION_CONFIG,
+    NOOP_FEDERATION,
+    NOOP_FEDERATION_DESCRIPTION,
+)
+from flwr.supercore.error import ApiErrorCode, FlowerError
 
 from .noop_federation_manager import NoOpFederationManager
 
@@ -31,9 +40,17 @@ from .noop_federation_manager import NoOpFederationManager
 def test_get_details_with_valid_federation() -> None:
     """Test get_details returns correct Federation details."""
     # Prepare
-    manager = NoOpFederationManager()
+    manager = NoOpFederationManager(simulation=True)
     mock_linkstate = Mock()
     manager.linkstate = mock_linkstate
+    config = SimulationConfig(
+        num_supernodes=12,
+        client_resources_num_cpus=3,
+        client_resources_num_gpus=1.0,
+        backend_name="ray",
+        verbose=True,
+    )
+    manager.set_simulation_config(NOOP_FLWR_AID, NOOP_FEDERATION, config)
 
     # Mock data
     run_id_1 = 123
@@ -112,7 +129,8 @@ def test_get_details_with_valid_federation() -> None:
     assert len(result.runs) == 2
     assert mock_run_1 in result.runs and mock_run_2 in result.runs
     assert result.archived is False
-    assert result.simulation is False
+    assert result.simulation is True
+    assert result.config == config
 
 
 def test_get_details_with_invalid_federation() -> None:
@@ -241,3 +259,74 @@ def test_simulation_runtime_flag_is_reflected() -> None:
 
     assert federations[0].simulation is True
     assert details.simulation is True
+    assert federations[0].config == DEFAULT_SIMULATION_CONFIG
+    assert details.config == DEFAULT_SIMULATION_CONFIG
+
+
+def test_get_simulation_config_returns_defaults_when_unset() -> None:
+    """Test get_simulation_config returns shared defaults when unset."""
+    manager = NoOpFederationManager(simulation=True)
+
+    stored = manager.get_simulation_config(NOOP_FEDERATION)
+
+    assert stored == DEFAULT_SIMULATION_CONFIG
+    assert stored.num_supernodes == DEFAULT_SIMULATION_CONFIG.num_supernodes
+    assert (
+        stored.client_resources_num_cpus
+        == DEFAULT_SIMULATION_CONFIG.client_resources_num_cpus
+    )
+    assert (
+        stored.client_resources_num_gpus
+        == DEFAULT_SIMULATION_CONFIG.client_resources_num_gpus
+    )
+    assert stored.backend_name == DEFAULT_SIMULATION_CONFIG.backend_name
+    assert stored.verbose is DEFAULT_SIMULATION_CONFIG.verbose
+    assert (
+        stored.init_args_log_to_driver
+        is DEFAULT_SIMULATION_CONFIG.init_args_log_to_driver
+    )
+
+
+def test_simulation_config_access_fails_when_simulation_is_disabled() -> None:
+    """Test simulation config access fails outside simulation mode."""
+    manager = NoOpFederationManager()
+
+    assert manager._simulation_config is None  # pylint: disable=protected-access
+
+    with pytest.raises(FlowerError) as get_err:
+        manager.get_simulation_config(NOOP_FEDERATION)
+    assert get_err.value.code == ApiErrorCode.FEDERATION_NOT_FOUND_OR_NO_PERMISSION
+
+    with pytest.raises(FlowerError) as set_err:
+        manager.set_simulation_config(
+            NOOP_FLWR_AID, NOOP_FEDERATION, SimulationConfig()
+        )
+    assert set_err.value.code == ApiErrorCode.FEDERATION_NOT_FOUND_OR_NO_PERMISSION
+
+
+def test_get_simulation_config_fails_for_invalid_federation() -> None:
+    """Test get_simulation_config fails for invalid federation names."""
+    manager = NoOpFederationManager(simulation=True)
+
+    with pytest.raises(FlowerError) as err:
+        manager.get_simulation_config("invalid_federation")
+
+    assert err.value.code == ApiErrorCode.FEDERATION_NOT_FOUND_OR_NO_PERMISSION
+
+
+def test_get_federations_returns_stored_simulation_config() -> None:
+    """Test get_federations returns the stored simulation config."""
+    manager = NoOpFederationManager(simulation=True)
+    config = SimulationConfig(
+        num_supernodes=12,
+        client_resources_num_cpus=3,
+        client_resources_num_gpus=1.0,
+        backend_name="ray",
+        verbose=True,
+    )
+
+    manager.set_simulation_config(NOOP_FLWR_AID, NOOP_FEDERATION, config)
+
+    federations = manager.get_federations(NOOP_FLWR_AID)
+
+    assert federations[0].config == config
