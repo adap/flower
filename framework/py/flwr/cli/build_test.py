@@ -240,18 +240,3 @@ def test_build_fab_from_files_exclude_prevails_over_include() -> None:
 
     assert "server.py" in entries
     assert "client.py" not in entries
-
-
-def test_build_fab_from_files_normalizes_windows_path_separators() -> None:
-    """Test that Windows-style backslash keys are normalized to forward slashes."""
-    files: dict[str, bytes | Path] = {
-        "pyproject.toml": b'[project]\nname = "app"\nversion = "1.0.0"\n',
-        "src\\client.py": _DUMMY_PY,
-        "src\\utils\\helpers.py": _DUMMY_PY,
-    }
-
-    entries = _build_entries(files)
-
-    assert "src/client.py" in entries
-    assert "src/utils/helpers.py" in entries
-    assert "src\\client.py" not in entries

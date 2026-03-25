@@ -19,7 +19,7 @@ import hashlib
 import json
 import re
 import sys
-from collections.abc import Callable, Iterable, Iterator
+from collections.abc import Callable, Iterable, Iterator, Mapping
 from contextlib import contextmanager
 from io import StringIO
 from pathlib import Path
@@ -55,6 +55,11 @@ from flwr.common.grpc import (
 )
 from flwr.common.logger import print_json_error, redirect_output, restore_output
 from flwr.proto.control_pb2_grpc import ControlStub  # pylint: disable=E0611
+from flwr.supercore.constant import (
+    APP_PUBLISH_EXCLUDE_PATTERNS,
+    APP_PUBLISH_INCLUDE_PATTERNS,
+    MAX_DIR_DEPTH,
+)
 from flwr.supercore.credential_store import get_credential_store
 
 from .auth_plugin import CliAuthPlugin, get_cli_plugin_class
@@ -670,6 +675,66 @@ def collect_project_files(
     file_paths = [candidates[p] for p in accepted_posix]
     file_paths.sort()
     return file_paths
+
+
+def collect_files(root: Path) -> dict[str, Path]:
+    """Collect all files under the root directory and return a mapping of relative POSIX
+    paths to absolute Paths.
+
+    Symlinks are ignored. The relative paths are in POSIX format (using forward slashes)
+    for consistency across platforms.
+    """
+    files: dict[str, Path] = {}
+    for path in root.rglob("*"):
+        if path.is_file() and not path.is_symlink():
+            relative_path = path.relative_to(root).as_posix()
+            files[relative_path] = path
+    return files
+
+
+def filter_paths_for_publish(
+    files: Mapping[str, Path | bytes],
+) -> dict[str, Path | bytes]:
+    """Filter paths for app publishing, using publish-specific include/exclude rules.
+
+    Parameters
+    ----------
+    files : Mapping[str, Path | bytes]
+        Mapping of POSIX-style relative paths to file contents (as Path or bytes).
+
+    Returns
+    -------
+    dict[str, Path | bytes]
+        Filtered mapping of paths to contents that match publish include/exclude rules.
+
+    Raises
+    ------
+    ValueError
+        Raised if any path exceeds the maximum directory depth.
+    """
+    # Load gitignore patterns if exists
+    gitignore_patterns = tuple(load_gitignore_patterns(files.get(".gitignore", b"")))
+    gitignore_spec = build_pathspec(gitignore_patterns)
+
+    # Build include/exclude pathspecs for app publish
+    include_spec = build_pathspec(APP_PUBLISH_INCLUDE_PATTERNS)
+    exclude_spec = build_pathspec(APP_PUBLISH_EXCLUDE_PATTERNS)
+
+    # Apply filtering
+    filtered_paths = include_spec.match_files(files.keys())
+    filtered_paths = exclude_spec.match_files(filtered_paths, negate=True)
+    filtered_paths = gitignore_spec.match_files(filtered_paths, negate=True)
+
+    # Collect filtered files and check directory depth
+    ret_files = {}
+    for rel_pth in cast(Iterable[str], filtered_paths):
+        if depth_of(Path(rel_pth)) > MAX_DIR_DEPTH:
+            raise ValueError(
+                f"'{rel_pth}' in the project exceeds the maximum directory depth "
+                f"of {MAX_DIR_DEPTH}."
+            )
+        ret_files[rel_pth] = files[rel_pth]
+    return ret_files
 
 
 def validate_credentials_content(creds_path: Path) -> str:
