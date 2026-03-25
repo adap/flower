@@ -10,14 +10,18 @@ This example demonstrates how a variational autoencoder (VAE) can be trained in 
 
 ## Set up the project
 
-### Clone the project
+### Fetch the app
 
-Start by cloning the example project:
+Install Flower:
 
 ```shell
-git clone --depth=1 https://github.com/flwrlabs/flower.git _tmp \
-              && mv _tmp/examples/pytorch-federated-variational-autoencoder . \
-              && rm -rf _tmp && cd pytorch-federated-variational-autoencoder
+pip install flwr
+```
+
+Fetch the app:
+
+```shell
+flwr new @flwrlabs/pytorch-federated-variational-autoencoder
 ```
 
 This will create a new directory called `pytorch-federated-variational-autoencoder` with the following structure:
