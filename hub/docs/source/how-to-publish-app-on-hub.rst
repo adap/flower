@@ -79,10 +79,10 @@ Before publishing your app, ensure that its metadata is complete and accurate. T
 
 Under :code:`[project]`, provide:
 
-- :code:`name` — the app's unique name
-- :code:`version` — the current release version
-- :code:`description` — a short summary of the app
-- :code:`license` — the applicable software license
+- :code:`name` — the app's unique name. A valid app name must start with a letter and only contain letters, digits, and hyphens.
+- :code:`version` — the current release version.
+- :code:`description` — a short summary of the app.
+- :code:`license` — the applicable software license.
 
 Under :code:`[tool.flwr.app]`, specify:
 
