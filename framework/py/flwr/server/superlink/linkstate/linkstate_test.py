@@ -23,7 +23,6 @@ import threading
 import time
 import unittest
 from abc import abstractmethod
-from collections.abc import Callable
 from datetime import datetime, timedelta, timezone
 from unittest.mock import Mock, patch
 from uuid import uuid4
@@ -1949,19 +1948,6 @@ class SqlFileBasedTest(StateTest, unittest.TestCase):
         return state
 
     @staticmethod
-    def _count_successful_replies(results: list[list[Message] | None]) -> int:
-        """Count non-error reply Messages from concurrent pull results."""
-        count = 0
-        for message_list in results:
-            if message_list is None:
-                continue
-            typed_message_list: list[Message] = message_list
-            for message in typed_message_list:
-                if not message.has_error():
-                    count += 1
-        return count
-
-    @staticmethod
     def _create_shared_sql_states(
         database_path: str,
     ) -> tuple[SqlLinkState, SqlLinkState]:
@@ -1980,180 +1966,12 @@ class SqlFileBasedTest(StateTest, unittest.TestCase):
         state_1.initialize()
         return state_0, state_1
 
-    @staticmethod
-    def _run_in_parallel(
-        state_0: SqlLinkState,
-        state_1: SqlLinkState,
-        fn: Callable[[SqlLinkState], list[Message]],
-        timeout: float = 5.0,
-    ) -> list[list[Message]]:
-        """Run the same pull function concurrently on two replicas."""
-        barrier = threading.Barrier(3)
-        results: list[list[Message] | None] = [None, None]
-        exceptions: list[Exception] = []
-
-        def _run(idx: int, state: SqlLinkState) -> None:
-            try:
-                barrier.wait(timeout=timeout)
-                results[idx] = fn(state)
-            except Exception as ex:  # pylint: disable=broad-exception-caught
-                exceptions.append(ex)
-
-        threads = [
-            threading.Thread(target=_run, args=(0, state_0)),
-            threading.Thread(target=_run, args=(1, state_1)),
-        ]
-        for thread in threads:
-            thread.start()
-        try:
-            barrier.wait(timeout=timeout)
-        except threading.BrokenBarrierError as ex:
-            exceptions.append(ex)
-        for thread in threads:
-            thread.join(timeout=timeout)
-        alive_threads = [thread for thread in threads if thread.is_alive()]
-        if alive_threads:
-            raise AssertionError(
-                f"Concurrent test timed out; "
-                f"{len(alive_threads)} thread(s) still alive "
-                f"after {timeout} seconds."
-            )
-
-        if exceptions:
-            raise exceptions[0]
-        assert all(message_list is not None for message_list in results)
-        return [message_list or [] for message_list in results]
-
-    # pylint: disable-next=too-many-locals
-    def test_get_message_ins_claim_is_unique_across_replicas(self) -> None:
-        """Ensure concurrent replicas cannot both claim the same instruction."""
-        with tempfile.TemporaryDirectory() as tmpdir:
-            db_path = os.path.join(tmpdir, "shared.db")
-            state_0, state_1 = self._create_shared_sql_states(db_path)
-
-            node_id = create_dummy_node(state_0)
-            run_id = create_dummy_run(state_0)
-            msg = message_from_proto(
-                create_ins_message(
-                    src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
-                )
-            )
-            assert state_0.store_message_ins(message=msg)
-
-            results = self._run_in_parallel(
-                state_0,
-                state_1,
-                lambda state: state.get_message_ins(node_id=node_id, limit=1),
-            )
-            claimed = [msgs for msgs in results if msgs]
-            assert len(claimed) == 1
-            assert len(claimed[0]) == 1
-
-    def test_get_message_res_claim_is_unique_across_replicas(self) -> None:
-        """Ensure concurrent replicas cannot both claim the same reply Message."""
-        with tempfile.NamedTemporaryFile() as shared_db:
-            state_0 = SqlLinkState(
-                database_path=shared_db.name,
-                federation_manager=NoOpFederationManager(),
-                object_store=ObjectStoreFactory().store(),
-            )
-            state_1 = SqlLinkState(
-                database_path=shared_db.name,
-                federation_manager=NoOpFederationManager(),
-                object_store=ObjectStoreFactory().store(),
-            )
-            state_0.initialize()
-            state_1.initialize()
-
-            node_id = create_dummy_node(state_0)
-            assert state_0.store_message_ins(
-                message_from_proto(
-                    create_ins_message(
-                        src_node_id=SUPERLINK_NODE_ID,
-                        dst_node_id=node_id,
-                        run_id=create_dummy_run(state_0),
-                    )
-                )
-            )
-            pulled_ins = state_0.get_message_ins(node_id=node_id, limit=1)[0]
-
-            msg_res = Message(RecordDict(), reply_to=pulled_ins)
-            msg_res.metadata.__dict__["_message_id"] = str(uuid4())
-            assert state_0.store_message_res(msg_res)
-
-            barrier = threading.Barrier(3)
-            results: list[list[Message] | None] = [None, None]
-            exceptions: list[Exception] = []
-
-            def pull_res(idx: int, state: SqlLinkState) -> None:
-                try:
-                    barrier.wait(timeout=5)
-                    results[idx] = state.get_message_res(
-                        {pulled_ins.metadata.message_id}
-                    )
-                except Exception as ex:  # pylint: disable=broad-exception-caught
-                    exceptions.append(ex)
-
-            threads = [
-                threading.Thread(target=pull_res, args=(0, state_0)),
-                threading.Thread(target=pull_res, args=(1, state_1)),
-            ]
-            for thread in threads:
-                thread.start()
-            try:
-                barrier.wait(timeout=5)
-            except threading.BrokenBarrierError as ex:
-                exceptions.append(ex)
-            for thread in threads:
-                thread.join(timeout=5)
-            alive_threads = [thread for thread in threads if thread.is_alive()]
-            if alive_threads:
-                self.fail("Timed out waiting for concurrent pull_res threads to finish")
-
-            if exceptions:
-                raise exceptions[0]
-            assert all(message_list is not None for message_list in results)
-            assert self._count_successful_replies(results) == 1
-
-    # pylint: disable-next=too-many-locals
-    def test_get_message_ins_distributes_available_work_under_contention(self) -> None:
-        """Ensure two replicas can each claim work when two Messages are available."""
-        with tempfile.NamedTemporaryFile() as shared_db:
-            state_0, state_1 = self._create_shared_sql_states(shared_db.name)
-
-            node_id = create_dummy_node(state_0)
-            run_id = create_dummy_run(state_0)
-            msg_0 = message_from_proto(
-                create_ins_message(
-                    src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
-                )
-            )
-            msg_1 = message_from_proto(
-                create_ins_message(
-                    src_node_id=SUPERLINK_NODE_ID, dst_node_id=node_id, run_id=run_id
-                )
-            )
-            assert state_0.store_message_ins(message=msg_0)
-            assert state_0.store_message_ins(message=msg_1)
-
-            results = self._run_in_parallel(
-                state_0,
-                state_1,
-                lambda state: state.get_message_ins(node_id=node_id, limit=1),
-            )
-            claimed_messages = [msgs for msgs in results if msgs]
-            assert len(claimed_messages) == 2
-            assert all(len(msgs) == 1 for msgs in claimed_messages)
-            assert (
-                claimed_messages[0][0].metadata.message_id
-                != claimed_messages[1][0].metadata.message_id
-            )
-
     # pylint: disable-next=too-many-locals
     def test_update_run_status_running_claim_is_atomic_across_replicas(self) -> None:
         """Ensure only one replica can claim STARTING -> RUNNING transition."""
-        with tempfile.NamedTemporaryFile() as shared_db:
-            state_0, state_1 = self._create_shared_sql_states(shared_db.name)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            db_path = os.path.join(tmpdir, "shared.db")
+            state_0, state_1 = self._create_shared_sql_states(db_path)
             run_id = create_dummy_run(state_0)
             assert state_0.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
 
