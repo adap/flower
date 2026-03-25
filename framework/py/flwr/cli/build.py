@@ -168,7 +168,8 @@ def build(
 def build_fab_from_disk(app: Path) -> bytes:
     """Build a FAB from files on disk and return the FAB as bytes.
 
-    This function reads files from disk and bundles them into a FAB.
+    This function reads files from disk using publish-style rules and bundles them into
+    a FAB.
 
     Parameters
     ----------
@@ -182,9 +183,9 @@ def build_fab_from_disk(app: Path) -> bytes:
     """
     app = app.resolve()
 
-    # Collect files using publish-style rules (Layer 1):
-    # .gitignore exclusion, broad file-type include, depth limit.
-    # build_fab_from_files applies a second layer of FAB-specific filtering.
+    # Collect files using publish-style rules (.gitignore exclusion, broad file-type
+    # include, depth limit). build_fab_from_files applies a second layer of FAB-specific
+    # filtering.
     try:
         file_paths = collect_project_files(
             app,
@@ -200,7 +201,7 @@ def build_fab_from_disk(app: Path) -> bytes:
         file_path.relative_to(app).as_posix(): file_path for file_path in file_paths
     }
 
-    # Always include pyproject.toml — required by build_fab_from_files
+    # Ensure pyproject.toml is present even if excluded by .gitignore
     pyproject = app / FAB_CONFIG_FILE
     files_dict.setdefault(FAB_CONFIG_FILE, pyproject)
 
