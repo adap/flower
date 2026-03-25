@@ -19,7 +19,10 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
 from flwr.common.typing import Federation
-from flwr.proto.federation_pb2 import Invitation  # pylint: disable=E0611
+from flwr.proto.federation_pb2 import (  # pylint: disable=E0611
+    Invitation,
+    SimulationConfig,
+)
 
 if TYPE_CHECKING:
     from flwr.server.superlink.linkstate.linkstate import LinkState
@@ -66,6 +69,53 @@ class FederationManager(ABC):
     @abstractmethod
     def get_details(self, federation: str) -> Federation:
         """Get details of the federation."""
+
+    @abstractmethod
+    def get_simulation_config(self, federation: str) -> SimulationConfig | None:
+        """Get the simulation configuration for a federation. This method is called by
+        the SuperLink only.
+
+        Note that this method will treat non-simulation federations and non-existent
+        federations differently.
+
+        Parameters
+        ----------
+        federation : str
+            The name of the federation.
+
+        Returns
+        -------
+        SimulationConfig | None
+            The simulation configuration stored for the federation. If the federation
+            is not configured for simulation, None is returned.
+
+        Raises
+        ------
+        FlowerError
+            If the federation does not exist.
+        """
+
+    @abstractmethod
+    def set_simulation_config(
+        self, flwr_aid: str, federation: str, config: SimulationConfig
+    ) -> None:
+        """Set the simulation configuration for a federation.
+
+        Parameters
+        ----------
+        flwr_aid : str
+            The ID of the account setting the simulation configuration.
+        federation : str
+            The name of the federation.
+        config : SimulationConfig
+            The simulation configuration to store for the federation.
+
+        Raises
+        ------
+        FlowerError
+            If the federation does not exist, the caller account is not a
+            member, or the federation is not configured for simulation.
+        """
 
     @abstractmethod
     def create_federation(

@@ -14,6 +14,8 @@
 # ==============================================================================
 """Control API servicer."""
 
+# pylint: disable=too-many-lines
+
 
 import hashlib
 import json
@@ -65,6 +67,8 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     AddNodeToFederationResponse,
     ArchiveFederationRequest,
     ArchiveFederationResponse,
+    ConfigureSimulationFederationRequest,
+    ConfigureSimulationFederationResponse,
     CreateFederationRequest,
     CreateFederationResponse,
     CreateInvitationRequest,
@@ -591,6 +595,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             runs=[run_to_proto(run) for run in details.runs],
             archived=details.archived,
             simulation=details.simulation,
+            config=details.config,
         )
         return ShowFederationResponse(
             federation=federation_proto, now=now().isoformat()
@@ -822,6 +827,25 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 invitee_account_name=request.invitee_account_name,
             )
         return RevokeInvitationResponse()
+
+    def ConfigureSimulationFederation(
+        self,
+        request: ConfigureSimulationFederationRequest,
+        context: grpc.ServicerContext,
+    ) -> ConfigureSimulationFederationResponse:
+        """Configure a federation for simulation."""
+        log(INFO, rpc_name := self.ConfigureSimulationFederation.__qualname__)
+
+        state = self.linkstate_factory.state()
+
+        with rpc_error_translator(context, rpc_name):
+            state.federation_manager.set_simulation_config(
+                flwr_aid=_get_flwr_aid(context),
+                federation=request.federation_name,
+                config=request.config,
+            )
+
+        return ConfigureSimulationFederationResponse()
 
     # ***************
     # Unused for now
