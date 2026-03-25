@@ -50,8 +50,8 @@ jobs:
     steps:
       - name: Create build id
         id: build-id
-        shell: python
         run: |
+          python3 << 'PYTHON_EOF'
           import hashlib
           import os
 
@@ -68,7 +68,7 @@ jobs:
           # ARG3=
           #
           # This causes the Docker action to interpret ARG2 and ARG3 as keys instead
-          # of values ​​of the multi-line string.
+          # of values of the multi-line string.
           build_args = '''${{ inputs.build-args }}'''.replace("\n", "\n  ")
 
           with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
@@ -76,6 +76,7 @@ jobs:
               print("build-args<<EOF", file=fh)
               print(build_args, file=fh)
               print("EOF", file=fh)
+          PYTHON_EOF
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
