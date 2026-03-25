@@ -34,9 +34,13 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     ShowFederationResponse,
 )
 from flwr.proto.control_pb2_grpc import ControlStub
-from flwr.proto.federation_pb2 import Federation, Member  # pylint: disable=E0611
+from flwr.proto.federation_pb2 import (  # pylint: disable=E0611
+    Federation,
+    Member,
+    SimulationConfig,
+)
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
-from flwr.supercore.utils import humanize_duration
+from flwr.supercore.utils import humanize_duration, simulation_config_to_json
 
 from ..run_utils import RunRow, format_runs
 from ..utils import (
@@ -92,7 +96,7 @@ def ls(  # pylint: disable=R0914, R0913, R0917, R0912
 
             if federation:
                 # Show specific federation details
-                members, nodes, runs, archived, simulation = _show_federation(
+                members, nodes, runs, archived, simulation, config = _show_federation(
                     stub, federation
                 )
                 archived_str = (
@@ -111,12 +115,16 @@ def ls(  # pylint: disable=R0914, R0913, R0917, R0912
                             runs=runs,
                             archived=archived,
                             simulation=simulation,
+                            config=config,
                         )
                     )
                 else:
 
                     Console().print(_to_members_table(members))
-                    Console().print(_to_nodes_table(nodes))
+                    if simulation:
+                        Console().print(_to_simulation_config_table(config))
+                    else:
+                        Console().print(_to_nodes_table(nodes))
                     Console().print(_to_runs_table(runs))
             else:
                 # List federations
@@ -189,6 +197,7 @@ def _to_json(  # pylint: disable=R0913,R0917
     runs: list[RunRow] | None = None,
     archived: bool | None = None,
     simulation: bool | None = None,
+    config: SimulationConfig | None = None,
 ) -> dict[str, Any]:
     """Format the provided federations list to JSON serializable format."""
     if federations is not None:
@@ -240,13 +249,14 @@ def _to_json(  # pylint: disable=R0913,R0917
             "runs": runs_list,
             "archived": archived,
             "simulation": simulation,
+            "simulation-config": simulation_config_to_json(config) if config else None,
         }
     }
 
 
 def _show_federation(
     stub: ControlStub, federation: str
-) -> tuple[list[Member], list[NodeInfo], list[RunRow], bool, bool]:
+) -> tuple[list[Member], list[NodeInfo], list[RunRow], bool, bool, SimulationConfig]:
     """Show federation details.
 
     Parameters
@@ -258,8 +268,8 @@ def _show_federation(
 
     Returns
     -------
-    tuple[list[Member], list[NodeInfo], list[RunRow], bool, bool]
-        A tuple containing (members, nodes, runs, archived, simulation).
+    tuple[list[Member], list[NodeInfo], list[RunRow], bool, bool, SimulationConfig]
+        A tuple containing (members, nodes, runs, archived, simulation, config).
     """
     with flwr_cli_grpc_exc_handler():
         res: ShowFederationResponse = stub.ShowFederation(
@@ -276,6 +286,7 @@ def _show_federation(
         formatted_runs,
         fed_proto.archived,
         fed_proto.simulation,
+        fed_proto.config,
     )
 
 
@@ -357,6 +368,30 @@ def _to_nodes_table(nodes: list[NodeInfo]) -> Table:
             f"[{status_style}]{status}",
         )
         table.add_row(*formatted_row)
+
+    return table
+
+
+def _to_simulation_config_table(config: SimulationConfig) -> Table:
+    """Format the simulation configuration as a rich Table."""
+    table = Table(
+        title="Simulation Configuration",
+        header_style="bold cyan",
+        show_lines=True,
+    )
+
+    table.add_column(Text("Setting", justify="center"), style="bright_black")
+    table.add_column(Text("Value", justify="center"))
+
+    rows = [
+        ("Number of Simulated SuperNodes", str(config.num_supernodes)),
+        ("Client Resources (CPUs)", str(config.client_resources_num_cpus)),
+        ("Client Resources (GPUs)", str(config.client_resources_num_gpus)),
+        ("Backend Name", config.backend_name),
+    ]
+
+    for field, value in rows:
+        table.add_row(field, value)
 
     return table
 
