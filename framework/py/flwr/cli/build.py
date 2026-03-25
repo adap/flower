@@ -27,11 +27,14 @@ import tomli
 import tomli_w
 import typer
 
+from flwr.common.config import check_pattern_list_value
 from flwr.common.constant import (
     FAB_CONFIG_FILE,
     FAB_DATE,
+    FAB_EXCLUDE_KEY,
     FAB_EXCLUDE_PATTERNS,
     FAB_HASH_TRUNCATION,
+    FAB_INCLUDE_KEY,
     FAB_INCLUDE_PATTERNS,
     FAB_MAX_SIZE,
 )
@@ -42,7 +45,7 @@ from flwr.supercore.fab_format_version import (
 )
 
 from .config_utils import load_and_validate
-from .utils import build_pathspec, is_valid_project_name, load_gitignore_patterns
+from .utils import build_pathspec, is_valid_project_name
 
 
 def write_to_zip(
@@ -138,7 +141,10 @@ def build(
         )
 
     # Build FAB
-    fab_bytes = build_fab_from_disk(app)
+    try:
+        fab_bytes = build_fab_from_disk(app)
+    except ValueError as e:
+        raise click.ClickException(str(e)) from None
 
     # Calculate hash for filename
     fab_hash = hashlib.sha256(fab_bytes).hexdigest()
@@ -254,6 +260,8 @@ def build_fab_from_files(
         return f"{path},{sha256_hash},{file_size_bits}"
 
     # Extract, load, and parse pyproject.toml
+    # Normalise path separators up-front so all subsequent lookups are consistent.
+    files = {k.replace("\\", "/"): v for k, v in files.items()}
     if FAB_CONFIG_FILE not in files:
         raise ValueError(f"{FAB_CONFIG_FILE} not found in files")
     pyproject_content = _to_bytes(files[FAB_CONFIG_FILE])
@@ -268,21 +276,8 @@ def build_fab_from_files(
     ):
         del config["tool"]["flwr"]["federations"]
 
-    # Extract and load .gitignore if present
-    gitignore_content = None
-    if ".gitignore" in files:
-        gitignore_content = _to_bytes(files[".gitignore"])
-
-    # Get exclude and include specs
-    exclude_spec = get_fab_exclude_pathspec(gitignore_content)
-    include_spec = get_fab_include_pathspec()
-
-    # Filter files based on include/exclude specs
-    filtered_paths = [
-        path.replace("\\", "/")  # Ensure consistent path separators across platforms
-        for path in files.keys()
-        if include_spec.match_file(path) and not exclude_spec.match_file(path)
-    ]
+    # Filter files based on user patterns and built-in constraints.
+    filtered_paths = get_filtered_fab_paths(files, config)
     filtered_paths.sort()  # Sort for deterministic output
     validate_fab_files_for_format(config, filtered_paths)
 
@@ -307,42 +302,124 @@ def build_fab_from_files(
     if len(fab_bytes) > FAB_MAX_SIZE:
         raise ValueError(
             f"FAB size exceeds maximum allowed size of {FAB_MAX_SIZE:,} bytes. "
-            "To reduce the package size, consider ignoring unnecessary files "
-            "via your `.gitignore` file or excluding them from the build."
+            f"To reduce package size, narrow `{FAB_INCLUDE_KEY}` or add "
+            f"`{FAB_EXCLUDE_KEY}` patterns in [tool.flwr.app]."
         )
 
     # Returned metadata is consumed by platform during publish.
     return fab_bytes, metadata
 
 
-def get_fab_include_pathspec() -> pathspec.PathSpec:
-    """Get the PathSpec for files to include in a FAB.
+def get_user_fab_patterns(
+    config: dict[str, Any],
+) -> tuple[list[str] | None, list[str] | None]:
+    """Return user-defined FAB include/exclude patterns.
 
-    Returns
-    -------
-    PathSpec
-        PathSpec object with default include patterns for FAB files.
+    Returns ``None`` for a key that is absent from the config, or the
+    non-empty pattern list itself. Raises ``ValueError`` if a key is
+    present but set to an empty list.
     """
-    return build_pathspec(FAB_INCLUDE_PATTERNS)
+    app_conf = config.get("tool", {}).get("flwr", {}).get("app", {})
+    if not isinstance(app_conf, dict):
+        return None, None
+
+    def _get_pattern_list(key: str) -> list[str] | None:
+        if key not in app_conf:
+            return None
+        value: list[str] = app_conf[key]
+        error = check_pattern_list_value(value, key)
+        if error:
+            raise ValueError(error)
+        return value
+
+    return _get_pattern_list(FAB_INCLUDE_KEY), _get_pattern_list(FAB_EXCLUDE_KEY)
 
 
-def get_fab_exclude_pathspec(gitignore_content: bytes | None) -> pathspec.PathSpec:
-    """Get the PathSpec for files to exclude from a FAB.
+def get_filtered_fab_paths(
+    files: dict[str, bytes | Path],
+    config: dict[str, Any],
+) -> list[str]:
+    """Compute final FAB file list using user patterns and non-overridable defaults."""
+    # Build built-in spec
+    normalized_paths = list(files.keys())
+    built_in_include_spec = build_pathspec(FAB_INCLUDE_PATTERNS)
+    built_in_exclude_spec = build_pathspec(FAB_EXCLUDE_PATTERNS)
+    user_include_spec = None
+    user_exclude_spec = None
 
-    If gitignore_content is provided, its patterns will be combined with the default
-    exclude patterns.
+    # Load and validate user patterns, and build user specs
+    user_include_patterns, user_exclude_patterns = get_user_fab_patterns(config)
+    if user_include_patterns is not None:
+        _raise_on_unresolved_patterns(
+            user_include_patterns, normalized_paths, FAB_INCLUDE_KEY
+        )
+        user_include_spec = build_pathspec(user_include_patterns)
+    if user_exclude_patterns is not None:
+        _raise_on_unresolved_patterns(
+            user_exclude_patterns, normalized_paths, FAB_EXCLUDE_KEY
+        )
+        user_exclude_spec = build_pathspec(user_exclude_patterns)
+    has_user_rules = bool(user_include_spec or user_exclude_spec)
 
-    Parameters
-    ----------
-    gitignore_content : bytes | None
-        Optional gitignore file content as bytes.
+    # Build the candidate set of files based on user-defined patterns,
+    # or all files if no user patterns are defined.
+    candidate_paths = normalized_paths
+    if user_include_spec:
+        candidate_paths = list(
+            user_include_spec.match_files(candidate_paths)  # type: ignore
+        )
+    if user_exclude_spec:
+        candidate_paths = list(
+            user_exclude_spec.match_files(candidate_paths, negate=True)  # type: ignore
+        )
 
-    Returns
-    -------
-    PathSpec
-        PathSpec object with combined exclude patterns.
-    """
-    patterns = list(FAB_EXCLUDE_PATTERNS)
-    if gitignore_content:
-        patterns += load_gitignore_patterns(gitignore_content)
-    return pathspec.PathSpec.from_lines("gitwildmatch", patterns)
+    # Apply built-in constraints and validate against user patterns
+    if has_user_rules:
+        _raise_on_built_in_pattern_conflicts(candidate_paths, built_in_include_spec)
+    final_paths = [
+        path
+        for path in candidate_paths
+        if built_in_include_spec.match_file(path)
+        and not built_in_exclude_spec.match_file(path)
+    ]
+    return final_paths
+
+
+def _raise_on_unresolved_patterns(
+    patterns: list[str], file_paths: list[str], key_name: str
+) -> None:
+    """Raise ValueError for any user-defined pattern that is invalid or matches
+    nothing."""
+    for pattern in patterns:
+        try:
+            pattern_spec = build_pathspec([pattern])
+        except Exception as err:  # pylint: disable=broad-except
+            raise ValueError(
+                f'Invalid pattern in "{key_name}": "{pattern}" ({err})'
+            ) from err
+
+        if not any(pattern_spec.match_file(path) for path in file_paths):
+            raise ValueError(
+                f'Pattern in "{key_name}" did not match any files: "{pattern}". '
+                "Correct the pattern or remove it."
+            )
+
+
+def _raise_on_built_in_pattern_conflicts(
+    candidate_paths: list[str],
+    built_in_include_spec: pathspec.PathSpec,
+) -> None:
+    """Raise ValueError for user-defined rules and built-in rules conflicts."""
+    # Only count files whose type is not supported by built-in include patterns
+    # (e.g. .txt files). Files that match built-in includes but are removed by
+    # built-in excludes (e.g. .toml inside .venv/, pyproject.toml) are expected
+    # removals and should not be flagged.
+    removed_files = set(built_in_include_spec.match_files(candidate_paths, negate=True))
+    if removed_files:
+        files_list = "\n".join(f"- {file}" for file in removed_files)
+        raise ValueError(
+            f'{len(removed_files)} file(s) matched "{FAB_INCLUDE_KEY}" but were '
+            "removed by non-overridable built-in FAB constraints. "
+            f'Remove the conflicting patterns from "{FAB_INCLUDE_KEY}".\n\n'
+            f"Affected files:\n{files_list}"
+        )

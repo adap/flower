@@ -20,6 +20,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 from flwr.cli.typing import SuperLinkConnection, SuperLinkSimulationOptions
+from flwr.supercore.constant import FLWR_DISABLE_UPDATE_CHECK
 
 from .local_superlink import _start_local_superlink, ensure_local_superlink
 
@@ -111,3 +112,4 @@ def test_start_local_superlink_uses_builtin_log_rotation(tmp_path: Path) -> None
     assert "7" in cmd
     assert popen.call_args.kwargs["stdout"] is subprocess.DEVNULL
     assert popen.call_args.kwargs["stderr"] is subprocess.DEVNULL
+    assert popen.call_args.kwargs["env"][FLWR_DISABLE_UPDATE_CHECK] == "1"
