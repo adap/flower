@@ -352,4 +352,4 @@ class Federation:  # pylint: disable=R0902
     runs: list[Run]
     archived: bool
     simulation: bool
-    config: SimulationConfig
+    config: SimulationConfig | None

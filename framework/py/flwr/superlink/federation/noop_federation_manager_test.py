@@ -287,15 +287,13 @@ def test_get_simulation_config_returns_defaults_when_unset() -> None:
     )
 
 
-def test_simulation_config_access_fails_when_simulation_is_disabled() -> None:
-    """Test simulation config access fails outside simulation mode."""
+def test_simulation_config_returns_none_when_simulation_is_disabled() -> None:
+    """Test simulation config reads return None outside simulation mode."""
     manager = NoOpFederationManager()
 
     assert manager._simulation_config is None  # pylint: disable=protected-access
 
-    with pytest.raises(FlowerError) as get_err:
-        manager.get_simulation_config(NOOP_FEDERATION)
-    assert get_err.value.code == ApiErrorCode.FEDERATION_NOT_FOUND_OR_NO_PERMISSION
+    assert manager.get_simulation_config(NOOP_FEDERATION) is None
 
     with pytest.raises(FlowerError) as set_err:
         manager.set_simulation_config(
