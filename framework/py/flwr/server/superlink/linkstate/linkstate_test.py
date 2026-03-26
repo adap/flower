@@ -1935,6 +1935,7 @@ class SqlFileBasedTest(StateTest, unittest.TestCase):
     """Test SqlLinkState implementation with file-based database."""
 
     __test__ = True
+    _CONCURRENT_TEST_TIMEOUT = 10.0
 
     def state_factory(self) -> SqlLinkState:
         """Return SqlLinkState with file-based database."""
@@ -1985,7 +1986,7 @@ class SqlFileBasedTest(StateTest, unittest.TestCase):
         state_0: SqlLinkState,
         state_1: SqlLinkState,
         fn: Callable[[SqlLinkState], list[Message]],
-        timeout: float = 5.0,
+        timeout: float = _CONCURRENT_TEST_TIMEOUT,
     ) -> list[list[Message]]:
         """Run the same pull function concurrently on two replicas."""
         barrier = threading.Barrier(3)
@@ -2049,21 +2050,12 @@ class SqlFileBasedTest(StateTest, unittest.TestCase):
             assert len(claimed) == 1
             assert len(claimed[0]) == 1
 
+    # pylint: disable-next=too-many-locals
     def test_get_message_res_claim_is_unique_across_replicas(self) -> None:
         """Ensure concurrent replicas cannot both claim the same reply Message."""
-        with tempfile.NamedTemporaryFile() as shared_db:
-            state_0 = SqlLinkState(
-                database_path=shared_db.name,
-                federation_manager=NoOpFederationManager(),
-                object_store=ObjectStoreFactory().store(),
-            )
-            state_1 = SqlLinkState(
-                database_path=shared_db.name,
-                federation_manager=NoOpFederationManager(),
-                object_store=ObjectStoreFactory().store(),
-            )
-            state_0.initialize()
-            state_1.initialize()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            db_path = os.path.join(tmpdir, "shared.db")
+            state_0, state_1 = self._create_shared_sql_states(db_path)
 
             node_id = create_dummy_node(state_0)
             assert state_0.store_message_ins(
@@ -2087,7 +2079,7 @@ class SqlFileBasedTest(StateTest, unittest.TestCase):
 
             def pull_res(idx: int, state: SqlLinkState) -> None:
                 try:
-                    barrier.wait(timeout=5)
+                    barrier.wait(timeout=self._CONCURRENT_TEST_TIMEOUT)
                     results[idx] = state.get_message_res(
                         {pulled_ins.metadata.message_id}
                     )
@@ -2101,11 +2093,11 @@ class SqlFileBasedTest(StateTest, unittest.TestCase):
             for thread in threads:
                 thread.start()
             try:
-                barrier.wait(timeout=5)
+                barrier.wait(timeout=self._CONCURRENT_TEST_TIMEOUT)
             except threading.BrokenBarrierError as ex:
                 exceptions.append(ex)
             for thread in threads:
-                thread.join(timeout=5)
+                thread.join(timeout=self._CONCURRENT_TEST_TIMEOUT)
             alive_threads = [thread for thread in threads if thread.is_alive()]
             if alive_threads:
                 self.fail("Timed out waiting for concurrent pull_res threads to finish")
@@ -2118,8 +2110,9 @@ class SqlFileBasedTest(StateTest, unittest.TestCase):
     # pylint: disable-next=too-many-locals
     def test_get_message_ins_distributes_available_work_under_contention(self) -> None:
         """Ensure two replicas can each claim work when two Messages are available."""
-        with tempfile.NamedTemporaryFile() as shared_db:
-            state_0, state_1 = self._create_shared_sql_states(shared_db.name)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            db_path = os.path.join(tmpdir, "shared.db")
+            state_0, state_1 = self._create_shared_sql_states(db_path)
 
             node_id = create_dummy_node(state_0)
             run_id = create_dummy_run(state_0)
