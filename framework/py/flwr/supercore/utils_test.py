@@ -273,7 +273,7 @@ def test_simulation_config_to_json_includes_unset_optional_fields() -> None:
         num_supernodes=10,
         client_resources_num_cpus=2,
         client_resources_num_gpus=0.25,
-        backend_name="ray",
+        backend="ray",
         verbose=True,
     )
 
@@ -281,7 +281,7 @@ def test_simulation_config_to_json_includes_unset_optional_fields() -> None:
         "num_supernodes": 10,
         "client_resources_num_cpus": 2,
         "client_resources_num_gpus": 0.25,
-        "backend_name": "ray",
+        "backend": "ray",
         "verbose": True,
         "init_args_num_cpus": None,
         "init_args_num_gpus": None,
@@ -296,7 +296,7 @@ def test_simulation_config_from_json_preserves_falsey_optional_values() -> None:
         "num_supernodes": 5,
         "client_resources_num_cpus": 1,
         "client_resources_num_gpus": 0.0,
-        "backend_name": "ray",
+        "backend": "ray",
         "verbose": False,
         "init_args_num_cpus": 4,
         "init_args_num_gpus": 0,
@@ -309,7 +309,7 @@ def test_simulation_config_from_json_preserves_falsey_optional_values() -> None:
     assert config.num_supernodes == 5
     assert config.client_resources_num_cpus == 1
     assert config.client_resources_num_gpus == 0.0
-    assert config.backend_name == "ray"
+    assert config.backend == "ray"
     assert not config.verbose
     assert config.init_args_num_cpus == 4
     assert config.init_args_num_gpus == 0
@@ -327,7 +327,7 @@ def test_simulation_config_json_round_trip_preserves_presence() -> None:
         num_supernodes=12,
         client_resources_num_cpus=3,
         client_resources_num_gpus=1.5,
-        backend_name="ray",
+        backend="ray",
         verbose=False,
         init_args_num_gpus=2,
     )

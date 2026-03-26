@@ -67,7 +67,7 @@ class SimulationBackendConfig:
 
     client_resources: SimulationClientResources | None = None
     init_args: SimulationInitArgs | None = None
-    name: str = DEFAULT_SIMULATION_CONFIG.backend_name
+    name: str = DEFAULT_SIMULATION_CONFIG.backend
 
     def __post_init__(self) -> None:
         """Validate backend configuration."""

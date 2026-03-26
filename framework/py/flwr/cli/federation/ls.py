@@ -387,7 +387,7 @@ def _to_simulation_config_table(config: SimulationConfig) -> Table:
         ("Number of Simulated SuperNodes", str(config.num_supernodes)),
         ("Client Resources (CPUs)", str(config.client_resources_num_cpus)),
         ("Client Resources (GPUs)", str(config.client_resources_num_gpus)),
-        ("Backend Name", config.backend_name),
+        ("Backend Name", config.backend),
     ]
 
     for field, value in rows:

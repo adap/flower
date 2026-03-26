@@ -98,7 +98,7 @@ def simulation_config(  # pylint: disable=R0913,R0917,W0613
             case_sensitive=False,
             help="Choice of backend name (Currently, only 'ray' is supported).",
         ),
-    ] = DEFAULT_SIMULATION_CONFIG.backend_name,  # type: ignore
+    ] = DEFAULT_SIMULATION_CONFIG.backend,  # type: ignore
     init_args_num_cpus: Annotated[
         int | None,
         typer.Option(
@@ -138,7 +138,7 @@ def simulation_config(  # pylint: disable=R0913,R0917,W0613
                 num_supernodes=num_supernodes,
                 client_resources_num_cpus=client_resources_num_cpus,
                 client_resources_num_gpus=client_resources_num_gpus,
-                backend_name=backend,
+                backend=backend,
                 verbose=verbose,
                 init_args_num_cpus=init_args_num_cpus,
                 init_args_num_gpus=init_args_num_gpus,

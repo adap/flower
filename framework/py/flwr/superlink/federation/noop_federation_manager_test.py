@@ -47,7 +47,7 @@ def test_get_details_with_valid_federation() -> None:
         num_supernodes=12,
         client_resources_num_cpus=3,
         client_resources_num_gpus=1.0,
-        backend_name="ray",
+        backend="ray",
         verbose=True,
     )
     manager.set_simulation_config(NOOP_FLWR_AID, NOOP_FEDERATION, config)
@@ -279,7 +279,7 @@ def test_get_simulation_config_returns_defaults_when_unset() -> None:
         stored.client_resources_num_gpus
         == DEFAULT_SIMULATION_CONFIG.client_resources_num_gpus
     )
-    assert stored.backend_name == DEFAULT_SIMULATION_CONFIG.backend_name
+    assert stored.backend == DEFAULT_SIMULATION_CONFIG.backend
     assert stored.verbose is DEFAULT_SIMULATION_CONFIG.verbose
     assert (
         stored.init_args_log_to_driver
@@ -319,7 +319,7 @@ def test_get_federations_returns_stored_simulation_config() -> None:
         num_supernodes=12,
         client_resources_num_cpus=3,
         client_resources_num_gpus=1.0,
-        backend_name="ray",
+        backend="ray",
         verbose=True,
     )
 
