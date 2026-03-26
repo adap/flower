@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "pytorch-federated-variational-autoencoder"
+name = "federated-vae"
 version = "1.0.0"
 description = "Federated Variational Autoencoder Example with PyTorch and Flower"
 license = "Apache-2.0"

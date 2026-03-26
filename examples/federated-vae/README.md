@@ -21,13 +21,13 @@ pip install flwr
 Fetch the app:
 
 ```shell
-flwr new @flwrlabs/pytorch-federated-variational-autoencoder
+flwr new @flwrlabs/federated-vae
 ```
 
-This will create a new directory called `pytorch-federated-variational-autoencoder` with the following structure:
+This will create a new directory called `federated-vae` with the following structure:
 
 ```shell
-pytorch-federated-variational-autoencoder
+federated-vae
 ├── README.md
 ├── fedvaeexample
 │   ├── __init__.py
