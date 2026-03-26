@@ -48,7 +48,6 @@ from .utils import (
     get_sha256_hash,
     init_channel_from_connection,
     load_gitignore_patterns,
-    optional_min_callback,
     validate_credentials_content,
 )
 
@@ -200,23 +199,6 @@ def test_get_executed_command_nested() -> None:
         ) as fed_ctx:
             with click.Context(list_cmd, parent=fed_ctx, info_name="list"):
                 assert get_executed_command() == "flwr federation list"
-
-
-@pytest.mark.parametrize("value", [None, 0, 1, 4, 2.5])
-def test_optional_min_callback_accepts_none_and_valid_values(
-    value: int | float | None,
-) -> None:
-    """Optional minimum validation should allow omitted and in-range values."""
-    assert optional_min_callback(0)(value) == value
-
-
-@pytest.mark.parametrize(("minimum", "value"), [(1, 0), (1, -1), (0, -0.5)])
-def test_optional_min_callback_rejects_values_below_minimum(
-    minimum: int, value: int | float
-) -> None:
-    """Optional minimum validation should reject explicit below-range values."""
-    with pytest.raises(click.BadParameter, match=f"{minimum}"):
-        optional_min_callback(minimum)(value)
 
 
 def test_init_channel_from_connection_uses_resolved_connection() -> None:

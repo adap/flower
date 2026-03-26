@@ -22,7 +22,6 @@ import typer
 from flwr.cli.utils import (
     cli_output_control_stub,
     flwr_cli_grpc_exc_handler,
-    optional_min_callback,
     print_json_to_stdout,
 )
 from flwr.common.constant import CliOutputFormat
