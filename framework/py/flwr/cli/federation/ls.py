@@ -381,17 +381,22 @@ def _to_simulation_config_table(config: SimulationConfig) -> Table:
     )
 
     table.add_column(Text("Setting", justify="center"), style="bright_black")
-    table.add_column(Text("Value", justify="center"))
+    table.add_column(Text("Key", justify="center"), style="bright_black")
+    table.add_column(Text("Value"), justify="right")
 
     rows = [
-        ("Number of Simulated SuperNodes", str(config.num_supernodes)),
-        ("Client Resources (CPUs)", str(config.client_resources_num_cpus)),
-        ("Client Resources (GPUs)", str(config.client_resources_num_gpus)),
-        ("Backend Name", config.backend),
+        ("Number of Simulated SuperNodes", "num_supernodes"),
+        ("ClientApp Resources (CPUs)", "client_resources_num_cpus"),
+        ("ClientApp Resources (GPUs)", "client_resources_num_gpus"),
+        ("Backend Name", "backend"),
     ]
 
-    for field, value in rows:
-        table.add_row(field, value)
+    for name, key in rows:
+        table.add_row(
+            name,
+            Text(key.replace("_", "-"), style="bold magenta"),
+            str(getattr(config, key)),
+        )
 
     return table
 
