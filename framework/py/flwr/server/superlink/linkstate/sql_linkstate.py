@@ -72,21 +72,6 @@ from .utils import (
 )
 
 
-def _simulation_config_to_db(config: SimulationConfig | None) -> str | None:
-    """Serialize a simulation config for database storage."""
-    if config is None or not config.ListFields():
-        return None
-    return json.dumps(simulation_config_to_json(config))
-
-
-def _simulation_config_from_db(payload: str | None) -> SimulationConfig | None:
-    """Deserialize a simulation config from database storage."""
-    if payload is None:
-        return None
-    config = simulation_config_from_json(json.loads(payload))
-    return config if config.ListFields() else None
-
-
 class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
     """SQLAlchemy-based LinkState implementation."""
 
