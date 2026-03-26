@@ -42,7 +42,7 @@ from flwr.common.typing import Run, RunStatus
 from flwr.proto.federation_config_pb2 import SimulationConfig  # pylint: disable=E0611
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.server.utils.validator import validate_message
-from flwr.supercore.constant import NodeStatus, RunType
+from flwr.supercore.constant import NodeStatus
 from flwr.supercore.corestate.sql_corestate import SqlCoreState
 from flwr.supercore.object_store.object_store import ObjectStore
 from flwr.supercore.state.schema.corestate_tables import create_corestate_metadata
@@ -70,6 +70,21 @@ from .utils import (
     verify_found_message_replies,
     verify_message_ids,
 )
+
+
+def _simulation_config_to_db(config: SimulationConfig | None) -> str | None:
+    """Serialize a simulation config for database storage."""
+    if config is None or not config.ListFields():
+        return None
+    return json.dumps(simulation_config_to_json(config))
+
+
+def _simulation_config_from_db(payload: str | None) -> SimulationConfig | None:
+    """Deserialize a simulation config from database storage."""
+    if payload is None:
+        return None
+    config = simulation_config_from_json(json.loads(payload))
+    return config if config.ListFields() else None
 
 
 class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
@@ -783,7 +798,7 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
         node_id = int64_to_uint64(rows[0]["node_id"])
         return node_id
 
-    def create_run(  # pylint: disable=too-many-arguments,too-many-positional-arguments
+    def create_run(  # pylint: disable=R0913, R0914, R0917
         self,
         fab_id: str | None,
         fab_version: str | None,
@@ -802,9 +817,9 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
         sint64_run_id = uint64_to_int64(uint64_run_id)
 
         # Convert federation_config to JSON string for storage
-        federation_config_json = None
+        fed_cfg_json = None
         if federation_config:
-            federation_config_json = simulation_config_to_json(federation_config)
+            fed_cfg_json = json.dumps(simulation_config_to_json(federation_config))
 
         with self.session():
             # Check conflicts
@@ -831,7 +846,7 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
                     "fab_hash": fab_hash or "",
                     "override_config": override_config_json,
                     "federation": federation,
-                    "federation_config": federation_config_json,
+                    "federation_config": fed_cfg_json,
                     "run_type": run_type,
                     "pending_at": now().isoformat(),
                     "starting_at": "",
@@ -956,7 +971,7 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
                 bytes_recv=row["bytes_recv"],
                 clientapp_runtime=row["clientapp_runtime"],
                 federation_config=(
-                    simulation_config_from_json(row["federation_config"])
+                    simulation_config_from_json(json.loads(row["federation_config"]))
                     if row["federation_config"]
                     else None
                 ),
