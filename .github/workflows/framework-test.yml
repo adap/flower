@@ -78,3 +78,25 @@ jobs:
       - name: Check benchmarks and examples
         if: ${{ needs.changes.outputs.ex_bench == 'true' }}
         run: ./dev/test.sh
+
+  test_windows:
+    runs-on: windows-latest
+    needs: changes
+    if: ${{ needs.changes.outputs.framework == 'true' }}
+    name: Windows pytest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Bootstrap
+        uses: ./.github/actions/bootstrap
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: |
+          cd framework
+          python -m poetry install --all-extras
+      - name: Run pytest
+        run: |
+          cd framework
+          python -m pytest py/flwr/cli/utils_test.py::test_collect_files_nested -v
