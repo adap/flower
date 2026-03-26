@@ -40,7 +40,6 @@ from flwr.common.constant import (
 )
 from flwr.common.typing import RunStatus
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
-from flwr.proto.federation_config_pb2 import SimulationConfig  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     ActivateNodeRequest,
     ActivateNodeResponse,
@@ -256,7 +255,7 @@ class TestNodeAuthServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
     def _create_dummy_run(self, running: bool = True) -> int:
         """Create a dummy run in linkstate and return the run_id."""
         run_id = self.state.create_run(
-            "", "", "", {}, NOOP_FEDERATION, SimulationConfig(), "", RunType.SERVER_APP
+            "", "", "", {}, NOOP_FEDERATION, None, "", RunType.SERVER_APP
         )
         if running:
             self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
