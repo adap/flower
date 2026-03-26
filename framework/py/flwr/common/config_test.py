@@ -641,7 +641,7 @@ def test_v1_fab_format_accepts_additional_specifiers_with_lower_bound() -> None:
             "version": "1.0.0",
             "description": "",
             "license": {"file": "LICENSE"},
-            "dependencies": ['flwr>=1.26.0,==1.27.0'],
+            "dependencies": ["flwr>=1.26.0,==1.27.0"],
         },
         "tool": {
             "flwr": {
@@ -663,6 +663,8 @@ def test_v1_fab_format_accepts_additional_specifiers_with_lower_bound() -> None:
     assert is_valid
     assert not errors
     assert not warnings
+
+
 def test_v1_fab_format_requires_target_version() -> None:
     """Test fab_format_version=1 requires flwr_version_target."""
     config = {

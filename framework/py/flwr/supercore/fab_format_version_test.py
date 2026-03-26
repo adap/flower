@@ -180,7 +180,7 @@ def test_v1_fab_format_accepts_additional_non_lower_bound_specifiers() -> None:
             "name": "fedgpt",
             "version": "1.0.0",
             "license": {"file": "LICENSE"},
-            "dependencies": ['flwr>=1.26.0,==1.27.0,!=1.27.1'],
+            "dependencies": ["flwr>=1.26.0,==1.27.0,!=1.27.1"],
         },
         "tool": {
             "flwr": {
