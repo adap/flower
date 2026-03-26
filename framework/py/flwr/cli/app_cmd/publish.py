@@ -178,11 +178,14 @@ def _collect_file_paths(root: Path) -> list[Path]:
         all_files = collect_files(root)
         # Filter files based on .gitignore and include/exclude patterns
         files = cast(dict[str, Path], filter_paths_for_publish(all_files))
-        # Warn about skipped files
-        for path in set(all_files.keys()) - set(files.keys()):
+        # Warn about skipped files (sorted for deterministic output)
+        skipped_paths = sorted(set(all_files.keys()) - set(files.keys()))
+        for path in skipped_paths:
             typer.secho(f"Skip: {path}", fg=typer.colors.YELLOW)
-        # Build list of absolute file paths
-        file_paths = [p.expanduser().resolve() for p in files.values()]
+        # Build list of absolute file paths (sorted by relative path for stability)
+        file_paths = [
+            files[key].expanduser().resolve() for key in sorted(files.keys())
+        ]
     except ValueError as err:
         raise click.ClickException(str(err)) from err
 
