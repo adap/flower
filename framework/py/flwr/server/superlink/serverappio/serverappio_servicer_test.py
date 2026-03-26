@@ -15,6 +15,8 @@
 """ServerAppIoServicer tests."""
 
 
+# pylint: disable=too-many-lines
+
 import tempfile
 import unittest
 from datetime import timedelta
@@ -52,6 +54,7 @@ from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
     RequestTokenRequest,
     RequestTokenResponse,
 )
+from flwr.proto.federation_pb2 import SimulationConfig  # pylint: disable=E0611
 from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
     SendAppHeartbeatRequest,
     SendAppHeartbeatResponse,
@@ -910,7 +913,9 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
     def test_get_federation_options(self) -> None:
         """Test `GetFederationOptions`."""
         # Prepare
-        federation_options = ConfigRecord({"num-supernodes": 3, "backend": "ray"})
+        federation_options = ConfigRecord(
+            {"num-supernodes": 3, "backend.name": "existing-backend"}
+        )
         run_id = self.state.create_run(
             "",
             "",
@@ -922,15 +927,37 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
             RunType.SIMULATION,
         )
         request = GetFederationOptionsRequest(run_id=run_id)
+        simulation_config = SimulationConfig(
+            num_supernodes=10,
+            client_resources_num_cpus=2,
+            client_resources_num_gpus=0.5,
+            backend_name="ray",
+            verbose=False,
+            init_args_num_cpus=4,
+            init_args_logging_level="INFO",
+        )
 
         # Execute
-        response, call = self._get_federation_options.with_call(request=request)
+        with patch.object(
+            self.state.federation_manager,
+            "get_simulation_config",
+            return_value=simulation_config,
+        ):
+            response, call = self._get_federation_options.with_call(request=request)
 
         # Assert
         assert isinstance(response, GetFederationOptionsResponse)
         assert grpc.StatusCode.OK == call.code()
-        assert (
-            config_record_from_proto(response.federation_options) == federation_options
+        assert config_record_from_proto(response.federation_options) == ConfigRecord(
+            {
+                "num-supernodes": 3,
+                "backend.name": "existing-backend",
+                "backend.client-resources.num-cpus": 2,
+                "backend.client-resources.num-gpus": 0.5,
+                "verbose": False,
+                "backend.init-args.num-cpus": 4,
+                "backend.init-args.logging-level": "INFO",
+            }
         )
 
     def test_get_federation_options_not_successful_for_unknown_run_id(
@@ -943,10 +970,38 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         # Execute & Assert
         with self.assertRaises(grpc.RpcError) as err:
             self._get_federation_options.with_call(request=request)
+        assert err.exception.code() == grpc.StatusCode.NOT_FOUND
+        assert err.exception.details() == "Run ID not found."
+
+    def test_get_federation_options_not_successful_without_simulation_config(
+        self,
+    ) -> None:
+        """Test `GetFederationOptions` failure without simulation config."""
+        # Prepare
+        run_id = self.state.create_run(
+            "",
+            "",
+            "",
+            {},
+            NOOP_FEDERATION,
+            ConfigRecord(),
+            "",
+            RunType.SIMULATION,
+        )
+        request = GetFederationOptionsRequest(run_id=run_id)
+
+        # Execute & Assert
+        with patch.object(
+            self.state.federation_manager,
+            "get_simulation_config",
+            return_value=None,
+        ):
+            with self.assertRaises(grpc.RpcError) as err:
+                self._get_federation_options.with_call(request=request)
         assert err.exception.code() == grpc.StatusCode.FAILED_PRECONDITION
         assert (
             err.exception.details()
-            == "Expected federation options to be set, but none available."
+            == "The federation is not configured for simulation."
         )
 
     def test_run_status_transitions(self) -> None:

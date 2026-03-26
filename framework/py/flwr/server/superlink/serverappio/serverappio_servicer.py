@@ -422,15 +422,49 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
         log(DEBUG, "ServerAppIoServicer.GetFederationOptions")
         state = self.state_factory.state()
 
-        federation_options = state.get_federation_options(request.run_id)
-        if federation_options is None:
+        fed_opt = state.get_federation_options(request.run_id)
+        if fed_opt is None:
             context.abort(
-                grpc.StatusCode.FAILED_PRECONDITION,
-                "Expected federation options to be set, but none available.",
+                grpc.StatusCode.NOT_FOUND,
+                "Run ID not found.",
             )
             return GetFederationOptionsResponse()
+
+        # Apply overrides
+        run = state.get_run_info(run_ids=[request.run_id])[0]
+        sim_cfg = state.federation_manager.get_simulation_config(run.federation)
+
+        if sim_cfg is None:
+            context.abort(
+                grpc.StatusCode.FAILED_PRECONDITION,
+                "The federation is not configured for simulation.",
+            )
+            raise RuntimeError("This line should never be reached.")
+
+        fed_opt.setdefault("num-supernodes", sim_cfg.num_supernodes)
+        fed_opt.setdefault(
+            "backend.client-resources.num-cpus", sim_cfg.client_resources_num_cpus
+        )
+        fed_opt.setdefault(
+            "backend.client-resources.num-gpus", sim_cfg.client_resources_num_gpus
+        )
+        fed_opt.setdefault("backend.name", sim_cfg.backend_name)
+        fed_opt.setdefault("verbose", sim_cfg.verbose)
+        if sim_cfg.HasField("init_args_num_cpus"):
+            fed_opt.setdefault("backend.init-args.num-cpus", sim_cfg.init_args_num_cpus)
+        if sim_cfg.HasField("init_args_num_gpus"):
+            fed_opt.setdefault("backend.init-args.num-gpus", sim_cfg.init_args_num_gpus)
+        if sim_cfg.HasField("init_args_logging_level"):
+            fed_opt.setdefault(
+                "backend.init-args.logging-level", sim_cfg.init_args_logging_level
+            )
+        if sim_cfg.HasField("init_args_log_to_driver"):
+            fed_opt.setdefault(
+                "backend.init-args.log-to-driver", sim_cfg.init_args_log_to_driver
+            )
+
         return GetFederationOptionsResponse(
-            federation_options=config_record_to_proto(federation_options)
+            federation_options=config_record_to_proto(fed_opt)
         )
 
     def SendAppHeartbeat(

@@ -152,6 +152,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         log(INFO, "ControlServicer.StartRun")
         state = self.linkstate_factory.state()
         ffs = self.ffs_factory.ffs()
+        print(request.federation_options)
 
         verification_dict: dict[str, str] = {}
         if request.app_spec:
