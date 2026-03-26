@@ -243,7 +243,10 @@ def build_fab_from_files(
 
     # Extract, load, and parse pyproject.toml
     if FAB_CONFIG_FILE not in files:
-        raise ValueError(f"{FAB_CONFIG_FILE} not found in files")
+        raise ValueError(
+            f"{FAB_CONFIG_FILE} not found in files. It may have been excluded by "
+            ".gitignore."
+        )
     pyproject_content = _to_bytes(files[FAB_CONFIG_FILE])
     config = tomli.loads(pyproject_content.decode("utf-8"))
     metadata = normalize_and_validate_fab_format(config)
