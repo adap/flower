@@ -371,8 +371,7 @@ class LinkState(CoreState):  # pylint: disable=R0904
         """
 
     def get_federation_options(self, run_id: int) -> ConfigRecord | None:
-        """Retrieve the federation options for the specified `run_id`."""
-        _ = run_id
+        """Deprecated."""
         raise NotImplementedError
 
     @abc.abstractmethod
