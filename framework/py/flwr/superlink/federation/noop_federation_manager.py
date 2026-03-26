@@ -19,11 +19,11 @@ from typing import cast
 
 from flwr.common.constant import NOOP_ACCOUNT_NAME, NOOP_FLWR_AID
 from flwr.common.typing import Federation
+from flwr.proto.federation_config_pb2 import SimulationConfig  # pylint: disable=E0611
 from flwr.proto.federation_pb2 import (  # pylint: disable=E0611
     Account,
     Invitation,
     Member,
-    SimulationConfig,
 )
 from flwr.supercore.constant import (
     DEFAULT_SIMULATION_CONFIG,
