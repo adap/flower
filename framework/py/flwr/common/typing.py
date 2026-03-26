@@ -240,8 +240,8 @@ class Run:  # pylint: disable=too-many-instance-attributes
     bytes_sent: int
     bytes_recv: int
     clientapp_runtime: float
-    federation_config: SimulationConfig | None = None
     run_type: str = ""
+    federation_config: SimulationConfig | None = None
 
     @classmethod
     def create_empty(cls, run_id: int) -> "Run":
@@ -262,8 +262,8 @@ class Run:  # pylint: disable=too-many-instance-attributes
             bytes_sent=0,
             bytes_recv=0,
             clientapp_runtime=0.0,
-            federation_config=None,
             run_type=RunType.SERVER_APP,
+            federation_config=None,
         )
 
 
