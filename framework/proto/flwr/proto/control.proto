@@ -19,7 +19,6 @@ package flwr.proto;
 
 import "flwr/proto/fab.proto";
 import "flwr/proto/transport.proto";
-import "flwr/proto/recorddict.proto";
 import "flwr/proto/run.proto";
 import "flwr/proto/node.proto";
 import "flwr/proto/federation.proto";
@@ -119,7 +118,7 @@ service Control {
 message StartRunRequest {
   Fab fab = 1;
   map<string, Scalar> override_config = 2;
-  ConfigRecord federation_options = 3;
+  SimulationConfig override_federation_config = 3;
   string app_spec = 4;
   string federation = 5;
 }

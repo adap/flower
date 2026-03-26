@@ -52,11 +52,8 @@ from flwr.common.constant import (
     SubStatus,
 )
 from flwr.common.logger import log
-from flwr.common.serde import (
-    config_record_from_proto,
-    run_to_proto,
-    user_config_from_proto,
-)
+from flwr.common.record import ConfigRecord
+from flwr.common.serde import run_to_proto, user_config_from_proto
 from flwr.common.typing import AccountInfo, Fab, Run, RunStatus
 from flwr.proto import control_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
@@ -151,6 +148,9 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         log(INFO, rpc_name := self.StartRun.__qualname__)
         state = self.linkstate_factory.state()
         ffs = self.ffs_factory.ffs()
+        print("\nFederation Config Override:")
+        print(request.override_federation_config)
+        print("\n")
 
         verification_dict: dict[str, str] = {}
         if request.app_spec:
@@ -170,7 +170,6 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
 
         flwr_aid = _get_flwr_aid(context)
         override_config = user_config_from_proto(request.override_config)
-        federation_options = config_record_from_proto(request.federation_options)
 
         with rpc_error_translator(context, rpc_name):
             # Check (1) federation exists and (2) the flwr_aid is a member
@@ -223,7 +222,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 fab_hash,
                 override_config,
                 federation,
-                federation_options,
+                ConfigRecord(),
                 flwr_aid,
                 run_type,
             )
