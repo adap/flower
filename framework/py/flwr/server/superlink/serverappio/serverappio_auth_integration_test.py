@@ -33,7 +33,7 @@ from flwr.proto.serverappio_pb2 import (  # pylint: disable=E0611
 )
 from flwr.server.superlink.linkstate.linkstate_factory import LinkStateFactory
 from flwr.server.superlink.serverappio.serverappio_grpc import run_serverappio_api_grpc
-from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME, NOOP_FEDERATION
+from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME, NOOP_FEDERATION, RunType
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.interceptors import APP_TOKEN_HEADER, AUTHENTICATION_FAILED_MESSAGE
 from flwr.supercore.object_store import ObjectStoreFactory
@@ -84,7 +84,7 @@ class TestServerAppIoAuthIntegration(unittest.TestCase):
 
     def _create_running_run(self) -> int:
         run_id = self.state.create_run(
-            "", "", "", {}, NOOP_FEDERATION, ConfigRecord(), ""
+            "", "", "", {}, NOOP_FEDERATION, ConfigRecord(), "", RunType.SERVER_APP
         )
         _ = self.state.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
         _ = self.state.update_run_status(run_id, RunStatus(Status.RUNNING, "", ""))
