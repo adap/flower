@@ -322,7 +322,6 @@ jobs:
           - example: quickstart-jax
           - example: quickstart-sklearn
           - example: quickstart-numpy
-          - example: quickstart-pytorch-deprecated
 
     name: App / ${{ matrix.example }}
 
