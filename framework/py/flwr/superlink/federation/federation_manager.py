@@ -19,9 +19,9 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
 from flwr.common.typing import Federation
+from flwr.proto.federation_config_pb2 import SimulationConfig  # pylint: disable=E0611
 from flwr.proto.federation_pb2 import (  # pylint: disable=E0611
     Invitation,
-    SimulationConfig,
 )
 
 if TYPE_CHECKING:
