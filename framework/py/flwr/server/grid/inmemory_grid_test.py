@@ -31,7 +31,6 @@ from flwr.common.constant import (
 )
 from flwr.common.serde import message_from_proto
 from flwr.common.typing import Run, RunStatus
-from flwr.proto.federation_config_pb2 import SimulationConfig  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import (
     InMemoryLinkState,
     LinkStateFactory,
@@ -219,7 +218,7 @@ class TestInMemoryGrid(unittest.TestCase):
             "", NoOpFederationManager(), ObjectStoreFactory()
         ).state()
         run_id = state.create_run(
-            "", "", "", {}, NOOP_FEDERATION, SimulationConfig(), "", RunType.SERVER_APP
+            "", "", "", {}, NOOP_FEDERATION, None, "", RunType.SERVER_APP
         )
         self.grid = InMemoryGrid(MagicMock(state=lambda: state))
         runs = state.get_run_info(run_ids=[run_id])
@@ -252,7 +251,7 @@ class TestInMemoryGrid(unittest.TestCase):
         )
         state = state_factory.state()
         run_id = state.create_run(
-            "", "", "", {}, NOOP_FEDERATION, SimulationConfig(), "", RunType.SERVER_APP
+            "", "", "", {}, NOOP_FEDERATION, None, "", RunType.SERVER_APP
         )
         self.grid = InMemoryGrid(state_factory)
         runs = state.get_run_info(run_ids=[run_id])
