@@ -99,7 +99,7 @@ from flwr.supercore.inflatable.inflatable_object import (
 from flwr.supercore.object_store import ObjectStoreFactory
 from flwr.superlink.federation import NoOpFederationManager
 
-# pylint: disable=broad-except
+# pylint: disable=broad-except,too-many-lines
 
 
 def test_raise_if_false() -> None:
