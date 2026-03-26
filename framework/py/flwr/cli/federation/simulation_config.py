@@ -15,11 +15,15 @@
 """Flower command line interface `federation simulation-config` command."""
 
 
-from typing import Annotated, Literal
+from typing import Annotated, Any, Literal
 
 import typer
 
-from flwr.cli.utils import cli_output_control_stub, flwr_cli_grpc_exc_handler
+from flwr.cli.utils import (
+    cli_output_control_stub,
+    flwr_cli_grpc_exc_handler,
+    print_json_to_stdout,
+)
 from flwr.common.constant import CliOutputFormat
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     ConfigureSimulationFederationRequest,
@@ -30,6 +34,13 @@ from flwr.proto.federation_pb2 import SimulationConfig  # pylint: disable=E0611
 from flwr.supercore.constant import DEFAULT_SIMULATION_CONFIG
 
 from .error_handlers import handle_invite_grpc_error
+
+
+def _handle_none_field(cfg: SimulationConfig, field_name: str) -> Any:
+    """Convert unset optional fields to None."""
+    if not cfg.HasField(field_name):  # type: ignore
+        return None
+    return getattr(cfg, field_name)
 
 
 def simulation_config(  # pylint: disable=R0913,R0917,W0613
@@ -95,7 +106,7 @@ def simulation_config(  # pylint: disable=R0913,R0917,W0613
             help="Number of CPUs to make available to the Simulation Runtime.",
             min=1,
         ),
-    ] = DEFAULT_SIMULATION_CONFIG.init_args_num_cpus,
+    ] = _handle_none_field(DEFAULT_SIMULATION_CONFIG, "init_args_num_cpus"),
     init_args_num_gpus: Annotated[
         int | None,
         typer.Option(
@@ -103,7 +114,7 @@ def simulation_config(  # pylint: disable=R0913,R0917,W0613
             help="Number of GPUs to make available to the Simulation Runtime",
             min=0,
         ),
-    ] = DEFAULT_SIMULATION_CONFIG.init_args_num_gpus,
+    ] = _handle_none_field(DEFAULT_SIMULATION_CONFIG, "init_args_num_gpus"),
     init_args_logging_level: Annotated[
         str | None,
         typer.Option(
@@ -139,12 +150,14 @@ def simulation_config(  # pylint: disable=R0913,R0917,W0613
         _configure_federation_for_simulation(
             stub=stub,
             request=request,
+            is_json=is_json,
         )
 
 
 def _configure_federation_for_simulation(
     stub: ControlStub,
     request: ConfigureSimulationFederationRequest,
+    is_json: bool,
 ) -> None:
     """Send a request to configure a federation for simulation."""
     with flwr_cli_grpc_exc_handler(handle_invite_grpc_error):
@@ -152,6 +165,9 @@ def _configure_federation_for_simulation(
             request
         )
 
-    raise NotImplementedError(
-        "Federation simulation configuration is not implemented yet."
-    )
+    if is_json:
+        print_json_to_stdout({"success": True})
+    else:
+        typer.secho(
+            f"✅ Updated simulation configuration for '{request.federation_name}'."
+        )
