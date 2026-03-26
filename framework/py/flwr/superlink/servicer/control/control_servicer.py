@@ -197,6 +197,26 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
             if state.federation_manager.get_simulation_config(federation) is not None:
                 run_type = RunType.SIMULATION
 
+        with rpc_error_translator(context, rpc_name):
+            # Check (1) federation exists and (2) the flwr_aid is a member
+            federation = request.federation or NOOP_FEDERATION
+            if not state.federation_manager.exists(federation):
+                if request.federation:
+                    raise FlowerError(
+                        ApiErrorCode.FEDERATION_NOT_FOUND_OR_NO_PERMISSION,
+                        f"Federation '{federation}' not found or has been archived.",
+                    )
+                raise FlowerError(
+                    ApiErrorCode.FEDERATION_NOT_SPECIFIED, "No federation specified."
+                )
+
+            if not state.federation_manager.has_member(flwr_aid, federation):
+                raise FlowerError(
+                    ApiErrorCode.FEDERATION_NOT_FOUND_OR_NO_PERMISSION,
+                    f"Account with ID '{flwr_aid}' is not a member of the "
+                    f"federation '{federation}'.",
+                )
+
         try:
             # Validate user config overrides matches keys in run config in FAB
             fab_config = get_fab_config(fab_file)

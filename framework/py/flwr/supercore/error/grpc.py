@@ -68,6 +68,6 @@ def _is_aborted(context: grpc.ServicerContext, err: Exception) -> bool:
     if hasattr(context, "code") and context.code() not in (None, StatusCode.OK):
         return True
     # Fallback: check if the error is `Exception` with no message
-    if isinstance(err, Exception) and not str(err):
+    if err.__class__ is Exception and not str(err):
         return True
     return False
