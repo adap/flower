@@ -35,6 +35,9 @@ class ServerAppExecPlugin(BaseExecPlugin):
 
     def get_popen_kwargs(self) -> dict[str, Any]:
         """Isolate ServerApp stdio from the parent SuperLink process streams."""
+        if self.command == "flwr-simulation":
+            # Keep simulation executor output visible so CI captures root causes.
+            return {}
         return {
             "stdout": subprocess.DEVNULL,
             "stderr": subprocess.DEVNULL,
