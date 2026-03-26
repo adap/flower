@@ -237,7 +237,8 @@ def _parse_federation_config_overrides(
         if override_federation_config:
             typer.secho(
                 "⚠️ Warning: `--federation-config` was provided, so deprecated "
-                "`options.` entries from the SuperLink connection in your Flower configuration will be ignored.",
+                "`options.` entries from the SuperLink connection in your Flower "
+                "configuration will be ignored.",
                 fg=typer.colors.YELLOW,
             )
 
@@ -255,8 +256,9 @@ def _parse_deprecated_options(conn: SuperLinkConnection) -> SimulationConfig | N
         return None
     typer.secho(
         "⚠️ Warning: `options.` fields in the SuperLink connection configuration are "
-        "deprecated. Use `--federation-config` with `flwr run` instead. Alternatively, ",
-        "permanently set your simulation configuration via `flwr federation simulation-config`.",
+        "deprecated. Use `--federation-config` with `flwr run` instead. "
+        "Alternatively, permanently set your simulation configuration via "
+        "`flwr federation simulation-config`.",
         fg=typer.colors.YELLOW,
     )
     kwargs: dict[str, Any] = {
