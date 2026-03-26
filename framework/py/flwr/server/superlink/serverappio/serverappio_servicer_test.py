@@ -258,7 +258,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
             fab_hash,
             {},
             NOOP_FEDERATION,
-            SimulationConfig(),
+            None,
             "",
             RunType.SERVER_APP,
         )
