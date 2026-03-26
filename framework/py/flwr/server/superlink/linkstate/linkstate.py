@@ -264,19 +264,19 @@ class LinkState(CoreState):  # pylint: disable=R0904
 
         Parameters
         ----------
-        fab_id : Optional[str]
+        fab_id : str | None
             The ID of the FAB, of format `<publisher>/<app-name>`.
-        fab_version : Optional[str]
+        fab_version : str | None
             The version of the FAB.
-        fab_hash : Optional[str]
+        fab_hash : str | None
             The SHA256 hex hash of the FAB.
         override_config : UserConfig
             Configuration overrides for the run config.
         federation : str
             The federation this run belongs to.
-        federation_config : Optional[SimulationConfig]
+        federation_config : SimulationConfig | None
             Per-run federation configuration for the simulation runtime.
-        flwr_aid : Optional[str]
+        flwr_aid : str | None
             Flower Account ID of the creator.
         run_type : str
             The type of run being created.
