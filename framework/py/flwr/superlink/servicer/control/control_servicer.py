@@ -188,9 +188,13 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 )
 
             # Derive run type based on the presence of simulation config
+            federation_config = state.federation_manager.get_simulation_config(
+                federation
+            )
             run_type = RunType.SERVER_APP
-            if state.federation_manager.get_simulation_config(federation) is not None:
+            if federation_config is not None:
                 run_type = RunType.SIMULATION
+                federation_config.MergeFrom(request.override_federation_config)
 
         try:
             # Validate user config overrides matches keys in run config in FAB
@@ -218,7 +222,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 fab_hash,
                 override_config,
                 federation,
-                request.override_federation_config,
+                federation_config,
                 flwr_aid,
                 run_type,
             )
