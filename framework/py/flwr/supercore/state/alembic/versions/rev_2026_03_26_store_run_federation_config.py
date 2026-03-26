@@ -41,5 +41,7 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     """Downgrade schema."""
-    op.add_column("run", sa.Column("federation_options", sa.LargeBinary(), nullable=True))
+    op.add_column(
+        "run", sa.Column("federation_options", sa.LargeBinary(), nullable=True)
+    )
     op.drop_column("run", "federation_config")

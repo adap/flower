@@ -31,6 +31,7 @@ from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
     PushAppOutputsRequest,
     PushAppOutputsResponse,
 )
+from flwr.proto.federation_config_pb2 import SimulationConfig  # pylint: disable=E0611
 from flwr.proto.heartbeat_pb2 import (  # pylint:disable=E0611
     SendAppHeartbeatRequest,
     SendAppHeartbeatResponse,
@@ -39,7 +40,6 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     UpdateRunStatusRequest,
     UpdateRunStatusResponse,
 )
-from flwr.proto.federation_config_pb2 import SimulationConfig  # pylint: disable=E0611
 from flwr.server.superlink.linkstate.linkstate_factory import LinkStateFactory
 from flwr.server.superlink.simulation.simulationio_grpc import run_simulationio_api_grpc
 from flwr.server.superlink.utils import _STATUS_TO_MSG

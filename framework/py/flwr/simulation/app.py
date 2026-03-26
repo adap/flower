@@ -83,13 +83,13 @@ def _run_simulation_settings(
     backend_config: BackendConfig = {"client_resources": {}, "init_args": {}}
 
     if sim_cfg.HasField("client_resources_num_cpus"):
-        backend_config["client_resources"]["num_cpus"] = (
-            sim_cfg.client_resources_num_cpus
-        )
+        backend_config["client_resources"][
+            "num_cpus"
+        ] = sim_cfg.client_resources_num_cpus
     if sim_cfg.HasField("client_resources_num_gpus"):
-        backend_config["client_resources"]["num_gpus"] = (
-            sim_cfg.client_resources_num_gpus
-        )
+        backend_config["client_resources"][
+            "num_gpus"
+        ] = sim_cfg.client_resources_num_gpus
     if sim_cfg.HasField("init_args_num_cpus"):
         backend_config["init_args"]["num_cpus"] = sim_cfg.init_args_num_cpus
     if sim_cfg.HasField("init_args_num_gpus"):
@@ -97,9 +97,7 @@ def _run_simulation_settings(
     if sim_cfg.HasField("init_args_logging_level"):
         backend_config["init_args"]["logging_level"] = sim_cfg.init_args_logging_level
     if sim_cfg.HasField("init_args_log_to_driver"):
-        backend_config["init_args"]["log_to_driver"] = (
-            sim_cfg.init_args_log_to_driver
-        )
+        backend_config["init_args"]["log_to_driver"] = sim_cfg.init_args_log_to_driver
 
     verbose = sim_cfg.verbose if sim_cfg.HasField("verbose") else False
     return sim_cfg.num_supernodes, backend_name, backend_config, verbose, False

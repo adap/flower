@@ -30,14 +30,9 @@ from flwr.common.constant import (
     Status,
 )
 from flwr.common.message import get_message_to_descendant_id_mapping
-from flwr.common.serde import (
-    context_to_proto,
-    message_from_proto,
-    run_status_to_proto,
-)
+from flwr.common.serde import context_to_proto, message_from_proto, run_status_to_proto
 from flwr.common.serde_test import RecordMaker
 from flwr.common.typing import RunStatus
-from flwr.proto.federation_config_pb2 import SimulationConfig  # pylint: disable=E0611
 from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
     ListAppsToLaunchRequest,
     ListAppsToLaunchResponse,
@@ -52,6 +47,7 @@ from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
     RequestTokenRequest,
     RequestTokenResponse,
 )
+from flwr.proto.federation_config_pb2 import SimulationConfig  # pylint: disable=E0611
 from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
     SendAppHeartbeatRequest,
     SendAppHeartbeatResponse,

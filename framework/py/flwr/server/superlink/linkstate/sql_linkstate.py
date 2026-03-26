@@ -39,8 +39,8 @@ from flwr.common.constant import (
     SubStatus,
 )
 from flwr.common.typing import Run, RunStatus
-from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.proto.federation_config_pb2 import SimulationConfig  # pylint: disable=E0611
+from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.server.utils.validator import validate_message
 from flwr.supercore.constant import NodeStatus
 from flwr.supercore.corestate.sql_corestate import SqlCoreState

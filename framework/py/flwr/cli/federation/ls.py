@@ -34,12 +34,9 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     ShowFederationResponse,
 )
 from flwr.proto.control_pb2_grpc import ControlStub
-from flwr.proto.federation_pb2 import (  # pylint: disable=E0611
-    Federation,
-    Member,
-)
-from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.proto.federation_config_pb2 import SimulationConfig  # pylint: disable=E0611
+from flwr.proto.federation_pb2 import Federation, Member  # pylint: disable=E0611
+from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.supercore.utils import humanize_duration, simulation_config_to_json
 
 from ..run_utils import RunRow, format_runs

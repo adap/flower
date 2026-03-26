@@ -21,6 +21,7 @@ from flwr.app.user_config import UserConfig, UserConfigValue
 
 # pylint: disable=E0611
 from flwr.proto.fab_pb2 import Fab as ProtoFab
+from flwr.proto.federation_config_pb2 import SimulationConfig as ProtoSimulationConfig
 from flwr.proto.message_pb2 import Context as ProtoContext
 from flwr.proto.message_pb2 import Message as ProtoMessage
 from flwr.proto.recorddict_pb2 import Array as ProtoArray
@@ -32,7 +33,6 @@ from flwr.proto.recorddict_pb2 import MetricRecordValue as ProtoMetricRecordValu
 from flwr.proto.recorddict_pb2 import RecordDict as ProtoRecordDict
 from flwr.proto.run_pb2 import Run as ProtoRun
 from flwr.proto.run_pb2 import RunStatus as ProtoRunStatus
-from flwr.proto.federation_config_pb2 import SimulationConfig as ProtoSimulationConfig
 from flwr.proto.transport_pb2 import (
     ClientMessage,
     Code,
