@@ -237,7 +237,7 @@ def _parse_federation_config_overrides(
         if override_federation_config:
             typer.secho(
                 "⚠️ Warning: `--federation-config` was provided, so deprecated "
-                "options from the SuperLink connection configuration will be ignored.",
+                "`options.` entries from the SuperLink connection in your Flower configuration will be ignored.",
                 fg=typer.colors.YELLOW,
             )
 
