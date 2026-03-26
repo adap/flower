@@ -22,7 +22,7 @@ from collections.abc import Iterable
 from unittest.mock import MagicMock, patch
 from uuid import uuid4
 
-from flwr.common import ConfigRecord, Message, RecordDict, now
+from flwr.common import Message, RecordDict, now
 from flwr.common.constant import (
     HEARTBEAT_INTERVAL_INF,
     NODE_ID_NUM_BYTES,
@@ -31,6 +31,7 @@ from flwr.common.constant import (
 )
 from flwr.common.serde import message_from_proto
 from flwr.common.typing import Run, RunStatus
+from flwr.proto.federation_config_pb2 import SimulationConfig  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import (
     InMemoryLinkState,
     LinkStateFactory,
@@ -218,7 +219,7 @@ class TestInMemoryGrid(unittest.TestCase):
             "", NoOpFederationManager(), ObjectStoreFactory()
         ).state()
         run_id = state.create_run(
-            "", "", "", {}, NOOP_FEDERATION, ConfigRecord(), "", RunType.SERVER_APP
+            "", "", "", {}, NOOP_FEDERATION, SimulationConfig(), "", RunType.SERVER_APP
         )
         self.grid = InMemoryGrid(MagicMock(state=lambda: state))
         runs = state.get_run_info(run_ids=[run_id])
@@ -251,7 +252,7 @@ class TestInMemoryGrid(unittest.TestCase):
         )
         state = state_factory.state()
         run_id = state.create_run(
-            "", "", "", {}, NOOP_FEDERATION, ConfigRecord(), "", RunType.SERVER_APP
+            "", "", "", {}, NOOP_FEDERATION, SimulationConfig(), "", RunType.SERVER_APP
         )
         self.grid = InMemoryGrid(state_factory)
         runs = state.get_run_info(run_ids=[run_id])

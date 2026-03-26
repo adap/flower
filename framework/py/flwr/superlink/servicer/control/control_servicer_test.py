@@ -30,7 +30,7 @@ from unittest.mock import MagicMock, Mock, patch
 import grpc
 from parameterized import parameterized
 
-from flwr.common import ConfigRecord, now
+from flwr.common import now
 from flwr.common.constant import (
     NODE_NOT_FOUND_MESSAGE,
     NOOP_ACCOUNT_NAME,
@@ -41,6 +41,7 @@ from flwr.common.constant import (
 )
 from flwr.common.serde import user_config_to_proto
 from flwr.common.typing import Run, RunStatus
+from flwr.proto.federation_config_pb2 import SimulationConfig  # pylint: disable=E0611
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     AcceptInvitationRequest,
     AcceptInvitationResponse,
@@ -142,7 +143,7 @@ class TestControlServicer(unittest.TestCase):  # pylint: disable=R0904
             "hash123",
             {},
             NOOP_FEDERATION,
-            ConfigRecord(),
+            SimulationConfig(),
             flwr_aid,
             RunType.SERVER_APP,
         )
@@ -565,7 +566,7 @@ class TestControlServicer(unittest.TestCase):  # pylint: disable=R0904
             "hash123",
             {},
             "test-federation",
-            ConfigRecord(),
+            SimulationConfig(),
             self.aid,
             RunType.SERVER_APP,
         )
@@ -623,7 +624,7 @@ class TestControlServicer(unittest.TestCase):  # pylint: disable=R0904
             "hash123",
             {},
             "test-federation",
-            ConfigRecord(),
+            SimulationConfig(),
             target_flwr_aid,
             RunType.SERVER_APP,
         )
@@ -772,7 +773,7 @@ class TestControlServicerAuth(unittest.TestCase):
             "hash123",
             {},
             NOOP_FEDERATION,
-            ConfigRecord(),
+            SimulationConfig(),
             flwr_aid,
             RunType.SERVER_APP,
         )

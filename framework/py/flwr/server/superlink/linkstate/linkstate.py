@@ -24,6 +24,7 @@ from flwr.common import Context, Message
 from flwr.common.record import ConfigRecord
 from flwr.common.typing import Run, RunStatus
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
+from flwr.proto.federation_config_pb2 import SimulationConfig  # pylint: disable=E0611
 from flwr.supercore.corestate import CoreState
 from flwr.superlink.federation import FederationManager
 
@@ -255,7 +256,7 @@ class LinkState(CoreState):  # pylint: disable=R0904
         fab_hash: str | None,
         override_config: UserConfig,
         federation: str,
-        federation_options: ConfigRecord,
+        federation_config: SimulationConfig,
         flwr_aid: str | None,
         run_type: str,
     ) -> int:
@@ -273,9 +274,8 @@ class LinkState(CoreState):  # pylint: disable=R0904
             Configuration overrides for the run config.
         federation : str
             The federation this run belongs to.
-        federation_options : ConfigRecord
-            Federation configurations. For now, only `num-supernodes` for
-            the simulation runtime.
+        federation_config : SimulationConfig
+            Per-run federation configuration for the simulation runtime.
         flwr_aid : Optional[str]
             Flower Account ID of the creator.
         run_type : str
@@ -370,20 +370,10 @@ class LinkState(CoreState):  # pylint: disable=R0904
             True if the status update is successful; False otherwise.
         """
 
-    @abc.abstractmethod
     def get_federation_options(self, run_id: int) -> ConfigRecord | None:
-        """Retrieve the federation options for the specified `run_id`.
-
-        Parameters
-        ----------
-        run_id : int
-            The identifier of the run.
-
-        Returns
-        -------
-        Optional[ConfigRecord]
-            The federation options for the run if it exists; None otherwise.
-        """
+        """Retrieve the federation options for the specified `run_id`."""
+        _ = run_id
+        raise NotImplementedError
 
     @abc.abstractmethod
     def acknowledge_node_heartbeat(

@@ -34,6 +34,7 @@ from flwr.common.message import get_message_to_descendant_id_mapping
 from flwr.common.serde import message_from_proto
 from flwr.common.typing import RunStatus
 from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
+from flwr.proto.federation_config_pb2 import SimulationConfig  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     ActivateNodeRequest,
     ActivateNodeResponse,
@@ -194,7 +195,7 @@ class TestFleetServicer(unittest.TestCase):  # pylint: disable=R0902, R0904
             fab_hash=fab_hash,
             override_config={},
             federation=NOOP_FEDERATION,
-            federation_options=ConfigRecord(),
+            federation_config=SimulationConfig(),
             flwr_aid="",
             run_type=RunType.SERVER_APP,
         )

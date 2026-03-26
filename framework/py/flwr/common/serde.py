@@ -32,6 +32,7 @@ from flwr.proto.recorddict_pb2 import MetricRecordValue as ProtoMetricRecordValu
 from flwr.proto.recorddict_pb2 import RecordDict as ProtoRecordDict
 from flwr.proto.run_pb2 import Run as ProtoRun
 from flwr.proto.run_pb2 import RunStatus as ProtoRunStatus
+from flwr.proto.federation_config_pb2 import SimulationConfig as ProtoSimulationConfig
 from flwr.proto.transport_pb2 import (
     ClientMessage,
     Code,
@@ -639,6 +640,9 @@ def run_to_proto(run: typing.Run) -> ProtoRun:
         clientapp_runtime=run.clientapp_runtime,
         run_type=run.run_type,
     )
+    federation_config = _clone_simulation_config(run.federation_config)
+    if federation_config is not None:
+        proto.federation_config.CopyFrom(federation_config)
     return proto
 
 
@@ -660,9 +664,25 @@ def run_from_proto(run_proto: ProtoRun) -> typing.Run:
         bytes_sent=run_proto.bytes_sent,
         bytes_recv=run_proto.bytes_recv,
         clientapp_runtime=run_proto.clientapp_runtime,
+        federation_config=(
+            _clone_simulation_config(run_proto.federation_config)
+            if run_proto.HasField("federation_config")
+            else None
+        ),
         run_type=run_proto.run_type,
     )
     return run
+
+
+def _clone_simulation_config(
+    config: ProtoSimulationConfig | None,
+) -> ProtoSimulationConfig | None:
+    """Clone a simulation config if it has any set fields."""
+    if config is None or not config.ListFields():
+        return None
+    clone = ProtoSimulationConfig()
+    clone.CopyFrom(config)
+    return clone
 
 
 # === Run status ===

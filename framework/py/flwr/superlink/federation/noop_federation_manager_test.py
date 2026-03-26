@@ -24,9 +24,9 @@ from flwr.common.typing import Federation, Run, RunStatus
 from flwr.proto.federation_pb2 import (  # pylint: disable=E0611
     Account,
     Member,
-    SimulationConfig,
 )
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
+from flwr.proto.federation_config_pb2 import SimulationConfig  # pylint: disable=E0611
 from flwr.supercore.constant import (
     DEFAULT_SIMULATION_CONFIG,
     NOOP_FEDERATION,

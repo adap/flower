@@ -36,9 +36,9 @@ from flwr.common.constant import (
     Status,
     SubStatus,
 )
-from flwr.common.record import ConfigRecord
 from flwr.common.typing import Run, RunStatus
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
+from flwr.proto.federation_config_pb2 import SimulationConfig  # pylint: disable=E0611
 from flwr.server.superlink.linkstate.linkstate import LinkState
 from flwr.server.utils import validate_message
 from flwr.supercore.constant import NodeStatus
@@ -66,6 +66,17 @@ class RunRecord:  # pylint: disable=R0902
     lock: threading.RLock = field(default_factory=threading.RLock)
 
 
+def _clone_simulation_config(
+    config: SimulationConfig,
+) -> SimulationConfig | None:
+    """Clone a simulation config if it has any set fields."""
+    if not config.ListFields():
+        return None
+    clone = SimulationConfig()
+    clone.CopyFrom(config)
+    return clone
+
+
 class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,R0904
     """In-memory LinkState implementation."""
 
@@ -82,7 +93,6 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
         # Map run_id to RunRecord
         self.run_ids: dict[int, RunRecord] = {}
         self.contexts: dict[int, Context] = {}
-        self.federation_options: dict[int, ConfigRecord] = {}
         self.message_ins_store: dict[str, Message] = {}
         self.message_res_store: dict[str, Message] = {}
         self.message_ins_id_to_message_res_id: dict[str, str] = {}
@@ -542,7 +552,7 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
         fab_hash: str | None,
         override_config: UserConfig,
         federation: str,
-        federation_options: ConfigRecord,
+        federation_config: SimulationConfig,
         flwr_aid: str | None,
         run_type: str,
     ) -> int:
@@ -573,6 +583,7 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
                         bytes_sent=0,
                         bytes_recv=0,
                         clientapp_runtime=0.0,
+                        federation_config=_clone_simulation_config(federation_config),
                         run_type=run_type,
                     ),
                 )
@@ -581,8 +592,6 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
                 if flwr_aid:
                     self.flwr_aid_to_run_ids[flwr_aid].add(run_id)
 
-                # Record federation options. Leave empty if not passed
-                self.federation_options[run_id] = federation_options
                 return run_id
         log(ERROR, "Unexpected run creation failure.")
         return 0
@@ -713,14 +722,6 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
                 run_record.run.finished_at = current.isoformat()
             run_record.run.status = new_status
             return True
-
-    def get_federation_options(self, run_id: int) -> ConfigRecord | None:
-        """Retrieve the federation options for the specified `run_id`."""
-        with self.lock:
-            if run_id not in self.run_ids:
-                log(ERROR, "`run_id` is invalid")
-                return None
-            return self.federation_options[run_id]
 
     def acknowledge_node_heartbeat(
         self, node_id: int, heartbeat_interval: float

@@ -38,23 +38,26 @@ from flwr.common.constant import (
     Status,
     SubStatus,
 )
-from flwr.common.record import ConfigRecord
 from flwr.common.typing import Run, RunStatus
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
+from flwr.proto.federation_config_pb2 import SimulationConfig  # pylint: disable=E0611
 from flwr.server.utils.validator import validate_message
 from flwr.supercore.constant import NodeStatus
 from flwr.supercore.corestate.sql_corestate import SqlCoreState
 from flwr.supercore.object_store.object_store import ObjectStore
 from flwr.supercore.state.schema.corestate_tables import create_corestate_metadata
 from flwr.supercore.state.schema.linkstate_tables import create_linkstate_metadata
-from flwr.supercore.utils import int64_to_uint64, uint64_to_int64
+from flwr.supercore.utils import (
+    int64_to_uint64,
+    simulation_config_from_json,
+    simulation_config_to_json,
+    uint64_to_int64,
+)
 from flwr.superlink.federation import FederationManager
 
 from .linkstate import LinkState
 from .utils import (
     check_node_availability_for_in_message,
-    configrecord_from_bytes,
-    configrecord_to_bytes,
     context_from_bytes,
     context_to_bytes,
     convert_sint64_values_in_dict_to_uint64,
@@ -67,6 +70,32 @@ from .utils import (
     verify_found_message_replies,
     verify_message_ids,
 )
+
+
+def _clone_simulation_config(
+    config: SimulationConfig | None,
+) -> SimulationConfig | None:
+    """Clone a simulation config if it has any set fields."""
+    if config is None or not config.ListFields():
+        return None
+    clone = SimulationConfig()
+    clone.CopyFrom(config)
+    return clone
+
+
+def _simulation_config_to_db(config: SimulationConfig) -> str | None:
+    """Serialize a simulation config for database storage."""
+    normalized = _clone_simulation_config(config)
+    if normalized is None:
+        return None
+    return json.dumps(simulation_config_to_json(normalized))
+
+
+def _simulation_config_from_db(payload: str | None) -> SimulationConfig | None:
+    """Deserialize a simulation config from database storage."""
+    if payload is None:
+        return None
+    return _clone_simulation_config(simulation_config_from_json(json.loads(payload)))
 
 
 class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
@@ -787,7 +816,7 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
         fab_hash: str | None,
         override_config: UserConfig,
         federation: str,
-        federation_options: ConfigRecord,
+        federation_config: SimulationConfig,
         flwr_aid: str | None,
         run_type: str,
     ) -> int:
@@ -806,11 +835,11 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
                 query = """
                     INSERT INTO run
                     (run_id, fab_id, fab_version,
-                    fab_hash, override_config, federation, federation_options, run_type,
+                    fab_hash, override_config, federation, federation_config, run_type,
                     pending_at, starting_at, running_at, finished_at, sub_status,
                     details, flwr_aid, bytes_sent, bytes_recv, clientapp_runtime)
                     VALUES (:run_id, :fab_id, :fab_version, :fab_hash, :override_config,
-                    :federation, :federation_options, :run_type, :pending_at,
+                    :federation, :federation_config, :run_type, :pending_at,
                     :starting_at,
                     :running_at, :finished_at, :sub_status, :details, :flwr_aid,
                     :bytes_sent, :bytes_recv, :clientapp_runtime)
@@ -823,7 +852,7 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
                     "fab_hash": fab_hash or "",
                     "override_config": override_config_json,
                     "federation": federation,
-                    "federation_options": configrecord_to_bytes(federation_options),
+                    "federation_config": _simulation_config_to_db(federation_config),
                     "run_type": run_type,
                     "pending_at": now().isoformat(),
                     "starting_at": "",
@@ -947,6 +976,7 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
                 bytes_sent=row["bytes_sent"],
                 bytes_recv=row["bytes_recv"],
                 clientapp_runtime=row["clientapp_runtime"],
+                federation_config=_simulation_config_from_db(row["federation_config"]),
                 run_type=row["run_type"],
             )
             for row in rows
@@ -1042,21 +1072,6 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
             }
             self.query(query % timestamp_fld, params)
         return True
-
-    def get_federation_options(self, run_id: int) -> ConfigRecord | None:
-        """Retrieve the federation options for the specified `run_id`."""
-        # Convert the uint64 value to sint64 for SQLite
-        sint64_run_id = uint64_to_int64(run_id)
-        query = "SELECT federation_options FROM run WHERE run_id = :run_id"
-        rows = self.query(query, {"run_id": sint64_run_id})
-
-        # Check if the run_id exists
-        if not rows:
-            log(ERROR, "`run_id` is invalid")
-            return None
-
-        row = rows[0]
-        return configrecord_from_bytes(row["federation_options"])
 
     def acknowledge_node_heartbeat(
         self, node_id: int, heartbeat_interval: float

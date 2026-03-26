@@ -34,7 +34,7 @@ from flwr.common.serde import fab_to_proto, user_config_to_proto
 from flwr.common.typing import Fab
 from flwr.proto.control_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.control_pb2_grpc import ControlStub
-from flwr.proto.federation_pb2 import SimulationConfig  # pylint: disable=E0611
+from flwr.proto.federation_config_pb2 import SimulationConfig  # pylint: disable=E0611
 from flwr.supercore.utils import (
     check_federation_format,
     parse_app_spec,

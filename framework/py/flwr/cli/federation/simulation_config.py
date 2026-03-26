@@ -30,7 +30,7 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     ConfigureSimulationFederationResponse,
 )
 from flwr.proto.control_pb2_grpc import ControlStub
-from flwr.proto.federation_pb2 import SimulationConfig  # pylint: disable=E0611
+from flwr.proto.federation_config_pb2 import SimulationConfig  # pylint: disable=E0611
 from flwr.supercore.constant import DEFAULT_SIMULATION_CONFIG
 
 from .error_handlers import handle_invite_grpc_error

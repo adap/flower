@@ -22,7 +22,7 @@ from unittest.mock import Mock
 import grpc
 from parameterized import parameterized
 
-from flwr.common import ConfigRecord, Context
+from flwr.common import Context
 from flwr.common.constant import SIMULATIONIO_API_DEFAULT_SERVER_ADDRESS, Status
 from flwr.common.serde import context_to_proto, run_status_to_proto
 from flwr.common.serde_test import RecordMaker
@@ -39,6 +39,7 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     UpdateRunStatusRequest,
     UpdateRunStatusResponse,
 )
+from flwr.proto.federation_config_pb2 import SimulationConfig  # pylint: disable=E0611
 from flwr.server.superlink.linkstate.linkstate_factory import LinkStateFactory
 from flwr.server.superlink.simulation.simulationio_grpc import run_simulationio_api_grpc
 from flwr.server.superlink.utils import _STATUS_TO_MSG
@@ -104,7 +105,7 @@ class TestSimulationIoServicer(unittest.TestCase):  # pylint: disable=R0902
 
     def _create_dummy_run(self) -> int:
         run_id = self.state.create_run(
-            "", "", "", {}, NOOP_FEDERATION, ConfigRecord(), "", RunType.SIMULATION
+            "", "", "", {}, NOOP_FEDERATION, SimulationConfig(), "", RunType.SIMULATION
         )
         return run_id
 
