@@ -80,7 +80,7 @@ APP_PUBLISH_INCLUDE_PATTERNS = (
     "/LICENSE",
     "/LICENSE.md",
 )
-APP_PUBLISH_EXCLUDE_PATTERNS = FAB_EXCLUDE_PATTERNS = (
+APP_PUBLISH_EXCLUDE_PATTERNS = (
     f"{FLWR_DIR}/**",  # Exclude the .flwr directory
     "**/__pycache__/**",
 )
@@ -102,7 +102,7 @@ DEFAULT_SIMULATION_CONFIG = SimulationConfig(
     num_supernodes=10,
     client_resources_num_cpus=2,
     client_resources_num_gpus=0.0,
-    backend_name="ray",
+    backend="ray",
     verbose=False,
     init_args_num_cpus=None,
     init_args_num_gpus=None,

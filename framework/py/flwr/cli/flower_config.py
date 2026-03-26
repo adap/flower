@@ -86,7 +86,7 @@ def _parse_simulation_options(options: dict[str, Any]) -> SuperLinkSimulationOpt
         simulation_backend = SimulationBackendConfig(
             name=backend_dict.get(
                 SimulationBackendConfigTomlKey.NAME,
-                DEFAULT_SIMULATION_CONFIG.backend_name,
+                DEFAULT_SIMULATION_CONFIG.backend,
             ),
             client_resources=client_resources,
             init_args=init_args,

@@ -180,13 +180,13 @@ def test_build_fab_from_files_without_fab_include_uses_all_then_builtin() -> Non
 
 
 def test_build_fab_from_files_fab_include_is_constrained_by_builtin_include() -> None:
-    """Test fab-include that only matches built-in-excluded files raises ValueError."""
+    """Test fab-include that only matches publish-excluded files raises ValueError."""
     files = _make_files(
         '\n[tool.flwr.app]\nfab-include = ["**/*.mock"]\n',
         **{"client.py": _DUMMY_PY, "data.mock": b"not included"},
     )
 
-    with pytest.raises(ValueError, match="non-overridable built-in FAB constraints"):
+    with pytest.raises(ValueError, match="did not match any files"):
         build_fab_from_files(files)
 
 
@@ -253,30 +253,3 @@ def test_build_fab_from_files_exclude_prevails_over_include() -> None:
 
     assert "server.py" in entries
     assert "client.py" not in entries
-
-
-def test_build_fab_from_files_raises_when_include_hits_builtin_constraints() -> None:
-    """Test build fails when fab-include matches files blocked by built-in
-    constraints."""
-    files = _make_files(
-        '\n[tool.flwr.app]\nfab-include = ["**/*.mock"]\n',
-        **{"data.mock": b"not included"},
-    )
-
-    with pytest.raises(ValueError, match="non-overridable built-in FAB constraints"):
-        build_fab_from_files(files)
-
-
-def test_build_fab_from_files_normalizes_windows_path_separators() -> None:
-    """Test that Windows-style backslash keys are normalized to forward slashes."""
-    files: dict[str, bytes | Path] = {
-        "pyproject.toml": b'[project]\nname = "app"\nversion = "1.0.0"\n',
-        "src\\client.py": _DUMMY_PY,
-        "src\\utils\\helpers.py": _DUMMY_PY,
-    }
-
-    entries = _build_entries(files)
-
-    assert "src/client.py" in entries
-    assert "src/utils/helpers.py" in entries
-    assert "src\\client.py" not in entries

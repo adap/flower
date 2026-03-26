@@ -154,7 +154,7 @@ class SimulationConfig(google.protobuf.message.Message):
     NUM_SUPERNODES_FIELD_NUMBER: builtins.int
     CLIENT_RESOURCES_NUM_CPUS_FIELD_NUMBER: builtins.int
     CLIENT_RESOURCES_NUM_GPUS_FIELD_NUMBER: builtins.int
-    BACKEND_NAME_FIELD_NUMBER: builtins.int
+    BACKEND_FIELD_NUMBER: builtins.int
     VERBOSE_FIELD_NUMBER: builtins.int
     INIT_ARGS_NUM_CPUS_FIELD_NUMBER: builtins.int
     INIT_ARGS_NUM_GPUS_FIELD_NUMBER: builtins.int
@@ -163,7 +163,7 @@ class SimulationConfig(google.protobuf.message.Message):
     num_supernodes: builtins.int
     client_resources_num_cpus: builtins.int
     client_resources_num_gpus: builtins.float
-    backend_name: builtins.str
+    backend: builtins.str
     verbose: builtins.bool
     init_args_num_cpus: builtins.int
     init_args_num_gpus: builtins.int
@@ -172,18 +172,24 @@ class SimulationConfig(google.protobuf.message.Message):
     def __init__(
         self,
         *,
-        num_supernodes: builtins.int = ...,
-        client_resources_num_cpus: builtins.int = ...,
-        client_resources_num_gpus: builtins.float = ...,
-        backend_name: builtins.str = ...,
-        verbose: builtins.bool = ...,
+        num_supernodes: builtins.int | None = ...,
+        client_resources_num_cpus: builtins.int | None = ...,
+        client_resources_num_gpus: builtins.float | None = ...,
+        backend: builtins.str | None = ...,
+        verbose: builtins.bool | None = ...,
         init_args_num_cpus: builtins.int | None = ...,
         init_args_num_gpus: builtins.int | None = ...,
         init_args_logging_level: builtins.str | None = ...,
         init_args_log_to_driver: builtins.bool | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["_init_args_log_to_driver", b"_init_args_log_to_driver", "_init_args_logging_level", b"_init_args_logging_level", "_init_args_num_cpus", b"_init_args_num_cpus", "_init_args_num_gpus", b"_init_args_num_gpus", "init_args_log_to_driver", b"init_args_log_to_driver", "init_args_logging_level", b"init_args_logging_level", "init_args_num_cpus", b"init_args_num_cpus", "init_args_num_gpus", b"init_args_num_gpus"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["_init_args_log_to_driver", b"_init_args_log_to_driver", "_init_args_logging_level", b"_init_args_logging_level", "_init_args_num_cpus", b"_init_args_num_cpus", "_init_args_num_gpus", b"_init_args_num_gpus", "backend_name", b"backend_name", "client_resources_num_cpus", b"client_resources_num_cpus", "client_resources_num_gpus", b"client_resources_num_gpus", "init_args_log_to_driver", b"init_args_log_to_driver", "init_args_logging_level", b"init_args_logging_level", "init_args_num_cpus", b"init_args_num_cpus", "init_args_num_gpus", b"init_args_num_gpus", "num_supernodes", b"num_supernodes", "verbose", b"verbose"]) -> None: ...
+    def HasField(self, field_name: typing.Literal["_backend", b"_backend", "_client_resources_num_cpus", b"_client_resources_num_cpus", "_client_resources_num_gpus", b"_client_resources_num_gpus", "_init_args_log_to_driver", b"_init_args_log_to_driver", "_init_args_logging_level", b"_init_args_logging_level", "_init_args_num_cpus", b"_init_args_num_cpus", "_init_args_num_gpus", b"_init_args_num_gpus", "_num_supernodes", b"_num_supernodes", "_verbose", b"_verbose", "backend", b"backend", "client_resources_num_cpus", b"client_resources_num_cpus", "client_resources_num_gpus", b"client_resources_num_gpus", "init_args_log_to_driver", b"init_args_log_to_driver", "init_args_logging_level", b"init_args_logging_level", "init_args_num_cpus", b"init_args_num_cpus", "init_args_num_gpus", b"init_args_num_gpus", "num_supernodes", b"num_supernodes", "verbose", b"verbose"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing.Literal["_backend", b"_backend", "_client_resources_num_cpus", b"_client_resources_num_cpus", "_client_resources_num_gpus", b"_client_resources_num_gpus", "_init_args_log_to_driver", b"_init_args_log_to_driver", "_init_args_logging_level", b"_init_args_logging_level", "_init_args_num_cpus", b"_init_args_num_cpus", "_init_args_num_gpus", b"_init_args_num_gpus", "_num_supernodes", b"_num_supernodes", "_verbose", b"_verbose", "backend", b"backend", "client_resources_num_cpus", b"client_resources_num_cpus", "client_resources_num_gpus", b"client_resources_num_gpus", "init_args_log_to_driver", b"init_args_log_to_driver", "init_args_logging_level", b"init_args_logging_level", "init_args_num_cpus", b"init_args_num_cpus", "init_args_num_gpus", b"init_args_num_gpus", "num_supernodes", b"num_supernodes", "verbose", b"verbose"]) -> None: ...
+    @typing.overload
+    def WhichOneof(self, oneof_group: typing.Literal["_backend", b"_backend"]) -> typing.Literal["backend"] | None: ...
+    @typing.overload
+    def WhichOneof(self, oneof_group: typing.Literal["_client_resources_num_cpus", b"_client_resources_num_cpus"]) -> typing.Literal["client_resources_num_cpus"] | None: ...
+    @typing.overload
+    def WhichOneof(self, oneof_group: typing.Literal["_client_resources_num_gpus", b"_client_resources_num_gpus"]) -> typing.Literal["client_resources_num_gpus"] | None: ...
     @typing.overload
     def WhichOneof(self, oneof_group: typing.Literal["_init_args_log_to_driver", b"_init_args_log_to_driver"]) -> typing.Literal["init_args_log_to_driver"] | None: ...
     @typing.overload
@@ -192,5 +198,9 @@ class SimulationConfig(google.protobuf.message.Message):
     def WhichOneof(self, oneof_group: typing.Literal["_init_args_num_cpus", b"_init_args_num_cpus"]) -> typing.Literal["init_args_num_cpus"] | None: ...
     @typing.overload
     def WhichOneof(self, oneof_group: typing.Literal["_init_args_num_gpus", b"_init_args_num_gpus"]) -> typing.Literal["init_args_num_gpus"] | None: ...
+    @typing.overload
+    def WhichOneof(self, oneof_group: typing.Literal["_num_supernodes", b"_num_supernodes"]) -> typing.Literal["num_supernodes"] | None: ...
+    @typing.overload
+    def WhichOneof(self, oneof_group: typing.Literal["_verbose", b"_verbose"]) -> typing.Literal["verbose"] | None: ...
 
 global___SimulationConfig = SimulationConfig
