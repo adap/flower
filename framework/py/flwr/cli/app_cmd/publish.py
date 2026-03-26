@@ -183,9 +183,7 @@ def _collect_file_paths(root: Path) -> list[Path]:
         for path in skipped_paths:
             typer.secho(f"Skip: {path}", fg=typer.colors.YELLOW)
         # Build list of absolute file paths (sorted by relative path for stability)
-        file_paths = [
-            files[key].expanduser().resolve() for key in sorted(files.keys())
-        ]
+        file_paths = [files[key].expanduser().resolve() for key in sorted(files.keys())]
     except ValueError as err:
         raise click.ClickException(str(err)) from err
 
