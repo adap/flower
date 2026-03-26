@@ -32,7 +32,6 @@ from parameterized import parameterized
 
 from flwr.common import ConfigRecord, now
 from flwr.common.constant import (
-    FEDERATION_NOT_SPECIFIED_MESSAGE,
     NODE_NOT_FOUND_MESSAGE,
     NOOP_ACCOUNT_NAME,
     PUBLIC_KEY_ALREADY_IN_USE_MESSAGE,
@@ -79,6 +78,8 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
 from flwr.proto.federation_pb2 import Account, Member  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkStateFactory
 from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME, NOOP_FEDERATION, RunType
+from flwr.supercore.error import ApiErrorCode, FlowerError
+from flwr.supercore.error.catalog import API_ERROR_MAP
 from flwr.supercore.ffs import FfsFactory
 from flwr.supercore.primitives.asymmetric import generate_key_pairs, public_key_to_bytes
 from flwr.superlink.auth_plugin import NoOpControlAuthnPlugin
@@ -962,13 +963,12 @@ class TestValidateFederationAndNodesInRequest(unittest.TestCase):
 
     # --- _validate_federation_and_node_in_request tests ---
 
-    def test_validate_aborts_when_federation_not_specified(self) -> None:
-        """Test abort when federation name is empty."""
+    def test_validate_raises_when_federation_not_specified(self) -> None:
+        """Test raises FlowerError when federation name is empty."""
         ctx = self._make_context()
-        with self.assertRaises(RuntimeError) as cm:
+        with self.assertRaises(FlowerError) as cm:
             _validate_federation_and_node_in_request(self.state, self.aid, "", 1, ctx)
-        ctx.abort.assert_called_once()
-        self.assertIn(FEDERATION_NOT_SPECIFIED_MESSAGE, str(cm.exception))
+        self.assertEqual(cm.exception.code, ApiErrorCode.FEDERATION_NOT_SPECIFIED)
 
     def test_validate_aborts_when_federation_not_found(self) -> None:
         """Test abort when federation does not exist."""
@@ -1041,9 +1041,9 @@ class TestValidateFederationAndNodesInRequest(unittest.TestCase):
         """Test AddNodeToFederation aborts when no federation is specified."""
         request = AddNodeToFederationRequest(federation_name="", node_id=1)
         ctx = self._make_context()
-        with self.assertRaises(RuntimeError) as cm:
+        with self.assertRaises(RuntimeError):
             self.servicer.AddNodeToFederation(request, ctx)
-        self.assertIn(FEDERATION_NOT_SPECIFIED_MESSAGE, str(cm.exception))
+        _assert_abort_with_flwr_err(ctx, ApiErrorCode.FEDERATION_NOT_SPECIFIED)
 
     def test_remove_node_from_federation_success(self) -> None:
         """Test RemoveNodeFromFederation succeeds with valid inputs."""
@@ -1072,9 +1072,9 @@ class TestValidateFederationAndNodesInRequest(unittest.TestCase):
         """Test RemoveNodeFromFederation aborts when no federation is specified."""
         request = RemoveNodeFromFederationRequest(federation_name="", node_id=1)
         ctx = self._make_context()
-        with self.assertRaises(RuntimeError) as cm:
+        with self.assertRaises(RuntimeError):
             self.servicer.RemoveNodeFromFederation(request, ctx)
-        self.assertIn(FEDERATION_NOT_SPECIFIED_MESSAGE, str(cm.exception))
+        _assert_abort_with_flwr_err(ctx, ApiErrorCode.FEDERATION_NOT_SPECIFIED)
 
 
 def test_format_verification_compact() -> None:
@@ -1093,3 +1093,9 @@ def test_format_verification_compact() -> None:
     v2: dict[str, str] = json.loads(out["key2"])
     assert v1 == {"sig": "abc", "algo": "ed25519"}
     assert v2 == {"sig": "def", "algo": "ed25519"}
+
+
+def _assert_abort_with_flwr_err(ctx: MagicMock, code: int) -> None:
+    """Assert that ctx.abort was called with a translated FlowerError."""
+    spec = API_ERROR_MAP[code]
+    ctx.abort.assert_called_once_with(spec.status_code, spec.public_message)
