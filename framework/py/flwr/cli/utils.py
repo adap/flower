@@ -17,9 +17,10 @@
 
 import hashlib
 import json
+import os
 import re
 import sys
-from collections.abc import Callable, Iterable, Iterator
+from collections.abc import Callable, Iterable, Iterator, Mapping
 from contextlib import contextmanager
 from io import StringIO
 from pathlib import Path
@@ -36,7 +37,6 @@ from flwr.common.constant import (
     ACCESS_TOKEN_KEY,
     AUTHN_TYPE_JSON_KEY,
     FEDERATION_NOT_FOUND_MESSAGE,
-    FEDERATION_NOT_SPECIFIED_MESSAGE,
     NO_ACCOUNT_AUTH_MESSAGE,
     NO_ARTIFACT_PROVIDER_MESSAGE,
     NODE_NOT_FOUND_MESSAGE,
@@ -55,6 +55,11 @@ from flwr.common.grpc import (
 )
 from flwr.common.logger import print_json_error, redirect_output, restore_output
 from flwr.proto.control_pb2_grpc import ControlStub  # pylint: disable=E0611
+from flwr.supercore.constant import (
+    APP_PUBLISH_EXCLUDE_PATTERNS,
+    APP_PUBLISH_INCLUDE_PATTERNS,
+    MAX_DIR_DEPTH,
+)
 from flwr.supercore.credential_store import get_credential_store
 
 from .auth_plugin import CliAuthPlugin, get_cli_plugin_class
@@ -469,12 +474,6 @@ def flwr_cli_grpc_exc_handler(  # pylint: disable=too-many-branches
                     "The provided public key is invalid. Please provide a valid "
                     "NIST EC public key."
                 ) from None
-            if e.details() == FEDERATION_NOT_SPECIFIED_MESSAGE:  # pylint: disable=E1101
-                raise click.ClickException(
-                    "No federation specified. "
-                    "Please use the `--federation` flag or set a default federation "
-                    "in your SuperLink connection configuration."
-                ) from None
             patten = re.compile(FEDERATION_NOT_FOUND_MESSAGE.replace("%s", "(.+)"))
             if m := patten.match(e.details()):  # pylint: disable=E1101
                 raise click.ClickException(
@@ -536,89 +535,74 @@ def depth_of(relative_path: Path) -> int:
     return max(0, len(relative_path.parts) - 1)
 
 
-def collect_project_files(
-    root: Path,
-    include_patterns: tuple[str, ...],
-    exclude_patterns: tuple[str, ...],
-    max_depth: int | None = None,
-    on_skip: Callable[[Path], None] | None = None,
-) -> list[Path]:
-    """Walk a project directory and return filtered file paths.
+def collect_files(root: Path) -> dict[str, Path]:
+    """Collect all files under the root directory and return a mapping of relative POSIX
+    paths to absolute Paths.
 
-    Files are included or excluded based on gitignore-style patterns.
-    Patterns from the project's ``.gitignore`` are merged with the
-    caller-supplied ``exclude_patterns`` before matching.
+    Symlinks (both files and directories) are ignored, and only paths that resolve
+    within ``root`` are included. The traversal uses ``os.walk`` with
+    ``followlinks=False`` so symlinked directories are never entered. The relative
+    paths are in POSIX format (using forward slashes) for consistency across platforms.
+    """
+    resolved_root = root.resolve()
+    files: dict[str, Path] = {}
+    for dirpath, _, filenames in os.walk(root, followlinks=False):
+        for filename in filenames:
+            path = Path(dirpath) / filename
+            # Skip symlink files
+            if path.is_symlink():
+                continue
+            # Skip paths that resolve outside the root directory
+            if not path.resolve().is_relative_to(resolved_root):
+                continue
+            relative_path = path.relative_to(root).as_posix()
+            files[relative_path] = path
+    return files
+
+
+def filter_paths_for_publish(
+    files: Mapping[str, Path | bytes],
+) -> dict[str, Path | bytes]:
+    """Filter paths for app publishing, using publish-specific include/exclude rules.
 
     Parameters
     ----------
-    root : Path
-        Absolute path to the project root directory.
-    include_patterns : tuple[str, ...]
-        Gitignore-style patterns for files to include.  A file must
-        match at least one include pattern to be accepted.
-    exclude_patterns : tuple[str, ...]
-        Gitignore-style patterns for files to exclude.  These are
-        combined with any patterns found in ``root/.gitignore``.
-    max_depth : int | None
-        If set, raise ``ValueError`` for any file whose relative path
-        has a directory depth (see :func:`depth_of`) exceeding this
-        value.
-    on_skip : Callable[[Path], None] | None
-        If provided, called with each file path that is skipped by
-        the include/exclude filters.
+    files : Mapping[str, Path | bytes]
+        Mapping of POSIX-style relative paths to file contents (as Path or bytes).
 
     Returns
     -------
-    list[Path]
-        Absolute ``Path`` objects for every accepted file, sorted by
-        their POSIX-style relative path for deterministic ordering.
+    dict[str, Path | bytes]
+        Filtered mapping of paths to contents that match publish include/exclude rules.
 
     Raises
     ------
     ValueError
-        If any file exceeds ``max_depth``.
+        Raised if any path exceeds the maximum directory depth.
     """
-    # Build include/exclude pathspecs
-    # Note: This should be a temporary solution until we have a complete mechanism
-    # for configurable inclusion and exclusion rules.
-    # Note: Unlike Git, we do not support nested .gitignore files in subdirectories.
-    gitignore_patterns = tuple(load_gitignore_patterns(root / ".gitignore"))
-    exclude_spec = build_pathspec(gitignore_patterns + exclude_patterns)
-    include_spec = build_pathspec(include_patterns)
+    # Load gitignore patterns if exists
+    gitignore_patterns = tuple(load_gitignore_patterns(files.get(".gitignore", b"")))
+    gitignore_spec = build_pathspec(gitignore_patterns)
 
-    # Walk the directory tree
-    file_paths: list[Path] = []
-    for path in root.rglob("*"):
-        if not path.is_file():
-            continue
+    # Build include/exclude pathspecs for app publish
+    include_spec = build_pathspec(APP_PUBLISH_INCLUDE_PATTERNS)
+    exclude_spec = build_pathspec(APP_PUBLISH_EXCLUDE_PATTERNS)
 
-        # Skip if the file is outside the root directory (e.g. via symlink)
-        if not path.resolve().is_relative_to(root.resolve()):
-            if on_skip is not None:
-                on_skip(path)
-            continue
+    # Apply filtering
+    filtered_paths = include_spec.match_files(files.keys())
+    filtered_paths = exclude_spec.match_files(filtered_paths, negate=True)
+    filtered_paths = gitignore_spec.match_files(filtered_paths, negate=True)
 
-        # Skip excluded or not included files
-        # Note: pathspec requires POSIX style relative paths
-        relative_path = path.relative_to(root)
-        posix = relative_path.as_posix()
-
-        if exclude_spec.match_file(posix) or not include_spec.match_file(posix):
-            if on_skip is not None:
-                on_skip(path)
-            continue
-
-        # Check max depth
-        if max_depth is not None and depth_of(relative_path) > max_depth:
+    # Collect filtered files and check directory depth
+    ret_files = {}
+    for rel_pth in cast(Iterable[str], filtered_paths):
+        if depth_of(Path(rel_pth)) > MAX_DIR_DEPTH:
             raise ValueError(
-                f"'{path}' exceeds the maximum directory depth of {max_depth}."
+                f"'{rel_pth}' in the project exceeds the maximum directory depth "
+                f"of {MAX_DIR_DEPTH}."
             )
-
-        file_paths.append(path)
-
-    # Sort for deterministic ordering
-    file_paths.sort(key=lambda p: p.relative_to(root).as_posix())
-    return file_paths
+        ret_files[rel_pth] = files[rel_pth]
+    return ret_files
 
 
 def validate_credentials_content(creds_path: Path) -> str:

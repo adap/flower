@@ -17,6 +17,7 @@
 
 import hashlib
 import zipfile
+from collections.abc import Mapping
 from io import BytesIO
 from pathlib import Path
 from typing import Annotated, Any
@@ -45,7 +46,12 @@ from flwr.supercore.fab_format_version import (
 )
 
 from .config_utils import load_and_validate
-from .utils import build_pathspec, is_valid_project_name
+from .utils import (
+    build_pathspec,
+    collect_files,
+    filter_paths_for_publish,
+    is_valid_project_name,
+)
 
 
 def write_to_zip(
@@ -161,39 +167,12 @@ def build(
 
 
 def build_fab_from_disk(app: Path) -> bytes:
-    """Build a FAB from files on disk and return the FAB as bytes.
-
-    This function reads files from disk and bundles them into a FAB.
-
-    Parameters
-    ----------
-    app : Path
-        Path to the Flower app to bundle into a FAB.
-
-    Returns
-    -------
-    bytes
-        The FAB as bytes.
-    """
-    app = app.resolve()
-
-    # Collect all files recursively (including pyproject.toml and .gitignore)
-    all_files = [f for f in app.rglob("*") if f.is_file()]
-
-    # Create dict mapping relative paths to Path objects
-    files_dict: dict[str, bytes | Path] = {
-        # Ensure consistent path separators across platforms
-        str(file_path.relative_to(app)).replace("\\", "/"): file_path
-        for file_path in all_files
-    }
-
-    # Build FAB from the files dict
-    fab_bytes, _ = build_fab_from_files(files_dict)
-    return fab_bytes
+    """Build a FAB from files on disk and return the FAB as bytes."""
+    return build_fab_from_files(collect_files(app.expanduser().resolve()))[0]
 
 
 def build_fab_from_files(
-    files: dict[str, bytes | Path],
+    files: Mapping[str, bytes | Path],
 ) -> tuple[bytes, FabFormatMetadata]:
     r"""Build a FAB from in-memory files and return the FAB plus metadata.
 
@@ -203,8 +182,8 @@ def build_fab_from_files(
 
     Parameters
     ----------
-    files : dict[str, Union[bytes, Path]]
-        Dictionary mapping relative file paths to their contents.
+    files : Mapping[str, bytes | Path]
+        Mapping of relative POSIX file paths to their contents.
         - Keys: Relative paths (strings)
         - Values: Either bytes (file contents) or Path (will be read)
         Must include "pyproject.toml" and optionally ".gitignore".
@@ -259,11 +238,15 @@ def build_fab_from_files(
         file_size_bits = len(content) * 8
         return f"{path},{sha256_hash},{file_size_bits}"
 
+    # Apply publish-style rules (.gitignore + publish include/exclude).
+    files = filter_paths_for_publish(files)
+
     # Extract, load, and parse pyproject.toml
-    # Normalise path separators up-front so all subsequent lookups are consistent.
-    files = {k.replace("\\", "/"): v for k, v in files.items()}
     if FAB_CONFIG_FILE not in files:
-        raise ValueError(f"{FAB_CONFIG_FILE} not found in files")
+        raise ValueError(
+            f"{FAB_CONFIG_FILE} not found in files. It may have been excluded by "
+            ".gitignore."
+        )
     pyproject_content = _to_bytes(files[FAB_CONFIG_FILE])
     config = tomli.loads(pyproject_content.decode("utf-8"))
     metadata = normalize_and_validate_fab_format(config)
@@ -276,7 +259,7 @@ def build_fab_from_files(
     ):
         del config["tool"]["flwr"]["federations"]
 
-    # Filter files based on user patterns and built-in constraints.
+    # Apply FAB include/exclude rules (user patterns + built-in).
     filtered_paths = get_filtered_fab_paths(files, config)
     filtered_paths.sort()  # Sort for deterministic output
     validate_fab_files_for_format(config, filtered_paths)

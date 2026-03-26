@@ -17,7 +17,7 @@
 
 from contextlib import ExitStack
 from pathlib import Path
-from typing import IO, Annotated, Any
+from typing import IO, Annotated, Any, cast
 
 import click
 import requests
@@ -28,9 +28,6 @@ from flwr.cli.config_utils import load_and_validate
 from flwr.common.constant import FAB_CONFIG_FILE
 from flwr.supercore.constant import (
     APP_PUBLISH_ALLOWED_LICENSE_FILES,
-    APP_PUBLISH_EXCLUDE_PATTERNS,
-    APP_PUBLISH_INCLUDE_PATTERNS,
-    MAX_DIR_DEPTH,
     MAX_FILE_BYTES,
     MAX_FILE_COUNT,
     MAX_TOTAL_BYTES,
@@ -43,7 +40,11 @@ from flwr.supercore.version import package_version as flwr_version
 
 from ..auth_plugin.oidc_cli_plugin import OidcCliPlugin
 from ..config_utils import load as load_toml
-from ..utils import collect_project_files, load_cli_auth_plugin_from_connection
+from ..utils import (
+    collect_files,
+    filter_paths_for_publish,
+    load_cli_auth_plugin_from_connection,
+)
 
 
 # pylint: disable=too-many-locals
@@ -173,15 +174,16 @@ def _collect_file_paths(root: Path) -> list[Path]:
     declared_license_file = _get_declared_license_file(root)
 
     try:
-        file_paths = collect_project_files(
-            root,
-            include_patterns=APP_PUBLISH_INCLUDE_PATTERNS,
-            exclude_patterns=APP_PUBLISH_EXCLUDE_PATTERNS,
-            max_depth=MAX_DIR_DEPTH,
-            on_skip=lambda p: typer.echo(
-                typer.style(f"Skip: {p}", fg=typer.colors.YELLOW)
-            ),
-        )
+        # Collect all files
+        all_files = collect_files(root)
+        # Filter files based on .gitignore and include/exclude patterns
+        files = cast(dict[str, Path], filter_paths_for_publish(all_files))
+        # Warn about skipped files (sorted for deterministic output)
+        skipped_paths = sorted(set(all_files.keys()) - set(files.keys()))
+        for path in skipped_paths:
+            typer.secho(f"Skip: {path}", fg=typer.colors.YELLOW)
+        # Build list of absolute file paths (sorted by relative path for stability)
+        file_paths = [files[key].expanduser().resolve() for key in sorted(files.keys())]
     except ValueError as err:
         raise click.ClickException(str(err)) from err
 
