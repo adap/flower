@@ -180,8 +180,6 @@ def test_build_fab_from_files_uses_highest_inclusive_lower_bound() -> None:
     assert metadata.fab_format_version == 1
     assert metadata.flwr_version_min == "1.27.0"
     assert metadata.flwr_version_target == "1.27.0"
-
-
 def test_build_fab_from_files_requires_target_for_version_one() -> None:
     """Test build fails for fab_format_version=1 without flwr_version_target."""
     files = _make_files(
