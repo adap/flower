@@ -639,10 +639,8 @@ def run_to_proto(run: typing.Run) -> ProtoRun:
         bytes_recv=run.bytes_recv,
         clientapp_runtime=run.clientapp_runtime,
         run_type=run.run_type,
+        federation_config=run.federation_config
     )
-    federation_config = _clone_simulation_config(run.federation_config)
-    if federation_config is not None:
-        proto.federation_config.CopyFrom(federation_config)
     return proto
 
 
@@ -665,24 +663,13 @@ def run_from_proto(run_proto: ProtoRun) -> typing.Run:
         bytes_recv=run_proto.bytes_recv,
         clientapp_runtime=run_proto.clientapp_runtime,
         federation_config=(
-            _clone_simulation_config(run_proto.federation_config)
+            run_proto.federation_config
             if run_proto.HasField("federation_config")
             else None
         ),
         run_type=run_proto.run_type,
     )
     return run
-
-
-def _clone_simulation_config(
-    config: ProtoSimulationConfig | None,
-) -> ProtoSimulationConfig | None:
-    """Clone a simulation config if it has any set fields."""
-    if config is None or not config.ListFields():
-        return None
-    clone = ProtoSimulationConfig()
-    clone.CopyFrom(config)
-    return clone
 
 
 # === Run status ===
