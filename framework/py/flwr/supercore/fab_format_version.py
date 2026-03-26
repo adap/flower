@@ -78,7 +78,7 @@ def _get_flwr_requirement(config: dict[str, Any]) -> Requirement | None:
 
 def _derive_flwr_version_min(requirement: Requirement) -> Version:
     """Derive the supported Flower minimum version from `>=` specifiers only."""
-    lower: Version | None = None
+    lower_bound: Version | None = None
 
     for specifier in requirement.specifier:
         if specifier.operator != ">=":
@@ -86,16 +86,16 @@ def _derive_flwr_version_min(requirement: Requirement) -> Version:
             continue
 
         version = _parse_version(specifier.version, '"flwr" dependency specifier')
-        if lower is None or version > lower:
-            lower = version
+        if lower_bound is None or version > lower_bound:
+            lower_bound = version
 
-    if lower is None:
+    if lower_bound is None:
         raise ValueError(
             'Invalid "flwr" dependency specifier: an inclusive lower bound declared '
             'with ">=" is required for fab_format_version = 1.'
         )
 
-    return lower
+    return lower_bound
 
 
 def _get_flwr_app_config(config: dict[str, Any]) -> dict[str, Any]:
@@ -154,15 +154,15 @@ def _require_flwr_target_version(app_config: dict[str, Any]) -> Version:
     return target_version
 
 
-def _validate_target_within_bounds(
+def _validate_target_against_lower_bound(
     target_version: Version | None,
-    lower: Version | None,
+    lower_bound: Version | None,
 ) -> None:
     """Ensure `flwr_version_target` respects the derived lower bound, if any."""
-    if target_version is None or lower is None:
+    if target_version is None or lower_bound is None:
         return
 
-    if target_version < lower:
+    if target_version < lower_bound:
         raise ValueError(
             "Invalid [tool.flwr.app].flwr_version_target: must be greater than or "
             'equal to the declared "flwr" dependency lower bound.'
@@ -172,12 +172,12 @@ def _validate_target_within_bounds(
 def _build_fab_metadata(
     fab_format_version: int,
     target_version: Version | None,
-    lower: Version | None,
+    lower_bound: Version | None,
 ) -> FabFormatMetadata:
     """Create normalized metadata from parsed versions."""
     return FabFormatMetadata(
         fab_format_version=fab_format_version,
-        flwr_version_min=str(lower) if lower is not None else None,
+        flwr_version_min=str(lower_bound) if lower_bound is not None else None,
         flwr_version_target=str(target_version) if target_version is not None else None,
     )
 
@@ -193,16 +193,16 @@ def _normalize_and_validate_fab_format_v0(config: dict[str, Any]) -> FabFormatMe
     app_config = _get_flwr_app_config(config)
     target_version = _parse_flwr_target_version(app_config)
     requirement = _get_flwr_requirement(config)
-    lower: Version | None = None
+    lower_bound: Version | None = None
 
     if requirement is not None:
         try:
-            lower = _derive_flwr_version_min(requirement)
+            lower_bound = _derive_flwr_version_min(requirement)
         except ValueError:
-            lower = None
+            lower_bound = None
 
-    _validate_target_within_bounds(target_version, lower)
-    return _build_fab_metadata(0, target_version, lower)
+    _validate_target_against_lower_bound(target_version, lower_bound)
+    return _build_fab_metadata(0, target_version, lower_bound)
 
 
 def _normalize_and_validate_fab_format_v1(config: dict[str, Any]) -> FabFormatMetadata:
@@ -225,9 +225,9 @@ def _normalize_and_validate_fab_format_v1(config: dict[str, Any]) -> FabFormatMe
             "fab_format_version >= 1."
         )
 
-    lower = _derive_flwr_version_min(requirement)
-    _validate_target_within_bounds(target_version, lower)
-    return _build_fab_metadata(1, target_version, lower)
+    lower_bound = _derive_flwr_version_min(requirement)
+    _validate_target_against_lower_bound(target_version, lower_bound)
+    return _build_fab_metadata(1, target_version, lower_bound)
 
 
 def _validate_fab_format_v0_contents(
