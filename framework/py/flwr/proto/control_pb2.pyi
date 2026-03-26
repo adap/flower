@@ -20,6 +20,7 @@ limitations under the License.
 import builtins
 import collections.abc
 import flwr.proto.fab_pb2
+import flwr.proto.federation_config_pb2
 import flwr.proto.federation_pb2
 import flwr.proto.node_pb2
 import flwr.proto.run_pb2
@@ -65,13 +66,13 @@ class StartRunRequest(google.protobuf.message.Message):
     @property
     def override_config(self) -> google.protobuf.internal.containers.MessageMap[builtins.str, flwr.proto.transport_pb2.Scalar]: ...
     @property
-    def override_federation_config(self) -> flwr.proto.federation_pb2.SimulationConfig: ...
+    def override_federation_config(self) -> flwr.proto.federation_config_pb2.SimulationConfig: ...
     def __init__(
         self,
         *,
         fab: flwr.proto.fab_pb2.Fab | None = ...,
         override_config: collections.abc.Mapping[builtins.str, flwr.proto.transport_pb2.Scalar] | None = ...,
-        override_federation_config: flwr.proto.federation_pb2.SimulationConfig | None = ...,
+        override_federation_config: flwr.proto.federation_config_pb2.SimulationConfig | None = ...,
         app_spec: builtins.str = ...,
         federation: builtins.str = ...,
     ) -> None: ...
@@ -765,12 +766,12 @@ class ConfigureSimulationFederationRequest(google.protobuf.message.Message):
     CONFIG_FIELD_NUMBER: builtins.int
     federation_name: builtins.str
     @property
-    def config(self) -> flwr.proto.federation_pb2.SimulationConfig: ...
+    def config(self) -> flwr.proto.federation_config_pb2.SimulationConfig: ...
     def __init__(
         self,
         *,
         federation_name: builtins.str = ...,
-        config: flwr.proto.federation_pb2.SimulationConfig | None = ...,
+        config: flwr.proto.federation_config_pb2.SimulationConfig | None = ...,
     ) -> None: ...
     def HasField(self, field_name: typing.Literal["config", b"config"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing.Literal["config", b"config", "federation_name", b"federation_name"]) -> None: ...
