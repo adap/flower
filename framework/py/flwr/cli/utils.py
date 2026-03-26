@@ -37,7 +37,6 @@ from flwr.common.constant import (
     ACCESS_TOKEN_KEY,
     AUTHN_TYPE_JSON_KEY,
     FEDERATION_NOT_FOUND_MESSAGE,
-    FEDERATION_NOT_SPECIFIED_MESSAGE,
     NO_ACCOUNT_AUTH_MESSAGE,
     NO_ARTIFACT_PROVIDER_MESSAGE,
     NODE_NOT_FOUND_MESSAGE,
@@ -461,12 +460,6 @@ def flwr_cli_grpc_exc_handler(  # pylint: disable=too-many-branches
                 raise click.ClickException(
                     "The provided public key is invalid. Please provide a valid "
                     "NIST EC public key."
-                ) from None
-            if e.details() == FEDERATION_NOT_SPECIFIED_MESSAGE:  # pylint: disable=E1101
-                raise click.ClickException(
-                    "No federation specified. "
-                    "Please use the `--federation` flag or set a default federation "
-                    "in your SuperLink connection configuration."
                 ) from None
             patten = re.compile(FEDERATION_NOT_FOUND_MESSAGE.replace("%s", "(.+)"))
             if m := patten.match(e.details()):  # pylint: disable=E1101
