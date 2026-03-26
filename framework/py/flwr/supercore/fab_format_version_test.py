@@ -265,30 +265,6 @@ def test_v1_fab_format_requires_target_version() -> None:
                 "app": {
                     "publisher": "flwrlabs",
                     "fab_format_version": 1,
-                    "flwr_version_target": "1.27.0",
-                }
-            }
-        },
-    }
-
-    with pytest.raises(ValueError, match="flwr_version_target"):
-        normalize_and_validate_fab_format(config)
-
-
-def test_v1_fab_format_requires_target_version() -> None:
-    """Test fab_format_version=1 requires flwr_version_target."""
-    config: dict[str, Any] = {
-        "project": {
-            "name": "fedgpt",
-            "version": "1.0.0",
-            "license": {"file": "LICENSE"},
-            "dependencies": ["flwr>=1.26.0,<=1.28.0"],
-        },
-        "tool": {
-            "flwr": {
-                "app": {
-                    "publisher": "flwrlabs",
-                    "fab_format_version": 1,
                 }
             }
         },
