@@ -94,10 +94,11 @@ def test_build_fab_from_files_preserves_target_for_version_zero() -> None:
 def test_build_fab_from_files_derives_flwr_bounds() -> None:
     """Test fab_format_version=1 derives metadata."""
     files = _make_files(
+        'license = { file = "LICENSE" }\n'
         'dependencies = ["flwr[simulation]>=1.26.0,<=1.28.0", "numpy>=1.0.0"]\n'
         '\n[tool.flwr.app]\npublisher = "alice"\n'
         'fab_format_version = 1\nflwr_version_target = "1.27.1"\n',
-        **{"client.py": _DUMMY_PY},
+        **{"client.py": _DUMMY_PY, "LICENSE": b"Apache-2.0\n"},
     )
 
     _, metadata = build_fab_from_files(files)
@@ -139,10 +140,11 @@ def test_build_fab_from_files_skips_unsupported_bounds_for_version_zero() -> Non
 def test_build_fab_from_files_rejects_unsupported_flwr_specifier() -> None:
     """Test build fails for fab_format_version=1 with an exclusive lower bound."""
     files = _make_files(
+        'license = { file = "LICENSE" }\n'
         'dependencies = ["flwr>1.26.0"]\n'
         '\n[tool.flwr.app]\npublisher = "alice"\n'
         'fab_format_version = 1\nflwr_version_target = "1.27.1"\n',
-        **{"client.py": _DUMMY_PY},
+        **{"client.py": _DUMMY_PY, "LICENSE": b"Apache-2.0\n"},
     )
 
     with pytest.raises(ValueError, match="inclusive lower bound"):
@@ -152,13 +154,73 @@ def test_build_fab_from_files_rejects_unsupported_flwr_specifier() -> None:
 def test_build_fab_from_files_requires_target_for_version_one() -> None:
     """Test build fails for fab_format_version=1 without flwr_version_target."""
     files = _make_files(
+        'license = { file = "LICENSE" }\n'
         'dependencies = ["flwr>=1.26.0,<=1.28.0"]\n'
         '\n[tool.flwr.app]\npublisher = "alice"\nfab_format_version = 1\n',
-        **{"client.py": _DUMMY_PY},
+        **{"client.py": _DUMMY_PY, "LICENSE": b"Apache-2.0\n"},
     )
 
     with pytest.raises(ValueError, match="flwr_version_target"):
         build_fab_from_files(files)
+
+
+def test_build_fab_from_files_rejects_v1_without_license_file_reference() -> None:
+    """Test fab_format_version=1 requires [project].license.file."""
+    files = _make_files(
+        'dependencies = ["flwr>=1.26.0"]\n'
+        '\n[tool.flwr.app]\npublisher = "alice"\n'
+        'fab_format_version = 1\nflwr_version_target = "1.27.1"\n',
+        **{"client.py": _DUMMY_PY},
+    )
+
+    with pytest.raises(ValueError, match=r"\[project\]\.license"):
+        build_fab_from_files(files)
+
+
+def test_build_fab_from_files_rejects_v1_when_license_file_missing() -> None:
+    """Test fab_format_version=1 requires the declared license file in the FAB."""
+    files = _make_files(
+        'license = { file = "LICENSE" }\n'
+        'dependencies = ["flwr>=1.26.0"]\n'
+        '\n[tool.flwr.app]\npublisher = "alice"\n'
+        'fab_format_version = 1\nflwr_version_target = "1.27.1"\n',
+        **{"client.py": _DUMMY_PY},
+    )
+
+    with pytest.raises(ValueError, match="included in the FAB"):
+        build_fab_from_files(files)
+
+
+def test_build_fab_from_files_rejects_v1_when_license_file_is_excluded() -> None:
+    """Test fab_format_version=1 fails when fab-exclude removes the license file."""
+    files = _make_files(
+        'license = { file = "LICENSE" }\n'
+        'dependencies = ["flwr>=1.26.0"]\n'
+        '\n[tool.flwr.app]\npublisher = "alice"\n'
+        'fab_format_version = 1\nflwr_version_target = "1.27.1"\n'
+        'fab-exclude = ["LICENSE"]\n',
+        **{"client.py": _DUMMY_PY, "LICENSE": b"Apache-2.0\n"},
+    )
+
+    with pytest.raises(ValueError, match="included in the FAB"):
+        build_fab_from_files(files)
+
+
+def test_build_fab_from_files_accepts_v1_with_license_md() -> None:
+    """Test fab_format_version=1 accepts LICENSE.md as the declared license file."""
+    files = _make_files(
+        'license = { file = "LICENSE.md" }\n'
+        'dependencies = ["flwr>=1.26.0"]\n'
+        '\n[tool.flwr.app]\npublisher = "alice"\n'
+        'fab_format_version = 1\nflwr_version_target = "1.27.1"\n',
+        **{"client.py": _DUMMY_PY, "LICENSE.md": b"# Apache-2.0\n"},
+    )
+
+    _, metadata = build_fab_from_files(files)
+
+    assert metadata.fab_format_version == 1
+    assert metadata.flwr_version_min == "1.26.0"
+    assert metadata.flwr_version_target == "1.27.1"
 
 
 def test_build_fab_from_files_without_fab_include_uses_all_then_builtin() -> None:
