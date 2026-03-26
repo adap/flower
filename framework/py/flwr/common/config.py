@@ -301,6 +301,11 @@ def check_pattern_list_value(value: Any, key: str) -> str | None:
     """Validate a pattern list value and return an error message or ``None``."""
     if not isinstance(value, list):
         return f'Property "{key}" in [tool.flwr.app] must be a list of strings.'
+    if not value:
+        return (
+            f'Property "{key}" in [tool.flwr.app] must not be an empty list. '
+            "Remove the key to use built-in defaults, or specify at least one pattern."
+        )
     if any(not isinstance(pattern, str) or pattern.strip() == "" for pattern in value):
         return (
             f'Property "{key}" in [tool.flwr.app] must be a list of non-empty '

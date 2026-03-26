@@ -18,6 +18,7 @@
 from __future__ import annotations
 
 import os
+from typing import Final
 
 TRANSPORT_TYPE_GRPC_RERE = "grpc-rere"
 TRANSPORT_TYPE_GRPC_ADAPTER = "grpc-adapter"
@@ -86,6 +87,10 @@ FAB_INCLUDE_PATTERNS = (
     "**/*.py",
     "**/*.toml",
     "**/*.md",
+    "**/*.yaml",
+    "**/*.yml",
+    "**/*.json",
+    "**/*.jsonl",
     "/LICENSE",
 )
 # FAB file exclude patterns (gitignore-style patterns)
@@ -257,8 +262,8 @@ class SubStatus:
 class CliOutputFormat:
     """Define output format for `flwr` CLI commands."""
 
-    DEFAULT = "default"
-    JSON = "json"
+    DEFAULT: Final = "default"
+    JSON: Final = "json"
 
     def __new__(cls) -> CliOutputFormat:
         """Prevent instantiation."""
@@ -301,7 +306,7 @@ class ExecPluginType:
 
     CLIENT_APP = "clientapp"
     SERVER_APP = "serverapp"
-    SIMULATION = "simulation"
+    SIMULATION = "simulation"  # Deprecated
 
     def __new__(cls) -> ExecPluginType:
         """Prevent instantiation."""

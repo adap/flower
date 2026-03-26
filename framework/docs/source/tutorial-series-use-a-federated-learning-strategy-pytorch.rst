@@ -371,7 +371,7 @@ that the number of training examples on each client is quite small, we should pr
 train the model a bit longer, so we configure the clients to perform 3 local training
 epochs. We should also adjust the fraction of clients selected for training during each
 round (we don't want all 1000 clients participating in every round), so we add
-``franction-train = 0.025`` and adjust ``fraction_evaluate`` to ``0.05``, which means
+``fraction-train = 0.025`` and adjust ``fraction-evaluate`` to ``0.05``, which means
 that only 2.5% of available clients will be selected for training each round (so 25
 clients) and 5% of them for evaluation (so 50 clients). We can add and adjust values in
 the ``pyproject.toml`` for ease of experimentation:
@@ -380,7 +380,7 @@ the ``pyproject.toml`` for ease of experimentation:
 
     [tool.flwr.app.config]
     num-server-rounds = 3
-    franction-train = 0.025  # <-- new
+    fraction-train = 0.025  # <-- new
     fraction-evaluate = 0.05 # <-- updated
     local-epochs = 1
     learning-rate = 0.1
@@ -396,7 +396,7 @@ following:
         """Main entry point for the ServerApp."""
 
         # ... unchanged
-        fraction_train: float = context.run_config["franction-train"]
+        fraction_train: float = context.run_config["fraction-train"]
         # Initialize FedAdagrad strategy
         strategy = CustomFedAdagrad(
             fraction_train=fraction_train,

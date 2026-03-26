@@ -31,7 +31,6 @@ from flwr.supercore.constant import (
 from .publish import (
     _build_multipart_files_param,
     _collect_file_paths,
-    _depth_of,
     _detect_mime,
     _validate_description,
     _validate_files,
@@ -47,20 +46,6 @@ def write(tmp: Path, file_name: str, data: bytes) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_bytes(data)
     return path
-
-
-@pytest.mark.parametrize(
-    ("rel", "expected"),
-    [
-        (Path("a.py"), 0),
-        (Path("d1/file.txt"), 1),
-        (Path("d1/d2/d3/f.txt"), 3),
-        (Path("d1/d2/d3/d4/d5/x"), 5),
-    ],
-)
-def test_depth_of(rel: Path, expected: int) -> None:
-    """Test the directory depth detection."""
-    assert _depth_of(rel) == expected
 
 
 def test_detect_mime_has_string(tmp_path: Path) -> None:
