@@ -15,7 +15,7 @@
 """Flower command line interface `federation simulation-config` command."""
 
 
-from typing import Annotated, Literal
+from typing import Annotated, Any, Literal
 
 import typer
 
@@ -35,6 +35,13 @@ from flwr.proto.federation_pb2 import SimulationConfig  # pylint: disable=E0611
 from flwr.supercore.constant import DEFAULT_SIMULATION_CONFIG
 
 from .error_handlers import handle_invite_grpc_error
+
+
+def _handle_none_field(cfg: SimulationConfig, field_name: str) -> Any:
+    """Convert unset optional fields to None."""
+    if not cfg.HasField(field_name):  # type: ignore
+        return None
+    return getattr(cfg, field_name)
 
 
 def simulation_config(  # pylint: disable=R0913,R0917,W0613
@@ -100,11 +107,7 @@ def simulation_config(  # pylint: disable=R0913,R0917,W0613
             help="Number of CPUs to make available to the Simulation Runtime.",
             callback=optional_min_callback(1),
         ),
-    ] = (
-        DEFAULT_SIMULATION_CONFIG.init_args_num_cpus
-        if DEFAULT_SIMULATION_CONFIG.HasField("init_args_num_cpus")
-        else None
-    ),
+    ] = _handle_none_field(DEFAULT_SIMULATION_CONFIG, "init_args_num_cpus"),
     init_args_num_gpus: Annotated[
         int | None,
         typer.Option(
@@ -112,11 +115,7 @@ def simulation_config(  # pylint: disable=R0913,R0917,W0613
             help="Number of GPUs to make available to the Simulation Runtime",
             callback=optional_min_callback(0),
         ),
-    ] = (
-        DEFAULT_SIMULATION_CONFIG.init_args_num_gpus
-        if DEFAULT_SIMULATION_CONFIG.HasField("init_args_num_gpus")
-        else None
-    ),
+    ] = _handle_none_field(DEFAULT_SIMULATION_CONFIG, "init_args_num_gpus"),
     init_args_logging_level: Annotated[
         str | None,
         typer.Option(
