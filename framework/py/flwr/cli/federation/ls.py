@@ -391,11 +391,11 @@ def _to_simulation_config_table(config: SimulationConfig) -> Table:
         ("Backend Name", "backend"),
     ]
 
-    for field, field_name in rows:
+    for name, key in rows:
         table.add_row(
-            field,
-            Text(field_name.replace("_", "-"), style="bold magenta"),
-            str(getattr(config, field_name)),
+            name,
+            Text(key.replace("_", "-"), style="bold magenta"),
+            str(getattr(config, key)),
         )
 
     return table
