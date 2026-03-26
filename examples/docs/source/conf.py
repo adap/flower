@@ -79,6 +79,7 @@ redirects = {
     "xgboost-quickstart": "quickstart-xgboost.html",
     "tensorflow-privacy": "index.html",
     "flower-authentication": "supernode-authentication.html",
+    "pytorch-federated-variational-autoencoder": "federated-vae.html",
 }
 
 
