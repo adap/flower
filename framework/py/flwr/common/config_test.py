@@ -601,6 +601,70 @@ def test_v1_fab_format_rejects_exclusive_lower_bound() -> None:
     assert not warnings
 
 
+def test_v1_fab_format_ignores_upper_bound_when_validating_target() -> None:
+    """Test fab_format_version=1 ignores upper bounds for target validation."""
+    config = {
+        "project": {
+            "name": "fedgpt",
+            "version": "1.0.0",
+            "description": "",
+            "license": "",
+            "dependencies": ["flwr>=1.26.0,<1.28.0"],
+        },
+        "tool": {
+            "flwr": {
+                "app": {
+                    "publisher": "flwrlabs",
+                    "fab_format_version": 1,
+                    "flwr_version_target": "2.0.0",
+                    "components": {
+                        "serverapp": "flwr.cli.run:run",
+                        "clientapp": "flwr.cli.run:run",
+                    },
+                },
+            },
+        },
+    }
+
+    is_valid, errors, warnings = validate_config(config)
+
+    assert is_valid
+    assert not errors
+    assert not warnings
+
+
+def test_v1_fab_format_accepts_additional_specifiers_with_lower_bound() -> None:
+    """Test fab_format_version=1 accepts extra specifiers when `>=` is present."""
+    config = {
+        "project": {
+            "name": "fedgpt",
+            "version": "1.0.0",
+            "description": "",
+            "license": "",
+            "dependencies": ['flwr>=1.26.0,==1.27.0'],
+        },
+        "tool": {
+            "flwr": {
+                "app": {
+                    "publisher": "flwrlabs",
+                    "fab_format_version": 1,
+                    "flwr_version_target": "1.27.0",
+                    "components": {
+                        "serverapp": "flwr.cli.run:run",
+                        "clientapp": "flwr.cli.run:run",
+                    },
+                },
+            },
+        },
+    }
+
+    is_valid, errors, warnings = validate_config(config)
+
+    assert is_valid
+    assert not errors
+    assert not warnings
+
+
 def test_v1_fab_format_requires_target_version() -> None:
     """Test fab_format_version=1 requires flwr_version_target."""
     config = {
@@ -609,7 +673,7 @@ def test_v1_fab_format_requires_target_version() -> None:
             "version": "1.0.0",
             "description": "",
             "license": "",
-            "dependencies": ["flwr>=1.26.0,<=1.28.0"],
+            "dependencies": ["flwr>=1.26.0"],
         },
         "tool": {
             "flwr": {

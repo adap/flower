@@ -88,11 +88,10 @@ def test_build_fab_from_files_preserves_target_for_version_zero() -> None:
     assert metadata.fab_format_version == 0
     assert metadata.flwr_version_min is None
     assert metadata.flwr_version_target == "1.27.1"
-    assert metadata.flwr_version_max is None
 
 
 def test_build_fab_from_files_derives_flwr_bounds() -> None:
-    """Test fab_format_version=1 derives metadata."""
+    """Test fab_format_version=1 derives only the lower-bound metadata."""
     files = _make_files(
         'dependencies = ["flwr[simulation]>=1.26.0,<=1.28.0", "numpy>=1.0.0"]\n'
         '\n[tool.flwr.app]\npublisher = "alice"\n'
@@ -105,7 +104,6 @@ def test_build_fab_from_files_derives_flwr_bounds() -> None:
     assert metadata.fab_format_version == 1
     assert metadata.flwr_version_min == "1.26.0"
     assert metadata.flwr_version_target == "1.27.1"
-    assert metadata.flwr_version_max == "1.28.0"
 
 
 def test_build_fab_from_files_rejects_unsupported_fab_format_version() -> None:
@@ -133,7 +131,6 @@ def test_build_fab_from_files_skips_unsupported_bounds_for_version_zero() -> Non
     assert metadata.fab_format_version == 0
     assert metadata.flwr_version_min is None
     assert metadata.flwr_version_target == "1.27.1"
-    assert metadata.flwr_version_max is None
 
 
 def test_build_fab_from_files_rejects_unsupported_flwr_specifier() -> None:
@@ -149,10 +146,42 @@ def test_build_fab_from_files_rejects_unsupported_flwr_specifier() -> None:
         build_fab_from_files(files)
 
 
+def test_build_fab_from_files_ignores_upper_bound_for_version_one() -> None:
+    """Test build derives only the lower bound for fab_format_version=1."""
+    files = _make_files(
+        'dependencies = ["flwr>=1.26.0,<1.28.0"]\n'
+        '\n[tool.flwr.app]\npublisher = "alice"\n'
+        'fab_format_version = 1\nflwr_version_target = "2.0.0"\n',
+        **{"client.py": _DUMMY_PY},
+    )
+
+    _, metadata = build_fab_from_files(files)
+
+    assert metadata.fab_format_version == 1
+    assert metadata.flwr_version_min == "1.26.0"
+    assert metadata.flwr_version_target == "2.0.0"
+
+
+def test_build_fab_from_files_uses_highest_inclusive_lower_bound() -> None:
+    """Test build derives the highest declared `>=` lower bound."""
+    files = _make_files(
+        'dependencies = ["flwr>=1.26.0,>=1.27.0,==1.27.0"]\n'
+        '\n[tool.flwr.app]\npublisher = "alice"\n'
+        'fab_format_version = 1\nflwr_version_target = "1.27.0"\n',
+        **{"client.py": _DUMMY_PY},
+    )
+
+    _, metadata = build_fab_from_files(files)
+
+    assert metadata.fab_format_version == 1
+    assert metadata.flwr_version_min == "1.27.0"
+    assert metadata.flwr_version_target == "1.27.0"
+
+
 def test_build_fab_from_files_requires_target_for_version_one() -> None:
     """Test build fails for fab_format_version=1 without flwr_version_target."""
     files = _make_files(
-        'dependencies = ["flwr>=1.26.0,<=1.28.0"]\n'
+        'dependencies = ["flwr>=1.26.0"]\n'
         '\n[tool.flwr.app]\npublisher = "alice"\nfab_format_version = 1\n',
         **{"client.py": _DUMMY_PY},
     )
