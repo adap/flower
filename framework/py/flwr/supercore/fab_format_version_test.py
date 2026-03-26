@@ -129,6 +129,7 @@ def test_v1_fab_format_rejects_duplicate_lower_bounds() -> None:
         "project": {
             "name": "fedgpt",
             "version": "1.0.0",
+            "license": {"file": "LICENSE"},
             "dependencies": ["flwr>=1.26.0,>=1.27.0"],
         },
         "tool": {
@@ -151,6 +152,7 @@ def test_v1_fab_format_rejects_duplicate_upper_bounds() -> None:
         "project": {
             "name": "fedgpt",
             "version": "1.0.0",
+            "license": {"file": "LICENSE"},
             "dependencies": ["flwr>=1.26.0,<=2.0.0,<=1.28.0"],
         },
         "tool": {
@@ -164,4 +166,72 @@ def test_v1_fab_format_rejects_duplicate_upper_bounds() -> None:
     }
 
     with pytest.raises(ValueError, match="multiple upper bounds"):
+        normalize_and_validate_fab_format(config)
+
+
+def test_v1_fab_format_requires_license_file_reference() -> None:
+    """Test fab_format_version=1 requires [project].license.file."""
+    config: dict[str, Any] = {
+        "project": {
+            "name": "fedgpt",
+            "version": "1.0.0",
+            "dependencies": ["flwr>=1.26.0,<=2.0.0"],
+        },
+        "tool": {
+            "flwr": {
+                "app": {
+                    "publisher": "flwrlabs",
+                    "fab_format_version": 1,
+                }
+            }
+        },
+    }
+
+    with pytest.raises(ValueError, match=r"\[project\]\.license"):
+        normalize_and_validate_fab_format(config)
+
+
+def test_v1_fab_format_rejects_inline_license_text() -> None:
+    """Test fab_format_version=1 rejects inline license text."""
+    config: dict[str, Any] = {
+        "project": {
+            "name": "fedgpt",
+            "version": "1.0.0",
+            "license": {"text": "Apache-2.0"},
+            "dependencies": ["flwr>=1.26.0,<=2.0.0"],
+        },
+        "tool": {
+            "flwr": {
+                "app": {
+                    "publisher": "flwrlabs",
+                    "fab_format_version": 1,
+                }
+            }
+        },
+    }
+
+    with pytest.raises(ValueError, match="root-level license file"):
+        normalize_and_validate_fab_format(config)
+
+
+def test_v1_fab_format_rejects_invalid_license_file_name() -> None:
+    """Test fab_format_version=1 only allows LICENSE or LICENSE.md."""
+    config: dict[str, Any] = {
+        "project": {
+            "name": "fedgpt",
+            "version": "1.0.0",
+            "license": {"file": "legal/LICENSE.txt"},
+            "dependencies": ["flwr>=1.26.0,<=2.0.0"],
+        },
+        "tool": {
+            "flwr": {
+                "app": {
+                    "publisher": "flwrlabs",
+                    "fab_format_version": 1,
+                }
+            }
+        },
+    }
+
+    with pytest.raises(ValueError, match='"LICENSE" or "LICENSE.md"'):
         normalize_and_validate_fab_format(config)
