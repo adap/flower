@@ -79,4 +79,9 @@ API_ERROR_MAP: Final[dict[int, ApiErrorSpec]] = {
         status_code=StatusCode.FAILED_PRECONDITION,
         public_message="The SuperNode is already part of the federation.",
     ),
+    ApiErrorCode.FEDERATION_NOT_SPECIFIED: ApiErrorSpec(
+        status_code=StatusCode.FAILED_PRECONDITION,
+        public_message="No federation specified. You must specify a federation to "
+        "perform this action.",
+    ),
 }

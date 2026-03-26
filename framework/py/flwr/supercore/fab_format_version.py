@@ -76,6 +76,61 @@ def _get_flwr_requirement(config: dict[str, Any]) -> Requirement | None:
     return flwr_requirements[0]
 
 
+def _get_declared_license_file(config: dict[str, Any]) -> str | None:
+    """Return `[project].license.file` when declared and valid."""
+    project_config = config.get("project")
+    if not isinstance(project_config, dict):
+        return None
+
+    license_entry = project_config.get("license")
+    if license_entry is None:
+        return None
+
+    if isinstance(license_entry, str):
+        raise ValueError(
+            "fab_format_version = 1 requires [project].license to be "
+            '{ file = "LICENSE" } or { file = "LICENSE.md" }.'
+        )
+
+    if not isinstance(license_entry, dict):
+        raise ValueError("Invalid [project].license: expected a string or table value.")
+
+    if "text" in license_entry:
+        raise ValueError(
+            "fab_format_version = 1 requires [project].license to reference "
+            "a root-level license file, not inline text."
+        )
+
+    if "file" not in license_entry:
+        raise ValueError(
+            "fab_format_version = 1 requires [project].license to be "
+            '{ file = "LICENSE" } or { file = "LICENSE.md" }.'
+        )
+
+    license_file = license_entry["file"]
+    if not isinstance(license_file, str):
+        raise ValueError("Invalid [project].license.file: expected a string path.")
+
+    if license_file not in {"LICENSE", "LICENSE.md"}:
+        raise ValueError(
+            "fab_format_version = 1 requires [project].license.file to be "
+            '"LICENSE" or "LICENSE.md".'
+        )
+
+    return license_file
+
+
+def _require_license_file(config: dict[str, Any]) -> str:
+    """Return the required license file declaration for `fab_format_version = 1`."""
+    license_file = _get_declared_license_file(config)
+    if license_file is None:
+        raise ValueError(
+            "fab_format_version = 1 requires [project].license to be "
+            '{ file = "LICENSE" } or { file = "LICENSE.md" }.'
+        )
+    return license_file
+
+
 def _derive_flwr_version_min(requirement: Requirement) -> Version:
     """Derive the supported Flower minimum version from `>=` specifiers only."""
     lower_bound: Version | None = None
@@ -208,6 +263,7 @@ def _normalize_and_validate_fab_format_v0(config: dict[str, Any]) -> FabFormatMe
 def _normalize_and_validate_fab_format_v1(config: dict[str, Any]) -> FabFormatMetadata:
     """Require and derive strict metadata for `fab_format_version = 1`.
 
+    - `[project].license` must reference a root-level license file.
     - `flwr` dependency is required.
     - The dependency must include at least one inclusive lower bound declared with
       `>=`.
@@ -218,6 +274,7 @@ def _normalize_and_validate_fab_format_v1(config: dict[str, Any]) -> FabFormatMe
     """
     app_config = _get_flwr_app_config(config)
     target_version = _require_flwr_target_version(app_config)
+    _require_license_file(config)
     requirement = _get_flwr_requirement(config)
     if requirement is None:
         raise ValueError(
@@ -239,11 +296,15 @@ def _validate_fab_format_v0_contents(
 
 
 def _validate_fab_format_v1_contents(
-    _config: dict[str, Any], _filtered_paths: list[str]
+    config: dict[str, Any], filtered_paths: list[str]
 ) -> None:
     """Validate the final FAB contents for `fab_format_version = 1`."""
-    # Reserved for future file-level FAB format rules.
-    return None
+    license_file = _require_license_file(config)
+    if license_file not in filtered_paths:
+        raise ValueError(
+            "fab_format_version = 1 requires the declared [project].license.file "
+            "to be included in the FAB."
+        )
 
 
 def normalize_and_validate_fab_format(
