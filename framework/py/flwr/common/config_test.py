@@ -510,7 +510,7 @@ def test_validate_pyproject_toml_with_fab_format_version_derives_metadata() -> N
             "name": "fedgpt",
             "version": "1.0.0",
             "description": "",
-            "license": "",
+            "license": {"file": "LICENSE"},
             "dependencies": ["flwr[simulation]>=1.26.0,<=1.28.0"],
         },
         "tool": {
@@ -542,7 +542,7 @@ def test_v1_fab_format_requires_flwr_dependency() -> None:
             "name": "fedgpt",
             "version": "1.0.0",
             "description": "",
-            "license": "",
+            "license": {"file": "LICENSE"},
             "dependencies": ["numpy>=1.26.0"],
         },
         "tool": {
@@ -574,7 +574,7 @@ def test_v1_fab_format_rejects_exclusive_lower_bound() -> None:
             "name": "fedgpt",
             "version": "1.0.0",
             "description": "",
-            "license": "",
+            "license": {"file": "LICENSE"},
             "dependencies": ["flwr>1.26.0"],
         },
         "tool": {
