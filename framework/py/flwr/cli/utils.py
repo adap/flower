@@ -17,6 +17,7 @@
 
 import hashlib
 import json
+import os
 import re
 import sys
 from collections.abc import Callable, Iterable, Iterator, Mapping
@@ -532,12 +533,22 @@ def collect_files(root: Path) -> dict[str, Path]:
     """Collect all files under the root directory and return a mapping of relative POSIX
     paths to absolute Paths.
 
-    Symlinks are ignored. The relative paths are in POSIX format (using forward slashes)
-    for consistency across platforms.
+    Symlinks (both files and directories) are ignored, and only paths that resolve
+    within ``root`` are included. The traversal uses ``os.walk`` with
+    ``followlinks=False`` so symlinked directories are never entered. The relative
+    paths are in POSIX format (using forward slashes) for consistency across platforms.
     """
+    resolved_root = root.resolve()
     files: dict[str, Path] = {}
-    for path in root.rglob("*"):
-        if path.is_file() and not path.is_symlink():
+    for dirpath, _, filenames in os.walk(root, followlinks=False):
+        for filename in filenames:
+            path = Path(dirpath) / filename
+            # Skip symlink files
+            if path.is_symlink():
+                continue
+            # Skip paths that resolve outside the root directory
+            if not path.resolve().is_relative_to(resolved_root):
+                continue
             relative_path = path.relative_to(root).as_posix()
             files[relative_path] = path
     return files

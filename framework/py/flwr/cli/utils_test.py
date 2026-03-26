@@ -281,11 +281,14 @@ def test_collect_files_empty_dir(tmp_path: Path) -> None:
 
 def test_collect_files_basic(tmp_path: Path) -> None:
     """Files are collected with correct POSIX relative paths and absolute values."""
+    # Prepare
     (tmp_path / "a.py").write_text("x", encoding="utf-8")
     (tmp_path / "b.txt").write_text("y", encoding="utf-8")
 
+    # Execute
     result = collect_files(tmp_path)
 
+    # Assert
     assert set(result.keys()) == {"a.py", "b.txt"}
     assert result["a.py"] == tmp_path / "a.py"
     assert result["b.txt"] == tmp_path / "b.txt"
@@ -293,27 +296,55 @@ def test_collect_files_basic(tmp_path: Path) -> None:
 
 def test_collect_files_nested(tmp_path: Path) -> None:
     """Nested files use forward-slash POSIX paths regardless of OS."""
+    # Prepare
     sub = tmp_path / "sub" / "deep"
     sub.mkdir(parents=True)
     (sub / "file.py").write_text("z", encoding="utf-8")
 
+    # Execute
     result = collect_files(tmp_path)
 
+    # Assert
     assert "sub/deep/file.py" in result
     assert result["sub/deep/file.py"] == sub / "file.py"
 
 
-def test_collect_files_ignores_symlinks(tmp_path: Path) -> None:
-    """Symlinks are excluded from the collected files."""
+def test_collect_files_ignores_symlinked_files(tmp_path: Path) -> None:
+    """Symlinked files are excluded from the collected files."""
+    # Prepare
     real = tmp_path / "real.py"
     real.write_text("real", encoding="utf-8")
     link = tmp_path / "link.py"
     link.symlink_to(real)
 
+    # Execute
     result = collect_files(tmp_path)
 
+    # Assert
     assert "real.py" in result
     assert "link.py" not in result
+
+
+def test_collect_files_ignores_symlinked_dirs(tmp_path: Path) -> None:
+    """Symlinked directories are not traversed."""
+    # Prepare
+    # Create a real directory with a file outside the root
+    external = tmp_path / "external"
+    external.mkdir()
+    (external / "secret.py").write_text("s", encoding="utf-8")
+
+    # Root with a symlinked directory pointing to external
+    root = tmp_path / "root"
+    root.mkdir()
+    (root / "app.py").write_text("a", encoding="utf-8")
+    (root / "linked_dir").symlink_to(external)
+
+    # Execute
+    result = collect_files(root)
+
+    # Assert
+    assert "app.py" in result
+    assert "linked_dir/secret.py" not in result
 
 
 # === filter_paths_for_publish tests ===
