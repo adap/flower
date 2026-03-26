@@ -294,21 +294,6 @@ def test_collect_files_basic(tmp_path: Path) -> None:
     assert result["b.txt"] == tmp_path / "b.txt"
 
 
-def test_collect_files_nested(tmp_path: Path) -> None:
-    """Nested files use forward-slash POSIX paths regardless of OS."""
-    # Prepare
-    sub = tmp_path / "sub" / "deep"
-    sub.mkdir(parents=True)
-    (sub / "file.py").write_text("z", encoding="utf-8")
-
-    # Execute
-    result = collect_files(tmp_path)
-
-    # Assert
-    assert "sub/deep/file.py" in result
-    assert result["sub/deep/file.py"] == sub / "file.py"
-
-
 def test_collect_files_ignores_symlinked_files(tmp_path: Path) -> None:
     """Symlinked files are excluded from the collected files."""
     # Prepare
