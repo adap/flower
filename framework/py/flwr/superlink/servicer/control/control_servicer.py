@@ -172,12 +172,6 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         override_config = user_config_from_proto(request.override_config)
         federation_options = config_record_from_proto(request.federation_options)
 
-
-            # Derive run type based on the presence of simulation config
-            run_type = RunType.SERVER_APP
-            if state.federation_manager.get_simulation_config(federation) is not None:
-                run_type = RunType.SIMULATION
-
         with rpc_error_translator(context, rpc_name):
             # Check (1) federation exists and (2) the flwr_aid is a member
             federation = request.federation or NOOP_FEDERATION
@@ -197,6 +191,11 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                     f"Account with ID '{flwr_aid}' is not a member of the "
                     f"federation '{federation}'.",
                 )
+
+            # Derive run type based on the presence of simulation config
+            run_type = RunType.SERVER_APP
+            if state.federation_manager.get_simulation_config(federation) is not None:
+                run_type = RunType.SIMULATION
 
         try:
             # Validate user config overrides matches keys in run config in FAB
