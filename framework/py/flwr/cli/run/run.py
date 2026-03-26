@@ -254,8 +254,9 @@ def _parse_deprecated_options(conn: SuperLinkConnection) -> SimulationConfig | N
     if not (opt := conn.options):
         return None
     typer.secho(
-        "⚠️ Warning: options in the SuperLink connection configuration are "
-        "deprecated. Use `--federation-config` with `flwr run` instead.",
+        "⚠️ Warning: `options.` fields in the SuperLink connection configuration are "
+        "deprecated. Use `--federation-config` with `flwr run` instead. Alternatively, ",
+        "permanently set your simulation configuration via `flwr federation simulation-config`.",
         fg=typer.colors.YELLOW,
     )
     kwargs: dict[str, Any] = {
