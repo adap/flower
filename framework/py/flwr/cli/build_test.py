@@ -90,7 +90,7 @@ def test_build_fab_from_files_preserves_target_for_version_zero() -> None:
     assert metadata.flwr_version_target == "1.27.1"
 
 
-def test_build_fab_from_files_derives_flwr_bounds() -> None:
+def test_build_fab_from_files_derives_flwr_minimum() -> None:
     """Test fab_format_version=1 derives only the lower-bound metadata."""
     files = _make_files(
         'dependencies = ["flwr[simulation]>=1.26.0,<=1.28.0", "numpy>=1.0.0"]\n'
