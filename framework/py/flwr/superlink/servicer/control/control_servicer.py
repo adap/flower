@@ -148,9 +148,16 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         log(INFO, rpc_name := self.StartRun.__qualname__)
         state = self.linkstate_factory.state()
         ffs = self.ffs_factory.ffs()
-        print("\nFederation Config Override:")
-        print(request.override_federation_config)
-        print("\n")
+
+        # Temporarily convert back to ConfigRecord for compatibility
+        sim_cfg = request.override_federation_config
+        federation_config = ConfigRecord(
+            {
+                "num-supernodes": sim_cfg.num_supernodes,
+                "backend.client-resources.num-cpus": sim_cfg.client_resources_num_cpus,
+                "backend.client-resources.num-gpus": sim_cfg.client_resources_num_gpus,
+            }
+        )
 
         verification_dict: dict[str, str] = {}
         if request.app_spec:
@@ -222,7 +229,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 fab_hash,
                 override_config,
                 federation,
-                ConfigRecord(),
+                federation_config,
                 flwr_aid,
                 run_type,
             )
