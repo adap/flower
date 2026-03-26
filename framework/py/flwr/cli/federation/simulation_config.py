@@ -105,7 +105,7 @@ def simulation_config(  # pylint: disable=R0913,R0917,W0613
         typer.Option(
             "--init-args-num-cpus",
             help="Number of CPUs to make available to the Simulation Runtime.",
-            callback=optional_min_callback(1),
+            min=1,
         ),
     ] = _handle_none_field(DEFAULT_SIMULATION_CONFIG, "init_args_num_cpus"),
     init_args_num_gpus: Annotated[
@@ -113,7 +113,7 @@ def simulation_config(  # pylint: disable=R0913,R0917,W0613
         typer.Option(
             "--init-args-num-gpus",
             help="Number of GPUs to make available to the Simulation Runtime",
-            callback=optional_min_callback(0),
+            min=0,
         ),
     ] = _handle_none_field(DEFAULT_SIMULATION_CONFIG, "init_args_num_gpus"),
     init_args_logging_level: Annotated[
