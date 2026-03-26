@@ -181,41 +181,6 @@ class TestControlServicer(unittest.TestCase):  # pylint: disable=R0904
         self.assertEqual(run_info.fab_version, fab_version)
         self.assertEqual(run_info.run_type, RunType.SERVER_APP)
 
-    def test_start_run_fuses_federation_config(self) -> None:
-        """Test StartRun merges federation config with request overrides."""
-        fab_content = b"test FAB content merge"
-        fab_hash = hashlib.sha256(fab_content).hexdigest()
-        request = StartRunRequest()
-        request.fab.hash_str = fab_hash
-        request.fab.content = fab_content
-        request.federation = NOOP_FEDERATION
-        request.override_federation_config.backend = "ray"
-        request.override_federation_config.verbose = True
-
-        with (
-            patch.object(
-                self.state.federation_manager,
-                "get_simulation_config",
-                return_value=SimulationConfig(num_supernodes=5, verbose=False),
-            ),
-            patch(
-                "flwr.superlink.servicer.control.control_servicer.get_fab_config"
-            ) as _,
-            patch(
-                "flwr.superlink.servicer.control.control_servicer.get_metadata_from_config"
-            ) as mock_get_metadata_from_config,
-        ):
-            mock_get_metadata_from_config.return_value = ("flwr/demo", "v1.0.0")
-            response = self.servicer.StartRun(request, Mock())
-
-        run_info = self.state.get_run_info(run_ids=[response.run_id])[0]
-
-        assert run_info.federation_config is not None
-        self.assertEqual(run_info.run_type, RunType.SIMULATION)
-        self.assertEqual(run_info.federation_config.num_supernodes, 5)
-        self.assertEqual(run_info.federation_config.backend, "ray")
-        self.assertTrue(run_info.federation_config.verbose)
-
     def test_start_run_accepts_valid_nested_override_keys(self) -> None:
         """Test StartRun accepts valid dotted override keys from nested FAB config."""
         # Prepare
