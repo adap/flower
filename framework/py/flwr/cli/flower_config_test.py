@@ -288,7 +288,7 @@ class TestSuperLinkConnection(unittest.TestCase):
                 "num-supernodes": 10,
                 "backend": {
                     "client-resources": {"num-cpus": 1.0, "num-gpus": 0.5},
-                    "init-args": {"logging-level": "info", "log-to-drive": True},
+                    "init-args": {"logging-level": "info", "log-to-driver": True},
                     "name": "custom-backend",
                 },
             }
@@ -317,7 +317,7 @@ class TestSuperLinkConnection(unittest.TestCase):
         self.assertIsNotNone(backend.init_args)
         assert backend.init_args is not None
         self.assertEqual(backend.init_args.logging_level, "info")
-        self.assertTrue(backend.init_args.log_to_drive)
+        self.assertTrue(backend.init_args.log_to_driver)
         self.assertEqual(backend.name, "custom-backend")
 
     def test_parse_superlink_connection_simulation_invalid_name(self) -> None:

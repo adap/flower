@@ -22,7 +22,6 @@ import collections.abc
 import flwr.proto.fab_pb2
 import flwr.proto.federation_pb2
 import flwr.proto.node_pb2
-import flwr.proto.recorddict_pb2
 import flwr.proto.run_pb2
 import flwr.proto.transport_pb2
 import google.protobuf.descriptor
@@ -56,7 +55,7 @@ class StartRunRequest(google.protobuf.message.Message):
 
     FAB_FIELD_NUMBER: builtins.int
     OVERRIDE_CONFIG_FIELD_NUMBER: builtins.int
-    FEDERATION_OPTIONS_FIELD_NUMBER: builtins.int
+    OVERRIDE_FEDERATION_CONFIG_FIELD_NUMBER: builtins.int
     APP_SPEC_FIELD_NUMBER: builtins.int
     FEDERATION_FIELD_NUMBER: builtins.int
     app_spec: builtins.str
@@ -66,18 +65,18 @@ class StartRunRequest(google.protobuf.message.Message):
     @property
     def override_config(self) -> google.protobuf.internal.containers.MessageMap[builtins.str, flwr.proto.transport_pb2.Scalar]: ...
     @property
-    def federation_options(self) -> flwr.proto.recorddict_pb2.ConfigRecord: ...
+    def override_federation_config(self) -> flwr.proto.federation_pb2.SimulationConfig: ...
     def __init__(
         self,
         *,
         fab: flwr.proto.fab_pb2.Fab | None = ...,
         override_config: collections.abc.Mapping[builtins.str, flwr.proto.transport_pb2.Scalar] | None = ...,
-        federation_options: flwr.proto.recorddict_pb2.ConfigRecord | None = ...,
+        override_federation_config: flwr.proto.federation_pb2.SimulationConfig | None = ...,
         app_spec: builtins.str = ...,
         federation: builtins.str = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["fab", b"fab", "federation_options", b"federation_options"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["app_spec", b"app_spec", "fab", b"fab", "federation", b"federation", "federation_options", b"federation_options", "override_config", b"override_config"]) -> None: ...
+    def HasField(self, field_name: typing.Literal["fab", b"fab", "override_federation_config", b"override_federation_config"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing.Literal["app_spec", b"app_spec", "fab", b"fab", "federation", b"federation", "override_config", b"override_config", "override_federation_config", b"override_federation_config"]) -> None: ...
 
 global___StartRunRequest = StartRunRequest
 
