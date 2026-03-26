@@ -41,7 +41,7 @@ from flwr.proto.federation_config_pb2 import SimulationConfig  # pylint: disable
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.server.superlink.linkstate.linkstate import LinkState
 from flwr.server.utils import validate_message
-from flwr.supercore.constant import NodeStatus
+from flwr.supercore.constant import NodeStatus, RunType
 from flwr.supercore.corestate.in_memory_corestate import InMemoryCoreState
 from flwr.supercore.object_store.object_store import ObjectStore
 from flwr.superlink.federation import FederationManager
@@ -64,19 +64,6 @@ class RunRecord:  # pylint: disable=R0902
     logs: list[tuple[float, str]] = field(default_factory=list)
     log_lock: threading.Lock = field(default_factory=threading.Lock)
     lock: threading.RLock = field(default_factory=threading.RLock)
-
-
-def _clone_simulation_config(
-    config: SimulationConfig,
-) -> SimulationConfig | None:
-    """Clone a simulation config if it has any set fields."""
-    if not config.ListFields():
-        return None
-    clone = SimulationConfig()
-    clone.CopyFrom(config)
-    return clone
-
-
 class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,R0904
     """In-memory LinkState implementation."""
 
@@ -552,7 +539,7 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
         fab_hash: str | None,
         override_config: UserConfig,
         federation: str,
-        federation_config: SimulationConfig,
+        federation_config: SimulationConfig | None,
         flwr_aid: str | None,
         run_type: str,
     ) -> int:
@@ -562,6 +549,16 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
             run_id = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
 
             if run_id not in self.run_ids:
+                run_federation_config = (
+                    None
+                    if run_type == RunType.SERVER_APP
+                    else (
+                        federation_config
+                        if federation_config is not None
+                        and federation_config.ListFields()
+                        else None
+                    )
+                )
                 run_record = RunRecord(
                     run=Run(
                         run_id=run_id,
@@ -583,7 +580,7 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
                         bytes_sent=0,
                         bytes_recv=0,
                         clientapp_runtime=0.0,
-                        federation_config=_clone_simulation_config(federation_config),
+                        federation_config=run_federation_config,
                         run_type=run_type,
                     ),
                 )

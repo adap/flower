@@ -42,7 +42,7 @@ from flwr.common.typing import Run, RunStatus
 from flwr.proto.federation_config_pb2 import SimulationConfig  # pylint: disable=E0611
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.server.utils.validator import validate_message
-from flwr.supercore.constant import NodeStatus
+from flwr.supercore.constant import NodeStatus, RunType
 from flwr.supercore.corestate.sql_corestate import SqlCoreState
 from flwr.supercore.object_store.object_store import ObjectStore
 from flwr.supercore.state.schema.corestate_tables import create_corestate_metadata
@@ -70,32 +70,6 @@ from .utils import (
     verify_found_message_replies,
     verify_message_ids,
 )
-
-
-def _clone_simulation_config(
-    config: SimulationConfig | None,
-) -> SimulationConfig | None:
-    """Clone a simulation config if it has any set fields."""
-    if config is None or not config.ListFields():
-        return None
-    clone = SimulationConfig()
-    clone.CopyFrom(config)
-    return clone
-
-
-def _simulation_config_to_db(config: SimulationConfig) -> str | None:
-    """Serialize a simulation config for database storage."""
-    normalized = _clone_simulation_config(config)
-    if normalized is None:
-        return None
-    return json.dumps(simulation_config_to_json(normalized))
-
-
-def _simulation_config_from_db(payload: str | None) -> SimulationConfig | None:
-    """Deserialize a simulation config from database storage."""
-    if payload is None:
-        return None
-    return _clone_simulation_config(simulation_config_from_json(json.loads(payload)))
 
 
 class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
@@ -816,7 +790,7 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
         fab_hash: str | None,
         override_config: UserConfig,
         federation: str,
-        federation_config: SimulationConfig,
+        federation_config: SimulationConfig | None,
         flwr_aid: str | None,
         run_type: str,
     ) -> int:
@@ -826,6 +800,11 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
 
         # Convert the uint64 value to sint64 for SQLite
         sint64_run_id = uint64_to_int64(uint64_run_id)
+
+        # Convert federation_config to JSON string for storage
+        federation_config_json = None
+        if federation_config:
+            federation_config_json = simulation_config_to_json(federation_config)
 
         with self.session():
             # Check conflicts
@@ -852,7 +831,7 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
                     "fab_hash": fab_hash or "",
                     "override_config": override_config_json,
                     "federation": federation,
-                    "federation_config": _simulation_config_to_db(federation_config),
+                    "federation_config": federation_config_json,
                     "run_type": run_type,
                     "pending_at": now().isoformat(),
                     "starting_at": "",
@@ -976,7 +955,11 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
                 bytes_sent=row["bytes_sent"],
                 bytes_recv=row["bytes_recv"],
                 clientapp_runtime=row["clientapp_runtime"],
-                federation_config=_simulation_config_from_db(row["federation_config"]),
+                federation_config=(
+                    simulation_config_from_json(row["federation_config"])
+                    if row["federation_config"]
+                    else None
+                ),
                 run_type=row["run_type"],
             )
             for row in rows

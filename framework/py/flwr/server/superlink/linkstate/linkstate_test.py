@@ -88,7 +88,7 @@ class StateTest(CoreStateTest):
             "9f86d08",
             {"test_key": "test_value"},
             "health-federation",
-            SimulationConfig(),
+            None,
             "i1r9f",
             RunType.SERVER_APP,
         )
@@ -1686,6 +1686,7 @@ class StateTest(CoreStateTest):
         assert run_info.run_type == RunType.SIMULATION
         assert run_info.federation_config == federation_config
         assert second_run_info.run_type == RunType.SERVER_APP
+        assert second_run_info.federation_config is None
 
     def test_get_federation_options_raises_not_implemented(self) -> None:
         """Test that federation options access is no longer implemented."""
@@ -1885,7 +1886,7 @@ def create_dummy_run(  # pylint: disable=too-many-positional-arguments
         fab_hash=fab_hash,
         override_config=override_config or {},
         federation=federation,
-        federation_config=federation_config or SimulationConfig(),
+        federation_config=federation_config,
         flwr_aid=flwr_aid,
         run_type=run_type,
     )

@@ -256,7 +256,7 @@ class LinkState(CoreState):  # pylint: disable=R0904
         fab_hash: str | None,
         override_config: UserConfig,
         federation: str,
-        federation_config: SimulationConfig,
+        federation_config: SimulationConfig | None,
         flwr_aid: str | None,
         run_type: str,
     ) -> int:
@@ -274,7 +274,7 @@ class LinkState(CoreState):  # pylint: disable=R0904
             Configuration overrides for the run config.
         federation : str
             The federation this run belongs to.
-        federation_config : SimulationConfig
+        federation_config : Optional[SimulationConfig]
             Per-run federation configuration for the simulation runtime.
         flwr_aid : Optional[str]
             Flower Account ID of the creator.
