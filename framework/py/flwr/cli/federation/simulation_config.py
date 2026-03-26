@@ -19,7 +19,12 @@ from typing import Annotated, Literal
 
 import typer
 
-from flwr.cli.utils import cli_output_control_stub, flwr_cli_grpc_exc_handler
+from flwr.cli.utils import (
+    cli_output_control_stub,
+    flwr_cli_grpc_exc_handler,
+    optional_min_callback,
+    print_json_to_stdout,
+)
 from flwr.common.constant import CliOutputFormat
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     ConfigureSimulationFederationRequest,
@@ -93,17 +98,25 @@ def simulation_config(  # pylint: disable=R0913,R0917,W0613
         typer.Option(
             "--init-args-num-cpus",
             help="Number of CPUs to make available to the Simulation Runtime.",
-            min=1,
+            callback=optional_min_callback(1),
         ),
-    ] = DEFAULT_SIMULATION_CONFIG.init_args_num_cpus,
+    ] = (
+        DEFAULT_SIMULATION_CONFIG.init_args_num_cpus
+        if DEFAULT_SIMULATION_CONFIG.HasField("init_args_num_cpus")
+        else None
+    ),
     init_args_num_gpus: Annotated[
         int | None,
         typer.Option(
             "--init-args-num-gpus",
             help="Number of GPUs to make available to the Simulation Runtime",
-            min=0,
+            callback=optional_min_callback(0),
         ),
-    ] = DEFAULT_SIMULATION_CONFIG.init_args_num_gpus,
+    ] = (
+        DEFAULT_SIMULATION_CONFIG.init_args_num_gpus
+        if DEFAULT_SIMULATION_CONFIG.HasField("init_args_num_gpus")
+        else None
+    ),
     init_args_logging_level: Annotated[
         str | None,
         typer.Option(
@@ -139,12 +152,14 @@ def simulation_config(  # pylint: disable=R0913,R0917,W0613
         _configure_federation_for_simulation(
             stub=stub,
             request=request,
+            is_json=is_json,
         )
 
 
 def _configure_federation_for_simulation(
     stub: ControlStub,
     request: ConfigureSimulationFederationRequest,
+    is_json: bool,
 ) -> None:
     """Send a request to configure a federation for simulation."""
     with flwr_cli_grpc_exc_handler(handle_invite_grpc_error):
@@ -152,6 +167,9 @@ def _configure_federation_for_simulation(
             request
         )
 
-    raise NotImplementedError(
-        "Federation simulation configuration is not implemented yet."
-    )
+    if is_json:
+        print_json_to_stdout({"success": True})
+    else:
+        typer.secho(
+            f"✅ Updated simulation configuration for '{request.federation_name}'."
+        )

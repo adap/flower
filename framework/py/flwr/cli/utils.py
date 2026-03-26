@@ -65,6 +65,19 @@ from .flower_config import read_superlink_connection
 from .local_superlink import ensure_local_superlink
 
 
+def optional_min_callback(
+    minimum: int,
+) -> Callable[[int | float | None], int | float | None]:
+    """Return a validator enforcing a minimum only when a value is provided."""
+
+    def callback(value: int | float | None) -> int | float | None:
+        if value is not None and value < minimum:
+            raise typer.BadParameter(f"Must be greater than or equal to {minimum}.")
+        return value
+
+    return callback
+
+
 def print_json_to_stdout(data: str | Any) -> None:
     """Print JSON data to stdout, bypassing any output redirection.
 
