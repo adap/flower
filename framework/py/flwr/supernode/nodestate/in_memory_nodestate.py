@@ -93,7 +93,13 @@ class InMemoryNodeState(
     def store_fab(self, fab: Fab) -> str:
         """Store a FAB."""
         fab_hash = hashlib.sha256(fab.content).hexdigest()
+        if fab.hash_str and fab.hash_str != fab_hash:
+            raise ValueError(
+                f"FAB hash mismatch: provided {fab.hash_str}, computed {fab_hash}"
+            )
         with self.lock_fab_store:
+            # Keep launch behavior: last write wins for metadata under the same
+            # content hash.
             self.fab_store[fab_hash] = Fab(
                 hash_str=fab_hash,
                 content=fab.content,
@@ -107,6 +113,8 @@ class InMemoryNodeState(
             fab = self.fab_store.get(fab_hash)
             if fab is None:
                 return None
+            # Launch tradeoff: do not recompute content hash on reads; rely on
+            # write-time validation and hash-addressed lookup.
             return Fab(
                 hash_str=fab.hash_str,
                 content=fab.content,

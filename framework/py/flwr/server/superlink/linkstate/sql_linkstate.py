@@ -103,11 +103,17 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
     def store_fab(self, fab: Fab) -> str:
         """Store a FAB."""
         fab_hash = hashlib.sha256(fab.content).hexdigest()
+        if fab.hash_str and fab.hash_str != fab_hash:
+            raise ValueError(
+                f"FAB hash mismatch: provided {fab.hash_str}, computed {fab_hash}"
+            )
         params = {
             "fab_hash": fab_hash,
             "content": fab.content,
             "verifications": json.dumps(fab.verifications),
         }
+        # Keep launch behavior: last write wins for metadata under the same
+        # content hash.
         query = """
             INSERT INTO fab (fab_hash, content, verifications)
             VALUES (:fab_hash, :content, :verifications)
@@ -129,6 +135,8 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
         if not rows:
             return None
         row = rows[0]
+        # Launch tradeoff: do not recompute content hash on reads; rely on
+        # write-time validation and hash-addressed lookup.
         return Fab(
             hash_str=row["fab_hash"],
             content=row["content"],

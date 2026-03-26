@@ -16,6 +16,7 @@
 # pylint: disable=invalid-name, too-many-lines, R0904, R0913
 
 
+import hashlib
 import secrets
 import tempfile
 import time
@@ -81,7 +82,8 @@ class StateTest(CoreStateTest):
     def test_store_and_get_fab(self) -> None:
         """Test storing and retrieving a FAB."""
         state = self.state_factory()
-        fab = Fab("ignored", b"fab-content", {"meta": "data"})
+        content = b"fab-content"
+        fab = Fab(hashlib.sha256(content).hexdigest(), content, {"meta": "data"})
 
         fab_hash = state.store_fab(fab)
         retrieved = state.get_fab(fab_hash)
@@ -95,9 +97,11 @@ class StateTest(CoreStateTest):
     def test_store_fab_deduplicates_by_hash(self) -> None:
         """Test storing the same FAB content reuses the same hash."""
         state = self.state_factory()
+        content = b"fab-content"
+        hash_str = hashlib.sha256(content).hexdigest()
 
-        fab_hash = state.store_fab(Fab("a", b"fab-content", {"meta": "data"}))
-        other_hash = state.store_fab(Fab("b", b"fab-content", {"meta": "next"}))
+        fab_hash = state.store_fab(Fab(hash_str, content, {"meta": "data"}))
+        other_hash = state.store_fab(Fab(hash_str, content, {"meta": "next"}))
         retrieved = state.get_fab(fab_hash)
 
         self.assertEqual(fab_hash, other_hash)
@@ -109,6 +113,12 @@ class StateTest(CoreStateTest):
         """Test missing FAB retrieval."""
         state = self.state_factory()
         self.assertIsNone(state.get_fab("missing-fab-hash"))
+
+    def test_store_fab_rejects_hash_mismatch(self) -> None:
+        """Test storing a FAB fails when provided hash doesn't match content."""
+        state = self.state_factory()
+        with self.assertRaisesRegex(ValueError, "FAB hash mismatch"):
+            state.store_fab(Fab("not-the-content-hash", b"fab-content", {}))
 
     def test_create_and_get_run_info(self) -> None:
         """Test if create_run and get_run_info work correctly."""
