@@ -1681,13 +1681,6 @@ class StateTest(CoreStateTest):
         assert second_run_info.run_type == RunType.SERVER_APP
         assert second_run_info.federation_config is None
 
-    def test_get_federation_options_raises_not_implemented(self) -> None:
-        """Test that federation options access is no longer implemented."""
-        state = self.state_factory()
-
-        with self.assertRaises(NotImplementedError):
-            state.get_federation_options(run_id=1)
-
     def test_set_linkstate_of_federation_manager(self) -> None:
         """Test that setting the LinkState of the FederationManager works."""
         state: LinkState = self.state_factory()
