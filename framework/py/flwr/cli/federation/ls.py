@@ -385,7 +385,7 @@ def _to_simulation_config_table(config: SimulationConfig) -> Table:
     table.add_column(Text("Value"), justify="right")
 
     rows = [
-        ("Number Simulated SuperNodes", "num_supernodes"),
+        ("Number of Simulated SuperNodes", "num_supernodes"),
         ("ClientApp Resources (CPUs)", "client_resources_num_cpus"),
         ("ClientApp Resources (GPUs)", "client_resources_num_gpus"),
         ("Backend Name", "backend"),
