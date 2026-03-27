@@ -21,6 +21,7 @@ import os
 import tempfile
 import unittest
 from pathlib import Path
+from typing import cast
 from unittest.mock import Mock, patch
 
 import click
@@ -35,11 +36,13 @@ from flwr.common.constant import (
     REFRESH_TOKEN_KEY,
 )
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH
+from flwr.supercore.constant import MAX_DIR_DEPTH
 
 from .utils import (
     build_pathspec,
-    collect_project_files,
+    collect_files,
     depth_of,
+    filter_paths_for_publish,
     flwr_cli_grpc_exc_handler,
     get_executed_command,
     get_sha256_hash,
@@ -268,122 +271,172 @@ def test_depth_of(rel: Path, expected: int) -> None:
     assert depth_of(rel) == expected
 
 
-# === collect_project_files tests ===
+# === collect_files tests ===
 
 
-def _make_files(root: Path, names: list[str]) -> None:
-    """Create empty files under root, creating parent dirs as needed."""
-    for name in names:
-        p = root / name
+def test_collect_files_empty_dir(tmp_path: Path) -> None:
+    """Empty directory returns an empty dict."""
+    assert not collect_files(tmp_path)
+
+
+def test_collect_files_basic(tmp_path: Path) -> None:
+    """Files are collected with correct POSIX relative paths and absolute values."""
+    # Prepare
+    (tmp_path / "a.py").write_text("x", encoding="utf-8")
+    (tmp_path / "b.txt").write_text("y", encoding="utf-8")
+
+    # Execute
+    result = collect_files(tmp_path)
+
+    # Assert
+    assert set(result.keys()) == {"a.py", "b.txt"}
+    assert result["a.py"] == tmp_path / "a.py"
+    assert result["b.txt"] == tmp_path / "b.txt"
+
+
+def test_collect_files_ignores_symlinked_files(tmp_path: Path) -> None:
+    """Symlinked files are excluded from the collected files."""
+    # Prepare
+    real = tmp_path / "real.py"
+    real.write_text("real", encoding="utf-8")
+    link = tmp_path / "link.py"
+    link.symlink_to(real)
+
+    # Execute
+    result = collect_files(tmp_path)
+
+    # Assert
+    assert "real.py" in result
+    assert "link.py" not in result
+
+
+def test_collect_files_ignores_symlinked_dirs(tmp_path: Path) -> None:
+    """Symlinked directories are not traversed."""
+    # Prepare
+    # Create a real directory with a file outside the root
+    external = tmp_path / "external"
+    external.mkdir()
+    (external / "secret.py").write_text("s", encoding="utf-8")
+
+    # Root with a symlinked directory pointing to external
+    root = tmp_path / "root"
+    root.mkdir()
+    (root / "app.py").write_text("a", encoding="utf-8")
+    (root / "linked_dir").symlink_to(external)
+
+    # Execute
+    result = collect_files(root)
+
+    # Assert
+    assert "app.py" in result
+    assert "linked_dir/secret.py" not in result
+
+
+# === filter_paths_for_publish tests ===
+
+
+def _to_path_files(files: dict[str, bytes], tmp_path: Path) -> dict[str, Path]:
+    """Write bytes to disk and return a mapping of relative paths to Path objects."""
+    result: dict[str, Path] = {}
+    for name, content in files.items():
+        p = tmp_path / name
         p.parent.mkdir(parents=True, exist_ok=True)
-        p.touch()
+        p.write_bytes(content)
+        result[name] = p
+    return result
 
 
-def _rel(root: Path, paths: list[Path]) -> list[str]:
-    """Return relative POSIX paths from a list of absolute paths."""
-    return [p.relative_to(root).as_posix() for p in paths]
-
-
-def test_collect_project_files_basic_include(tmp_path: Path) -> None:
-    """Only files matching include patterns are returned."""
-    _make_files(tmp_path, ["app.py", "utils.py", "readme.md", "data.csv"])
-    paths = collect_project_files(
-        tmp_path, include_patterns=("*.py",), exclude_patterns=()
+@pytest.mark.parametrize(
+    ("files", "expected_keys"),
+    [
+        # Included extensions pass through
+        ({"app.py": b""}, {"app.py"}),
+        ({"pyproject.toml": b""}, {"pyproject.toml"}),
+        ({"README.md": b""}, {"README.md"}),
+        ({"config.yaml": b""}, {"config.yaml"}),
+        ({"config.yml": b""}, {"config.yml"}),
+        ({"data.json": b""}, {"data.json"}),
+        ({"data.jsonl": b""}, {"data.jsonl"}),
+        # Non-matching extensions are excluded
+        ({"image.png": b"", "app.py": b""}, {"app.py"}),
+        # Nested files work
+        ({"src/main.py": b""}, {"src/main.py"}),
+    ],
+)
+@pytest.mark.parametrize("use_paths", [False, True], ids=["bytes", "path"])
+def test_filter_paths_for_publish_include(
+    files: dict[str, bytes],
+    expected_keys: set[str],
+    use_paths: bool,
+    tmp_path: Path,
+) -> None:
+    """Files with included extensions are kept; others are dropped."""
+    # Prepare
+    input_files = cast(
+        dict[str, Path | bytes], _to_path_files(files, tmp_path) if use_paths else files
     )
-    assert _rel(tmp_path, paths) == ["app.py", "utils.py"]
+    # Execute & assert
+    assert set(filter_paths_for_publish(input_files).keys()) == expected_keys
 
 
-def test_collect_project_files_exclude_patterns(tmp_path: Path) -> None:
-    """Files matching exclude patterns are filtered out."""
-    _make_files(tmp_path, ["app.py", "test.py", "secret.key"])
-    paths = collect_project_files(
-        tmp_path, include_patterns=("*",), exclude_patterns=("*.key",)
+@pytest.mark.parametrize(
+    "excluded_path",
+    [
+        "__pycache__/mod.py",
+        ".flwr/creds.json",
+    ],
+)
+@pytest.mark.parametrize("use_paths", [False, True], ids=["bytes", "path"])
+def test_filter_paths_for_publish_excludes(
+    excluded_path: str, use_paths: bool, tmp_path: Path
+) -> None:
+    """__pycache__ and .flwr paths are excluded."""
+    # Prepare
+    raw: dict[str, bytes] = {excluded_path: b"", "app.py": b""}
+    files = cast(
+        dict[str, Path | bytes], _to_path_files(raw, tmp_path) if use_paths else raw
     )
-    assert _rel(tmp_path, paths) == ["app.py", "test.py"]
+    # Execute & assert
+    assert set(filter_paths_for_publish(files).keys()) == {"app.py"}
 
 
-def test_collect_project_files_gitignore_respected(tmp_path: Path) -> None:
-    """Patterns in .gitignore are merged with exclude patterns."""
-    _make_files(tmp_path, ["app.py", "debug.log", "build/output.bin"])
-    (tmp_path / ".gitignore").write_text("*.log\nbuild/\n", encoding="utf-8")
-    paths = collect_project_files(
-        tmp_path, include_patterns=("*",), exclude_patterns=()
+@pytest.mark.parametrize("use_paths", [False, True], ids=["bytes", "path"])
+def test_filter_paths_for_publish_respects_gitignore(
+    use_paths: bool, tmp_path: Path
+) -> None:
+    """Patterns in .gitignore cause matching files to be excluded."""
+    # Prepare
+    raw: dict[str, bytes] = {
+        ".gitignore": b"secret.py\n",
+        "app.py": b"",
+        "secret.py": b"",
+    }
+    files = cast(
+        dict[str, Path | bytes], _to_path_files(raw, tmp_path) if use_paths else raw
     )
-    assert _rel(tmp_path, paths) == [".gitignore", "app.py"]
+    # Execute
+    result = filter_paths_for_publish(files)
+    # Assert
+    assert "secret.py" not in result
+    assert "app.py" in result
 
 
-def test_collect_project_files_max_depth_ok(tmp_path: Path) -> None:
-    """Files within max_depth are accepted."""
-    _make_files(tmp_path, ["root.py", "a/nested.py"])
-    paths = collect_project_files(
-        tmp_path, include_patterns=("*.py",), exclude_patterns=(), max_depth=1
+@pytest.mark.parametrize("use_paths", [False, True], ids=["bytes", "path"])
+def test_filter_paths_for_publish_max_depth_exceeded(
+    use_paths: bool, tmp_path: Path
+) -> None:
+    """ValueError is raised when a file exceeds MAX_DIR_DEPTH."""
+    # Prepare
+    deep = "/".join(["d"] * (MAX_DIR_DEPTH + 1)) + "/f.py"
+    raw: dict[str, bytes] = {deep: b""}
+    files = cast(
+        dict[str, Path | bytes], _to_path_files(raw, tmp_path) if use_paths else raw
     )
-    assert _rel(tmp_path, paths) == ["a/nested.py", "root.py"]
-
-
-def test_collect_project_files_max_depth_exceeded(tmp_path: Path) -> None:
-    """ValueError is raised when a file exceeds max_depth."""
-    _make_files(tmp_path, ["a/b/deep.py"])
+    # Execute & assert
     with pytest.raises(ValueError, match="exceeds the maximum directory depth"):
-        collect_project_files(
-            tmp_path, include_patterns=("*.py",), exclude_patterns=(), max_depth=1
-        )
+        filter_paths_for_publish(files)
 
 
-def test_collect_project_files_on_skip_called(tmp_path: Path) -> None:
-    """on_skip callback is invoked for excluded files."""
-    _make_files(tmp_path, ["keep.py", "skip.txt"])
-    skipped: list[Path] = []
-    collect_project_files(
-        tmp_path,
-        include_patterns=("*.py",),
-        exclude_patterns=(),
-        on_skip=skipped.append,
-    )
-    assert _rel(tmp_path, skipped) == ["skip.txt"]
-
-
-def test_collect_project_files_sorted_deterministic(tmp_path: Path) -> None:
-    """Results are sorted by POSIX relative path."""
-    _make_files(tmp_path, ["z.py", "a.py", "m/b.py"])
-    paths = collect_project_files(
-        tmp_path, include_patterns=("*.py",), exclude_patterns=()
-    )
-    rel = _rel(tmp_path, paths)
-    assert rel == sorted(rel)
-
-
-def test_collect_project_files_empty_directory(tmp_path: Path) -> None:
-    """An empty directory returns no files."""
-    paths = collect_project_files(
-        tmp_path, include_patterns=("*",), exclude_patterns=()
-    )
-    assert not paths
-
-
-def test_collect_project_files_subdirectory_patterns(tmp_path: Path) -> None:
-    """Include/exclude with subdirectory glob patterns."""
-    _make_files(tmp_path, ["src/app.py", "src/test.py", "docs/guide.md"])
-    paths = collect_project_files(
-        tmp_path, include_patterns=("src/**",), exclude_patterns=("src/test.py",)
-    )
-    assert _rel(tmp_path, paths) == ["src/app.py"]
-
-
-def test_collect_project_files_symlink_outside_root_excluded(tmp_path: Path) -> None:
-    """Symlinks pointing outside root are excluded and trigger on_skip."""
-    outside = tmp_path / "outside"
-    outside.mkdir()
-    (outside / "secret.txt").write_text("sensitive data", encoding="utf-8")
-
-    project = tmp_path / "project"
-    project.mkdir()
-    _make_files(project, ["app.py"])
-    (project / "link.txt").symlink_to(outside / "secret.txt")
-
-    skipped: list[Path] = []
-    paths = collect_project_files(
-        project, include_patterns=("*",), exclude_patterns=(), on_skip=skipped.append
-    )
-    assert _rel(project, paths) == ["app.py"]
-    assert _rel(project, skipped) == ["link.txt"]
+def test_filter_paths_for_publish_empty() -> None:
+    """Empty input returns empty output."""
+    assert not filter_paths_for_publish({})

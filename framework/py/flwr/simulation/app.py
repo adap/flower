@@ -16,6 +16,7 @@
 
 
 import argparse
+from dataclasses import replace
 from logging import DEBUG, ERROR, INFO
 from queue import Queue
 
@@ -68,6 +69,7 @@ from flwr.server.superlink.fleet.vce.backend.backend import BackendConfig
 from flwr.simulation.run_simulation import _run_simulation
 from flwr.simulation.simulationio_connection import SimulationIoConnection
 from flwr.supercore.app_utils import start_parent_process_monitor
+from flwr.supercore.constant import NOOP_FEDERATION
 from flwr.supercore.heartbeat import HeartbeatSender, make_app_heartbeat_fn_grpc
 from flwr.supercore.superexec.plugin import ServerAppExecPlugin
 from flwr.supercore.superexec.run_superexec import run_with_deprecation_warning
@@ -253,7 +255,7 @@ def run_simulation_process(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
             backend_name=backend_name,
             backend_config=backend_config,
             app_dir=str(app_path),
-            run=run,
+            run=replace(run, federation=NOOP_FEDERATION),
             enable_tf_gpu_growth=enable_tf_gpu_growth,
             verbose_logging=verbose,
             server_app_context=context,

@@ -510,7 +510,7 @@ def test_validate_pyproject_toml_with_fab_format_version_derives_metadata() -> N
             "name": "fedgpt",
             "version": "1.0.0",
             "description": "",
-            "license": "",
+            "license": {"file": "LICENSE"},
             "dependencies": ["flwr[simulation]>=1.26.0,<=1.28.0"],
         },
         "tool": {
@@ -542,7 +542,7 @@ def test_v1_fab_format_requires_flwr_dependency() -> None:
             "name": "fedgpt",
             "version": "1.0.0",
             "description": "",
-            "license": "",
+            "license": {"file": "LICENSE"},
             "dependencies": ["numpy>=1.26.0"],
         },
         "tool": {
@@ -550,6 +550,7 @@ def test_v1_fab_format_requires_flwr_dependency() -> None:
                 "app": {
                     "publisher": "flwrlabs",
                     "fab_format_version": 1,
+                    "flwr_version_target": "1.27.0",
                     "components": {
                         "serverapp": "flwr.cli.run:run",
                         "clientapp": "flwr.cli.run:run",
@@ -574,8 +575,105 @@ def test_v1_fab_format_rejects_exclusive_lower_bound() -> None:
             "name": "fedgpt",
             "version": "1.0.0",
             "description": "",
-            "license": "",
+            "license": {"file": "LICENSE"},
             "dependencies": ["flwr>1.26.0"],
+        },
+        "tool": {
+            "flwr": {
+                "app": {
+                    "publisher": "flwrlabs",
+                    "fab_format_version": 1,
+                    "flwr_version_target": "1.27.0",
+                    "components": {
+                        "serverapp": "flwr.cli.run:run",
+                        "clientapp": "flwr.cli.run:run",
+                    },
+                },
+            },
+        },
+    }
+
+    is_valid, errors, warnings = validate_config(config)
+
+    assert not is_valid
+    assert len(errors) == 1
+    assert "inclusive lower bound" in errors[0]
+    assert not warnings
+
+
+def test_v1_fab_format_ignores_upper_bound_when_validating_target() -> None:
+    """Test fab_format_version=1 ignores upper bounds for target validation."""
+    config = {
+        "project": {
+            "name": "fedgpt",
+            "version": "1.0.0",
+            "description": "",
+            "license": {"file": "LICENSE"},
+            "dependencies": ["flwr>=1.26.0,<1.28.0"],
+        },
+        "tool": {
+            "flwr": {
+                "app": {
+                    "publisher": "flwrlabs",
+                    "fab_format_version": 1,
+                    "flwr_version_target": "2.0.0",
+                    "components": {
+                        "serverapp": "flwr.cli.run:run",
+                        "clientapp": "flwr.cli.run:run",
+                    },
+                },
+            },
+        },
+    }
+
+    is_valid, errors, warnings = validate_config(config)
+
+    assert is_valid
+    assert not errors
+    assert not warnings
+
+
+def test_v1_fab_format_accepts_additional_specifiers_with_lower_bound() -> None:
+    """Test fab_format_version=1 accepts extra specifiers when `>=` is present."""
+    config = {
+        "project": {
+            "name": "fedgpt",
+            "version": "1.0.0",
+            "description": "",
+            "license": {"file": "LICENSE"},
+            "dependencies": ["flwr>=1.26.0,==1.27.0"],
+        },
+        "tool": {
+            "flwr": {
+                "app": {
+                    "publisher": "flwrlabs",
+                    "fab_format_version": 1,
+                    "flwr_version_target": "1.27.0",
+                    "components": {
+                        "serverapp": "flwr.cli.run:run",
+                        "clientapp": "flwr.cli.run:run",
+                    },
+                },
+            },
+        },
+    }
+
+    is_valid, errors, warnings = validate_config(config)
+
+    assert is_valid
+    assert not errors
+    assert not warnings
+
+
+def test_v1_fab_format_requires_target_version() -> None:
+    """Test fab_format_version=1 requires flwr_version_target."""
+    config = {
+        "project": {
+            "name": "fedgpt",
+            "version": "1.0.0",
+            "description": "",
+            "license": {"file": "LICENSE"},
+            "dependencies": ["flwr>=1.26.0"],
         },
         "tool": {
             "flwr": {
@@ -595,7 +693,7 @@ def test_v1_fab_format_rejects_exclusive_lower_bound() -> None:
 
     assert not is_valid
     assert len(errors) == 1
-    assert "inclusive lower bound" in errors[0]
+    assert "flwr_version_target" in errors[0]
     assert not warnings
 
 
