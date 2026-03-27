@@ -92,16 +92,16 @@ particular, each worker is an `Actor
  Launch your Flower simulation
 *******************************
 
-Running a simulation is straightforward; in fact, it is the default mode of operation
-for |flwr_run_link|_. Therefore, running Flower simulations primarily requires you to
-first define a ``ClientApp`` and a ``ServerApp``. A convenient way to generate a minimal
-but fully functional Flower app is by means of the |flwr_new_link|_ command. There are
-multiple apps to choose from. The example below uses the ``PyTorch`` quickstart app.
-
 .. tip::
 
     If you haven't already, install Flower via ``pip install -U flwr`` in a Python
     environment.
+
+Running a simulation is straightforward; in fact, it is the default mode of operation
+for |flwr_run_link|_. Running Flower simulations primarily requires you to
+first define a ``ClientApp`` and a ``ServerApp``. A convenient way to generate a minimal
+but fully functional Flower app is by means of the |flwr_new_link|_ command. There are
+multiple apps to choose from. The example below uses the ``PyTorch`` quickstart app.
 
 .. code-block:: shell
 
