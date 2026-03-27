@@ -43,8 +43,8 @@ def test_normalize_and_validate_fab_format_rejects_unsupported_version() -> None
         normalize_and_validate_fab_format(config)
 
 
-def test_normalize_and_validate_fab_format_accepts_target_for_version_zero() -> None:
-    """Test flwr-version-target is accepted for fab-format-version=0."""
+def test_normalize_and_validate_fab_format_ignores_target_for_version_zero() -> None:
+    """Test flwr-version-target is ignored for fab-format-version=0."""
     config: dict[str, Any] = {
         "project": {
             "name": "fedgpt",
@@ -65,7 +65,7 @@ def test_normalize_and_validate_fab_format_accepts_target_for_version_zero() -> 
 
     assert metadata.fab_format_version == 0
     assert metadata.flwr_version_min is None
-    assert metadata.flwr_version_target == "1.27.0"
+    assert metadata.flwr_version_target is None
 
 
 def test_normalize_and_validate_fab_format_derives_min_for_version_zero() -> None:
@@ -91,7 +91,7 @@ def test_normalize_and_validate_fab_format_derives_min_for_version_zero() -> Non
 
     assert metadata.fab_format_version == 0
     assert metadata.flwr_version_min == "1.26.0"
-    assert metadata.flwr_version_target == "1.27.0"
+    assert metadata.flwr_version_target is None
 
 
 def test_v0_fab_format_skips_unsupported_bounds() -> None:
@@ -117,11 +117,11 @@ def test_v0_fab_format_skips_unsupported_bounds() -> None:
 
     assert metadata.fab_format_version == 0
     assert metadata.flwr_version_min is None
-    assert metadata.flwr_version_target == "1.27.0"
+    assert metadata.flwr_version_target is None
 
 
-def test_v0_fab_format_ignores_upper_bound_for_target_validation() -> None:
-    """Test fab-format-version=0 does not constrain targets by upper bounds."""
+def test_v0_fab_format_ignores_target_even_with_upper_bounds() -> None:
+    """Test fab-format-version=0 ignores flwr-version-target even with upper bounds."""
     config: dict[str, Any] = {
         "project": {
             "name": "fedgpt",
@@ -143,7 +143,7 @@ def test_v0_fab_format_ignores_upper_bound_for_target_validation() -> None:
 
     assert metadata.fab_format_version == 0
     assert metadata.flwr_version_min == "1.26.0"
-    assert metadata.flwr_version_target == "2.1.0"
+    assert metadata.flwr_version_target is None
 
 
 def test_v1_fab_format_uses_highest_inclusive_lower_bound() -> None:

@@ -241,12 +241,11 @@ def _normalize_and_validate_fab_format_v0(config: dict[str, Any]) -> FabFormatMe
     """Derive best-effort compatibility metadata for `fab-format-version = 0`.
 
     - `flwr` dependency is optional.
-    - `flwr-version-target` is optional.
+    - `flwr-version-target` is ignored.
     - Compatibility minimum is derived from the highest declared `>=` specifier.
     - All non-`>=` specifiers are ignored for metadata derivation.
     """
     app_config = _get_flwr_app_config(config)
-    target_version = _parse_flwr_target_version(app_config)
     requirement = _get_flwr_requirement(config)
     lower_bound: Version | None = None
 
@@ -256,8 +255,7 @@ def _normalize_and_validate_fab_format_v0(config: dict[str, Any]) -> FabFormatMe
         except ValueError:
             lower_bound = None
 
-    _validate_target_against_lower_bound(target_version, lower_bound)
-    return _build_fab_metadata(0, target_version, lower_bound)
+    return _build_fab_metadata(0, None, lower_bound)
 
 
 def _normalize_and_validate_fab_format_v1(config: dict[str, Any]) -> FabFormatMetadata:

@@ -116,8 +116,8 @@ def test_build_fab_from_files_defaults_fab_format_version() -> None:
     assert metadata.flwr_version_min is None
 
 
-def test_build_fab_from_files_preserves_target_for_version_zero() -> None:
-    """Test fab-format-version=0 accepts flwr-version-target without bounds."""
+def test_build_fab_from_files_ignores_target_for_version_zero() -> None:
+    """Test fab-format-version=0 ignores flwr-version-target."""
     files = _make_files(
         '\n[tool.flwr.app]\npublisher = "alice"\n'
         'fab-format-version = 0\nflwr-version-target = "1.27.1"\n',
@@ -128,7 +128,7 @@ def test_build_fab_from_files_preserves_target_for_version_zero() -> None:
 
     assert metadata.fab_format_version == 0
     assert metadata.flwr_version_min is None
-    assert metadata.flwr_version_target == "1.27.1"
+    assert metadata.flwr_version_target is None
 
 
 def test_build_fab_from_files_derives_flwr_minimum() -> None:
@@ -160,7 +160,7 @@ def test_build_fab_from_files_rejects_unsupported_fab_format_version() -> None:
 
 
 def test_build_fab_from_files_skips_unsupported_bounds_for_version_zero() -> None:
-    """Test fab-format-version=0 keeps target metadata without derivation fallback."""
+    """Test fab-format-version=0 ignores flwr-version-target without derivation."""
     files = _make_files(
         'dependencies = ["flwr>1.26.0"]\n'
         '\n[tool.flwr.app]\npublisher = "alice"\n'
@@ -172,7 +172,7 @@ def test_build_fab_from_files_skips_unsupported_bounds_for_version_zero() -> Non
 
     assert metadata.fab_format_version == 0
     assert metadata.flwr_version_min is None
-    assert metadata.flwr_version_target == "1.27.1"
+    assert metadata.flwr_version_target is None
 
 
 def test_build_fab_from_files_rejects_unsupported_flwr_specifier() -> None:
