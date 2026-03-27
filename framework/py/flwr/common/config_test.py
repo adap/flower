@@ -696,6 +696,7 @@ def test_v1_fab_format_requires_target_version() -> None:
     assert "flwr-version-target" in errors[0]
     assert not warnings
 
+
 def test_validate_pyproject_toml_fail() -> None:
     """Test that validate_pyproject_toml fails correctly."""
     # Prepare

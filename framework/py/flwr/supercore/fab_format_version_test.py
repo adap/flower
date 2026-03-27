@@ -67,6 +67,7 @@ def test_normalize_and_validate_fab_format_accepts_target_for_version_zero() -> 
     assert metadata.flwr_version_min is None
     assert metadata.flwr_version_target == "1.27.0"
 
+
 def test_normalize_and_validate_fab_format_derives_min_for_version_zero() -> None:
     """Test fab-format-version=0 derives only the lower bound when usable."""
     config: dict[str, Any] = {
@@ -170,6 +171,7 @@ def test_v1_fab_format_uses_highest_inclusive_lower_bound() -> None:
     assert metadata.fab_format_version == 1
     assert metadata.flwr_version_min == "1.27.0"
     assert metadata.flwr_version_target == "1.27.0"
+
 
 def test_v1_fab_format_accepts_additional_non_lower_bound_specifiers() -> None:
     """Test fab-format-version=1 accepts extra specifiers beyond the lower bound."""
