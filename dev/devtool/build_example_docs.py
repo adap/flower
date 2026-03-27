@@ -195,7 +195,7 @@ def _copy_markdown_files(example: str) -> None:
 def _add_gh_button(example: str) -> None:
     gh_text = (
         '[<img src="_static/view-gh.png" alt="View on GitHub" width="200"/>]'
-        f"(https://github.com/flwrlabs/flower/blob/main/examples/{example})"
+        f"(https://github.com/flwrlabs/flower/blob/main/hub/apps/{example})"
     )
     readme_file = os.path.join(str(ROOT), "examples", "docs", "source", example + ".md")
     with open(readme_file, "r+", encoding="utf-8") as f:
