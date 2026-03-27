@@ -102,6 +102,16 @@ def get_fab_filename(config: dict[str, Any], fab_hash: str) -> str:
     return f"{publisher}.{name}.{version}.{fab_hash_truncated}.fab"
 
 
+def _validate_project_name(name: str) -> None:
+    """Validate the app name declared in pyproject.toml."""
+    if not is_valid_project_name(name):
+        raise ValueError(
+            f"The Flower App name {name} is invalid, "
+            "a valid app name must start with a letter, "
+            "and can only contain letters, digits, and hyphens."
+        )
+
+
 # pylint: disable=too-many-locals, too-many-statements
 def build(
     app: Annotated[
@@ -249,6 +259,7 @@ def build_fab_from_files(
         )
     pyproject_content = _to_bytes(files[FAB_CONFIG_FILE])
     config = tomli.loads(pyproject_content.decode("utf-8"))
+    _validate_project_name(config["project"]["name"])
     metadata = normalize_and_validate_fab_format(config)
 
     # Remove the 'federations' field if it exists

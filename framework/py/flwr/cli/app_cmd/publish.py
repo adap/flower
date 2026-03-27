@@ -43,6 +43,7 @@ from ..config_utils import load as load_toml
 from ..utils import (
     collect_files,
     filter_paths_for_publish,
+    is_valid_project_name,
     load_cli_auth_plugin_from_connection,
 )
 
@@ -74,6 +75,7 @@ def publish(
 
     # Validate app description from config
     config, _ = load_and_validate(app / FAB_CONFIG_FILE, check_module=False)
+    _validate_app_name(app.name, "Flower App directory name")
     _validate_description(config["project"].get("description", ""))
 
     # Collect & validate app files
@@ -122,6 +124,16 @@ def _validate_description(description: Any) -> None:
         should_continue = typer.confirm("Do you want to continue publishing anyway?")
         if not should_continue:
             raise click.ClickException("Publishing cancelled by user.")
+
+
+def _validate_app_name(name: str, target: str) -> None:
+    """Validate app and directory names used during publish."""
+    if not is_valid_project_name(name):
+        raise click.ClickException(
+            f"{target} {name} is invalid, "
+            "a valid app name must start with a letter, "
+            "and can only contain letters, digits, and hyphens."
+        )
 
 
 def _detect_mime(path: Path) -> str:

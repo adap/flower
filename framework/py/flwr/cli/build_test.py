@@ -65,6 +65,20 @@ def test_build_fab_from_files_missing_pyproject_raises() -> None:
         build_fab_from_files({"client.py": _DUMMY_PY})
 
 
+def test_build_fab_from_files_rejects_invalid_project_name() -> None:
+    """Test shared FAB build rejects invalid project names."""
+    files = {
+        "pyproject.toml": (
+            b'[project]\nname = "app_numpy33"\nversion = "1.0.0"\n'
+            b'[tool.flwr.app]\npublisher = "alice"\n'
+        ),
+        "client.py": _DUMMY_PY,
+    }
+
+    with pytest.raises(ValueError, match="valid app name must start"):
+        build_fab_from_files(files)
+
+
 def test_build_fab_from_files_defaults_fab_format_version() -> None:
     """Test missing fab_format_version defaults in returned metadata."""
     files = _make_files(**{"client.py": _DUMMY_PY})
