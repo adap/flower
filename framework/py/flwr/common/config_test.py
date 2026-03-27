@@ -504,7 +504,7 @@ def test_validate_pyproject_toml() -> None:
 
 
 def test_validate_pyproject_toml_with_fab_format_version_derives_metadata() -> None:
-    """Test fab_format_version=1 succeeds without mutating authored metadata."""
+    """Test fab-format-version=1 succeeds without mutating authored metadata."""
     config: dict[str, Any] = {
         "project": {
             "name": "fedgpt",
@@ -536,7 +536,7 @@ def test_validate_pyproject_toml_with_fab_format_version_derives_metadata() -> N
 
 
 def test_v1_fab_format_requires_flwr_dependency() -> None:
-    """Test fab_format_version=1 requires a flwr dependency."""
+    """Test fab-format-version=1 requires a flwr dependency."""
     config = {
         "project": {
             "name": "fedgpt",
@@ -569,7 +569,7 @@ def test_v1_fab_format_requires_flwr_dependency() -> None:
 
 
 def test_v1_fab_format_rejects_exclusive_lower_bound() -> None:
-    """Test fab_format_version=1 rejects exclusive lower bounds."""
+    """Test fab-format-version=1 rejects exclusive lower bounds."""
     config = {
         "project": {
             "name": "fedgpt",
@@ -602,7 +602,7 @@ def test_v1_fab_format_rejects_exclusive_lower_bound() -> None:
 
 
 def test_v1_fab_format_ignores_upper_bound_when_validating_target() -> None:
-    """Test fab_format_version=1 ignores upper bounds for target validation."""
+    """Test fab-format-version=1 ignores upper bounds for target validation."""
     config = {
         "project": {
             "name": "fedgpt",
@@ -634,7 +634,7 @@ def test_v1_fab_format_ignores_upper_bound_when_validating_target() -> None:
 
 
 def test_v1_fab_format_accepts_additional_specifiers_with_lower_bound() -> None:
-    """Test fab_format_version=1 accepts extra specifiers when `>=` is present."""
+    """Test fab-format-version=1 accepts extra specifiers when `>=` is present."""
     config = {
         "project": {
             "name": "fedgpt",
@@ -666,7 +666,7 @@ def test_v1_fab_format_accepts_additional_specifiers_with_lower_bound() -> None:
 
 
 def test_v1_fab_format_requires_target_version() -> None:
-    """Test fab_format_version=1 requires flwr_version_target."""
+    """Test fab-format-version=1 requires flwr-version-target."""
     config = {
         "project": {
             "name": "fedgpt",
@@ -695,7 +695,6 @@ def test_v1_fab_format_requires_target_version() -> None:
     assert len(errors) == 1
     assert "flwr-version-target" in errors[0]
     assert not warnings
-
 
 def test_validate_pyproject_toml_fail() -> None:
     """Test that validate_pyproject_toml fails correctly."""

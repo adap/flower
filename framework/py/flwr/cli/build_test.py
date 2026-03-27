@@ -107,7 +107,7 @@ def test_build_fab_from_files_non_string_project_name_raises() -> None:
 
 
 def test_build_fab_from_files_defaults_fab_format_version() -> None:
-    """Test missing fab_format_version defaults in returned metadata."""
+    """Test missing fab-format-version defaults in returned metadata."""
     files = _make_files(**{"client.py": _DUMMY_PY})
 
     _, metadata = build_fab_from_files(files)
@@ -117,7 +117,7 @@ def test_build_fab_from_files_defaults_fab_format_version() -> None:
 
 
 def test_build_fab_from_files_preserves_target_for_version_zero() -> None:
-    """Test fab_format_version=0 accepts flwr_version_target without bounds."""
+    """Test fab-format-version=0 accepts flwr-version-target without bounds."""
     files = _make_files(
         '\n[tool.flwr.app]\npublisher = "alice"\n'
         'fab-format-version = 0\nflwr-version-target = "1.27.1"\n',
@@ -132,7 +132,7 @@ def test_build_fab_from_files_preserves_target_for_version_zero() -> None:
 
 
 def test_build_fab_from_files_derives_flwr_minimum() -> None:
-    """Test fab_format_version=1 derives only the lower-bound metadata."""
+    """Test fab-format-version=1 derives only the lower-bound metadata."""
     files = _make_files(
         'license = { file = "LICENSE" }\n'
         'dependencies = ["flwr[simulation]>=1.26.0,<=1.28.0", "numpy>=1.0.0"]\n'
@@ -149,7 +149,7 @@ def test_build_fab_from_files_derives_flwr_minimum() -> None:
 
 
 def test_build_fab_from_files_rejects_unsupported_fab_format_version() -> None:
-    """Test build fails for unsupported fab_format_version values."""
+    """Test build fails for unsupported fab-format-version values."""
     files = _make_files(
         '\n[tool.flwr.app]\npublisher = "alice"\nfab-format-version = 2\n',
         **{"client.py": _DUMMY_PY},
@@ -160,7 +160,7 @@ def test_build_fab_from_files_rejects_unsupported_fab_format_version() -> None:
 
 
 def test_build_fab_from_files_skips_unsupported_bounds_for_version_zero() -> None:
-    """Test fab_format_version=0 keeps target metadata without derivation fallback."""
+    """Test fab-format-version=0 keeps target metadata without derivation fallback."""
     files = _make_files(
         'dependencies = ["flwr>1.26.0"]\n'
         '\n[tool.flwr.app]\npublisher = "alice"\n'
@@ -176,7 +176,7 @@ def test_build_fab_from_files_skips_unsupported_bounds_for_version_zero() -> Non
 
 
 def test_build_fab_from_files_rejects_unsupported_flwr_specifier() -> None:
-    """Test build fails for fab_format_version=1 with an exclusive lower bound."""
+    """Test build fails for fab-format-version=1 with an exclusive lower bound."""
     files = _make_files(
         'license = { file = "LICENSE" }\n'
         'dependencies = ["flwr>1.26.0"]\n'
@@ -190,7 +190,7 @@ def test_build_fab_from_files_rejects_unsupported_flwr_specifier() -> None:
 
 
 def test_build_fab_from_files_ignores_upper_bound_for_version_one() -> None:
-    """Test build derives only the lower bound for fab_format_version=1."""
+    """Test build derives only the lower bound for fab-format-version=1."""
     files = _make_files(
         'license = { file = "LICENSE" }\n'
         'dependencies = ["flwr>=1.26.0,<1.28.0"]\n'
@@ -224,7 +224,7 @@ def test_build_fab_from_files_uses_highest_inclusive_lower_bound() -> None:
 
 
 def test_build_fab_from_files_requires_target_for_version_one() -> None:
-    """Test build fails for fab_format_version=1 without flwr_version_target."""
+    """Test build fails for fab-format-version=1 without flwr-version-target."""
     files = _make_files(
         'license = { file = "LICENSE" }\n'
         'dependencies = ["flwr>=1.26.0"]\n'
@@ -237,7 +237,7 @@ def test_build_fab_from_files_requires_target_for_version_one() -> None:
 
 
 def test_build_fab_from_files_rejects_v1_without_license_file_reference() -> None:
-    """Test fab_format_version=1 requires [project].license.file."""
+    """Test fab-format-version=1 requires [project].license.file."""
     files = _make_files(
         'dependencies = ["flwr>=1.26.0"]\n'
         '\n[tool.flwr.app]\npublisher = "alice"\n'
@@ -250,7 +250,7 @@ def test_build_fab_from_files_rejects_v1_without_license_file_reference() -> Non
 
 
 def test_build_fab_from_files_rejects_v1_when_license_file_missing() -> None:
-    """Test fab_format_version=1 requires the declared license file in the FAB."""
+    """Test fab-format-version=1 requires the declared license file in the FAB."""
     files = _make_files(
         'license = { file = "LICENSE" }\n'
         'dependencies = ["flwr>=1.26.0"]\n'
@@ -264,7 +264,7 @@ def test_build_fab_from_files_rejects_v1_when_license_file_missing() -> None:
 
 
 def test_build_fab_from_files_rejects_v1_when_license_file_is_excluded() -> None:
-    """Test fab_format_version=1 fails when fab-exclude removes the license file."""
+    """Test fab-format-version=1 fails when fab-exclude removes the license file."""
     files = _make_files(
         'license = { file = "LICENSE" }\n'
         'dependencies = ["flwr>=1.26.0"]\n'
@@ -279,7 +279,7 @@ def test_build_fab_from_files_rejects_v1_when_license_file_is_excluded() -> None
 
 
 def test_build_fab_from_files_accepts_v1_with_license_md() -> None:
-    """Test fab_format_version=1 accepts LICENSE.md as the declared license file."""
+    """Test fab-format-version=1 accepts LICENSE.md as the declared license file."""
     files = _make_files(
         'license = { file = "LICENSE.md" }\n'
         'dependencies = ["flwr>=1.26.0"]\n'

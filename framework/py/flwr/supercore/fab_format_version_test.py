@@ -23,7 +23,7 @@ from .fab_format_version import normalize_and_validate_fab_format
 
 
 def test_normalize_and_validate_fab_format_rejects_unsupported_version() -> None:
-    """Test unsupported fab_format_version values fail explicitly."""
+    """Test unsupported fab-format-version values fail explicitly."""
     config: dict[str, Any] = {
         "project": {
             "name": "fedgpt",
@@ -44,7 +44,7 @@ def test_normalize_and_validate_fab_format_rejects_unsupported_version() -> None
 
 
 def test_normalize_and_validate_fab_format_accepts_target_for_version_zero() -> None:
-    """Test flwr_version_target is accepted for fab_format_version=0."""
+    """Test flwr-version-target is accepted for fab-format-version=0."""
     config: dict[str, Any] = {
         "project": {
             "name": "fedgpt",
@@ -67,9 +67,8 @@ def test_normalize_and_validate_fab_format_accepts_target_for_version_zero() -> 
     assert metadata.flwr_version_min is None
     assert metadata.flwr_version_target == "1.27.0"
 
-
 def test_normalize_and_validate_fab_format_derives_min_for_version_zero() -> None:
-    """Test fab_format_version=0 derives only the lower bound when usable."""
+    """Test fab-format-version=0 derives only the lower bound when usable."""
     config: dict[str, Any] = {
         "project": {
             "name": "fedgpt",
@@ -95,7 +94,7 @@ def test_normalize_and_validate_fab_format_derives_min_for_version_zero() -> Non
 
 
 def test_v0_fab_format_skips_unsupported_bounds() -> None:
-    """Test fab_format_version=0 ignores unrepresentable flwr dependency specifiers."""
+    """Test fab-format-version=0 ignores unrepresentable flwr dependency specifiers."""
     config: dict[str, Any] = {
         "project": {
             "name": "fedgpt",
@@ -121,7 +120,7 @@ def test_v0_fab_format_skips_unsupported_bounds() -> None:
 
 
 def test_v0_fab_format_ignores_upper_bound_for_target_validation() -> None:
-    """Test fab_format_version=0 does not constrain targets by upper bounds."""
+    """Test fab-format-version=0 does not constrain targets by upper bounds."""
     config: dict[str, Any] = {
         "project": {
             "name": "fedgpt",
@@ -147,7 +146,7 @@ def test_v0_fab_format_ignores_upper_bound_for_target_validation() -> None:
 
 
 def test_v1_fab_format_uses_highest_inclusive_lower_bound() -> None:
-    """Test fab_format_version=1 derives the highest declared `>=` lower bound."""
+    """Test fab-format-version=1 derives the highest declared `>=` lower bound."""
     config: dict[str, Any] = {
         "project": {
             "name": "fedgpt",
@@ -172,9 +171,8 @@ def test_v1_fab_format_uses_highest_inclusive_lower_bound() -> None:
     assert metadata.flwr_version_min == "1.27.0"
     assert metadata.flwr_version_target == "1.27.0"
 
-
 def test_v1_fab_format_accepts_additional_non_lower_bound_specifiers() -> None:
-    """Test fab_format_version=1 accepts extra specifiers beyond the lower bound."""
+    """Test fab-format-version=1 accepts extra specifiers beyond the lower bound."""
     config: dict[str, Any] = {
         "project": {
             "name": "fedgpt",
@@ -201,7 +199,7 @@ def test_v1_fab_format_accepts_additional_non_lower_bound_specifiers() -> None:
 
 
 def test_v1_fab_format_ignores_upper_bounds() -> None:
-    """Test fab_format_version=1 ignores upper bounds during validation."""
+    """Test fab-format-version=1 ignores upper bounds during validation."""
     config: dict[str, Any] = {
         "project": {
             "name": "fedgpt",
@@ -228,7 +226,7 @@ def test_v1_fab_format_ignores_upper_bounds() -> None:
 
 
 def test_v1_fab_format_rejects_missing_inclusive_lower_bound() -> None:
-    """Test fab_format_version=1 rejects lower bounds declared with `>` only."""
+    """Test fab-format-version=1 rejects lower bounds declared with `>` only."""
     config: dict[str, Any] = {
         "project": {
             "name": "fedgpt",
@@ -252,7 +250,7 @@ def test_v1_fab_format_rejects_missing_inclusive_lower_bound() -> None:
 
 
 def test_v1_fab_format_requires_target_version() -> None:
-    """Test fab_format_version=1 requires flwr_version_target."""
+    """Test fab-format-version=1 requires flwr-version-target."""
     config: dict[str, Any] = {
         "project": {
             "name": "fedgpt",
@@ -275,7 +273,7 @@ def test_v1_fab_format_requires_target_version() -> None:
 
 
 def test_v1_fab_format_requires_license_file_reference() -> None:
-    """Test fab_format_version=1 requires [project].license.file."""
+    """Test fab-format-version=1 requires [project].license.file."""
     config: dict[str, Any] = {
         "project": {
             "name": "fedgpt",
@@ -298,7 +296,7 @@ def test_v1_fab_format_requires_license_file_reference() -> None:
 
 
 def test_v1_fab_format_rejects_inline_license_text() -> None:
-    """Test fab_format_version=1 rejects inline license text."""
+    """Test fab-format-version=1 rejects inline license text."""
     config: dict[str, Any] = {
         "project": {
             "name": "fedgpt",
@@ -322,7 +320,7 @@ def test_v1_fab_format_rejects_inline_license_text() -> None:
 
 
 def test_v1_fab_format_rejects_invalid_license_file_name() -> None:
-    """Test fab_format_version=1 only allows LICENSE or LICENSE.md."""
+    """Test fab-format-version=1 only allows LICENSE or LICENSE.md."""
     config: dict[str, Any] = {
         "project": {
             "name": "fedgpt",
