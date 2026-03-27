@@ -221,7 +221,7 @@ def _copy_images(example: str) -> None:
 
 
 def _add_all_entries() -> None:
-    examples_dir = os.path.join(ROOT, "examples")
+    examples_dir = os.path.join(ROOT, "hub", "apps")
     for example in sorted(os.listdir(examples_dir)):
         example_path = os.path.join(examples_dir, example)
         if os.path.isdir(example_path) and example != "docs":
@@ -237,7 +237,7 @@ def _main() -> None:
     with INDEX.open("w", encoding="utf-8") as index_file:
         index_file.write(INITIAL_TEXT)
 
-    examples_dir = os.path.join(ROOT, "examples")
+    examples_dir = os.path.join(ROOT, "hub", "apps")
     for example in sorted(os.listdir(examples_dir)):
         example_path = os.path.join(examples_dir, example)
         if os.path.isdir(example_path) and example != "docs":
