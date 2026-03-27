@@ -1001,16 +1001,6 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
         self._cleanup_expired_tokens()
 
         with self.session():
-            # Convert the uint64 value to sint64 for SQLite
-            sint64_run_id = uint64_to_int64(run_id)
-            query = "SELECT * FROM run WHERE run_id = :run_id"
-            rows = self.query(query, {"run_id": sint64_run_id})
-
-            # Check if the run_id exists
-            if not rows:
-                log(ERROR, "`run_id` is invalid")
-                return False
-
             # Check if the status transition is valid
             row = rows[0]
             current_status = RunStatus(
@@ -1048,35 +1038,25 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
             # Prepare data for query
             current = now()
 
-            # Determine the timestamp field based on the new status
+            # Determine the timestamp field and conditions based on the new status
             timestamp_fld = ""
-            ts_condition = ""
+            ts_con = ""
             if new_status.status == Status.STARTING:
                 timestamp_fld = "starting_at"
-                ts_condition = "starting_at = '' AND running_at = '' AND finished_at = ''"
+                ts_con = "starting_at = '' AND finished_at = ''"
             elif new_status.status == Status.RUNNING:
                 timestamp_fld = "running_at"
-                ts_condition = "starting_at != '' AND running_at = '' AND finished_at = ''"
+                ts_con = "starting_at != '' AND running_at = '' AND finished_at = ''"
             elif new_status.status == Status.FINISHED:
                 timestamp_fld = "finished_at"
-                if current_status.status == Status.RUNNING:
-                    ts_condition = "running_at != '' AND finished_at = ''"
-                elif current_status.status == Status.STARTING:
-                    ts_condition = (
-                        "starting_at != '' AND running_at = '' AND finished_at = ''"
-                    )
-                else:
-                    ts_condition = (
-                        "starting_at = '' AND running_at = '' AND finished_at = ''"
-                    )
-
+                ts_con = "finished_at = ''"
             params = {
                 "timestamp": current.isoformat(),
                 "sub_status": new_status.sub_status,
                 "details": new_status.details,
-                "run_id": sint64_run_id,
+                "run_id": uint64_to_int64(run_id),
             }
-            rows = self.query(query % (timestamp_fld, ts_condition), params)
+            rows = self.query(query % (timestamp_fld, ts_con), params)
         return len(rows) > 0
 
     def acknowledge_node_heartbeat(
