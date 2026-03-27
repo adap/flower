@@ -50,7 +50,7 @@ from .utils import (
     build_pathspec,
     collect_files,
     filter_paths_for_publish,
-    is_valid_project_name,
+    validate_project_name,
 )
 
 
@@ -102,16 +102,6 @@ def get_fab_filename(config: dict[str, Any], fab_hash: str) -> str:
     return f"{publisher}.{name}.{version}.{fab_hash_truncated}.fab"
 
 
-def _validate_project_name(name: str) -> None:
-    """Validate the app name declared in pyproject.toml."""
-    if not is_valid_project_name(name):
-        raise ValueError(
-            f"The Flower App name {name} is invalid, "
-            "a valid app name must start with a letter, "
-            "and can only contain letters, digits, and hyphens."
-        )
-
-
 def _get_project_name(config: dict[str, Any]) -> str:
     """Return the validated project name from pyproject.toml."""
     project = config.get("project")
@@ -149,12 +139,10 @@ def build(
             f"The path {app} is not a valid path to a Flower app."
         )
 
-    if not is_valid_project_name(app.name):
-        raise click.ClickException(
-            f"The Flower App name {app.name} is invalid, "
-            "a valid app name must start with a letter, "
-            "and can only contain letters, digits, and hyphens."
-        )
+    try:
+        validate_project_name(app.name, "The Flower App directory name")
+    except ValueError as err:
+        raise click.ClickException(str(err)) from None
 
     try:
         config, warnings = load_and_validate(app / "pyproject.toml")
@@ -272,7 +260,7 @@ def build_fab_from_files(
         )
     pyproject_content = _to_bytes(files[FAB_CONFIG_FILE])
     config = tomli.loads(pyproject_content.decode("utf-8"))
-    _validate_project_name(_get_project_name(config))
+    validate_project_name(_get_project_name(config), "The Flower App [project].name")
     metadata = normalize_and_validate_fab_format(config)
 
     # Remove the 'federations' field if it exists

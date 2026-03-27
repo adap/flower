@@ -43,8 +43,8 @@ from ..config_utils import load as load_toml
 from ..utils import (
     collect_files,
     filter_paths_for_publish,
-    is_valid_project_name,
     load_cli_auth_plugin_from_connection,
+    validate_project_name,
 )
 
 
@@ -128,12 +128,10 @@ def _validate_description(description: Any) -> None:
 
 def _validate_app_name(name: str, target: str) -> None:
     """Validate app and directory names used during publish."""
-    if not is_valid_project_name(name):
-        raise click.ClickException(
-            f"{target} {name} is invalid, "
-            "a valid app name must start with a letter, "
-            "and can only contain letters, digits, and hyphens."
-        )
+    try:
+        validate_project_name(name, target)
+    except ValueError as err:
+        raise click.ClickException(str(err)) from None
 
 
 def _detect_mime(path: Path) -> str:
