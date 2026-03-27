@@ -245,7 +245,6 @@ def _normalize_and_validate_fab_format_v0(config: dict[str, Any]) -> FabFormatMe
     - Compatibility minimum is derived from the highest declared `>=` specifier.
     - All non-`>=` specifiers are ignored for metadata derivation.
     """
-    app_config = _get_flwr_app_config(config)
     requirement = _get_flwr_requirement(config)
     lower_bound: Version | None = None
 
