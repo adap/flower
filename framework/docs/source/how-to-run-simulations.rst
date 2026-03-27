@@ -111,13 +111,12 @@ multiple apps to choose from. The example below uses the ``PyTorch`` quickstart 
 Then, follow the instructions shown after completing the |flwr_new_link|_ command. When
 you execute |flwr_run_link|_, the run will execute with the ``Simulation Runtime``.
 
-For local simulation profiles, ``flwr run`` submits the run to a managed local
-SuperLink via the Control API. If the profile uses ``address = ":local:"``, Flower
-starts a local SuperLink automatically when needed, keeps it running in the background,
-and reuses it for ``flwr list``, ``flwr log``, and ``flwr stop``. See
-:doc:`how-to-run-flower-locally` for the full local workflow and runtime lifecycle.
-If you encounter SQL database errors while doing this on networked storage, see
-:ref:`faq-local-superlink-db-error`.
+For local simulation profiles, ``flwr run`` submits the run to a managed local SuperLink
+via the Control API. If the profile uses ``address = ":local:"``, Flower starts a local
+SuperLink automatically when needed, keeps it running in the background, and reuses it
+for ``flwr list``, ``flwr log``, and ``flwr stop``. See :doc:`how-to-run-flower-locally`
+for the full local workflow and runtime lifecycle. If you encounter SQL database errors
+while doing this on networked storage, see :ref:`FAQ <faq-local-superlink-db-error>`.
 
 Simulation examples
 ===================

@@ -71,8 +71,7 @@ Flower.
     After that, start your local simulation again with ``flwr run``. Flower will launch
     the managed local SuperLink with an in-memory database instead of an on-disk SQLite
     database, which avoids filesystem locking issues. See
-    :ref:`flower-config-local-in-memory` for the corresponding Flower Configuration
-    example.
+    :ref:`Flower Configuration <flower-config-local-in-memory>` for details.
 
     The tradeoff is that this mode is not persistent. When the managed local SuperLink
     stops, it loses its state, including run history and stored logs for previous runs.

@@ -9,8 +9,8 @@
 When you use a local profile in the :doc:`Flower configuration
 <ref-flower-configuration>` with ``address = ":local:"``, ``flwr`` does not call the
 simulation runtime directly. Instead, Flower starts a managed local ``flower-superlink``
-on demand, submits the run through the Control API, and the local SuperLink executes
-the run with the simulation runtime.
+on demand, submits the run through the Control API, and the local SuperLink executes the
+run with the simulation runtime.
 
 This is the default experience for a profile like the one created automatically in your
 Flower configuration:
@@ -39,8 +39,8 @@ On the first command that needs the local Control API, Flower starts a local
 - is reused by later ``flwr run``, ``flwr list``, ``flwr log``, and ``flwr stop``
   commands
 
-You can override the default Control API port with the
-``FLWR_LOCAL_CONTROL_API_PORT`` environment variable.
+You can override the default Control API port with the ``FLWR_LOCAL_CONTROL_API_PORT``
+environment variable.
 
 **************
  Submit a run
@@ -186,8 +186,8 @@ If you changed the local Control API port with ``FLWR_LOCAL_CONTROL_API_PORT``, 
  Troubleshooting
 *****************
 
-If you see SQL database errors such as ``database is locked``, see
-:ref:`faq-local-superlink-db-error`.
+If you see SQL database errors such as ``database is locked``, see :ref:`FAQ
+<faq-local-superlink-db-error>`.
 
 If a local run fails before it starts, or if the managed local SuperLink does not come
 up correctly, inspect:
