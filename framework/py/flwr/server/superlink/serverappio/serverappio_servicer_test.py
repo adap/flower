@@ -191,7 +191,7 @@ def _create_shared_runtime(
         fab_hash,
         {},
         NOOP_FEDERATION,
-        ConfigRecord(),
+        None,
         "",
         RunType.SERVER_APP,
     )
