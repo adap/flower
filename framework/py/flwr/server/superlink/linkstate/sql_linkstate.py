@@ -1031,53 +1031,7 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
                 "details": new_status.details,
                 "run_id": sint64_run_id,
             }
-            rows = self.query(query, params)
-            if rows:
-                # Successfully claimed STARTING -> RUNNING.
-                return True
-
-            # Claim failed: diagnose why the UPDATE affected zero rows.
-            diag_rows = self.query(
-                "SELECT * FROM run WHERE run_id = :run_id",
-                {"run_id": sint64_run_id},
-            )
-            if not diag_rows:
-                log(ERROR, "`run_id` is invalid")
-                return False
-
-            row = diag_rows[0]
-            current_status = RunStatus(
-                status=determine_run_status(row),
-                sub_status=row["sub_status"],
-                details=row["details"],
-            )
-            if row["finished_at"] != "":
-                log(
-                    ERROR,
-                    'Invalid status transition: from "%s" to "%s"',
-                    current_status.status,
-                    new_status.status,
-                )
-            elif row["starting_at"] == "":
-                log(
-                    ERROR,
-                    'Invalid status transition: run "%d" is not in STARTING state',
-                    run_id,
-                )
-            elif row["running_at"] != "":
-                log(
-                    ERROR,
-                    'Invalid status transition: run "%d" is already in RUNNING state',
-                    run_id,
-                )
-            else:
-                log(
-                    ERROR,
-                    'Invalid status transition: from "%s" to "%s"',
-                    current_status.status,
-                    new_status.status,
-                )
-            return False
+            return len(self.query(query, params)) > 0
 
         with self.session():
             # Convert the uint64 value to sint64 for SQLite
