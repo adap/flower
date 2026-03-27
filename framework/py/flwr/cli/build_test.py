@@ -83,7 +83,7 @@ def test_build_fab_from_files_missing_project_name_raises() -> None:
     """Test shared FAB build rejects missing project names cleanly."""
     files = {
         "pyproject.toml": (
-            b'[project]\nversion = "1.0.0"\n' b'[tool.flwr.app]\npublisher = "alice"\n'
+            b'[project]\nversion = "1.0.0"\n[tool.flwr.app]\npublisher = "alice"\n'
         ),
         "client.py": _DUMMY_PY,
     }
