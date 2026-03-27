@@ -125,7 +125,7 @@ Quickstart examples:
 - [Quickstart (Android [TFLite])](https://github.com/flwrlabs/flower/tree/main/hub/apps/android)
 - [Quickstart (iOS [CoreML])](https://github.com/flwrlabs/flower/tree/main/hub/apps/ios)
 - [Quickstart (MLX)](https://github.com/flwrlabs/flower/tree/main/hub/apps/quickstart-mlx)
-- [Quickstart (XGBoost)](https://github.com/flwrlabs/flower/tree/main/hub/apps/xgboost-quickstart)
+- [Quickstart (XGBoost)](https://github.com/flwrlabs/flower/tree/main/hub/apps/quickstart-xgboost)
 
 Other [examples](https://github.com/flwrlabs/flower/tree/main/hub/apps):
 
