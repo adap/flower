@@ -135,7 +135,7 @@ def main() -> None:
     # Get app process PID(s) after the first run starts
     while True:
         if pids := get_pids(app_cmd):
-            first_run_pids = set(pids)
+            first_run_pids = sorted(pids)
             break
         time.sleep(0.1)
 
