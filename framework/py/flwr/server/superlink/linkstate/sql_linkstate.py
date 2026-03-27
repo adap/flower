@@ -1041,7 +1041,8 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
             query = """
                 UPDATE run SET %s = :timestamp,
                 sub_status = :sub_status, details = :details
-                WHERE run_id = :run_id
+                WHERE run_id = :run_id AND %s
+                RETURNING run_id
             """
 
             # Prepare data for query
@@ -1049,12 +1050,25 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
 
             # Determine the timestamp field based on the new status
             timestamp_fld = ""
+            ts_condition = ""
             if new_status.status == Status.STARTING:
                 timestamp_fld = "starting_at"
+                ts_condition = "starting_at = '' AND running_at = '' AND finished_at = ''"
             elif new_status.status == Status.RUNNING:
                 timestamp_fld = "running_at"
+                ts_condition = "starting_at != '' AND running_at = '' AND finished_at = ''"
             elif new_status.status == Status.FINISHED:
                 timestamp_fld = "finished_at"
+                if current_status.status == Status.RUNNING:
+                    ts_condition = "running_at != '' AND finished_at = ''"
+                elif current_status.status == Status.STARTING:
+                    ts_condition = (
+                        "starting_at != '' AND running_at = '' AND finished_at = ''"
+                    )
+                else:
+                    ts_condition = (
+                        "starting_at = '' AND running_at = '' AND finished_at = ''"
+                    )
 
             params = {
                 "timestamp": current.isoformat(),
@@ -1062,8 +1076,8 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
                 "details": new_status.details,
                 "run_id": sint64_run_id,
             }
-            self.query(query % timestamp_fld, params)
-        return True
+            rows = self.query(query % (timestamp_fld, ts_condition), params)
+        return len(rows) > 0
 
     def acknowledge_node_heartbeat(
         self, node_id: int, heartbeat_interval: float
