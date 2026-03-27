@@ -1015,6 +1015,9 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
             ts_fld = "finished_at"
             # Condition: current status is not FINISHED
             ts_con = "finished_at = ''"
+            if new_status.sub_status == SubStatus.COMPLETED:
+                # For COMPLETED runs, ensure they are currently RUNNING
+                ts_con += " AND running_at != ''"
         else:
             return False  # Cannot update to PENDING
 
