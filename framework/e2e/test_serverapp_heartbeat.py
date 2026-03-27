@@ -193,7 +193,7 @@ def main() -> None:
             run_status.get(run_id2) == f"{Status.FINISHED}:{SubStatus.COMPLETED}"
         )
         run2_failed = run_status.get(run_id2) == f"{Status.FINISHED}:{SubStatus.FAILED}"
-        run2_valid = (run2_completed or run2_failed) if use_sim else run2_completed
+        run2_valid = run2_completed
 
         if run1_failed and run2_valid:
             is_valid = True
