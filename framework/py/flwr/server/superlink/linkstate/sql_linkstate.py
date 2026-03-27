@@ -789,6 +789,7 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
         federation: str,
         federation_options: ConfigRecord,
         flwr_aid: str | None,
+        run_type: str,
     ) -> int:
         """Create a new run."""
         # Sample a random int64 as run_id
@@ -805,11 +806,12 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
                 query = """
                     INSERT INTO run
                     (run_id, fab_id, fab_version,
-                    fab_hash, override_config, federation, federation_options,
+                    fab_hash, override_config, federation, federation_options, run_type,
                     pending_at, starting_at, running_at, finished_at, sub_status,
                     details, flwr_aid, bytes_sent, bytes_recv, clientapp_runtime)
                     VALUES (:run_id, :fab_id, :fab_version, :fab_hash, :override_config,
-                    :federation, :federation_options, :pending_at, :starting_at,
+                    :federation, :federation_options, :run_type, :pending_at,
+                    :starting_at,
                     :running_at, :finished_at, :sub_status, :details, :flwr_aid,
                     :bytes_sent, :bytes_recv, :clientapp_runtime)
                 """
@@ -822,6 +824,7 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
                     "override_config": override_config_json,
                     "federation": federation,
                     "federation_options": configrecord_to_bytes(federation_options),
+                    "run_type": run_type,
                     "pending_at": now().isoformat(),
                     "starting_at": "",
                     "running_at": "",
@@ -944,6 +947,7 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
                 bytes_sent=row["bytes_sent"],
                 bytes_recv=row["bytes_recv"],
                 clientapp_runtime=row["clientapp_runtime"],
+                run_type=row["run_type"],
             )
             for row in rows
         ]
@@ -1038,15 +1042,6 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
             }
             self.query(query % timestamp_fld, params)
         return True
-
-    def get_pending_run_id(self) -> int | None:
-        """Get the `run_id` of a run with `Status.PENDING` status."""
-        # Fetch all runs with unset `starting_at` (i.e. they are in PENDING status)
-        query = "SELECT * FROM run WHERE starting_at = '' LIMIT 1"
-        rows = self.query(query, {})
-        if rows:
-            return int64_to_uint64(rows[0]["run_id"])
-        return None
 
     def get_federation_options(self, run_id: int) -> ConfigRecord | None:
         """Retrieve the federation options for the specified `run_id`."""

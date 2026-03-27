@@ -16,6 +16,7 @@
 
 
 import argparse
+from dataclasses import replace
 from logging import DEBUG, ERROR, INFO
 from queue import Queue
 
@@ -31,7 +32,7 @@ from flwr.common.config import (
     unflatten_dict,
 )
 from flwr.common.constant import (
-    SIMULATIONIO_API_DEFAULT_CLIENT_ADDRESS,
+    SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
     ExecPluginType,
     Status,
     SubStatus,
@@ -63,13 +64,14 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     GetFederationOptionsResponse,
     UpdateRunStatusRequest,
 )
-from flwr.proto.simulationio_pb2_grpc import SimulationIoStub
+from flwr.proto.serverappio_pb2_grpc import ServerAppIoStub
 from flwr.server.superlink.fleet.vce.backend.backend import BackendConfig
 from flwr.simulation.run_simulation import _run_simulation
 from flwr.simulation.simulationio_connection import SimulationIoConnection
 from flwr.supercore.app_utils import start_parent_process_monitor
+from flwr.supercore.constant import NOOP_FEDERATION
 from flwr.supercore.heartbeat import HeartbeatSender, make_app_heartbeat_fn_grpc
-from flwr.supercore.superexec.plugin import SimulationExecPlugin
+from flwr.supercore.superexec.plugin import ServerAppExecPlugin
 from flwr.supercore.superexec.run_superexec import run_with_deprecation_warning
 
 
@@ -91,10 +93,10 @@ def flwr_simulation() -> None:
     if args.token is None:
         run_with_deprecation_warning(
             cmd="flwr-simulation",
-            plugin_type=ExecPluginType.SIMULATION,
-            plugin_class=SimulationExecPlugin,
-            stub_class=SimulationIoStub,
-            appio_api_address=args.simulationio_api_address,
+            plugin_type=ExecPluginType.SERVER_APP,
+            plugin_class=ServerAppExecPlugin,
+            stub_class=ServerAppIoStub,
+            appio_api_address=args.serverappio_api_address,
             parent_pid=args.parent_pid,
             warn_run_once=args.run_once,
         )
@@ -103,12 +105,11 @@ def flwr_simulation() -> None:
     log(INFO, "Starting Flower Simulation")
     log(
         DEBUG,
-        "Starting isolated `Simulation` connected to SuperLink SimulationAppIo API "
-        "at %s",
-        args.simulationio_api_address,
+        "Starting isolated `Simulation` connected to SuperLink ServerAppIo API at %s",
+        args.serverappio_api_address,
     )
     run_simulation_process(
-        simulationio_api_address=args.simulationio_api_address,
+        serverappio_api_address=args.serverappio_api_address,
         log_queue=log_queue,
         token=args.token,
         certificates=None,
@@ -120,7 +121,7 @@ def flwr_simulation() -> None:
 
 
 def run_simulation_process(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
-    simulationio_api_address: str,
+    serverappio_api_address: str,
     log_queue: Queue[str | None],
     token: str,
     certificates: bytes | None = None,
@@ -132,7 +133,7 @@ def run_simulation_process(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
         start_parent_process_monitor(parent_pid)
 
     conn = SimulationIoConnection(
-        simulationio_service_address=simulationio_api_address,
+        serverappio_api_address=serverappio_api_address,
         root_certificates=certificates,
     )
 
@@ -254,7 +255,7 @@ def run_simulation_process(  # pylint: disable=R0913, R0914, R0915, R0917, W0212
             backend_name=backend_name,
             backend_config=backend_config,
             app_dir=str(app_path),
-            run=run,
+            run=replace(run, federation=NOOP_FEDERATION),
             enable_tf_gpu_growth=enable_tf_gpu_growth,
             verbose_logging=verbose,
             server_app_context=context,
@@ -295,11 +296,14 @@ def _parse_args_run_flwr_simulation() -> argparse.ArgumentParser:
         description="Run a Flower Simulation",
     )
     parser.add_argument(
+        "--serverappio-api-address",
         "--simulationio-api-address",
-        default=SIMULATIONIO_API_DEFAULT_CLIENT_ADDRESS,
+        dest="serverappio_api_address",
+        default=SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS,
         type=str,
-        help="Address of SuperLink's SimulationIO API (IPv4, IPv6, or a domain name)."
-        f"By default, it is set to {SIMULATIONIO_API_DEFAULT_CLIENT_ADDRESS}.",
+        help="Address of SuperLink's ServerAppIo API (IPv4, IPv6, or a domain name). "
+        "`--simulationio-api-address` is accepted as a deprecated alias. "
+        f"By default, it is set to {SERVERAPPIO_API_DEFAULT_CLIENT_ADDRESS}.",
     )
     add_args_flwr_app_common(parser=parser)
     return parser

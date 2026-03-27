@@ -17,6 +17,7 @@
 
 from __future__ import annotations
 
+import os
 import subprocess
 import time
 from pathlib import Path
@@ -27,13 +28,14 @@ import typer
 
 from flwr.common.constant import ISOLATION_MODE_SUBPROCESS
 from flwr.common.grpc import create_channel
+from flwr.supercore.constant import FLWR_DISABLE_UPDATE_CHECK
 from flwr.supercore.utils import get_flwr_home
 
 from .constant import (
     CONTROL_API_PROBE_INTERVAL,
     CONTROL_API_PROBE_TIMEOUT,
     LOCAL_CONTROL_API_ADDRESS,
-    LOCAL_SIMULATIONIO_API_ADDRESS,
+    LOCAL_SERVERAPPIO_API_ADDRESS,
     LOCAL_SUPERLINK_STARTUP_TIMEOUT,
 )
 from .typing import SuperLinkConnection
@@ -111,7 +113,7 @@ def _start_local_superlink() -> None:
         "--control-api-address",
         LOCAL_CONTROL_API_ADDRESS,
         "--simulationio-api-address",
-        LOCAL_SIMULATIONIO_API_ADDRESS,
+        LOCAL_SERVERAPPIO_API_ADDRESS,
         "--database",
         str(database_path),
         "--storage-dir",
@@ -126,8 +128,13 @@ def _start_local_superlink() -> None:
 
     # Keep process detached and rely on SuperLink's file logging/rotation.
     try:
+        env = os.environ.copy()
+        # NOTE: `flwr` already performs the startup update check before spawning this
+        # managed child process, so we disable the child-side check to avoid duplicates.
+        env[FLWR_DISABLE_UPDATE_CHECK] = "1"
         process = subprocess.Popen(  # pylint: disable=consider-using-with
             command,
+            env=env,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
             start_new_session=True,
