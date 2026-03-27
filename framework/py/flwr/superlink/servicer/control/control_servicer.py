@@ -151,13 +151,9 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
 
         # Temporarily convert back to ConfigRecord for compatibility
         sim_cfg = request.override_federation_config
-        federation_config = ConfigRecord(
-            {
-                "num-supernodes": sim_cfg.num_supernodes,
-                "backend.client-resources.num-cpus": sim_cfg.client_resources_num_cpus,
-                "backend.client-resources.num-gpus": sim_cfg.client_resources_num_gpus,
-            }
-        )
+        federation_config = ConfigRecord()
+        if sim_cfg.HasField("num_supernodes"):
+            federation_config["num-supernodes"] = sim_cfg.num_supernodes
 
         verification_dict: dict[str, str] = {}
         if request.app_spec:
