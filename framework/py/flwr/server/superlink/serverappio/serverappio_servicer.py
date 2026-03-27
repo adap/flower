@@ -23,7 +23,6 @@ from flwr.common import Message
 from flwr.common.constant import SUPERLINK_NODE_ID, Status
 from flwr.common.logger import log
 from flwr.common.serde import (
-    config_record_to_proto,
     context_from_proto,
     context_to_proto,
     fab_to_proto,
@@ -333,6 +332,12 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
             if result := ffs.get(run.fab_hash):
                 fab = Fab(run.fab_hash, result[0], result[1])
         if run and fab and serverapp_ctxt:
+            # Get federation config and apply overrides if available
+            fed_config = state.federation_manager.get_simulation_config(run.federation)
+            fed_config_overrides = state.get_federation_config_overrides(run_id)
+            if fed_config and fed_config_overrides:
+                fed_config.MergeFrom(fed_config_overrides)
+
             # Update run status to RUNNING
             if state.update_run_status(run_id, RunStatus(Status.RUNNING, "", "")):
                 log(INFO, "Starting run %d", run_id)
@@ -340,6 +345,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
                     context=context_to_proto(serverapp_ctxt),
                     run=run_to_proto(run),
                     fab=fab_to_proto(fab),
+                    federation_config=fed_config,
                 )
 
         # Raise an exception if the Run or Fab is not found,
@@ -420,18 +426,7 @@ class ServerAppIoServicer(serverappio_pb2_grpc.ServerAppIoServicer):
     ) -> GetFederationOptionsResponse:
         """Get Federation Options associated with a run."""
         log(DEBUG, "ServerAppIoServicer.GetFederationOptions")
-        state = self.state_factory.state()
-
-        federation_options = state.get_federation_options(request.run_id)
-        if federation_options is None:
-            context.abort(
-                grpc.StatusCode.FAILED_PRECONDITION,
-                "Expected federation options to be set, but none available.",
-            )
-            return GetFederationOptionsResponse()
-        return GetFederationOptionsResponse(
-            federation_options=config_record_to_proto(federation_options)
-        )
+        raise NotImplementedError("To be removed")
 
     def SendAppHeartbeat(
         self, request: SendAppHeartbeatRequest, context: grpc.ServicerContext

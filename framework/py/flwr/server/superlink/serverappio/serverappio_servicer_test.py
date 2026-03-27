@@ -30,12 +30,7 @@ from flwr.common.constant import (
     Status,
 )
 from flwr.common.message import get_message_to_descendant_id_mapping
-from flwr.common.serde import (
-    config_record_from_proto,
-    context_to_proto,
-    message_from_proto,
-    run_status_to_proto,
-)
+from flwr.common.serde import context_to_proto, message_from_proto, run_status_to_proto
 from flwr.common.serde_test import RecordMaker
 from flwr.common.typing import RunStatus
 from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
@@ -52,6 +47,7 @@ from flwr.proto.appio_pb2 import (  # pylint: disable=E0611
     RequestTokenRequest,
     RequestTokenResponse,
 )
+from flwr.proto.federation_config_pb2 import SimulationConfig  # pylint: disable=E0611
 from flwr.proto.heartbeat_pb2 import (  # pylint: disable=E0611
     SendAppHeartbeatRequest,
     SendAppHeartbeatResponse,
@@ -262,7 +258,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
             fab_hash,
             {},
             NOOP_FEDERATION,
-            ConfigRecord(),
+            None,
             "",
             RunType.SERVER_APP,
         )
@@ -910,28 +906,22 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
     def test_get_federation_options(self) -> None:
         """Test `GetFederationOptions`."""
         # Prepare
-        federation_options = ConfigRecord({"num-supernodes": 3, "backend": "ray"})
         run_id = self.state.create_run(
             "",
             "",
             "",
             {},
             NOOP_FEDERATION,
-            federation_options,
+            SimulationConfig(num_supernodes=3, backend="ray"),
             "",
             RunType.SIMULATION,
         )
         request = GetFederationOptionsRequest(run_id=run_id)
 
         # Execute
-        response, call = self._get_federation_options.with_call(request=request)
-
-        # Assert
-        assert isinstance(response, GetFederationOptionsResponse)
-        assert grpc.StatusCode.OK == call.code()
-        assert (
-            config_record_from_proto(response.federation_options) == federation_options
-        )
+        with self.assertRaises(grpc.RpcError) as err:
+            self._get_federation_options.with_call(request=request)
+        assert err.exception.code() == grpc.StatusCode.UNKNOWN
 
     def test_get_federation_options_not_successful_for_unknown_run_id(
         self,
@@ -943,11 +933,7 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         # Execute & Assert
         with self.assertRaises(grpc.RpcError) as err:
             self._get_federation_options.with_call(request=request)
-        assert err.exception.code() == grpc.StatusCode.FAILED_PRECONDITION
-        assert (
-            err.exception.details()
-            == "Expected federation options to be set, but none available."
-        )
+        assert err.exception.code() == grpc.StatusCode.UNKNOWN
 
     def test_run_status_transitions(self) -> None:
         """Test `RequestToken` and `PullAppInputs` transitions run status from PENDING

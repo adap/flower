@@ -52,7 +52,6 @@ from flwr.common.constant import (
     SubStatus,
 )
 from flwr.common.logger import log
-from flwr.common.record import ConfigRecord
 from flwr.common.serde import run_to_proto, user_config_from_proto
 from flwr.common.typing import AccountInfo, Fab, Run, RunStatus
 from flwr.proto import control_pb2_grpc  # pylint: disable=E0611
@@ -149,16 +148,6 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
         state = self.linkstate_factory.state()
         ffs = self.ffs_factory.ffs()
 
-        # Temporarily convert back to ConfigRecord for compatibility
-        sim_cfg = request.override_federation_config
-        federation_config = ConfigRecord(
-            {
-                "num-supernodes": sim_cfg.num_supernodes,
-                "backend.client-resources.num-cpus": sim_cfg.client_resources_num_cpus,
-                "backend.client-resources.num-gpus": sim_cfg.client_resources_num_gpus,
-            }
-        )
-
         verification_dict: dict[str, str] = {}
         if request.app_spec:
             fab_file, verification_dict = _get_remote_fab(
@@ -177,6 +166,9 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
 
         flwr_aid = _get_flwr_aid(context)
         override_config = user_config_from_proto(request.override_config)
+        federation_config_overrides = None
+        if request.HasField("override_federation_config"):
+            federation_config_overrides = request.override_federation_config
 
         with rpc_error_translator(context, rpc_name):
             # Check (1) federation exists and (2) the flwr_aid is a member
@@ -229,7 +221,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 fab_hash,
                 override_config,
                 federation,
-                federation_config,
+                federation_config_overrides,
                 flwr_aid,
                 run_type,
             )
