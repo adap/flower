@@ -66,9 +66,9 @@ else
   echo -e $"\n[tool.flwr.federations.e2e]\naddress = \"127.0.0.1:9093\"\nroot-certificates = \"../certificates/ca.crt\"" >> pyproject.toml
 fi
 
-if [ "$3" = "simulation-engine" ]; then
-  echo -e $"options.num-supernodes = 10" >> pyproject.toml
-fi
+# if [ "$3" = "simulation-engine" ]; then
+#   echo -e $"options.num-supernodes = 10" >> pyproject.toml
+# fi
 
 # Combine the arguments into a single command for flower-superlink
 combined_args="$server_arg $server_auth $simulation_arg"
