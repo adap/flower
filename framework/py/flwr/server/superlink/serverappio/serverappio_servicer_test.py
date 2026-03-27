@@ -66,8 +66,6 @@ from flwr.proto.message_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
-    GetFederationOptionsRequest,
-    GetFederationOptionsResponse,
     UpdateRunStatusRequest,
     UpdateRunStatusResponse,
 )
@@ -202,11 +200,6 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
             "/flwr.proto.ServerAppIo/SendAppHeartbeat",
             request_serializer=SendAppHeartbeatRequest.SerializeToString,
             response_deserializer=SendAppHeartbeatResponse.FromString,
-        )
-        self._get_federation_options = self._channel.unary_unary(
-            "/flwr.proto.ServerAppIo/GetFederationOptions",
-            request_serializer=GetFederationOptionsRequest.SerializeToString,
-            response_deserializer=GetFederationOptionsResponse.FromString,
         )
         self._push_object = self._channel.unary_unary(
             "/flwr.proto.ServerAppIo/PushObject",
@@ -902,38 +895,6 @@ class TestServerAppIoServicer(unittest.TestCase):  # pylint: disable=R0902, R090
         # Assert: Only one token is issued
         assert response1.token != ""
         assert response2.token == ""
-
-    def test_get_federation_options(self) -> None:
-        """Test `GetFederationOptions`."""
-        # Prepare
-        run_id = self.state.create_run(
-            "",
-            "",
-            "",
-            {},
-            NOOP_FEDERATION,
-            SimulationConfig(num_supernodes=3, backend="ray"),
-            "",
-            RunType.SIMULATION,
-        )
-        request = GetFederationOptionsRequest(run_id=run_id)
-
-        # Execute
-        with self.assertRaises(grpc.RpcError) as err:
-            self._get_federation_options.with_call(request=request)
-        assert err.exception.code() == grpc.StatusCode.UNKNOWN
-
-    def test_get_federation_options_not_successful_for_unknown_run_id(
-        self,
-    ) -> None:
-        """Test `GetFederationOptions` failure for an unknown run_id."""
-        # Prepare
-        request = GetFederationOptionsRequest(run_id=2**63 - 1)
-
-        # Execute & Assert
-        with self.assertRaises(grpc.RpcError) as err:
-            self._get_federation_options.with_call(request=request)
-        assert err.exception.code() == grpc.StatusCode.UNKNOWN
 
     def test_run_status_transitions(self) -> None:
         """Test `RequestToken` and `PullAppInputs` transitions run status from PENDING
