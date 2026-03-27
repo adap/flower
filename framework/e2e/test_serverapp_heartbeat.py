@@ -140,10 +140,10 @@ def main() -> None:
     print("Starting the first run...")
     run_id1 = flwr_run()
 
-    # Get the PID of the first app process
+    # Get app process PID(s) after the first run starts
     while True:
         if pids := get_pids(app_cmd):
-            app_pid = pids[0]
+            first_run_pids = set(pids)
             break
         time.sleep(0.1)
 
@@ -165,6 +165,12 @@ def main() -> None:
         time.sleep(1)
     assert is_running, "Run IDs did not start within 6 seconds"
     print("Both runs are running.")
+
+    # In simulation mode, some environments can run both workloads under one
+    # `flwr-simulation` process. In that case, killing one PID can affect both runs.
+    all_run_pids = set(get_pids(app_cmd))
+    shared_app_process = use_sim and len(all_run_pids) <= len(first_run_pids)
+    app_pid = next(iter(first_run_pids))
 
     # Kill SuperLink process first to simulate restart scenario
     # This prevents ServerApp from notifying SuperLink, isolating the heartbeat test
@@ -192,10 +198,17 @@ def main() -> None:
     is_valid = False
     while (time.time() - tic) < heartbeat_timeout:
         run_status = flwr_ls()
-        if (
-            run_status[run_id1] == f"{Status.FINISHED}:{SubStatus.FAILED}"
-            and run_status[run_id2] == f"{Status.FINISHED}:{SubStatus.COMPLETED}"
-        ):
+        if shared_app_process:
+            expected = {
+                run_id1: f"{Status.FINISHED}:{SubStatus.FAILED}",
+                run_id2: f"{Status.FINISHED}:{SubStatus.FAILED}",
+            }
+        else:
+            expected = {
+                run_id1: f"{Status.FINISHED}:{SubStatus.FAILED}",
+                run_id2: f"{Status.FINISHED}:{SubStatus.COMPLETED}",
+            }
+        if all(run_status.get(run_id) == status for run_id, status in expected.items()):
             is_valid = True
             break
         time.sleep(1)
