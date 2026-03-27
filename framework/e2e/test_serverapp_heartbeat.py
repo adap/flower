@@ -160,7 +160,7 @@ def main() -> None:
 
     # Some simulation environments can share internals in ways that make the
     # second run either complete or fail after we SIGKILL one app process.
-    app_pid = next(iter(first_run_pids))
+    app_pid = min(first_run_pids)
 
     # Kill SuperLink process first to simulate restart scenario
     # This prevents ServerApp from notifying SuperLink, isolating the heartbeat test
