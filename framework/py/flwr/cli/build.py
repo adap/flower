@@ -112,6 +112,19 @@ def _validate_project_name(name: str) -> None:
         )
 
 
+def _get_project_name(config: dict[str, Any]) -> str:
+    """Return the validated project name from pyproject.toml."""
+    project = config.get("project")
+    if not isinstance(project, dict):
+        raise ValueError("Missing [project] section")
+
+    name = project.get("name")
+    if not isinstance(name, str) or not name.strip():
+        raise ValueError('Property "name" missing in [project]')
+
+    return name.strip()
+
+
 # pylint: disable=too-many-locals, too-many-statements
 def build(
     app: Annotated[
@@ -259,7 +272,7 @@ def build_fab_from_files(
         )
     pyproject_content = _to_bytes(files[FAB_CONFIG_FILE])
     config = tomli.loads(pyproject_content.decode("utf-8"))
-    _validate_project_name(config["project"]["name"])
+    _validate_project_name(_get_project_name(config))
     metadata = normalize_and_validate_fab_format(config)
 
     # Remove the 'federations' field if it exists
