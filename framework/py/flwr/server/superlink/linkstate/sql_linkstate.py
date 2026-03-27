@@ -1001,6 +1001,16 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
         self._cleanup_expired_tokens()
 
         with self.session():
+            # Convert the uint64 value to sint64 for SQLite
+            sint64_run_id = uint64_to_int64(run_id)
+            query = "SELECT * FROM run WHERE run_id = :run_id"
+            rows = self.query(query, {"run_id": sint64_run_id})
+
+            # Check if the run_id exists
+            if not rows:
+                log(ERROR, "`run_id` is invalid")
+                return False
+
             # Check if the status transition is valid
             row = rows[0]
             current_status = RunStatus(
@@ -1054,7 +1064,7 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
                 "timestamp": current.isoformat(),
                 "sub_status": new_status.sub_status,
                 "details": new_status.details,
-                "run_id": uint64_to_int64(run_id),
+                "run_id": sint64_run_id,
             }
             rows = self.query(query % (timestamp_fld, ts_con), params)
         return len(rows) > 0
