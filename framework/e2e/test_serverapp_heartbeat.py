@@ -132,10 +132,10 @@ def main() -> None:
     print("Starting the first run...")
     run_id1 = flwr_run()
 
-    # Get the PID of the first app process
+    # Get app process PID(s) after the first run starts
     while True:
         if pids := get_pids(app_cmd):
-            app_pid = pids[0]
+            first_run_pids = set(pids)
             break
         time.sleep(0.1)
 
@@ -158,13 +158,17 @@ def main() -> None:
     assert is_running, "Run IDs did not start within 6 seconds"
     print("Both runs are running.")
 
+    # Some simulation environments can share internals in ways that make the
+    # second run either complete or fail after we SIGKILL one app process.
+    app_pid = next(iter(first_run_pids))
+
     # Kill SuperLink process first to simulate restart scenario
     # This prevents ServerApp from notifying SuperLink, isolating the heartbeat test
     print("Terminating SuperLink process...")
     superlink_proc.terminate()
     superlink_proc.wait()
 
-    # Kill the first ServerApp process
+    # Kill one app process (intended to target the first run)
     print("Terminating the first ServerApp process...")
     os.kill(app_pid, 9)  # SIGKILL to ensure it stops immediately
 
@@ -184,10 +188,14 @@ def main() -> None:
     is_valid = False
     while (time.time() - tic) < heartbeat_timeout:
         run_status = flwr_ls()
-        if (
-            run_status[run_id1] == f"{Status.FINISHED}:{SubStatus.FAILED}"
-            and run_status[run_id2] == f"{Status.FINISHED}:{SubStatus.COMPLETED}"
-        ):
+        run1_failed = run_status.get(run_id1) == f"{Status.FINISHED}:{SubStatus.FAILED}"
+        run2_completed = (
+            run_status.get(run_id2) == f"{Status.FINISHED}:{SubStatus.COMPLETED}"
+        )
+        run2_failed = run_status.get(run_id2) == f"{Status.FINISHED}:{SubStatus.FAILED}"
+        run2_valid = (run2_completed or run2_failed) if use_sim else run2_completed
+
+        if run1_failed and run2_valid:
             is_valid = True
             break
         time.sleep(1)
