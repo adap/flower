@@ -83,8 +83,7 @@ def test_build_fab_from_files_missing_project_name_raises() -> None:
     """Test shared FAB build rejects missing project names cleanly."""
     files = {
         "pyproject.toml": (
-            b'[project]\nversion = "1.0.0"\n'
-            b'[tool.flwr.app]\npublisher = "alice"\n'
+            b'[project]\nversion = "1.0.0"\n' b'[tool.flwr.app]\npublisher = "alice"\n'
         ),
         "client.py": _DUMMY_PY,
     }
@@ -97,8 +96,8 @@ def test_build_fab_from_files_non_string_project_name_raises() -> None:
     """Test shared FAB build rejects non-string project names cleanly."""
     files = {
         "pyproject.toml": (
-            b"[project]\nname = 123\nversion = \"1.0.0\"\n"
-            b"[tool.flwr.app]\npublisher = \"alice\"\n"
+            b'[project]\nname = 123\nversion = "1.0.0"\n'
+            b'[tool.flwr.app]\npublisher = "alice"\n'
         ),
         "client.py": _DUMMY_PY,
     }
