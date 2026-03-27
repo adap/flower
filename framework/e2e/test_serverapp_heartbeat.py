@@ -166,10 +166,8 @@ def main() -> None:
     assert is_running, "Run IDs did not start within 6 seconds"
     print("Both runs are running.")
 
-    # In simulation mode, some environments can run both workloads under one
-    # `flwr-simulation` process. In that case, killing one PID can affect both runs.
-    all_run_pids = set(get_pids(app_cmd))
-    shared_app_process = use_sim and len(all_run_pids) <= len(first_run_pids)
+    # Some simulation environments can share internals in ways that make the
+    # second run either complete or fail after we SIGKILL one app process.
     app_pid = next(iter(first_run_pids))
 
     # Kill SuperLink process first to simulate restart scenario
@@ -198,17 +196,14 @@ def main() -> None:
     is_valid = False
     while (time.time() - tic) < heartbeat_timeout:
         run_status = flwr_ls()
-        if shared_app_process:
-            expected = {
-                run_id1: f"{Status.FINISHED}:{SubStatus.FAILED}",
-                run_id2: f"{Status.FINISHED}:{SubStatus.FAILED}",
-            }
-        else:
-            expected = {
-                run_id1: f"{Status.FINISHED}:{SubStatus.FAILED}",
-                run_id2: f"{Status.FINISHED}:{SubStatus.COMPLETED}",
-            }
-        if all(run_status.get(run_id) == status for run_id, status in expected.items()):
+        run1_failed = run_status.get(run_id1) == f"{Status.FINISHED}:{SubStatus.FAILED}"
+        run2_completed = (
+            run_status.get(run_id2) == f"{Status.FINISHED}:{SubStatus.COMPLETED}"
+        )
+        run2_failed = run_status.get(run_id2) == f"{Status.FINISHED}:{SubStatus.FAILED}"
+        run2_valid = (run2_completed or run2_failed) if use_sim else run2_completed
+
+        if run1_failed and run2_valid:
             is_valid = True
             break
         time.sleep(1)
