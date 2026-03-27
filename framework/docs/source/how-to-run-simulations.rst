@@ -111,11 +111,13 @@ multiple apps to choose from. The example below uses the ``PyTorch`` quickstart 
 Then, follow the instructions shown after completing the |flwr_new_link|_ command. When
 you execute |flwr_run_link|_, the run will execute with the ``Simulation Runtime``.
 
-For local simulation profiles, ``flwr run`` submits the run to a managed local SuperLink
-via the Control API. If the profile has ``options.*`` and no explicit ``address``,
-Flower starts a local SuperLink automatically when needed, keeps it running in the
-background, and reuses it for ``flwr list``, ``flwr log``, and ``flwr stop``. See
+For local simulation profiles, ``flwr run`` submits the run to a managed local
+SuperLink via the Control API. If the profile uses ``address = ":local:"``, Flower
+starts a local SuperLink automatically when needed, keeps it running in the background,
+and reuses it for ``flwr list``, ``flwr log``, and ``flwr stop``. See
 :doc:`how-to-run-flower-locally` for the full local workflow and runtime lifecycle.
+If you encounter SQL database errors while doing this on networked storage, see
+:ref:`faq-local-superlink-db-error`.
 
 Simulation examples
 ===================
@@ -173,6 +175,7 @@ set:
 .. code-block:: toml
 
     [superlink.local]
+    address = ":local:"
     options.num-supernodes = 10
     options.backend.client-resources.num-cpus = 1 # each ClientApp assumes to use 1 CPU (default is 2)
     options.backend.client-resources.num-gpus = 0.0 # no GPU access to the ClientApp (default is 0.0)
@@ -184,6 +187,7 @@ assigned by specifying the **ratio** of VRAM each should make use of.
 .. code-block:: toml
 
     [superlink.local-gpu]
+    address = ":local:"
     options.num-supernodes = 10
     options.backend.client-resources.num-cpus = 1 # each ClientApp assumes to use 1 CPU (default is 2)
     options.backend.client-resources.num-gpus = 0.25 # each ClientApp uses 25% of VRAM (default is 0.0)
@@ -241,6 +245,7 @@ variable.
 .. code-block:: toml
 
     [superlink.local-gpu-limited]
+    address = ":local:"
     options.num-supernodes = 10
     options.backend.client-resources.num-cpus = 1 # Each ClientApp will get assigned 1 CPU core
     options.backend.client-resources.num-gpus = 0.5 # Each ClientApp will get 50% of each available GPU
