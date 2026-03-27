@@ -255,7 +255,7 @@ class LinkState(CoreState):  # pylint: disable=R0904
         fab_hash: str | None,
         override_config: UserConfig,
         federation: str,
-        federation_config_overrides: SimulationConfig | None,
+        federation_config: SimulationConfig | None,
         flwr_aid: str | None,
         run_type: str,
     ) -> int:
@@ -273,8 +273,8 @@ class LinkState(CoreState):  # pylint: disable=R0904
             Configuration overrides for the run config.
         federation : str
             The federation this run belongs to.
-        federation_config_overrides : SimulationConfig | None
-            Optional federation configuration overrides for the run.
+        federation_config : SimulationConfig | None
+            Optional resolved federation configuration for the run.
         flwr_aid : str | None
             Flower Account ID of the creator.
         run_type : str
@@ -333,8 +333,8 @@ class LinkState(CoreState):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
-    def get_federation_config_overrides(self, run_id: int) -> SimulationConfig | None:
-        """Get the federation configuration overrides for the specified `run_id`."""
+    def get_federation_config(self, run_id: int) -> SimulationConfig | None:
+        """Get the resolved federation configuration for the specified `run_id`."""
 
     @abc.abstractmethod
     def get_run_status(self, run_ids: set[int]) -> dict[int, RunStatus]:

@@ -1677,9 +1677,9 @@ class StateTest(CoreStateTest):
 
         # Assert
         assert run_info.run_type == RunType.SIMULATION
-        assert state.get_federation_config_overrides(run_id) == federation_config
+        assert state.get_federation_config(run_id) == federation_config
         assert second_run_info.run_type == RunType.SERVER_APP
-        assert state.get_federation_config_overrides(second_run_id) is None
+        assert state.get_federation_config(second_run_id) is None
 
     def test_set_linkstate_of_federation_manager(self) -> None:
         """Test that setting the LinkState of the FederationManager works."""
@@ -1872,7 +1872,7 @@ def create_dummy_run(  # pylint: disable=too-many-positional-arguments
         fab_hash=fab_hash,
         override_config=override_config or {},
         federation=federation,
-        federation_config_overrides=federation_config,
+        federation_config=federation_config,
         flwr_aid=flwr_aid,
         run_type=run_type,
     )

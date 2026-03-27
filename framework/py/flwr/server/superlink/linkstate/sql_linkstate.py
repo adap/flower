@@ -790,7 +790,7 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
         fab_hash: str | None,
         override_config: UserConfig,
         federation: str,
-        federation_config_overrides: SimulationConfig | None,
+        federation_config: SimulationConfig | None,
         flwr_aid: str | None,
         run_type: str,
     ) -> int:
@@ -802,11 +802,9 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
         sint64_run_id = uint64_to_int64(uint64_run_id)
 
         # Convert federation_config to JSON string for storage
-        fed_config_overrides_json = None
-        if federation_config_overrides:
-            fed_config_overrides_json = json.dumps(
-                simulation_config_to_json(federation_config_overrides)
-            )
+        fed_config_json = None
+        if federation_config:
+            fed_config_json = json.dumps(simulation_config_to_json(federation_config))
 
         with self.session():
             # Check conflicts
@@ -816,11 +814,11 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
                 query = """
                     INSERT INTO run
                     (run_id, fab_id, fab_version, fab_hash, override_config, federation,
-                    federation_config_overrides, run_type, pending_at, starting_at,
-                    running_at, finished_at, sub_status, details, flwr_aid, bytes_sent,
-                    bytes_recv, clientapp_runtime)
+                    federation_config, run_type, pending_at, starting_at, running_at,
+                    finished_at, sub_status, details, flwr_aid, bytes_sent, bytes_recv,
+                    clientapp_runtime)
                     VALUES (:run_id, :fab_id, :fab_version, :fab_hash, :override_config,
-                    :federation, :federation_config_overrides, :run_type, :pending_at,
+                    :federation, :federation_config, :run_type, :pending_at,
                     :starting_at, :running_at, :finished_at, :sub_status, :details,
                     :flwr_aid, :bytes_sent, :bytes_recv, :clientapp_runtime)
                 """
@@ -832,7 +830,7 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
                     "fab_hash": fab_hash or "",
                     "override_config": override_config_json,
                     "federation": federation,
-                    "federation_config_overrides": fed_config_overrides_json,
+                    "federation_config": fed_config_json,
                     "run_type": run_type,
                     "pending_at": now().isoformat(),
                     "starting_at": "",
@@ -982,20 +980,20 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
             for row in rows
         }
 
-    def get_federation_config_overrides(self, run_id: int) -> SimulationConfig | None:
-        """Get the federation configuration overrides for the specified `run_id`."""
-        query = "SELECT federation_config_overrides FROM run WHERE run_id = :run_id"
+    def get_federation_config(self, run_id: int) -> SimulationConfig | None:
+        """Get the resolved federation configuration for the specified `run_id`."""
+        query = "SELECT federation_config FROM run WHERE run_id = :run_id"
         sint64_run_id = uint64_to_int64(run_id)
         rows = self.query(query, {"run_id": sint64_run_id})
         if not rows:
-            log(ERROR, "`run_id` invalid for fetching federation config overrides")
+            log(ERROR, "`run_id` invalid for fetching resolved federation config")
             return None
 
-        fed_config_overrides_json = rows[0]["federation_config_overrides"]
-        if fed_config_overrides_json is None:
+        fed_config_json = rows[0]["federation_config"]
+        if fed_config_json is None:
             return None
 
-        return simulation_config_from_json(json.loads(fed_config_overrides_json))
+        return simulation_config_from_json(json.loads(fed_config_json))
 
     def update_run_status(self, run_id: int, new_status: RunStatus) -> bool:
         """Update the status of the run with the specified `run_id`."""

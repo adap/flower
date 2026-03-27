@@ -61,7 +61,7 @@ class RunRecord:  # pylint: disable=R0902
     """The record of a specific run, including its status and timestamps."""
 
     run: Run
-    federation_config_overrides: SimulationConfig | None = None
+    federation_config: SimulationConfig | None = None
     logs: list[tuple[float, str]] = field(default_factory=list)
     log_lock: threading.Lock = field(default_factory=threading.Lock)
     lock: threading.RLock = field(default_factory=threading.RLock)
@@ -542,7 +542,7 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
         fab_hash: str | None,
         override_config: UserConfig,
         federation: str,
-        federation_config_overrides: SimulationConfig | None,
+        federation_config: SimulationConfig | None,
         flwr_aid: str | None,
         run_type: str,
     ) -> int:
@@ -575,7 +575,7 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
                         clientapp_runtime=0.0,
                         run_type=run_type,
                     ),
-                    federation_config_overrides=federation_config_overrides,
+                    federation_config=federation_config,
                 )
                 self.run_ids[run_id] = run_record
                 # Add run_id to the flwr_aid_to_run_ids mapping if flwr_aid is provided
@@ -656,13 +656,13 @@ class InMemoryLinkState(LinkState, InMemoryCoreState):  # pylint: disable=R0902,
 
             return runs
 
-    def get_federation_config_overrides(self, run_id: int) -> SimulationConfig | None:
-        """Get the federation configuration overrides for the specified `run_id`."""
+    def get_federation_config(self, run_id: int) -> SimulationConfig | None:
+        """Get the resolved federation configuration for the specified `run_id`."""
         with self.lock:
             if run_id not in self.run_ids:
-                log(ERROR, "`run_id` invalid for fetching federation config overrides")
+                log(ERROR, "`run_id` invalid for fetching resolved federation config")
                 return None
-            return self.run_ids[run_id].federation_config_overrides
+            return self.run_ids[run_id].federation_config
 
     def get_run_status(self, run_ids: set[int]) -> dict[int, RunStatus]:
         """Retrieve the statuses for the specified runs."""

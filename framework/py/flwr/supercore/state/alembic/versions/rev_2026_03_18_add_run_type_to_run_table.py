@@ -46,9 +46,7 @@ def upgrade() -> None:
             server_default=RunType.SERVER_APP,
         ),
     )
-    op.add_column(
-        "run", sa.Column("federation_config_overrides", sa.String(), nullable=True)
-    )
+    op.add_column("run", sa.Column("federation_config", sa.String(), nullable=True))
     op.execute(
         sa.text(
             "UPDATE run SET run_type = :run_type WHERE length(federation_options) > 0"
@@ -62,5 +60,5 @@ def downgrade() -> None:
     op.add_column(
         "run", sa.Column("federation_options", sa.LargeBinary(), nullable=True)
     )
-    op.drop_column("run", "federation_config_overrides")
+    op.drop_column("run", "federation_config")
     op.drop_column("run", "run_type")

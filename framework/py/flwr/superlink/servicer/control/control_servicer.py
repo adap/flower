@@ -105,6 +105,7 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     UnregisterNodeRequest,
     UnregisterNodeResponse,
 )
+from flwr.proto.federation_config_pb2 import SimulationConfig  # pylint: disable=E0611
 from flwr.proto.federation_pb2 import Federation  # pylint: disable=E0611
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkState, LinkStateFactory
@@ -166,9 +167,6 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
 
         flwr_aid = _get_flwr_aid(context)
         override_config = user_config_from_proto(request.override_config)
-        federation_config_overrides = None
-        if request.HasField("override_federation_config"):
-            federation_config_overrides = request.override_federation_config
 
         with rpc_error_translator(context, rpc_name):
             # Check (1) federation exists and (2) the flwr_aid is a member
@@ -190,10 +188,15 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                     f"federation '{federation}'.",
                 )
 
-            # Derive run type based on the presence of simulation config
+            # Derive run type based on the presence of simulation config and apply
+            # federation config overrides
             run_type = RunType.SERVER_APP
-            if state.federation_manager.get_simulation_config(federation) is not None:
+            resolved_federation_config = None
+            if sim_cfg := state.federation_manager.get_simulation_config(federation):
                 run_type = RunType.SIMULATION
+                resolved_federation_config = SimulationConfig()
+                resolved_federation_config.CopyFrom(sim_cfg)
+                resolved_federation_config.MergeFrom(request.override_federation_config)
 
         try:
             # Validate user config overrides matches keys in run config in FAB
@@ -221,7 +224,7 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
                 fab_hash,
                 override_config,
                 federation,
-                federation_config_overrides,
+                resolved_federation_config,
                 flwr_aid,
                 run_type,
             )
