@@ -33,7 +33,7 @@ def test_normalize_and_validate_fab_format_rejects_unsupported_version() -> None
             "flwr": {
                 "app": {
                     "publisher": "flwrlabs",
-                    "fab_format_version": 2,
+                    "fab-format-version": 2,
                 }
             }
         },
@@ -54,8 +54,8 @@ def test_normalize_and_validate_fab_format_accepts_target_for_version_zero() -> 
             "flwr": {
                 "app": {
                     "publisher": "flwrlabs",
-                    "fab_format_version": 0,
-                    "flwr_version_target": "1.27.0",
+                    "fab-format-version": 0,
+                    "flwr-version-target": "1.27.0",
                 }
             }
         },
@@ -80,8 +80,8 @@ def test_normalize_and_validate_fab_format_derives_min_for_version_zero() -> Non
             "flwr": {
                 "app": {
                     "publisher": "flwrlabs",
-                    "fab_format_version": 0,
-                    "flwr_version_target": "1.27.0",
+                    "fab-format-version": 0,
+                    "flwr-version-target": "1.27.0",
                 }
             }
         },
@@ -106,8 +106,8 @@ def test_v0_fab_format_skips_unsupported_bounds() -> None:
             "flwr": {
                 "app": {
                     "publisher": "flwrlabs",
-                    "fab_format_version": 0,
-                    "flwr_version_target": "1.27.0",
+                    "fab-format-version": 0,
+                    "flwr-version-target": "1.27.0",
                 }
             }
         },
@@ -132,8 +132,8 @@ def test_v0_fab_format_ignores_upper_bound_for_target_validation() -> None:
             "flwr": {
                 "app": {
                     "publisher": "flwrlabs",
-                    "fab_format_version": 0,
-                    "flwr_version_target": "2.1.0",
+                    "fab-format-version": 0,
+                    "flwr-version-target": "2.1.0",
                 }
             }
         },
@@ -159,8 +159,8 @@ def test_v1_fab_format_uses_highest_inclusive_lower_bound() -> None:
             "flwr": {
                 "app": {
                     "publisher": "flwrlabs",
-                    "fab_format_version": 1,
-                    "flwr_version_target": "1.27.0",
+                    "fab-format-version": 1,
+                    "flwr-version-target": "1.27.0",
                 }
             }
         },
@@ -186,8 +186,8 @@ def test_v1_fab_format_accepts_additional_non_lower_bound_specifiers() -> None:
             "flwr": {
                 "app": {
                     "publisher": "flwrlabs",
-                    "fab_format_version": 1,
-                    "flwr_version_target": "1.27.0",
+                    "fab-format-version": 1,
+                    "flwr-version-target": "1.27.0",
                 }
             }
         },
@@ -213,8 +213,8 @@ def test_v1_fab_format_ignores_upper_bounds() -> None:
             "flwr": {
                 "app": {
                     "publisher": "flwrlabs",
-                    "fab_format_version": 1,
-                    "flwr_version_target": "2.1.0",
+                    "fab-format-version": 1,
+                    "flwr-version-target": "2.1.0",
                 }
             }
         },
@@ -240,8 +240,8 @@ def test_v1_fab_format_rejects_missing_inclusive_lower_bound() -> None:
             "flwr": {
                 "app": {
                     "publisher": "flwrlabs",
-                    "fab_format_version": 1,
-                    "flwr_version_target": "1.27.0",
+                    "fab-format-version": 1,
+                    "flwr-version-target": "1.27.0",
                 }
             }
         },
@@ -264,13 +264,13 @@ def test_v1_fab_format_requires_target_version() -> None:
             "flwr": {
                 "app": {
                     "publisher": "flwrlabs",
-                    "fab_format_version": 1,
+                    "fab-format-version": 1,
                 }
             }
         },
     }
 
-    with pytest.raises(ValueError, match="flwr_version_target"):
+    with pytest.raises(ValueError, match="flwr-version-target"):
         normalize_and_validate_fab_format(config)
 
 
@@ -286,8 +286,8 @@ def test_v1_fab_format_requires_license_file_reference() -> None:
             "flwr": {
                 "app": {
                     "publisher": "flwrlabs",
-                    "fab_format_version": 1,
-                    "flwr_version_target": "1.27.0",
+                    "fab-format-version": 1,
+                    "flwr-version-target": "1.27.0",
                 }
             }
         },
@@ -310,8 +310,8 @@ def test_v1_fab_format_rejects_inline_license_text() -> None:
             "flwr": {
                 "app": {
                     "publisher": "flwrlabs",
-                    "fab_format_version": 1,
-                    "flwr_version_target": "1.27.0",
+                    "fab-format-version": 1,
+                    "flwr-version-target": "1.27.0",
                 }
             }
         },
@@ -334,8 +334,8 @@ def test_v1_fab_format_rejects_invalid_license_file_name() -> None:
             "flwr": {
                 "app": {
                     "publisher": "flwrlabs",
-                    "fab_format_version": 1,
-                    "flwr_version_target": "1.27.0",
+                    "fab-format-version": 1,
+                    "flwr-version-target": "1.27.0",
                 }
             }
         },

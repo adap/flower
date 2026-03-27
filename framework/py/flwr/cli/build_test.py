@@ -120,7 +120,7 @@ def test_build_fab_from_files_preserves_target_for_version_zero() -> None:
     """Test fab_format_version=0 accepts flwr_version_target without bounds."""
     files = _make_files(
         '\n[tool.flwr.app]\npublisher = "alice"\n'
-        'fab_format_version = 0\nflwr_version_target = "1.27.1"\n',
+        'fab-format-version = 0\nflwr-version-target = "1.27.1"\n',
         **{"client.py": _DUMMY_PY},
     )
 
@@ -137,7 +137,7 @@ def test_build_fab_from_files_derives_flwr_minimum() -> None:
         'license = { file = "LICENSE" }\n'
         'dependencies = ["flwr[simulation]>=1.26.0,<=1.28.0", "numpy>=1.0.0"]\n'
         '\n[tool.flwr.app]\npublisher = "alice"\n'
-        'fab_format_version = 1\nflwr_version_target = "1.27.1"\n',
+        'fab-format-version = 1\nflwr-version-target = "1.27.1"\n',
         **{"client.py": _DUMMY_PY, "LICENSE": b"Apache-2.0\n"},
     )
 
@@ -151,7 +151,7 @@ def test_build_fab_from_files_derives_flwr_minimum() -> None:
 def test_build_fab_from_files_rejects_unsupported_fab_format_version() -> None:
     """Test build fails for unsupported fab_format_version values."""
     files = _make_files(
-        '\n[tool.flwr.app]\npublisher = "alice"\nfab_format_version = 2\n',
+        '\n[tool.flwr.app]\npublisher = "alice"\nfab-format-version = 2\n',
         **{"client.py": _DUMMY_PY},
     )
 
@@ -164,7 +164,7 @@ def test_build_fab_from_files_skips_unsupported_bounds_for_version_zero() -> Non
     files = _make_files(
         'dependencies = ["flwr>1.26.0"]\n'
         '\n[tool.flwr.app]\npublisher = "alice"\n'
-        'fab_format_version = 0\nflwr_version_target = "1.27.1"\n',
+        'fab-format-version = 0\nflwr-version-target = "1.27.1"\n',
         **{"client.py": _DUMMY_PY},
     )
 
@@ -181,7 +181,7 @@ def test_build_fab_from_files_rejects_unsupported_flwr_specifier() -> None:
         'license = { file = "LICENSE" }\n'
         'dependencies = ["flwr>1.26.0"]\n'
         '\n[tool.flwr.app]\npublisher = "alice"\n'
-        'fab_format_version = 1\nflwr_version_target = "1.27.1"\n',
+        'fab-format-version = 1\nflwr-version-target = "1.27.1"\n',
         **{"client.py": _DUMMY_PY, "LICENSE": b"Apache-2.0\n"},
     )
 
@@ -195,7 +195,7 @@ def test_build_fab_from_files_ignores_upper_bound_for_version_one() -> None:
         'license = { file = "LICENSE" }\n'
         'dependencies = ["flwr>=1.26.0,<1.28.0"]\n'
         '\n[tool.flwr.app]\npublisher = "alice"\n'
-        'fab_format_version = 1\nflwr_version_target = "2.0.0"\n',
+        'fab-format-version = 1\nflwr-version-target = "2.0.0"\n',
         **{"client.py": _DUMMY_PY, "LICENSE": b"Apache-2.0\n"},
     )
 
@@ -212,7 +212,7 @@ def test_build_fab_from_files_uses_highest_inclusive_lower_bound() -> None:
         'license = { file = "LICENSE" }\n'
         'dependencies = ["flwr>=1.26.0,>=1.27.0,==1.27.0"]\n'
         '\n[tool.flwr.app]\npublisher = "alice"\n'
-        'fab_format_version = 1\nflwr_version_target = "1.27.0"\n',
+        'fab-format-version = 1\nflwr-version-target = "1.27.0"\n',
         **{"client.py": _DUMMY_PY, "LICENSE": b"Apache-2.0\n"},
     )
 
@@ -228,11 +228,11 @@ def test_build_fab_from_files_requires_target_for_version_one() -> None:
     files = _make_files(
         'license = { file = "LICENSE" }\n'
         'dependencies = ["flwr>=1.26.0"]\n'
-        '\n[tool.flwr.app]\npublisher = "alice"\nfab_format_version = 1\n',
+        '\n[tool.flwr.app]\npublisher = "alice"\nfab-format-version = 1\n',
         **{"client.py": _DUMMY_PY, "LICENSE": b"Apache-2.0\n"},
     )
 
-    with pytest.raises(ValueError, match="flwr_version_target"):
+    with pytest.raises(ValueError, match="flwr-version-target"):
         build_fab_from_files(files)
 
 
@@ -241,7 +241,7 @@ def test_build_fab_from_files_rejects_v1_without_license_file_reference() -> Non
     files = _make_files(
         'dependencies = ["flwr>=1.26.0"]\n'
         '\n[tool.flwr.app]\npublisher = "alice"\n'
-        'fab_format_version = 1\nflwr_version_target = "1.27.1"\n',
+        'fab-format-version = 1\nflwr-version-target = "1.27.1"\n',
         **{"client.py": _DUMMY_PY},
     )
 
@@ -255,7 +255,7 @@ def test_build_fab_from_files_rejects_v1_when_license_file_missing() -> None:
         'license = { file = "LICENSE" }\n'
         'dependencies = ["flwr>=1.26.0"]\n'
         '\n[tool.flwr.app]\npublisher = "alice"\n'
-        'fab_format_version = 1\nflwr_version_target = "1.27.1"\n',
+        'fab-format-version = 1\nflwr-version-target = "1.27.1"\n',
         **{"client.py": _DUMMY_PY},
     )
 
@@ -269,7 +269,7 @@ def test_build_fab_from_files_rejects_v1_when_license_file_is_excluded() -> None
         'license = { file = "LICENSE" }\n'
         'dependencies = ["flwr>=1.26.0"]\n'
         '\n[tool.flwr.app]\npublisher = "alice"\n'
-        'fab_format_version = 1\nflwr_version_target = "1.27.1"\n'
+        'fab-format-version = 1\nflwr-version-target = "1.27.1"\n'
         'fab-exclude = ["LICENSE"]\n',
         **{"client.py": _DUMMY_PY, "LICENSE": b"Apache-2.0\n"},
     )
@@ -284,7 +284,7 @@ def test_build_fab_from_files_accepts_v1_with_license_md() -> None:
         'license = { file = "LICENSE.md" }\n'
         'dependencies = ["flwr>=1.26.0"]\n'
         '\n[tool.flwr.app]\npublisher = "alice"\n'
-        'fab_format_version = 1\nflwr_version_target = "1.27.1"\n',
+        'fab-format-version = 1\nflwr-version-target = "1.27.1"\n',
         **{"client.py": _DUMMY_PY, "LICENSE.md": b"# Apache-2.0\n"},
     )
 

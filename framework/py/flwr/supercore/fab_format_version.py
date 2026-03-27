@@ -168,42 +168,42 @@ def _get_flwr_app_config(config: dict[str, Any]) -> dict[str, Any]:
 
 
 def _resolve_fab_format_version(app_config: dict[str, Any]) -> int:
-    """Resolve and validate `fab_format_version` from app config."""
-    fab_format_version = app_config.get("fab_format_version", 0)
+    """Resolve and validate `fab-format-version` from app config."""
+    fab_format_version = app_config.get("fab-format-version", 0)
     if (
         not isinstance(fab_format_version, int)
         or isinstance(fab_format_version, bool)
         or fab_format_version < 0
     ):
         raise ValueError(
-            "Invalid [tool.flwr.app].fab_format_version: expected a non-negative "
+            "Invalid [tool.flwr.app].fab-format-version: expected a non-negative "
             "integer."
         )
     return fab_format_version
 
 
 def _parse_flwr_target_version(app_config: dict[str, Any]) -> Version | None:
-    """Parse optional `flwr_version_target` from app config."""
-    target_raw = app_config.get("flwr_version_target")
+    """Parse optional `flwr-version-target` from app config."""
+    target_raw = app_config.get("flwr-version-target")
     if target_raw is not None and not isinstance(target_raw, str):
         raise ValueError(
-            "Invalid [tool.flwr.app].flwr_version_target: expected a string."
+            "Invalid [tool.flwr.app].flwr-version-target: expected a string."
         )
 
     if isinstance(target_raw, str):
         return _parse_version(
             target_raw,
-            "[tool.flwr.app].flwr_version_target",
+            "[tool.flwr.app].flwr-version-target",
         )
     return None
 
 
 def _require_flwr_target_version(app_config: dict[str, Any]) -> Version:
-    """Parse required `flwr_version_target` from app config."""
+    """Parse required `flwr-version-target` from app config."""
     target_version = _parse_flwr_target_version(app_config)
     if target_version is None:
         raise ValueError(
-            "Missing [tool.flwr.app].flwr_version_target for "
+            "Missing [tool.flwr.app].flwr-version-target for "
             "fab_format_version >= 1."
         )
     return target_version
@@ -213,13 +213,13 @@ def _validate_target_against_lower_bound(
     target_version: Version | None,
     lower_bound: Version | None,
 ) -> None:
-    """Ensure `flwr_version_target` respects the derived lower bound, if any."""
+    """Ensure `flwr-version-target` respects the derived lower bound, if any."""
     if target_version is None or lower_bound is None:
         return
 
     if target_version < lower_bound:
         raise ValueError(
-            "Invalid [tool.flwr.app].flwr_version_target: must be greater than or "
+            "Invalid [tool.flwr.app].flwr-version-target: must be greater than or "
             'equal to the declared "flwr" dependency lower bound.'
         )
 
@@ -241,7 +241,7 @@ def _normalize_and_validate_fab_format_v0(config: dict[str, Any]) -> FabFormatMe
     """Derive best-effort compatibility metadata for `fab_format_version = 0`.
 
     - `flwr` dependency is optional.
-    - `flwr_version_target` is optional.
+    - `flwr-version-target` is optional.
     - Compatibility minimum is derived from the highest declared `>=` specifier.
     - All non-`>=` specifiers are ignored for metadata derivation.
     """
@@ -269,7 +269,7 @@ def _normalize_and_validate_fab_format_v1(config: dict[str, Any]) -> FabFormatMe
       `>=`.
     - The highest declared `>=` specifier is used as the derived lower bound.
     - All non-`>=` specifiers are ignored for metadata derivation.
-    - `flwr_version_target` is required and must be greater than or equal to the
+    - `flwr-version-target` is required and must be greater than or equal to the
       derived lower bound.
     """
     app_config = _get_flwr_app_config(config)
@@ -319,7 +319,7 @@ def normalize_and_validate_fab_format(
         return _normalize_and_validate_fab_format_v1(config)
 
     raise ValueError(
-        f"Unsupported [tool.flwr.app].fab_format_version: {fab_format_version}."
+        f"Unsupported [tool.flwr.app].fab-format-version: {fab_format_version}."
     )
 
 
@@ -337,5 +337,5 @@ def validate_fab_files_for_format(
         return
 
     raise ValueError(
-        f"Unsupported [tool.flwr.app].fab_format_version: {fab_format_version}."
+        f"Unsupported [tool.flwr.app].fab-format-version: {fab_format_version}."
     )
