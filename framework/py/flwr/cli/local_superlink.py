@@ -89,10 +89,9 @@ def _is_local_superlink_started() -> bool:
     """Return True if local SuperLink's Control API endpoint is reachable."""
     channel = create_channel(server_address=LOCAL_CONTROL_API_ADDRESS, insecure=True)
     try:
-        grpc.channel_ready_future(channel).result(timeout=CONTROL_API_PROBE_TIMEOUT)
-        # Verify the ControlServicer is actually handling RPCs, not just that the
-        # HTTP/2 connection is up.
-        ControlStub(channel).ListFederations(ListFederationsRequest())
+        ControlStub(channel).ListFederations(
+            ListFederationsRequest(), timeout=CONTROL_API_PROBE_TIMEOUT
+        )
         return True
     except (grpc.FutureTimeoutError, grpc.RpcError):
         return False
