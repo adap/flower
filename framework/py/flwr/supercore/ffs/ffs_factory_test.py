@@ -17,6 +17,8 @@
 
 from .disk_ffs import DiskFfs
 from .ffs_factory import FfsFactory
+from .objectstore_ffs import ObjectStoreFfs
+from .objectstore_ffs_factory import ObjectStoreFfsFactory
 
 
 def test_disk_ffs_factory() -> None:
@@ -35,6 +37,31 @@ def test_cache_ffs_factory() -> None:
     """Test cache with FfsFactory."""
     # Prepare
     ffs_factory = FfsFactory("other_test")
+    ffs = ffs_factory.ffs()
+
+    # Execute
+    other_ffs = ffs_factory.ffs()
+
+    # Assert
+    assert id(ffs) == id(other_ffs)
+
+
+def test_objectstore_ffs_factory() -> None:
+    """Test ObjectStoreFfs instantiation with ObjectStoreFfsFactory."""
+    # Prepare
+    ffs_factory = ObjectStoreFfsFactory()
+
+    # Execute
+    ffs = ffs_factory.ffs()
+
+    # Assert
+    assert isinstance(ffs, ObjectStoreFfs)
+
+
+def test_cache_objectstore_ffs_factory() -> None:
+    """Test cache with ObjectStoreFfsFactory."""
+    # Prepare
+    ffs_factory = ObjectStoreFfsFactory()
     ffs = ffs_factory.ffs()
 
     # Execute

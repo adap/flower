@@ -18,9 +18,13 @@
 from .disk_ffs import DiskFfs as DiskFfs
 from .ffs import Ffs as Ffs
 from .ffs_factory import FfsFactory as FfsFactory
+from .objectstore_ffs import ObjectStoreFfs as ObjectStoreFfs
+from .objectstore_ffs_factory import ObjectStoreFfsFactory as ObjectStoreFfsFactory
 
 __all__ = [
     "DiskFfs",
     "Ffs",
     "FfsFactory",
+    "ObjectStoreFfs",
+    "ObjectStoreFfsFactory",
 ]
