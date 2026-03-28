@@ -1983,7 +1983,7 @@ class SqlFileBasedTest(StateTest, unittest.TestCase):
         """Ensure only one replica can claim STARTING -> RUNNING transition."""
         with tempfile.TemporaryDirectory() as tmpdir:
             db_path = os.path.join(tmpdir, "shared.db")
-            state_0, state_1 = self._create_shared_sql_states(db_path)
+            state_0, _ = self._create_shared_sql_states(db_path)
             run_id = create_dummy_run(state_0)
             assert state_0.update_run_status(run_id, RunStatus(Status.STARTING, "", ""))
 
