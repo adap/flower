@@ -64,8 +64,6 @@ from .utils import (
     convert_uint64_values_in_dict_to_sint64,
     dict_to_message,
     generate_rand_int_from_bytes,
-    has_valid_sub_status,
-    is_valid_transition,
     message_to_dict,
     verify_found_message_replies,
     verify_message_ids,
