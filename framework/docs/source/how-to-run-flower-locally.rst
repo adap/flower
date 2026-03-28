@@ -10,7 +10,8 @@ When you use a local profile in the :doc:`Flower configuration
 <ref-flower-configuration>` with ``address = ":local:"``, ``flwr`` does not call the
 simulation runtime directly. Instead, Flower starts a managed local ``flower-superlink``
 on demand, submits the run through the Control API, and the local SuperLink executes the
-run with the simulation runtime.
+run with the simulation runtime. The SuperLink will keep running in the background
+accepting commands until you :ref:`stop it manually <stop-background-local-superlink>`.
 
 This is the default experience for a profile like the one created automatically in your
 Flower configuration:
@@ -56,7 +57,6 @@ Representative output:
 
 .. code-block:: text
 
-    Successfully built flwrlabs.myapp.1-0-0.014c8eb3.fab
     Starting local SuperLink on 127.0.0.1:39093...
     Successfully started run 1859953118041441032
 
@@ -133,6 +133,8 @@ The managed local SuperLink keeps its files in ``$FLWR_HOME/local-superlink/``:
 - ``superlink.log`` stores the local SuperLink process output
 
 These files persist across local runs until you remove them yourself.
+
+.. _stop-background-local-superlink:
 
 *************************************
  Stop the background local SuperLink

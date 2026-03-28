@@ -115,8 +115,14 @@ For local simulation profiles, ``flwr run`` submits the run to a managed local S
 via the Control API. If the profile uses ``address = ":local:"``, Flower starts a local
 SuperLink automatically when needed, keeps it running in the background, and reuses it
 for ``flwr list``, ``flwr log``, and ``flwr stop``. See :doc:`how-to-run-flower-locally`
-for the full local workflow and runtime lifecycle. If you encounter SQL database errors
-while doing this on networked storage, see :ref:`FAQ <faq-local-superlink-db-error>`.
+for the full local workflow and runtime lifecycle.
+
+.. tip::
+
+    If you run your simulations on a server using a networked filesystem (e.g.,
+    NFS-mounted home directory) you might encounter SQL database errors if your network
+    is slow. If you do, check :ref:`this FAQ entry <faq-local-superlink-db-error>` to
+    learn how to run simulations with a SuperLink using an in-memory database.
 
 Simulation examples
 ===================
