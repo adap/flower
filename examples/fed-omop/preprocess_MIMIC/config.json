@@ -1,0 +1,22 @@
+{
+  "Version": "2.2",
+  "RawDataPath": "mimic-iv-2.2/",
+  "PreprocessedDataPath": "data/output/",
+  "Task": "Readmission",
+  "Readmission_number_of_days_threshold": 30,
+  "Include_ICU": true,
+  "Include_Diagnosis": true,
+  "Include_Procedures": true,
+  "Include_Medications": true,
+  "Include_chart_event": true,
+  "Include_output_event": true,
+  "Disease_Filter": "HF",
+  "Outliers_management": "remove",
+  "Outliers_threshold_right": 98.0,
+  "Outliers_threshold_left": 0,
+  "Time_window_size": 24,
+  "Time_window_bucket_size": 1,
+  "Missing_values_management": "mean",
+  "Oversampling": true,
+  "Concatenation": false
+}
