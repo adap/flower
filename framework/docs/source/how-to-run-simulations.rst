@@ -12,9 +12,13 @@
 
 .. |flwr_new_link| replace:: ``flwr new``
 
+.. |flwr_fed_sim_config_link| replace:: ``flwr federation simulation-config``
+
 .. _clientapp_link: ref-api/flwr.client.ClientApp.html
 
 .. _context_link: ref-api/flwr.common.Context.html
+
+.. _flwr_fed_sim_config_link: ref-api-cli.html#flwr-federation-simulation-config
 
 .. _flwr_new_link: ref-api-cli.html#flwr-new
 
@@ -177,11 +181,11 @@ configuration on a per-run basis. Let's see how to do both.
 Permanently set Simulation Runtime Configuration
 ================================================
 
-The ``flwr federation simulation-config`` command allows you to permanently set the
-default simulation configuration for your local SuperLink. This is useful when you want
-to have a default configuration that is different from the one provided by Flower out of
-the box. For example, if you'd like to set the configuration to 100 ``SuperNodes``,
-where each ``ClientApp`` is assigned 4 CPUs and 25% of a GPU, you would run:
+The |flwr_fed_sim_config_link|_ command allows you to permanently set the default
+simulation configuration for your local SuperLink. This is useful when you want to have
+a default configuration that is different from the one provided by Flower out of the
+box. For example, if you'd like to set the configuration to 100 ``SuperNodes``, where
+each ``ClientApp`` is assigned 4 CPUs and 25% of a GPU, you would run:
 
 .. code-block:: shell
 
