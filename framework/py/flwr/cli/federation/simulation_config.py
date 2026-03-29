@@ -44,17 +44,16 @@ def _handle_none_field(cfg: SimulationConfig, field_name: str) -> Any:
 
 
 def simulation_config(  # pylint: disable=R0913,R0917,W0613
+    federation: Annotated[
+        str | None,
+        typer.Argument(
+            help="Name of the federation; must be in the "
+            "format `@<account>/<federation>`."
+        ),
+    ] = None,
     superlink: Annotated[
         str | None,
         typer.Argument(help="Name of the SuperLink connection."),
-    ] = None,
-    federation: Annotated[
-        str | None,
-        typer.Option(
-            "--federation",
-            help="The federation to submit the run to; must be in the "
-            "format `@<account>/<federation>`.",
-        ),
     ] = None,
     output_format: Annotated[
         Literal["default", "json"],
@@ -137,7 +136,7 @@ def simulation_config(  # pylint: disable=R0913,R0917,W0613
     """Configure a Federation using the Simulation Runtime."""
     with cli_output_control_stub(superlink, output_format) as (stub, is_json):
         request = ConfigureSimulationFederationRequest(
-            federation_name=federation,
+            federation_name=federation or "",
             config=SimulationConfig(
                 num_supernodes=num_supernodes,
                 client_resources_num_cpus=client_resources_num_cpus,
