@@ -72,6 +72,33 @@ flwr run .
 flwr run . --run-config num-server-rounds=5,local-epochs=2
 ```
 
+Smoke Test
+----------
+
+From the `baselines/` directory, run:
+
+```bash
+./dev/format-baseline.sh sovereign_mohawk
+./dev/test-baseline.sh sovereign_mohawk
+```
+
+Then run a short baseline simulation from `baselines/sovereign_mohawk/`:
+
+```bash
+flwr run . --run-config num-server-rounds=1,fraction-train=0.5,local-epochs=1,enable-verification-hooks=true
+```
+
+Expected Results (Smoke Run)
+----------------------------
+
+| Check | Expected Signal |
+| --- | --- |
+| Python lint/type checks | `All Python checks passed` in `./dev/test-baseline.sh` output |
+| Simulation completion | Run exits without exception |
+| Verification hook status | JSON log contains `"status": "passed"` |
+| Model artifact | `final_model.pt` is created |
+| Verification artifact | `verification_report.json` is created |
+
 Next Implementation Steps
 -------------------------
 
