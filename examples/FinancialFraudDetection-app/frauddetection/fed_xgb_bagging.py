@@ -169,7 +169,7 @@ def _data_proxy_similarity(e1: Dict, e2: Dict) -> float:
 
 def _metadata_similarity(meta_i: Dict, meta_j: Dict) -> float:
     
-    score_parts: List[Tuple[str, float, float]] = []  # (ì´ë¦, ì ì, ê°ì¤ì¹)
+    score_parts: List[Tuple[str, float, float]] = []  # (name, score, weight)
 
     lr_i = meta_i.get("label_ratio_count", {})
     lr_j = meta_j.get("label_ratio_count", {})
