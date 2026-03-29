@@ -102,6 +102,6 @@ Expected Results (Smoke Run)
 Next Implementation Steps
 -------------------------
 
-1. Add a verifiable aggregation adapter in `sovereign_mohawk/strategy.py`.
-2. Wire optional proof-check hooks controlled by `enable-verification-hooks` in `pyproject.toml`.
-3. Add experiment configs and expected result tables aligned with the final issue scope.
+1. Extend verification checks from finite-value validation to configurable policy checks.
+2. Add experiment config variants and expected result tables aligned with the final issue scope.
+3. Add plotting/report utilities to persist comparable metrics across repeated runs.
