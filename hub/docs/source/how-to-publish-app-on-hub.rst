@@ -87,7 +87,7 @@ Under :code:`[project]`, provide:
 Under :code:`[tool.flwr.app]`, specify:
 
 - :code:`publisher` — your Flower account username
-- :code:`fab-format-version` — the app build contract version used for FAB validation
+- :code:`fab-format-version` — optional; defaults to :code:`0` if omitted
 - :code:`flwr-version-target` — required for :code:`fab-format-version = 1`
 
 Example:
