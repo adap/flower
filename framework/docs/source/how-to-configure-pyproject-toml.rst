@@ -26,7 +26,7 @@ A complete ``pyproject.toml`` file, for example, looks like this:
         description = "A Flower app example"
         license = "Apache-2.0"
         dependencies = [
-            "flwr[simulation]>=1.20.0",
+            "flwr[simulation]>=1.28.0",
             "numpy>=2.0.2",
         ]
 
@@ -35,6 +35,8 @@ A complete ``pyproject.toml`` file, for example, looks like this:
 
         [tool.flwr.app]
         publisher = "your-name-or-organization"
+        fab-include = ["path/to/include_file.py"]  # Optional
+        fab-exclude = ["path/to/exclude_file.py"]  # Optional
 
         [tool.flwr.app.components]
         serverapp = "your_module.server_app:app"
@@ -58,12 +60,14 @@ Here are a few key sections to look out for:
     description = ""
     license = "Apache-2.0"
     dependencies = [
-        "flwr[simulation]>=1.20.0",
+        "flwr[simulation]>=1.28.0",
         "numpy>=2.0.2",
     ]
 
     [tool.flwr.app]
     publisher = "your-name-or-organization"
+    fab-include = ["src/**/*.py", "conf/*.yaml"]    # Optional
+    fab-exclude = ["src/scratch.py"]                # Optional
 
 .. dropdown:: Understanding each field
 
@@ -79,6 +83,8 @@ Here are a few key sections to look out for:
     - ``license``: The license your app is distributed under (e.g., Apache-2.0).
     - ``dependencies``\*: A list of Python packages required to run your app.
     - ``publisher``\*: The name of the person or organization publishing the app.
+    - ``fab-include``: A list of file paths to include in the Flower App Bundle.
+    - ``fab-exclude``: A list of file paths to exclude from the Flower App Bundle.
 
 Specify the metadata, including the app name, version, etc., in these sections. Add any
 Python packages your app needs under ``dependencies``. These will be installed when you
@@ -87,6 +93,68 @@ run:
 .. code-block:: shell
 
     pip install -e .
+
+**********************************
+ Defining Included/Excluded Files
+**********************************
+
+The ``fab-include`` and ``fab-exclude`` fields let you control which files end up in
+your Flower App Bundle (FAB) — the package that carries your application code to the
+SuperLink and SuperNodes.
+
+Both fields are optional. When omitted, Flower uses sensible built-in defaults that
+include common source files (``*.py``, ``*.toml``, ``*.md``, ``*.yaml``, ``*.yml``,
+``*.json``, ``*.jsonl``, and ``LICENSE``) while excluding virtual environments, build
+artifacts, ``__pycache__`` directories, and test files.
+
+.. code-block:: toml
+
+    [tool.flwr.app]
+    fab-include = ["src/**/*.py", "conf/*.yaml"]    # Optional
+    fab-exclude = ["src/scratch.py"]                # Optional
+
+When you do specify ``fab-include`` or ``fab-exclude``, every pattern must match at
+least one file — Flower will raise an error for unresolved patterns so you can catch
+typos early. Patterns follow the same syntax as ``.gitignore``.
+
+Flower applies filtering in two stages:
+
+1. **Publish filter** — Files are first narrowed to supported types, and any patterns in
+   your ``.gitignore`` are applied to remove ignored files.
+2. **FAB filter** — Your ``fab-include`` and ``fab-exclude`` patterns are applied next,
+   followed by non-overridable built-in constraints that enforce supported file types
+   and exclude directories like ``.venv/`` or ``__pycache__/``.
+
+In short, ``fab-include`` and ``fab-exclude`` give you fine-grained control *within* the
+boundaries of what Flower supports. You cannot use them to include unsupported file
+types (e.g., ``.txt``) — Flower will flag any such conflicts with a clear error message.
+
+.. dropdown:: Example: bundling only your source package and a config file
+
+    Suppose your project looks like this::
+
+        my-flower-app/
+        ├── pyproject.toml
+        ├── README.md
+        ├── conf/
+        │   └── config.yaml
+        └── your_module/
+            ├── client_app.py
+            ├── server_app.py
+            └── scratch.py      ← you don't want this in the FAB
+
+    Add the following to your ``pyproject.toml``:
+
+    .. code-block:: toml
+
+        [tool.flwr.app]
+        publisher = "your-name-or-organization"
+        fab-include = ["your_module/**/*.py", "conf/*.yaml"]
+        fab-exclude = ["your_module/scratch.py"]
+
+    When you run ``flwr build``, the FAB will contain ``pyproject.toml`, ``your_module/client_app.py``,
+    ``your_module/server_app.py``, and ``conf/config.yaml`` — but not ``your_module/scratch.py`` or
+    ``README.md``.
 
 ****************
  App Components
