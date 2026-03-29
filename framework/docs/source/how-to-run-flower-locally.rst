@@ -20,19 +20,24 @@ Flower configuration:
 
     [superlink.local]
     address = ":local:"
-    options.num-supernodes = 10
-    options.backend.client-resources.num-cpus = 1
-    options.backend.client-resources.num-gpus = 0
 
 If ``FLWR_HOME`` is unset, Flower stores this managed local runtime under
 ``$HOME/.flwr/local-superlink``.
+
+.. note::
+
+    The remainder of this guide assumes you have set ``[superlink.local]`` as the
+    default profile in your Flower configuration. This should already be the case if you
+    have installed Flower for the first time or upgraded from a previous version that
+    didn't have the Flower Configuration functionality. For more information check
+    :doc:`the Flower Configuration <ref-flower-configuration>` guide.
 
 ****************************
  What Flower starts for you
 ****************************
 
-On the first command that needs the local Control API, Flower starts a local
-``flower-superlink`` process automatically. That process:
+On the first command that needs the local Control API (e.g. ``flwr run``, ``flwr list``,
+etc), Flower starts a local ``flower-superlink`` process automatically. That process:
 
 - listens on ``127.0.0.1:39093`` for the Control API
 - binds ServerAppIo to a free local port chosen by the OS
