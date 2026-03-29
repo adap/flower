@@ -995,10 +995,89 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
 
         return simulation_config_from_json(json.loads(fed_config_json))
 
+    # pylint: disable=too-many-return-statements,too-many-branches
     def update_run_status(self, run_id: int, new_status: RunStatus) -> bool:
         """Update the status of the run with the specified `run_id`."""
         # Clean up expired tokens; this will flag inactive runs as needed
         self._cleanup_expired_tokens()
+
+        # Atomic claim path for STARTING -> RUNNING across replicas/processes.
+        if new_status.status == Status.RUNNING:
+            if not has_valid_sub_status(new_status):
+                log(
+                    ERROR,
+                    'Invalid run status payload: sub_status="%s" is not valid for '
+                    'status="%s". For non-FINISHED statuses, sub_status must be '
+                    "empty.",
+                    new_status.sub_status,
+                    new_status.status,
+                )
+                return False
+
+            sint64_run_id = uint64_to_int64(run_id)
+            query = """
+                UPDATE run
+                SET running_at = :timestamp,
+                sub_status = :sub_status, details = :details
+                WHERE run_id = :run_id
+                AND starting_at != ''
+                AND running_at = ''
+                AND finished_at = ''
+                RETURNING run_id
+            """
+            params = {
+                "timestamp": now().isoformat(),
+                "sub_status": new_status.sub_status,
+                "details": new_status.details,
+                "run_id": sint64_run_id,
+            }
+            rows = self.query(query, params)
+            if rows:
+                # Successfully claimed STARTING -> RUNNING.
+                return True
+
+            # Claim failed: diagnose why the UPDATE affected zero rows.
+            diag_rows = self.query(
+                "SELECT * FROM run WHERE run_id = :run_id",
+                {"run_id": sint64_run_id},
+            )
+            if not diag_rows:
+                log(ERROR, "`run_id` is invalid")
+                return False
+
+            row = diag_rows[0]
+            current_status = RunStatus(
+                status=determine_run_status(row),
+                sub_status=row["sub_status"],
+                details=row["details"],
+            )
+            if row["finished_at"] != "":
+                log(
+                    ERROR,
+                    'Invalid status transition: from "%s" to "%s"',
+                    current_status.status,
+                    new_status.status,
+                )
+            elif row["starting_at"] == "":
+                log(
+                    ERROR,
+                    'Invalid status transition: run "%d" is not in STARTING state',
+                    run_id,
+                )
+            elif row["running_at"] != "":
+                log(
+                    ERROR,
+                    'Invalid status transition: run "%d" is already in RUNNING state',
+                    run_id,
+                )
+            else:
+                log(
+                    ERROR,
+                    'Invalid status transition: from "%s" to "%s"',
+                    current_status.status,
+                    new_status.status,
+                )
+            return False
 
         with self.session():
             # Convert the uint64 value to sint64 for SQLite
@@ -1031,7 +1110,7 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
             if not has_valid_sub_status(current_status):
                 log(
                     ERROR,
-                    'Invalid sub-status "%s" for status "%s"',
+                    'Invalid sub-status: sub_status="%s" is not valid for status="%s".',
                     current_status.sub_status,
                     current_status.status,
                 )
