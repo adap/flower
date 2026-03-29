@@ -183,11 +183,7 @@ to have a default configuration that is different from the one provided by Flowe
 the box. For example, if you'd like to set the configuration to 100 ``SuperNodes``,
 where each ``ClientApp`` is assigned 4 CPUs and 25% of a GPU, you would run:
 
-    [superlink.local]
-    address = ":local:"
-    options.num-supernodes = 10
-    options.backend.client-resources.num-cpus = 1 # each ClientApp assumes to use 1 CPU (default is 2)
-    options.backend.client-resources.num-gpus = 0.0 # no GPU access to the ClientApp (default is 0.0)
+.. code-block:: shell
 
     flwr federation simulation-config \
             --num-supernodes 100 \
@@ -198,11 +194,8 @@ Then, for every subsequent runs, the SuperLink will use the above configuration 
 default. Use ``flwr federation simulation-config --help`` to see all the options you can
 set.
 
-    [superlink.local-gpu]
-    address = ":local:"
-    options.num-supernodes = 10
-    options.backend.client-resources.num-cpus = 1 # each ClientApp assumes to use 1 CPU (default is 2)
-    options.backend.client-resources.num-gpus = 0.25 # each ClientApp uses 25% of VRAM (default is 0.0)
+Per-run override of Simulation Runtime Configuration
+====================================================
 
 Sometimes, you might want to override the default simulation configuration for a
 specific run. You can do so by passing the same options as above to |flwr_run_link|_ but
@@ -267,13 +260,7 @@ Configuration <ref-flower-configuration>` by passing a value to the ``init-args`
 
 .. code-block:: shell
 
-    [superlink.local-gpu-limited]
-    address = ":local:"
-    options.num-supernodes = 10
-    options.backend.client-resources.num-cpus = 1 # Each ClientApp will get assigned 1 CPU core
-    options.backend.client-resources.num-gpus = 0.5 # Each ClientApp will get 50% of each available GPU
-    options.backend.init-args.num-cpus = 1 # Only expose 1 CPU to the simulation
-    options.backend.init-args.num-gpus = 1 # Expose a single GPU to the simulation
+    flwr federation simulation-config --init-args-num-cpus 1 --init-args-num-gpus 0
 
 With the above setup, the Backend will be initialized with a single CPU and GPU.
 Therefore, even if more CPUs and GPUs are available in your system, they will not be
