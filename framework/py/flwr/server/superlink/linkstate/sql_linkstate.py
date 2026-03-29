@@ -252,47 +252,58 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
             msg = f"`node_id` must be != {SUPERLINK_NODE_ID}"
             raise AssertionError(msg)
 
-        params: dict[str, str | int] = {}
-
         # Convert the uint64 value to sint64 for SQLite
-        params["node_id"] = uint64_to_int64(node_id)
+        sint64_node_id = uint64_to_int64(node_id)
 
         with self.session():
-            # Retrieve all Messages for node_id
-            query = """
-                SELECT message_id
-                FROM message_ins
-                WHERE dst_node_id = :node_id
-                AND delivered_at = ''
-                AND (created_at + ttl) > CAST(strftime('%s', 'now') AS REAL)
-            """
+            delivered_at = now().isoformat()
+            params: dict[str, str | int] = {
+                "node_id": sint64_node_id,
+                "delivered_at": delivered_at,
+            }
 
-            if limit is not None:
-                query += " LIMIT :limit"
+            if limit is None:
+                query = """
+                    UPDATE message_ins
+                    SET delivered_at = :delivered_at
+                    WHERE dst_node_id = :node_id
+                    AND delivered_at = ''
+                    AND (created_at + ttl) > CAST(strftime('%s', 'now') AS REAL)
+                    RETURNING *
+                """
+            else:
+                query = """
+                    UPDATE message_ins
+                    SET delivered_at = :delivered_at
+                    WHERE message_id IN (
+                        SELECT message_id
+                        FROM message_ins
+                        WHERE dst_node_id = :node_id
+                        AND delivered_at = ''
+                        AND (created_at + ttl) > CAST(strftime('%s', 'now') AS REAL)
+                        ORDER BY rowid
+                        LIMIT :limit
+                    )
+                    AND delivered_at = ''
+                    RETURNING *
+                """
                 params["limit"] = limit
 
             rows = self.query(query, params)
             message_ids: set[str] = {row["message_id"] for row in rows}
             self._check_stored_messages(message_ids)
 
-            # Mark retrieved Messages as delivered
-            if rows:
-                # Prepare query
+            # _check_stored_messages can delete claimed Messages if they became invalid
+            # (for example, node removed from federation), so re-read current rows.
+            if message_ids:
                 placeholders = ",".join([f":mid_{i}" for i in range(len(message_ids))])
                 query = f"""
-                    UPDATE message_ins
-                    SET delivered_at = :delivered_at
+                    SELECT *
+                    FROM message_ins
                     WHERE message_id IN ({placeholders})
-                    RETURNING *
+                    ORDER BY rowid
                 """
-
-                # Prepare data for query
-                delivered_at = now().isoformat()
-                params = {"delivered_at": delivered_at}
-                for index, msg_id in enumerate(message_ids):
-                    params[f"mid_{index}"] = str(msg_id)
-
-                # Run query
+                params = {f"mid_{i}": msg_id for i, msg_id in enumerate(message_ids)}
                 rows = self.query(query, params)
 
             for row in rows:
@@ -434,15 +445,18 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
             )
             ret.update(tmp_ret_dict)
 
-            # Find all reply Messages
+            # Atomically claim all eligible reply Messages.
             placeholders = ",".join([f":mid_{i}" for i in range(len(message_ids))])
+            delivered_at = now().isoformat()
             query = f"""
-                SELECT *
-                FROM message_res
+                UPDATE message_res
+                SET delivered_at = :delivered_at
                 WHERE reply_to_message_id IN ({placeholders})
                 AND delivered_at = ''
+                RETURNING *
             """
-            params = {f"mid_{i}": str(mid) for i, mid in enumerate(message_ids)}
+            params = {"delivered_at": delivered_at}
+            params.update({f"mid_{i}": str(mid) for i, mid in enumerate(message_ids)})
             rows = self.query(query, params)
             for row in rows:
                 convert_sint64_values_in_dict_to_uint64(
@@ -455,23 +469,6 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
                 current_time=current,
             )
             ret.update(tmp_ret_dict)
-
-            # Mark existing reply Messages to be returned as delivered
-            delivered_at = now().isoformat()
-            for message_res in ret.values():
-                message_res.metadata.delivered_at = delivered_at
-            message_res_ids = [
-                message_res.metadata.message_id for message_res in ret.values()
-            ]
-            placeholders = ",".join([f":mid_{i}" for i in range(len(message_res_ids))])
-            query = f"""
-                UPDATE message_res
-                SET delivered_at = :delivered_at
-                WHERE message_id IN ({placeholders})
-            """
-            params = {"delivered_at": delivered_at}
-            params.update({f"mid_{i}": mid for i, mid in enumerate(message_res_ids)})
-            self.query(query, params)
 
         return list(ret.values())
 
