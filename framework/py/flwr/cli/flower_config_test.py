@@ -41,6 +41,7 @@ from flwr.cli.typing import (
     SuperLinkSimulationOptions,
 )
 from flwr.common.constant import FLWR_HOME
+from flwr.supercore.constant import DEFAULT_SIMULATION_CONFIG
 
 from .flower_config import (
     init_flwr_config,
@@ -97,7 +98,10 @@ class TestInitFlwrConfig(unittest.TestCase):
         # In TOML `options.num-supernodes = 10` creates a nested dict
         self.assertIn(SuperLinkConnectionTomlKey.OPTIONS, local)
         options = local[SuperLinkConnectionTomlKey.OPTIONS]
-        self.assertEqual(options[SuperLinkSimulationOptionsTomlKey.NUM_SUPERNODES], 10)
+        self.assertEqual(
+            options[SuperLinkSimulationOptionsTomlKey.NUM_SUPERNODES],
+            DEFAULT_SIMULATION_CONFIG.num_supernodes,
+        )
 
         # options.backend...
         self.assertIn(SuperLinkSimulationOptionsTomlKey.BACKEND, options)
@@ -108,8 +112,14 @@ class TestInitFlwrConfig(unittest.TestCase):
         resources = backend[SimulationBackendConfigTomlKey.CLIENT_RESOURCES]
 
         # ...num-cpus / num-gpus
-        self.assertEqual(resources[SimulationClientResourcesTomlKey.NUM_CPUS], 1)
-        self.assertEqual(resources[SimulationClientResourcesTomlKey.NUM_GPUS], 0)
+        self.assertEqual(
+            resources[SimulationClientResourcesTomlKey.NUM_CPUS],
+            DEFAULT_SIMULATION_CONFIG.client_resources_num_cpus,
+        )
+        self.assertEqual(
+            resources[SimulationClientResourcesTomlKey.NUM_GPUS],
+            DEFAULT_SIMULATION_CONFIG.client_resources_num_gpus,
+        )
 
     def test_init_flwr_config_does_not_overwrite(self) -> None:
         """Test that init_flwr_config does not overwrite existing config file."""
@@ -278,7 +288,7 @@ class TestSuperLinkConnection(unittest.TestCase):
                 "num-supernodes": 10,
                 "backend": {
                     "client-resources": {"num-cpus": 1.0, "num-gpus": 0.5},
-                    "init-args": {"logging-level": "info", "log-to-drive": True},
+                    "init-args": {"logging-level": "info", "log-to-driver": True},
                     "name": "custom-backend",
                 },
             }
@@ -307,7 +317,7 @@ class TestSuperLinkConnection(unittest.TestCase):
         self.assertIsNotNone(backend.init_args)
         assert backend.init_args is not None
         self.assertEqual(backend.init_args.logging_level, "info")
-        self.assertTrue(backend.init_args.log_to_drive)
+        self.assertTrue(backend.init_args.log_to_driver)
         self.assertEqual(backend.name, "custom-backend")
 
     def test_parse_superlink_connection_simulation_invalid_name(self) -> None:
