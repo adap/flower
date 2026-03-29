@@ -842,10 +842,12 @@ class ControlServicer(control_pb2_grpc.ControlServicer):
 
         state = self.linkstate_factory.state()
 
+        federation = request.federation_name or NOOP_FEDERATION
+
         with rpc_error_translator(context, rpc_name):
             state.federation_manager.set_simulation_config(
                 flwr_aid=_get_flwr_aid(context),
-                federation=request.federation_name,
+                federation=federation,
                 config=request.config,
             )
 
