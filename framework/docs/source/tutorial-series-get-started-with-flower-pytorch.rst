@@ -573,7 +573,6 @@ You should expect streamed output similar to this:
 
 .. code-block:: shell
 
-    Successfully built flwrlabs.quickstart-pytorch.1-0-0.014c8eb3.fab
     Starting local SuperLink on 127.0.0.1:39093...
     Successfully started run 1859953118041441032
     INFO :      Starting FedAvg strategy:
@@ -615,8 +614,7 @@ So how does this work? How does Flower execute this simulation?
 
 When we execute ``flwr run`` against the default local profile, Flower submits the run
 to the managed local SuperLink selected by ``address = ":local:"`` and tells it that
-there are 10 clients (``options.num-supernodes = 10``, where each SuperNode launches one
-``ClientApp``).
+there are 10 clients (where each SuperNode launches one ``ClientApp``).
 
 The local SuperLink then starts the ``ServerApp`` and asks it to issue instructions to
 those nodes using the ``FedAvg`` strategy. In this example, ``FedAvg`` is configured
