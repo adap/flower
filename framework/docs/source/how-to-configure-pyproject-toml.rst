@@ -129,7 +129,7 @@ In short, ``fab-include`` and ``fab-exclude`` give you fine-grained control *wit
 boundaries of what Flower supports. You cannot use them to include unsupported file
 types (e.g., ``.txt``) — Flower will flag any such conflicts with a clear error message.
 
-.. dropdown:: Example: bundling only your source package and a config file
+.. dropdown:: Example: Bundling only your source package and a config file
 
     Suppose your project looks like this::
 
@@ -141,7 +141,7 @@ types (e.g., ``.txt``) — Flower will flag any such conflicts with a clear erro
         └── your_module/
             ├── client_app.py
             ├── server_app.py
-            └── scratch.py      ← you don't want this in the FAB
+            └── scratch.py      ← you want to exclude this in the FAB
 
     Add the following to your ``pyproject.toml``:
 
@@ -152,9 +152,10 @@ types (e.g., ``.txt``) — Flower will flag any such conflicts with a clear erro
         fab-include = ["your_module/**/*.py", "conf/*.yaml"]
         fab-exclude = ["your_module/scratch.py"]
 
-    When you run ``flwr build``, the FAB will contain ``pyproject.toml`, ``your_module/client_app.py``,
-    ``your_module/server_app.py``, and ``conf/config.yaml`` — but not ``your_module/scratch.py`` or
-    ``README.md``.
+    When you execute |flwr_run_cli_link|_ or |flwr_build_cli_link|_, the resulting FAB
+    will contain ``pyproject.toml``, ``your_module/client_app.py``,
+    ``your_module/server_app.py``, and ``conf/config.yaml`` — but not
+    ``your_module/scratch.py`` or ``README.md``.
 
 ****************
  App Components
@@ -203,7 +204,7 @@ Access these values in your code using ``context.run_config``. For example:
 
     You can also override the ``run_config`` values by passing the ``--run-config`` flag
     followed by key-value pairs when executing ``flwr run``. See the
-    |flwr_run_cli_link|_ for more details.
+    |flwr_run_cli_link|_ CLI documentation for more details.
 
 **************************
  Federation Configuration
@@ -216,6 +217,10 @@ Access these values in your code using ``context.run_config``. For example:
     connection configuration** and are defined in the Flower configuration file. Refer
     to the `Flower Configuration <ref-flower-configuration.html>`_ for more information.
 
-.. |flwr_run_cli_link| replace:: ``flwr run`` CLI documentation
+.. |flwr_run_cli_link| replace:: ``flwr run``
+
+.. |flwr_build_cli_link| replace:: ``flwr build``
+
+.. _flwr_build_cli_link: ref-api-cli.html#flwr-build
 
 .. _flwr_run_cli_link: ref-api-cli.html#flwr-run
