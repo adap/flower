@@ -184,7 +184,7 @@ def main(grid: Grid, context: Context) -> None:
             print("\n[Server] Central evaluation on held-out server data …")
             X_test, y_test = _load_central_test(csv_path)
             ensemble.test_data = X_test
-            y_pred, y_prob = ensemble.predict(X_test, y_true=y_test)
+            y_pred, y_prob = ensemble.predict(X_test)
             metrics = ensemble.evaluate_predictions(y_test, y_pred, y_prob)
 
             print("\n[Server] ══ Final Ensemble Metrics ══")

@@ -1,6 +1,5 @@
 """frauddetection: XGBoost model training and data utilities."""
 
-import json
 import os
 import tempfile
 from typing import Tuple

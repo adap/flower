@@ -1,7 +1,5 @@
 """frauddetection: Flower ClientApp for federated XGBoost fraud detection."""
 
-import os
-
 import numpy as np
 from flwr.app import ArrayRecord, ConfigRecord, Context, Message, MetricRecord, RecordDict
 from flwr.clientapp import ClientApp

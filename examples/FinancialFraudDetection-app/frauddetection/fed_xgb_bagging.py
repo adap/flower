@@ -357,12 +357,14 @@ class FedXGBBagging:
         self.model_paths = model_paths
         self.voting = voting
         self.model_weights = model_weights
-        self.config = config
+        self.config = config or {}
         self.result_path = result_path
         self.history = []
         self.test_data = None
 
         self.models = [self._load_model(path) for path in model_paths]
+
+        bank_name_round_number = self.config.get("bank_name_round_number", "unknown")
 
         logger.info(f"Initialized EachBankModel for bank_name_round_number={self.config['bank_name_round_number']}")
 

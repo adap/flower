@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "federated-fraud-detection"
-version = "1.0.0"
+version = "1.0.1"
 description = "Federated Financial Fraud Detection with XGBoost and Flower"
 license = "Apache-2.0"
 dependencies = [
@@ -16,10 +16,10 @@ dependencies = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["."]
+packages = ["frauddetection"]
 
 [tool.flwr.app]
-publisher = "mainthread"
+publisher = "frauddetection"
 
 [tool.flwr.app.components]
 serverapp = "frauddetection.server_app:app"
@@ -32,13 +32,6 @@ fraction-evaluate = 1.0
 
 # Local XGBoost training: number of boosting rounds per client per FL round
 local-epochs = 50
-
-# Path to the Ethereum transaction CSV (relative to the working directory).
-# Simulation mode: all virtual clients share this file; it is partitioned on
-#   the fly by partition-id / num-partitions from node_config.
-# Deployment mode: override this with the data-path key in each node's
-#   node_config instead (client will use node_config["data-path"]).
-data-csv = "data/preprocessed_Ethereum_cleaned_v2.csv"
 
 [tool.flwr.federations.local-simulation]
 options.num-supernodes = 5
