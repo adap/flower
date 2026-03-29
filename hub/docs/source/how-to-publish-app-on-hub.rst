@@ -210,7 +210,7 @@ After logging in, publish your app:
 .. note::
    :code:`flwr app publish` uploads your project files (source + metadata), not a prebuilt :code:`.fab` file.
    Flower Hub builds the FAB server-side from the uploaded project contents.
-   If your app uses :code:`fab-format-version = 1`, Hub validates the Flower
+   If your app uses :code:`fab-format-version = 1`, Flower Hub validates the Flower
    version metadata and license-file requirements during this server-side build.
    This means publish upload rules and FAB packaging rules are related but not identical.
    For details on FAB packaging, see the Flower Framework CLI reference for :code:`flwr build`:
