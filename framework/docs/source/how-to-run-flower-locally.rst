@@ -13,19 +13,9 @@ on demand, submits the run through the Control API, and the local SuperLink exec
 run with the simulation runtime. The SuperLink will keep running in the background
 accepting commands until you :ref:`stop it manually <stop-background-local-superlink>`.
 
-This is the default experience for a profile like the one created automatically in your
-Flower configuration:
-
-.. code-block:: toml
-
-    [superlink.local]
-    address = ":local:"
-    options.num-supernodes = 10
-    options.backend.client-resources.num-cpus = 1
-    options.backend.client-resources.num-gpus = 0
-
-If ``FLWR_HOME`` is unset, Flower stores this managed local runtime under
-``$HOME/.flwr/local-superlink``.
+Flower stores this managed local runtime under ``$HOME/.flwr/local-superlink``. If you
+would like to change this location, set the ``FLWR_HOME`` environment variable to a
+different directory.
 
 .. note::
 
