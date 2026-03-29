@@ -1,51 +1,49 @@
-# PR Draft: Sovereign Mohawk Baseline Starter
+# Sovereign Mohawk Baseline Starter
 
-## Suggested PR Title
+## Overview
 
-Add sovereign_mohawk baseline starter with optional verification hooks
+The Sovereign Mohawk baseline starter provides an initial scaffold under `baselines/sovereign_mohawk` inspired by the contribution proposal discussed during issue planning.
+It is intended as a contributor-friendly starting point for iterating toward a full "verifiable aggregation" baseline following Flower baseline conventions.
 
-## Suggested PR Body
+## Included components
 
-## Summary
-
-This PR adds an initial baseline scaffold under `baselines/sovereign_mohawk` inspired by the contribution proposal discussed in issue planning.
-
-Included in this first commit set:
+The baseline currently includes:
 
 - New baseline package layout and Flower app wiring
-- Runnable ServerApp + ClientApp + dataset/model scaffold
+- Runnable `ServerApp` + `ClientApp` + dataset/model scaffold
 - Baseline README with environment setup, run commands, and smoke-test expectations
-- Optional verification hooks (`enable-verification-hooks`) that run lightweight checks on aggregated tensors and produce a report artifact
+- Optional verification hooks (`enable-verification-hooks`) that run lightweight checks on aggregated tensors and produce a `verification_report.json` artifact
 
 ## What this enables
 
+The baseline is designed to support:
+
 - A contributor-friendly starting point for iterating toward a full "verifiable aggregation" baseline
 - Reproducible baseline setup following Flower baseline conventions
-- Early operational evidence via `verification_report.json`
+- Early operational evidence via the generated `verification_report.json`
 
-## Verification done
+## Verification & testing
 
-- Updated files pass editor diagnostics
-- Baseline includes explicit lint/test commands:
+The following checks and commands are expected to be available for this baseline:
+
+- Updated files should pass standard editor diagnostics and linters.
+- The baseline includes explicit lint/test commands:
   - `./dev/format-baseline.sh sovereign_mohawk`
   - `./dev/test-baseline.sh sovereign_mohawk`
 
-## Contribution Compliance
+These commands are intended to be run locally to validate formatting, linting, and tests before integrating further changes.
 
-- License: contribution is provided under Apache License 2.0, consistent with project requirements.
-- Code of Conduct: this PR follows the Contributor Covenant expectations for respectful collaboration.
-- Review and CI: this PR is intended for standard Flower code-owner review and will only be considered merge-ready after all CI checks pass.
+## Licensing and conduct
 
-## Merge Readiness Checklist
+- Contributions to this baseline are expected to be provided under the Apache License 2.0, consistent with project requirements.
+- Contributor behavior should follow the project Code of Conduct (Contributor Covenant) and general expectations for respectful collaboration.
 
-- [x] Opened as a focused PR against main
-- [x] Baseline scaffold is runnable and documented
-- [x] Formatting/lint/type checks documented and executed locally
-- [ ] All GitHub Actions checks passing
-- [ ] Code-owner review completed
+## Planned enhancements
 
-## Follow-up scope (next PRs)
+The following areas have been identified for future work building on this baseline:
 
-- Extend verification hooks into richer strategy-level checks/metrics
+- Extend verification hooks into richer strategy-level checks and metrics
 - Add experiment configuration variants and expected result tables
 - Add plotting/reporting utilities and benchmark evidence artifacts
+
+This document is intended to serve as a stable reference for the Sovereign Mohawk baseline starter and may be updated as the baseline evolves.
