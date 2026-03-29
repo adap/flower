@@ -55,8 +55,8 @@ Flower.
     .. _faq-local-superlink-db-error:
 
     Local simulations run through a managed local SuperLink. By default, that local
-    SuperLink stores its state in a SQLite database under ``$FLWR_HOME``. SQLite usually
-    works well on local disks, but it can perform poorly on networked filesystems such
+    SuperLink stores its state in a SQLite database under ``$FLWR_HOME``. SQLite is reliable
+    on a local file system, but it can perform poorly on networked filesystems such
     as NFS-mounted home directories or HPC cluster storage. In those environments, you
     might see errors such as ``database is locked`` or other SQLite-related failures.
 

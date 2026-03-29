@@ -82,10 +82,10 @@ clearer naming.
   you don't specify a connection explicitly in your ``flwr`` commands
 - ``[superlink.local]`` defines a managed local SuperLink profile. The special address
   value ``":local:"`` tells Flower to launch or reuse the background local SuperLink on
-  demand with its default on-disk state. The alternative value
-  ``":local-in-memory:"`` starts the managed local SuperLink with an in-memory
-  database instead. In this example, the profile also requests a simulation with 10
-  virtual SuperNodes
+  demand with its default on-disk state. The alternative value ``":local-in-memory:"``
+  starts the managed local SuperLink with an in-memory database instead. The SuperLink
+  will run simulations using the default configuration of the :doc:`Simulation Runtime
+  <how-to-run-simulations>`.
 - ``[superlink.local-poc]`` defines a configuration for connecting to a locally running
   SuperLink at address ``127.0.0.1:9093``
 
@@ -157,7 +157,7 @@ distribution or simulate resource-constrained environments.
 This creates a managed local SuperLink profile that keeps its database in memory instead
 of on disk. This can be useful on networked filesystems where SQLite locking or
 performance issues can occur. The tradeoff is that local run history and logs are lost
-when the managed local SuperLink stops.
+when the managed local SuperLink is shut down.
 
 **When to use each**
 
@@ -172,10 +172,10 @@ Learn more in the `How to Run Simulations
 <https://flower.ai/docs/framework/how-to-run-simulations.html>`_ guide about other
 optional parameters you can use to configure your local simulation.
 
-When you use a local simulation profile with ``address = ":local:"`` or
-``address = ":local-in-memory:"``, Flower CLI commands that communicate with SuperLink
-use the Control API. Flower starts a managed local SuperLink automatically when needed
-and reuses it across ``flwr run``, ``flwr list``, ``flwr log``, and ``flwr stop``. See
+When you use a local simulation profile with ``address = ":local:"`` or ``address =
+":local-in-memory:"``, Flower CLI commands that communicate with SuperLink use the
+Control API. Flower starts a managed local SuperLink automatically when needed and
+reuses it across ``flwr run``, ``flwr list``, ``flwr log``, and ``flwr stop``. See
 :doc:`how-to-run-flower-locally` for the full local workflow, background process
 behavior, and runtime file locations.
 

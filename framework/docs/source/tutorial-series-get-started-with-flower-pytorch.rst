@@ -564,8 +564,8 @@ with Flower! The last step is to run our simulation in the command line, as foll
 This submits the run to the managed local SuperLink for the ``[superlink.local]``
 profile (identified in the Flower configuration with ``address = ":local:"``), which
 then executes the federated learning simulation with 10 clients, or SuperNodes, using
-the Flower Simulation Runtime. Plain ``flwr run .`` submits the run, prints the run ID,
-and returns without streaming logs. For the full local workflow, see
+the Flower Simulation Runtime. Plain ``flwr run .`` would submit the run, print the run
+ID, and return without streaming logs. For the full local workflow, see
 :doc:`how-to-run-flower-locally`. If you run into SQL database errors during local
 simulations, see :ref:`FAQ <faq-local-superlink-db-error>`.
 
