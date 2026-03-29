@@ -87,6 +87,8 @@ Under :code:`[project]`, provide:
 Under :code:`[tool.flwr.app]`, specify:
 
 - :code:`publisher` — your Flower account username
+- :code:`fab-format-version` — the app build contract version used for FAB validation
+- :code:`flwr-version-target` — required for :code:`fab-format-version = 1`
 
 Example:
 
@@ -96,10 +98,19 @@ Example:
     name = "my-federated-app"
     version = "0.1.0"
     description = "Federated training for medical image classification."
-    license = "Apache-2.0"
+    license = { file = "LICENSE" }
+    dependencies = ["flwr>=1.28.0"]
 
     [tool.flwr.app]
     publisher = "your-username"  # Must match your Flower account username
+    fab-format-version = 1
+    flwr-version-target = "1.28.0"
+
+.. note::
+   :code:`fab-format-version` introduces versioned FAB build rules. For a full
+   explanation of :code:`fab-format-version`, the derived minimum Flower
+   version, :code:`flwr-version-target`, and the version 1 license-file
+   requirement, see :doc:`fab-format-version`.
 
 License Field Formats
 ^^^^^^^^^^^^^^^^^^^^^
@@ -124,6 +135,12 @@ Rules:
 - :code:`file` and :code:`text` cannot be set together.
 - If you use :code:`license.file`, it must be exactly :code:`LICENSE` or :code:`LICENSE.md`.
 - The referenced license file must exist and be included in the files uploaded by :code:`flwr app publish`.
+
+.. note::
+   For legacy apps, Flower Hub still accepts string and inline-text license
+   forms. For :code:`fab-format-version = 1`, the app must use
+   :code:`license = { file = "LICENSE" }` or
+   :code:`license = { file = "LICENSE.md" }`.
 
 
 .. warning::
@@ -193,6 +210,8 @@ After logging in, publish your app:
 .. note::
    :code:`flwr app publish` uploads your project files (source + metadata), not a prebuilt :code:`.fab` file.
    Flower Hub builds the FAB server-side from the uploaded project contents.
+   If your app uses :code:`fab-format-version = 1`, Hub validates the Flower
+   version metadata and license-file requirements during this server-side build.
    This means publish upload rules and FAB packaging rules are related but not identical.
    For details on FAB packaging, see the Flower Framework CLI reference for :code:`flwr build`:
    `https://flower.ai/docs/framework/ref-api-cli.html <https://flower.ai/docs/framework/ref-api-cli.html>`_.

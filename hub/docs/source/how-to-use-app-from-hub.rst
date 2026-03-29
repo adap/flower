@@ -20,6 +20,11 @@ Next, select the app you want to download. For example, to create an app from `@
 
 This command downloads the application from Flower Hub into your local environment.
 
+.. note::
+   Flower Hub apps can declare a FAB format version and Flower version compatibility
+   metadata. If your installed Flower version is incompatible with the selected
+   app, :code:`flwr new` can fail before download. See :doc:`fab-format-version`.
+
 
 Run a Hub App
 -------------
@@ -96,3 +101,8 @@ In the Deployment Runtime, you can run an app directly from Flower Hub without f
     flwr run @<account_name>/<app_name> --stream
 
 In this case, the SuperLink downloads the app from Flower Hub and distributes the :code:`FAB` file to each SuperNode for execution.
+
+.. note::
+   Remote Flower Hub runs can be rejected before download if the app's declared Flower
+   version compatibility does not match the Flower version used by the client.
+   See :doc:`fab-format-version`.
