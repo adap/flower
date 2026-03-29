@@ -20,6 +20,9 @@ Flower configuration:
 
     [superlink.local]
     address = ":local:"
+    options.num-supernodes = 10
+    options.backend.client-resources.num-cpus = 1
+    options.backend.client-resources.num-gpus = 0
 
 If ``FLWR_HOME`` is unset, Flower stores this managed local runtime under
 ``$HOME/.flwr/local-superlink``.
