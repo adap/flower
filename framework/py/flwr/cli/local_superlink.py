@@ -28,6 +28,8 @@ import typer
 
 from flwr.common.constant import ISOLATION_MODE_SUBPROCESS
 from flwr.common.grpc import create_channel
+from flwr.proto.control_pb2 import ListFederationsRequest  # pylint: disable=E0611
+from flwr.proto.control_pb2_grpc import ControlStub
 from flwr.supercore.constant import FLWR_DISABLE_UPDATE_CHECK
 from flwr.supercore.utils import get_flwr_home
 
@@ -87,7 +89,9 @@ def _is_local_superlink_started() -> bool:
     """Return True if local SuperLink's Control API endpoint is reachable."""
     channel = create_channel(server_address=LOCAL_CONTROL_API_ADDRESS, insecure=True)
     try:
-        grpc.channel_ready_future(channel).result(timeout=CONTROL_API_PROBE_TIMEOUT)
+        ControlStub(channel).ListFederations(
+            ListFederationsRequest(), timeout=CONTROL_API_PROBE_TIMEOUT
+        )
         return True
     except (grpc.FutureTimeoutError, grpc.RpcError):
         return False
