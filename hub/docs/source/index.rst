@@ -30,6 +30,16 @@ With Flower Hub, you can:
 Explore the available applications on Flower Hub and contribute your own federated apps to help grow the ecosystem.
 
 
+Explanations
+~~~~~~~~~~~~
+
+.. toctree::
+  :maxdepth: 1
+  :caption: Explanations
+
+  fab-format-version
+
+
 How-to guides
 ~~~~~~~~~~~~~
 
