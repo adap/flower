@@ -52,10 +52,11 @@ def verify_arrayrecord(arrays: ArrayRecord, enabled: bool) -> VerificationReport
         if tensor.numel() == 0:
             continue
 
-        max_abs_value = max(max_abs_value, float(tensor.abs().max().item()))
-
         finite_tensor = tensor[finite_mask]
         if finite_tensor.numel() > 0:
+            local_max_abs = float(finite_tensor.abs().max().item())
+            if local_max_abs > max_abs_value:
+                max_abs_value = local_max_abs
             sum_squared_l2 += float(torch.sum(finite_tensor * finite_tensor).item())
 
     status = "passed" if non_finite_tensors == 0 else "failed"
