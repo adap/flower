@@ -14,6 +14,9 @@ response text. Use it as a starting point for a custom Flower Agent.
 Flower Runtime supplies the SDK base URL and task token, so the AgentApp does
 not need provider credentials.
 
+The OpenAI client waits up to 930 seconds without response data by default. Set
+`FLWR_RUNTIME_API_TIMEOUT` in the AgentApp environment to change this timeout.
+
 ## Build
 
 Install the project and build its Flower App Bundle (FAB):

@@ -70,8 +70,9 @@ _TERMINAL_EVENTS = frozenset(
     {"error", "response.completed", "response.failed", "response.incomplete"}
 )
 _POLL_INTERVAL = 0.25
-_DEFAULT_MODEL_RESPONSE_TIMEOUT = 300.0
+_DEFAULT_MODEL_RESPONSE_TIMEOUT = 900.0
 _DEFAULT_MODEL_TASK_LAUNCH_TIMEOUT = 300.0
+_MODEL_RESPONSE_TIMEOUT_ENV = "FLWR_MODEL_RESPONSE_TIMEOUT"
 _MODEL_TASK_LAUNCH_TIMEOUT_ENV = "FLWR_MODEL_TASK_LAUNCH_TIMEOUT"
 
 
@@ -246,7 +247,7 @@ async def _wait_for_response(
     """Wait for and return one correlated model response."""
     started_at = time.monotonic()
     launch_deadline = started_at + _model_task_launch_timeout()
-    response_deadline = started_at + _DEFAULT_MODEL_RESPONSE_TIMEOUT
+    response_deadline = started_at + _model_response_timeout()
     complete = False
     try:
         while True:
@@ -287,7 +288,7 @@ async def _stream_response(
         exchange = await run_in_threadpool(_start_exchange, state, task, model_payload)
         started_at = time.monotonic()
         launch_deadline = started_at + _model_task_launch_timeout()
-        response_deadline = started_at + _DEFAULT_MODEL_RESPONSE_TIMEOUT
+        response_deadline = started_at + _model_response_timeout()
         while True:
             # The model task stores all stream events before its final reply.
             response = await run_in_threadpool(
@@ -436,6 +437,19 @@ def _model_task_launch_timeout() -> float:
         timeout = float(raw_timeout.strip())
     except ValueError:
         timeout = _DEFAULT_MODEL_TASK_LAUNCH_TIMEOUT
+    return max(1.0, timeout)
+
+
+def _model_response_timeout() -> float:
+    """Return the configured maximum time for receiving a model response."""
+    raw_timeout = os.getenv(
+        _MODEL_RESPONSE_TIMEOUT_ENV,
+        str(_DEFAULT_MODEL_RESPONSE_TIMEOUT),
+    )
+    try:
+        timeout = float(raw_timeout.strip())
+    except ValueError:
+        timeout = _DEFAULT_MODEL_RESPONSE_TIMEOUT
     return max(1.0, timeout)
 
 
