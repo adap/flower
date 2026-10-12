@@ -78,7 +78,6 @@ async def trace_task_completion(
         "task.complete",
         traceparent=carrier,
         attributes={
-            "flwr.component": "superlink",
             "flwr.task_id": str(task.task_id),
             "flwr.run_id": str(task.run_id),
         },
