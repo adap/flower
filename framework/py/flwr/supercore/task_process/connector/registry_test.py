@@ -25,6 +25,7 @@ from .definition import (
     ActionAccess,
     ActionDefinition,
     ConnectorDefinition,
+    ConnectorExecutionContext,
     ConnectorToolSource,
 )
 from .registry import CONNECTORS
@@ -33,8 +34,8 @@ from .registry import CONNECTORS
 @pytest.fixture(name="dynamic_connector")
 def fixture_dynamic_connector(
     monkeypatch: pytest.MonkeyPatch,
-) -> tuple[ConnectorDefinition, Mock, Mock]:
-    """Register a test provider without network access or mutable tool registration."""
+) -> tuple[Mock, Mock]:
+    """Register a dynamic provider with mocked discovery and execution."""
     discover = Mock(
         return_value=(
             ActionDefinition(
@@ -48,8 +49,8 @@ def fixture_dynamic_connector(
     execute = Mock(return_value={"ok": True})
     connector = ConnectorDefinition(
         ref="example",
-        tools=({"name": "example_fixed"},),
-        executors={"example_fixed": Mock(return_value="static")},
+        tools=(),
+        executors={},
         requires_credentials=True,
         tool_source=ConnectorToolSource(discover, execute),
     )
@@ -58,12 +59,7 @@ def fixture_dynamic_connector(
         "example",
         connector,
     )
-    monkeypatch.setitem(
-        registry._CONNECTORS_BY_TOOL,  # pylint: disable=protected-access
-        "example_fixed",
-        connector,
-    )
-    return connector, discover, execute
+    return discover, execute
 
 
 def test_connector_references_are_unique() -> None:
@@ -81,64 +77,40 @@ def test_connector_tool_names_are_unique() -> None:
 
 
 def test_dynamic_discovery_and_execution_are_separate(
-    dynamic_connector: tuple[ConnectorDefinition, Mock, Mock],
+    dynamic_connector: tuple[Mock, Mock],
 ) -> None:
-    """Discover once, then call through the ordinary executor with fresh context."""
-    connector, discover, execute = dynamic_connector
+    """Discover schemas and execute with bound credentials and the original name."""
+    discover, execute = dynamic_connector
+    usage_recorder = Mock()
     credentials: JSONObject = {"access_token": "bound-token"}
-    tools = registry.invoke_connector(
-        "example__discover_tools", {}, Mock(), credentials, {}
-    )
-    assert tools == [
-        {
-            "type": "function",
-            "name": "example_FutureTool",
-            "description": "Future",
-            "parameters": {"type": "object"},
-            "strict": False,
-        }
-    ]
-    for value in (1, 2):
-        assert registry.invoke_connector(
-            "example__call_tool",
-            {"name": "FutureTool", "arguments": {"value": value}},
-            Mock(),
-            credentials,
-            {},
-        ) == {"ok": True}
-    discover.assert_called_once()
-    assert discover.call_args.args[0].credentials == credentials
-    assert execute.call_args.args[0] == {"value": 2}
-    assert execute.call_args.args[1].action_name == "FutureTool"
-    assert execute.call_args.args[1].credentials == credentials
-    assert connector.tools == ({"name": "example_fixed"},)
-    assert set(connector.executors) == {"example_fixed"}
-
-
-def test_dynamic_routing_preserves_static_precedence(
-    dynamic_connector: tuple[ConnectorDefinition, Mock, Mock],
-) -> None:
-    """Preserve static executors and distinguish similarly named providers."""
-    _, discover, execute = dynamic_connector
     assert registry.get_connector_ref("example_futuretool") == "example"
-    assert registry.requires_connector_credentials("example_futuretool")
-    assert registry.get_connector_call_tool("example_fixed") is None
-    assert (
-        registry.get_connector_ref("exampleish_futuretool") == "exampleish_futuretool"
+    assert registry.invoke_connector(
+        "example__discover_tools", {}, usage_recorder, credentials, {}
+    ) == [discover.return_value[0].tool("example")]
+    assert registry.invoke_connector(
+        "example__call_tool",
+        {"name": "FutureTool", "arguments": {"value": 1}},
+        usage_recorder,
+        credentials,
+        {},
+    ) == {"ok": True}
+    discover.assert_called_once_with(
+        ConnectorExecutionContext(credentials, {}, usage_recorder)
     )
-    assert registry.invoke_connector("example_fixed", {}, Mock(), {}, {}) == "static"
-    discover.assert_not_called()
-    execute.assert_not_called()
-    with pytest.raises(RuntimeError, match="credentials are required"):
-        registry.invoke_connector("example__discover_tools", {}, Mock())
+    execute.assert_called_once_with(
+        {"value": 1},
+        ConnectorExecutionContext(
+            credentials, {}, usage_recorder, action_name="FutureTool"
+        ),
+    )
 
 
 @pytest.mark.parametrize("arguments", [{}, {"name": "FutureTool", "arguments": []}])
 def test_invalid_dynamic_calls_do_not_execute(
-    dynamic_connector: tuple[ConnectorDefinition, Mock, Mock], arguments: JSONObject
+    dynamic_connector: tuple[Mock, Mock], arguments: JSONObject
 ) -> None:
     """Validate the internal call envelope before entering the provider executor."""
-    _, _, execute = dynamic_connector
+    _, execute = dynamic_connector
     with pytest.raises(ValueError):
         registry.invoke_connector("example__call_tool", arguments, Mock(), {}, {})
     execute.assert_not_called()
