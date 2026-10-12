@@ -15,13 +15,15 @@
 """Connector registry indexed by connector reference and tool name."""
 
 from copy import deepcopy
+from dataclasses import replace
 
 from flwr.supercore.task_process.usage import TaskUsageRecorder
 from flwr.supercore.typing import JSONObject, JSONValue
 
 from . import browser_use, filesystem, web_fetch, web_search
 from .automation import START_AUTOMATION_TOOL_NAME, make_start_automation_tool
-from .definition import ConnectorExecutionContext
+from .definition import ConnectorDefinition, ConnectorExecutionContext
+from .json_utils import require_string
 from .loader import load_oauth_connectors
 from .oauth import OAuthFlow
 
@@ -52,30 +54,44 @@ def invoke_connector(
     config: JSONObject | None = None,
 ) -> JSONValue:
     """Invoke one connector tool by its model-facing name."""
-    connector = _CONNECTORS_BY_TOOL.get(tool_name)
+    connector = _resolve_connector(tool_name)
     if connector is None:
         raise ValueError(f"Unsupported connector '{tool_name}'.")
     if connector.requires_credentials and (credentials is None or config is None):
         raise RuntimeError("Connector credentials are required.")
-    return connector.executors[tool_name](
-        arguments,
-        ConnectorExecutionContext(
-            credentials=credentials or {},
-            config=config or {},
-            usage_recorder=usage_recorder,
-        ),
+    context = ConnectorExecutionContext(
+        credentials=credentials or {},
+        config=config or {},
+        usage_recorder=usage_recorder,
     )
+    if executor := connector.executors.get(tool_name):
+        return executor(arguments, context)
+    if connector.tool_source is not None:
+        if tool_name == get_connector_discovery_tool(connector.ref):
+            return [
+                action.tool(connector.ref)
+                for action in connector.tool_source.discover(context)
+            ]
+        if tool_name == f"{connector.ref}__call_tool":
+            action_name = require_string(arguments.get("name"), connector.ref, "name")
+            action_arguments = arguments.get("arguments")
+            if not isinstance(action_arguments, dict):
+                raise ValueError("Dynamic connector arguments must be a JSON object.")
+            return connector.tool_source.execute(
+                action_arguments, replace(context, action_name=action_name)
+            )
+    raise ValueError(f"Unsupported connector '{tool_name}'.")
 
 
 def requires_connector_credentials(tool_name: str) -> bool:
     """Return whether a tool's connector uses federation-scoped credentials."""
-    connector = _CONNECTORS_BY_TOOL.get(tool_name)
+    connector = _resolve_connector(tool_name)
     return connector is not None and connector.requires_credentials
 
 
 def get_connector_ref(tool_name: str) -> str:
     """Resolve a connector tool name to its connector reference."""
-    connector = _CONNECTORS_BY_TOOL.get(tool_name)
+    connector = _resolve_connector(tool_name)
     return connector.ref if connector is not None else tool_name
 
 
@@ -87,6 +103,43 @@ def get_connector_tools(connector_ref: str) -> list[JSONObject]:
     if connector is None:
         raise ValueError(f"Unsupported connector '{connector_ref}'.")
     return list(deepcopy(connector.tools))
+
+
+def get_connector_discovery_tool(connector_ref: str) -> str | None:
+    """Return the credential-bound operation for discovering a connector's actions."""
+    connector = _CONNECTORS_BY_REF.get(connector_ref)
+    if connector is not None and connector.tool_source is not None:
+        return f"{connector_ref}__discover_tools"
+    return None
+
+
+def get_connector_call_tool(tool_name: str) -> str | None:
+    """Return the internal call operation for a discovered, non-static tool."""
+    if tool_name in _CONNECTORS_BY_TOOL:
+        return None
+    connector = _resolve_connector(tool_name)
+    if connector is not None and connector.tool_source is not None:
+        operation = f"{connector.ref}__call_tool"
+        if tool_name not in (operation, get_connector_discovery_tool(connector.ref)):
+            return operation
+    return None
+
+
+def _resolve_connector(tool_name: str) -> ConnectorDefinition | None:
+    """Resolve static tools first, then the most specific dynamic namespace."""
+    if connector := _CONNECTORS_BY_TOOL.get(tool_name):
+        return connector
+    for connector in sorted(
+        _CONNECTORS_BY_REF.values(), key=lambda item: len(item.ref), reverse=True
+    ):
+        prefix = f"{connector.ref}_"
+        if (
+            connector.tool_source is not None
+            and tool_name.startswith(prefix)
+            and len(tool_name) > len(prefix)
+        ):
+            return connector
+    return None
 
 
 def get_oauth_flow(connector_ref: str) -> OAuthFlow:

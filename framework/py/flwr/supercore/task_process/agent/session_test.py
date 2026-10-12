@@ -14,6 +14,7 @@
 # ==============================================================================
 """Runtime AgentApp session tests."""
 
+from typing import cast
 from unittest.mock import Mock, call, patch
 
 import pytest
@@ -42,7 +43,11 @@ from flwr.supercore.json_message.connector_message import (
 from flwr.supercore.task_identity import TaskIdentity
 from flwr.supercore.task_process.connector import registry as connector_registry
 from flwr.supercore.task_process.connector.automation import START_AUTOMATION_TOOL_NAME
-from flwr.supercore.typing import JSONObject
+from flwr.supercore.task_process.connector.definition import (
+    ConnectorDefinition,
+    ConnectorToolSource,
+)
+from flwr.supercore.typing import JSONObject, JSONValue
 
 from .session import (
     AgentRuntime,
@@ -58,6 +63,36 @@ def task_identity(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(TaskIdentity, "_task_id", 789)
     monkeypatch.setattr(TaskIdentity, "_run_id", 123)
     monkeypatch.setattr(TaskIdentity, "_node_id", 456)
+
+
+@pytest.fixture(name="runtime")
+def fixture_runtime() -> AgentRuntime:
+    """Create a fresh run-scoped runtime with a task stub."""
+    stub = Mock()
+    stub.CreateTask.return_value = CreateTaskResponse(task_id=456)
+    return AgentRuntime(
+        stub=stub,
+        run_id=123,
+        task_id=789,
+        start_run_request=StartRunRequest(),
+        events=Mock(),
+    )
+
+
+@pytest.fixture(name="dynamic_connector")
+def fixture_dynamic_connector(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Advertise a dynamic test connector while task replies are mocked."""
+    monkeypatch.setitem(
+        connector_registry._CONNECTORS_BY_REF,  # pylint: disable=protected-access
+        "example",
+        ConnectorDefinition(
+            ref="example",
+            tools=(),
+            executors={},
+            requires_credentials=True,
+            tool_source=ConnectorToolSource(discover=Mock(), execute=Mock()),
+        ),
+    )
 
 
 def test_emit_event_pushes_task_event() -> None:
@@ -235,9 +270,11 @@ def test_start_automation_tool_exposes_only_input_and_schedule() -> None:
     assert parameters["required"] == ["input", "start_at"]
 
 
-def test_runtime_connectors_expand_one_connector_into_multiple_tools() -> None:
+def test_runtime_connectors_expand_one_connector_into_multiple_tools(
+    runtime: AgentRuntime,
+) -> None:
     """One connector reference can advertise multiple model-facing tools."""
-    connectors = RuntimeAgentConnectors(Mock())
+    connectors = RuntimeAgentConnectors(runtime)
     tools: list[JSONObject] = [
         {"type": "function", "name": "example_search"},
         {"type": "function", "name": "example_read"},
@@ -422,9 +459,11 @@ def test_create_connector_response_uses_connector_task_for_filesystem() -> None:
     )
 
 
-def test_connector_tools_include_agent_handled_automation() -> None:
+def test_connector_tools_include_agent_handled_automation(
+    runtime: AgentRuntime,
+) -> None:
     """Automation and connector schemas should remain available in request order."""
-    connectors = RuntimeAgentConnectors(Mock())
+    connectors = RuntimeAgentConnectors(runtime)
 
     assert [
         tool["name"]
@@ -445,3 +484,136 @@ def test_connector_tools_include_agent_handled_automation() -> None:
         "notion_get_user",
         "notion_get_self",
     ]
+
+
+@pytest.mark.usefixtures("dynamic_connector")
+def test_dynamic_catalogue_cache_and_refresh(runtime: AgentRuntime) -> None:
+    """Share a cache within the runtime, copy nested schemas, and refresh explicitly."""
+    tools: list[JSONObject] = [
+        {
+            "name": "example_CreateThing",
+            "parameters": {"type": "object", "required": ["value"]},
+        }
+    ]
+    with patch.object(
+        runtime, "create_connector_response", return_value=tools
+    ) as request:
+        first = RuntimeAgentConnectors(runtime).tools(["example"])
+        assert first[0]["name"] == "example_creatething"
+        cast(JSONObject, first[0]["parameters"])["required"] = []
+        assert RuntimeAgentConnectors(runtime).tools(["example"])[0]["parameters"] == {
+            "type": "object",
+            "required": ["value"],
+        }
+        request.assert_called_once()
+        assert request.call_args.kwargs["name"] == "example__discover_tools"
+        RuntimeAgentConnectors(runtime).tools(["example"], refresh=True)
+        assert request.call_count == 2
+        other = AgentRuntime(
+            stub=Mock(),
+            run_id=124,
+            task_id=790,
+            start_run_request=StartRunRequest(),
+            events=Mock(),
+        )
+        with patch.object(
+            other, "create_connector_response", return_value=[]
+        ) as other_request:
+            assert other.get_connector_tools("example") == []
+        other_request.assert_called_once()
+
+
+@pytest.mark.usefixtures("dynamic_connector")
+def test_failed_refresh_discards_stale_catalogue(runtime: AgentRuntime) -> None:
+    """A failed refresh is retried instead of reusing stale schemas."""
+    with patch.object(
+        runtime,
+        "create_connector_response",
+        side_effect=[
+            [{"name": "example_old"}],
+            RuntimeError("Discovery failed"),
+            [{"name": "example_new"}],
+        ],
+    ) as request:
+        assert runtime.get_connector_tools("example")[0]["name"] == "example_old"
+        with pytest.raises(RuntimeError, match="Discovery failed"):
+            runtime.get_connector_tools("example", refresh=True)
+        assert runtime.get_connector_tools("example")[0]["name"] == "example_new"
+        assert request.call_count == 3
+
+
+@pytest.mark.usefixtures("dynamic_connector")
+@pytest.mark.parametrize(
+    "output",
+    [
+        None,
+        [{"name": "other_read"}],
+        [{"name": "example__call_tool"}],
+        [{"name": "example_Same"}, {"name": "example_same"}],
+    ],
+)
+def test_invalid_dynamic_catalogue_is_not_cached(
+    runtime: AgentRuntime, output: object
+) -> None:
+    """Reject malformed, foreign, and ambiguous discovery results."""
+    with patch.object(
+        runtime, "create_connector_response", side_effect=[output, []]
+    ) as request:
+        with pytest.raises(RuntimeError, match="invalid"):
+            runtime.get_connector_tools("example")
+        assert runtime.get_connector_tools("example") == []
+        assert request.call_count == 2
+
+
+@pytest.mark.usefixtures("dynamic_connector")
+def test_discovered_calls_preserve_remote_names_without_rediscovery(
+    runtime: AgentRuntime,
+) -> None:
+    """Route native action names through a bound worker without rediscovery."""
+
+    def reply(request: ConnectorRequest) -> ConnectorResponse:
+        output: JSONValue = (
+            [{"name": "example_CreateThing"}]
+            if request.payload["name"] == "example__discover_tools"
+            else {"ok": True}
+        )
+        return ConnectorResponse(
+            dst_task_id=789,
+            name=cast(str, request.payload["name"]),
+            call_id=cast(str, request.payload["call_id"]),
+            output=output,
+            error=None,
+            reply_to_message_id="request-message-id",
+        )
+
+    with patch.object(runtime, "_send_and_receive", side_effect=reply) as exchange:
+        connectors = RuntimeAgentConnectors(runtime)
+        connectors.tools(["example"])
+        for value in (1, 2):
+            connectors.call(
+                {
+                    "name": "example_creatething",
+                    "call_id": f"call-{value}",
+                    "arguments": {"value": value},
+                }
+            )
+        with pytest.raises(ValueError, match="Unsupported discovered tool"):
+            runtime.create_connector_response(
+                name="example_unknown", call_id="missing", arguments={}
+            )
+    requests = [item.args[0].payload for item in exchange.call_args_list]
+    assert [item["name"] for item in requests] == [
+        "example__discover_tools",
+        "example__call_tool",
+        "example__call_tool",
+    ]
+    assert requests[-1]["arguments"] == {
+        "name": "CreateThing",
+        "arguments": {"value": 2},
+    }
+    stub = cast(Mock, runtime._stub)  # pylint: disable=protected-access
+    stub.GetConnector.assert_not_called()
+    assert all(
+        item.args[0].connector_ref == "example"
+        for item in stub.CreateTask.call_args_list
+    )

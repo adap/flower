@@ -16,7 +16,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
 from enum import StrEnum
 from typing import Literal
@@ -111,9 +111,18 @@ class ConnectorExecutionContext:
     credentials: JSONObject
     config: JSONObject
     usage_recorder: TaskUsageRecorder
+    action_name: str | None = None
 
 
 ConnectorExecutor = Callable[[JSONObject, ConnectorExecutionContext], JSONValue]
+
+
+@dataclass(frozen=True)
+class ConnectorToolSource:
+    """Discover connection-specific actions and execute them without registration."""
+
+    discover: Callable[[ConnectorExecutionContext], Sequence[ActionDefinition]]
+    execute: ConnectorExecutor
 
 
 @dataclass(frozen=True)
@@ -126,6 +135,7 @@ class ConnectorDefinition:
     requires_credentials: bool = False
     provider: ProviderDefinition | None = None
     oauth_flow: OAuthFlow | None = None
+    tool_source: ConnectorToolSource | None = None
 
     @classmethod
     def from_provider(
@@ -133,6 +143,7 @@ class ConnectorDefinition:
         provider: ProviderDefinition,
         executors: Mapping[str, ConnectorExecutor],
         oauth_flow: OAuthFlow | None = None,
+        tool_source: ConnectorToolSource | None = None,
     ) -> ConnectorDefinition:
         """Build a federation-scoped connector from its provider actions."""
         action_names = {action.name for action in provider.actions}
@@ -150,6 +161,7 @@ class ConnectorDefinition:
             requires_credentials=True,
             provider=provider,
             oauth_flow=oauth_flow,
+            tool_source=tool_source,
         )
 
 
