@@ -15,12 +15,12 @@
 """Tests for the Runtime HTTP client."""
 
 from importlib import import_module
-from typing import Annotated
-from unittest.mock import Mock, patch
+from typing import Annotated, cast
+from unittest.mock import MagicMock, Mock, patch
 
 import httpx
 import pytest
-from fastapi import Depends, FastAPI, Request
+from fastapi import Depends, FastAPI
 from fastapi.testclient import TestClient
 
 from flwr.proto.runtime_pb2 import (  # pylint: disable=E0611
@@ -28,9 +28,12 @@ from flwr.proto.runtime_pb2 import (  # pylint: disable=E0611
     AcquireTaskResponse,
     PullTaskInputRequest,
     PullTaskInputResponse,
+    PushTaskOutputRequest,
+    PushTaskOutputResponse,
 )
 from flwr.proto.task_pb2 import Task  # pylint: disable=E0611
 from flwr.supercore.constant import TASK_TOKEN_HEADER
+from flwr.supercore.dependencies.runtime import get_runtime_state, get_task
 from flwr.supercore.interceptors import RuntimeTokenHttpInterceptor
 from flwr.supercore.protobuf.client import ProtobufClient
 from flwr.supercore.protobuf.routing import ProtobufRoute
@@ -38,8 +41,10 @@ from flwr.supercore.protobuf.translation import (
     ProtobufTranslationMiddleware,
     get_protobuf_request,
 )
-from flwr.supercore.routers.runtime.router import acquire_task, pull_task_input
+from flwr.supercore.routers.runtime.router import acquire_task, pull_task_input, router
+from flwr.supercore.routers.runtime.tracing import RuntimeTracingMiddleware
 from flwr.supercore.runtime import RuntimeHttpClient
+from flwr.supercore.runtime.tracing import RuntimeTracingInterceptor
 
 _UNARY_UNARY_PATHS = (
     "acquire-task",
@@ -74,12 +79,12 @@ def test_task_context_round_trips_in_headers(
     """Real protobuf HTTP boundaries preserve per-task transport metadata."""
     carrier = "00-" + "1" * 32 + "-" + "2" * 16 + "-03"
     monkeypatch.setattr(
-        import_module("flwr.supercore.routers.runtime.router"),
+        import_module("flwr.supercore.routers.runtime.tracing"),
         "load_task_context",
         lambda state, task_id: carrier,
     )
     monkeypatch.setattr(
-        "flwr.supercore.runtime.runtime_http_client.current_traceparent",
+        "flwr.supercore.runtime.tracing.current_traceparent",
         lambda: carrier,
     )
     state, handlers = Mock(), Mock()
@@ -89,30 +94,32 @@ def test_task_context_round_trips_in_headers(
     )
     handlers.pull_task_input.return_value = PullTaskInputResponse(task_id=5)
     app = FastAPI()
+    monkeypatch.setenv("FLWR_TRACING_ENABLED", "1")
+    app.state.runtime_state_factory = Mock(state=lambda: state)
     app.router.route_class = ProtobufRoute
+    app.add_middleware(RuntimeTracingMiddleware)
     app.add_middleware(ProtobufTranslationMiddleware)
 
     @app.post("/v1/runtime/acquire-task")
     def acquire(
-        http_request: Request,
         request: Annotated[AcquireTaskRequest, Depends(get_protobuf_request)],
     ) -> AcquireTaskResponse:
-        return acquire_task(http_request, request, state, handlers, None)
+        return acquire_task(request, state, handlers, None)
 
     @app.post("/v1/runtime/pull-task-input")
     def pull(
-        http_request: Request,
         request: Annotated[PullTaskInputRequest, Depends(get_protobuf_request)],
     ) -> PullTaskInputResponse:
-        return pull_task_input(http_request, request, state, handlers, task)
+        return pull_task_input(request, state, handlers, task)
 
+    tracing = RuntimeTracingInterceptor()
     with (
         TestClient(app) as server,
         RuntimeHttpClient.from_server_address(
             "runtime.example",
             True,
             None,
-            interceptors=[RuntimeTokenHttpInterceptor("test-token")],
+            interceptors=[tracing, RuntimeTokenHttpInterceptor("test-token")],
         ) as client,
     ):
 
@@ -133,11 +140,16 @@ def test_task_context_round_trips_in_headers(
             client._client, "send", side_effect=send  # pylint: disable=protected-access
         ):  # pylint: disable=protected-access
             assert client.AcquireTask(AcquireTaskRequest()).task.task_id == 5
-            assert client.take_task_traceparent(6) == ""
-            assert client.take_task_traceparent(5) == carrier
-            assert client.take_task_traceparent(5) == ""
+            assert tracing.take_task_traceparent(6) == ""
+            assert tracing.take_task_traceparent(5) == carrier
+            assert tracing.take_task_traceparent(5) == ""
             assert client.PullTaskInput(PullTaskInputRequest()).task_id == 5
-            assert client.take_task_traceparent(5) == carrier
+            assert tracing.take_task_traceparent(5) == carrier
+            app.state.runtime_state_factory.state = Mock(
+                side_effect=RuntimeError("metadata")
+            )
+            assert client.AcquireTask(AcquireTaskRequest()).task.task_id == 5
+            assert tracing.take_task_traceparent(5) == ""
 
 
 @pytest.mark.parametrize("failure", ["current_traceparent", "validate_traceparent"])
@@ -146,11 +158,13 @@ def test_tracing_interceptor_failure_preserves_rpc(
 ) -> None:
     """Telemetry failures do not fail successful RPCs or swallow transport errors."""
     monkeypatch.setattr(
-        f"flwr.supercore.runtime.runtime_http_client.{failure}",
+        f"flwr.supercore.runtime.tracing.{failure}",
         Mock(side_effect=RuntimeError("telemetry failure")),
     )
     error = httpx.ConnectError("transport failure")
-    with RuntimeHttpClient("http://runtime.example") as client:
+    with RuntimeHttpClient(
+        "http://runtime.example", interceptors=[RuntimeTracingInterceptor()]
+    ) as client:
         response = httpx.Response(
             200,
             headers={"traceparent": "00-" + "1" * 32 + "-" + "2" * 16 + "-01"},
@@ -166,6 +180,55 @@ def test_tracing_interceptor_failure_preserves_rpc(
                 client.PullTaskInput(PullTaskInputRequest())
             assert caught.value is error
             assert send.call_count == 2
+
+
+@pytest.mark.parametrize("failed", [False, True])
+def test_completion_tracing_scopes_handler_and_preserves_failure(
+    monkeypatch: pytest.MonkeyPatch, failed: bool
+) -> None:
+    """The dependency wraps business work even if the metadata lookup fails."""
+    monkeypatch.setenv("FLWR_TRACING_ENABLED", "1")
+    manager = MagicMock()
+    backend = Mock(trace_span=Mock(return_value=manager))
+    backend.load_task_context.side_effect = RuntimeError("metadata")
+    monkeypatch.setattr("flwr.supercore.tracing._load_backend", lambda: backend)
+    handlers = Mock()
+    error = ValueError("business failure")
+
+    def finish(*_args: object) -> PushTaskOutputResponse:
+        manager.__enter__.assert_called_once()
+        manager.__exit__.assert_not_called()
+        if failed:
+            raise error
+        return PushTaskOutputResponse()
+
+    handlers.push_task_output.side_effect = finish
+    state = Mock()
+    app = FastAPI()
+    app.include_router(router)
+    app.add_middleware(ProtobufTranslationMiddleware)
+    app.state.runtime_handlers = handlers
+    app.dependency_overrides[get_runtime_state] = lambda: state
+    app.dependency_overrides[get_task] = lambda: Task(task_id=5, run_id=7)
+    with TestClient(app) as server:
+
+        def push() -> httpx.Response:
+            return cast(
+                httpx.Response,
+                server.post(
+                    "/v1/runtime/push-task-output",
+                    content=PushTaskOutputRequest().SerializeToString(),
+                    headers={"content-type": "application/protobuf"},
+                ),
+            )
+
+        if failed:
+            with pytest.raises(ValueError) as caught:
+                push()
+            assert caught.value is error
+        else:
+            assert push().status_code == 200
+        manager.__exit__.assert_called_once_with(None, None, None)
 
 
 @pytest.mark.parametrize(

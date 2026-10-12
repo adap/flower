@@ -14,16 +14,6 @@
 # ==============================================================================
 """HTTP client for the Runtime API."""
 
-from __future__ import annotations
-
-import ssl
-from collections.abc import Sequence
-from contextvars import ContextVar
-from typing import TYPE_CHECKING
-
-import httpx
-from google.protobuf.message import Message
-
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     StartAutomationRequest,
     StartAutomationResponse,
@@ -70,44 +60,7 @@ from flwr.proto.runtime_pb2 import (  # pylint: disable=E0611
     SendTaskHeartbeatRequest,
     SendTaskHeartbeatResponse,
 )
-from flwr.supercore.protobuf.client import (
-    ProtobufCall,
-    ProtobufClient,
-    ProtobufClientInterceptor,
-    ProtobufRequestContext,
-    ResponseT,
-)
-from flwr.supercore.tracing import current_traceparent, validate_traceparent
-
-if TYPE_CHECKING:
-    from flwr.supercore.retry import RetryInvoker
-
-
-class _RuntimeTracingInterceptor:
-    """Propagate headers and capture response context without decoding protobufs."""
-
-    def __init__(self, response_carrier: ContextVar[str | None]) -> None:
-        self._response_carrier = response_carrier
-
-    def intercept(
-        self, context: ProtobufRequestContext, call_next: ProtobufCall
-    ) -> httpx.Response:
-        """Keep tracing failures separate from transport and application errors."""
-        try:
-            if carrier := current_traceparent():
-                context.request.headers["traceparent"] = carrier
-        except Exception:  # pylint: disable=broad-exception-caught
-            pass
-        response = call_next(context)
-        try:
-            if self._response_carrier.get() is not None:
-                self._response_carrier.set("")
-                self._response_carrier.set(
-                    validate_traceparent(response.headers.get("traceparent"))
-                )
-        except Exception:  # pylint: disable=broad-exception-caught
-            pass
-        return response
+from flwr.supercore.protobuf.client import ProtobufClient
 
 
 # Match the method names defined by the Runtime protobuf service.
@@ -115,64 +68,9 @@ class _RuntimeTracingInterceptor:
 class RuntimeHttpClient(ProtobufClient):  # pylint: disable=too-many-public-methods
     """Protobuf-over-HTTP client for the Runtime API."""
 
-    def __init__(  # pylint: disable=too-many-arguments
-        self,
-        base_url: str,
-        *,
-        interceptors: Sequence[ProtobufClientInterceptor] = (),
-        verify: ssl.SSLContext | bool | str = True,
-        timeout: float = 30.0,
-        retry_invoker: RetryInvoker | None = None,
-    ) -> None:
-        self._response_carrier: ContextVar[str | None] = ContextVar(
-            "runtime_response_traceparent", default=None
-        )
-        self._task_traceparents: dict[int, str] = {}
-        super().__init__(
-            base_url,
-            interceptors=(
-                _RuntimeTracingInterceptor(self._response_carrier),
-                *interceptors,
-            ),
-            verify=verify,
-            timeout=timeout,
-            retry_invoker=retry_invoker,
-        )
-
-    def _task_unary_unary(
-        self,
-        *,
-        path: str,
-        rpc_method: str,
-        request: Message,
-        response_type: type[ResponseT],
-    ) -> ResponseT:
-        """Pair per-call response headers with a normally decoded task response."""
-        token = self._response_carrier.set("")
-        try:
-            result = self._unary_unary(
-                path=path,
-                rpc_method=rpc_method,
-                request=request,
-                response_type=response_type,
-            )
-            carrier = self._response_carrier.get()
-        finally:
-            self._response_carrier.reset(token)
-        if carrier:
-            if isinstance(result, AcquireTaskResponse) and result.HasField("task"):
-                self._task_traceparents[result.task.task_id] = carrier
-            elif isinstance(result, PullTaskInputResponse):
-                self._task_traceparents[result.task_id] = carrier
-        return result
-
-    def take_task_traceparent(self, task_id: int) -> str:
-        """Consume response metadata scoped to one acquired task."""
-        return self._task_traceparents.pop(task_id, "")
-
     def AcquireTask(self, request: AcquireTaskRequest) -> AcquireTaskResponse:
         """Acquire the oldest eligible pending task."""
-        return self._task_unary_unary(
+        return self._unary_unary(
             path="/v1/runtime/acquire-task",
             rpc_method="/flwr.proto.Runtime/AcquireTask",
             request=request,
@@ -192,7 +90,7 @@ class RuntimeHttpClient(ProtobufClient):  # pylint: disable=too-many-public-meth
 
     def PullTaskInput(self, request: PullTaskInputRequest) -> PullTaskInputResponse:
         """Pull the input for a claimed task."""
-        return self._task_unary_unary(
+        return self._unary_unary(
             path="/v1/runtime/pull-task-input",
             rpc_method="/flwr.proto.Runtime/PullTaskInput",
             request=request,

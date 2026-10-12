@@ -17,7 +17,7 @@
 from collections.abc import Iterator
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends
 
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     AcceptInvitationRequest,
@@ -112,7 +112,6 @@ from flwr.supercore.protobuf.streaming import (
     get_protobuf_stream_context,
 )
 from flwr.supercore.protobuf.translation import get_protobuf_request
-from flwr.supercore.tracing import trace_span
 from flwr.superlink.artifact_provider import ArtifactProvider
 from flwr.superlink.auth_plugin import ControlAuthnPlugin
 from flwr.superlink.dependencies.account import get_account, get_authn_plugin
@@ -121,6 +120,8 @@ from flwr.superlink.dependencies.fleet_api import FleetApiTypeDependency
 from flwr.superlink.dependencies.linkstate import get_linkstate
 from flwr.superlink.dependencies.run_source import RunSourceDependency
 from flwr.superlink.servicer.control import control_handlers
+
+from .tracing import RunCreationTracingDependency
 
 router = APIRouter(
     prefix="/v1/control",
@@ -155,19 +156,14 @@ def start_run(  # pylint: disable=too-many-arguments,too-many-positional-argumen
     account: AccountDependency,
     fleet_api_type: FleetApiTypeDependency,
     run_source: RunSourceDependency,
-    http_request: Request,
+    tracing: RunCreationTracingDependency,
 ) -> StartRunResponse:
     """Start a run."""
-    with trace_span(
-        "run.create",
-        traceparent=http_request.headers.get("traceparent", ""),
-        attributes={"flwr.component": "superlink"},
-    ) as span:
-        response = control_handlers.start_run(
-            request, account, linkstate, fleet_api_type, source=run_source
-        )
-        span.set_attribute("flwr.run_id", str(response.run_id))
-        return response
+    response = control_handlers.start_run(
+        request, account, linkstate, fleet_api_type, source=run_source
+    )
+    tracing.set_attribute("flwr.run_id", str(response.run_id))
+    return response
 
 
 @router.post("/list-runs")

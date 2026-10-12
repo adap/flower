@@ -36,6 +36,7 @@ from flwr.supercore.interceptors import (
 from flwr.supercore.protobuf.client import ProtobufClientInterceptor
 from flwr.supercore.retry import make_simple_http_retry_invoker
 from flwr.supercore.runtime import RuntimeHttpClient
+from flwr.supercore.runtime.tracing import RuntimeTracingInterceptor
 from flwr.supercore.telemetry import EventType
 from flwr.supercore.tls import validate_and_resolve_root_certificates
 from flwr.supercore.tracing import flush_traces, trace_span
@@ -179,8 +180,10 @@ def run_superexec(  # pylint: disable=R0912,R0913,R0914,R0915,R0917
     except ValueError as err:
         flwr_exit(ExitCode.SUPEREXEC_INVALID_EXECUTOR_CONFIG, str(err))
 
+    tracing = RuntimeTracingInterceptor()
     interceptors: list[ProtobufClientInterceptor] = [
-        RuntimeVersionHttpInterceptor(component_name="SuperExec")
+        tracing,
+        RuntimeVersionHttpInterceptor(component_name="SuperExec"),
     ]
     if superexec_auth_secret:
         interceptors.append(
@@ -259,7 +262,9 @@ def run_superexec(  # pylint: disable=R0912,R0913,R0914,R0915,R0917
             if combined_res.HasField("task") and combined_res.token:
                 with trace_span(
                     "task.dispatch",
-                    traceparent=client.take_task_traceparent(combined_res.task.task_id),
+                    traceparent=tracing.take_task_traceparent(
+                        combined_res.task.task_id
+                    ),
                     attributes={
                         "flwr.component": "superexec",
                         "flwr.task_id": str(combined_res.task.task_id),

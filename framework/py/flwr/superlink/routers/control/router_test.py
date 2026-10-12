@@ -464,7 +464,7 @@ def test_start_run_forwards_resolved_source() -> None:
             _ACCOUNT,
             "grpc-rere",
             "unknown",
-            Request({"type": "http", "headers": []}),
+            Mock(),
         )
 
     assert response is expected
@@ -493,7 +493,7 @@ def test_start_run_forwards_caller_provided_source() -> None:
             _ACCOUNT,
             fleet_api_type="grpc-rere",
             run_source="cli",
-            http_request=Request({"type": "http", "headers": []}),
+            tracing=Mock(),
         )
 
     assert start_run.call_args.kwargs["source"] == "cli"

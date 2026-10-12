@@ -53,6 +53,7 @@ from flwr.supercore.interceptors import (
 )
 from flwr.supercore.retry import RetryInvoker, make_simple_http_retry_invoker
 from flwr.supercore.runtime import RuntimeHttpClient
+from flwr.supercore.runtime.tracing import RuntimeTracingInterceptor
 from flwr.supercore.task_identity import TaskIdentity
 from flwr.supercore.telemetry import EventType, event
 from flwr.supercore.tracing import flush_traces, trace_span
@@ -75,6 +76,7 @@ class _ModelTaskLifecycle:  # pylint: disable=too-many-instance-attributes
         self._insecure = insecure
         self._certificates = certificates
         self._client: RuntimeHttpClient | None = None
+        self._tracing = RuntimeTracingInterceptor()
         self._retry_invoker: RetryInvoker | None = None
         self._heartbeat_sender: HeartbeatSender | None = None
         self._sub_status = SubStatus.FAILED
@@ -106,7 +108,7 @@ class _ModelTaskLifecycle:  # pylint: disable=too-many-instance-attributes
             event(EventType.FLWR_MODEL_RUN_ENTER)
             with trace_span(
                 "model.execute",
-                traceparent=self._client.take_task_traceparent(task_input.task_id),
+                traceparent=self._tracing.take_task_traceparent(task_input.task_id),
                 attributes={
                     "flwr.component": "model",
                     "flwr.task_id": str(task_input.task_id),
@@ -139,6 +141,7 @@ class _ModelTaskLifecycle:  # pylint: disable=too-many-instance-attributes
             token=self._token,
             insecure=self._insecure,
             certificates=self._certificates,
+            tracing=self._tracing,
         )
 
     def mark_interrupted(self) -> None:
@@ -339,6 +342,7 @@ def _create_runtime_client(
     token: str,
     insecure: bool,
     certificates: bytes | None,
+    tracing: RuntimeTracingInterceptor,
 ) -> tuple[RuntimeHttpClient, RetryInvoker]:
     """Create a Runtime HTTP client authenticated as the model task."""
     retry_invoker = make_simple_http_retry_invoker()
@@ -347,6 +351,7 @@ def _create_runtime_client(
         insecure=insecure,
         root_certificates=certificates,
         interceptors=[
+            tracing,
             RuntimeVersionHttpInterceptor(component_name="flwr-model"),
             RuntimeTokenHttpInterceptor(token),
         ],
