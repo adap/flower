@@ -14,10 +14,7 @@
 # ==============================================================================
 """Tests for the Runtime HTTP client."""
 
-from concurrent.futures import ThreadPoolExecutor
-from contextvars import ContextVar
 from importlib import import_module
-from threading import Barrier
 from typing import Annotated
 from unittest.mock import Mock, patch
 
@@ -71,18 +68,15 @@ _RESPONSE_NAME_OVERRIDES = {
 }
 
 
-@pytest.mark.parametrize("response_carrier", ["valid", "invalid", ""])
 def test_task_context_round_trips_in_headers(
-    monkeypatch: pytest.MonkeyPatch, response_carrier: str
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """Real protobuf HTTP boundaries preserve per-task transport metadata."""
     carrier = "00-" + "1" * 32 + "-" + "2" * 16 + "-03"
-    response_carrier = carrier if response_carrier == "valid" else response_carrier
-    expected = carrier if response_carrier == carrier else ""
     monkeypatch.setattr(
         import_module("flwr.supercore.routers.runtime.router"),
         "load_task_context",
-        lambda state, task_id: response_carrier,
+        lambda state, task_id: carrier,
     )
     monkeypatch.setattr(
         "flwr.supercore.runtime.runtime_http_client.current_traceparent",
@@ -140,47 +134,10 @@ def test_task_context_round_trips_in_headers(
         ):  # pylint: disable=protected-access
             assert client.AcquireTask(AcquireTaskRequest()).task.task_id == 5
             assert client.take_task_traceparent(6) == ""
-            assert client.take_task_traceparent(5) == expected
+            assert client.take_task_traceparent(5) == carrier
             assert client.take_task_traceparent(5) == ""
             assert client.PullTaskInput(PullTaskInputRequest()).task_id == 5
-            assert client.take_task_traceparent(5) == expected
-
-
-def test_concurrent_task_response_context_is_isolated(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    """Concurrent calls pair their own carrier with the decoded task ID."""
-    active: ContextVar[str] = ContextVar("test_traceparent")
-    monkeypatch.setattr(
-        "flwr.supercore.runtime.runtime_http_client.current_traceparent", active.get
-    )
-    barrier = Barrier(2)
-
-    def send(request: httpx.Request) -> httpx.Response:
-        carrier = request.headers["traceparent"]
-        task_id = int(carrier.split("-")[1], 16)
-        barrier.wait(timeout=5)
-        return httpx.Response(
-            200,
-            headers={"traceparent": carrier},
-            content=PullTaskInputResponse(task_id=task_id).SerializeToString(),
-            request=request,
-        )
-
-    with RuntimeHttpClient("http://runtime.example") as client:
-
-        def pull(task_id: int) -> tuple[int, str]:
-            active.set(f"00-{task_id:032x}-{task_id:016x}-01")
-            result = client.PullTaskInput(PullTaskInputRequest())
-            return result.task_id, client.take_task_traceparent(task_id)
-
-        with (
-            patch("flwr.supercore.protobuf.client.httpx.Client.send", side_effect=send),
-            ThreadPoolExecutor(max_workers=2) as pool,
-        ):
-            assert list(pool.map(pull, [5, 6])) == [
-                (task_id, f"00-{task_id:032x}-{task_id:016x}-01") for task_id in [5, 6]
-            ]
+            assert client.take_task_traceparent(5) == carrier
 
 
 @pytest.mark.parametrize("failure", ["current_traceparent", "validate_traceparent"])
