@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import json
 import time
+from collections import defaultdict
 from collections.abc import Sequence
 from copy import deepcopy
 from queue import Empty, Queue
@@ -243,6 +244,7 @@ class RuntimeAgentConnectors(AgentConnectors):
         )
 
 
+# pylint: disable-next=too-many-instance-attributes
 class AgentRuntime:
     """Coordinate AgentApp operations with Runtime services."""
 
@@ -261,6 +263,7 @@ class AgentRuntime:
         self._start_run_request = start_run_request
         self._events = events
         self._discovered_tools: dict[str, list[JSONObject]] = {}
+        self._discovery_locks: defaultdict[str, Lock] = defaultdict(Lock)
         self._discovery_lock = Lock()
 
     def get_connector_tools(
@@ -280,46 +283,49 @@ class AgentRuntime:
     def _discover_connector_tools(
         self, connector_ref: str, *, refresh: bool = False
     ) -> list[JSONObject]:
-        """Cache tool metadata in this runtime and invalidate before refresh."""
+        """Cache tool metadata and serialize discovery only within each connector."""
         with self._discovery_lock:
+            lock = self._discovery_locks[connector_ref]
+        with lock:
             if refresh:
                 self._discovered_tools.pop(connector_ref, None)
-            if connector_ref not in self._discovered_tools:
-                operation = get_connector_discovery_tool(connector_ref)
-                if operation is None:
-                    raise ValueError(
-                        f"Connector '{connector_ref}' has no discovery source."
-                    )
-                result = self.create_connector_response(
-                    name=operation, call_id=uuid4().hex, arguments={}
+            if connector_ref in self._discovered_tools:
+                return self._discovered_tools[connector_ref]
+            operation = get_connector_discovery_tool(connector_ref)
+            if operation is None:
+                raise ValueError(
+                    f"Connector '{connector_ref}' has no discovery source."
                 )
-                if not isinstance(result, list) or not all(
-                    isinstance(tool, dict) for tool in result
+            result = self.create_connector_response(
+                name=operation, call_id=uuid4().hex, arguments={}
+            )
+            if not isinstance(result, list) or not all(
+                isinstance(tool, dict) for tool in result
+            ):
+                raise RuntimeError(
+                    f"Connector '{connector_ref}' returned invalid tools."
+                )
+            tools = cast(list[JSONObject], result)
+            names: set[str] = {operation, f"{connector_ref}__call_tool"}
+            names.update(
+                cast(str, tool["name"]).lower()
+                for tool in get_connector_tools(connector_ref)
+            )
+            for tool in tools:
+                name = tool.get("name")
+                if (
+                    not isinstance(name, str)
+                    or not name.startswith(f"{connector_ref}_")
+                    or name == f"{connector_ref}_"
+                    or name.lower() in names
+                    or get_connector_ref(name.lower()) != connector_ref
                 ):
                     raise RuntimeError(
-                        f"Connector '{connector_ref}' returned invalid tools."
+                        f"Connector '{connector_ref}' returned invalid tool names."
                     )
-                tools = cast(list[JSONObject], result)
-                names: set[str] = {operation, f"{connector_ref}__call_tool"}
-                names.update(
-                    cast(str, tool["name"]).lower()
-                    for tool in get_connector_tools(connector_ref)
-                )
-                for tool in tools:
-                    name = tool.get("name")
-                    if (
-                        not isinstance(name, str)
-                        or not name.startswith(f"{connector_ref}_")
-                        or name == f"{connector_ref}_"
-                        or name.lower() in names
-                        or get_connector_ref(name.lower()) != connector_ref
-                    ):
-                        raise RuntimeError(
-                            f"Connector '{connector_ref}' returned invalid tool names."
-                        )
-                    names.add(name.lower())
-                self._discovered_tools[connector_ref] = deepcopy(tools)
-            return self._discovered_tools[connector_ref]
+                names.add(name.lower())
+            self._discovered_tools[connector_ref] = tools
+            return tools
 
     def create_connector_response(
         self, *, name: str, call_id: str, arguments: JSONObject

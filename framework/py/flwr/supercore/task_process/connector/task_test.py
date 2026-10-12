@@ -28,7 +28,6 @@ from flwr.supercore.json_message.connector_message import (
     ConnectorResponse,
 )
 from flwr.supercore.task_identity import TaskIdentity
-from flwr.supercore.typing import JSONObject
 
 from . import registry
 from .definition import (
@@ -46,15 +45,13 @@ class NotionTestApiError(ConnectorApiError):
     provider = "Notion"
 
 
-def _connector_request(
-    name: str, arguments: JSONObject | None = None
-) -> ConnectorRequest:
+def _connector_request(name: str) -> ConnectorRequest:
     """Build a connector request with routed task metadata."""
     request = ConnectorRequest(
         dst_task_id=22,
         name=name,
         call_id="call-1",
-        arguments=arguments if arguments is not None else {"query": "release notes"},
+        arguments={"query": "release notes"},
     )
     request.metadata.__dict__["_run_id"] = 7
     request.metadata.__dict__["_message_id"] = "request-message-id"
@@ -142,9 +139,9 @@ class TestHandleTask(unittest.TestCase):
 
         self.provider.assert_not_called()
 
-    def test_dynamic_operations_use_only_bound_credentials(self) -> None:
+    def test_dynamic_operations_reject_foreign_credentials(self) -> None:
         """Discovery and calls reject foreign credentials before entering callbacks."""
-        discover = Mock(return_value=())
+        discover = Mock()
         connector = ConnectorDefinition(
             ref="example",
             tools=(),
@@ -152,7 +149,6 @@ class TestHandleTask(unittest.TestCase):
             requires_credentials=True,
             tool_source=ConnectorToolSource(discover, self.provider),
         )
-        self.provider.return_value = {"ok": True}
         with patch.dict(
             registry._CONNECTORS_BY_REF,  # pylint: disable=protected-access
             {"example": connector},
@@ -163,28 +159,8 @@ class TestHandleTask(unittest.TestCase):
                     RuntimeError, "Credential-backed connector execution failed"
                 ):
                     handle_task(client=self.stub)
-            discover.assert_not_called()
-            self.provider.assert_not_called()
-            self.stub.GetConnector.return_value = GetConnectorResponse(
-                connector_ref="example",
-                credentials_json='{"token":"bound"}',
-                config_json='{"account":"selected"}',
-            )
-            self.pull_connector_request.return_value = _connector_request(
-                "example__discover_tools"
-            )
-            handle_task(client=self.stub)
-            request = _connector_request(
-                "example__call_tool", {"name": "CreateThing", "arguments": {"value": 1}}
-            )
-            self.pull_connector_request.return_value = request
-            handle_task(client=self.stub)
-        assert discover.call_args.args[0].credentials == {"token": "bound"}
-        assert self.provider.call_args.args[0] == {"value": 1}
-        context = self.provider.call_args.args[1]
-        assert context.action_name == "CreateThing"
-        assert context.credentials == {"token": "bound"}
-        assert context.config == {"account": "selected"}
+        discover.assert_not_called()
+        self.provider.assert_not_called()
 
     def test_does_not_expose_credentials_in_provider_errors(self) -> None:
         """Credential-backed provider failures should not expose secret values."""

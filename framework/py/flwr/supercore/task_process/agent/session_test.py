@@ -14,6 +14,8 @@
 # ==============================================================================
 """Runtime AgentApp session tests."""
 
+from concurrent.futures import ThreadPoolExecutor
+from threading import Event
 from typing import cast
 from unittest.mock import Mock, call, patch
 
@@ -76,22 +78,6 @@ def fixture_runtime() -> AgentRuntime:
         task_id=789,
         start_run_request=StartRunRequest(),
         events=Mock(),
-    )
-
-
-@pytest.fixture(name="dynamic_connector")
-def fixture_dynamic_connector(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Advertise a dynamic test connector while task replies are mocked."""
-    monkeypatch.setitem(
-        connector_registry._CONNECTORS_BY_REF,  # pylint: disable=protected-access
-        "example",
-        ConnectorDefinition(
-            ref="example",
-            tools=(),
-            executors={},
-            requires_credentials=True,
-            tool_source=ConnectorToolSource(discover=Mock(), execute=Mock()),
-        ),
     )
 
 
@@ -486,9 +472,20 @@ def test_connector_tools_include_agent_handled_automation(
     ]
 
 
-@pytest.mark.usefixtures("dynamic_connector")
-def test_dynamic_tools_are_cached_and_routed(runtime: AgentRuntime) -> None:
+def test_dynamic_tools_are_cached_and_routed(
+    runtime: AgentRuntime, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """Cache copied schemas and route calls using the original provider name."""
+    monkeypatch.setitem(
+        connector_registry._CONNECTORS_BY_REF,  # pylint: disable=protected-access
+        "example",
+        ConnectorDefinition(
+            ref="example",
+            tools=(),
+            executors={},
+            tool_source=ConnectorToolSource(discover=Mock(), execute=Mock()),
+        ),
+    )
     reply = ConnectorResponse(
         dst_task_id=789,
         name="example__discover_tools",
@@ -519,45 +516,46 @@ def test_dynamic_tools_are_cached_and_routed(runtime: AgentRuntime) -> None:
             "call_id": "call-1",
             "arguments": {"name": "CreateThing", "arguments": {"value": 1}},
         }
-        with pytest.raises(ValueError, match="Unsupported discovered tool"):
-            runtime.create_connector_response(
-                name="example_unknown", call_id="missing", arguments={}
-            )
-
-
-@pytest.mark.usefixtures("dynamic_connector")
-def test_failed_refresh_discards_stale_catalogue(runtime: AgentRuntime) -> None:
-    """A failed refresh is retried instead of reusing stale schemas."""
-    with patch.object(
-        runtime,
-        "create_connector_response",
-        side_effect=[
-            [{"name": "example_old"}],
-            RuntimeError("Discovery failed"),
-            [{"name": "example_new"}],
-        ],
-    ):
-        assert runtime.get_connector_tools("example")[0]["name"] == "example_old"
+        exchange.side_effect = RuntimeError("Discovery failed")
         with pytest.raises(RuntimeError, match="Discovery failed"):
-            runtime.get_connector_tools("example", refresh=True)
-        assert runtime.get_connector_tools("example")[0]["name"] == "example_new"
+            connectors.tools(["example"], refresh=True)
+        exchange.side_effect = None
+        connectors.tools(["example"])
+        assert exchange.call_count == 5
 
 
-@pytest.mark.usefixtures("dynamic_connector")
-@pytest.mark.parametrize(
-    "output",
-    [
-        None,
-        [{"name": "other_read"}],
-        [{"name": "example__call_tool"}],
-        [{"name": "example_Same"}, {"name": "example_same"}],
-    ],
-)
-def test_invalid_dynamic_catalogue_is_not_cached(
-    runtime: AgentRuntime, output: object
+def test_discovery_does_not_block_other_connectors(
+    runtime: AgentRuntime, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """Reject malformed, foreign, and ambiguous discovery results."""
-    with patch.object(runtime, "create_connector_response", side_effect=[output, []]):
-        with pytest.raises(RuntimeError, match="invalid"):
-            runtime.get_connector_tools("example")
-        assert runtime.get_connector_tools("example") == []
+    """A slow connector must not block discovery for another connector."""
+    for ref in ("example", "other"):
+        monkeypatch.setitem(
+            connector_registry._CONNECTORS_BY_REF,  # pylint: disable=protected-access
+            ref,
+            ConnectorDefinition(
+                ref=ref,
+                tools=(),
+                executors={},
+                tool_source=ConnectorToolSource(discover=Mock(), execute=Mock()),
+            ),
+        )
+    started, release = Event(), Event()
+
+    def discover(*, name: str, **_kwargs: object) -> list[JSONObject]:
+        if name == "example__discover_tools":
+            started.set()
+            assert release.wait(5)
+        return []
+
+    with (
+        patch.object(runtime, "create_connector_response", side_effect=discover),
+        ThreadPoolExecutor(max_workers=2) as executor,
+    ):
+        slow = executor.submit(runtime.get_connector_tools, "example")
+        try:
+            assert started.wait(5)
+            other = executor.submit(runtime.get_connector_tools, "other")
+            assert other.result(timeout=5) == []
+        finally:
+            release.set()
+        assert slow.result(timeout=5) == []

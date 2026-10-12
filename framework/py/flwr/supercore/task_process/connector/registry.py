@@ -129,16 +129,16 @@ def _resolve_connector(tool_name: str) -> ConnectorDefinition | None:
     """Resolve static tools first, then the most specific dynamic namespace."""
     if connector := _CONNECTORS_BY_TOOL.get(tool_name):
         return connector
-    for connector in sorted(
-        _CONNECTORS_BY_REF.values(), key=lambda item: len(item.ref), reverse=True
-    ):
-        prefix = f"{connector.ref}_"
+    connector_ref, separator, _ = tool_name.rpartition("_")
+    while separator:
+        connector = _CONNECTORS_BY_REF.get(connector_ref)
         if (
-            connector.tool_source is not None
-            and tool_name.startswith(prefix)
-            and len(tool_name) > len(prefix)
+            connector is not None
+            and connector.tool_source is not None
+            and len(tool_name) > len(connector_ref) + 1
         ):
             return connector
+        connector_ref, separator, _ = connector_ref.rpartition("_")
     return None
 
 
