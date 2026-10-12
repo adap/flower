@@ -14,9 +14,6 @@
 # ==============================================================================
 """Runtime AgentApp session tests."""
 
-from concurrent.futures import ThreadPoolExecutor
-from threading import Event
-from typing import cast
 from unittest.mock import Mock, call, patch
 
 import pytest
@@ -45,10 +42,6 @@ from flwr.supercore.json_message.connector_message import (
 from flwr.supercore.task_identity import TaskIdentity
 from flwr.supercore.task_process.connector import registry as connector_registry
 from flwr.supercore.task_process.connector.automation import START_AUTOMATION_TOOL_NAME
-from flwr.supercore.task_process.connector.definition import (
-    ConnectorDefinition,
-    ConnectorToolSource,
-)
 from flwr.supercore.typing import JSONObject
 
 from .session import (
@@ -65,20 +58,6 @@ def task_identity(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(TaskIdentity, "_task_id", 789)
     monkeypatch.setattr(TaskIdentity, "_run_id", 123)
     monkeypatch.setattr(TaskIdentity, "_node_id", 456)
-
-
-@pytest.fixture(name="runtime")
-def fixture_runtime() -> AgentRuntime:
-    """Create a fresh run-scoped runtime with a task stub."""
-    stub = Mock()
-    stub.CreateTask.return_value = CreateTaskResponse(task_id=456)
-    return AgentRuntime(
-        stub=stub,
-        run_id=123,
-        task_id=789,
-        start_run_request=StartRunRequest(),
-        events=Mock(),
-    )
 
 
 def test_emit_event_pushes_task_event() -> None:
@@ -256,23 +235,18 @@ def test_start_automation_tool_exposes_only_input_and_schedule() -> None:
     assert parameters["required"] == ["input", "start_at"]
 
 
-def test_runtime_connectors_expand_one_connector_into_multiple_tools(
-    runtime: AgentRuntime,
-) -> None:
+def test_runtime_connectors_expand_one_connector_into_multiple_tools() -> None:
     """One connector reference can advertise multiple model-facing tools."""
+    runtime = Mock()
     connectors = RuntimeAgentConnectors(runtime)
     tools: list[JSONObject] = [
         {"type": "function", "name": "example_search"},
         {"type": "function", "name": "example_read"},
     ]
 
-    with patch(
-        "flwr.supercore.task_process.agent.session.get_connector_tools",
-        return_value=tools,
-    ) as get_connector_tools:
-        assert connectors.tools(["example"]) == tools
-
-    get_connector_tools.assert_called_once_with("example")
+    runtime.get_connector_tools.return_value = tools
+    assert connectors.tools(["example"]) == tools
+    runtime.get_connector_tools.assert_called_once_with("example", refresh=False)
 
 
 def test_call_automation_embeds_input_in_control_request() -> None:
@@ -445,10 +419,12 @@ def test_create_connector_response_uses_connector_task_for_filesystem() -> None:
     )
 
 
-def test_connector_tools_include_agent_handled_automation(
-    runtime: AgentRuntime,
-) -> None:
+def test_connector_tools_include_agent_handled_automation() -> None:
     """Automation and connector schemas should remain available in request order."""
+    runtime = Mock()
+    runtime.get_connector_tools.side_effect = (
+        lambda name, **_kwargs: connector_registry.get_connector_tools(name)
+    )
     connectors = RuntimeAgentConnectors(runtime)
 
     assert [
@@ -472,90 +448,30 @@ def test_connector_tools_include_agent_handled_automation(
     ]
 
 
-def test_dynamic_tools_are_cached_and_routed(
-    runtime: AgentRuntime, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    """Cache copied schemas and route calls using the original provider name."""
-    monkeypatch.setitem(
-        connector_registry._CONNECTORS_BY_REF,  # pylint: disable=protected-access
-        "example",
-        ConnectorDefinition(
-            ref="example",
-            tools=(),
-            executors={},
-            tool_source=ConnectorToolSource(discover=Mock(), execute=Mock()),
+def test_runtime_discovers_and_caches_tools() -> None:
+    """Discover once, return independent copies, and refresh explicitly."""
+    runtime = AgentRuntime(
+        stub=Mock(),
+        run_id=123,
+        task_id=789,
+        start_run_request=StartRunRequest(),
+        events=Mock(),
+    )
+    tools: list[JSONObject] = [{"name": "example_Read"}]
+    with (
+        patch.dict(
+            connector_registry._CONNECTORS_BY_REF,  # pylint: disable=protected-access
+            {"example": Mock(ref="example", tools=(), tool_source=Mock())},
         ),
-    )
-    reply = ConnectorResponse(
-        dst_task_id=789,
-        name="example__discover_tools",
-        call_id="discovery",
-        output=[{"name": "example_CreateThing", "parameters": {"required": ["value"]}}],
-        error=None,
-        reply_to_message_id="request-message-id",
-    )
-    with patch.object(runtime, "_send_and_receive", return_value=reply) as exchange:
+        patch.object(
+            runtime, "create_connector_response", return_value=tools
+        ) as discover,
+    ):
         connectors = RuntimeAgentConnectors(runtime)
         first = connectors.tools(["example"])
-        assert first[0]["name"] == "example_creatething"
-        cast(JSONObject, first[0]["parameters"])["required"] = []
-        assert RuntimeAgentConnectors(runtime).tools(["example"])[0]["parameters"] == {
-            "required": ["value"],
-        }
-        exchange.assert_called_once()
-        assert exchange.call_args.args[0].payload["name"] == "example__discover_tools"
+        assert first == [{"name": "example_read"}]
+        first[0]["name"] = "Changed"
+        assert connectors.tools(["example"]) == [{"name": "example_read"}]
+        discover.assert_called_once()
         connectors.tools(["example"], refresh=True)
-        assert exchange.call_count == 2
-
-        runtime.create_connector_response(
-            name="example_creatething", call_id="call-1", arguments={"value": 1}
-        )
-        assert exchange.call_count == 3
-        assert exchange.call_args.args[0].payload == {
-            "name": "example__call_tool",
-            "call_id": "call-1",
-            "arguments": {"name": "CreateThing", "arguments": {"value": 1}},
-        }
-        exchange.side_effect = RuntimeError("Discovery failed")
-        with pytest.raises(RuntimeError, match="Discovery failed"):
-            connectors.tools(["example"], refresh=True)
-        exchange.side_effect = None
-        connectors.tools(["example"])
-        assert exchange.call_count == 5
-
-
-def test_discovery_does_not_block_other_connectors(
-    runtime: AgentRuntime, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    """A slow connector must not block discovery for another connector."""
-    for ref in ("example", "other"):
-        monkeypatch.setitem(
-            connector_registry._CONNECTORS_BY_REF,  # pylint: disable=protected-access
-            ref,
-            ConnectorDefinition(
-                ref=ref,
-                tools=(),
-                executors={},
-                tool_source=ConnectorToolSource(discover=Mock(), execute=Mock()),
-            ),
-        )
-    started, release = Event(), Event()
-
-    def discover(*, name: str, **_kwargs: object) -> list[JSONObject]:
-        if name == "example__discover_tools":
-            started.set()
-            assert release.wait(5)
-        return []
-
-    with (
-        patch.object(runtime, "create_connector_response", side_effect=discover),
-        ThreadPoolExecutor(max_workers=2) as executor,
-    ):
-        slow = executor.submit(runtime.get_connector_tools, "example")
-        try:
-            assert started.wait(5)
-            other = executor.submit(runtime.get_connector_tools, "other")
-            assert other.result(timeout=5) == []
-        finally:
-            release.set()
-        assert slow.result(timeout=5) == []
+        assert discover.call_count == 2

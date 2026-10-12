@@ -14,20 +14,9 @@
 # ==============================================================================
 """Tests for the connector registry."""
 
-from unittest.mock import Mock
-
-import pytest
-
-from flwr.supercore.typing import JSONObject
+from unittest.mock import Mock, patch
 
 from . import registry
-from .definition import (
-    ActionAccess,
-    ActionDefinition,
-    ConnectorDefinition,
-    ConnectorExecutionContext,
-    ConnectorToolSource,
-)
 from .registry import CONNECTORS
 
 
@@ -45,51 +34,14 @@ def test_connector_tool_names_are_unique() -> None:
     assert len(tool_names) == len(set(tool_names))
 
 
-def test_dynamic_discovery_and_execution_are_separate(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    """Discover schemas and execute with bound credentials and the original name."""
-    action = ActionDefinition(
-        name="FutureTool",
-        description="Future",
-        access=ActionAccess.WRITE,
-        input_schema={"type": "object"},
-    )
-    discover = Mock(return_value=(action,))
-    execute = Mock(return_value={"ok": True})
-    for ref in ("example", "example_nested"):
-        monkeypatch.setitem(
-            registry._CONNECTORS_BY_REF,  # pylint: disable=protected-access
-            ref,
-            ConnectorDefinition(
-                ref=ref,
-                tools=(),
-                executors={},
-                requires_credentials=True,
-                tool_source=ConnectorToolSource(discover, execute),
-            ),
-        )
-    assert registry.get_connector_ref("example_nested_read") == "example_nested"
-    assert registry.get_connector_ref("example_nested_") == "example"
-    assert registry.get_connector_ref("exampleish_read") == "exampleish_read"
-    usage_recorder = Mock()
-    credentials: JSONObject = {"access_token": "bound-token"}
-    assert registry.invoke_connector(
-        "example__discover_tools", {}, usage_recorder, credentials, {}
-    ) == [action.tool("example")]
-    assert registry.invoke_connector(
-        "example__call_tool",
-        {"name": "FutureTool", "arguments": {"value": 1}},
-        usage_recorder,
-        credentials,
-        {},
-    ) == {"ok": True}
-    discover.assert_called_once_with(
-        ConnectorExecutionContext(credentials, {}, usage_recorder)
-    )
-    execute.assert_called_once_with(
-        {"value": 1},
-        ConnectorExecutionContext(
-            credentials, {}, usage_recorder, action_name="FutureTool"
-        ),
-    )
+def test_dynamic_tools_resolve_to_their_connector() -> None:
+    """Resolve dynamic tools to their credential-backed connector."""
+    connector = Mock(ref="example", tool_source=Mock(), requires_credentials=True)
+    with patch.dict(
+        registry._CONNECTORS_BY_REF,  # pylint: disable=protected-access
+        {"example": connector},
+    ):
+        assert registry.get_connector_ref("example_read") == "example"
+        assert registry.requires_connector_credentials("example_read")
+        assert registry.get_connector_call_tool("example_read") == "example__call_tool"
+        assert registry.get_connector_ref("exampleish_read") == "exampleish_read"

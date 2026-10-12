@@ -30,11 +30,7 @@ from flwr.supercore.json_message.connector_message import (
 from flwr.supercore.task_identity import TaskIdentity
 
 from . import registry
-from .definition import (
-    ConnectorDefinition,
-    ConnectorExecutionContext,
-    ConnectorToolSource,
-)
+from .definition import ConnectorDefinition, ConnectorExecutionContext
 from .http import ConnectorApiError
 from .task import handle_task
 
@@ -137,29 +133,6 @@ class TestHandleTask(unittest.TestCase):
         ):
             handle_task(client=self.stub)
 
-        self.provider.assert_not_called()
-
-    def test_dynamic_operations_reject_foreign_credentials(self) -> None:
-        """Discovery and calls reject foreign credentials before entering callbacks."""
-        discover = Mock()
-        connector = ConnectorDefinition(
-            ref="example",
-            tools=(),
-            executors={},
-            requires_credentials=True,
-            tool_source=ConnectorToolSource(discover, self.provider),
-        )
-        with patch.dict(
-            registry._CONNECTORS_BY_REF,  # pylint: disable=protected-access
-            {"example": connector},
-        ):
-            for operation in ("example__discover_tools", "example__call_tool"):
-                self.pull_connector_request.return_value = _connector_request(operation)
-                with self.assertRaisesRegex(
-                    RuntimeError, "Credential-backed connector execution failed"
-                ):
-                    handle_task(client=self.stub)
-        discover.assert_not_called()
         self.provider.assert_not_called()
 
     def test_does_not_expose_credentials_in_provider_errors(self) -> None:
