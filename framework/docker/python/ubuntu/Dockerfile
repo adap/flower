@@ -22,6 +22,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Install the certificate bundle required to download the managed Python build.
 RUN apt-get update \
+    && apt-get -y upgrade \
     && apt-get -y --no-install-recommends install \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
@@ -40,7 +41,12 @@ ARG PIP_VERSION
 ARG SETUPTOOLS_VERSION
 # Use a virtual environment so packages have the same location regardless of
 # whether the subsequent image build runs as root or app.
-RUN python -m venv /python/venv \
+# Update the bundled installer too, since the managed Python tree is copied
+# into the runtime image alongside the virtual environment.
+RUN python -m pip install -U --no-cache-dir --break-system-packages \
+    pip==${PIP_VERSION} \
+    setuptools==${SETUPTOOLS_VERSION} \
+    && python -m venv /python/venv \
     && /python/venv/bin/python -m pip install -U --no-cache-dir \
     pip==${PIP_VERSION} \
     setuptools==${SETUPTOOLS_VERSION}
@@ -53,6 +59,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     PATH=/usr/local/bin/python/bin:$PATH
 
 RUN apt-get update \
+    && apt-get -y upgrade \
     && apt-get -y --no-install-recommends install \
     libsqlite3-0 \
     ca-certificates \
