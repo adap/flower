@@ -36,8 +36,10 @@ from flwr.supercore.interceptors import (
 from flwr.supercore.protobuf.client import ProtobufClientInterceptor
 from flwr.supercore.retry import make_simple_http_retry_invoker
 from flwr.supercore.runtime import RuntimeHttpClient
+from flwr.supercore.runtime.tracing import RuntimeTracingInterceptor
 from flwr.supercore.telemetry import EventType
 from flwr.supercore.tls import validate_and_resolve_root_certificates
+from flwr.supercore.tracing import flush_traces, trace_span
 
 from .executor import LaunchResult, LaunchResultStatus, get_executor
 from .executor.config import ExecutorConfig
@@ -50,8 +52,6 @@ _DEFAULT_TASK_POLL_INTERVAL_SECONDS = 1.0
 _SUPEREXEC_AUTH_METHODS = frozenset(
     {
         "/flwr.proto.Runtime/AcquireTask",
-        "/flwr.proto.Runtime/PullPendingTasks",
-        "/flwr.proto.Runtime/ClaimTask",
     }
 )
 
@@ -180,8 +180,10 @@ def run_superexec(  # pylint: disable=R0912,R0913,R0914,R0915,R0917
     except ValueError as err:
         flwr_exit(ExitCode.SUPEREXEC_INVALID_EXECUTOR_CONFIG, str(err))
 
+    tracing = RuntimeTracingInterceptor()
     interceptors: list[ProtobufClientInterceptor] = [
-        RuntimeVersionHttpInterceptor(component_name="SuperExec")
+        tracing,
+        RuntimeVersionHttpInterceptor(component_name="SuperExec"),
     ]
     if superexec_auth_secret:
         interceptors.append(
@@ -258,13 +260,25 @@ def run_superexec(  # pylint: disable=R0912,R0913,R0914,R0915,R0917
                 )
             )
             if combined_res.HasField("task") and combined_res.token:
-                launch_result = plugin.launch_task(
-                    token=combined_res.token, task=combined_res.task
-                )
+                with trace_span(
+                    "task.dispatch",
+                    traceparent=tracing.take_task_traceparent(
+                        combined_res.task.task_id
+                    ),
+                    attributes={
+                        "flwr.component": "superexec",
+                        "flwr.task_id": str(combined_res.task.task_id),
+                        "flwr.run_id": str(combined_res.task.run_id),
+                    },
+                ):
+                    launch_result = plugin.launch_task(
+                        token=combined_res.token, task=combined_res.task
+                    )
                 _handle_launch_result(launch_result, combined_res.task)
 
             # Sleep for a while before checking again
             time.sleep(task_poll_interval)
     finally:
+        flush_traces()
         client.close()
         executor.close()

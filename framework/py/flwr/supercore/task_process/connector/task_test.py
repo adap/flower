@@ -140,10 +140,7 @@ class TestHandleTask(unittest.TestCase):
         self.pull_connector_request.return_value = _connector_request(
             "github_future_tool"
         )
-        self.provider.side_effect = [
-            [{"name": "future_tool", "inputSchema": {"type": "object"}}],
-            {"content": []},
-        ]
+        self.provider.return_value = {"content": []}
         with patch(
             "flwr.supercore.task_process.connector.github.mcp.request", self.provider
         ):
@@ -159,7 +156,6 @@ class TestHandleTask(unittest.TestCase):
             )
             handle_task(client=self.stub)
         assert self.provider.call_args_list == [
-            call(None, {}, {"access_token": "github-token"}),
             call(
                 "future_tool",
                 {"query": "release notes"},

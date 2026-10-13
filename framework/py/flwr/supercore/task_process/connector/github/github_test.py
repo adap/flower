@@ -26,12 +26,13 @@ import requests
 from mcp import types
 from mcp.shared.exceptions import McpError
 
+from flwr.supercore.task_process.agent.session import AgentRuntime
 from flwr.supercore.typing import JSONObject, JSONValue
 
 from .. import registry
-from ..definition import ActionAccess
+from ..definition import ActionAccess, ConnectorExecutionContext
 from ..oauth import OAuthFlow
-from .definition import CONNECTOR, PROVIDER, load_connector
+from .definition import CONNECTOR, PROVIDER
 from .mcp import GitHubApiError
 
 _ACCESS_TOKEN = "github-private-token-fixture"
@@ -106,7 +107,7 @@ def test_discovery_preserves_paginated_remote_catalog(session: AsyncMock) -> Non
         "parameters": schema,
         "strict": False,
     }
-    assert tools[1]["name"] == "github_futuretool"
+    assert tools[1]["name"] == "github_FutureTool"
     assert session.list_tools.await_args_list == [
         call(params=None),
         call(params=types.PaginatedRequestParams(cursor="next")),
@@ -118,17 +119,20 @@ def test_discovery_preserves_paginated_remote_catalog(session: AsyncMock) -> Non
 def test_catalog_builds_connection_specific_actions(
     session: AsyncMock, read_only: bool | None
 ) -> None:
-    """Use normal actions and executors without changing the shared definition."""
+    """Discover actions through the shared dynamic source without registration."""
     session.list_tools.return_value.tools[0].annotations = types.ToolAnnotations(
         readOnlyHint=read_only
     )
-    connector = load_connector({"access_token": _ACCESS_TOKEN})
-    assert connector.provider is not None
-    assert connector.provider.actions[0].access == (
-        ActionAccess.READ if read_only else ActionAccess.WRITE
+    assert CONNECTOR.tool_source is not None
+    actions = CONNECTOR.tool_source.discover(
+        ConnectorExecutionContext(
+            credentials={"access_token": _ACCESS_TOKEN},
+            config={},
+            usage_recorder=Mock(),
+        )
     )
-    assert set(connector.executors) == {"github_futuretool"}
-    assert connector.load_connector is None
+    assert actions[0].name == "FutureTool"
+    assert actions[0].access == (ActionAccess.READ if read_only else ActionAccess.WRITE)
     assert not CONNECTOR.tools and not CONNECTOR.executors
 
 
@@ -141,18 +145,30 @@ def test_calls_forward_remote_names_arguments_and_results(
         tools=[types.Tool(name=name, inputSchema={"type": "object"})]
     )
     arguments: JSONObject = {"perPage": 5, "data": {"items": [1, False, None]}}
-    assert _invoke(f"github_{name.lower()}", arguments) == (
+    assert _invoke(f"github_{name}", arguments) == (
         session.call_tool.return_value.model_dump(
             mode="json", by_alias=True, exclude_none=True
         )
     )
     session.call_tool.assert_awaited_once_with(name, arguments)
+    session.list_tools.assert_not_awaited()
 
 
 def test_unadvertised_tool_is_not_called(session: AsyncMock) -> None:
     """Reject tools absent from the connection's catalog."""
-    with pytest.raises(ValueError, match="Unsupported connector"):
-        _invoke("github_unknown", {})
+    tools = _invoke("github__discover_tools", {})
+    stub = Mock()
+    runtime = AgentRuntime(
+        stub=stub, run_id=123, task_id=456, start_run_request=Mock(), events=Mock()
+    )
+    with (
+        patch.object(runtime, "_discover_connector_tools", return_value=tools),
+        pytest.raises(ValueError, match="Unsupported discovered tool"),
+    ):
+        runtime.create_connector_response(
+            name="github_unknown", call_id="call-1", arguments={}
+        )
+    stub.CreateTask.assert_not_called()
     session.call_tool.assert_not_awaited()
 
 
@@ -182,7 +198,7 @@ def test_errors_do_not_expose_credentials(session: AsyncMock, failure: str) -> N
             ],
         )
     with pytest.raises(GitHubApiError) as error:
-        _invoke("github_futuretool", {})
+        _invoke("github_FutureTool", {})
     assert (
         error.value.code
         == {

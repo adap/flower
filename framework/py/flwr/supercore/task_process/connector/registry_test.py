@@ -14,7 +14,10 @@
 # ==============================================================================
 """Tests for the connector registry."""
 
-from .registry import CONNECTORS, get_connector_ref, requires_connector_credentials
+from unittest.mock import Mock, patch
+
+from . import registry
+from .registry import CONNECTORS
 
 
 def test_connector_references_are_unique() -> None:
@@ -31,9 +34,30 @@ def test_connector_tool_names_are_unique() -> None:
     assert len(tool_names) == len(set(tool_names))
 
 
+def test_dynamic_tools_resolve_to_their_connector() -> None:
+    """Resolve and directly execute tools on their credential-backed connector."""
+    connector = Mock(ref="example", tool_source=Mock(), requires_credentials=True)
+    connector.executors = {}
+    with patch.dict(
+        registry._CONNECTORS_BY_REF,  # pylint: disable=protected-access
+        {"example": connector},
+    ):
+        assert registry.get_connector_ref("example_read") == "example"
+        assert registry.requires_connector_credentials("example_read")
+        assert registry.is_dynamic_connector_tool("example_read")
+        operation = registry.get_connector_discovery_tool("example")
+        assert operation is not None
+        assert not registry.is_dynamic_connector_tool(operation)
+        registry.invoke_connector("example_Read", {}, Mock(), {}, {})
+        assert connector.tool_source.execute.call_args.args[1].action_name == "Read"
+        assert registry.get_connector_ref("exampleish_read") == "exampleish_read"
+
+
 def test_dynamic_github_tools_require_github_credentials() -> None:
     """Resolve newly discovered names without treating them as built-in tools."""
-    assert get_connector_ref("github_future_tool") == "github"
-    assert requires_connector_credentials("github_future_tool")
-    assert get_connector_ref("githubish_future_tool") == "githubish_future_tool"
-    assert not requires_connector_credentials("githubish_future_tool")
+    assert registry.get_connector_ref("github_future_tool") == "github"
+    assert registry.requires_connector_credentials("github_future_tool")
+    assert (
+        registry.get_connector_ref("githubish_future_tool") == "githubish_future_tool"
+    )
+    assert not registry.requires_connector_credentials("githubish_future_tool")

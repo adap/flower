@@ -16,7 +16,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
 from enum import StrEnum
 from typing import Literal
@@ -48,7 +48,7 @@ class ActionDefinition:
 
     def tool_name(self, provider_ref: str) -> str:
         """Return the globally unique model-facing action name."""
-        return f"{provider_ref}_{self.name.lower()}"
+        return f"{provider_ref}_{self.name}"
 
     def tool(self, provider_ref: str) -> JSONObject:
         """Return the model-facing function tool for this action."""
@@ -111,9 +111,18 @@ class ConnectorExecutionContext:
     credentials: JSONObject
     config: JSONObject
     usage_recorder: TaskUsageRecorder
+    action_name: str | None = None
 
 
 ConnectorExecutor = Callable[[JSONObject, ConnectorExecutionContext], JSONValue]
+
+
+@dataclass(frozen=True)
+class ConnectorToolSource:
+    """Discover connection-specific actions and execute them without registration."""
+
+    discover: Callable[[ConnectorExecutionContext], Sequence[ActionDefinition]]
+    execute: ConnectorExecutor
 
 
 @dataclass(frozen=True)
@@ -126,18 +135,17 @@ class ConnectorDefinition:
     requires_credentials: bool = False
     provider: ProviderDefinition | None = None
     oauth_flow: OAuthFlow | None = None
-    load_connector: Callable[[JSONObject], ConnectorDefinition] | None = None
+    tool_source: ConnectorToolSource | None = None
 
     @classmethod
     def from_provider(
         cls,
         provider: ProviderDefinition,
-        executors: Mapping[str, ConnectorExecutor] | None = None,
+        executors: Mapping[str, ConnectorExecutor],
         oauth_flow: OAuthFlow | None = None,
-        load_connector: Callable[[JSONObject], ConnectorDefinition] | None = None,
+        tool_source: ConnectorToolSource | None = None,
     ) -> ConnectorDefinition:
-        """Build a provider connector with static actions or a runtime loader."""
-        executors = executors or {}
+        """Build a federation-scoped connector from its provider actions."""
         action_names = {action.name for action in provider.actions}
         if action_names != set(executors):
             raise ValueError(
@@ -153,7 +161,7 @@ class ConnectorDefinition:
             requires_credentials=True,
             provider=provider,
             oauth_flow=oauth_flow,
-            load_connector=load_connector,
+            tool_source=tool_source,
         )
 
 

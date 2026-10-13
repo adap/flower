@@ -18,13 +18,13 @@ from typing import cast
 
 from flwr.supercore.typing import JSONObject
 
-from ..definition import ActionAccess, ActionDefinition
+from ..definition import ActionAccess, ActionDefinition, ConnectorExecutionContext
 from . import mcp
 
 
-def load_actions(credentials: JSONObject) -> tuple[ActionDefinition, ...]:
+def discover_tools(context: ConnectorExecutionContext) -> tuple[ActionDefinition, ...]:
     """Discover every GitHub tool and preserve its remote schema and name."""
-    tools = cast(list[JSONObject], mcp.request(None, {}, credentials))
+    tools = cast(list[JSONObject], mcp.request(None, {}, context.credentials))
     return tuple(
         ActionDefinition(
             name=cast(str, tool["name"]),

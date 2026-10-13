@@ -15,6 +15,7 @@
 """Connector registry indexed by connector reference and tool name."""
 
 from copy import deepcopy
+from dataclasses import replace
 
 from flwr.supercore.task_process.usage import TaskUsageRecorder
 from flwr.supercore.typing import JSONObject, JSONValue
@@ -24,6 +25,8 @@ from .automation import START_AUTOMATION_TOOL_NAME, make_start_automation_tool
 from .definition import ConnectorDefinition, ConnectorExecutionContext
 from .loader import load_oauth_connectors
 from .oauth import OAuthFlow
+
+_DISCOVERY_TOOL_SUFFIX = "__discover_tools"
 
 CONNECTORS = (
     web_search.CONNECTOR,
@@ -62,13 +65,18 @@ def invoke_connector(
         config=config or {},
         usage_recorder=usage_recorder,
     )
-    if connector.load_connector is not None:
-        discovery_tool = get_connector_discovery_tool(connector.ref)
-        connector = connector.load_connector(context.credentials)
-        if tool_name == discovery_tool:
-            return list(connector.tools)
     if executor := connector.executors.get(tool_name):
         return executor(arguments, context)
+    if connector.tool_source is not None:
+        if is_connector_discovery_tool(tool_name):
+            return [
+                action.tool(connector.ref)
+                for action in connector.tool_source.discover(context)
+            ]
+        return connector.tool_source.execute(
+            arguments,
+            replace(context, action_name=tool_name[len(connector.ref) + 1 :]),
+        )
     raise ValueError(f"Unsupported connector '{tool_name}'.")
 
 
@@ -95,25 +103,41 @@ def get_connector_tools(connector_ref: str) -> list[JSONObject]:
 
 
 def get_connector_discovery_tool(connector_ref: str) -> str | None:
-    """Return the worker operation used to discover a connection's tools."""
+    """Return the credential-bound operation for discovering a connector's actions."""
     connector = _CONNECTORS_BY_REF.get(connector_ref)
-    if connector is not None and connector.load_connector is not None:
-        return f"{connector_ref}__discover_tools"
+    if connector is not None and connector.tool_source is not None:
+        return f"{connector_ref}{_DISCOVERY_TOOL_SUFFIX}"
     return None
 
 
+def is_connector_discovery_tool(tool_name: str) -> bool:
+    """Return whether a tool is a dynamic connector's discovery operation."""
+    if (connector := _resolve_connector(tool_name)) is None:
+        return False
+    return tool_name == get_connector_discovery_tool(connector.ref)
+
+
+def is_dynamic_connector_tool(tool_name: str) -> bool:
+    """Return whether a non-static tool uses a dynamic connector source."""
+    if tool_name in _CONNECTORS_BY_TOOL or is_connector_discovery_tool(tool_name):
+        return False
+    return _resolve_connector(tool_name) is not None
+
+
 def _resolve_connector(tool_name: str) -> ConnectorDefinition | None:
-    """Resolve static tools first, then a dynamic connector's namespace."""
+    """Resolve static tools first, then the most specific dynamic namespace."""
     if connector := _CONNECTORS_BY_TOOL.get(tool_name):
         return connector
-    for connector in _CONNECTORS_BY_REF.values():
-        prefix = f"{connector.ref}_"
+    connector_ref, separator, _ = tool_name.rpartition("_")
+    while separator:
+        connector = _CONNECTORS_BY_REF.get(connector_ref)
         if (
-            connector.load_connector is not None
-            and tool_name.startswith(prefix)
-            and len(tool_name) > len(prefix)
+            connector is not None
+            and connector.tool_source is not None
+            and len(tool_name) > len(connector_ref) + 1
         ):
             return connector
+        connector_ref, separator, _ = connector_ref.rpartition("_")
     return None
 
 

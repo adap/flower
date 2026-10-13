@@ -20,8 +20,6 @@ from ..definition import ConnectorExecutionContext
 from . import mcp
 
 
-def execute(
-    name: str, arguments: JSONObject, context: ConnectorExecutionContext
-) -> JSONValue:
-    """Call the remote name bound into an ordinary ConnectorExecutor."""
-    return mcp.request(name, arguments, context.credentials)
+def execute(arguments: JSONObject, context: ConnectorExecutionContext) -> JSONValue:
+    """Call the discovered remote name supplied by the connector runtime."""
+    return mcp.request(context.action_name, arguments, context.credentials)
