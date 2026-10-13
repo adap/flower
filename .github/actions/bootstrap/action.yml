@@ -6,13 +6,13 @@ inputs:
     default: 3.11.14
   pip-version:
     description: "Version of pip to be installed using pip"
-    default: 26.0.1
+    default: 26.2.1
   setuptools-version:
     description: "Version of setuptools to be installed using pip"
-    default: 82.0.0
+    default: 83.0.0
   uv-version:
     description: "Version of uv to install"
-    default: "0.10.7"
+    default: "0.12.20"
 outputs:
   python-version:
     description: "Version range or exact version of Python"
