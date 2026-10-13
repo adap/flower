@@ -21,8 +21,6 @@ from ..definition import (
     ProviderDefinition,
 )
 from ..oauth import load_oauth_flow
-from .actions import ACTIONS
-from .executors import EXECUTORS
 from .mcp import discover_tools, execute_tool
 
 SLACK_CONNECTOR_REF = "slack"
@@ -62,7 +60,7 @@ PROVIDER = ProviderDefinition(
     ref=SLACK_CONNECTOR_REF,
     display_name="Slack",
     description="Search, read, and manage Slack messages, channels, files, and lists.",
-    actions=ACTIONS,
+    actions=(),
     oauth=OAuth2Definition(
         authorization_url="https://slack.com/oauth/v2/authorize",
         token_url="https://slack.com/api/oauth.v2.access",
@@ -83,7 +81,7 @@ PROVIDER = ProviderDefinition(
 
 CONNECTOR = ConnectorDefinition.from_provider(
     provider=PROVIDER,
-    executors=EXECUTORS,
+    executors={},
     oauth_flow=load_oauth_flow(PROVIDER),
     tool_source=ConnectorToolSource(discover=discover_tools, execute=execute_tool),
 )

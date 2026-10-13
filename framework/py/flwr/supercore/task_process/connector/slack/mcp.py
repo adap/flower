@@ -27,14 +27,18 @@ import httpx
 from flwr.supercore.typing import JSONObject
 
 from ..definition import ActionAccess, ActionDefinition, ConnectorExecutionContext
-from .actions import ACTIONS
-from .executors import SlackApiError
+from ..http import ConnectorApiError
 
 if TYPE_CHECKING:
     from mcp import ClientSession
 
 _MCP_URL = "https://mcp.slack.com/mcp"
-_STATIC_TOOL_NAMES = {action.tool_name("slack") for action in ACTIONS}
+
+
+class SlackApiError(ConnectorApiError):
+    """Secret-safe Slack MCP failure."""
+
+    provider = "Slack"
 
 
 @asynccontextmanager
@@ -72,7 +76,7 @@ async def _session(context: ConnectorExecutionContext) -> AsyncIterator[ClientSe
 
 
 def discover_tools(context: ConnectorExecutionContext) -> list[ActionDefinition]:
-    """Discover account-specific MCP tools alongside the existing static tools."""
+    """Discover account-specific tools from Slack's MCP server."""
     return asyncio.run(_discover_tools(context))
 
 
@@ -90,8 +94,6 @@ async def _discover_tools(context: ConnectorExecutionContext) -> list[ActionDefi
                 params=PaginatedRequestParams(cursor=cursor)
             )
             for tool in page.tools:
-                if tool.name in _STATIC_TOOL_NAMES:
-                    continue
                 actions.append(
                     ActionDefinition(
                         name=tool.name.removeprefix("slack_"),
