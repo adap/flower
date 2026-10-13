@@ -134,9 +134,10 @@ jobs:
         run: |
           tag=$(jq --exit-status --raw-output \
             '[.[] | select(startswith("nightly-"))][0]' <<< "${IMAGE_TAGS}")
+          # Buildx exposes the registry descriptor digest through this template field.
           digest=$(docker buildx imagetools inspect "${IMAGE_REPOSITORY}:${tag}" \
-            --format '{{json .Manifest}}' | \
-            jq --exit-status --raw-output '.digest | select(test("^sha256:[0-9a-f]{64}$"))')
+            --format '{{.Manifest.Digest}}')
+          [[ "${digest}" =~ ^sha256:[0-9a-f]{64}$ ]] || exit 1
           echo "ref=registry://${IMAGE_REPOSITORY}@${digest}" >> "$GITHUB_OUTPUT"
 
       - name: Report all high and critical vulnerabilities
