@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterator
+from contextlib import nullcontext
 from dataclasses import dataclass, field
 from unittest.mock import Mock
 
@@ -114,6 +115,19 @@ def test_invoke_model_provider_keeps_auth_when_key_is_set(
     }
 
 
+def test_invoke_model_provider_uses_ten_minute_default_timeout(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Provider calls should allow long-running model inference by default."""
+    monkeypatch.setenv("FLWR_MODEL_API_ENDPOINT", "http://proxy/v1/responses")
+    monkeypatch.delenv("FLWR_MODEL_API_TIMEOUT", raising=False)
+    post_mock = _patch_post(monkeypatch, _Response(body={"id": "resp_1"}))
+
+    invoke_model_provider({"model": "model", "input": []}, usage_recorder=Mock())
+
+    assert post_mock.call_args.kwargs["timeout"] == 600.0
+
+
 @pytest.mark.parametrize(
     ("request_payload", "expected_provider"),
     [
@@ -156,6 +170,11 @@ def test_invoke_model_provider_collects_stream_events(
 ) -> None:
     """Streaming calls should collect events and accept incomplete terminals."""
     monkeypatch.setenv("FLWR_MODEL_API_KEY", "fk_test")
+    span = Mock()
+    monkeypatch.setattr(
+        "flwr.supercore.task_process.model.provider.trace_span",
+        lambda *args, **kwargs: nullcontext(span),
+    )
     post_mock = _patch_post(
         monkeypatch,
         _Response(
@@ -183,6 +202,7 @@ def test_invoke_model_provider_collects_stream_events(
     )
 
     assert result == {"id": "resp_1", "output_text": "hel"}
+    span.add_event.assert_called_once_with("provider.first_text")
     assert streamed_events == [
         {"type": "response.created", "response": {"id": "resp_1"}},
         {"delta": "hel", "type": "response.output_text.delta"},
