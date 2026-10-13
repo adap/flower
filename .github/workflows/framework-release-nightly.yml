@@ -2,6 +2,11 @@ name: Release nightly
 
 on:
   workflow_dispatch:
+    inputs:
+      scan-only:
+        description: "Scan existing nightly base images without publishing a release"
+        type: boolean
+        default: true
   schedule:
     - cron: "0 23 * * *"
 
@@ -15,7 +20,7 @@ jobs:
 
   release-nightly:
     runs-on: ubuntu-24.04
-    name: Release nightly on PyPI
+    name: Prepare nightly release or scan
     if: github.repository == 'flwrlabs/flower'
     needs: authorize-manual-trigger
     outputs:
@@ -42,8 +47,9 @@ jobs:
             echo "Missing required configuration: DOCKER_IMAGE_NAMESPACE" >&2
             exit 1
           fi
-      - name: Release nightly
-        id: release
+      - name: Publish nightly on PyPI
+        id: publish
+        if: ${{ !inputs.scan-only }}
         env:
           PYPI_REPOSITORY_PASSWORD: ${{ secrets.PYPI_REPOSITORY_PASSWORD }}
           PYPI_REPOSITORY_URL: ${{ vars.PYPI_REPOSITORY_URL }}
@@ -56,8 +62,17 @@ jobs:
             echo "skip=true" >> $GITHUB_OUTPUT
           fi
 
-          echo "pip-version=${{ steps.bootstrap.outputs.pip-version }}" >> "$GITHUB_OUTPUT"
-          echo "setuptools-version=${{ steps.bootstrap.outputs.setuptools-version }}" >> "$GITHUB_OUTPUT"
+      - name: Prepare Docker image matrix
+        id: release
+        env:
+          SKIP_BUILD: ${{ inputs.scan-only || steps.publish.outputs.skip == 'true' }}
+        working-directory: framework
+        run: |
+          {
+            echo "skip=${SKIP_BUILD}"
+            echo "pip-version=${{ steps.bootstrap.outputs.pip-version }}"
+            echo "setuptools-version=${{ steps.bootstrap.outputs.setuptools-version }}"
+          } >> "$GITHUB_OUTPUT"
 
           NAME=$(uv version | awk '{ print $1 }')
           VERSION=$(uv version --short)
@@ -141,7 +156,7 @@ jobs:
           echo "ref=registry://${IMAGE_REPOSITORY}@${digest}" >> "$GITHUB_OUTPUT"
 
       - name: Report all high and critical vulnerabilities
-        uses: docker/scout-action@bacf462e8d090c09660de30a6ccc718035f961e3 # v1
+        uses: docker/scout-action@221e7f4860634eeb1579e3bd7ca232e577bd1864 # v1.26.0
         with:
           command: cves
           image: ${{ steps.image.outputs.ref }}
