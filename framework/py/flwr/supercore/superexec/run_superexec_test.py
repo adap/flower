@@ -28,6 +28,7 @@ from flwr.supercore.interceptors import (
     RuntimeVersionHttpInterceptor,
     SuperExecAuthHttpInterceptor,
 )
+from flwr.supercore.runtime.tracing import RuntimeTracingInterceptor
 from flwr.supercore.superexec.executor import LaunchResult, LaunchResultStatus
 from flwr.supercore.superexec.plugin import AutoExecPlugin
 
@@ -137,10 +138,14 @@ def test_builtin_kubernetes_uses_capacity_filtered_combined_acquisition(
 @pytest.mark.parametrize(
     ("superexec_auth_secret", "expected_interceptor_types"),
     [
-        (None, (RuntimeVersionHttpInterceptor,)),
+        (None, (RuntimeTracingInterceptor, RuntimeVersionHttpInterceptor)),
         (
             b"superexec-secret",
-            (RuntimeVersionHttpInterceptor, SuperExecAuthHttpInterceptor),
+            (
+                RuntimeTracingInterceptor,
+                RuntimeVersionHttpInterceptor,
+                SuperExecAuthHttpInterceptor,
+            ),
         ),
     ],
 )
