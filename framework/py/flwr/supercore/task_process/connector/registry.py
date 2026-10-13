@@ -112,7 +112,8 @@ def get_connector_discovery_tool(connector_ref: str) -> str | None:
 
 def is_connector_discovery_tool(tool_name: str) -> bool:
     """Return whether a tool is a dynamic connector's discovery operation."""
-    return tool_name.endswith(_DISCOVERY_TOOL_SUFFIX)
+    connector = _resolve_connector(tool_name)
+    return connector and tool_name == get_connector_discovery_tool(connector.ref)
 
 
 def is_dynamic_connector_tool(tool_name: str) -> bool:
