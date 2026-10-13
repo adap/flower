@@ -86,13 +86,8 @@ async def _discover_tools(context: ConnectorExecutionContext) -> list[ActionDefi
     cursor: str | None = None
     seen_cursors: set[str] = set()
     async with _session(context) as session:
-        # pylint: disable-next=import-outside-toplevel
-        from mcp.types import PaginatedRequestParams
-
         while True:
-            page = await session.list_tools(
-                params=PaginatedRequestParams(cursor=cursor)
-            )
+            page = await session.list_tools(cursor=cursor)
             for tool in page.tools:
                 actions.append(
                     ActionDefinition(

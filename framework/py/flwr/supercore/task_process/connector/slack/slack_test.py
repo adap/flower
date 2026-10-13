@@ -15,8 +15,9 @@
 """Tests for Slack MCP discovery and execution."""
 
 from typing import cast
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import Mock, call, create_autospec, patch
 
+from mcp import ClientSession
 from mcp.types import CallToolResult, ListToolsResult, TextContent, Tool
 
 from flwr.supercore.typing import JSONObject
@@ -27,7 +28,7 @@ from . import mcp as slack_mcp
 
 def test_mcp_discovery_and_execution() -> None:
     """Discover all Slack tools and execute former static names through MCP."""
-    session = AsyncMock()
+    session = create_autospec(ClientSession, instance=True)
     session.list_tools.side_effect = [
         ListToolsResult(
             tools=[
@@ -61,8 +62,10 @@ def test_mcp_discovery_and_execution() -> None:
             credentials,
             {},
         )
-    assert session.list_tools.await_count == 2
-    assert session.list_tools.await_args.kwargs["params"].cursor == "next"
+    assert session.list_tools.await_args_list == [
+        call(cursor=None),
+        call(cursor="next"),
+    ]
     request = session.send_request.await_args.args[0].root
     assert request.params.name == "slack_search_public"
     assert request.params.arguments == {"query": "release"}
