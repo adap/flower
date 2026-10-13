@@ -50,6 +50,7 @@ class NodeState(CoreState):
         """
 
     @abstractmethod
+    # pylint: disable-next=arguments-differ
     def get_messages(  # type: ignore[override]
         self,
         *,
