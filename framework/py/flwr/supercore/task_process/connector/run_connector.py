@@ -52,6 +52,7 @@ from flwr.supercore.interceptors import (
 )
 from flwr.supercore.retry import RetryInvoker, make_simple_http_retry_invoker
 from flwr.supercore.runtime import RuntimeHttpClient
+from flwr.supercore.runtime.tracing import RuntimeTracingInterceptor
 from flwr.supercore.task_identity import TaskIdentity
 from flwr.supercore.telemetry import EventType, event
 
@@ -333,6 +334,7 @@ def _create_runtime_client(
         insecure=insecure,
         root_certificates=certificates,
         interceptors=[
+            RuntimeTracingInterceptor(),
             RuntimeVersionHttpInterceptor(component_name="flwr-connector"),
             RuntimeTokenHttpInterceptor(token),
         ],
