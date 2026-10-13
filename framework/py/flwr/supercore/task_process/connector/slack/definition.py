@@ -14,10 +14,16 @@
 # ==============================================================================
 """Slack connector definition."""
 
-from ..definition import ConnectorDefinition, OAuth2Definition, ProviderDefinition
+from ..definition import (
+    ConnectorDefinition,
+    ConnectorToolSource,
+    OAuth2Definition,
+    ProviderDefinition,
+)
 from ..oauth import load_oauth_flow
 from .actions import ACTIONS
 from .executors import EXECUTORS
+from .mcp import discover_tools, execute_tool
 
 SLACK_CONNECTOR_REF = "slack"
 SLACK_USER_SCOPES = (
@@ -35,11 +41,27 @@ SLACK_USER_SCOPES = (
     "groups:read",
     "im:read",
     "mpim:read",
+    "search:read.users",
+    "emoji:read",
+    "chat:write",
+    "channels:write",
+    "groups:write",
+    "im:write",
+    "mpim:write",
+    "reactions:read",
+    "reactions:write",
+    "canvases:read",
+    "canvases:write",
+    "users:read",
+    "users:read.email",
+    "lists:read",
+    "lists:write",
+    "files:write",
 )
 PROVIDER = ProviderDefinition(
     ref=SLACK_CONNECTOR_REF,
     display_name="Slack",
-    description="Search and read messages, conversations, and threads.",
+    description="Search, read, and manage Slack messages, channels, files, and lists.",
     actions=ACTIONS,
     oauth=OAuth2Definition(
         authorization_url="https://slack.com/oauth/v2/authorize",
@@ -63,4 +85,5 @@ CONNECTOR = ConnectorDefinition.from_provider(
     provider=PROVIDER,
     executors=EXECUTORS,
     oauth_flow=load_oauth_flow(PROVIDER),
+    tool_source=ConnectorToolSource(discover=discover_tools, execute=execute_tool),
 )

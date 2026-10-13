@@ -15,13 +15,15 @@
 """Tests for Slack request mapping and API errors."""
 
 from typing import cast
-from unittest.mock import Mock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
+from mcp.types import CallToolResult, ListToolsResult, TextContent, Tool
 
 from flwr.supercore.typing import JSONObject
 
 from .. import registry
+from . import mcp as slack_mcp
 from .executors import SlackApiError
 
 _HTTP_REQUEST = "flwr.supercore.task_process.connector.http.requests.request"
@@ -170,3 +172,44 @@ def test_search_options(response_format: str, file_error: str | None) -> None:
             "before": [{"text": "befor"}],
             "after": [{"text": "after"}],
         }
+
+
+def test_mcp_discovery_and_execution() -> None:
+    """Page through discovery, preserve static tools, and call native MCP names."""
+    session = AsyncMock()
+    session.list_tools.side_effect = [
+        ListToolsResult(
+            tools=[
+                Tool(name="slack_search_public", inputSchema={}),
+                Tool(name="slack_read_channel", inputSchema={"type": "object"}),
+            ],
+            nextCursor="next",
+        ),
+        ListToolsResult(tools=[]),
+    ]
+    session.send_request.return_value = CallToolResult(
+        content=[TextContent(type="text", text="done")]
+    )
+    with patch.object(slack_mcp, "_session") as open_session:
+        open_session.return_value.__aenter__.return_value = session
+        tools = registry.invoke_connector(
+            "slack__discover_tools", {}, Mock(), _CREDENTIALS, {}
+        )
+        assert isinstance(tools, list)
+        assert [cast(JSONObject, tool)["name"] for tool in tools] == [
+            "slack_read_channel"
+        ]
+        result = registry.invoke_connector(
+            "slack__call_tool",
+            {"name": "read_channel", "arguments": {"channel_id": "C1"}},
+            Mock(),
+            _CREDENTIALS,
+            {},
+        )
+    assert session.list_tools.await_count == 2
+    assert session.list_tools.await_args.kwargs["params"].cursor == "next"
+    request = session.send_request.await_args.args[0].root
+    assert request.params.name == "slack_read_channel"
+    assert request.params.arguments == {"channel_id": "C1"}
+    assert isinstance(result, dict)
+    assert result["content"] == [{"type": "text", "text": "done"}]
