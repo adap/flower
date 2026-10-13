@@ -69,6 +69,7 @@ from flwr.supercore.interceptors import (
 from flwr.supercore.retry import make_simple_http_retry_invoker
 from flwr.supercore.run import Run
 from flwr.supercore.runtime import RuntimeHttpClient
+from flwr.supercore.runtime.tracing import RuntimeTracingInterceptor
 from flwr.supercore.superexec.dependency_installer import (
     RuntimeDependencyInstallationError,
     cleanup_app_runtime_environment,
@@ -99,6 +100,7 @@ def run_clientapp(  # pylint: disable=R0913, R0914, R0915, R0917
         insecure=insecure,
         root_certificates=certificates,
         interceptors=[
+            RuntimeTracingInterceptor(),
             RuntimeVersionHttpInterceptor(component_name="flwr-clientapp"),
             RuntimeTokenHttpInterceptor(token),
         ],
