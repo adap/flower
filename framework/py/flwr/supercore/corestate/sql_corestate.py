@@ -18,7 +18,7 @@
 import hashlib
 import json
 import secrets
-from collections.abc import Sequence
+from collections.abc import Collection, Sequence
 from datetime import UTC, datetime, timedelta
 from logging import ERROR
 from typing import Any, Literal, cast
@@ -168,6 +168,35 @@ class SqlCoreState(CoreState, SqlMixin):  # pylint: disable=R0904
     def object_store(self) -> ObjectStore:
         """Return the ObjectStore instance used by this CoreState."""
         return self._object_store
+
+    # shortcut: unified delivery is unavailable, implement in the RFC backend step.
+    def store_messages(self, messages: Sequence[Message]) -> list[bool]:
+        """Store one or more Messages."""
+        raise NotImplementedError
+
+    def get_messages(
+        self,
+        *,
+        dst_node_id: int,
+        run_id: int | None = None,
+        reply_to_message_ids: Collection[str] | None = None,
+        limit: int | None = None,
+    ) -> list[Message]:
+        """Get pending Messages for the provided destination node ID."""
+        raise NotImplementedError
+
+    def acknowledge_messages(self, message_ids: Collection[str]) -> None:
+        """Acknowledge Messages based on the provided Message IDs."""
+        raise NotImplementedError
+
+    def cancel_messages(
+        self,
+        *,
+        message_ids: Collection[str] | None = None,
+        run_id: int | None = None,
+    ) -> None:
+        """Cancel pending Messages based on the specified filters."""
+        raise NotImplementedError
 
     def start_session(self, run_id: int) -> str:
         """Start a run-scoped object push session."""
