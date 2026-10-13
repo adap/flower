@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Slack action executors."""
+"""Execute Slack-shaped read tools through the Slack Web API."""
+
+from __future__ import annotations
 
 from typing import cast
 
@@ -20,12 +22,6 @@ from flwr.supercore.typing import JSONObject
 
 from ..definition import ConnectorExecutionContext, ConnectorExecutor
 from ..http import ConnectorApiError, request_json_object
-from ..json_utils import (
-    optional_string,
-    require_bool,
-    require_int_range,
-    require_string,
-)
 from .actions import SLACK_CONVERSATION_TYPES
 
 _SLACK_API_BASE_URL = "https://slack.com/api"
@@ -37,127 +33,221 @@ class SlackApiError(ConnectorApiError):
     provider = "Slack"
 
 
-def search_messages(
+def _call_slack_api(
+    method: str,
+    credentials: JSONObject,
+    *,
+    params: dict[str, str] | None = None,
+    body: JSONObject | None = None,
+) -> JSONObject:
+    """Call one Slack Web API method and validate its response."""
+    token = credentials.get("access_token")
+    if not isinstance(token, str) or not token:
+        raise SlackApiError("invalid_credentials")
+    payload = request_json_object(
+        "POST" if body is not None else "GET",
+        f"{_SLACK_API_BASE_URL}/{method}",
+        error=SlackApiError,
+        headers={"Authorization": f"Bearer {token}"},
+        params=params,
+        json=body,
+    )
+    if payload.get("ok") is not True:
+        raise SlackApiError(cast(str, payload.get("error", "api_error")))
+    return payload
+
+
+def _search(
+    arguments: JSONObject,
+    context: ConnectorExecutionContext,
+    *,
+    channel_types: tuple[str, ...] = SLACK_CONVERSATION_TYPES,
+) -> JSONObject:
+    """Map search arguments to one Slack Real-time Search request."""
+    query = cast(str, arguments.get("query", ""))
+    terms = cast(list[str], arguments.get("keywords", []))
+    filters = cast(str, arguments.get("filters", ""))
+    natural_language_query = cast(str, arguments.get("natural_language_query", ""))
+    query_parts = (
+        [natural_language_query, query, filters]
+        if natural_language_query
+        else [query, *terms, filters]
+    )
+    payload: JSONObject = {
+        "query": " ".join(part for part in query_parts if part),
+        "content_types": cast(str, arguments.get("content_types", "messages")).split(
+            ","
+        ),
+        "channel_types": list(channel_types),
+        "include_bots": arguments.get("include_bots", False),
+        "include_context_messages": arguments.get("include_context", True),
+    }
+    if channel_types != ("public_channel",) and "channel_types" in arguments:
+        payload["channel_types"] = cast(str, arguments["channel_types"]).split(",")
+    if terms:
+        payload["term_clauses"] = terms
+        if filters:
+            payload["modifiers"] = filters
+    for name in ("context_channel_id", "cursor", "sort", "sort_dir", "limit"):
+        if name in arguments:
+            payload[name] = arguments[name]
+    for name in ("after", "before"):
+        if name in arguments:
+            payload[name] = int(cast(str, arguments[name]))
+    result = _call_slack_api(
+        "assistant.search.context", context.credentials, body=payload
+    )
+    if arguments.get("only_my_channels"):
+        _filter_joined_channels(
+            result, context.credentials, cast(list[str], payload["channel_types"])
+        )
+    if (
+        "max_context_length" in arguments
+        or arguments.get("response_format") == "concise"
+    ):
+        _format_search_result(result, arguments)
+    return result
+
+
+def _filter_joined_channels(
+    result: JSONObject, credentials: JSONObject, channel_types: list[str]
+) -> None:
+    """Keep messages and files shared in conversations the user has joined."""
+    joined: set[str] = set()
+    params = {"types": ",".join(channel_types), "limit": "200"}
+    while True:
+        page = _call_slack_api("users.conversations", credentials, params=params)
+        joined.update(
+            cast(str, channel["id"])
+            for channel in cast(list[JSONObject], page["channels"])
+        )
+        cursor = cast(JSONObject, page.get("response_metadata", {})).get("next_cursor")
+        if not cursor:
+            break
+        params["cursor"] = cast(str, cursor)
+    results = cast(dict[str, list[JSONObject]], result["results"])
+    if "messages" in results:
+        results["messages"] = [
+            item for item in results["messages"] if item["channel_id"] in joined
+        ]
+    if "files" in results:
+        files = []
+        for item in results["files"]:
+            try:
+                info = _call_slack_api(
+                    "files.info",
+                    credentials,
+                    params={"file": cast(str, item["file_id"])},
+                )
+            except SlackApiError as error:
+                if error.code != "access_denied":
+                    raise
+                continue
+            file = cast(JSONObject, info["file"])
+            if any(
+                joined.intersection(cast(list[str], file.get(field, [])))
+                for field in ("channels", "groups", "ims")
+            ):
+                files.append(item)
+        results["files"] = files
+
+
+def _format_search_result(result: JSONObject, arguments: JSONObject) -> None:
+    """Apply the requested context length and concise result fields."""
+    results = cast(dict[str, list[JSONObject]], result["results"])
+    if "max_context_length" in arguments:
+        maximum = cast(int, arguments["max_context_length"])
+        for message in results.get("messages", []):
+            context = cast(
+                dict[str, list[JSONObject]], message.get("context_messages", {})
+            )
+            for direction in ("before", "after"):
+                for item in context.get(direction, []):
+                    item["text"] = cast(str, item["text"])[:maximum]
+    if arguments.get("response_format") == "concise":
+        fields = {
+            "messages": (
+                "channel_id",
+                "message_ts",
+                "author_user_id",
+                "content",
+                "permalink",
+            ),
+            "files": ("file_id", "title", "content", "permalink"),
+        }
+        for kind, names in fields.items():
+            if kind in results:
+                results[kind] = [
+                    {key: item[key] for key in names if key in item}
+                    for item in results[kind]
+                ]
+
+
+def search_public(
     arguments: JSONObject, context: ConnectorExecutionContext
 ) -> JSONObject:
-    """Search messages visible to the connected Slack user."""
-    return _call_slack_api(
-        "search.messages",
-        context.credentials,
-        {
-            "query": require_string(arguments.get("query"), "Slack", "query"),
-            "count": _limit(arguments, default=5, maximum=15),
-        },
+    """Search public-channel messages and files."""
+    return _search(
+        arguments,
+        context,
+        channel_types=("public_channel",),
     )
+
+
+def search_public_and_private(
+    arguments: JSONObject, context: ConnectorExecutionContext
+) -> JSONObject:
+    """Search visible messages and files in all conversation types."""
+    return _search(arguments, context)
 
 
 def list_conversations(
     arguments: JSONObject, context: ConnectorExecutionContext
 ) -> JSONObject:
     """List conversations visible to the connected Slack user."""
-    types = arguments.get("types")
-    if types is not None and (
-        not isinstance(types, list) or not all(isinstance(item, str) for item in types)
-    ):
-        raise ValueError("Slack conversation types are invalid.")
-    selected_types = (
-        list(SLACK_CONVERSATION_TYPES) if types is None else cast(list[str], types)
-    )
-    if not selected_types or any(
-        item not in SLACK_CONVERSATION_TYPES for item in selected_types
-    ):
-        raise ValueError("Slack conversation types are invalid.")
-    return _call_slack_api(
-        "conversations.list",
-        context.credentials,
-        {
-            "limit": _limit(arguments, default=10, maximum=50),
-            "cursor": optional_string(arguments.get("cursor"), "Slack", "cursor"),
-            "types": ",".join(dict.fromkeys(selected_types)),
-            "exclude_archived": str(
-                require_bool(
-                    arguments.get("exclude_archived", True),
-                    "Slack",
-                    "exclude_archived",
-                )
-            ).lower(),
-        },
-    )
+    types = cast(list[str], arguments.get("types", list(SLACK_CONVERSATION_TYPES)))
+    params = {"types": ",".join(types)}
+    for name in ("cursor", "team_id"):
+        if name in arguments:
+            params[name] = cast(str, arguments[name])
+    if "limit" in arguments:
+        params["limit"] = str(arguments["limit"])
+    if "exclude_archived" in arguments:
+        params["exclude_archived"] = str(arguments["exclude_archived"]).lower()
+    return _call_slack_api("conversations.list", context.credentials, params=params)
 
 
 def get_conversation_history(
     arguments: JSONObject, context: ConnectorExecutionContext
 ) -> JSONObject:
-    """Read one page of a Slack conversation's message history."""
-    return _call_slack_api(
-        "conversations.history",
-        context.credentials,
-        _conversation_params(arguments),
-    )
+    """Get recent messages from a Slack conversation."""
+    params = {"channel": cast(str, arguments["channel_id"])}
+    if "cursor" in arguments:
+        params["cursor"] = cast(str, arguments["cursor"])
+    if "limit" in arguments:
+        params["limit"] = str(arguments["limit"])
+    return _call_slack_api("conversations.history", context.credentials, params=params)
 
 
-def get_thread_replies(
+def get_conversation_replies(
     arguments: JSONObject, context: ConnectorExecutionContext
 ) -> JSONObject:
-    """Read one page of replies from a Slack thread."""
-    params = _conversation_params(arguments)
-    params["ts"] = require_string(arguments.get("thread_ts"), "Slack", "thread_ts")
-    return _call_slack_api("conversations.replies", context.credentials, params)
+    """Get messages in a Slack thread."""
+    params = {
+        "channel": cast(str, arguments["channel_id"]),
+        "ts": cast(str, arguments["thread_ts"]),
+    }
+    if "cursor" in arguments:
+        params["cursor"] = cast(str, arguments["cursor"])
+    if "limit" in arguments:
+        params["limit"] = str(arguments["limit"])
+    return _call_slack_api("conversations.replies", context.credentials, params=params)
 
 
 EXECUTORS: dict[str, ConnectorExecutor] = {
-    "search_messages": search_messages,
+    "search_public": search_public,
+    "search_public_and_private": search_public_and_private,
     "list_conversations": list_conversations,
     "get_conversation_history": get_conversation_history,
-    "get_thread_replies": get_thread_replies,
+    "get_conversation_replies": get_conversation_replies,
 }
-
-
-def _call_slack_api(
-    method: str, credentials: JSONObject, params: dict[str, str | None]
-) -> JSONObject:
-    """Call one Slack Web API method and validate its response envelope."""
-    token = credentials.get("access_token")
-    if not isinstance(token, str) or not token:
-        raise SlackApiError("invalid_credentials")
-    payload = request_json_object(
-        "GET",
-        f"{_SLACK_API_BASE_URL}/{method}",
-        error=SlackApiError,
-        headers={"Authorization": f"Bearer {token}"},
-        params={key: value for key, value in params.items() if value is not None},
-        http_error_code=lambda response: (
-            "rate_limited" if response.status_code == 429 else "http_error"
-        ),
-    )
-    if payload.get("ok") is not True:
-        error = payload.get("error")
-        code = (
-            error
-            if isinstance(error, str)
-            and error.replace("_", "").isalnum()
-            and error.islower()
-            else "api_error"
-        )
-        raise SlackApiError(code)
-    return payload
-
-
-def _conversation_params(arguments: JSONObject) -> dict[str, str | None]:
-    """Build validated parameters for a Slack conversation read."""
-    return {
-        "channel": require_string(
-            arguments.get("conversation_id"), "Slack", "conversation_id"
-        ),
-        "limit": _limit(arguments, default=10, maximum=15),
-        "cursor": optional_string(arguments.get("cursor"), "Slack", "cursor"),
-    }
-
-
-def _limit(arguments: JSONObject, *, default: int, maximum: int) -> str:
-    """Return one validated Slack page limit."""
-    return str(
-        require_int_range(
-            arguments.get("limit", default), "Slack", "limit", maximum=maximum
-        )
-    )

@@ -1,3 +1,7 @@
+.. meta::
+    :description: Explore Flower Endeavor 1.0, a language model for reasoning, coding, and agent workflows, with managed API access and private deployment.
+    :property=og:description: Explore Flower Endeavor 1.0, a language model for reasoning, coding, and agent workflows, with managed API access and private deployment.
+
 Endeavor 1.0
 ============
 
@@ -43,6 +47,13 @@ At a glance
    * - Access
      - Flower-managed API, or private deployment on infrastructure you
        control; by request during the 1.0 preview
+   * - Context window
+     - 128,000 tokens in the supplied Codex configuration, with automatic
+       compaction at 96,000 tokens; the supported API limit varies by
+       deployment. See
+       :ref:`Context window and limits <endeavor-context-limits>`.
+   * - Maximum context length
+     - 1M tokens
    * - Model artifacts
      - Availability and formats are confirmed during private-deployment
        onboarding; no public checkpoint is listed for download during the
@@ -74,6 +85,21 @@ Flower-managed service and a private deployment.
 The complete technical contract is provided only to approved participants
 during onboarding. It is not published as part of the public Endeavor 1.0
 documentation.
+
+Context window and limits
+-------------------------
+
+.. _endeavor-context-limits:
+
+The supplied Codex configuration uses a 128,000-token context window, with
+automatic compaction configured at 96,000 tokens. These are client
+configuration settings, not a universal limit on Flower Endeavor API requests.
+
+The API does not use the supplied Codex catalog's context-window setting as a
+server-side cap. Effective request limits depend on the deployment, upstream
+provider route, requested output budget, and internal processing overhead.
+Flower Endeavor model support up to a 1M-token context window. Confirm the
+supported limit for your deployment during onboarding.
 
 Architecture and configuration
 ------------------------------
@@ -205,8 +231,8 @@ Policy <https://flower.ai/pdfs/legal/flower_labs_gmbh_terms_of_service_aup_05202
 Deployment-specific safety, monitoring, and support requirements will be detailed
 during onboarding.
 
-Next steps
-----------
+Guides and Next Steps
+---------------------
 
 - To see the first model in the Flower model program, see
   :doc:`lizzy-7b`.
@@ -224,3 +250,4 @@ Endeavor 1.0 pages
 
    endeavor-chatgpt-codex
    endeavor-opencode
+   endeavor-api-key

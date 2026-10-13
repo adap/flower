@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower Docs\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-09-11 00:10+0000\n"
+"POT-Creation-Date: 2026-10-10 00:11+0000\n"
 "PO-Revision-Date: 2026-05-23 06:55+0000\n"
 "Last-Translator: lco <Leandro.COLLIER@student.umons.ac.be>\n"
 "Language: fr\n"
@@ -48,8 +48,8 @@ msgstr ""
 msgid "Changelog"
 msgstr ""
 
-#: ../../source/changelog/v1.36.0.md:2
-msgid "v1.36.0 (2026-09-01)"
+#: ../../source/changelog/v1.39.0.md:2
+msgid "v1.39.0 (2026-09-28)"
 msgstr ""
 
 #: ../../source/changelog/v1.0.0.md:11 ../../source/changelog/v1.1.0.md:4
@@ -70,10 +70,11 @@ msgstr ""
 #: ../../source/changelog/v1.31.0.md:4 ../../source/changelog/v1.32.0.md:4
 #: ../../source/changelog/v1.32.1.md:4 ../../source/changelog/v1.33.0.md:4
 #: ../../source/changelog/v1.34.0.md:4 ../../source/changelog/v1.35.0.md:4
-#: ../../source/changelog/v1.36.0.md:4 ../../source/changelog/v1.4.0.md:4
-#: ../../source/changelog/v1.5.0.md:4 ../../source/changelog/v1.6.0.md:4
-#: ../../source/changelog/v1.7.0.md:4 ../../source/changelog/v1.8.0.md:4
-#: ../../source/changelog/v1.9.0.md:4
+#: ../../source/changelog/v1.36.0.md:4 ../../source/changelog/v1.37.0.md:4
+#: ../../source/changelog/v1.38.0.md:4 ../../source/changelog/v1.39.0.md:4
+#: ../../source/changelog/v1.4.0.md:4 ../../source/changelog/v1.5.0.md:4
+#: ../../source/changelog/v1.6.0.md:4 ../../source/changelog/v1.7.0.md:4
+#: ../../source/changelog/v1.8.0.md:4 ../../source/changelog/v1.9.0.md:4
 msgid "Thanks to our contributors"
 msgstr "Merci à nos contributeurs"
 
@@ -94,10 +95,11 @@ msgstr "Merci à nos contributeurs"
 #: ../../source/changelog/v1.31.0.md:6 ../../source/changelog/v1.32.0.md:6
 #: ../../source/changelog/v1.32.1.md:6 ../../source/changelog/v1.33.0.md:6
 #: ../../source/changelog/v1.34.0.md:6 ../../source/changelog/v1.35.0.md:6
-#: ../../source/changelog/v1.36.0.md:6 ../../source/changelog/v1.4.0.md:6
-#: ../../source/changelog/v1.5.0.md:6 ../../source/changelog/v1.6.0.md:6
-#: ../../source/changelog/v1.7.0.md:6 ../../source/changelog/v1.8.0.md:6
-#: ../../source/changelog/v1.9.0.md:6
+#: ../../source/changelog/v1.36.0.md:6 ../../source/changelog/v1.37.0.md:6
+#: ../../source/changelog/v1.38.0.md:6 ../../source/changelog/v1.39.0.md:6
+#: ../../source/changelog/v1.4.0.md:6 ../../source/changelog/v1.5.0.md:6
+#: ../../source/changelog/v1.6.0.md:6 ../../source/changelog/v1.7.0.md:6
+#: ../../source/changelog/v1.8.0.md:6 ../../source/changelog/v1.9.0.md:6
 msgid ""
 "We would like to give our special thanks to all the contributors who made"
 " the new version of Flower possible (in `git shortlog` order):"
@@ -106,11 +108,11 @@ msgstr ""
 "ont rendu possible la nouvelle version de Flower (dans l'ordre `git "
 "shortlog`) :"
 
-#: ../../source/changelog/v1.36.0.md:8
+#: ../../source/changelog/v1.39.0.md:8
 #, fuzzy
 msgid ""
-"`Charles Beauville`, `Daniel J. Beutel`, `Dimitris Stripelis`, `Heng "
-"Pan`, `Javier`, `Lorenzo Sani`, `Taner Topal`, `Yan Gao`, `jafermarq`"
+"`Charles Beauville`, `Daniel J. Beutel`, `Daniel Nata Nugraha`, `Dimitris"
+" Stripelis`, `Heng Pan`, `Javier`, `Riyasat Ohib`, `Taner Topal`"
 msgstr ""
 
 #: ../../source/changelog/v0.13.0.md:4 ../../source/changelog/v0.14.0.md:4
@@ -134,12 +136,545 @@ msgstr ""
 #: ../../source/changelog/v1.31.0.md:10 ../../source/changelog/v1.32.0.md:10
 #: ../../source/changelog/v1.32.1.md:10 ../../source/changelog/v1.33.0.md:10
 #: ../../source/changelog/v1.34.0.md:10 ../../source/changelog/v1.35.0.md:10
-#: ../../source/changelog/v1.36.0.md:10 ../../source/changelog/v1.4.0.md:10
-#: ../../source/changelog/v1.5.0.md:10 ../../source/changelog/v1.6.0.md:10
-#: ../../source/changelog/v1.7.0.md:10 ../../source/changelog/v1.8.0.md:10
-#: ../../source/changelog/v1.9.0.md:10
+#: ../../source/changelog/v1.36.0.md:10 ../../source/changelog/v1.37.0.md:10
+#: ../../source/changelog/v1.38.0.md:10 ../../source/changelog/v1.39.0.md:10
+#: ../../source/changelog/v1.4.0.md:10 ../../source/changelog/v1.5.0.md:10
+#: ../../source/changelog/v1.6.0.md:10 ../../source/changelog/v1.7.0.md:10
+#: ../../source/changelog/v1.8.0.md:10 ../../source/changelog/v1.9.0.md:10
 msgid "What's new?"
 msgstr "Quoi de neuf ?"
+
+#: ../../source/changelog/v1.39.0.md:12
+#, fuzzy
+msgid ""
+"**Read Notion users, pages, properties, blocks, meeting notes, and "
+"databases** ([#8245](https://github.com/flwrlabs/flower/pull/8245), "
+"[#8252](https://github.com/flwrlabs/flower/pull/8252), "
+"[#8255](https://github.com/flwrlabs/flower/pull/8255), "
+"[#8266](https://github.com/flwrlabs/flower/pull/8266))"
+msgstr ""
+
+#: ../../source/changelog/v1.39.0.md:14
+msgid ""
+"The Notion connector now exposes read actions for users, page metadata "
+"and complete property values, individual blocks and their children, AI "
+"meeting notes, and database metadata with associated data source "
+"references. The actions map directly to Notion API endpoints, return "
+"native responses, and support the relevant filtering, sorting, and "
+"pagination options."
+msgstr ""
+
+#: ../../source/changelog/v1.39.0.md:16
+#, fuzzy
+msgid ""
+"**Add federation-wide connectors** "
+"([#8210](https://github.com/flwrlabs/flower/pull/8210), "
+"[#8237](https://github.com/flwrlabs/flower/pull/8237), "
+"[#8239](https://github.com/flwrlabs/flower/pull/8239), "
+"[#8240](https://github.com/flwrlabs/flower/pull/8240), "
+"[#8265](https://github.com/flwrlabs/flower/pull/8265))"
+msgstr ""
+
+#: ../../source/changelog/v1.39.0.md:18
+msgid ""
+"Connector storage, OAuth sessions, APIs, and task metadata now carry "
+"federation scope, allowing members to connect, list, disconnect, and use "
+"connector-backed runs in federations. Federations can now keep multiple "
+"connections to the same provider, and select one connection of each "
+"provider per run."
+msgstr ""
+
+#: ../../source/changelog/v1.39.0.md:20
+#, fuzzy
+msgid ""
+"**Run sparse federated learning experiments with SSFL** "
+"([#7900](https://github.com/flwrlabs/flower/pull/7900))"
+msgstr ""
+
+#: ../../source/changelog/v1.39.0.md:22
+msgid ""
+"The new SSFL baseline implements static sparse federated learning with "
+"the Message API, client-side saliency scoring, global mask aggregation, "
+"and sample-weighted sparse FedAvg. It includes ResNet-18 experiments for "
+"CIFAR-10 and CIFAR-100, paper-scale configurations, communication "
+"accounting, and reproduction guidance."
+msgstr ""
+
+#: ../../source/changelog/v1.39.0.md:24
+#, fuzzy
+msgid ""
+"**Get faster agent responses** "
+"([#8225](https://github.com/flwrlabs/flower/pull/8225), "
+"[#8226](https://github.com/flwrlabs/flower/pull/8226), "
+"[#8227](https://github.com/flwrlabs/flower/pull/8227), "
+"[#8231](https://github.com/flwrlabs/flower/pull/8231), "
+"[#8232](https://github.com/flwrlabs/flower/pull/8232), "
+"[#8233](https://github.com/flwrlabs/flower/pull/8233), "
+"[#8238](https://github.com/flwrlabs/flower/pull/8238))"
+msgstr ""
+
+#: ../../source/changelog/v1.39.0.md:26
+#, fuzzy
+msgid ""
+"**General improvements** "
+"([#8221](https://github.com/flwrlabs/flower/pull/8221), "
+"[#8229](https://github.com/flwrlabs/flower/pull/8229), "
+"[#8230](https://github.com/flwrlabs/flower/pull/8230), "
+"[#8234](https://github.com/flwrlabs/flower/pull/8234), "
+"[#8235](https://github.com/flwrlabs/flower/pull/8235), "
+"[#8242](https://github.com/flwrlabs/flower/pull/8242), "
+"[#8243](https://github.com/flwrlabs/flower/pull/8243), "
+"[#8244](https://github.com/flwrlabs/flower/pull/8244), "
+"[#8249](https://github.com/flwrlabs/flower/pull/8249), "
+"[#8253](https://github.com/flwrlabs/flower/pull/8253), "
+"[#8254](https://github.com/flwrlabs/flower/pull/8254), "
+"[#8256](https://github.com/flwrlabs/flower/pull/8256), "
+"[#8258](https://github.com/flwrlabs/flower/pull/8258), "
+"[#8259](https://github.com/flwrlabs/flower/pull/8259), "
+"[#8260](https://github.com/flwrlabs/flower/pull/8260), "
+"[#8261](https://github.com/flwrlabs/flower/pull/8261), "
+"[#8268](https://github.com/flwrlabs/flower/pull/8268), "
+"[#8270](https://github.com/flwrlabs/flower/pull/8270))"
+msgstr ""
+
+#: ../../source/changelog/v1.10.0.md:68 ../../source/changelog/v1.11.0.md:65
+#: ../../source/changelog/v1.12.0.md:64 ../../source/changelog/v1.13.0.md:69
+#: ../../source/changelog/v1.13.1.md:32 ../../source/changelog/v1.14.0.md:63
+#: ../../source/changelog/v1.15.0.md:80 ../../source/changelog/v1.16.0.md:54
+#: ../../source/changelog/v1.17.0.md:85 ../../source/changelog/v1.18.0.md:50
+#: ../../source/changelog/v1.19.0.md:68 ../../source/changelog/v1.20.0.md:66
+#: ../../source/changelog/v1.21.0.md:56 ../../source/changelog/v1.22.0.md:40
+#: ../../source/changelog/v1.23.0.md:48 ../../source/changelog/v1.24.0.md:42
+#: ../../source/changelog/v1.25.0.md:36 ../../source/changelog/v1.26.0.md:44
+#: ../../source/changelog/v1.27.0.md:50 ../../source/changelog/v1.28.0.md:50
+#: ../../source/changelog/v1.29.0.md:46 ../../source/changelog/v1.30.0.md:34
+#: ../../source/changelog/v1.31.0.md:50 ../../source/changelog/v1.32.0.md:44
+#: ../../source/changelog/v1.33.0.md:50 ../../source/changelog/v1.34.0.md:54
+#: ../../source/changelog/v1.35.0.md:50 ../../source/changelog/v1.36.0.md:30
+#: ../../source/changelog/v1.37.0.md:40 ../../source/changelog/v1.38.0.md:36
+#: ../../source/changelog/v1.39.0.md:28
+msgid ""
+"As always, many parts of the Flower framework and quality infrastructure "
+"were improved and updated."
+msgstr ""
+"Comme toujours, de nombreuses parties du cadre Flower et de "
+"l'infrastructure qualité ont été améliorées et mises à jour."
+
+#: ../../source/changelog/v1.38.0.md:2
+msgid "v1.38.0 (2026-09-22)"
+msgstr ""
+
+#: ../../source/changelog/v1.38.0.md:8
+#, fuzzy
+msgid ""
+"`Charles Beauville`, `Chong Shen Ng`, `Daniel J. Beutel`, `Daniel Nata "
+"Nugraha`, `Dimitris Stripelis`, `Heng Pan`, `Javier`, `Lorenzo Sani`, "
+"`Mohammad Naseri`, `Ruth Galindo`, `Taner Topal`, `Yan Gao`"
+msgstr ""
+
+#: ../../source/changelog/v1.38.0.md:12
+#, fuzzy
+msgid ""
+"**Run AgentApps across a federation (experimental)** "
+"([#8143](https://github.com/flwrlabs/flower/pull/8143), "
+"[#8150](https://github.com/flwrlabs/flower/pull/8150), "
+"[#8166](https://github.com/flwrlabs/flower/pull/8166), "
+"[#8170](https://github.com/flwrlabs/flower/pull/8170), "
+"[#8175](https://github.com/flwrlabs/flower/pull/8175), "
+"[#8181](https://github.com/flwrlabs/flower/pull/8181), "
+"[#8183](https://github.com/flwrlabs/flower/pull/8183), "
+"[#8185](https://github.com/flwrlabs/flower/pull/8185), "
+"[#8192](https://github.com/flwrlabs/flower/pull/8192), "
+"[#8193](https://github.com/flwrlabs/flower/pull/8193), "
+"[#8197](https://github.com/flwrlabs/flower/pull/8197), "
+"[#8200](https://github.com/flwrlabs/flower/pull/8200), "
+"[#8204](https://github.com/flwrlabs/flower/pull/8204), "
+"[#8205](https://github.com/flwrlabs/flower/pull/8205), "
+"[#8209](https://github.com/flwrlabs/flower/pull/8209), "
+"[#8211](https://github.com/flwrlabs/flower/pull/8211), "
+"[#8214](https://github.com/flwrlabs/flower/pull/8214), "
+"[#8216](https://github.com/flwrlabs/flower/pull/8216), "
+"[#8219](https://github.com/flwrlabs/flower/pull/8219))"
+msgstr ""
+
+#: ../../source/changelog/v1.38.0.md:14
+msgid ""
+"AgentApps can now run on both SuperLink and SuperNodes within a "
+"federation, enabling agents at the federation level and on individual "
+"nodes to communicate with one another. An AgentApp on SuperLink can "
+"discover available SuperNodes, send JSON messages to agents on selected "
+"nodes, and collect their replies; agents on SuperNodes can receive those "
+"messages and respond to the sender. The grid tools for agents expose this"
+" workflow through `get_nodes`, `push_messages`, and `pull_messages`. "
+"SuperNode-hosted AgentApps also support the Open Responses-compatible "
+"endpoint, user prompts, and run-series events."
+msgstr ""
+
+#: ../../source/changelog/v1.38.0.md:16
+#, fuzzy
+msgid ""
+"**Use Endeavor with ChatGPT/Codex and OpenCode** "
+"([#8117](https://github.com/flwrlabs/flower/pull/8117), "
+"[#8199](https://github.com/flwrlabs/flower/pull/8199), "
+"[#8202](https://github.com/flwrlabs/flower/pull/8202), "
+"[#8222](https://github.com/flwrlabs/flower/pull/8222))"
+msgstr ""
+
+#: ../../source/changelog/v1.38.0.md:18
+msgid ""
+"New guides explain how to connect ChatGPT/Codex and OpenCode to Endeavor."
+" The documentation also distinguishes the supplied Codex configuration's "
+"128,000-token context window and 96,000-token compaction threshold from "
+"the model's one-million-token maximum context length, while noting that "
+"effective request limits depend on the deployment and provider route."
+msgstr ""
+
+#: ../../source/changelog/v1.38.0.md:20
+#, fuzzy
+msgid ""
+"**Use native connector actions and access local files** "
+"([#8164](https://github.com/flwrlabs/flower/pull/8164), "
+"[#8177](https://github.com/flwrlabs/flower/pull/8177), "
+"[#8178](https://github.com/flwrlabs/flower/pull/8178), "
+"[#8182](https://github.com/flwrlabs/flower/pull/8182), "
+"[#8191](https://github.com/flwrlabs/flower/pull/8191), "
+"[#8203](https://github.com/flwrlabs/flower/pull/8203))"
+msgstr ""
+
+#: ../../source/changelog/v1.38.0.md:22
+msgid ""
+"GitHub, Slack, and Notion connector actions now follow their native API "
+"names, options, responses, and diagnostics, while Attio's `identify` "
+"action matches its documented scopes. A new read-only `FileSystem` "
+"connector enable `AgentApps` to list and read contents in the configured "
+"directory. The `FileSystem` tools only become avaialble when "
+"`FLWR_FILESYSTEM_ALLOWED_DIRS` is set."
+msgstr ""
+
+#: ../../source/changelog/v1.38.0.md:24
+#, fuzzy
+msgid ""
+"**Set SuperNodes name and location** "
+"([#8213](https://github.com/flwrlabs/flower/pull/8213), "
+"[#8215](https://github.com/flwrlabs/flower/pull/8215), "
+"[#8217](https://github.com/flwrlabs/flower/pull/8217), "
+"[#8218](https://github.com/flwrlabs/flower/pull/8218))"
+msgstr ""
+
+#: ../../source/changelog/v1.38.0.md:26
+msgid ""
+"Register a SuperNode with an optional human-readable `--name` and "
+"`--location <latitude>,<longitude>`."
+msgstr ""
+
+#: ../../source/changelog/v1.38.0.md:28
+#, fuzzy
+msgid ""
+"**Drop `--plugin-type` from `SuperExec`** "
+"([#8151](https://github.com/flwrlabs/flower/pull/8151), "
+"[#8152](https://github.com/flwrlabs/flower/pull/8152), "
+"[#8153](https://github.com/flwrlabs/flower/pull/8153), "
+"[#8157](https://github.com/flwrlabs/flower/pull/8157))"
+msgstr ""
+
+#: ../../source/changelog/v1.38.0.md:30
+msgid ""
+"`flower-superexec` now selects the process to launch from the task type, "
+"so `--plugin-type` is deprecated, and has no effect. The obsolete "
+"`ServerappEphemeral` plugin has also been removed."
+msgstr ""
+
+#: ../../source/changelog/v1.38.0.md:32
+#, fuzzy
+msgid ""
+"**Prepare `flwr-model` for faster AgentApp responses** "
+"([#8187](https://github.com/flwrlabs/flower/pull/8187), "
+"[#8188](https://github.com/flwrlabs/flower/pull/8188), "
+"[#8189](https://github.com/flwrlabs/flower/pull/8189))"
+msgstr ""
+
+#: ../../source/changelog/v1.38.0.md:34
+#, fuzzy
+msgid ""
+"**General improvements** "
+"([#8130](https://github.com/flwrlabs/flower/pull/8130), "
+"[#8145](https://github.com/flwrlabs/flower/pull/8145), "
+"[#8146](https://github.com/flwrlabs/flower/pull/8146), "
+"[#8156](https://github.com/flwrlabs/flower/pull/8156), "
+"[#8160](https://github.com/flwrlabs/flower/pull/8160), "
+"[#8161](https://github.com/flwrlabs/flower/pull/8161), "
+"[#8163](https://github.com/flwrlabs/flower/pull/8163), "
+"[#8165](https://github.com/flwrlabs/flower/pull/8165), "
+"[#8169](https://github.com/flwrlabs/flower/pull/8169), "
+"[#8171](https://github.com/flwrlabs/flower/pull/8171), "
+"[#8172](https://github.com/flwrlabs/flower/pull/8172), "
+"[#8174](https://github.com/flwrlabs/flower/pull/8174), "
+"[#8179](https://github.com/flwrlabs/flower/pull/8179), "
+"[#8195](https://github.com/flwrlabs/flower/pull/8195), "
+"[#8196](https://github.com/flwrlabs/flower/pull/8196), "
+"[#8198](https://github.com/flwrlabs/flower/pull/8198), "
+"[#8220](https://github.com/flwrlabs/flower/pull/8220), "
+"[#8223](https://github.com/flwrlabs/flower/pull/8223), "
+"[#8224](https://github.com/flwrlabs/flower/pull/8224))"
+msgstr ""
+
+#: ../../source/changelog/v1.37.0.md:2
+msgid "v1.37.0 (2026-09-15)"
+msgstr ""
+
+#: ../../source/changelog/v1.37.0.md:8
+#, fuzzy
+msgid ""
+"`Charles Beauville`, `Chong Shen Ng`, `Daniel J. Beutel`, `Daniel Nata "
+"Nugraha`, `Dimitris Stripelis`, `Heng Pan`, `Javier`, `Julian Rußmeyer`, "
+"`Paul Thomas`, `Silvio Cretti`, `Taner Topal`, `Zhewen Tan`"
+msgstr ""
+
+#: ../../source/changelog/v1.37.0.md:12
+msgid ""
+"With this release, both RuntimeAPI and ControlAPI now use HTTP, making "
+"traffic easier to inspect, debug, and integrate with standard HTTP "
+"tooling. Logging is also richer, and the default log output has changed "
+"slightly to improve readability. To see all logs, enable [verbose "
+"logging](https://flower.ai/docs/framework/1.37/en/how-to-configure-"
+"logging.html) for SuperLink, SuperNode, or SuperExec. SuperLink no longer"
+" periodically logs which SuperNodes are connected; you can query this "
+"information at any time by running `flwr supernode ls`."
+msgstr ""
+
+#: ../../source/changelog/v1.37.0.md:14
+#, fuzzy
+msgid ""
+"**Flower CLI switches to HTTP** "
+"([#8028](https://github.com/flwrlabs/flower/pull/8028), "
+"[#8045](https://github.com/flwrlabs/flower/pull/8045), "
+"[#8046](https://github.com/flwrlabs/flower/pull/8046), "
+"[#8047](https://github.com/flwrlabs/flower/pull/8047), "
+"[#8055](https://github.com/flwrlabs/flower/pull/8055), "
+"[#8057](https://github.com/flwrlabs/flower/pull/8057), "
+"[#8070](https://github.com/flwrlabs/flower/pull/8070), "
+"[#8072](https://github.com/flwrlabs/flower/pull/8072), "
+"[#8073](https://github.com/flwrlabs/flower/pull/8073), "
+"[#8076](https://github.com/flwrlabs/flower/pull/8076), "
+"[#8077](https://github.com/flwrlabs/flower/pull/8077), "
+"[#8084](https://github.com/flwrlabs/flower/pull/8084), "
+"[#8085](https://github.com/flwrlabs/flower/pull/8085), "
+"[#8087](https://github.com/flwrlabs/flower/pull/8087), "
+"[#8089](https://github.com/flwrlabs/flower/pull/8089), "
+"[#8093](https://github.com/flwrlabs/flower/pull/8093), "
+"[#8099](https://github.com/flwrlabs/flower/pull/8099))"
+msgstr ""
+
+#: ../../source/changelog/v1.37.0.md:16
+msgid ""
+"The Flower CLI now sends Control API requests over HTTP. The gRPC Control"
+" API is disabled by default, and `--control-api-address` is deprecated in"
+" favor of `--host` and `--port`. SuperGrid configuration and deployment "
+"guides now use `api.flower.ai`. If your [Flower "
+"Configuration](https://flower.ai/docs/framework/1.37/en/ref-flower-"
+"configuration.html) file defines a custom `SuperLink` connection, you "
+"must update it for the switch from gRPC to HTTP; in most cases, only the "
+"port needs to change."
+msgstr ""
+
+#: ../../source/changelog/v1.37.0.md:18
+#, fuzzy
+msgid ""
+"**Improve AgentApp conversations with history, connectors, titles, and "
+"local app loading** "
+"([#8048](https://github.com/flwrlabs/flower/pull/8048), "
+"[#8058](https://github.com/flwrlabs/flower/pull/8058), "
+"[#8060](https://github.com/flwrlabs/flower/pull/8060), "
+"[#8101](https://github.com/flwrlabs/flower/pull/8101), "
+"[#8102](https://github.com/flwrlabs/flower/pull/8102), "
+"[#8104](https://github.com/flwrlabs/flower/pull/8104), "
+"[#8105](https://github.com/flwrlabs/flower/pull/8105), "
+"[#8110](https://github.com/flwrlabs/flower/pull/8110), "
+"[#8123](https://github.com/flwrlabs/flower/pull/8123), "
+"[#8127](https://github.com/flwrlabs/flower/pull/8127), "
+"[#8128](https://github.com/flwrlabs/flower/pull/8128), "
+"[#8131](https://github.com/flwrlabs/flower/pull/8131), "
+"[#8133](https://github.com/flwrlabs/flower/pull/8133), "
+"[#8148](https://github.com/flwrlabs/flower/pull/8148))"
+msgstr ""
+
+#: ../../source/changelog/v1.37.0.md:20
+msgid ""
+"`flwr chat` can now load and interactively test local AgentApps with the "
+"`/load <path>` command. Users can name or rename conversation titles, and"
+" titles can also be generated automatically. Within an `AgentApp`, "
+"persisted conversation history is now accessible through "
+"`agent.events.get_trace()`, with user inputs and tool calls recorded as "
+"standard events. `flwr chat` can also use connected connectors: select "
+"them with `/connector`, view the current selection in the context bar, "
+"and clear it with `/connector clear`. Connector setup remains available "
+"through the Web UI."
+msgstr ""
+
+#: ../../source/changelog/v1.37.0.md:22
+#, fuzzy
+msgid ""
+"**Configure Runtime API TLS with consistent options** "
+"([#8109](https://github.com/flwrlabs/flower/pull/8109), "
+"[#8113](https://github.com/flwrlabs/flower/pull/8113))"
+msgstr ""
+
+#: ../../source/changelog/v1.37.0.md:24
+msgid ""
+"SuperNode now uses `--ssl-certfile`, `--ssl-keyfile`, and `--ssl-ca-"
+"certfile` for Runtime API TLS while retaining the former `--appio-ssl-*` "
+"options as deprecated aliases. SuperLink help now clarifies that the same"
+" `--ssl-*` options secure its Fleet, Control, and Runtime APIs."
+msgstr ""
+
+#: ../../source/changelog/v1.37.0.md:26
+#, fuzzy
+msgid ""
+"**Deploy SuperNodes using Slurm** "
+"([#8074](https://github.com/flwrlabs/flower/pull/8074))"
+msgstr ""
+
+#: ../../source/changelog/v1.37.0.md:28
+msgid ""
+"A new guide covers running SuperNodes as Slurm jobs with subprocess or "
+"process isolation, including separate SuperExec jobs, GPU allocation, and"
+" scheduler-selected nodes."
+msgstr ""
+
+#: ../../source/changelog/v1.37.0.md:30
+#, fuzzy
+msgid ""
+"**Reject invalid `FedTrimmedAvg` trimming fractions** "
+"([#7946](https://github.com/flwrlabs/flower/pull/7946))"
+msgstr ""
+
+#: ../../source/changelog/v1.37.0.md:32
+msgid ""
+"ServerApp and legacy `FedTrimmedAvg` strategies now require `beta` to be "
+"in `[0, 0.5)`, preventing invalid trimming from producing `NaN` model "
+"parameters."
+msgstr ""
+
+#: ../../source/changelog/v1.37.0.md:34
+#, fuzzy
+msgid ""
+"**Run adaptive federated DDoS attack detection with FLAD** "
+"([#8083](https://github.com/flwrlabs/flower/pull/8083))"
+msgstr ""
+
+#: ../../source/changelog/v1.37.0.md:36
+msgid ""
+"The new FLAD baseline implements the strategy and a subset of the "
+"convergence experiments from its paper on a highly non-IID dataset of "
+"heterogeneous DDoS attacks. FLAD dynamically assigns more computation to "
+"clients whose attack profiles are harder to learn without sharing test "
+"data."
+msgstr ""
+
+#: ../../source/changelog/v1.37.0.md:38
+msgid ""
+"**General improvements** "
+"([#8049](https://github.com/flwrlabs/flower/pull/8049), "
+"[#8056](https://github.com/flwrlabs/flower/pull/8056), "
+"[#8064](https://github.com/flwrlabs/flower/pull/8064), "
+"[#8066](https://github.com/flwrlabs/flower/pull/8066), "
+"[#8067](https://github.com/flwrlabs/flower/pull/8067), "
+"[#8068](https://github.com/flwrlabs/flower/pull/8068), "
+"[#8071](https://github.com/flwrlabs/flower/pull/8071), "
+"[#8075](https://github.com/flwrlabs/flower/pull/8075), "
+"[#8078](https://github.com/flwrlabs/flower/pull/8078), "
+"[#8080](https://github.com/flwrlabs/flower/pull/8080), "
+"[#8082](https://github.com/flwrlabs/flower/pull/8082), "
+"[#8088](https://github.com/flwrlabs/flower/pull/8088), "
+"[#8095](https://github.com/flwrlabs/flower/pull/8095), "
+"[#8096](https://github.com/flwrlabs/flower/pull/8096), "
+"[#8098](https://github.com/flwrlabs/flower/pull/8098), "
+"[#8103](https://github.com/flwrlabs/flower/pull/8103), "
+"[#8108](https://github.com/flwrlabs/flower/pull/8108), "
+"[#8112](https://github.com/flwrlabs/flower/pull/8112), "
+"[#8114](https://github.com/flwrlabs/flower/pull/8114), "
+"[#8115](https://github.com/flwrlabs/flower/pull/8115), "
+"[#8116](https://github.com/flwrlabs/flower/pull/8116), "
+"[#8118](https://github.com/flwrlabs/flower/pull/8118), "
+"[#8119](https://github.com/flwrlabs/flower/pull/8119), "
+"[#8120](https://github.com/flwrlabs/flower/pull/8120), "
+"[#8124](https://github.com/flwrlabs/flower/pull/8124), "
+"[#8125](https://github.com/flwrlabs/flower/pull/8125), "
+"[#8126](https://github.com/flwrlabs/flower/pull/8126), "
+"[#8129](https://github.com/flwrlabs/flower/pull/8129), "
+"[#8134](https://github.com/flwrlabs/flower/pull/8134), "
+"[#8135](https://github.com/flwrlabs/flower/pull/8135), "
+"[#8136](https://github.com/flwrlabs/flower/pull/8136), "
+"[#8137](https://github.com/flwrlabs/flower/pull/8137), "
+"[#8139](https://github.com/flwrlabs/flower/pull/8139), "
+"[#8140](https://github.com/flwrlabs/flower/pull/8140), "
+"[#8142](https://github.com/flwrlabs/flower/pull/8142), "
+"[#8144](https://github.com/flwrlabs/flower/pull/8144), "
+"[#8149](https://github.com/flwrlabs/flower/pull/8149))"
+msgstr ""
+
+#: ../../source/changelog/v0.16.0.md:21 ../../source/changelog/v0.17.0.md:33
+#: ../../source/changelog/v0.18.0.md:62 ../../source/changelog/v0.19.0.md:58
+#: ../../source/changelog/v1.0.0.md:17 ../../source/changelog/v1.1.0.md:60
+#: ../../source/changelog/v1.10.0.md:90 ../../source/changelog/v1.11.0.md:78
+#: ../../source/changelog/v1.11.1.md:30 ../../source/changelog/v1.12.0.md:66
+#: ../../source/changelog/v1.13.0.md:77 ../../source/changelog/v1.14.0.md:65
+#: ../../source/changelog/v1.15.0.md:82 ../../source/changelog/v1.16.0.md:56
+#: ../../source/changelog/v1.18.0.md:52 ../../source/changelog/v1.2.0.md:67
+#: ../../source/changelog/v1.20.0.md:68 ../../source/changelog/v1.21.0.md:58
+#: ../../source/changelog/v1.23.0.md:50 ../../source/changelog/v1.24.0.md:44
+#: ../../source/changelog/v1.25.0.md:38 ../../source/changelog/v1.26.0.md:46
+#: ../../source/changelog/v1.27.0.md:52 ../../source/changelog/v1.28.0.md:52
+#: ../../source/changelog/v1.29.0.md:48 ../../source/changelog/v1.3.0.md:56
+#: ../../source/changelog/v1.30.0.md:36 ../../source/changelog/v1.31.0.md:52
+#: ../../source/changelog/v1.32.0.md:46 ../../source/changelog/v1.33.0.md:52
+#: ../../source/changelog/v1.34.0.md:56 ../../source/changelog/v1.35.0.md:52
+#: ../../source/changelog/v1.37.0.md:42 ../../source/changelog/v1.4.0.md:62
+#: ../../source/changelog/v1.5.0.md:82 ../../source/changelog/v1.6.0.md:90
+#: ../../source/changelog/v1.7.0.md:73 ../../source/changelog/v1.8.0.md:62
+#: ../../source/changelog/v1.9.0.md:88
+msgid "Incompatible changes"
+msgstr "Changements incompatibles"
+
+#: ../../source/changelog/v1.37.0.md:44
+#, fuzzy
+msgid ""
+"**Remove deprecated SuperLink Exec API options** "
+"([#8100](https://github.com/flwrlabs/flower/pull/8100))"
+msgstr ""
+
+#: ../../source/changelog/v1.37.0.md:46
+msgid ""
+"SuperLink no longer accepts `--exec-api-address`, `--executor`, "
+"`--executor-dir`, or `--executor-config`. Remove these long-deprecated "
+"options from SuperLink launch configurations."
+msgstr ""
+
+#: ../../source/changelog/v1.37.0.md:48
+#, fuzzy
+msgid ""
+"**Update SuperLink TLS configuration** "
+"([#8106](https://github.com/flwrlabs/flower/pull/8106))"
+msgstr ""
+
+#: ../../source/changelog/v1.37.0.md:50
+msgid ""
+"SuperLink now uses `--ssl-certfile`, `--ssl-keyfile`, and `--ssl-ca-"
+"certfile` to secure its Fleet, Control, and Runtime APIs with one "
+"certificate set. Replace any `--appio-ssl-*` options with these shared "
+"options; the removed flags now terminate startup."
+msgstr ""
+
+#: ../../source/changelog/v1.36.0.md:2
+msgid "v1.36.0 (2026-09-01)"
+msgstr ""
+
+#: ../../source/changelog/v1.36.0.md:8
+#, fuzzy
+msgid ""
+"`Charles Beauville`, `Daniel J. Beutel`, `Dimitris Stripelis`, `Heng "
+"Pan`, `Javier`, `Lorenzo Sani`, `Taner Topal`, `Yan Gao`, `jafermarq`"
+msgstr ""
 
 #: ../../source/changelog/v1.36.0.md:12
 #, fuzzy
@@ -243,27 +778,6 @@ msgid ""
 "[#8043](https://github.com/flwrlabs/flower/pull/8043), "
 "[#8044](https://github.com/flwrlabs/flower/pull/8044))"
 msgstr ""
-
-#: ../../source/changelog/v1.10.0.md:68 ../../source/changelog/v1.11.0.md:65
-#: ../../source/changelog/v1.12.0.md:64 ../../source/changelog/v1.13.0.md:69
-#: ../../source/changelog/v1.13.1.md:32 ../../source/changelog/v1.14.0.md:63
-#: ../../source/changelog/v1.15.0.md:80 ../../source/changelog/v1.16.0.md:54
-#: ../../source/changelog/v1.17.0.md:85 ../../source/changelog/v1.18.0.md:50
-#: ../../source/changelog/v1.19.0.md:68 ../../source/changelog/v1.20.0.md:66
-#: ../../source/changelog/v1.21.0.md:56 ../../source/changelog/v1.22.0.md:40
-#: ../../source/changelog/v1.23.0.md:48 ../../source/changelog/v1.24.0.md:42
-#: ../../source/changelog/v1.25.0.md:36 ../../source/changelog/v1.26.0.md:44
-#: ../../source/changelog/v1.27.0.md:50 ../../source/changelog/v1.28.0.md:50
-#: ../../source/changelog/v1.29.0.md:46 ../../source/changelog/v1.30.0.md:34
-#: ../../source/changelog/v1.31.0.md:50 ../../source/changelog/v1.32.0.md:44
-#: ../../source/changelog/v1.33.0.md:50 ../../source/changelog/v1.34.0.md:54
-#: ../../source/changelog/v1.35.0.md:50 ../../source/changelog/v1.36.0.md:30
-msgid ""
-"As always, many parts of the Flower framework and quality infrastructure "
-"were improved and updated."
-msgstr ""
-"Comme toujours, de nombreuses parties du cadre Flower et de "
-"l'infrastructure qualité ont été améliorées et mises à jour."
 
 #: ../../source/changelog/v1.35.0.md:2
 msgid "v1.35.0 (2026-08-25)"
@@ -459,28 +973,6 @@ msgid ""
 "[#7989](https://github.com/flwrlabs/flower/pull/7989), "
 "[#7995](https://github.com/flwrlabs/flower/pull/7995))"
 msgstr ""
-
-#: ../../source/changelog/v0.16.0.md:21 ../../source/changelog/v0.17.0.md:33
-#: ../../source/changelog/v0.18.0.md:62 ../../source/changelog/v0.19.0.md:58
-#: ../../source/changelog/v1.0.0.md:17 ../../source/changelog/v1.1.0.md:60
-#: ../../source/changelog/v1.10.0.md:90 ../../source/changelog/v1.11.0.md:78
-#: ../../source/changelog/v1.11.1.md:30 ../../source/changelog/v1.12.0.md:66
-#: ../../source/changelog/v1.13.0.md:77 ../../source/changelog/v1.14.0.md:65
-#: ../../source/changelog/v1.15.0.md:82 ../../source/changelog/v1.16.0.md:56
-#: ../../source/changelog/v1.18.0.md:52 ../../source/changelog/v1.2.0.md:67
-#: ../../source/changelog/v1.20.0.md:68 ../../source/changelog/v1.21.0.md:58
-#: ../../source/changelog/v1.23.0.md:50 ../../source/changelog/v1.24.0.md:44
-#: ../../source/changelog/v1.25.0.md:38 ../../source/changelog/v1.26.0.md:46
-#: ../../source/changelog/v1.27.0.md:52 ../../source/changelog/v1.28.0.md:52
-#: ../../source/changelog/v1.29.0.md:48 ../../source/changelog/v1.3.0.md:56
-#: ../../source/changelog/v1.30.0.md:36 ../../source/changelog/v1.31.0.md:52
-#: ../../source/changelog/v1.32.0.md:46 ../../source/changelog/v1.33.0.md:52
-#: ../../source/changelog/v1.34.0.md:56 ../../source/changelog/v1.35.0.md:52
-#: ../../source/changelog/v1.4.0.md:62 ../../source/changelog/v1.5.0.md:82
-#: ../../source/changelog/v1.6.0.md:90 ../../source/changelog/v1.7.0.md:73
-#: ../../source/changelog/v1.8.0.md:62 ../../source/changelog/v1.9.0.md:88
-msgid "Incompatible changes"
-msgstr "Changements incompatibles"
 
 #: ../../source/changelog/v1.35.0.md:54
 #, fuzzy
@@ -18757,14 +19249,15 @@ msgstr "Argument de construction"
 #: ../../source/ref-exit-codes/202.rst:7 ../../source/ref-exit-codes/203.rst:7
 #: ../../source/ref-exit-codes/250.rst:7 ../../source/ref-exit-codes/3.rst:7
 #: ../../source/ref-exit-codes/302.rst:7 ../../source/ref-exit-codes/303.rst:7
-#: ../../source/ref-exit-codes/304.rst:7 ../../source/ref-exit-codes/400.rst:7
-#: ../../source/ref-exit-codes/401.rst:7 ../../source/ref-exit-codes/402.rst:7
-#: ../../source/ref-exit-codes/500.rst:7 ../../source/ref-exit-codes/600.rst:7
-#: ../../source/ref-exit-codes/602.rst:7 ../../source/ref-exit-codes/603.rst:7
-#: ../../source/ref-exit-codes/604.rst:7 ../../source/ref-exit-codes/605.rst:7
-#: ../../source/ref-exit-codes/606.rst:7 ../../source/ref-exit-codes/607.rst:7
-#: ../../source/ref-exit-codes/608.rst:7 ../../source/ref-exit-codes/700.rst:7
-#: ../../source/ref-exit-codes/701.rst:7 ../../source/ref-exit-codes/800.rst:7
+#: ../../source/ref-exit-codes/304.rst:7 ../../source/ref-exit-codes/305.rst:7
+#: ../../source/ref-exit-codes/400.rst:7 ../../source/ref-exit-codes/401.rst:7
+#: ../../source/ref-exit-codes/402.rst:7 ../../source/ref-exit-codes/500.rst:7
+#: ../../source/ref-exit-codes/600.rst:7 ../../source/ref-exit-codes/602.rst:7
+#: ../../source/ref-exit-codes/603.rst:7 ../../source/ref-exit-codes/604.rst:7
+#: ../../source/ref-exit-codes/605.rst:7 ../../source/ref-exit-codes/606.rst:7
+#: ../../source/ref-exit-codes/607.rst:7 ../../source/ref-exit-codes/608.rst:7
+#: ../../source/ref-exit-codes/700.rst:7 ../../source/ref-exit-codes/701.rst:7
+#: ../../source/ref-exit-codes/800.rst:7
 msgid "Description"
 msgstr "Description"
 
@@ -21207,9 +21700,9 @@ msgstr "Comprendre la commande"
 #: ../../source/docker/enable-tls.rst:215
 #: ../../source/docker/enable-tls.rst:240
 #: ../../source/docker/tutorial-quickstart-docker.rst:84
-#: ../../source/docker/tutorial-quickstart-docker.rst:129
-#: ../../source/docker/tutorial-quickstart-docker.rst:246
-#: ../../source/docker/tutorial-quickstart-docker.rst:284
+#: ../../source/docker/tutorial-quickstart-docker.rst:128
+#: ../../source/docker/tutorial-quickstart-docker.rst:243
+#: ../../source/docker/tutorial-quickstart-docker.rst:277
 msgid "``docker run``: This tells Docker to run a container from an image."
 msgstr ""
 "``docker run``: Cela dit à Docker de lancer un conteneur à partir d'une "
@@ -21221,9 +21714,9 @@ msgstr ""
 #: ../../source/docker/enable-tls.rst:216
 #: ../../source/docker/enable-tls.rst:241
 #: ../../source/docker/tutorial-quickstart-docker.rst:85
-#: ../../source/docker/tutorial-quickstart-docker.rst:130
-#: ../../source/docker/tutorial-quickstart-docker.rst:247
-#: ../../source/docker/tutorial-quickstart-docker.rst:285
+#: ../../source/docker/tutorial-quickstart-docker.rst:129
+#: ../../source/docker/tutorial-quickstart-docker.rst:244
+#: ../../source/docker/tutorial-quickstart-docker.rst:278
 msgid "``--rm``: Remove the container once it is stopped or the command exits."
 msgstr ""
 "``--rm``: Supprimez le conteneur une fois qu'il est arrêté ou que la "
@@ -21604,13 +22097,13 @@ msgstr ""
 #: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:167
 #: ../../source/docker/tutorial-quickstart-docker-compose.rst:110
 #: ../../source/docker/tutorial-quickstart-docker-compose.rst:250
-#: ../../source/docker/tutorial-quickstart-docker.rst:331
+#: ../../source/docker/tutorial-quickstart-docker.rst:321
 #: ../../source/how-to-authenticate-accounts.rst:71
 #: ../../source/how-to-authenticate-supernodes.rst:122
-#: ../../source/how-to-enable-tls-connections.rst:219
-#: ../../source/how-to-run-flower-on-azure.rst:230
-#: ../../source/how-to-run-flower-on-gcp.rst:625
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:684
+#: ../../source/how-to-enable-tls-connections.rst:217
+#: ../../source/how-to-run-flower-on-azure.rst:197
+#: ../../source/how-to-run-flower-on-gcp.rst:614
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:678
 #: ../../source/how-to-run-flower-with-deployment-engine.rst:214
 #: ../../source/how-to-upgrade-to-flower-1.28.rst:80
 #: ../../source/how-to-upgrade-to-flower-1.28.rst:99
@@ -22383,8 +22876,7 @@ msgstr ""
 "locale."
 
 #: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:32
-#, fuzzy
-msgid "Ports ``8000`` and ``9092`` are accessible on the remote machine."
+msgid "Port ``8000`` is accessible on the remote machine."
 msgstr ""
 
 #: ../../source/docker/tutorial-deploy-on-multiple-machines.rst:36
@@ -22655,16 +23147,15 @@ msgstr "Ouvrez votre terminal et exécutez :"
 #: ../../source/docker/tutorial-quickstart-docker.rst:86
 #, fuzzy
 msgid ""
-"``-p 8000:8000 -p 9092:9092``: Map ports ``8000`` and ``9092`` of the "
-"container to the same port of the host machine, allowing other services "
-"to access the Runtime and Control APIs on ``http://localhost:8000`` and "
-"the Fleet API on ``localhost:9092``."
+"``-p 8000:8000``: Map port ``8000`` of the container to the same port of "
+"the host machine, allowing other services to access the Runtime, Control,"
+" and Fleet APIs on ``http://localhost:8000``."
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:90
-#: ../../source/docker/tutorial-quickstart-docker.rst:134
-#: ../../source/docker/tutorial-quickstart-docker.rst:248
-#: ../../source/docker/tutorial-quickstart-docker.rst:286
+#: ../../source/docker/tutorial-quickstart-docker.rst:89
+#: ../../source/docker/tutorial-quickstart-docker.rst:133
+#: ../../source/docker/tutorial-quickstart-docker.rst:245
+#: ../../source/docker/tutorial-quickstart-docker.rst:279
 msgid ""
 "``--network flwr-network``: Make the container join the network named "
 "``flwr-network``."
@@ -22672,20 +23163,20 @@ msgstr ""
 "``--network flwr-network``: Faites en sorte que le conteneur rejoigne le "
 "réseau nommé ``flwr-network``: "
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:91
+#: ../../source/docker/tutorial-quickstart-docker.rst:90
 msgid "``--name superlink``: Assign the name ``superlink`` to the container."
 msgstr "``--name superlink``: Attribuez au conteneur le nom ``superlink``: "
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:92
-#: ../../source/docker/tutorial-quickstart-docker.rst:136
-#: ../../source/docker/tutorial-quickstart-docker.rst:250
-#: ../../source/docker/tutorial-quickstart-docker.rst:288
+#: ../../source/docker/tutorial-quickstart-docker.rst:91
+#: ../../source/docker/tutorial-quickstart-docker.rst:135
+#: ../../source/docker/tutorial-quickstart-docker.rst:247
+#: ../../source/docker/tutorial-quickstart-docker.rst:281
 msgid ""
 "``--detach``: Run the container in the background, freeing up the "
 "terminal."
 msgstr "``--detach``: Exécutez le conteneur en arrière-plan, libérant la console."
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:93
+#: ../../source/docker/tutorial-quickstart-docker.rst:92
 msgid ""
 ":substitution-code:`flwr/superlink:|stable_flwr_version|`: The name of "
 "the image to be run and the specific tag of the image. The tag "
@@ -22697,8 +23188,8 @@ msgstr ""
 "code:`|stable_flwr_version|` représente une :doc:`version spécifique "
 "<pin-version>` de l'image."
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:95
-#: ../../source/docker/tutorial-quickstart-docker.rst:139
+#: ../../source/docker/tutorial-quickstart-docker.rst:94
+#: ../../source/docker/tutorial-quickstart-docker.rst:138
 msgid ""
 "``--insecure``: This flag tells the container to operate in an insecure "
 "mode, allowing unencrypted communication."
@@ -22706,13 +23197,13 @@ msgstr ""
 "``--insecure``: Ce drapeau indique au conteneur qu'il doit fonctionner "
 "dans un mode non sécurisé, permettant une communication non chiffrée."
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:97
+#: ../../source/docker/tutorial-quickstart-docker.rst:96
 msgid ""
-"``--host 0.0.0.0``: Make the Runtime and Control HTTP APIs reachable "
-"outside the container."
+"``--host 0.0.0.0``: Make the Runtime, Control, and Fleet HTTP APIs "
+"reachable outside the container."
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:99
+#: ../../source/docker/tutorial-quickstart-docker.rst:98
 msgid ""
 "``--isolation process``: Tells the SuperLink that the ServerApp is "
 "executed by separate independent process. The SuperLink does not attempt "
@@ -22724,19 +23215,19 @@ msgstr ""
 "Vous pouvez en savoir plus sur les différents modes de processus ici : "
 ":doc:`run-as-subprocess`: "
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:105
+#: ../../source/docker/tutorial-quickstart-docker.rst:104
 msgid "Step 3: Start the SuperNodes"
 msgstr "Étape 3 : Démarrer les SuperNodes"
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:107
+#: ../../source/docker/tutorial-quickstart-docker.rst:106
 msgid "Start two SuperNode containers."
 msgstr "Démarrer deux conteneurs SuperNode."
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:109
+#: ../../source/docker/tutorial-quickstart-docker.rst:108
 msgid "Start the first container:"
 msgstr "Démarrer le premier conteneur :"
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:131
+#: ../../source/docker/tutorial-quickstart-docker.rst:130
 msgid ""
 "``-p 9094:9094``: Map port ``9094`` of the container to the same port of "
 "the host machine, allowing other services to access the SuperNode API on "
@@ -22746,11 +23237,11 @@ msgstr ""
 "même port de la machine hôte, permettant à d'autres services d'accéder au"
 " SuperNode API sur ``http://localhost:9094``: "
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:135
+#: ../../source/docker/tutorial-quickstart-docker.rst:134
 msgid "``--name supernode-1``: Assign the name ``supernode-1`` to the container."
 msgstr "``--name supernode-1``: Attribuez au conteneur le nom ``supernode-1``: "
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:137
+#: ../../source/docker/tutorial-quickstart-docker.rst:136
 msgid ""
 ":substitution-code:`flwr/supernode:|stable_flwr_version|`: This is the "
 "name of the image to be run and the specific tag of the image."
@@ -22758,15 +23249,14 @@ msgstr ""
 ":substitution-code:`flwr/supernode:|stable_flwr_version|` : nom de "
 "l'image à exécuter et tag spécifique de l'image."
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:141
+#: ../../source/docker/tutorial-quickstart-docker.rst:140
+#, fuzzy
 msgid ""
-"``--superlink superlink:9092``: Connect to the SuperLink's Fleet API at "
-"the address ``superlink:9092``."
+"``--superlink superlink:8000``: Connect to the SuperLink's Fleet API at "
+"the address ``superlink:8000``."
 msgstr ""
-"``--superlink superlink:9092``: Connectez-vous à l'API Fleet de SuperLink"
-" à l'adresse ``superlink:9092``."
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:143
+#: ../../source/docker/tutorial-quickstart-docker.rst:142
 msgid ""
 "``--node-config \"partition-id=0 num-partitions=2\"``: Set the partition "
 "ID to ``0`` and the number of partitions to ``2`` for the SuperNode "
@@ -22776,13 +23266,13 @@ msgstr ""
 "partition à ``0`` et le nombre de partitions à ``2`` pour la "
 "configuration du SuperNode."
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:145
+#: ../../source/docker/tutorial-quickstart-docker.rst:144
 msgid ""
 "``--host 0.0.0.0``: Make the SuperNode Runtime API accessible outside the"
 " container."
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:146
+#: ../../source/docker/tutorial-quickstart-docker.rst:145
 msgid ""
 "``--port 9094``: Set the port where the SuperNode listens for the "
 "ClientApp process. If multiple SuperNodes are started on the same "
@@ -22795,7 +23285,7 @@ msgstr ""
 "chaque SuperNode. (Par exemple, à l'étape suivante, nous configurons le "
 "deuxième conteneur SuperNode pour écouter sur le port 9095)"
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:149
+#: ../../source/docker/tutorial-quickstart-docker.rst:148
 msgid ""
 "``--isolation process``: Tells the SuperNode that the ClientApp is "
 "executed by a separate independent process. The SuperNode does not "
@@ -22804,38 +23294,30 @@ msgstr ""
 "``--isolation process``: Indique à SuperNode que ClientApp est exécuté "
 "par un processus indépendant. Le SuperNode ne tente pas d'exécuter cela."
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:152
+#: ../../source/docker/tutorial-quickstart-docker.rst:151
 msgid "Start the second container:"
 msgstr "Démarrer le deuxième conteneur :"
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:172
+#: ../../source/docker/tutorial-quickstart-docker.rst:171
 msgid "Step 4: Start the SuperExec to execute ServerApps"
 msgstr "Étape 4 : Démarrer SuperExec pour exécuter les ServerApps"
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:174
-msgid ""
-"The **SuperExec** Docker image comes with a pre-installed version of "
-"Flower and serves as a base for building your own image. Use a **single**"
-" image and select the desired behavior (ServerApps vs ClientApps) at "
-"runtime via the ``--plugin-type`` flag. SuperExec spawns the "
-"corresponding processes on demand."
-msgstr ""
-"Le **image** SuperExec de conteneur vient avec une version pré-installée "
-"de Flower et sert de base pour construire votre propre image. Utilisez "
-"une seule image et sélectionnez le comportement souhaité (ServerApps vs "
-"ClientApps) au moment de l'exécution via le drapeau ``--plugin-type``. "
-"SuperExec démarre les processus correspondants à la demande."
-
-#: ../../source/docker/tutorial-quickstart-docker.rst:179
+#: ../../source/docker/tutorial-quickstart-docker.rst:173
 #, fuzzy
 msgid ""
-"When using SuperExec with the *serverapp* plugin, pass ``--runtime-api-"
-"address`` pointing to the SuperLink's **Runtime API** endpoint."
+"The **SuperExec** Docker image comes with a pre-installed version of "
+"Flower and serves as a base for building your own image. SuperExec spawns"
+" the appropriate processes on demand based on the tasks it receives."
 msgstr ""
-"Lorsque vous utilisez SuperExec avec le plugin *serverapp*, passez "
-"``--appio-api-address`` pointant vers l'API **ServerAppIO** de SuperLink."
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:182
+#: ../../source/docker/tutorial-quickstart-docker.rst:177
+#, fuzzy
+msgid ""
+"To execute ServerApps, pass ``--runtime-api-address`` pointing to the "
+"SuperLink's **Runtime API** endpoint."
+msgstr ""
+
+#: ../../source/docker/tutorial-quickstart-docker.rst:180
 msgid ""
 "Create a Dockerfile called ``superexec.Dockerfile`` and paste the "
 "following:"
@@ -22843,7 +23325,7 @@ msgstr ""
 "Créez un fichier Docker appelé ``superexec.Dockerfile`` et collez-y le "
 "suivant : "
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:184
+#: ../../source/docker/tutorial-quickstart-docker.rst:182
 #: ../../source/how-to-run-flower-on-gcp.rst
 msgid "superexec.Dockerfile"
 msgstr ""
@@ -22852,7 +23334,7 @@ msgstr ""
 msgid "Understand the Dockerfile"
 msgstr "Comprenez le fichier Dockerfile"
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:200
+#: ../../source/docker/tutorial-quickstart-docker.rst:198
 msgid ""
 ":substitution-code:`FROM flwr/superexec:|stable_flwr_version|`: This line"
 " specifies that the Docker image to be built from is the "
@@ -22863,7 +23345,7 @@ msgstr ""
 "ligne indique que l'image Docker utilisée comme base est l'image "
 "``flwr/superexec``, version :substitution-code:`|stable_flwr_version|`."
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:202
+#: ../../source/docker/tutorial-quickstart-docker.rst:200
 msgid ""
 "``WORKDIR /app``: Set the working directory for the container to "
 "``/app``. Any subsequent commands that reference a directory will be "
@@ -22873,7 +23355,7 @@ msgstr ""
 "sur ``/app``. Toute commande ultérieure qui référence un répertoire sera "
 "relative à ce répertoire."
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:204
+#: ../../source/docker/tutorial-quickstart-docker.rst:202
 msgid ""
 "``COPY pyproject.toml .``: Copy the ``pyproject.toml`` file. from the "
 "current working directory into the container's ``/app`` directory."
@@ -22881,7 +23363,7 @@ msgstr ""
 "``COPY pyproject.toml .``: Copiez le fichier ``pyproject.toml``. from le "
 "répertoire courant dans le répertoire ``/app`` du conteneur."
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:206
+#: ../../source/docker/tutorial-quickstart-docker.rst:204
 msgid ""
 "``RUN sed -i 's/.*flwr\\[simulation\\].*//' pyproject.toml``: Remove the "
 "``flwr`` dependency from the ``pyproject.toml``."
@@ -22889,7 +23371,7 @@ msgstr ""
 "``RUN sed -i 's/.*flwr\\[simulation\\].*//' pyproject.toml``: Supprimez "
 "la dépendance ``flwr`` du ``pyproject.toml``."
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:208
+#: ../../source/docker/tutorial-quickstart-docker.rst:206
 msgid ""
 "``python -m pip install -U --no-cache-dir .``: Run the ``pip`` install "
 "command to install the dependencies defined in the ``pyproject.toml`` "
@@ -22899,7 +23381,7 @@ msgstr ""
 "d'installation ``pip`` pour installer les dépendances définies dans le "
 "fichier ``pyproject.toml``."
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:211
+#: ../../source/docker/tutorial-quickstart-docker.rst:209
 msgid ""
 "The ``-U`` flag indicates that any existing packages should be upgraded, "
 "and ``--no-cache-dir`` prevents pip from using the cache to speed up the "
@@ -22909,7 +23391,7 @@ msgstr ""
 "et ``--no-cache-dir`` empêche pip d'utiliser la cache pour accélérer "
 "l'installation."
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:213
+#: ../../source/docker/tutorial-quickstart-docker.rst:211
 msgid ""
 "``ENTRYPOINT [\"flower-superexec\"]``: Set the command ``flower-"
 "superexec`` to be the default command run when the container is started."
@@ -22918,7 +23400,7 @@ msgstr ""
 "superexec`` comme commande par défaut à exécuter lorsqu'on démarrage le "
 "conteneur."
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:218
+#: ../../source/docker/tutorial-quickstart-docker.rst:216
 msgid ""
 "Note that `flwr <https://pypi.org/project/flwr/>`__ is already installed "
 "in the ``flwr/superexec`` base image, so only other package dependencies "
@@ -22933,7 +23415,7 @@ msgstr ""
 " est supprimée de l'image ``pyproject.toml`` après qu'elle a été copiée "
 "dans l'image Docker (voir ligne 5)."
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:224
+#: ../../source/docker/tutorial-quickstart-docker.rst:222
 msgid ""
 "Afterward, in the directory that holds the Dockerfile, execute this "
 "Docker command to build the SuperExec image:"
@@ -22941,16 +23423,16 @@ msgstr ""
 "Après cela, dans le répertoire qui contient le fichier Dockerfile, "
 "exécutez cette commande Docker pour construire l'image SuperExec :"
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:231
+#: ../../source/docker/tutorial-quickstart-docker.rst:229
 msgid "Start the **SuperExec for ServerApps** container:"
 msgstr "Démarrer le **SuperExec pour les ServerApps** conteneur :"
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:249
+#: ../../source/docker/tutorial-quickstart-docker.rst:246
 msgid "``--name superexec-serverapp``: Give the container a descriptive name."
 msgstr "``--name superexec-serverapp``: Attribuez au conteneur un nom descriptif."
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:251
-#: ../../source/docker/tutorial-quickstart-docker.rst:289
+#: ../../source/docker/tutorial-quickstart-docker.rst:248
+#: ../../source/docker/tutorial-quickstart-docker.rst:282
 msgid ""
 "``flwr_superexec:0.0.1``: This is the name of the image to be run and the"
 " specific tag of the image."
@@ -22958,8 +23440,8 @@ msgstr ""
 "``flwr_superexec:0.0.1``: C'est le nom de l'image à exécuter et la balise"
 " spécifique de l'image."
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:253
-#: ../../source/docker/tutorial-quickstart-docker.rst:291
+#: ../../source/docker/tutorial-quickstart-docker.rst:250
+#: ../../source/docker/tutorial-quickstart-docker.rst:284
 msgid ""
 "``--insecure``: This flag tells the container to operate in an insecure "
 "mode, allowing unencrypted communication. Secure connections will be "
@@ -22969,59 +23451,39 @@ msgstr ""
 "mode non sécurisé, permettant la communication non chiffrée. Les "
 "connexions sécurisées seront ajoutées dans les futures versions."
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:255
-msgid ""
-"``--plugin-type serverapp``: Load the *serverapp* plugin. SuperExec will "
-"spawn ServerApp processes as needed."
-msgstr ""
-"``--plugin-type serverapp``: Chargez le plugin *serverapp*. SuperExec "
-"lancera ServerApp processus à mesure que nécessaire."
-
-#: ../../source/docker/tutorial-quickstart-docker.rst:257
+#: ../../source/docker/tutorial-quickstart-docker.rst:252
 #, fuzzy
 msgid ""
 "``--runtime-api-address superlink:8000``: Connect to the SuperLink's "
 "Runtime API at the address ``superlink:8000``."
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:262
+#: ../../source/docker/tutorial-quickstart-docker.rst:257
 msgid "Step 5: Start the SuperExec to execute ClientApps"
 msgstr "Étape 5 : Démarrer SuperExec pour exécuter les ClientApps"
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:264
+#: ../../source/docker/tutorial-quickstart-docker.rst:259
 #, fuzzy
 msgid ""
-"For ClientApps, reuse the **same** image and change the plugin and API "
-"address. When using the *clientapp* plugin, pass ``--runtime-api-"
+"For ClientApps, reuse the **same** image and pass ``--runtime-api-"
 "address`` pointing to the SuperNode's **Runtime API** endpoint."
 msgstr ""
-"Pour les ClientApps, réutilisez l'image **même** et modifiez le plugin et"
-" l'adresse API. Lorsque vous utilisez le plugin *clientapp*, passez "
-"``--runtime-api-address`` pointant vers l'API **Runtime** de SuperNode."
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:268
+#: ../../source/docker/tutorial-quickstart-docker.rst:262
 msgid "(No new Dockerfile is needed; reuse ``flwr_superexec:0.0.1``.)"
 msgstr ""
 "(Aucun nouveau fichier Dockerfile n'est nécessaire ; réutilisez "
 "``flwr_superexec:0.0.1``)"
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:269
+#: ../../source/docker/tutorial-quickstart-docker.rst:263
 msgid "Start the first **SuperExec for ClientApps** container:"
 msgstr "Démarrer le premier **SuperExec pour les ClientApps** conteneur :"
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:287
+#: ../../source/docker/tutorial-quickstart-docker.rst:280
 msgid "``--name superexec-clientapp-1``: Give the container a descriptive name."
 msgstr "``--name superexec-clientapp-1``: Donnez au conteneur un nom descriptif."
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:293
-msgid ""
-"``--plugin-type clientapp``: Load the *clientapp* plugin. SuperExec will "
-"spawn ClientApp processes as needed."
-msgstr ""
-"``--plugin-type clientapp``: Chargez le plugin *clientapp*. SuperExec "
-"lancera ClientApp processus à mesure que nécessaire."
-
-#: ../../source/docker/tutorial-quickstart-docker.rst:295
+#: ../../source/docker/tutorial-quickstart-docker.rst:286
 #, fuzzy
 msgid ""
 "``--runtime-api-address supernode-1:9094``: Connect to the SuperNode's "
@@ -23030,16 +23492,16 @@ msgstr ""
 "``--appio-api-address supernode-1:9094``: Connectez-vous à l'API "
 "ClientAppIO de SuperNode à l'adresse ``supernode-1:9094``."
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:298
+#: ../../source/docker/tutorial-quickstart-docker.rst:289
 msgid "Start the second **SuperExec for ClientApps** container:"
 msgstr "Démarrer le deuxième **SuperExec pour les ClientApps** conteneur :"
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:313
+#: ../../source/docker/tutorial-quickstart-docker.rst:303
 msgid "Step 6: Run the Quickstart Project"
 msgstr "Étape 6 : Exécuter le Projet Quickstart"
 
 #: ../../source/docker/tutorial-quickstart-docker-compose.rst:94
-#: ../../source/docker/tutorial-quickstart-docker.rst:315
+#: ../../source/docker/tutorial-quickstart-docker.rst:305
 #: ../../source/how-to-run-flower-with-deployment-engine.rst:198
 msgid ""
 "Find the Flower Configuration TOML file in your machine. This file is "
@@ -23053,7 +23515,7 @@ msgstr ""
 "voir les connexions SuperLink disponibles ainsi que le chemin du fichier "
 "de configuration."
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:329
+#: ../../source/docker/tutorial-quickstart-docker.rst:319
 msgid ""
 "Add the following lines to the ``config.toml`` to add a new SuperLink "
 "connection:"
@@ -23061,7 +23523,7 @@ msgstr ""
 "Ajoutez les lignes suivantes au ``config.toml`` pour ajouter une nouvelle"
 " connexion SuperLink: "
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:338
+#: ../../source/docker/tutorial-quickstart-docker.rst:328
 msgid ""
 "Run the ``quickstart-pytorch`` project and follow the ServerApp logs to "
 "track the execution of the run:"
@@ -23069,11 +23531,11 @@ msgstr ""
 "Exécutez le projet ``quickstart-pytorch`` et suivez les journaux "
 "ServerApp pour suivre l'exécution de l’exécution:"
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:347
+#: ../../source/docker/tutorial-quickstart-docker.rst:337
 msgid "Step 7: Update the Application"
 msgstr "Étape 7 : Mettre à jour l'Application"
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:349
+#: ../../source/docker/tutorial-quickstart-docker.rst:339
 msgid ""
 "Change the application code. For example, change the ``seed`` in "
 "``pytorchexample/task.py`` to ``43`` and save it:"
@@ -23081,16 +23543,16 @@ msgstr ""
 "Modifiez le code de l'application. Par exemple, changez la valeur "
 "``seed`` dans ``pytorchexample/task.py`` en ``43`` et sauvegardez-le:"
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:352
+#: ../../source/docker/tutorial-quickstart-docker.rst:342
 msgid "pytorchexample/task.py"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:359
+#: ../../source/docker/tutorial-quickstart-docker.rst:349
 msgid "Stop the running containers:"
 msgstr "Arrêter les conteneurs en cours :"
 
 #: ../../source/docker/tutorial-quickstart-docker-compose.rst:148
-#: ../../source/docker/tutorial-quickstart-docker.rst:363
+#: ../../source/docker/tutorial-quickstart-docker.rst:353
 msgid ""
 "If you have modified the dependencies listed in your ``pyproject.toml`` "
 "file, it is essential to rebuild images."
@@ -23098,17 +23560,17 @@ msgstr ""
 "Si vous avez modifié les dépendances listées dans votre fichier "
 "``pyproject.toml``, il est essentiel de reconstruire les images."
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:366
+#: ../../source/docker/tutorial-quickstart-docker.rst:356
 msgid "If you haven't made any changes, you can skip steps 2 through 4."
 msgstr ""
 "Si vous n'avez pas apporté de modifications, vous pouvez sauter les "
 "étapes 2 à 4."
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:372
+#: ../../source/docker/tutorial-quickstart-docker.rst:362
 msgid "Rebuild the SuperExec image:"
 msgstr "Reconstruire l'image SuperExec :"
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:378
+#: ../../source/docker/tutorial-quickstart-docker.rst:368
 msgid ""
 "Launch **one SuperExec container** for the new ServerApp and **two "
 "SuperExec containers** for the new ClientApps:"
@@ -23116,32 +23578,32 @@ msgstr ""
 "Lancer **un conteneur SuperExec** pour la nouvelle ServerApp et **deux "
 "conteneurs SuperExec** pour les nouvelles ClientApps :"
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:408
+#: ../../source/docker/tutorial-quickstart-docker.rst:395
 msgid "Run the updated project:"
 msgstr "Lancer le projet mis à jour :"
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:416
+#: ../../source/docker/tutorial-quickstart-docker.rst:403
 msgid "Step 8: Clean Up"
 msgstr "Étape 8 : Nettoyage"
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:418
+#: ../../source/docker/tutorial-quickstart-docker.rst:405
 msgid "Remove the containers and the bridge network:"
 msgstr "Supprimer les conteneurs et le réseau de pont :"
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:444
-#: ../../source/docker/tutorial-quickstart-docker.rst:430
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:442
+#: ../../source/docker/tutorial-quickstart-docker.rst:417
 msgid "Where to Go Next"
 msgstr "Où aller ensuite ?"
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:432
+#: ../../source/docker/tutorial-quickstart-docker.rst:419
 msgid ":doc:`enable-tls`"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:433
+#: ../../source/docker/tutorial-quickstart-docker.rst:420
 msgid ":doc:`persist-superlink-state`"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker.rst:434
+#: ../../source/docker/tutorial-quickstart-docker.rst:421
 msgid ":doc:`tutorial-quickstart-docker-compose`"
 msgstr ""
 
@@ -23399,7 +23861,7 @@ msgstr ""
 
 #: ../../source/docker/tutorial-quickstart-docker-compose.rst:208
 #: ../../source/docker/tutorial-quickstart-docker-compose.rst:263
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:410
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:408
 msgid "Rerun the ``quickstart-pytorch`` project:"
 msgstr "Reexécutez le projet ``quickstart-pytorch``: "
 
@@ -23466,7 +23928,7 @@ msgstr ""
 msgid "compose.yml"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:332
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:330
 msgid ""
 "If you also want to enable TLS for the new SuperNode, uncomment the "
 "definition in the ``with-tls.yml`` file:"
@@ -23474,19 +23936,19 @@ msgstr ""
 "Si vous voulez également activer le TLS pour le nouveau SuperNode, "
 "décommentez la définition dans le fichier ``with-tls.yml`` :"
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:335
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:333
 msgid "with-tls.yml"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:358
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:356
 msgid "Restart the services with:"
 msgstr "Redémarrez les services avec :"
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:368
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:366
 msgid "Step 8: Persisting the SuperLink State and Enabling TLS"
 msgstr "Étape 8 : Persister l'état de SuperLink et activer TLS"
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:370
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:368
 msgid ""
 "To run Flower with persisted SuperLink state and enabled TLS, a slight "
 "change in the ``with-state.yml`` file is required:"
@@ -23495,24 +23957,24 @@ msgstr ""
 "activé, une légère modification est requise dans le fichier ``with-"
 "state.yml`` :"
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:373
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:371
 #, fuzzy
 msgid "Comment out the first ``command`` block and uncomment the second one:"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:375
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:373
 msgid "with-state.yml"
 msgstr ""
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:404
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:402
 msgid "Restart the services:"
 msgstr "Redémarrez les services :"
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:418
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:416
 msgid "Step 9: Merge Multiple Compose Files"
 msgstr "Étape 9 : Fusionner plusieurs fichiers Compose"
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:420
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:418
 msgid ""
 "You can merge multiple Compose files into a single file. For instance, if"
 " you wish to combine the basic configuration with the TLS configuration, "
@@ -23522,7 +23984,7 @@ msgstr ""
 "exemple, si vous souhaitez combiner la configuration de base avec la "
 "configuration TLS, exécutez la commande suivante :"
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:429
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:427
 msgid ""
 "This will merge the contents of ``compose.yml`` and ``with-tls.yml`` into"
 " a new file called ``my_compose.yml``."
@@ -23530,15 +23992,15 @@ msgstr ""
 "Cela fusionnera les contenus de ``compose.yml`` et ``with-tls.yml`` dans "
 "un nouveau fichier appelé ``my_compose.yml``."
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:434
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:432
 msgid "Step 10: Clean Up"
 msgstr "Étape 10 : Nettoyage"
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:436
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:434
 msgid "Remove all services and volumes:"
 msgstr "Supprimez tous les services et volumes :"
 
-#: ../../source/docker/tutorial-quickstart-docker-compose.rst:446
+#: ../../source/docker/tutorial-quickstart-docker-compose.rst:444
 msgid ":doc:`run-quickstart-examples-docker-compose`"
 msgstr ""
 
@@ -29898,7 +30360,7 @@ msgstr ""
 "exécutant une commande ``flwr ls`` : "
 
 #: ../../source/how-to-authenticate-supernodes.rst:145
-#: ../../source/how-to-enable-tls-connections.rst:236
+#: ../../source/how-to-enable-tls-connections.rst:234
 #: ../../source/how-to-run-flower-with-deployment-engine.rst:242
 msgid ""
 "You can setup your ``local-deployment`` profile as the default so you "
@@ -30071,7 +30533,7 @@ msgstr ""
 "méthodes de communication fiables."
 
 #: ../../source/how-to-authenticate-supernodes.rst:307
-#: ../../source/how-to-enable-tls-connections.rst:243
+#: ../../source/how-to-enable-tls-connections.rst:241
 #: ../../source/how-to-use-built-in-mods.rst:175
 #: ../../source/tutorial-series-what-is-federated-learning.rst:291
 msgid "Conclusion"
@@ -30089,7 +30551,7 @@ msgstr ""
 "stocker en toute sécurité pour minimiser les risques."
 
 #: ../../source/how-to-authenticate-supernodes.rst:315
-#: ../../source/how-to-enable-tls-connections.rst:253
+#: ../../source/how-to-enable-tls-connections.rst:251
 msgid ""
 "Refer to the :doc:`docker/index` documentation to learn how to setup a "
 "federation where each component runs in its own Docker container. You can"
@@ -30524,20 +30986,6 @@ msgstr ""
 "différents composants dans une fédération Flower (voir :doc:`how-to-run-"
 "flower-with-deployment-engine`) ou en utilisant le `flwr CLI <ref-api-"
 "cli.html>`_."
-
-#: ../../source/how-to-configure-logging.rst:41
-msgid "Configure gRPC logging"
-msgstr "Configurez la journalisation gRPC"
-
-#: ../../source/how-to-configure-logging.rst:43
-#, fuzzy
-msgid ""
-"Flower uses `gRPC <https://grpc.io/>`_ for the Fleet API and other gRPC-"
-"based connections (see :doc:`ref-flower-network-communication`). You can "
-"set the verbosity level of ``gRPC`` logs using `gRPC environment "
-"variables "
-"<https://github.com/grpc/grpc/blob/master/doc/environment_variables.md>`_."
-msgstr ""
 
 #: ../../source/how-to-configure-pyproject-toml.rst:-1
 msgid ""
@@ -31883,17 +32331,17 @@ msgstr ""
 msgid "Create ``superexec-clientapp.sbatch``:"
 msgstr ""
 
-#: ../../source/how-to-deploy-supernode-using-slurm.rst:156
+#: ../../source/how-to-deploy-supernode-using-slurm.rst:155
 msgid "Submit the SuperNode job first, then submit the SuperExec job:"
 msgstr ""
 
-#: ../../source/how-to-deploy-supernode-using-slurm.rst:163
+#: ../../source/how-to-deploy-supernode-using-slurm.rst:162
 msgid ""
 "The SuperExec waits for ClientApp tasks from the SuperNode. The ClientApp"
 " processes inherit the CPU and memory allocation of the SuperExec job."
 msgstr ""
 
-#: ../../source/how-to-deploy-supernode-using-slurm.rst:168
+#: ../../source/how-to-deploy-supernode-using-slurm.rst:167
 msgid ""
 "``--insecure`` applies only to the local Runtime API connection between "
 "SuperExec and SuperNode. The connection from SuperNode to SuperGrid still"
@@ -31902,11 +32350,11 @@ msgid ""
 "enable-tls-connections>`."
 msgstr ""
 
-#: ../../source/how-to-deploy-supernode-using-slurm.rst:175
+#: ../../source/how-to-deploy-supernode-using-slurm.rst:174
 msgid "Use process isolation with a GPU ClientApp"
 msgstr ""
 
-#: ../../source/how-to-deploy-supernode-using-slurm.rst:177
+#: ../../source/how-to-deploy-supernode-using-slurm.rst:176
 msgid ""
 "To run a ClientApp on a GPU, use the ``supernode-process.sbatch`` script "
 "from the previous section without adding a GPU request. The SuperNode "
@@ -31914,7 +32362,7 @@ msgid ""
 "need access to the GPU."
 msgstr ""
 
-#: ../../source/how-to-deploy-supernode-using-slurm.rst:181
+#: ../../source/how-to-deploy-supernode-using-slurm.rst:180
 msgid ""
 "Request the GPU only in the SuperExec job. The ClientApp process then "
 "inherits the SuperExec environment, including ``CUDA_VISIBLE_DEVICES``. "
@@ -31923,17 +32371,17 @@ msgid ""
 "node."
 msgstr ""
 
-#: ../../source/how-to-deploy-supernode-using-slurm.rst:186
+#: ../../source/how-to-deploy-supernode-using-slurm.rst:185
 msgid "Create ``superexec-clientapp-gpu.sbatch``:"
 msgstr ""
 
-#: ../../source/how-to-deploy-supernode-using-slurm.rst:225
+#: ../../source/how-to-deploy-supernode-using-slurm.rst:223
 msgid ""
 "Submit the unchanged process-isolated SuperNode job first, then submit "
 "the GPU SuperExec job:"
 msgstr ""
 
-#: ../../source/how-to-deploy-supernode-using-slurm.rst:233
+#: ../../source/how-to-deploy-supernode-using-slurm.rst:231
 msgid ""
 "The ClientApp environment must include a GPU-enabled version of its "
 "machine learning framework and the required GPU libraries. For example, a"
@@ -31941,11 +32389,11 @@ msgid ""
 "``CUDA_VISIBLE_DEVICES``."
 msgstr ""
 
-#: ../../source/how-to-deploy-supernode-using-slurm.rst:239
+#: ../../source/how-to-deploy-supernode-using-slurm.rst:237
 msgid "Discover the SuperNode address from its job ID"
 msgstr ""
 
-#: ../../source/how-to-deploy-supernode-using-slurm.rst:241
+#: ../../source/how-to-deploy-supernode-using-slurm.rst:239
 msgid ""
 "The preceding process-isolation examples use ``--nodelist`` to place both"
 " jobs on the same node. You can remove this constraint when the compute "
@@ -31954,32 +32402,32 @@ msgid ""
 "starts, SuperExec uses that ID to discover the assigned node's address."
 msgstr ""
 
-#: ../../source/how-to-deploy-supernode-using-slurm.rst:247
+#: ../../source/how-to-deploy-supernode-using-slurm.rst:245
 msgid "Create ``supernode-process-dynamic.sbatch``:"
 msgstr ""
 
-#: ../../source/how-to-deploy-supernode-using-slurm.rst:272
+#: ../../source/how-to-deploy-supernode-using-slurm.rst:270
 msgid ""
 "The SuperNode listens on all network interfaces because Slurm can place "
 "SuperExec on a different node. Create ``superexec-clientapp-"
 "dynamic.sbatch`` without a ``--nodelist`` directive:"
 msgstr ""
 
-#: ../../source/how-to-deploy-supernode-using-slurm.rst:334
+#: ../../source/how-to-deploy-supernode-using-slurm.rst:331
 msgid ""
 "This example requests one GPU for SuperExec. Remove ``#SBATCH "
 "--gres=gpu:1`` when the ClientApp does not need a GPU."
 msgstr ""
 
-#: ../../source/how-to-deploy-supernode-using-slurm.rst:337
+#: ../../source/how-to-deploy-supernode-using-slurm.rst:334
 msgid "Create ``submit-process-pair.sh`` to submit both jobs:"
 msgstr ""
 
-#: ../../source/how-to-deploy-supernode-using-slurm.rst:357
+#: ../../source/how-to-deploy-supernode-using-slurm.rst:354
 msgid "Run the submission script:"
 msgstr ""
 
-#: ../../source/how-to-deploy-supernode-using-slurm.rst:363
+#: ../../source/how-to-deploy-supernode-using-slurm.rst:360
 msgid ""
 "The first ``sbatch`` command returns the SuperNode job ID. The second job"
 " uses an ``after:<job-id>`` dependency, so Slurm holds it until the "
@@ -31989,7 +32437,7 @@ msgid ""
 "becoming available."
 msgstr ""
 
-#: ../../source/how-to-deploy-supernode-using-slurm.rst:371
+#: ../../source/how-to-deploy-supernode-using-slurm.rst:368
 msgid ""
 "This minimal example exposes an unauthenticated and unencrypted Runtime "
 "API on the compute-node network. Use it only in a trusted, isolated test "
@@ -31998,7 +32446,7 @@ msgid ""
 "guide."
 msgstr ""
 
-#: ../../source/how-to-deploy-supernode-using-slurm.rst:376
+#: ../../source/how-to-deploy-supernode-using-slurm.rst:373
 msgid ""
 "For more information about the two isolation modes and the Runtime API, "
 "see :doc:`Flower Network Communication <ref-flower-network-"
@@ -32619,7 +33067,7 @@ msgstr ""
 "SuperExecs. Voici un exemple de commande pour lancer une SuperExec qui "
 "peut établir des connexions TLS avec le ServerAppIo API du SuperLink:"
 
-#: ../../source/how-to-enable-tls-connections.rst:194
+#: ../../source/how-to-enable-tls-connections.rst:193
 #, fuzzy
 msgid ""
 "``--root-certificates``: Specify the location of the CA certificate file."
@@ -32638,27 +33086,14 @@ msgid ""
 "SuperLink's Runtime API."
 msgstr ""
 
-#: ../../source/how-to-enable-tls-connections.rst
-msgid ""
-"``--plugin-type``: Specify the type of app process SuperExec should "
-"launch. Use ``serverapp`` for a ``ServerApp`` SuperExec."
-msgstr ""
-"``--plugin-type``: Spécifiez le type de processus d'applications que "
-"SuperExec doit lancer. Utilisez ``serverapp`` pour un ``ServerApp`` "
-"SuperExec."
-
-#: ../../source/how-to-enable-tls-connections.rst:198
+#: ../../source/how-to-enable-tls-connections.rst:196
 #, fuzzy
 msgid ""
 "Next, use the same procedure for a ``ClientApp`` SuperExec, but pass the "
-"SuperNode's Runtime API address, e.g. ``127.0.0.1:9094``, and set "
-"``--plugin-type clientapp``."
+"SuperNode's Runtime API address, e.g. ``127.0.0.1:9094``."
 msgstr ""
-"Ensuite, utilisez la même procédure pour un ``ClientApp`` SuperExec, mais"
-" passez l'adresse API ClientAppIo du SuperNode, par exemple "
-"``127.0.0.1:9094``, et définissez ``--plugin-type clientapp``."
 
-#: ../../source/how-to-enable-tls-connections.rst:201
+#: ../../source/how-to-enable-tls-connections.rst:199
 #, fuzzy
 msgid ""
 "Now your SuperLink-side SuperExec and SuperNode-side SuperExec can "
@@ -32679,11 +33114,11 @@ msgstr ""
 "commandes ou la configuration utilisées par votre système "
 "d'orchestration."
 
-#: ../../source/how-to-enable-tls-connections.rst:210
+#: ../../source/how-to-enable-tls-connections.rst:208
 msgid "TLS-enabled Flower CLI"
 msgstr "Flower CLI avec TLS activé"
 
-#: ../../source/how-to-enable-tls-connections.rst:212
+#: ../../source/how-to-enable-tls-connections.rst:210
 msgid ""
 "The `Flower CLI <ref-api-cli.html>`_ (e.g. ``flwr run`` command) is the "
 "way a user (e.g. a data scientist) can interact with a deployed "
@@ -32703,7 +33138,7 @@ msgstr ""
 "faire, remplacez le champ ``insecure = true`` dans votre fichier de "
 "configuration TOML Flower avec un nouveau champ qui lit le certificat:"
 
-#: ../../source/how-to-enable-tls-connections.rst:227
+#: ../../source/how-to-enable-tls-connections.rst:225
 msgid ""
 "Note that the path to the ``root-certificates`` is relative to the root "
 "of the project. Now, you can run the example by executing ``flwr run``:"
@@ -32712,7 +33147,7 @@ msgstr ""
 " du projet. Vous pouvez maintenant exécuter l'exemple en exécutant ``flwr"
 " run``:"
 
-#: ../../source/how-to-enable-tls-connections.rst:245
+#: ../../source/how-to-enable-tls-connections.rst:243
 #, fuzzy
 msgid ""
 "You should now have learned how to generate self-signed certificates "
@@ -32730,11 +33165,11 @@ msgstr ""
 "connexions internes AppIo. Toutes les autres commandes dans le `Flower "
 "CLI <ref-api-cli.html>`_ seront également TLS-activées."
 
-#: ../../source/how-to-enable-tls-connections.rst:260
+#: ../../source/how-to-enable-tls-connections.rst:258
 msgid "Additional resources"
 msgstr "Ressources supplémentaires"
 
-#: ../../source/how-to-enable-tls-connections.rst:262
+#: ../../source/how-to-enable-tls-connections.rst:260
 msgid ""
 "These additional sources might be relevant if you would like to dive "
 "deeper into the topic of certificates:"
@@ -32742,11 +33177,11 @@ msgstr ""
 "Ces sources supplémentaires peuvent être pertinentes si tu souhaites "
 "approfondir le sujet des certificats :"
 
-#: ../../source/how-to-enable-tls-connections.rst:265
+#: ../../source/how-to-enable-tls-connections.rst:263
 msgid "`Let's Encrypt <https://letsencrypt.org/docs/>`_"
 msgstr ""
 
-#: ../../source/how-to-enable-tls-connections.rst:266
+#: ../../source/how-to-enable-tls-connections.rst:264
 msgid "`certbot <https://certbot.eff.org/>`_"
 msgstr ""
 
@@ -32845,7 +33280,7 @@ msgstr ""
 " utilisant FedBN. Félicitations !"
 
 #: ../../source/how-to-implement-fedbn.rst:107
-#: ../../source/how-to-run-flower-on-azure.rst:241
+#: ../../source/how-to-run-flower-on-azure.rst:208
 msgid "Next Steps"
 msgstr "Prochaines étapes"
 
@@ -32982,43 +33417,43 @@ msgid ""
 "``flower-superexec`` instead:"
 msgstr ""
 
-#: ../../source/how-to-install-app-dependencies-at-runtime.rst:103
+#: ../../source/how-to-install-app-dependencies-at-runtime.rst:102
 msgid "How installation works"
 msgstr ""
 
-#: ../../source/how-to-install-app-dependencies-at-runtime.rst:105
+#: ../../source/how-to-install-app-dependencies-at-runtime.rst:104
 msgid "When runtime dependency installation is enabled, Flower:"
 msgstr ""
 
-#: ../../source/how-to-install-app-dependencies-at-runtime.rst:107
+#: ../../source/how-to-install-app-dependencies-at-runtime.rst:106
 msgid "reads ``[project].dependencies`` from the installed Flower App,"
 msgstr ""
 
-#: ../../source/how-to-install-app-dependencies-at-runtime.rst:108
+#: ../../source/how-to-install-app-dependencies-at-runtime.rst:107
 msgid "creates an isolated runtime environment under ``$FLWR_HOME/runtime-envs``,"
 msgstr ""
 
-#: ../../source/how-to-install-app-dependencies-at-runtime.rst:109
+#: ../../source/how-to-install-app-dependencies-at-runtime.rst:108
 msgid ""
 "invokes ``uv sync`` in the app project directory using the current Python"
 " executable,"
 msgstr ""
 
-#: ../../source/how-to-install-app-dependencies-at-runtime.rst:110
+#: ../../source/how-to-install-app-dependencies-at-runtime.rst:109
 msgid ""
 "installs the declared app dependencies into the isolated runtime "
 "environment,"
 msgstr ""
 
-#: ../../source/how-to-install-app-dependencies-at-runtime.rst:111
+#: ../../source/how-to-install-app-dependencies-at-runtime.rst:110
 msgid "activates that environment for the current app process, and"
 msgstr ""
 
-#: ../../source/how-to-install-app-dependencies-at-runtime.rst:112
+#: ../../source/how-to-install-app-dependencies-at-runtime.rst:111
 msgid "deletes the environment after app execution is complete."
 msgstr ""
 
-#: ../../source/how-to-install-app-dependencies-at-runtime.rst:114
+#: ../../source/how-to-install-app-dependencies-at-runtime.rst:113
 msgid ""
 "Each run gets its own environment, so concurrently running apps do not "
 "modify each other's Python packages. The app code itself comes from the "
@@ -34380,18 +34815,15 @@ msgid "VM Networking"
 msgstr "Réseau de la VM"
 
 #: ../../source/how-to-run-flower-on-azure.rst:88
-#, fuzzy, python-brace-format
 msgid ""
 "During the execution of the Flower application, the server VM "
 "(``SuperLink``) will be responsible to orchestrate the execution of the "
-"application across the client VMs (``SuperNode``). When the SuperLink "
-"server starts, by default, it listens to the following ports: ``{8000, "
-"9092}``. Port ``9092`` is used to communicate with the federation clients"
-" (``SuperNode``), and port ``8000`` serves the HTTP Control API used to "
-"submit and execute Flower applications."
+"application across the client VMs (``SuperNode``). By default, SuperNodes"
+" use the Fleet API on port ``8000``. The SuperLink also serves the "
+"Control and Runtime APIs over HTTP on that port."
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-azure.rst:95
+#: ../../source/how-to-run-flower-on-azure.rst:93
 msgid ""
 "Therefore, to enable this communication we need to allow inbound traffic "
 "to the server VM instance. To achieve this, we need to navigate to the "
@@ -34406,102 +34838,70 @@ msgstr ""
 " rule``. Dans la nouvelle fenêtre qui s'affiche, nous modifierons les "
 "propriétés du règle comme suit:"
 
-#: ../../source/how-to-run-flower-on-azure.rst:100
+#: ../../source/how-to-run-flower-on-azure.rst:98
 msgid "The rest of the fields can be left at their default values."
 msgstr "Le reste des champs peut être laissé à leurs valeurs par défaut."
 
-#: ../../source/how-to-run-flower-on-azure.rst:107
-#: ../../source/how-to-run-flower-on-azure.rst:148
+#: ../../source/how-to-run-flower-on-azure.rst:105
 msgid "**Source**"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-azure.rst:108
+#: ../../source/how-to-run-flower-on-azure.rst:106
 msgid "``IP Addresses``"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-azure.rst:109
-#: ../../source/how-to-run-flower-on-azure.rst:136
+#: ../../source/how-to-run-flower-on-azure.rst:107
 msgid "**Source IP addresses/CIDR ranges**"
 msgstr "**Adresses IP source/ranges CIDR**"
 
-#: ../../source/how-to-run-flower-on-azure.rst:110
-msgid "add client VMs' Public IP (separated by comma)"
-msgstr "Ajoutez les adresses IP publiques des clients (séparées par une virgule)"
+#: ../../source/how-to-run-flower-on-azure.rst:108
+#, fuzzy
+msgid "add client VMs' Public IPs and your local machine's Public IP"
+msgstr ""
 
-#: ../../source/how-to-run-flower-on-azure.rst:111
+#: ../../source/how-to-run-flower-on-azure.rst:109
 msgid "**Destination**"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-azure.rst:112
-#: ../../source/how-to-run-flower-on-azure.rst:149
+#: ../../source/how-to-run-flower-on-azure.rst:110
 msgid "``Any``"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-azure.rst:113
+#: ../../source/how-to-run-flower-on-azure.rst:111
 msgid "**Service**"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-azure.rst:114
+#: ../../source/how-to-run-flower-on-azure.rst:112
 msgid "``custom``"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-azure.rst:115
-#: ../../source/how-to-run-flower-on-azure.rst:138
-#: ../../source/how-to-run-flower-on-azure.rst:150
+#: ../../source/how-to-run-flower-on-azure.rst:113
 msgid "**Destination port ranges**"
 msgstr "**Plages de ports de destination**"
 
-#: ../../source/how-to-run-flower-on-azure.rst:116
-msgid "``9092``"
-msgstr ""
-
-#: ../../source/how-to-run-flower-on-azure.rst:117
-msgid "**Protocol**"
-msgstr ""
-
-#: ../../source/how-to-run-flower-on-azure.rst:118
-msgid "``TCP``"
-msgstr ""
-
-#: ../../source/how-to-run-flower-on-azure.rst:120
-#, fuzzy
-msgid ""
-"Finally, we need to also open port 8000 to allow receiving and executing "
-"incoming application requests. To enable this we just need to repeat the "
-"steps above, i.e., create a new inbound rule, where for port range we "
-"assign port 8000. If we already know the Public IP from which our local "
-"machine (e.g., laptop) will be submitting applications to the Azure "
-"cluster, then we just need to specify the Source IP address/CIDR range. "
-"However, if we want to keep the port widely open we simply need to change"
-" source to ``Any``."
-msgstr ""
-
-#: ../../source/how-to-run-flower-on-azure.rst:128
-msgid ""
-"To be more precise, if we know the Public IP of our machine, then we make"
-" the following changes:"
-msgstr ""
-"Pour être plus précis, si nous connaissons l'adresse IP publique de notre"
-" machine, alors nous effectuons les modifications suivantes :"
-
-#: ../../source/how-to-run-flower-on-azure.rst:137
-msgid "add machine's Public IP"
-msgstr "Ajoutez l'adresse IP publique de la machine"
-
-#: ../../source/how-to-run-flower-on-azure.rst:139
-#: ../../source/how-to-run-flower-on-azure.rst:151
+#: ../../source/how-to-run-flower-on-azure.rst:114
 msgid "``8000``"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-azure.rst:141
-msgid "Otherwise, we change the properties as follows:"
-msgstr "Sinon, nous modifions les propriétés comme suit :"
+#: ../../source/how-to-run-flower-on-azure.rst:115
+msgid "**Protocol**"
+msgstr ""
 
-#: ../../source/how-to-run-flower-on-azure.rst:155
+#: ../../source/how-to-run-flower-on-azure.rst:116
+msgid "``TCP``"
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-azure.rst:118
+msgid ""
+"This rule also allows your local machine to submit applications through "
+"the Control API."
+msgstr ""
+
+#: ../../source/how-to-run-flower-on-azure.rst:122
 msgid "Flower Environment"
 msgstr "Environnement Flower"
 
-#: ../../source/how-to-run-flower-on-azure.rst:157
+#: ../../source/how-to-run-flower-on-azure.rst:124
 msgid ""
 "Assuming we have been able to login to each VM, and create a Python "
 "environment with Flower and all its dependencies installed (``pip install"
@@ -34518,7 +34918,7 @@ msgstr ""
 "l'auteur et sélectionner le type du cadre de travail Flower que nous "
 "voulons exécuter, par exemple ``numpy``."
 
-#: ../../source/how-to-run-flower-on-azure.rst:165
+#: ../../source/how-to-run-flower-on-azure.rst:132
 msgid ""
 "An alternative approach would be to use Docker in each VM, with each "
 "image containing the necessary environment and dependencies. For more "
@@ -34529,11 +34929,11 @@ msgstr ""
 "Pour plus de détails, veuillez vous référer au guide "
 "|flower_docker_index|_."
 
-#: ../../source/how-to-run-flower-on-azure.rst:170
+#: ../../source/how-to-run-flower-on-azure.rst:137
 msgid "Server Initialization"
 msgstr "Initialisation du serveur"
 
-#: ../../source/how-to-run-flower-on-azure.rst:172
+#: ../../source/how-to-run-flower-on-azure.rst:139
 msgid ""
 "After configuring the Flower application environment, we proceed by "
 "starting the Flower long-running processes (i.e., ``SuperLink`` and "
@@ -34547,7 +34947,7 @@ msgstr ""
 "suivantes, d'abord sur le serveur (``SuperLink``) et ensuite sur chaque "
 "client (``SuperNode``)."
 
-#: ../../source/how-to-run-flower-on-azure.rst:179
+#: ../../source/how-to-run-flower-on-azure.rst:146
 msgid ""
 "To enable authentication and encrypted communication during the execution"
 " lifecycle of the Flower application, please have a look at the following"
@@ -34558,12 +34958,12 @@ msgstr ""
 "sur les ressources suivantes : |authenticate_supernodes|_, "
 "|enable_tls_connections|_"
 
-#: ../../source/how-to-run-flower-on-azure.rst:199
-#: ../../source/how-to-run-flower-on-gcp.rst:592
+#: ../../source/how-to-run-flower-on-azure.rst:166
+#: ../../source/how-to-run-flower-on-gcp.rst:581
 msgid "Run Flower App"
 msgstr "Exécutez l'application Flower"
 
-#: ../../source/how-to-run-flower-on-azure.rst:201
+#: ../../source/how-to-run-flower-on-azure.rst:168
 msgid ""
 "Finally, after all running Flower processes have been initialized on the "
 "Microsoft Azure cluster, in our local machine, we first need to install "
@@ -34573,7 +34973,7 @@ msgstr ""
 "Microsoft Azure, dans notre machine locale, nous devons d'abord installer"
 " Flower et créer une application Flower."
 
-#: ../../source/how-to-run-flower-on-azure.rst:212
+#: ../../source/how-to-run-flower-on-azure.rst:179
 msgid ""
 "Next, we need to create a new SuperLink connection in the Flower "
 "Configuration file:"
@@ -34581,9 +34981,9 @@ msgstr ""
 "Ensuite, nous devons créer une nouvelle connexion SuperLink dans le "
 "fichier de configuration Flower :"
 
-#: ../../source/how-to-run-flower-on-azure.rst:214
-#: ../../source/how-to-run-flower-on-gcp.rst:609
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:668
+#: ../../source/how-to-run-flower-on-azure.rst:181
+#: ../../source/how-to-run-flower-on-gcp.rst:598
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:662
 msgid ""
 "Run ``flwr config list`` to locate the Flower configuration file on your "
 "machine and view available SuperLink connections."
@@ -34592,9 +34992,9 @@ msgstr ""
 "Flower sur votre machine et afficher les connexions SuperLink "
 "disponibles."
 
-#: ../../source/how-to-run-flower-on-azure.rst:227
-#: ../../source/how-to-run-flower-on-gcp.rst:622
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:681
+#: ../../source/how-to-run-flower-on-azure.rst:194
+#: ../../source/how-to-run-flower-on-gcp.rst:611
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:675
 msgid ""
 "Open the Flower Configuration file (``config.toml``) and add a new "
 "SuperLink connection at the end:"
@@ -34602,13 +35002,13 @@ msgstr ""
 "Ouvrez le fichier de configuration Flower (``config.toml``) et ajoutez "
 "une nouvelle connexion SuperLink à la fin:"
 
-#: ../../source/how-to-run-flower-on-azure.rst:237
+#: ../../source/how-to-run-flower-on-azure.rst:204
 msgid "Then from our local machine we need to run ``flwr run . my-federation``."
 msgstr ""
 "Ensuite, depuis notre machine locale, nous devons exécuter ``flwr run . "
 "my-federation``."
 
-#: ../../source/how-to-run-flower-on-azure.rst:245
+#: ../../source/how-to-run-flower-on-azure.rst:212
 msgid ""
 "This guide is not suitable for production environments due to missing "
 "authentication and TLS security."
@@ -34616,7 +35016,7 @@ msgstr ""
 "Ce guide n'est pas adapté aux environnements de production en raison de "
 "la absence d'autentification et de sécurité TLS."
 
-#: ../../source/how-to-run-flower-on-azure.rst:248
+#: ../../source/how-to-run-flower-on-azure.rst:215
 msgid ""
 "To enable authentication and establish secure connections, please refer "
 "to the following resources: |authenticate_supernodes|_, "
@@ -35123,7 +35523,7 @@ msgstr ""
 msgid "superexec-clientapp-2-deployment.yaml"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-gcp.rst:545
+#: ../../source/how-to-run-flower-on-gcp.rst:534
 msgid ""
 "Once you have created the required files, you can use the following "
 "``k8s-deploy.sh`` helper script to deploy all the ``Pods``."
@@ -35131,7 +35531,7 @@ msgstr ""
 "Une fois que vous avez créé les fichiers requis, vous pouvez utiliser l' "
 "aide script suivant ``k8s-deploy.sh`` pour déployer tous les ``Pods``."
 
-#: ../../source/how-to-run-flower-on-gcp.rst:550
+#: ../../source/how-to-run-flower-on-gcp.rst:539
 msgid ""
 "Make sure the Flower version you use to deploy the ``Pods`` matches the "
 "version of your Flower app."
@@ -35143,7 +35543,7 @@ msgstr ""
 msgid "k8s-deploy.sh"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-gcp.rst:580
+#: ../../source/how-to-run-flower-on-gcp.rst:569
 msgid ""
 "To see that your ``Pods`` are deployed, please go to the ``Navigation "
 "Menu`` on the Google Console, select ``Kubernetes Engine`` and then the "
@@ -35155,7 +35555,7 @@ msgstr ""
 "Engine`` et puis la page ``Workloads``. La nouvelle fenêtre qui apparaît "
 "montrera l'état des ``Pods`` en cours de déploiement."
 
-#: ../../source/how-to-run-flower-on-gcp.rst:586
+#: ../../source/how-to-run-flower-on-gcp.rst:575
 msgid ""
 "Please wait for a couple of minutes (3' to 5' minutes should be enough) "
 "before the ``Pods`` are up and running. While ``Pods`` resources are "
@@ -35166,7 +35566,7 @@ msgstr ""
 "mise en place des ressources ``Pods``, certaines avertissements sont "
 "attendus."
 
-#: ../../source/how-to-run-flower-on-gcp.rst:594
+#: ../../source/how-to-run-flower-on-gcp.rst:583
 msgid ""
 "Once all ``Pods`` are up and running, we need to get the ``EXTERNAL_IP`` "
 "of the ``superlink-service`` and point our Flower app to use the "
@@ -35177,7 +35577,7 @@ msgstr ""
 "pointer notre application Flower pour utiliser le cluster Kubernetes pour"
 " soumettre et exécuter la tâche."
 
-#: ../../source/how-to-run-flower-on-gcp.rst:598
+#: ../../source/how-to-run-flower-on-gcp.rst:587
 msgid ""
 "To get the ``EXTERNAL-IP`` of the ``superlink-service`` we run the "
 "following command, which will show the ``NAME``, ``TYPE``, ``CLUSTER-"
@@ -35187,7 +35587,7 @@ msgstr ""
 "suivante, qui montrera les ``TYPE``, ``CLUSTER-IP``, ``EXTERNAL-IP``, "
 "``PORTS`` et __PH7__ de la service :"
 
-#: ../../source/how-to-run-flower-on-gcp.rst:606
+#: ../../source/how-to-run-flower-on-gcp.rst:595
 msgid ""
 "After we get the ``EXTERNAL-IP`` we need to create a new SuperLink "
 "connection in the Flower Configuration file:"
@@ -35195,11 +35595,11 @@ msgstr ""
 "Après avoir récupéré le ``EXTERNAL-IP``, nous avons besoin de créer un "
 "nouveau lien de connexion dans le fichier de configuration SuperLink :"
 
-#: ../../source/how-to-run-flower-on-gcp.rst:632
+#: ../../source/how-to-run-flower-on-gcp.rst:621
 msgid "Then we can execute the example on the GCP cluster by running:"
 msgstr "Nous pouvons ensuite exécuter l'exemple sur le cluster GCP en exécutant :"
 
-#: ../../source/how-to-run-flower-on-gcp.rst:640
+#: ../../source/how-to-run-flower-on-gcp.rst:629
 msgid ""
 "Please note that in the current deployment, communication is not "
 "encrypted. To enable TLS for secure connections, check the following "
@@ -35212,7 +35612,7 @@ msgstr ""
 "mettrons également à jour ce guide bientôt avec plus de détails sur la "
 "configuration de TLS."
 
-#: ../../source/how-to-run-flower-on-gcp.rst:645
+#: ../../source/how-to-run-flower-on-gcp.rst:634
 msgid ""
 "If the job is successfully submitted, and executed, then in your console "
 "you should see the logs from the run. The output should look like the one"
@@ -35226,7 +35626,7 @@ msgstr ""
 msgid "Expected Output"
 msgstr "Sortie attendue"
 
-#: ../../source/how-to-run-flower-on-gcp.rst:721
+#: ../../source/how-to-run-flower-on-gcp.rst:710
 msgid ""
 "Please note that if you terminate or shut down the cluster, and create a "
 "new one, the value of the ``EXTERNAL_IP`` changes. In that case, you will"
@@ -35236,11 +35636,11 @@ msgstr ""
 "nouveau, la valeur du ``EXTERNAL_IP`` change. Dans ce cas, vous devrez "
 "mettre à jour le fichier de configuration Flower."
 
-#: ../../source/how-to-run-flower-on-gcp.rst:727
+#: ../../source/how-to-run-flower-on-gcp.rst:716
 msgid "Shutdown Flower Infrastructure"
 msgstr "Arrêter l'infrastructure Flower"
 
-#: ../../source/how-to-run-flower-on-gcp.rst:729
+#: ../../source/how-to-run-flower-on-gcp.rst:718
 msgid ""
 "If you would like to shutdown all the running pods deployed during this "
 "guide, you can use the ``kubectl delete`` command and pass the the "
@@ -35620,19 +36020,14 @@ msgstr ""
 "spécifiée."
 
 #: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:245
+#, fuzzy
 msgid ""
-"In our deployment, SuperLink listens on port ``9092`` corresponding to "
-"the Fleet API (for more details, read our reference on `Flower network "
+"In our deployment, SuperLink serves the Fleet API over HTTP on port "
+"``8000`` (for more details, read our reference on `Flower network "
 "communication <ref-flower-network-communication.rst#flower-components-"
 "apis>`_). Since we have given the SuperLink deployment the name "
 "``superlink``, we will use that as the workload name:"
 msgstr ""
-"Dans notre déploiement, SuperLink écoute sur le port ``9092`` "
-"correspondant à l'API Fleet (pour plus de détails, consultez notre "
-"référence sur `Flower network communication <ref-flower-network-"
-"communication.rst#flower-components-apis>`_). Puisque nous avons donné au"
-" déploiement SuperLink le nom ``superlink``, nous allons utiliser celui-"
-"ci comme nom de workload :"
 
 #: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:258
 msgid "Create a Listener"
@@ -35652,6 +36047,7 @@ msgstr ""
 "commande suivante :"
 
 #: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:269
+#, fuzzy
 msgid ""
 "The ``<name>`` is the name of the listener resource, and will be the "
 "default routing key and host if the ``--routing-key`` and ``--host`` "
@@ -35659,15 +36055,8 @@ msgid ""
 "name of the connector we created in the SuperLink cluster, which is "
 "``fleet-api``. The ``<port>`` is the port number that the listener will "
 "listen on, which must also match the port number of the connector "
-"(``9092``):"
+"(``8000``):"
 msgstr ""
-"Le ``<name>`` est le nom de la ressource d'écoute, et sera la clé de "
-"routage par défaut et hôte si les options ``--routing-key`` et ``--host``"
-" ne sont pas spécifiées. Dans notre cas, le ``<name>`` doit correspondre "
-"au nom du connecteur que nous avons créé dans le cluster SuperLink, qui "
-"est ``fleet-api``. Le ``<port>`` est le numéro de port que l'écouteur "
-"écoute sur, qui doit également correspondre au numéro de port du "
-"connecteur (``9092``) :"
 
 #: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:283
 msgid "Deploy SuperNode in a Separate OpenShift Cluster"
@@ -35769,17 +36158,17 @@ msgstr ""
 "hat-openshift>`"
 
 #: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:380
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:716
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:710
 msgid ":doc:`How to run Flower with Docker <docker/index>`"
 msgstr ":doc:`Exécuter Flower avec Docker <docker/index>`"
 
 #: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:381
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:717
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:711
 msgid ":doc:`How to run Flower with Helm <helm/index>`"
 msgstr ":doc:`Exécuter Flower avec Helm <helm/index>`"
 
 #: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:383
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:719
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:713
 msgid ""
 "To learn about running Flower on other cloud platforms, check out our "
 "guides below:"
@@ -35788,12 +36177,12 @@ msgstr ""
 "cloud, consultez nos guides ci-dessous :"
 
 #: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:385
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:721
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:715
 msgid ":doc:`How to run Flower on Microsoft Azure <how-to-run-flower-on-azure>`"
 msgstr ":doc:`Exécuter Flower sur Microsoft Azure <how-to-run-flower-on-azure>`"
 
 #: ../../source/how-to-run-flower-on-multiple-openshift-clusters.rst:386
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:722
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:716
 msgid ""
 ":doc:`How to run Flower on Google Cloud Platform <how-to-run-flower-on-"
 "gcp>`"
@@ -36256,7 +36645,7 @@ msgstr ""
 " Ce manifeste est adapté de notre tutoriel sur :doc:`how to deploy Flower"
 " in GCP <how-to-run-flower-on-gcp>`."
 
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:272
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:270
 msgid ""
 "After the SuperLink pod is created, add the service pod following the "
 "steps to create a pod and insert the following YAML definition:"
@@ -36268,13 +36657,13 @@ msgstr ""
 msgid "superlink-service.yaml"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:299
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:293
 msgid "Finally, spin up two SuperNode pods with the following YAML definitions:"
 msgstr ""
 "Finalement, lancez deux pods SuperNode avec les définitions YAML "
 "suivantes :"
 
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:419
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:413
 msgid ""
 "To view the status of pods that were just deployed, click on the "
 "``Workloads`` link in the left panel. You should be able to see three "
@@ -36285,15 +36674,15 @@ msgstr ""
 "trois pods Flower en état « Exécutant » comme montré dans la capture "
 "d'écran ci-dessous :"
 
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:423
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:417
 msgid "Flower SuperLink and SuperNode pods in Red Hat OpenShift"
 msgstr "Pods Flower SuperLink et SuperNode dans Red Hat OpenShift"
 
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:428
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:422
 msgid "Flower SuperLink and SuperNode pods in Red Hat OpenShift."
 msgstr "Pods Flower SuperLink et SuperNode dans Red Hat OpenShift."
 
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:430
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:424
 msgid ""
 "Click on the SuperLink pod to view the pod details and click on the "
 "``Logs`` tab. You should be able to view the SuperLink logs showing two "
@@ -36303,7 +36692,7 @@ msgstr ""
 "sur l'onglet ``Logs``. Vous devriez pouvoir afficher les journaux "
 "SuperLink montrant deux SuperNodes connectés."
 
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:435
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:429
 msgid ""
 "To shut down the pods, navigate to ``Workloads`` > ``Deployments``, "
 "select the deployed pods, and click on ``Edit Pod Count`` to set the "
@@ -36316,11 +36705,11 @@ msgstr ""
 "pods en sélectionnant-les et en cliquant sur le bouton ``Delete "
 "Deployment``."
 
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:442
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:436
 msgid "Deploy Red Hat OpenShift AI"
 msgstr "Déployer l'intelligence artificielle collaborative Red Hat OpenShift"
 
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:444
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:438
 msgid ""
 "To interface with the deployed SuperLink and SuperNode in the OpenShift "
 "cluster, we want to make use of OpenShift AI workbench. So, we need to "
@@ -36331,7 +36720,7 @@ msgstr ""
 "Par conséquent, nous devons activer cet Opérateur dans le cluster "
 "OpenShift."
 
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:448
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:442
 msgid ""
 "First, ensure that the Red Hat OpenShift AI is enabled via the Red Hat "
 "OpenShift console. You may enable a free trial if you do not have a "
@@ -36363,23 +36752,23 @@ msgstr ""
 "l'Opérateur ``Red Hat OpenShift AI`` dans le panneau ``Installed "
 "Operators`` :"
 
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:459
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:453
 msgid "Red Hat OpenShift AI Operator in OpenShift"
 msgstr ""
 "Opérateur d'intelligence artificielle collaborative Red Hat OpenShift "
 "dans OpenShift"
 
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:464
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:458
 msgid "Red Hat OpenShift AI Operator in OpenShift."
 msgstr ""
 "Opérateur d'intelligence artificielle collaborative Red Hat OpenShift "
 "dans OpenShift."
 
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:467
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:461
 msgid "Install Data Science Cluster"
 msgstr "Installer un cluster de science des données"
 
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:469
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:463
 msgid ""
 "After installing the Operator, we need to install the "
 "``DataScienceCluster`` using the web console. Follow the official steps "
@@ -36419,7 +36808,7 @@ msgstr ""
 msgid "rhosai-datasciencecluster.yaml"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:524
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:518
 msgid ""
 "Click on ``Create`` to create the Data Science Cluster. If successful, "
 "you should see a ``default-dsc`` instance in the ``Data Science "
@@ -36429,19 +36818,19 @@ msgstr ""
 "vous devriez voir une instance ``default-dsc`` dans l'onglet ``Data "
 "Science Clusters`` avec un signe de vérification vert :"
 
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:527
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:521
 msgid "View of a successfully created Red Hat OpenShift AI Data Science Cluster"
 msgstr ""
 "Vue d'un cluster de science des données Red Hat OpenShift AI créé avec "
 "succès"
 
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:532
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:526
 msgid "View of a successfully created Red Hat OpenShift AI Data Science Cluster."
 msgstr ""
 "Vue d'un cluster de science des données Red Hat OpenShift AI créé avec "
 "succès."
 
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:534
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:528
 msgid ""
 "Once the above is complete, you will be able to launch OpenShift AI by "
 "clicking on the grid icon on the top right of the OpenShift console and "
@@ -36452,19 +36841,19 @@ msgstr ""
 "grilleau à droite supérieur de la console OpenShift et en cliquant sur le"
 " lien ``Red Hat OpenShift AI`` :"
 
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:538
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:532
 msgid "Launch Red Hat OpenShift AI from OpenShift console"
 msgstr ""
 "Lancer l'intelligence artificielle collaborative Red Hat OpenShift à "
 "partir de la console OpenShift"
 
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:543
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:537
 msgid "Launch Red Hat OpenShift AI from OpenShift console."
 msgstr ""
 "Lancer l'intelligence artificielle collaborative Red Hat OpenShift à "
 "partir de la console OpenShift."
 
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:545
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:539
 msgid ""
 "Follow the instructions when prompted to ``Log in with OpenShift``. After"
 " logging in, you will be taken to the OpenShift AI dashboard."
@@ -36473,11 +36862,11 @@ msgstr ""
 "OpenShift``. Après avoir connecté, vous serez redirigé vers le tableau de"
 " bord d'intelligence artificielle OpenShift."
 
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:549
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:543
 msgid "Create a Custom OpenShift AI Image with Flower"
 msgstr "Créer une image d'OpenShift AI personnalisée avec Flower"
 
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:551
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:545
 msgid ""
 "In OpenShift AI, you will be building and running your Flower app in a "
 "workbench, which is a Jupyter notebook environment. However, the default "
@@ -36502,7 +36891,7 @@ msgstr ""
 "/creating-custom-workbench-images#creating-a-custom-image-from-default-"
 "image_custom-images>`_."
 
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:559
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:553
 msgid ""
 "**Pre-requisites**: Given that Red Hat OpenShift AI needs to be able to "
 "pull from a container registry, you will need to create an account on "
@@ -36520,7 +36909,7 @@ msgstr ""
 "<https://docs.docker.com/get-docker/>`_ sur votre système. Ensuite, "
 "connectez-vous à votre compte ``quay.io`` en utilisant la commande :"
 
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:570
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:564
 msgid ""
 "Now, we select a base image for our custom OpenShift AI image. In the Red"
 " Hat OpenShift console, go to ``Builds`` > ``ImageStreams``. You can find"
@@ -36538,7 +36927,7 @@ msgstr ""
 "l'identifiant ``sha256``. Dans ce guide, nous utilisons la balise "
 "``2025.1``."
 
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:576
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:570
 msgid "Next, in your machine, create a Dockerfile with the following contents:"
 msgstr ""
 "Créez ensuite dans votre machine un fichier Dockerfile avec le contenu "
@@ -36548,7 +36937,7 @@ msgstr ""
 msgid "Dockerfile"
 msgstr ""
 
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:589
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:583
 msgid ""
 "Build and push the container image to your public repository on "
 "``quay.io``:"
@@ -36556,7 +36945,7 @@ msgstr ""
 "Construirez et envoyez l'image de conteneur vers votre dépôt public sur "
 "``quay.io``: "
 
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:595
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:589
 msgid ""
 "Once the image is pushed, we will configure OpenShift AI to load this "
 "custom workbench image. In the OpenShift AI dashboard, go to ``Settings``"
@@ -36579,19 +36968,19 @@ msgstr ""
 " pour importer l'image. Si c'est réussi, vous devriez voir votre image "
 "personnalisée dans la liste des images de travail :"
 
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:603
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:597
 msgid "Custom OpenShift AI workbench image with Flower"
 msgstr "Image de travail OpenShift AI personnalisée avec Flower"
 
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:608
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:602
 msgid "Custom OpenShift AI workbench image with Flower."
 msgstr "Image de travail OpenShift AI personnalisée avec Flower."
 
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:611
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:605
 msgid "Create a Data Science Project"
 msgstr "Créer un projet de science des données"
 
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:613
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:607
 msgid ""
 "Now we are ready to create a Data Science project in OpenShift AI and "
 "create a workbench using the custom image we just created from the "
@@ -36602,7 +36991,7 @@ msgstr ""
 "l'image personnalisée que nous avons créée précédemment dans la section "
 "précédente."
 
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:616
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:610
 msgid ""
 "On the left sidebar, click on ``Home``, navigate to the ``Data Science "
 "Projects`` section, and click on the ``Create project`` button. Give your"
@@ -36616,15 +37005,15 @@ msgstr ""
 "demo``, et - si vous le souhaitez, une description. Ensuite, cliquez sur "
 "``Create``. Cliquez sur votre projet créé pour l'ouvrir."
 
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:621
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:615
 msgid "Data Science project in Red Hat OpenShift AI"
 msgstr "Projet de science des données dans Red Hat OpenShift AI"
 
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:626
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:620
 msgid "Data Science project in Red Hat OpenShift AI."
 msgstr "Projet de science des données dans Red Hat OpenShift AI."
 
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:628
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:622
 msgid ""
 "Navigate to the ``Workbenches`` tab and click on ``Create workbench`` to "
 "create a new workbench. Under \"Name and description\", provide a name "
@@ -36645,25 +37034,25 @@ msgstr ""
 "``Create Workbench``. L'état de votre interface de travail devrait passer"
 " à ``Running`` après quelques minutes :"
 
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:636
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:630
 msgid "Running workbench in Red Hat OpenShift AI"
 msgstr "Interface de travail en cours d'exécution dans Red Hat OpenShift AI"
 
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:641
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:635
 msgid "Running workbench in Red Hat OpenShift AI."
 msgstr "Interface de travail en cours d'exécution dans Red Hat OpenShift AI."
 
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:643
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:637
 msgid "Now, click on your workbench and launch the JupyterLab environment."
 msgstr ""
 "Cliquez maintenant sur votre interface de travail et lancez "
 "l'environnement JupyterLab."
 
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:647
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:641
 msgid "Run the Flower App in OpenShift AI"
 msgstr "Exécuter l'application Flower dans OpenShift AI"
 
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:649
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:643
 msgid ""
 "With a running workbench and deployed SuperLink and SuperNode pods in "
 "your OpenShift cluster, you are now ready to run a Flower app! In the "
@@ -36678,19 +37067,19 @@ msgstr ""
 "correctement et fonctionne comme attendu : ouvrez un nouveau terminal et "
 "exécutez ``flwr --version`` pour vérifier la version de Flower :"
 
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:654
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:648
 msgid "Verify Flower installation in OpenShift AI workbench"
 msgstr ""
 "Vérification de l'installation de Flower dans l'interface de travail "
 "OpenShift AI"
 
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:659
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:653
 msgid "Verify Flower installation in OpenShift AI workbench."
 msgstr ""
 "Vérification de l'installation de Flower dans l'interface de travail "
 "OpenShift AI."
 
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:661
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:655
 msgid ""
 "With Flower running correctly, you can now follow the usual steps of "
 "using ``flwr new`` to create a new Flower app from a template, and ``flwr"
@@ -36710,21 +37099,21 @@ msgstr ""
 "une nouvelle connexion SuperLink dans le fichier de configuration Flower:"
 " "
 
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:691
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:685
 msgid "And finally, run your Flower app as usual with ``flwr run``:"
 msgstr ""
 "Et enfin, exécutez votre application Flower comme d'habitude avec ``flwr "
 "run``: "
 
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:693
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:687
 msgid "Running Flower app in OpenShift AI workbench"
 msgstr "Exécuter l'application Flower dans l'interface de travail OpenShift AI"
 
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:698
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:692
 msgid "Running Flower app in OpenShift AI workbench."
 msgstr "Exécuter l'application Flower dans l'interface de travail OpenShift AI."
 
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:700
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:694
 msgid ""
 "You can also view the logs of the SuperLink pod in the OpenShift console."
 " Navigate to ``Workloads`` > ``Pods``, click on the SuperLink pod, and "
@@ -36734,19 +37123,19 @@ msgstr ""
 "console OpenShift. Naviguez vers ``Workloads`` > ``Pods``, cliquez sur le"
 " pod SuperLink, puis cliquez sur l'icône ``Logs``: "
 
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:703
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:697
 msgid "SuperLink logs showing connected SuperNodes and running Flower app"
 msgstr ""
 "Journal des logs SuperLink montrant les SuperNodes connectés et "
 "l'application Flower en cours d'exécution"
 
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:708
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:702
 msgid "SuperLink logs showing connected SuperNodes and running Flower app."
 msgstr ""
 "Journal des logs SuperLink montrant les SuperNodes connectés et "
 "l'application Flower en cours d'exécution."
 
-#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:710
+#: ../../source/how-to-run-flower-on-red-hat-openshift.rst:704
 msgid ""
 "Congratulations! You have successfully created, deployed, and run a "
 "Flower app on Red Hat OpenShift using the Red Hat OpenShift Service on "
@@ -37018,16 +37407,13 @@ msgstr ""
 "exécuter votre SuperNode avec TLS."
 
 #: ../../source/how-to-run-flower-with-deployment-engine.rst:152
+#, fuzzy
 msgid ""
-"``--superlink 127.0.0.1:9092``: Connect to the SuperLink's Fleet API at "
-"the address ``127.0.0.1:9092``. If you had launched the SuperLink in a "
+"``--superlink 127.0.0.1:8000``: Connect to the SuperLink's Fleet API at "
+"the address ``127.0.0.1:8000``. If you had launched the SuperLink in a "
 "different machine, you'd replace ``127.0.0.1`` with the public IP of that"
 " machine."
 msgstr ""
-"``--superlink 127.0.0.1:9092``: Connectez-vous à l'API Fleet du SuperLink"
-" à l'adresse ``127.0.0.1:9092``. Si vous aviez lancé le SuperLink dans "
-"une autre machine, vous remplaceriez ``127.0.0.1`` par l'IP publique de "
-"cette machine."
 
 #: ../../source/how-to-run-flower-with-deployment-engine.rst:154
 msgid ""
@@ -40911,6 +41297,10 @@ msgstr "Chemin de l'application Flower à bundler dans un FAB"
 msgid "Start an interactive chat session with the Flower agent."
 msgstr ""
 
+#: ../../flwr chat:1
+msgid "Set FLWR_CHAT_SUPERLINK to use a different SuperLink connection."
+msgstr ""
+
 #: ../../flwr config:1
 msgid "Manage Configuration"
 msgstr "Gérez les Configurations"
@@ -41405,6 +41795,17 @@ msgid "Add a SuperNode to the federation."
 msgstr "Ajoutez un SuperNode à la fédération."
 
 #: ../../flwr register:1 supernode
+msgid ""
+"Location of the SuperNode as \"<latitude>,<longitude>\", for example "
+"\"37.4056,-122.0775\"."
+msgstr ""
+
+#: ../../flwr register:1 supernode
+#, fuzzy
+msgid "Name of the SuperNode."
+msgstr ""
+
+#: ../../flwr register:1 supernode
 msgid "Path to a P-384 (or any other NIST EC curve) public key file."
 msgstr "Chemin vers un fichier clé publique P-384 (ou toute autre courbe NIST EC)"
 
@@ -41536,57 +41937,68 @@ msgstr ""
 msgid "Classes"
 msgstr ""
 
-#: ../../source/ref-api/flwr.agentapp.rst:30:<autosummary>:1
+#: ../../source/ref-api/flwr.agentapp.rst:31:<autosummary>:1
 msgid ":py:obj:`AgentApp <flwr.agentapp.AgentApp>`\\ \\(\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.agentapp.rst:30:<autosummary>:1
+#: ../../source/ref-api/flwr.agentapp.rst:31:<autosummary>:1
 #: flwr.agentapp.agent_app.AgentApp:1 of
 msgid "Flower AgentApp."
 msgstr "Agent Flower App."
 
-#: ../../source/ref-api/flwr.agentapp.rst:30:<autosummary>:1
+#: ../../source/ref-api/flwr.agentapp.rst:31:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`AgentConnectors <flwr.agentapp.AgentConnectors>`\\ \\(\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.agentapp.rst:30:<autosummary>:1
+#: ../../source/ref-api/flwr.agentapp.rst:31:<autosummary>:1
 #: flwr.agentapp.base.AgentConnectors:1 of
 #, fuzzy
 msgid "Abstract base class for AgentApp connector execution."
 msgstr ""
 
-#: ../../source/ref-api/flwr.agentapp.rst:30:<autosummary>:1
+#: ../../source/ref-api/flwr.agentapp.rst:31:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`AgentEvents <flwr.agentapp.AgentEvents>`\\ \\(\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.agentapp.rst:30:<autosummary>:1
+#: ../../source/ref-api/flwr.agentapp.rst:31:<autosummary>:1
 #: flwr.agentapp.base.AgentEvents:1 of
 #, fuzzy
 msgid "Abstract base class for AgentApp run events."
 msgstr ""
 
-#: ../../source/ref-api/flwr.agentapp.rst:30:<autosummary>:1
+#: ../../source/ref-api/flwr.agentapp.rst:31:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`AgentGrid <flwr.agentapp.AgentGrid>`\\ \\(\\)"
+msgstr ""
+
+#: ../../source/ref-api/flwr.agentapp.rst:31:<autosummary>:1
+#: flwr.agentapp.base.AgentGrid:1 of
+#, fuzzy
+msgid "Model-facing access to the federation Grid."
+msgstr ""
+
+#: ../../source/ref-api/flwr.agentapp.rst:31:<autosummary>:1
 msgid ":py:obj:`AgentSession <flwr.agentapp.AgentSession>`\\ \\(\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.agentapp.rst:30:<autosummary>:1
+#: ../../source/ref-api/flwr.agentapp.rst:31:<autosummary>:1
 #: flwr.agentapp.base.AgentSession:1 of
 msgid "Abstract base class for AgentApp runtime capabilities."
 msgstr ""
 "Classe abstraite de base pour les capacités d'exécution en temps réel de "
 "l'agent."
 
-#: ../../source/ref-api/flwr.agentapp.rst:32
+#: ../../source/ref-api/flwr.agentapp.rst:33
 msgid "Exceptions"
 msgstr ""
 
-#: ../../source/ref-api/flwr.agentapp.rst:36:<autosummary>:1
+#: ../../source/ref-api/flwr.agentapp.rst:37:<autosummary>:1
 msgid ":py:obj:`LoadAgentAppError <flwr.agentapp.LoadAgentAppError>`\\"
 msgstr ""
 
-#: ../../source/ref-api/flwr.agentapp.rst:36:<autosummary>:1
+#: ../../source/ref-api/flwr.agentapp.rst:37:<autosummary>:1
 #: flwr.agentapp.agent_app.LoadAgentAppError:1 of
 msgid "Error when trying to load `AgentApp`."
 msgstr ""
@@ -41664,6 +42076,7 @@ msgstr "Définir un agent avec une seule fonction principale::"
 #: ../../source/ref-api/flwr.agentapp.AgentApp.rst:15
 #: ../../source/ref-api/flwr.agentapp.AgentConnectors.rst:15
 #: ../../source/ref-api/flwr.agentapp.AgentEvents.rst:15
+#: ../../source/ref-api/flwr.agentapp.AgentGrid.rst:15
 #: ../../source/ref-api/flwr.agentapp.AgentSession.rst:15
 #: ../../source/ref-api/flwr.app.Array.rst:15
 #: ../../source/ref-api/flwr.app.ArrayRecord.rst:15
@@ -41798,7 +42211,8 @@ msgid "AgentConnectors"
 msgstr ""
 
 #: flwr.agentapp.base.AgentConnectors:1 flwr.agentapp.base.AgentEvents:1
-#: flwr.agentapp.base.AgentSession:1 flwr.compat.client.client.Client:1
+#: flwr.agentapp.base.AgentGrid:1 flwr.agentapp.base.AgentSession:1
+#: flwr.compat.client.client.Client:1
 #: flwr.compat.client.numpy_client.NumPyClient:1
 #: flwr.server.client_manager.ClientManager:1
 #: flwr.server.strategy.strategy.Strategy:1 flwr.serverapp.grid.grid.Grid:1
@@ -41850,6 +42264,30 @@ msgstr ""
 msgid "Get events from all runs in the current run series."
 msgstr ""
 
+#: ../../source/ref-api/flwr.agentapp.AgentGrid.rst:2
+msgid "AgentGrid"
+msgstr ""
+
+#: flwr.agentapp.base.AgentGrid.call:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`call <flwr.agentapp.AgentGrid.call>`\\ \\(tool\\_call\\)"
+msgstr ""
+
+#: flwr.agentapp.base.AgentGrid.call:1
+#: flwr.agentapp.base.AgentGrid.call:1:<autosummary>:1 of
+msgid "Execute one Grid function_call and return a function_call_output item."
+msgstr ""
+
+#: flwr.agentapp.base.AgentGrid.call:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`tools <flwr.agentapp.AgentGrid.tools>`\\ \\(\\)"
+msgstr ""
+
+#: flwr.agentapp.base.AgentGrid.call:1:<autosummary>:1
+#: flwr.agentapp.base.AgentGrid.tools:1 of
+msgid "Return model-facing Grid tool schemas."
+msgstr ""
+
 #: ../../source/ref-api/flwr.agentapp.AgentSession.rst:2
 msgid "AgentSession"
 msgstr ""
@@ -41896,13 +42334,13 @@ msgstr ""
 #: ../../source/ref-api/flwr.common.RecordSet.rst:61
 #: ../../source/ref-api/flwr.common.ServerMessage.rst:25
 #: ../../source/ref-api/flwr.common.Status.rst:25
-#: ../../source/ref-api/flwr.server.Driver.rst:43
-#: ../../source/ref-api/flwr.server.Grid.rst:43
+#: ../../source/ref-api/flwr.server.Driver.rst:46
+#: ../../source/ref-api/flwr.server.Grid.rst:46
 #: ../../source/ref-api/flwr.server.LegacyContext.rst:25
 #: ../../source/ref-api/flwr.server.ServerAppComponents.rst:25
 #: ../../source/ref-api/flwr.server.ServerConfig.rst:25
 #: ../../source/ref-api/flwr.serverapp.GaussianPrivacyEvent.rst:25
-#: ../../source/ref-api/flwr.serverapp.Grid.rst:43
+#: ../../source/ref-api/flwr.serverapp.Grid.rst:46
 #: ../../source/ref-api/flwr.serverapp.NeighboringRelation.rst:166
 #: ../../source/ref-api/flwr.serverapp.PrivacyAccountant.rst:46
 #: ../../source/ref-api/flwr.serverapp.PrivacyConfig.rst:25
@@ -41932,6 +42370,26 @@ msgstr ""
 #: flwr.agentapp.AgentSession.connectors:1:<autosummary>:1
 #: flwr.agentapp.AgentSession.events:1 of
 msgid "Frontend-visible structured run event API."
+msgstr ""
+
+#: flwr.agentapp.AgentSession.connectors:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`grid <flwr.agentapp.AgentSession.grid>`\\"
+msgstr ""
+
+#: flwr.agentapp.AgentSession.connectors:1:<autosummary>:1
+#: flwr.agentapp.AgentSession.grid:1 of
+msgid "Model-facing federation Grid API."
+msgstr ""
+
+#: flwr.agentapp.AgentSession.connectors:1:<autosummary>:1 of
+#, fuzzy
+msgid ":py:obj:`prompt <flwr.agentapp.AgentSession.prompt>`\\"
+msgstr ""
+
+#: flwr.agentapp.AgentSession.connectors:1:<autosummary>:1
+#: flwr.agentapp.AgentSession.prompt:1 of
+msgid "Return the initial prompt for this AgentApp run."
 msgstr ""
 
 #: ../../source/ref-api/flwr.agentapp.LoadAgentAppError.rst:2
@@ -48641,7 +49099,7 @@ msgstr ""
 msgid "Updated usage::"
 msgstr ""
 
-#: ../../source/ref-api/flwr.server.Driver.rst:41:<autosummary>:1
+#: ../../source/ref-api/flwr.server.Driver.rst:44:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`create_message <flwr.server.Driver.create_message>`\\ "
@@ -48650,26 +49108,39 @@ msgstr ""
 ":py:obj:`create_message <flwr.serverapp.Grid.create_message>`\\ "
 "\\(content\\, message\\_type\\, ...\\[\\, ttl\\]\\)"
 
-#: ../../source/ref-api/flwr.server.Driver.rst:41:<autosummary>:1
-#: ../../source/ref-api/flwr.server.Grid.rst:41:<autosummary>:1
-#: ../../source/ref-api/flwr.serverapp.Grid.rst:41:<autosummary>:1
+#: ../../source/ref-api/flwr.server.Driver.rst:44:<autosummary>:1
+#: ../../source/ref-api/flwr.server.Grid.rst:44:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.Grid.rst:44:<autosummary>:1
 #: flwr.serverapp.grid.grid.Grid.create_message:1 of
 msgid "Create a new message with specified parameters."
 msgstr "Créez un nouveau message avec les paramètres spécifiés."
 
-#: ../../source/ref-api/flwr.server.Driver.rst:41:<autosummary>:1
+#: ../../source/ref-api/flwr.server.Driver.rst:44:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`get_node_ids <flwr.server.Driver.get_node_ids>`\\ \\(\\)"
 msgstr ":py:obj:`get_node_ids <flwr.serverapp.Grid.get_node_ids>`\\ \\(\\)"
 
-#: ../../source/ref-api/flwr.server.Driver.rst:41:<autosummary>:1
-#: ../../source/ref-api/flwr.server.Grid.rst:41:<autosummary>:1
-#: ../../source/ref-api/flwr.serverapp.Grid.rst:41:<autosummary>:1
+#: ../../source/ref-api/flwr.server.Driver.rst:44:<autosummary>:1
+#: ../../source/ref-api/flwr.server.Grid.rst:44:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.Grid.rst:44:<autosummary>:1
 #: flwr.serverapp.grid.grid.Grid.get_node_ids:1 of
 msgid "Get node IDs."
 msgstr "Obtenir les IDs de nœud."
 
-#: ../../source/ref-api/flwr.server.Driver.rst:41:<autosummary>:1
+#: ../../source/ref-api/flwr.server.Driver.rst:44:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`get_nodes <flwr.server.Driver.get_nodes>`\\ \\(\\)"
+msgstr ""
+
+#: ../../source/ref-api/flwr.server.Driver.rst:44:<autosummary>:1
+#: ../../source/ref-api/flwr.server.Grid.rst:44:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.Grid.rst:44:<autosummary>:1
+#: flwr.serverapp.grid.grid.Grid.get_nodes:1 of
+#, fuzzy
+msgid "Get nodes."
+msgstr ""
+
+#: ../../source/ref-api/flwr.server.Driver.rst:44:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`pull_messages <flwr.server.Driver.pull_messages>`\\ "
@@ -48678,14 +49149,14 @@ msgstr ""
 ":py:obj:`pull_messages <flwr.serverapp.Grid.pull_messages>`\\ "
 "\\(message\\_ids\\)"
 
-#: ../../source/ref-api/flwr.server.Driver.rst:41:<autosummary>:1
-#: ../../source/ref-api/flwr.server.Grid.rst:41:<autosummary>:1
-#: ../../source/ref-api/flwr.serverapp.Grid.rst:41:<autosummary>:1
+#: ../../source/ref-api/flwr.server.Driver.rst:44:<autosummary>:1
+#: ../../source/ref-api/flwr.server.Grid.rst:44:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.Grid.rst:44:<autosummary>:1
 #: flwr.serverapp.grid.grid.Grid.pull_messages:1 of
 msgid "Pull messages based on message IDs."
 msgstr "Tirez des messages en fonction des IDs de message."
 
-#: ../../source/ref-api/flwr.server.Driver.rst:41:<autosummary>:1
+#: ../../source/ref-api/flwr.server.Driver.rst:44:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`push_messages <flwr.server.Driver.push_messages>`\\ "
@@ -48694,14 +49165,14 @@ msgstr ""
 ":py:obj:`push_messages <flwr.serverapp.Grid.push_messages>`\\ "
 "\\(messages\\)"
 
-#: ../../source/ref-api/flwr.server.Driver.rst:41:<autosummary>:1
-#: ../../source/ref-api/flwr.server.Grid.rst:41:<autosummary>:1
-#: ../../source/ref-api/flwr.serverapp.Grid.rst:41:<autosummary>:1
+#: ../../source/ref-api/flwr.server.Driver.rst:44:<autosummary>:1
+#: ../../source/ref-api/flwr.server.Grid.rst:44:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.Grid.rst:44:<autosummary>:1
 #: flwr.serverapp.grid.grid.Grid.push_messages:1 of
 msgid "Push messages to specified node IDs."
 msgstr "Envoi de messages vers les IDs de nœuds spécifiés."
 
-#: ../../source/ref-api/flwr.server.Driver.rst:41:<autosummary>:1
+#: ../../source/ref-api/flwr.server.Driver.rst:44:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`send_and_receive <flwr.server.Driver.send_and_receive>`\\ "
@@ -48710,23 +49181,23 @@ msgstr ""
 ":py:obj:`send_and_receive <flwr.serverapp.Grid.send_and_receive>`\\ "
 "\\(messages\\, \\*\\[\\, timeout\\]\\)"
 
-#: ../../source/ref-api/flwr.server.Driver.rst:41:<autosummary>:1
-#: ../../source/ref-api/flwr.server.Grid.rst:41:<autosummary>:1
-#: ../../source/ref-api/flwr.serverapp.Grid.rst:41:<autosummary>:1
+#: ../../source/ref-api/flwr.server.Driver.rst:44:<autosummary>:1
+#: ../../source/ref-api/flwr.server.Grid.rst:44:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.Grid.rst:44:<autosummary>:1
 #: flwr.serverapp.grid.grid.Grid.send_and_receive:1 of
 msgid "Push messages to specified node IDs and pull the reply messages."
 msgstr ""
 "Envoi de messages vers les IDs de nœuds spécifiés et récupération des "
 "réponses."
 
-#: ../../source/ref-api/flwr.server.Driver.rst:41:<autosummary>:1
+#: ../../source/ref-api/flwr.server.Driver.rst:44:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`set_run <flwr.server.Driver.set_run>`\\ \\(run\\)"
 msgstr ":py:obj:`set_run <flwr.serverapp.Grid.set_run>`\\ \\(run\\)"
 
-#: ../../source/ref-api/flwr.server.Driver.rst:41:<autosummary>:1
-#: ../../source/ref-api/flwr.server.Grid.rst:41:<autosummary>:1
-#: ../../source/ref-api/flwr.serverapp.Grid.rst:41:<autosummary>:1
+#: ../../source/ref-api/flwr.server.Driver.rst:44:<autosummary>:1
+#: ../../source/ref-api/flwr.server.Grid.rst:44:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.Grid.rst:44:<autosummary>:1
 #: flwr.serverapp.grid.grid.Grid.set_run:1 of
 msgid "Set the run this ``Grid`` object operates in."
 msgstr "Définissez l'exécution à laquelle cet objet ``Grid`` opère."
@@ -48885,7 +49356,7 @@ msgstr "Le ``Run`` à l'intérieur duquel cet objet ``Grid`` opère."
 msgid "Grid"
 msgstr ""
 
-#: ../../source/ref-api/flwr.server.Grid.rst:41:<autosummary>:1
+#: ../../source/ref-api/flwr.server.Grid.rst:44:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`create_message <flwr.server.Grid.create_message>`\\ "
@@ -48894,12 +49365,17 @@ msgstr ""
 ":py:obj:`create_message <flwr.serverapp.Grid.create_message>`\\ "
 "\\(content\\, message\\_type\\, ...\\[\\, ttl\\]\\)"
 
-#: ../../source/ref-api/flwr.server.Grid.rst:41:<autosummary>:1
+#: ../../source/ref-api/flwr.server.Grid.rst:44:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`get_node_ids <flwr.server.Grid.get_node_ids>`\\ \\(\\)"
 msgstr ":py:obj:`get_node_ids <flwr.serverapp.Grid.get_node_ids>`\\ \\(\\)"
 
-#: ../../source/ref-api/flwr.server.Grid.rst:41:<autosummary>:1
+#: ../../source/ref-api/flwr.server.Grid.rst:44:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`get_nodes <flwr.server.Grid.get_nodes>`\\ \\(\\)"
+msgstr ""
+
+#: ../../source/ref-api/flwr.server.Grid.rst:44:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`pull_messages <flwr.server.Grid.pull_messages>`\\ "
@@ -48908,14 +49384,14 @@ msgstr ""
 ":py:obj:`pull_messages <flwr.serverapp.Grid.pull_messages>`\\ "
 "\\(message\\_ids\\)"
 
-#: ../../source/ref-api/flwr.server.Grid.rst:41:<autosummary>:1
+#: ../../source/ref-api/flwr.server.Grid.rst:44:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`push_messages <flwr.server.Grid.push_messages>`\\ \\(messages\\)"
 msgstr ""
 ":py:obj:`push_messages <flwr.serverapp.Grid.push_messages>`\\ "
 "\\(messages\\)"
 
-#: ../../source/ref-api/flwr.server.Grid.rst:41:<autosummary>:1
+#: ../../source/ref-api/flwr.server.Grid.rst:44:<autosummary>:1
 #, fuzzy
 msgid ""
 ":py:obj:`send_and_receive <flwr.server.Grid.send_and_receive>`\\ "
@@ -48924,7 +49400,7 @@ msgstr ""
 ":py:obj:`send_and_receive <flwr.serverapp.Grid.send_and_receive>`\\ "
 "\\(messages\\, \\*\\[\\, timeout\\]\\)"
 
-#: ../../source/ref-api/flwr.server.Grid.rst:41:<autosummary>:1
+#: ../../source/ref-api/flwr.server.Grid.rst:44:<autosummary>:1
 #, fuzzy
 msgid ":py:obj:`set_run <flwr.server.Grid.set_run>`\\ \\(run\\)"
 msgstr ":py:obj:`set_run <flwr.serverapp.Grid.set_run>`\\ \\(run\\)"
@@ -53435,7 +53911,7 @@ msgid ""
 "<flwr.serverapp.GaussianPrivacyEvent.population_size>`\\"
 msgstr ""
 
-#: ../../source/ref-api/flwr.serverapp.Grid.rst:41:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.Grid.rst:44:<autosummary>:1
 msgid ""
 ":py:obj:`create_message <flwr.serverapp.Grid.create_message>`\\ "
 "\\(content\\, message\\_type\\, ...\\[\\, ttl\\]\\)"
@@ -53443,11 +53919,16 @@ msgstr ""
 ":py:obj:`create_message <flwr.serverapp.Grid.create_message>`\\ "
 "\\(content\\, message\\_type\\, ...\\[\\, ttl\\]\\)"
 
-#: ../../source/ref-api/flwr.serverapp.Grid.rst:41:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.Grid.rst:44:<autosummary>:1
 msgid ":py:obj:`get_node_ids <flwr.serverapp.Grid.get_node_ids>`\\ \\(\\)"
 msgstr ""
 
-#: ../../source/ref-api/flwr.serverapp.Grid.rst:41:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.Grid.rst:44:<autosummary>:1
+#, fuzzy
+msgid ":py:obj:`get_nodes <flwr.serverapp.Grid.get_nodes>`\\ \\(\\)"
+msgstr ""
+
+#: ../../source/ref-api/flwr.serverapp.Grid.rst:44:<autosummary>:1
 msgid ""
 ":py:obj:`pull_messages <flwr.serverapp.Grid.pull_messages>`\\ "
 "\\(message\\_ids\\)"
@@ -53455,7 +53936,7 @@ msgstr ""
 ":py:obj:`pull_messages <flwr.serverapp.Grid.pull_messages>`\\ "
 "\\(message\\_ids\\)"
 
-#: ../../source/ref-api/flwr.serverapp.Grid.rst:41:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.Grid.rst:44:<autosummary>:1
 msgid ""
 ":py:obj:`push_messages <flwr.serverapp.Grid.push_messages>`\\ "
 "\\(messages\\)"
@@ -53463,7 +53944,7 @@ msgstr ""
 ":py:obj:`push_messages <flwr.serverapp.Grid.push_messages>`\\ "
 "\\(messages\\)"
 
-#: ../../source/ref-api/flwr.serverapp.Grid.rst:41:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.Grid.rst:44:<autosummary>:1
 msgid ""
 ":py:obj:`send_and_receive <flwr.serverapp.Grid.send_and_receive>`\\ "
 "\\(messages\\, \\*\\[\\, timeout\\]\\)"
@@ -53471,7 +53952,7 @@ msgstr ""
 ":py:obj:`send_and_receive <flwr.serverapp.Grid.send_and_receive>`\\ "
 "\\(messages\\, \\*\\[\\, timeout\\]\\)"
 
-#: ../../source/ref-api/flwr.serverapp.Grid.rst:41:<autosummary>:1
+#: ../../source/ref-api/flwr.serverapp.Grid.rst:44:<autosummary>:1
 msgid ":py:obj:`set_run <flwr.serverapp.Grid.set_run>`\\ \\(run\\)"
 msgstr ""
 
@@ -57064,6 +57545,7 @@ msgstr ""
 #: ../../source/ref-exit-codes/302.rst:15
 #: ../../source/ref-exit-codes/303.rst:14
 #: ../../source/ref-exit-codes/304.rst:15
+#: ../../source/ref-exit-codes/305.rst:15
 #: ../../source/ref-exit-codes/400.rst:14
 #: ../../source/ref-exit-codes/401.rst:13
 #: ../../source/ref-exit-codes/402.rst:14
@@ -57568,6 +58050,47 @@ msgstr ""
 "``--trusted-entities`` lors du démarrage du serveur. Cela permet au "
 "serveur de fonctionner sans vérification d'entité."
 
+#: ../../source/ref-exit-codes/305.rst:3
+msgid "[305] SUPERNODE_CONNECTION_ERROR"
+msgstr ""
+
+#: ../../source/ref-exit-codes/305.rst:9
+msgid ""
+"This error occurs when the SuperNode cannot initialize its connection to "
+"the SuperLink. The error shown before this message contains additional "
+"details returned by the SuperLink or the local connection layer."
+msgstr ""
+
+#: ../../source/ref-exit-codes/305.rst:17
+msgid "Check the reported error and verify the following:"
+msgstr ""
+
+#: ../../source/ref-exit-codes/305.rst:19
+msgid ""
+"The SuperLink address is correct and reachable from the SuperNode. Check "
+"network, DNS, proxy, and firewall settings as applicable."
+msgstr ""
+
+#: ../../source/ref-exit-codes/305.rst:21
+msgid ""
+"The TLS configuration matches the SuperLink, including any root "
+"certificates passed to the SuperNode."
+msgstr ""
+
+#: ../../source/ref-exit-codes/305.rst:23
+msgid ""
+"If ``--auth-supernode-private-key`` is set, the corresponding public key "
+"is still registered with the SuperLink. Register it again if it was de-"
+"registered."
+msgstr ""
+
+#: ../../source/ref-exit-codes/305.rst:25
+msgid ""
+"Another SuperNode is not already active with the same credentials. Stop "
+"the other process or wait until the SuperLink marks it offline before "
+"retrying."
+msgstr ""
+
 #: ../../source/ref-exit-codes/400.rst:3
 msgid "[400] SUPEREXEC_INVALID_PLUGIN_CONFIG"
 msgstr ""
@@ -57750,7 +58273,7 @@ msgid "IPv4 (e.g., ``192.168.1.1:9091``)"
 msgstr ""
 
 #: ../../source/ref-exit-codes/600.rst:19
-msgid "IPv6 (e.g., ``[2001:0db8::1]:9092``)"
+msgid "IPv6 (e.g., ``[2001:0db8::1]:8000``)"
 msgstr ""
 
 #: ../../source/ref-exit-codes/602.rst:3
@@ -58844,27 +59367,18 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-flower-network-communication.rst:86
+#, fuzzy
 msgid ""
 "**SuperNode to SuperLink (Fleet API)**: In Flower terminology, a Flower "
 "federation is a set of SuperNodes connected to the same SuperLink. From a"
-" networking perspective, each SuperNode acts as a gRPC client and the "
-"SuperLink acts as a gRPC server. This means that, when deploying a "
+" networking perspective, each SuperNode acts as an HTTP client and the "
+"SuperLink acts as an HTTP server. This means that, when deploying a "
 "SuperNode, only outgoing connections are necessary to connect to the "
 "SuperLink. Only the SuperNodes can initiate such requests and they do not"
 " respond to incoming requests. The SuperNode to SuperLink connection "
 "should always use TLS (see :doc:`how-to-enable-tls-connections` to learn "
 "more), but ``insecure`` mode is supported for local testing."
 msgstr ""
-"**SuperNode vers SuperLink (Fleet API)** : dans la terminologie Flower, "
-"une fédération Flower est un ensemble de SuperNodes connectés au même "
-"SuperLink. Du point de vue réseau, chaque SuperNode agit comme un client "
-"gRPC et SuperLink agit comme un serveur gRPC. Cela signifie que, lors du "
-"déploiement d'un SuperNode, seules des connexions sortantes sont "
-"nécessaires pour se connecter au SuperLink. Seuls les SuperNodes peuvent "
-"initier ces requêtes et ils ne répondent pas aux requêtes entrantes. La "
-"connexion de SuperNode à SuperLink doit toujours utiliser TLS (consultez "
-":doc:`how-to-enable-tls-connections` pour en savoir plus), mais le mode "
-"``insecure`` est pris en charge pour les tests locaux."
 
 #: ../../source/ref-flower-network-communication.rst:97
 msgid "Optional Network Connections"
@@ -58907,60 +59421,57 @@ msgstr ""
 msgid ""
 "Runtime API communication uses HTTP starting with Flower 1.35. Starting "
 "with Flower 1.37, the Flower CLI also communicates with the Control API "
-"over HTTP."
+"over HTTP. The Fleet API also uses HTTP by default."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:121
+#: ../../source/ref-flower-network-communication.rst:122
 msgid "Component"
 msgstr "Composant"
 
-#: ../../source/ref-flower-network-communication.rst:122
+#: ../../source/ref-flower-network-communication.rst:123
 msgid "Default Port"
 msgstr "Port par défaut"
 
-#: ../../source/ref-flower-network-communication.rst:123
+#: ../../source/ref-flower-network-communication.rst:124
 msgid "API"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:124
+#: ../../source/ref-flower-network-communication.rst:125
 msgid "Purpose"
 msgstr "Objectif"
 
-#: ../../source/ref-flower-network-communication.rst:125
+#: ../../source/ref-flower-network-communication.rst:126
 msgid "SuperLink"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:126
-#: ../../source/ref-flower-network-communication.rst:134
+#: ../../source/ref-flower-network-communication.rst:127
+#: ../../source/ref-flower-network-communication.rst:131
+#: ../../source/ref-flower-network-communication.rst:135
 msgid "8000"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:127
-#: ../../source/ref-flower-network-communication.rst:140
+#: ../../source/ref-flower-network-communication.rst:128
+#: ../../source/ref-flower-network-communication.rst:141
 msgid "Runtime API"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:128
+#: ../../source/ref-flower-network-communication.rst:129
 msgid "Used by the SuperExec and the ``ServerApp`` processes"
 msgstr "Utilisé par les processus SuperExec et les processus ``ServerApp``"
 
-#: ../../source/ref-flower-network-communication.rst:130
-msgid "9092"
-msgstr ""
-
-#: ../../source/ref-flower-network-communication.rst:131
+#: ../../source/ref-flower-network-communication.rst:132
 msgid "Fleet API"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:132
+#: ../../source/ref-flower-network-communication.rst:133
 msgid "Used by the SuperNodes"
 msgstr "Utilisé par les SuperNodes"
 
-#: ../../source/ref-flower-network-communication.rst:135
+#: ../../source/ref-flower-network-communication.rst:136
 msgid "Control API"
 msgstr "Contrôle API"
 
-#: ../../source/ref-flower-network-communication.rst:136
+#: ../../source/ref-flower-network-communication.rst:137
 msgid ""
 "Users interface with the SuperLink via this API using the `FlowerCLI "
 "<ref-api-cli.html>`_"
@@ -58968,25 +59479,25 @@ msgstr ""
 "L'utilisateur interagit avec le SuperLink via cette API en utilisant le "
 "`FlowerCLI <ref-api-cli.html>`_"
 
-#: ../../source/ref-flower-network-communication.rst:138
+#: ../../source/ref-flower-network-communication.rst:139
 msgid "SuperNode"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:139
+#: ../../source/ref-flower-network-communication.rst:140
 msgid "9094"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:141
+#: ../../source/ref-flower-network-communication.rst:142
 msgid "Used by the SuperExec and the ``ClientApp`` processes"
 msgstr "Utilisé par les processus SuperExec et ``ClientApp``,"
 
-#: ../../source/ref-flower-network-communication.rst:143
+#: ../../source/ref-flower-network-communication.rst:144
 msgid ""
-"The SuperLink Runtime and Control APIs share the same HTTP server and "
-"default port."
+"The SuperLink Runtime, Fleet, and Control APIs share the same HTTP server"
+" and default port."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:147
+#: ../../source/ref-flower-network-communication.rst:149
 #, fuzzy
 msgid ""
 "Runtime APIs enforce runtime version compatibility between the API server"
@@ -59007,11 +59518,11 @@ msgstr ""
 "SuperExec, ``ServerApp`` et ``ClientApp`` sur des versions Flower "
 "compatibles."
 
-#: ../../source/ref-flower-network-communication.rst:155
+#: ../../source/ref-flower-network-communication.rst:157
 msgid "Isolation Mode"
 msgstr "Mode d'isolement"
 
-#: ../../source/ref-flower-network-communication.rst:157
+#: ../../source/ref-flower-network-communication.rst:159
 msgid ""
 "Both SuperLink and SuperNode can operate in different isolation modes. "
 "The **SuperExec** is responsible for scheduling, launching, and managing "
@@ -59024,7 +59535,7 @@ msgstr ""
 "d'applications, tels que le processus ``ServerApp`` et le processus "
 "``ClientApp``."
 
-#: ../../source/ref-flower-network-communication.rst:161
+#: ../../source/ref-flower-network-communication.rst:163
 msgid ""
 "The ``subprocess`` isolation mode configures the SuperLink/SuperNode to "
 "automatically run the SuperExec as a subprocess upon start. The "
@@ -59048,7 +59559,7 @@ msgstr ""
 "guide :doc:`docker/index` pour une compréhension plus approfondie de la "
 "façon dont utiliser les deux modes."
 
-#: ../../source/ref-flower-network-communication.rst:169
+#: ../../source/ref-flower-network-communication.rst:171
 msgid ""
 "When using the ``process`` isolation mode, additional network connections"
 " are necessary to allow the external process running the SuperExec, "
@@ -59060,7 +59571,7 @@ msgstr ""
 "externe exécutant le SuperExec, ``ServerApp`` ou ``ClientApp`` de "
 "communiquer avec le SuperLink ou SuperNode: "
 
-#: ../../source/ref-flower-network-communication.rst:173
+#: ../../source/ref-flower-network-communication.rst:175
 #, fuzzy
 msgid ""
 "**SuperExec/ServerApp process to SuperLink (Runtime API)**: Both the "
@@ -59073,7 +59584,7 @@ msgid ""
 "SuperLink)."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:179
+#: ../../source/ref-flower-network-communication.rst:181
 #, fuzzy
 msgid ""
 "**SuperExec/ClientApp process to SuperNode (Runtime API)**: Both the "
@@ -59086,7 +59597,7 @@ msgid ""
 "to the SuperNode."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:188
+#: ../../source/ref-flower-network-communication.rst:190
 #, fuzzy
 msgid ""
 "The Runtime API links above can run with plaintext communication or with "
@@ -59094,15 +59605,15 @@ msgid ""
 "remain unencrypted and should stay inside a trusted network:"
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:192
+#: ../../source/ref-flower-network-communication.rst:194
 msgid "SuperLink + SuperExec + ``ServerApp`` process"
 msgstr "Processus SuperLink + SuperExec + ``ServerApp``"
 
-#: ../../source/ref-flower-network-communication.rst:193
+#: ../../source/ref-flower-network-communication.rst:195
 msgid "SuperNode + SuperExec + ``ClientApp`` process"
 msgstr "Processus SuperNode + SuperExec + ``ClientApp``"
 
-#: ../../source/ref-flower-network-communication.rst:195
+#: ../../source/ref-flower-network-communication.rst:197
 #, fuzzy
 msgid ""
 "For SuperLink, ``--ssl-certfile``, ``--ssl-keyfile``, and ``--ssl-ca-"
@@ -59114,7 +59625,7 @@ msgid ""
 "commands."
 msgstr ""
 
-#: ../../source/ref-flower-network-communication.rst:204
+#: ../../source/ref-flower-network-communication.rst:206
 msgid ""
 "When running without TLS, each group must remain inside a single trusted "
 "network. They should never communicate with each other over untrusted "
@@ -59124,11 +59635,11 @@ msgstr ""
 " confiance unique. Ils ne devraient jamais communiquer entre eux sur des "
 "réseaux non fiables (par exemple, Internet public)."
 
-#: ../../source/ref-flower-network-communication.rst:209
+#: ../../source/ref-flower-network-communication.rst:211
 msgid "Account Authentication"
 msgstr "Authentification de compte"
 
-#: ../../source/ref-flower-network-communication.rst:211
+#: ../../source/ref-flower-network-communication.rst:213
 msgid ""
 "When account authentication is enabled, Flower uses an OIDC-compatible "
 "server to authenticate requests:"
@@ -59136,7 +59647,7 @@ msgstr ""
 "Lorsque l'authentification de compte est activée, Flower utilise un "
 "serveur compatible OIDC pour authentifier les requêtes :"
 
-#: ../../source/ref-flower-network-communication.rst:214
+#: ../../source/ref-flower-network-communication.rst:216
 msgid ""
 "**SuperLink to OIDC server**: A SuperLink can optionally be configured to"
 " only allow authenticated users to interact with it. In this setting, the"
@@ -59147,11 +59658,11 @@ msgstr ""
 "ce cas, le SuperLink Flower agit comme client REST vers le serveur OIDC "
 "compatible."
 
-#: ../../source/ref-flower-network-communication.rst:219
+#: ../../source/ref-flower-network-communication.rst:221
 msgid "Application-specific Connections"
 msgstr "Connexions spécifiques à l'application"
 
-#: ../../source/ref-flower-network-communication.rst:221
+#: ../../source/ref-flower-network-communication.rst:223
 msgid ""
 "Users who write Flower Apps (``ServerApp`` and ``ClientApp``) can also "
 "make additional network requests. This is, strictly speaking, not part of"
@@ -59168,11 +59679,11 @@ msgstr ""
 "Flower doit se connecter et (b) de l'administrateur système sur les types"
 " de connexions qu'ils souhaitent autoriser."
 
-#: ../../source/ref-flower-network-communication.rst:227
+#: ../../source/ref-flower-network-communication.rst:229
 msgid "Typical examples include:"
 msgstr "Exemples typiques incluent :"
 
-#: ../../source/ref-flower-network-communication.rst:229
+#: ../../source/ref-flower-network-communication.rst:231
 msgid ""
 "**ClientApp to Database**: ``ClientApp`` instances typically need to be "
 "able to access the data to perform the action they have been designed for"
@@ -59192,7 +59703,7 @@ msgstr ""
 "connexion(s) vers la base de données peut(ont) probablement différer de "
 "l'illustration ci-dessus."
 
-#: ../../source/ref-flower-network-communication.rst:235
+#: ../../source/ref-flower-network-communication.rst:237
 msgid ""
 "**ServerApp to Database**: ``ServerApp`` instances might want to access "
 "the data to perform the action they have been designed for (e.g. evaluate"
@@ -59209,7 +59720,7 @@ msgstr ""
 " le diagramme ci-dessus, nous avons omis de montrer une base de données "
 "connectée aux composants ``ServerApp``."
 
-#: ../../source/ref-flower-network-communication.rst:240
+#: ../../source/ref-flower-network-communication.rst:242
 msgid ""
 "**ServerApp to metric logging service**: Metric logging services like "
 "TensorBoard, MLFlow and Weights & Biases are often used to track the "
@@ -59222,11 +59733,11 @@ msgstr ""
 "exécutions d'entraînement. Dans ce cas, le ``ServerApp`` agit "
 "généralement comme client vers le service de journalisation de métrique."
 
-#: ../../source/ref-flower-network-communication.rst:246
+#: ../../source/ref-flower-network-communication.rst:248
 msgid "Communication Model"
 msgstr "Modèle de communication"
 
-#: ../../source/ref-flower-network-communication.rst:248
+#: ../../source/ref-flower-network-communication.rst:250
 msgid ""
 "During real-world deployment, the push/pull communication model adopted "
 "by each component can influence decisions related to resource "
@@ -59240,7 +59751,7 @@ msgstr ""
 " soutenir ces décisions, la liste ci-dessous détaille le modèle de "
 "communication utilisé entre les composants Flower :"
 
-#: ../../source/ref-flower-network-communication.rst:253
+#: ../../source/ref-flower-network-communication.rst:255
 msgid ""
 "**SuperLink ↔ SuperNode (Fleet API)**: The SuperNode pulls/pushes "
 "Messages from/to the SuperLink via the Fleet API. The SuperNode also "
@@ -59250,7 +59761,7 @@ msgstr ""
 "Messages vers/à partir du SuperLink via l'API Fleet. Le SuperNode "
 "récupère également le FAB si une nouvelle exécution est en cours."
 
-#: ../../source/ref-flower-network-communication.rst:256
+#: ../../source/ref-flower-network-communication.rst:258
 #, fuzzy
 msgid ""
 "**SuperLink ↔ ServerApp (Runtime API)**: The ``ServerApp`` process "
@@ -59265,7 +59776,7 @@ msgstr ""
 " de la première interaction avec le SuperLink, et à la fin de l'exécution"
 " ils poussent le Context vers le SuperLink."
 
-#: ../../source/ref-flower-network-communication.rst:260
+#: ../../source/ref-flower-network-communication.rst:262
 #, fuzzy
 msgid ""
 "**SuperNode ↔ ClientApp (Runtime API)**: The ``ClientApp`` process "
@@ -59434,16 +59945,14 @@ msgid "In-memory communication."
 msgstr "Communication en mémoire."
 
 #: ../../source/ref-flower-runtime-comparison.rst:50
-msgid ""
-"HTTP for Runtime API communication and gRPC for Fleet API communication. "
-"Both support TLS."
+msgid "HTTP for Runtime and Fleet API communication, with TLS support."
 msgstr ""
 
-#: ../../source/ref-flower-runtime-comparison.rst:52
+#: ../../source/ref-flower-runtime-comparison.rst:51
 msgid "**Server-side Infrastructure**"
 msgstr "**Infrastructure côté serveur**"
 
-#: ../../source/ref-flower-runtime-comparison.rst:53
+#: ../../source/ref-flower-runtime-comparison.rst:52
 msgid ""
 "In the standard local CLI workflow, ``flwr run`` submits the run to a "
 "managed local SuperLink, which then coordinates the simulation runtime "
@@ -59457,7 +59966,7 @@ msgstr ""
 " Le Simulation Runtime lui-même peut toujours être démarré avec ou sans "
 "`SuperLink <ref-api-cli.html#flower-superlink>`_."
 
-#: ../../source/ref-flower-runtime-comparison.rst:57
+#: ../../source/ref-flower-runtime-comparison.rst:56
 msgid ""
 "The SuperLink awaits for SuperNodes to connect. User interface with the "
 "SuperLink using the `Flower CLI <ref-api-cli.html>`_."
@@ -59465,11 +59974,11 @@ msgstr ""
 "Le SuperLink attend que les SuperNodes se connectent. Interface "
 "utilisateur avec SuperLink à l'aide de `Flower CLI <ref-api-cli.html>`_."
 
-#: ../../source/ref-flower-runtime-comparison.rst:59
+#: ../../source/ref-flower-runtime-comparison.rst:58
 msgid "**Server-side App execution**"
 msgstr "**Exécution d'application côté serveur**"
 
-#: ../../source/ref-flower-runtime-comparison.rst:60
+#: ../../source/ref-flower-runtime-comparison.rst:59
 msgid ""
 "A ``ServerApp`` process is initialized inside a controlled environment "
 "and communicates in-memory with workers."
@@ -59477,7 +59986,7 @@ msgstr ""
 "Un processus ``ServerApp`` est initialisé à l'intérieur d'un "
 "environnement contrôlé et communique en mémoire avec des travailleurs."
 
-#: ../../source/ref-flower-runtime-comparison.rst:62
+#: ../../source/ref-flower-runtime-comparison.rst:61
 #, fuzzy
 msgid ""
 "``ServerApp`` `process or subprocess <ref-flower-network-"
@@ -59485,11 +59994,11 @@ msgid ""
 "communicates with it over HTTP via the Runtime API."
 msgstr ""
 
-#: ../../source/ref-flower-runtime-comparison.rst:65
+#: ../../source/ref-flower-runtime-comparison.rst:64
 msgid "**Client-side Infrastructure**"
 msgstr "**Infrastructure côté client**"
 
-#: ../../source/ref-flower-runtime-comparison.rst:66
+#: ../../source/ref-flower-runtime-comparison.rst:65
 msgid ""
 "No user-managed client-side infrastructure is required. For local CLI "
 "workflows, the managed local SuperLink and simulation runtime remain "
@@ -59499,19 +60008,18 @@ msgstr ""
 "Dans les flux de travail CLI locaux, le SuperLink et le Simulation "
 "Runtime restent auto-contenus."
 
-#: ../../source/ref-flower-runtime-comparison.rst:68
+#: ../../source/ref-flower-runtime-comparison.rst:67
+#, fuzzy
 msgid ""
-"SuperNodes connect to the SuperLink via TLS-enabled gRPC using the Fleet "
+"SuperNodes connect to the SuperLink via TLS-enabled HTTP using the Fleet "
 "API. Node authentication can be enabled."
 msgstr ""
-"Les SuperNodes se connectent au SuperLink via gRPC avec chiffrement TLS à"
-" l'aide de l'API Fleet. L'authentification des nœuds peut être activée."
 
-#: ../../source/ref-flower-runtime-comparison.rst:70
+#: ../../source/ref-flower-runtime-comparison.rst:69
 msgid "**Client-side App execution**"
 msgstr "**Exécution d'application côté client**"
 
-#: ../../source/ref-flower-runtime-comparison.rst:71
+#: ../../source/ref-flower-runtime-comparison.rst:70
 msgid ""
 "Each process executes a ``ClientApp`` on demand. They might execute "
 "multiple instances of the same ``ClientApp`` to simulate large amounts of"
@@ -59521,7 +60029,7 @@ msgstr ""
 "exécuter plusieurs instances de la même ``ClientApp`` pour simuler des "
 "quantités importantes de clients. Les ``ClientApps`` sont sans état."
 
-#: ../../source/ref-flower-runtime-comparison.rst:74
+#: ../../source/ref-flower-runtime-comparison.rst:73
 #, fuzzy
 msgid ""
 "Initialized as a ``ClientApp`` `process or subprocess <ref-flower-"
@@ -66407,4 +66915,147 @@ msgstr ""
 
 #~ msgid "Model response creation API."
 #~ msgstr "API de création de réponse de modèle."
+
+#~ msgid ""
+#~ "``--plugin-type serverapp``: Load the "
+#~ "*serverapp* plugin. SuperExec will spawn "
+#~ "ServerApp processes as needed."
+#~ msgstr ""
+#~ "``--plugin-type serverapp``: Chargez le "
+#~ "plugin *serverapp*. SuperExec lancera "
+#~ "ServerApp processus à mesure que "
+#~ "nécessaire."
+
+#~ msgid ""
+#~ "``--plugin-type clientapp``: Load the "
+#~ "*clientapp* plugin. SuperExec will spawn "
+#~ "ClientApp processes as needed."
+#~ msgstr ""
+#~ "``--plugin-type clientapp``: Chargez le "
+#~ "plugin *clientapp*. SuperExec lancera "
+#~ "ClientApp processus à mesure que "
+#~ "nécessaire."
+
+#~ msgid ""
+#~ "``--plugin-type``: Specify the type of"
+#~ " app process SuperExec should launch. "
+#~ "Use ``serverapp`` for a ``ServerApp`` "
+#~ "SuperExec."
+#~ msgstr ""
+#~ "``--plugin-type``: Spécifiez le type de"
+#~ " processus d'applications que SuperExec "
+#~ "doit lancer. Utilisez ``serverapp`` pour "
+#~ "un ``ServerApp`` SuperExec."
+
+#~ msgid "Ports ``8000`` and ``9092`` are accessible on the remote machine."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "``-p 8000:8000 -p 9092:9092``: Map ports"
+#~ " ``8000`` and ``9092`` of the "
+#~ "container to the same port of the"
+#~ " host machine, allowing other services "
+#~ "to access the Runtime and Control "
+#~ "APIs on ``http://localhost:8000`` and the "
+#~ "Fleet API on ``localhost:9092``."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "``--host 0.0.0.0``: Make the Runtime and"
+#~ " Control HTTP APIs reachable outside "
+#~ "the container."
+#~ msgstr ""
+
+#~ msgid "Configure gRPC logging"
+#~ msgstr "Configurez la journalisation gRPC"
+
+#~ msgid ""
+#~ "Flower uses `gRPC <https://grpc.io/>`_ for "
+#~ "the Fleet API and other gRPC-based"
+#~ " connections (see :doc:`ref-flower-"
+#~ "network-communication`). You can set the"
+#~ " verbosity level of ``gRPC`` logs "
+#~ "using `gRPC environment variables "
+#~ "<https://github.com/grpc/grpc/blob/master/doc/environment_variables.md>`_."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "During the execution of the Flower "
+#~ "application, the server VM (``SuperLink``) "
+#~ "will be responsible to orchestrate the"
+#~ " execution of the application across "
+#~ "the client VMs (``SuperNode``). When the"
+#~ " SuperLink server starts, by default, "
+#~ "it listens to the following ports: "
+#~ "``{8000, 9092}``. Port ``9092`` is used"
+#~ " to communicate with the federation "
+#~ "clients (``SuperNode``), and port ``8000`` "
+#~ "serves the HTTP Control API used "
+#~ "to submit and execute Flower "
+#~ "applications."
+#~ msgstr ""
+
+#~ msgid "``9092``"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Finally, we need to also open port"
+#~ " 8000 to allow receiving and "
+#~ "executing incoming application requests. To"
+#~ " enable this we just need to "
+#~ "repeat the steps above, i.e., create "
+#~ "a new inbound rule, where for port"
+#~ " range we assign port 8000. If "
+#~ "we already know the Public IP from"
+#~ " which our local machine (e.g., "
+#~ "laptop) will be submitting applications "
+#~ "to the Azure cluster, then we just"
+#~ " need to specify the Source IP "
+#~ "address/CIDR range. However, if we want"
+#~ " to keep the port widely open "
+#~ "we simply need to change source to"
+#~ " ``Any``."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "To be more precise, if we know "
+#~ "the Public IP of our machine, then"
+#~ " we make the following changes:"
+#~ msgstr ""
+#~ "Pour être plus précis, si nous "
+#~ "connaissons l'adresse IP publique de "
+#~ "notre machine, alors nous effectuons les"
+#~ " modifications suivantes :"
+
+#~ msgid "add machine's Public IP"
+#~ msgstr "Ajoutez l'adresse IP publique de la machine"
+
+#~ msgid "Otherwise, we change the properties as follows:"
+#~ msgstr "Sinon, nous modifions les propriétés comme suit :"
+
+#~ msgid "IPv6 (e.g., ``[2001:0db8::1]:9092``)"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Runtime API communication uses HTTP "
+#~ "starting with Flower 1.35. Starting with"
+#~ " Flower 1.37, the Flower CLI also "
+#~ "communicates with the Control API over"
+#~ " HTTP."
+#~ msgstr ""
+
+#~ msgid "9092"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The SuperLink Runtime and Control APIs"
+#~ " share the same HTTP server and "
+#~ "default port."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "HTTP for Runtime API communication and"
+#~ " gRPC for Fleet API communication. "
+#~ "Both support TLS."
+#~ msgstr ""
 

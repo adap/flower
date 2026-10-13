@@ -31,8 +31,8 @@ from flwr.proto.message_pb2 import (  # pylint: disable=E0611
     PushObjectResponse,
 )
 from flwr.proto.runtime_pb2 import (  # pylint: disable=E0611
-    ClaimTaskRequest,
-    ClaimTaskResponse,
+    AcquireTaskRequest,
+    AcquireTaskResponse,
     CreateTaskRequest,
     CreateTaskResponse,
     GetConnectorRequest,
@@ -43,8 +43,6 @@ from flwr.proto.runtime_pb2 import (  # pylint: disable=E0611
     GetRunSeriesEventsResponse,
     PullAppMessagesRequest,
     PullAppMessagesResponse,
-    PullPendingTasksRequest,
-    PullPendingTasksResponse,
     PullTaskInputRequest,
     PullTaskInputResponse,
     PullTaskMessageRequest,
@@ -67,27 +65,16 @@ from flwr.supercore.protobuf.client import ProtobufClient
 
 # Match the method names defined by the Runtime protobuf service.
 # pylint: disable=invalid-name
-class RuntimeHttpClient(ProtobufClient):
+class RuntimeHttpClient(ProtobufClient):  # pylint: disable=too-many-public-methods
     """Protobuf-over-HTTP client for the Runtime API."""
 
-    def PullPendingTasks(
-        self, request: PullPendingTasksRequest
-    ) -> PullPendingTasksResponse:
-        """Pull tasks waiting to be executed."""
+    def AcquireTask(self, request: AcquireTaskRequest) -> AcquireTaskResponse:
+        """Acquire the oldest eligible pending task."""
         return self._unary_unary(
-            path="/v1/runtime/pull-pending-tasks",
-            rpc_method="/flwr.proto.Runtime/PullPendingTasks",
+            path="/v1/runtime/acquire-task",
+            rpc_method="/flwr.proto.Runtime/AcquireTask",
             request=request,
-            response_type=PullPendingTasksResponse,
-        )
-
-    def ClaimTask(self, request: ClaimTaskRequest) -> ClaimTaskResponse:
-        """Claim a task for execution."""
-        return self._unary_unary(
-            path="/v1/runtime/claim-task",
-            rpc_method="/flwr.proto.Runtime/ClaimTask",
-            request=request,
-            response_type=ClaimTaskResponse,
+            response_type=AcquireTaskResponse,
         )
 
     def SendTaskHeartbeat(

@@ -153,6 +153,10 @@ MESSAGE_TIME_ENTRY_MAX_AGE_SECONDS = 3600
 # Runtime auth constants
 TASK_TOKEN_HEADER = "flwr-task-token"
 
+# Fleet HTTP node auth constants
+FLEET_HTTP_PUBLIC_KEY_HEADER = "flwr-public-key"
+FLEET_HTTP_SIGNATURE_HEADER = "flwr-signature"
+
 # SuperExec auth constants
 SUPEREXEC_AUTH_TIMESTAMP_HEADER = "flwr-superexec-ts"
 SUPEREXEC_AUTH_NONCE_HEADER = "flwr-superexec-nonce"
@@ -215,6 +219,9 @@ class InvitationStatus(StrEnum):
 AUTOMATION_BATCH_LIMIT = 1
 
 FLOWER_AGENT_APP_ID = "@flwrlabs/flwr-agent"
+
+AGENT_MESSAGE_CONTENT_RECORD_KEY = "agent"
+AGENT_MESSAGE_TEXT_KEY = "text"
 
 
 class AutomationStatus(StrEnum):

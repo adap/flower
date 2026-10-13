@@ -33,68 +33,6 @@ import typing
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
 @typing.final
-class PullPendingTasksRequest(google.protobuf.message.Message):
-    """PullPendingTasks messages"""
-
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
-
-    def __init__(
-        self,
-    ) -> None: ...
-
-global___PullPendingTasksRequest = PullPendingTasksRequest
-
-@typing.final
-class PullPendingTasksResponse(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
-
-    TASKS_FIELD_NUMBER: builtins.int
-    @property
-    def tasks(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[flwr.proto.task_pb2.Task]: ...
-    def __init__(
-        self,
-        *,
-        tasks: collections.abc.Iterable[flwr.proto.task_pb2.Task] | None = ...,
-    ) -> None: ...
-    def ClearField(self, field_name: typing.Literal["tasks", b"tasks"]) -> None: ...
-
-global___PullPendingTasksResponse = PullPendingTasksResponse
-
-@typing.final
-class ClaimTaskRequest(google.protobuf.message.Message):
-    """ClaimTask messages"""
-
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
-
-    TASK_ID_FIELD_NUMBER: builtins.int
-    task_id: builtins.int
-    def __init__(
-        self,
-        *,
-        task_id: builtins.int = ...,
-    ) -> None: ...
-    def ClearField(self, field_name: typing.Literal["task_id", b"task_id"]) -> None: ...
-
-global___ClaimTaskRequest = ClaimTaskRequest
-
-@typing.final
-class ClaimTaskResponse(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
-
-    TOKEN_FIELD_NUMBER: builtins.int
-    token: builtins.str
-    def __init__(
-        self,
-        *,
-        token: builtins.str | None = ...,
-    ) -> None: ...
-    def HasField(self, field_name: typing.Literal["_token", b"_token", "token", b"token"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["_token", b"_token", "token", b"token"]) -> None: ...
-    def WhichOneof(self, oneof_group: typing.Literal["_token", b"_token"]) -> typing.Literal["token"] | None: ...
-
-global___ClaimTaskResponse = ClaimTaskResponse
-
-@typing.final
 class SendTaskHeartbeatRequest(google.protobuf.message.Message):
     """SendTaskHeartbeat messages"""
 
@@ -222,11 +160,11 @@ class GetNodesResponse(google.protobuf.message.Message):
 
     NODES_FIELD_NUMBER: builtins.int
     @property
-    def nodes(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[flwr.proto.node_pb2.Node]: ...
+    def nodes(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[flwr.proto.node_pb2.NodeInfo]: ...
     def __init__(
         self,
         *,
-        nodes: collections.abc.Iterable[flwr.proto.node_pb2.Node] | None = ...,
+        nodes: collections.abc.Iterable[flwr.proto.node_pb2.NodeInfo] | None = ...,
     ) -> None: ...
     def ClearField(self, field_name: typing.Literal["nodes", b"nodes"]) -> None: ...
 
@@ -412,17 +350,20 @@ class GetConnectorResponse(google.protobuf.message.Message):
     CONNECTOR_REF_FIELD_NUMBER: builtins.int
     CREDENTIALS_JSON_FIELD_NUMBER: builtins.int
     CONFIG_JSON_FIELD_NUMBER: builtins.int
+    CONNECTOR_ID_FIELD_NUMBER: builtins.int
     connector_ref: builtins.str
     credentials_json: builtins.str
     config_json: builtins.str
+    connector_id: builtins.int
     def __init__(
         self,
         *,
         connector_ref: builtins.str = ...,
         credentials_json: builtins.str = ...,
         config_json: builtins.str = ...,
+        connector_id: builtins.int = ...,
     ) -> None: ...
-    def ClearField(self, field_name: typing.Literal["config_json", b"config_json", "connector_ref", b"connector_ref", "credentials_json", b"credentials_json"]) -> None: ...
+    def ClearField(self, field_name: typing.Literal["config_json", b"config_json", "connector_id", b"connector_id", "connector_ref", b"connector_ref", "credentials_json", b"credentials_json"]) -> None: ...
 
 global___GetConnectorResponse = GetConnectorResponse
 
@@ -520,10 +461,12 @@ class CreateTaskRequest(google.protobuf.message.Message):
     FAB_HASH_FIELD_NUMBER: builtins.int
     MODEL_REF_FIELD_NUMBER: builtins.int
     CONNECTOR_REF_FIELD_NUMBER: builtins.int
+    CONNECTOR_ID_FIELD_NUMBER: builtins.int
     type: builtins.str
     fab_hash: builtins.str
     model_ref: builtins.str
     connector_ref: builtins.str
+    connector_id: builtins.int
     def __init__(
         self,
         *,
@@ -531,9 +474,12 @@ class CreateTaskRequest(google.protobuf.message.Message):
         fab_hash: builtins.str | None = ...,
         model_ref: builtins.str | None = ...,
         connector_ref: builtins.str | None = ...,
+        connector_id: builtins.int | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["_connector_ref", b"_connector_ref", "_fab_hash", b"_fab_hash", "_model_ref", b"_model_ref", "connector_ref", b"connector_ref", "fab_hash", b"fab_hash", "model_ref", b"model_ref"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["_connector_ref", b"_connector_ref", "_fab_hash", b"_fab_hash", "_model_ref", b"_model_ref", "connector_ref", b"connector_ref", "fab_hash", b"fab_hash", "model_ref", b"model_ref", "type", b"type"]) -> None: ...
+    def HasField(self, field_name: typing.Literal["_connector_id", b"_connector_id", "_connector_ref", b"_connector_ref", "_fab_hash", b"_fab_hash", "_model_ref", b"_model_ref", "connector_id", b"connector_id", "connector_ref", b"connector_ref", "fab_hash", b"fab_hash", "model_ref", b"model_ref"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing.Literal["_connector_id", b"_connector_id", "_connector_ref", b"_connector_ref", "_fab_hash", b"_fab_hash", "_model_ref", b"_model_ref", "connector_id", b"connector_id", "connector_ref", b"connector_ref", "fab_hash", b"fab_hash", "model_ref", b"model_ref", "type", b"type"]) -> None: ...
+    @typing.overload
+    def WhichOneof(self, oneof_group: typing.Literal["_connector_id", b"_connector_id"]) -> typing.Literal["connector_id"] | None: ...
     @typing.overload
     def WhichOneof(self, oneof_group: typing.Literal["_connector_ref", b"_connector_ref"]) -> typing.Literal["connector_ref"] | None: ...
     @typing.overload
@@ -559,3 +505,49 @@ class CreateTaskResponse(google.protobuf.message.Message):
     def WhichOneof(self, oneof_group: typing.Literal["_task_id", b"_task_id"]) -> typing.Literal["task_id"] | None: ...
 
 global___CreateTaskResponse = CreateTaskResponse
+
+@typing.final
+class AcquireTaskRequest(google.protobuf.message.Message):
+    """AcquireTask messages"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    SUPPORTED_TASK_TYPES_FIELD_NUMBER: builtins.int
+    AGENTAPP_FAB_HASHES_FIELD_NUMBER: builtins.int
+    @property
+    def supported_task_types(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.str]:
+        """Task types that can be launched regardless of FAB."""
+
+    @property
+    def agentapp_fab_hashes(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.str]:
+        """AgentApp FABs that can be launched by a ready prestarted executor."""
+
+    def __init__(
+        self,
+        *,
+        supported_task_types: collections.abc.Iterable[builtins.str] | None = ...,
+        agentapp_fab_hashes: collections.abc.Iterable[builtins.str] | None = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing.Literal["agentapp_fab_hashes", b"agentapp_fab_hashes", "supported_task_types", b"supported_task_types"]) -> None: ...
+
+global___AcquireTaskRequest = AcquireTaskRequest
+
+@typing.final
+class AcquireTaskResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    TASK_FIELD_NUMBER: builtins.int
+    TOKEN_FIELD_NUMBER: builtins.int
+    token: builtins.str
+    @property
+    def task(self) -> flwr.proto.task_pb2.Task: ...
+    def __init__(
+        self,
+        *,
+        task: flwr.proto.task_pb2.Task | None = ...,
+        token: builtins.str = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing.Literal["task", b"task"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing.Literal["task", b"task", "token", b"token"]) -> None: ...
+
+global___AcquireTaskResponse = AcquireTaskResponse

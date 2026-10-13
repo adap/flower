@@ -10,10 +10,10 @@ Use Endeavor with OpenCode
     You need a Flower API key with Endeavor access. Request access by filling out
     the `Endeavor 1.0 access form <https://flowerlabs.typeform.com/to/jlniHsuy>`_.
 
-This guide connects OpenCode CLI and OpenCode Desktop to ``flower-endeavor``
-at ``https://api.flower.ai/v1``. The commands below use macOS and its default
-shell, zsh. Install your preferred client using the `OpenCode setup guide
-<https://opencode.ai/download>`_ before continuing.
+This guide connects OpenCode CLI and OpenCode Desktop to
+``flwrlabs/endeavor-1.0`` at ``https://api.flower.ai/v1``. The commands below
+use macOS and its default shell, zsh. Install your preferred client using the
+`OpenCode setup guide <https://opencode.ai/download>`_ before continuing.
 
 For model details, see :doc:`endeavor`. To use ChatGPT/Codex instead, see
 :doc:`endeavor-chatgpt-codex`.
@@ -37,7 +37,7 @@ and ``provider.flower-labs`` settings, preserving unrelated configuration.
 
    {
      "$schema": "https://opencode.ai/config.json",
-     "model": "flower-labs/flower-endeavor",
+     "model": "flower-labs/flwrlabs/endeavor-1.0",
      "provider": {
        "flower-labs": {
          "npm": "@ai-sdk/openai",
@@ -47,7 +47,7 @@ and ``provider.flower-labs`` settings, preserving unrelated configuration.
            "apiKey": "{env:FLOWER_API_KEY}"
          },
          "models": {
-           "flower-endeavor": {
+           "flwrlabs/endeavor-1.0": {
              "name": "Endeavor"
            }
          }
@@ -59,19 +59,15 @@ Keep ``@ai-sdk/openai`` as shown: it uses the Responses API required by this
 setup. See the `OpenCode provider documentation
 <https://opencode.ai/docs/providers/#custom-provider>`_ for details.
 
+For context window and API limit details, see :ref:`Context window and limits
+<endeavor-context-limits>`.
+
 2. Set your Flower API key
 --------------------------
 
-Run this in your terminal, paste your key at the prompt, and press Enter:
-
-.. code-block:: console
-
-   read -rs 'FLOWER_API_KEY?Flower API key: '
-   echo
-   export FLOWER_API_KEY
-
-The input is hidden and is not saved in shell history. Keep this terminal
-open for the next step.
+Follow :doc:`endeavor-api-key` to set ``FLOWER_API_KEY`` in your terminal.
+For desktop use, also complete that guide's desktop setup before reopening
+OpenCode. Keep the terminal open for the next step.
 
 3. Start using Endeavor
 -----------------------
@@ -83,31 +79,23 @@ In the same terminal, change to your project directory and start OpenCode:
 
 .. code-block:: zsh
 
-   opencode --model flower-labs/flower-endeavor
+   opencode --model flower-labs/flwrlabs/endeavor-1.0
 
-Send a prompt such as ``Explain the structure of this project.`` Repeat
-step 2 when starting from a new terminal session.
+Send a prompt such as ``Explain the structure of this project.`` Repeat the
+instructions in :doc:`endeavor-api-key` when starting from a new terminal
+session.
 
 OpenCode Desktop on macOS
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Fully quit OpenCode. In the same terminal where you set the key, run:
-
-.. code-block:: zsh
-
-   launchctl setenv FLOWER_API_KEY "$FLOWER_API_KEY"
-
-This makes the key available to apps opened from the Dock. Reopen OpenCode,
-open a local project, start a new session, and select **Endeavor** from
-**Flower Labs** in the model selector. Send a prompt to begin.
-
-Repeat step 2 and the ``launchctl`` command after signing out of or restarting
-macOS. To remove the key from the desktop environment, quit OpenCode and run
-``launchctl unsetenv FLOWER_API_KEY``.
+After completing the desktop key setup in :doc:`endeavor-api-key`, reopen
+OpenCode, open a local project, start a new session, and select **Endeavor**
+from **Flower Labs** in the model selector. Send a prompt to begin.
 
 Get help
 --------
 
 If you encounter any issues, feel free to post on
-`Flower Discuss <https://discuss.flower.ai>`_. The Flower team will get back to
-you soon.
+`Flower Discuss <https://discuss.flower.ai>`_ or
+`Flower Slack <https://flower.ai/join-slack>`_. The Flower team will get back
+to you soon.

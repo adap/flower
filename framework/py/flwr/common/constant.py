@@ -132,6 +132,7 @@ FLWR_DISABLE_RUNTIME_DEPENDENCY_INSTALLATION = (
 
 # Internal API toggles
 FLWR_INTERNAL_GRPC_CONTROL_API = "FLWR_INTERNAL_GRPC_CONTROL_API"
+FLWR_INTERNAL_GRPC_FLEET_API = "FLWR_INTERNAL_GRPC_FLEET_API"
 
 # Log streaming configurations
 CONN_REFRESH_PERIOD = 60  # Stream connection refresh period
@@ -276,7 +277,6 @@ class ExecPluginType:
     CLIENT_APP = "clientapp"
     SERVER_APP = "serverapp"
     SIMULATION = "simulation"  # Deprecated
-    SERVER_APP_EPHEMERAL = "serverapp-ephemeral"
 
     def __new__(cls) -> ExecPluginType:
         """Prevent instantiation."""

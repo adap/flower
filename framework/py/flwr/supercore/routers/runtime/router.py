@@ -35,8 +35,8 @@ from flwr.proto.message_pb2 import (  # pylint: disable=E0611
     PushObjectResponse,
 )
 from flwr.proto.runtime_pb2 import (  # pylint: disable=E0611
-    ClaimTaskRequest,
-    ClaimTaskResponse,
+    AcquireTaskRequest,
+    AcquireTaskResponse,
     CreateTaskRequest,
     CreateTaskResponse,
     GetConnectorRequest,
@@ -47,8 +47,6 @@ from flwr.proto.runtime_pb2 import (  # pylint: disable=E0611
     GetRunSeriesEventsResponse,
     PullAppMessagesRequest,
     PullAppMessagesResponse,
-    PullPendingTasksRequest,
-    PullPendingTasksResponse,
     PullTaskInputRequest,
     PullTaskInputResponse,
     PullTaskMessageRequest,
@@ -72,6 +70,7 @@ from flwr.supercore.dependencies.runtime import (
     SuperExecAuthDependency,
     TaskDependency,
 )
+from flwr.supercore.dependencies.version import VersionDependency
 from flwr.supercore.protobuf.routing import ProtobufRoute
 from flwr.supercore.protobuf.translation import PROTOBUF_REQUEST_DEPENDENCY
 from flwr.supercore.servicer.runtime import runtime_handlers as core_runtime_handlers
@@ -82,35 +81,38 @@ router = APIRouter(
     route_class=ProtobufRoute,
 )
 
-PullPendingTasksAuthDependency = Annotated[
+
+def create_runtime_router(component_name: str) -> APIRouter:
+    """Return the Runtime router with version checks for its host component."""
+    versioned_router = APIRouter(
+        dependencies=[
+            Depends(
+                VersionDependency(
+                    component_name=component_name,
+                    connection_name=f"Caller <-> {component_name} Runtime API",
+                )
+            )
+        ]
+    )
+    versioned_router.include_router(router)
+    return versioned_router
+
+
+AcquireTaskAuthDependency = Annotated[
     None,
-    Depends(SuperExecAuthDependency("/flwr.proto.Runtime/PullPendingTasks")),
-]
-ClaimTaskAuthDependency = Annotated[
-    None,
-    Depends(SuperExecAuthDependency("/flwr.proto.Runtime/ClaimTask")),
+    Depends(SuperExecAuthDependency("/flwr.proto.Runtime/AcquireTask")),
 ]
 
 
-@router.post("/pull-pending-tasks")
-def pull_pending_tasks(
-    request: Annotated[PullPendingTasksRequest, PROTOBUF_REQUEST_DEPENDENCY],
+@router.post("/acquire-task")
+def acquire_task(
+    request: Annotated[AcquireTaskRequest, PROTOBUF_REQUEST_DEPENDENCY],
     state: RuntimeStateDependency,
     handlers: RuntimeHandlersDependency,
-    _auth: PullPendingTasksAuthDependency,
-) -> PullPendingTasksResponse:
-    """Pull pending tasks."""
-    return handlers.pull_pending_tasks(request, state)
-
-
-@router.post("/claim-task")
-def claim_task(
-    request: Annotated[ClaimTaskRequest, PROTOBUF_REQUEST_DEPENDENCY],
-    state: RuntimeStateDependency,
-    _auth: ClaimTaskAuthDependency,
-) -> ClaimTaskResponse:
-    """Claim a pending task."""
-    return core_runtime_handlers.claim_task(request, state)
+    _auth: AcquireTaskAuthDependency,
+) -> AcquireTaskResponse:
+    """Acquire the oldest eligible pending task."""
+    return handlers.acquire_task(request, state)
 
 
 @router.post("/send-task-heartbeat")

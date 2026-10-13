@@ -20,7 +20,7 @@ from itertools import chain
 from logging import DEBUG, ERROR, INFO
 
 from flwr.app import Message
-from flwr.common.constant import SUPERLINK_NODE_ID, Status
+from flwr.common.constant import SUPERLINK_NODE_ID
 from flwr.common.serde import (
     context_from_proto,
     context_to_proto,
@@ -41,8 +41,9 @@ from flwr.proto.message_pb2 import (  # pylint: disable=E0611
     PushObjectRequest,
     PushObjectResponse,
 )
-from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.runtime_pb2 import (  # pylint: disable=E0611
+    AcquireTaskRequest,
+    AcquireTaskResponse,
     GetConnectorRequest,
     GetConnectorResponse,
     GetNodesRequest,
@@ -51,8 +52,6 @@ from flwr.proto.runtime_pb2 import (  # pylint: disable=E0611
     GetRunSeriesEventsResponse,
     PullAppMessagesRequest,
     PullAppMessagesResponse,
-    PullPendingTasksRequest,
-    PullPendingTasksResponse,
     PullTaskInputRequest,
     PullTaskInputResponse,
     PushAppMessagesRequest,
@@ -67,19 +66,11 @@ from flwr.supercore import log
 from flwr.supercore.auth.typing import AccountInfo
 from flwr.supercore.constant import AUTOMATION_BATCH_LIMIT, TaskType
 from flwr.supercore.error import ApiErrorCode, FlowerError
-from flwr.supercore.inflatable.inflatable_object import (
-    get_all_nested_objects,
-    get_object_tree,
-    no_object_id_recompute,
-)
 from flwr.supercore.object_store import NoObjectInStoreError
+from flwr.supercore.servicer.runtime import runtime_handlers as core_runtime_handlers
 from flwr.superlink.servicer.control.control_handlers import process_due_automations
 from flwr.superlink.servicer.control.control_handlers import (
     start_automation as start_control_automation,
-)
-
-RUNTIME_ENDPOINT_UNAVAILABLE_MESSAGE = (
-    "Some Runtime API endpoints are only available for Deployment Runtime runs."
 )
 
 
@@ -101,17 +92,10 @@ def get_run_series_events(
     return GetRunSeriesEventsResponse(events=events)
 
 
-def pull_pending_tasks(
-    request: PullPendingTasksRequest,
-    state: LinkState,
-) -> PullPendingTasksResponse:
-    """Process due automations, then pull pending tasks."""
-    log(DEBUG, "Runtime.PullPendingTasks")
+def acquire_task(request: AcquireTaskRequest, state: LinkState) -> AcquireTaskResponse:
+    """Process due automations, then acquire an eligible pending task."""
     process_due_automations(state, limit=AUTOMATION_BATCH_LIMIT)
-    tasks = state.get_tasks(
-        statuses=[Status.PENDING], order_by="pending_at", ascending=True
-    )
-    return PullPendingTasksResponse(tasks=tasks)
+    return core_runtime_handlers.acquire_task(request, state)
 
 
 def get_nodes(
@@ -121,10 +105,9 @@ def get_nodes(
 ) -> GetNodesResponse:
     """Get available nodes."""
     log(DEBUG, "Runtime.GetNodes")
-    run_id = _get_authenticated_serverapp_run_id(task)
+    run_id = task.run_id
     all_ids: set[int] = state.get_nodes(run_id)
-    nodes: list[Node] = [Node(node_id=node_id) for node_id in all_ids]
-    return GetNodesResponse(nodes=nodes)
+    return GetNodesResponse(nodes=state.get_node_info(node_ids=list(all_ids)))
 
 
 def push_messages(
@@ -134,7 +117,7 @@ def push_messages(
 ) -> PushAppMessagesResponse:
     """Push a set of Messages."""
     log(DEBUG, "Runtime.PushMessages")
-    run_id = _get_authenticated_serverapp_run_id(task)
+    run_id = task.run_id
 
     _raise_if(
         validation_error=len(request.messages_list) == 0,
@@ -183,36 +166,32 @@ def pull_messages(  # pylint: disable=R0914
 ) -> PullAppMessagesResponse:
     """Pull a set of Messages."""
     log(DEBUG, "Runtime.PullMessages")
-    run_id = _get_authenticated_serverapp_run_id(task)
+    run_id = task.run_id
     message_ids = set(request.message_ids)
-    messages_res: list[Message] = state.get_message_res(
+    messages: list[Message] = state.get_message_res(
         message_ids=message_ids, run_id=run_id
+    )
+    # Allow pulling instruction message for `flwr-agentapp`
+    messages += state.get_message_ins(
+        node_id=SUPERLINK_NODE_ID, limit=None, run_id=run_id
     )
 
     store = state.object_store
-    for msg_res in messages_res:
-        if msg_res.metadata.src_node_id == SUPERLINK_NODE_ID:
-            with no_object_id_recompute():
-                all_objects = get_all_nested_objects(msg_res)
-                store.preregister(run_id, get_object_tree(msg_res))
-                for obj_id, obj in all_objects.items():
-                    store.put(obj_id, obj.deflate())
-
+    # Gather all the instruction message IDs to delete
     message_ins_ids_to_delete = {
-        msg_res.metadata.reply_to_message_id for msg_res in messages_res
+        msg.metadata.reply_to_message_id or msg.metadata.message_id for msg in messages
     }
     state.delete_messages(message_ins_ids=message_ins_ids_to_delete)
 
     messages_list = []
     trees = []
-    while messages_res:
-        msg = messages_res.pop(0)
-        if msg.metadata.src_node_id != SUPERLINK_NODE_ID:
-            _raise_if(
-                validation_error=run_id != msg.metadata.run_id,
-                request_name="PullMessages",
-                detail="`message.metadata` has mismatched `run_id`",
-            )
+    while messages:
+        msg = messages.pop(0)
+        _raise_if(
+            validation_error=run_id != msg.metadata.run_id,
+            request_name="PullMessages",
+            detail="`message.metadata` has mismatched `run_id`",
+        )
 
         try:
             msg_object_id = msg.metadata.message_id
@@ -235,26 +214,25 @@ def get_connector(
 ) -> GetConnectorResponse:
     """Return credentials authorized for the authenticated connector task."""
     log(DEBUG, "Runtime.GetConnector")
-    if task.type != TaskType.CONNECTOR or not task.connector_ref:
+    if task.type != TaskType.CONNECTOR or not task.connector_id:
         raise FlowerError(
             ApiErrorCode.RUNTIME_CONNECTOR_CREDENTIALS_NOT_AVAILABLE,
             "Connector credentials are not available to this task.",
         )
-    connector_ref = task.connector_ref
 
     runs = state.get_run_info(run_ids=[task.run_id])
     run = runs[0] if runs else None
-    if run is None or not run.flwr_aid:
+    if run is None or not run.federation_id:
         raise FlowerError(ApiErrorCode.CONNECTOR_NOT_FOUND, "Connector not found.")
 
-    connector = state.get_connector(
-        flwr_aid=run.flwr_aid,
-        connector_ref=connector_ref,
-    )
+    if task.connector_id not in state.get_run_connector_ids(task.run_id):
+        raise FlowerError(ApiErrorCode.CONNECTOR_NOT_FOUND, "Connector not found.")
+    connector = state.get_connector_by_id(task.connector_id)
     if connector is None:
         raise FlowerError(ApiErrorCode.CONNECTOR_NOT_FOUND, "Connector not found.")
 
     return GetConnectorResponse(
+        connector_id=connector.connector_id,
         connector_ref=connector.connector_ref,
         credentials_json=connector.credentials_json,
         config_json=connector.config_json,
@@ -335,8 +313,9 @@ def start_automation(
 
     run = state.get_run_info(run_ids=[task.run_id])[0]
     del request.start_run_request.connector_refs[:]
-    request.start_run_request.connector_refs.extend(
-        state.get_run_connector_refs(run_id=run.run_id)
+    del request.start_run_request.connector_ids[:]
+    request.start_run_request.connector_ids.extend(
+        state.get_run_connector_ids(run_id=run.run_id)
     )
     return start_control_automation(
         request,
@@ -355,7 +334,7 @@ def push_object(
 ) -> PushObjectResponse:
     """Push an object to the ObjectStore."""
     log(DEBUG, "Runtime.PushObject")
-    run_id = _get_authenticated_serverapp_run_id(task)
+    run_id = task.run_id
     if request.node.node_id != SUPERLINK_NODE_ID:
         raise FlowerError(
             ApiErrorCode.RUNTIME_UNEXPECTED_NODE_ID, "Unexpected node ID."
@@ -376,7 +355,7 @@ def pull_object(
 ) -> PullObjectResponse:
     """Pull an object from the ObjectStore."""
     log(DEBUG, "Runtime.PullObject")
-    run_id = _get_authenticated_serverapp_run_id(task)
+    run_id = task.run_id
     if request.node.node_id != SUPERLINK_NODE_ID:
         raise FlowerError(
             ApiErrorCode.RUNTIME_UNEXPECTED_NODE_ID, "Unexpected node ID."
@@ -399,19 +378,8 @@ def confirm_message_received(
 ) -> ConfirmMessageReceivedResponse:
     """Confirm message received."""
     log(DEBUG, "Runtime.ConfirmMessageReceived")
-    _ = _get_authenticated_serverapp_run_id(task)
     state.object_store.delete(request.message_object_id)
     return ConfirmMessageReceivedResponse()
-
-
-def _get_authenticated_serverapp_run_id(task: Task) -> int:
-    """Return the authenticated run ID if it can use these Runtime endpoints."""
-    if task.type != TaskType.SERVER_APP:
-        raise FlowerError(
-            ApiErrorCode.RUNTIME_ENDPOINT_UNAVAILABLE,
-            RUNTIME_ENDPOINT_UNAVAILABLE_MESSAGE,
-        )
-    return task.run_id
 
 
 def _raise_if(validation_error: bool, request_name: str, detail: str) -> None:
