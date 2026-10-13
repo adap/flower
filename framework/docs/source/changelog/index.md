@@ -4,6 +4,9 @@ orphan: true
 
 # Changelog
 
+```{include} v1.40.0.md
+```
+
 ```{include} v1.39.0.md
 ```
 
