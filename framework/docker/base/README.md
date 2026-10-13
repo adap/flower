@@ -19,6 +19,10 @@
 
 ## Supported tags
 
+Starting with Flower 1.40.0, Alpine images use Alpine 3.23 and Python 3.13.
+Alpine 3.22 images are not built for new releases. The Alpine 3.22 tags below
+refer to earlier releases.
+
 - `unstable`
   - points to the last successful build of the `main` branch
 - `nightly`, `<version>.dev<YYYYMMDD>` e.g. `1.40.0.dev20260928`

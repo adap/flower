@@ -25,7 +25,7 @@
 # hadolint global ignore=DL3018
 ARG PYTHON_VERSION=3.11
 ARG DISTRO=alpine
-ARG DISTRO_VERSION=3.22
+ARG DISTRO_VERSION=3.23
 FROM python:${PYTHON_VERSION}-${DISTRO}${DISTRO_VERSION} AS compile
 
 # Install system dependencies
@@ -66,8 +66,9 @@ ARG PIP_VERSION
 ARG SETUPTOOLS_VERSION
 RUN pip install -U --no-cache-dir pip==${PIP_VERSION} setuptools==${SETUPTOOLS_VERSION}
 
-# required by the grpc package
-RUN apk add --no-cache \
+# Upgrade inherited packages before adding runtime dependencies.
+RUN apk upgrade --no-cache \
+    && apk add --no-cache \
     libstdc++ \
     ca-certificates \
     # add non-root user
