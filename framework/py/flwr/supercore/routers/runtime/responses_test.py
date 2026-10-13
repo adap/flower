@@ -39,12 +39,26 @@ from flwr.supercore.typing import JSONObject
 
 from .responses import (
     _Exchange,
+    _model_response_timeout,
     _ResponsesError,
     _sse_frame,
     _stream_response,
     _wait_for_response,
     router,
 )
+
+
+def test_model_response_timeout_uses_configured_timeout(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Use the Runtime response timeout independently of provider settings."""
+    monkeypatch.delenv("FLWR_MODEL_RESPONSE_TIMEOUT", raising=False)
+
+    assert _model_response_timeout() == 900.0
+
+    monkeypatch.setenv("FLWR_MODEL_RESPONSE_TIMEOUT", "1800")
+
+    assert _model_response_timeout() == 1800.0
 
 
 def _client(state: Mock) -> TestClient:
@@ -409,8 +423,8 @@ def test_responses_times_out_if_running_model_task_does_not_respond() -> None:
             model_task_id=456,
         )
         with patch(
-            "flwr.supercore.routers.runtime.responses._DEFAULT_MODEL_RESPONSE_TIMEOUT",
-            new=0.0,
+            "flwr.supercore.routers.runtime.responses._model_response_timeout",
+            return_value=0.0,
         ):
             with pytest.raises(_ResponsesError) as exc_info:
                 await _wait_for_response(request, state, exchange)

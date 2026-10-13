@@ -43,7 +43,7 @@ def test_mcp_discovery_and_execution() -> None:
     )
     credentials: JSONObject = {"access_token": "xoxp-secret"}
     assert not registry.get_connector_tools("slack")
-    assert registry.get_connector_call_tool("slack_search_public") == "slack__call_tool"
+    assert registry.is_dynamic_connector_tool("slack_search_public")
     with patch.object(slack_mcp, "_session") as open_session:
         open_session.return_value.__aenter__.return_value = session
         tools = registry.invoke_connector(
@@ -55,8 +55,8 @@ def test_mcp_discovery_and_execution() -> None:
             "slack_read_channel",
         ]
         result = registry.invoke_connector(
-            "slack__call_tool",
-            {"name": "search_public", "arguments": {"query": "release"}},
+            "slack_search_public",
+            {"query": "release"},
             Mock(),
             credentials,
             {},

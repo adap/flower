@@ -35,7 +35,7 @@ class AgentConnectors(ABC):
         ----------
         names : Sequence[str]
             Connector references to include, in order.
-        refresh : bool, default False
+        refresh : bool (default: False)
             Rediscover the selected dynamic connectors. Schemas are otherwise
             cached for this agent runtime; static connectors require no discovery.
 
