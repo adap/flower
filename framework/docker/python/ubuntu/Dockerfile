@@ -28,7 +28,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python from uv's managed, prebuilt CPython distributions.
-COPY --from=ghcr.io/astral-sh/uv:0.11.30@sha256:93b61e21202b1dab861092748e46bbd6e0e41dd84f59b9174efd2353186e1b47 /uv /uvx /bin/
+COPY --from=ghcr.io/astral-sh/uv:0.12.20@sha256:100047e74f30778ab704942321a09750d6158739573ff58bf3924085cc6cd2d8 /uv /uvx /bin/
 
 ARG PYTHON_VERSION=3.13
 ENV UV_PYTHON_INSTALL_DIR=/usr/local/bin/python \
