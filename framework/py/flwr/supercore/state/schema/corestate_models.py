@@ -29,6 +29,7 @@ from sqlalchemy import (
     PrimaryKeyConstraint,
     String,
     Table,
+    Text,
     text,
 )
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
@@ -83,6 +84,19 @@ class SeriesContext(FlwrBase):
 
     series_id: Mapped[int] = mapped_column(BigInteger, primary_key=True, nullable=False)
     context: Mapped[bytes | None] = mapped_column(LargeBinary)
+
+
+class RunSeriesSummary(FlwrBase):
+    """Represent a compacted conversation summary for a run series."""
+
+    __tablename__ = "run_series_summary"
+
+    series_id: Mapped[int] = mapped_column(BigInteger, primary_key=True, nullable=False)
+    text: Mapped[str] = mapped_column(Text, nullable=False)
+    through_event_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    generation_output_tokens: Mapped[int | None] = mapped_column(
+        BigInteger, nullable=True
+    )
 
 
 class SeriesRuns(FlwrBase):

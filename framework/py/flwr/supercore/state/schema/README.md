@@ -192,6 +192,13 @@ erDiagram
     TIMESTAMP updated_at
   }
 
+  run_series_summary {
+    BIGINT series_id PK
+    BIGINT generation_output_tokens "nullable"
+    TEXT text
+    INTEGER through_event_id
+  }
+
   series_context {
     BIGINT series_id PK
     BLOB context "nullable"
