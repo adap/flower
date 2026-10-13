@@ -47,6 +47,7 @@ from flwr.supercore.constant import (
 )
 from flwr.supercore.date import now
 from flwr.supercore.fab import Fab
+from flwr.supercore.typing import ConversationSummary
 
 from . import CoreState
 from .utils_test import create_task_message
@@ -320,6 +321,19 @@ class StateTest(unittest.TestCase):  # pylint: disable=R0904
         self.assertEqual(updated.run_id, updated_context.run_id)
         self.assertEqual(updated.node_config, updated_context.node_config)
         self.assertEqual(updated.run_config, updated_context.run_config)
+
+    def test_run_series_summary_roundtrip(self) -> None:
+        """Store and replace a RunSeries summary."""
+        state = self.state_factory()
+        first = ConversationSummary("First summary", 12, 8)
+        updated = ConversationSummary("Updated summary", 25, 11)
+
+        self.assertIsNone(state.get_run_series_summary(series_id=42))
+        state.put_run_series_summary(42, first)
+        self.assertEqual(state.get_run_series_summary(42), first)
+        state.put_run_series_summary(42, updated)
+        self.assertEqual(state.get_run_series_summary(42), updated)
+        self.assertIsNone(state.get_run_series_summary(series_id=43))
 
     def test_connector_oauth_session_lifecycle(self) -> None:
         """An OAuth session can be created, retrieved, and completed once."""

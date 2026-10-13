@@ -105,6 +105,9 @@ from flwr.supercore.state.schema.corestate_models import (
 )
 from flwr.supercore.state.schema.corestate_models import RunSeries as RunSeriesModel
 from flwr.supercore.state.schema.corestate_models import (
+    RunSeriesSummary as RunSeriesSummaryModel,
+)
+from flwr.supercore.state.schema.corestate_models import (
     SeriesContext as SeriesContextModel,
 )
 from flwr.supercore.state.schema.corestate_models import SeriesRuns as SeriesRunsModel
@@ -119,7 +122,11 @@ from flwr.supercore.tracing import (
     load_task_context,
     store_task_context,
 )
-from flwr.supercore.typing import ConnectorOAuthSessionRecord, ConnectorRecord
+from flwr.supercore.typing import (
+    ConnectorOAuthSessionRecord,
+    ConnectorRecord,
+    ConversationSummary,
+)
 from flwr.supercore.utils import int64_to_uint64, uint64_to_int64
 
 from ..object_store import ObjectStore
@@ -930,6 +937,45 @@ class SqlCoreState(CoreState, SqlMixin):  # pylint: disable=R0904
         stmt = stmt.on_conflict_do_update(
             index_elements=[SeriesContextModel.series_id],
             set_={"context": stmt.excluded.context},
+        )
+        with self.session() as session:
+            session.execute(stmt)
+
+    def get_run_series_summary(self, series_id: int) -> ConversationSummary | None:
+        """Return the summary for a RunSeries, or None if it has none."""
+        with self.session() as session:
+            row = session.get(
+                RunSeriesSummaryModel,
+                uint64_to_int64(series_id),
+                populate_existing=True,
+            )
+            if row is None:
+                return None
+            return ConversationSummary(
+                text=row.text,
+                through_event_id=row.through_event_id,
+                generation_output_tokens=row.generation_output_tokens,
+            )
+
+    def put_run_series_summary(
+        self,
+        series_id: int,
+        summary: ConversationSummary,
+    ) -> None:
+        """Save the latest summary for a RunSeries."""
+        stmt = self.dialect_insert(RunSeriesSummaryModel).values(
+            series_id=uint64_to_int64(series_id),
+            text=summary.text,
+            through_event_id=summary.through_event_id,
+            generation_output_tokens=summary.generation_output_tokens,
+        )
+        stmt = stmt.on_conflict_do_update(
+            index_elements=[RunSeriesSummaryModel.series_id],
+            set_={
+                "text": stmt.excluded.text,
+                "through_event_id": stmt.excluded.through_event_id,
+                "generation_output_tokens": stmt.excluded.generation_output_tokens,
+            },
         )
         with self.session() as session:
             session.execute(stmt)

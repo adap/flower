@@ -28,6 +28,15 @@ JSONObject: TypeAlias = dict[str, JSONValue]
 
 
 @dataclass(frozen=True)
+class ConversationSummary:
+    """Persisted summary of a RunSeries through a task event."""
+
+    text: str
+    through_event_id: int
+    generation_output_tokens: int | None = None
+
+
+@dataclass(frozen=True)
 class ConnectorRecord:
     """Persisted connector configuration and credentials."""
 

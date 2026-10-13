@@ -57,7 +57,11 @@ from flwr.supercore.constant import (
 )
 from flwr.supercore.date import now
 from flwr.supercore.fab import Fab
-from flwr.supercore.typing import ConnectorOAuthSessionRecord, ConnectorRecord
+from flwr.supercore.typing import (
+    ConnectorOAuthSessionRecord,
+    ConnectorRecord,
+    ConversationSummary,
+)
 
 from ..object_store import ObjectStore
 from .corestate import CoreState
@@ -148,6 +152,8 @@ class InMemoryCoreState(
         self.lock_run_series_store = Lock()
         self.run_series_context_store: dict[int, Context] = {}
         self.lock_run_series_context_store = Lock()
+        self.run_series_summary_store: dict[int, ConversationSummary] = {}
+        self.lock_run_series_summary_store = Lock()
         self.automation_store: dict[int, AutomationRecord] = {}
         self.lock_automation_store = RLock()
         self._next_automation_id = 1
@@ -716,6 +722,20 @@ class InMemoryCoreState(
         """Set the shared Context for the specified RunSeries."""
         with self.lock_run_series_context_store:
             self.run_series_context_store[series_id] = context
+
+    def get_run_series_summary(self, series_id: int) -> ConversationSummary | None:
+        """Return the summary for a RunSeries, or None if it has none."""
+        with self.lock_run_series_summary_store:
+            return self.run_series_summary_store.get(series_id)
+
+    def put_run_series_summary(
+        self,
+        series_id: int,
+        summary: ConversationSummary,
+    ) -> None:
+        """Save the latest summary for a RunSeries."""
+        with self.lock_run_series_summary_store:
+            self.run_series_summary_store[series_id] = summary
 
     def store_run_in_series(  # pylint: disable=too-many-arguments,too-many-positional-arguments
         self,

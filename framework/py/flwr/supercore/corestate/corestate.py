@@ -36,7 +36,11 @@ from flwr.supercore.inflatable.inflatable_object import (
     get_object_tree,
     no_object_id_recompute,
 )
-from flwr.supercore.typing import ConnectorOAuthSessionRecord, ConnectorRecord
+from flwr.supercore.typing import (
+    ConnectorOAuthSessionRecord,
+    ConnectorRecord,
+    ConversationSummary,
+)
 
 from ..constant import AutomationStatus
 from ..object_store import ObjectStore
@@ -482,6 +486,24 @@ class CoreState(ABC):  # pylint: disable=R0904
             The ID of the RunSeries for which to persist shared context.
         context : Context
             The shared context to store.
+        """
+
+    @abstractmethod
+    def get_run_series_summary(self, series_id: int) -> ConversationSummary | None:
+        """Return the summary for a RunSeries, or None if it has none."""
+
+    @abstractmethod
+    def put_run_series_summary(
+        self,
+        series_id: int,
+        summary: ConversationSummary,
+    ) -> None:
+        """Save the latest summary for a RunSeries.
+
+        Notes
+        -----
+        This replaces the entire previous summary. Callers must include any earlier
+        information they want to retain in ``summary``.
         """
 
     @abstractmethod
