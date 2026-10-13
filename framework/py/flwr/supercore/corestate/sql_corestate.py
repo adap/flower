@@ -169,7 +169,6 @@ class SqlCoreState(CoreState, SqlMixin):  # pylint: disable=R0904
         """Return the ObjectStore instance used by this CoreState."""
         return self._object_store
 
-    # shortcut: unified delivery is unavailable, implement in the RFC backend step.
     def store_messages(self, messages: Sequence[Message]) -> list[bool]:
         """Store one or more Messages."""
         raise NotImplementedError
