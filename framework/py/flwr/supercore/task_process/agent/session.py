@@ -53,10 +53,10 @@ from flwr.supercore.json_message.connector_message import (
 from flwr.supercore.runtime import RuntimeHttpClient
 from flwr.supercore.task_process.connector.automation import START_AUTOMATION_TOOL_NAME
 from flwr.supercore.task_process.connector.registry import (
-    get_connector_call_tool,
     get_connector_discovery_tool,
     get_connector_ref,
     get_connector_tools,
+    is_dynamic_connector_tool,
 )
 from flwr.supercore.typing import JSONObject, JSONValue
 from flwr.supercore.utils import strict_json_dumps, strict_json_loads
@@ -306,7 +306,7 @@ class AgentRuntime:
                     f"Connector '{connector_ref}' returned invalid tools."
                 )
             tools = cast(list[JSONObject], result)
-            names: set[str] = {operation, f"{connector_ref}__call_tool"}
+            names: set[str] = {operation}
             names.update(
                 cast(str, tool["name"]).lower()
                 for tool in get_connector_tools(connector_ref)
@@ -333,7 +333,7 @@ class AgentRuntime:
         """Create one connector response."""
         name = name.strip().lower()
         connector_ref = get_connector_ref(name)
-        if operation := get_connector_call_tool(name):
+        if is_dynamic_connector_tool(name):
             catalog = self._discover_connector_tools(connector_ref)
             tool = next(
                 (tool for tool in catalog if cast(str, tool["name"]).lower() == name),
@@ -341,11 +341,7 @@ class AgentRuntime:
             )
             if tool is None:
                 raise ValueError(f"Unsupported discovered tool '{name}'.")
-            arguments = {
-                "name": cast(str, tool["name"])[len(connector_ref) + 1 :],
-                "arguments": arguments,
-            }
-            name = operation
+            name = cast(str, tool["name"])
         create_res = self._stub.CreateTask(
             CreateTaskRequest(type=TaskType.CONNECTOR, connector_ref=connector_ref)
         )
