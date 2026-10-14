@@ -14,11 +14,13 @@
 # ==============================================================================
 """Tests for Slack MCP discovery and execution."""
 
+import traceback
 from typing import cast
 from unittest.mock import Mock, call, create_autospec, patch
 
+import pytest
 from mcp import ClientSession
-from mcp.types import CallToolResult, ListToolsResult, TextContent, Tool
+from mcp.types import CallToolResult, ImageContent, ListToolsResult, TextContent, Tool
 
 from flwr.supercore.typing import JSONObject
 
@@ -71,3 +73,38 @@ def test_mcp_discovery_and_execution() -> None:
     assert request.params.arguments == {"query": "release"}
     assert isinstance(result, dict)
     assert result["content"] == [{"type": "text", "text": "done"}]
+
+
+@pytest.mark.parametrize(
+    ("result", "message"),
+    [
+        (
+            CallToolResult(
+                isError=True,
+                content=[
+                    TextContent(type="text", text="Denied xoxp-secret"),
+                    ImageContent(type="image", data="eA==", mimeType="image/png"),
+                    TextContent(type="text", text="Missing scope: chat:write"),
+                ],
+            ),
+            "Denied [REDACTED] Missing scope: chat:write",
+        ),
+        (CallToolResult(isError=True, content=[]), ""),
+    ],
+)
+def test_mcp_tool_error_preserves_redacted_diagnostics(
+    result: CallToolResult, message: str
+) -> None:
+    """Preserve error text without exposing the bound token or non-text blocks."""
+    session = create_autospec(ClientSession, instance=True)
+    session.send_request.return_value = result
+    credentials: JSONObject = {"access_token": "xoxp-secret"}
+    with patch.object(slack_mcp, "_session") as open_session:
+        open_session.return_value.__aenter__.return_value = session
+        with pytest.raises(slack_mcp.SlackApiError) as error:
+            registry.invoke_connector(
+                "slack_search_public", {"query": "release"}, Mock(), credentials, {}
+            )
+    assert error.value.code == "mcp_tool_error"
+    assert error.value.message == message
+    assert "xoxp-secret" not in "".join(traceback.format_exception(error.value))

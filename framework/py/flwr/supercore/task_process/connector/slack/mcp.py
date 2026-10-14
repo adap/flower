@@ -138,7 +138,13 @@ async def _execute_tool(
             types.CallToolResult,
         )
     if result.isError:
-        raise SlackApiError("mcp_tool_error")
+        message = " ".join(
+            item.text for item in result.content if isinstance(item, types.TextContent)
+        )
+        token = cast(str, context.credentials["access_token"])
+        raise SlackApiError(
+            "mcp_tool_error", message=message.replace(token, "[REDACTED]")
+        )
     return cast(
         JSONObject, result.model_dump(mode="json", by_alias=True, exclude_none=True)
     )
