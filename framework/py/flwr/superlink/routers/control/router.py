@@ -121,6 +121,8 @@ from flwr.superlink.dependencies.linkstate import get_linkstate
 from flwr.superlink.dependencies.run_source import RunSourceDependency
 from flwr.superlink.servicer.control import control_handlers
 
+from .tracing import RunCreationTracingDependency
+
 router = APIRouter(
     prefix="/v1/control",
     tags=["Control"],
@@ -148,21 +150,20 @@ ArtifactProviderDependency = Annotated[
 
 
 @router.post("/start-run")
-def start_run(
+def start_run(  # pylint: disable=too-many-arguments,too-many-positional-arguments
     request: Annotated[StartRunRequest, Depends(get_protobuf_request)],
     linkstate: LinkStateDependency,
     account: AccountDependency,
     fleet_api_type: FleetApiTypeDependency,
     run_source: RunSourceDependency,
+    tracing: RunCreationTracingDependency,
 ) -> StartRunResponse:
     """Start a run."""
-    return control_handlers.start_run(
-        request,
-        account,
-        linkstate,
-        fleet_api_type,
-        source=run_source,
+    response = control_handlers.start_run(
+        request, account, linkstate, fleet_api_type, source=run_source
     )
+    tracing.set_attribute("flwr.run_id", str(response.run_id))
+    return response
 
 
 @router.post("/list-runs")

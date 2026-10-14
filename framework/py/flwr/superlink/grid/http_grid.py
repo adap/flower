@@ -68,6 +68,7 @@ from flwr.supercore.logger import warn_deprecated_feature
 from flwr.supercore.retry import make_simple_http_retry_invoker
 from flwr.supercore.run import Run
 from flwr.supercore.runtime import RuntimeHttpClient
+from flwr.supercore.runtime.tracing import RuntimeTracingInterceptor
 
 _DEFAULT_RUNTIME_API_ADDRESS = f"{CLIENT_OCTET}:{SUPERLINK_UVICORN_DEFAULT_PORT}"
 
@@ -134,6 +135,7 @@ class HttpGrid(Grid):  # pylint: disable=too-many-instance-attributes
         self._insecure = insecure
         self._cert = root_certificates
         self._token = token
+        self._tracing = RuntimeTracingInterceptor()
         self._run: Run | None = None
         self._client: RuntimeHttpClient | None = None
         self.node = Node(node_id=SUPERLINK_NODE_ID)
@@ -155,6 +157,7 @@ class HttpGrid(Grid):  # pylint: disable=too-many-instance-attributes
             insecure=self._insecure,
             root_certificates=self._cert,
             interceptors=[
+                self._tracing,
                 RuntimeVersionHttpInterceptor(component_name="flwr-serverapp"),
                 RuntimeTokenHttpInterceptor(token=self._token),
             ],

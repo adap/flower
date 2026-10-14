@@ -35,10 +35,7 @@ from flwr.proto.runtime_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.task_pb2 import TaskEvent  # pylint: disable=E0611
 from flwr.supercore.constant import TaskType
-from flwr.supercore.json_message.connector_message import (
-    ConnectorRequest,
-    ConnectorResponse,
-)
+from flwr.supercore.json_message.connector_message import ConnectorResponse
 from flwr.supercore.task_identity import TaskIdentity
 from flwr.supercore.task_process.connector import registry as connector_registry
 from flwr.supercore.task_process.connector.automation import START_AUTOMATION_TOOL_NAME
@@ -237,19 +234,16 @@ def test_start_automation_tool_exposes_only_input_and_schedule() -> None:
 
 def test_runtime_connectors_expand_one_connector_into_multiple_tools() -> None:
     """One connector reference can advertise multiple model-facing tools."""
-    connectors = RuntimeAgentConnectors(Mock())
+    runtime = Mock()
+    connectors = RuntimeAgentConnectors(runtime)
     tools: list[JSONObject] = [
         {"type": "function", "name": "example_search"},
         {"type": "function", "name": "example_read"},
     ]
 
-    with patch(
-        "flwr.supercore.task_process.agent.session.get_connector_tools",
-        return_value=tools,
-    ) as get_connector_tools:
-        assert connectors.tools(["example"]) == tools
-
-    get_connector_tools.assert_called_once_with("example")
+    runtime.get_connector_tools.return_value = tools
+    assert connectors.tools(["example"]) == tools
+    runtime.get_connector_tools.assert_called_once_with("example", refresh=False)
 
 
 def test_call_automation_embeds_input_in_control_request() -> None:
@@ -345,7 +339,7 @@ def test_connector_call_emits_standard_items() -> None:
 
 
 def test_create_connector_response_resolves_canonical_name() -> None:
-    """Task creation should resolve the canonical tool name to its connector."""
+    """Resolve normalized names and forward original dynamic names and arguments."""
     stub = Mock()
     stub.CreateTask.return_value = CreateTaskResponse(task_id=456)
     agent_runtime = AgentRuntime(
@@ -355,9 +349,12 @@ def test_create_connector_response_resolves_canonical_name() -> None:
         start_run_request=StartRunRequest(),
         events=Mock(),
     )
+    agent_runtime._discovered_tools["example"] = [  # pylint: disable=protected-access
+        {"name": "example_Search"}
+    ]
     reply = ConnectorResponse(
         dst_task_id=789,
-        name="notion_search",
+        name="example_Search",
         call_id="call-1",
         output="done",
         error=None,
@@ -365,27 +362,26 @@ def test_create_connector_response_resolves_canonical_name() -> None:
     )
 
     with (
-        patch(
-            "flwr.supercore.task_process.agent.session.get_connector_ref",
-            return_value="notion",
-        ) as get_connector_ref,
+        patch.dict(
+            connector_registry._CONNECTORS_BY_REF,  # pylint: disable=protected-access
+            {"example": Mock(ref="example", tools=(), tool_source=Mock())},
+        ),
         patch.object(
             agent_runtime, "_send_and_receive", return_value=reply
         ) as send_and_receive,
     ):
         output = agent_runtime.create_connector_response(
-            name=" NoTiOn_Search ",
+            name=" EXAMPLE_search ",
             call_id="call-1",
-            arguments={},
+            arguments={"limit": 3},
         )
 
-    get_connector_ref.assert_called_once_with("notion_search")
     stub.CreateTask.assert_called_once_with(
-        CreateTaskRequest(type=TaskType.CONNECTOR, connector_ref="notion")
+        CreateTaskRequest(type=TaskType.CONNECTOR, connector_ref="example")
     )
     request = send_and_receive.call_args.args[0]
-    assert isinstance(request, ConnectorRequest)
-    assert request.payload["name"] == "notion_search"
+    assert request.payload["name"] == "example_Search"
+    assert request.payload["arguments"] == {"limit": 3}
     assert output == "done"
 
 
@@ -424,7 +420,11 @@ def test_create_connector_response_uses_connector_task_for_filesystem() -> None:
 
 def test_connector_tools_include_agent_handled_automation() -> None:
     """Automation and connector schemas should remain available in request order."""
-    connectors = RuntimeAgentConnectors(Mock())
+    runtime = Mock()
+    runtime.get_connector_tools.side_effect = (
+        lambda name, **_kwargs: connector_registry.get_connector_tools(name)
+    )
+    connectors = RuntimeAgentConnectors(runtime)
 
     assert [
         tool["name"]
@@ -445,3 +445,32 @@ def test_connector_tools_include_agent_handled_automation() -> None:
         "notion_get_user",
         "notion_get_self",
     ]
+
+
+def test_runtime_discovers_and_caches_tools() -> None:
+    """Discover once, return independent copies, and refresh explicitly."""
+    runtime = AgentRuntime(
+        stub=Mock(),
+        run_id=123,
+        task_id=789,
+        start_run_request=StartRunRequest(),
+        events=Mock(),
+    )
+    tools: list[JSONObject] = [{"name": "example_Read"}]
+    with (
+        patch.dict(
+            connector_registry._CONNECTORS_BY_REF,  # pylint: disable=protected-access
+            {"example": Mock(ref="example", tools=(), tool_source=Mock())},
+        ),
+        patch.object(
+            runtime, "create_connector_response", return_value=tools
+        ) as discover,
+    ):
+        connectors = RuntimeAgentConnectors(runtime)
+        first = connectors.tools(["example"])
+        assert first == [{"name": "example_read"}]
+        first[0]["name"] = "Changed"
+        assert connectors.tools(["example"]) == [{"name": "example_read"}]
+        discover.assert_called_once()
+        connectors.tools(["example"], refresh=True)
+        assert discover.call_count == 2

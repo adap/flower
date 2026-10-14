@@ -288,11 +288,11 @@ class TestHttpGrid(unittest.TestCase):
         interceptors = kwargs["interceptors"]
         self.assertIsNotNone(interceptors)
         assert interceptors is not None
-        self.assertEqual(len(interceptors), 2)
-        self.assertIsInstance(interceptors[0], RuntimeVersionHttpInterceptor)
-        self.assertIsInstance(interceptors[1], RuntimeTokenHttpInterceptor)
+        self.assertEqual(len(interceptors), 3)
+        self.assertIsInstance(interceptors[1], RuntimeVersionHttpInterceptor)
+        self.assertIsInstance(interceptors[2], RuntimeTokenHttpInterceptor)
         # pylint: disable-next=protected-access
-        self.assertEqual(interceptors[0]._metadata.component_name, "flwr-serverapp")
+        self.assertEqual(interceptors[1]._metadata.component_name, "flwr-serverapp")
 
     def test_init_rejects_empty_token(
         self,

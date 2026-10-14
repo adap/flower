@@ -75,6 +75,8 @@ from flwr.supercore.protobuf.routing import ProtobufRoute
 from flwr.supercore.protobuf.translation import PROTOBUF_REQUEST_DEPENDENCY
 from flwr.supercore.servicer.runtime import runtime_handlers as core_runtime_handlers
 
+from .tracing import TaskCompletionTracingDependency
+
 router = APIRouter(
     prefix="/v1/runtime",
     tags=["Runtime"],
@@ -142,6 +144,7 @@ def push_task_output(
     state: RuntimeStateDependency,
     handlers: RuntimeHandlersDependency,
     task: TaskDependency,
+    _tracing: TaskCompletionTracingDependency,
 ) -> PushTaskOutputResponse:
     """Push app process outputs."""
     return handlers.push_task_output(request, state, task)

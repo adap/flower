@@ -37,6 +37,7 @@ from flwr.supercore.http_logging import configure_uvicorn_logging
 from flwr.supercore.protobuf.translation import ProtobufTranslationMiddleware
 from flwr.supercore.routers import health
 from flwr.supercore.routers.runtime import create_runtime_router, responses_router
+from flwr.supercore.routers.runtime.tracing import RuntimeTracingMiddleware
 from flwr.supercore.version import package_version
 from flwr.superlink import extensions
 from flwr.superlink.config_loader import (
@@ -108,6 +109,7 @@ def _get_middleware() -> list[Middleware]:
         Middleware(ControlAuthenticationMiddleware),
         Middleware(ControlLicenseMiddleware),
         Middleware(ProtobufTranslationMiddleware),
+        Middleware(RuntimeTracingMiddleware),
         Middleware(ControlEventLogMiddleware),
         Middleware(NodeAuthMiddleware),
         Middleware(FleetEventLogMiddleware),
