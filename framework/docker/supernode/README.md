@@ -30,7 +30,7 @@ refer to earlier releases.
   - points to the last successful build of the `main` branch
 - `nightly`, `<version>.dev<YYYYMMDD>` e.g. `1.41.0.dev20261013`
   - uses Python 3.13 and Ubuntu 24.04
-- `1.40.0`, `1.40.0-py3.13-alpine3.22`
+- `1.40.0`, `1.40.0-py3.13-alpine3.23`
 - `1.40.0-py3.13-ubuntu24.04`, `latest`
 - `1.40.0-py3.12-ubuntu24.04`
 - `1.40.0-py3.11-ubuntu24.04`
