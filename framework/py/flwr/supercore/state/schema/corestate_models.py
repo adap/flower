@@ -258,7 +258,8 @@ class TaskEvent(FlwrBase):
 class TaskMessage(FlwrBase):
     """Represent a pending task message.
 
-    This table can be empty during normal operation even when it is in use.
+    Messages are removed when retrieved or expired. An empty table is normal
+    when no messages are waiting to be picked up.
     """
 
     __tablename__ = "task_message"
@@ -311,7 +312,8 @@ class ObjectPushSession(FlwrBase):
 class ObjectPushSessionRoot(FlwrBase):
     """Represent a root object for an object push session.
 
-    This table can be empty during normal operation even when it is in use.
+    These records are removed when uploads complete or sessions are cleaned up,
+    so the table may be empty when no uploads are in progress.
     """
 
     __tablename__ = "object_push_session_roots"
@@ -330,7 +332,8 @@ class ObjectPushSessionRoot(FlwrBase):
 class ObjectPushSessionPending(FlwrBase):
     """Represent a pending object for an object push session.
 
-    This table can be empty during normal operation even when it is in use.
+    Entries are removed as objects are uploaded. The table may be empty once
+    all pending uploads have finished.
     """
 
     __tablename__ = "object_push_session_pending"
