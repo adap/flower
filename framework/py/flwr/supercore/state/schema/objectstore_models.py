@@ -34,7 +34,12 @@ class ObjectStoreBase(DeclarativeBase):
 
 
 class StoredObject(ObjectStoreBase):
-    """Represent stored object content and reference counts."""
+    """Represent stored object content and reference counts.
+
+    Run cleanup, or cleanup of expired uploads on access, deletes
+    unreferenced objects and recursively releases their descendants. Clearing
+    the store removes all rows, so an empty table can reflect completed cleanup.
+    """
 
     __tablename__ = "objects"
     __table_args__ = (
@@ -53,7 +58,12 @@ class StoredObject(ObjectStoreBase):
 
 
 class ObjectChild(ObjectStoreBase):
-    """Represent a parent-child relationship between stored objects."""
+    """Represent a parent-child relationship between stored objects.
+
+    Rows cascade away when either referenced object is deleted during object
+    cleanup. Clearing the store also removes all rows; an empty table can mean
+    no object trees remain, or that stored objects have no children.
+    """
 
     __tablename__ = "object_children"
     __table_args__ = (PrimaryKeyConstraint("parent_id", "child_id"),)
@@ -71,7 +81,12 @@ class ObjectChild(ObjectStoreBase):
 
 
 class RunObject(ObjectStoreBase):
-    """Represent an object registered for a run."""
+    """Represent an object registered for a run.
+
+    Run cleanup removes the run's mappings and attempts to delete its objects.
+    Mappings also cascade away when an object is deleted, and clearing the store
+    removes all rows. An empty table can therefore reflect completed cleanup.
+    """
 
     __tablename__ = "run_objects"
     __table_args__ = (PrimaryKeyConstraint("run_id", "object_id"),)

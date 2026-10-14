@@ -256,7 +256,12 @@ class TaskEvent(FlwrBase):
 
 
 class TaskMessage(FlwrBase):
-    """Represent a task message."""
+    """Represent a pending task message with its serialized content or error.
+
+    Pulling messages atomically deletes and returns their rows. Retrieval also
+    deletes messages whose TTL has expired. This is a pending queue rather than
+    a message history, so it is normally empty once messages have been consumed.
+    """
 
     __tablename__ = "task_message"
     __table_args__ = (
@@ -306,7 +311,14 @@ class ObjectPushSession(FlwrBase):
 
 
 class ObjectPushSessionRoot(FlwrBase):
-    """Represent a root object for an object push session."""
+    """Represent a root object for an object push session.
+
+    Rows cascade away when a session is removed after its final pending upload,
+    on replacement by another session for the same root, during run cleanup,
+    or when an expired upload is cleaned up on access. Expiry cleanup uses these
+    roots to delete incomplete object trees and their message metadata. An empty
+    table can therefore mean upload bookkeeping has already been cleaned up.
+    """
 
     __tablename__ = "object_push_session_roots"
     __table_args__ = (Index("idx_object_push_session_roots_session_id", "session_id"),)
@@ -322,7 +334,13 @@ class ObjectPushSessionRoot(FlwrBase):
 
 
 class ObjectPushSessionPending(FlwrBase):
-    """Represent a pending object for an object push session."""
+    """Represent a pending object for an object push session.
+
+    Uploading an object atomically removes its row to claim the pending work;
+    failed writes roll back the claim. Remaining rows cascade away when the
+    session is removed during completion, replacement, run cleanup, or cleanup
+    of an expired upload on access. An empty table can mean no uploads are pending.
+    """
 
     __tablename__ = "object_push_session_pending"
     __table_args__ = (
