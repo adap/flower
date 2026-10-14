@@ -14,10 +14,6 @@ and ``flwr/supernode`` use Alpine 3.23 and Python 3.13. Alpine 3.22 images are n
 built for new releases. When upgrading to Flower 1.40.0 or later, update the Flower
 version in an explicitly pinned tag and use the ``-py3.13-alpine3.23`` suffix.
 
-Starting with Flower 1.40.0, Alpine images do not include ``pip`` or ``ensurepip``. Use
-an Ubuntu variant if your Dockerfile installs additional packages with ``pip``. Ubuntu
-and Ubuntu CUDA images continue to include ``pip``.
-
 Our Quickstart guide walks you through containerizing a Flower project and running it
 end to end using Docker.
 
