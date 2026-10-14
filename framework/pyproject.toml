@@ -73,7 +73,11 @@ simulation = [
     "ray==2.55.1; python_version >= '3.11' and python_version < '3.13'",
     "ray==2.55.1; python_version >= '3.13' and python_version < '3.15' and sys_platform != 'win32'",
 ]
-agent = ["browser-use[core]>=0.13.1,<0.14.0", "trafilatura>=2.1.0,<3.0.0"]
+agent = [
+    "browser-use[core]>=0.13.1,<0.14.0",
+    "trafilatura>=2.1.0,<3.0.0",
+    "mcp>=1.26.0,<2.0.0",
+]
 dp = ["dp-accounting>=0.6.0,<0.7.0"]
 
 [project.scripts]
