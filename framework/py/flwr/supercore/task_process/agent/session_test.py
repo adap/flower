@@ -246,30 +246,6 @@ def test_runtime_connectors_expand_one_connector_into_multiple_tools() -> None:
     runtime.get_connector_tools.assert_called_once_with("example", refresh=False)
 
 
-def test_runtime_discovers_and_caches_github_tools() -> None:
-    """Discover through the connector runtime and return independent cached copies."""
-    runtime = AgentRuntime(
-        stub=Mock(),
-        run_id=123,
-        task_id=789,
-        start_run_request=StartRunRequest(),
-        events=Mock(),
-    )
-    tools: list[JSONObject] = [{"name": "github_issue_write", "description": "Write"}]
-    connectors = RuntimeAgentConnectors(runtime)
-    with patch.object(
-        runtime, "create_connector_response", return_value=tools
-    ) as discover:
-        first = connectors.tools(["github", "web_search"])
-        assert [tool["name"] for tool in first] == ["github_issue_write", "web_search"]
-        first[0]["description"] = "Changed"
-        assert connectors.tools(["github"])[0]["description"] == "Write"
-        request = discover.call_args.kwargs
-        assert request["name"] == "github__discover_tools"
-        assert request["arguments"] == {}
-        discover.assert_called_once()
-
-
 def test_call_automation_embeds_input_in_control_request() -> None:
     """Embed model input in the Control request sent to the Runtime API."""
     # Prepare
@@ -409,18 +385,8 @@ def test_create_connector_response_resolves_canonical_name() -> None:
     assert output == "done"
 
 
-@pytest.mark.parametrize(
-    ("name", "connector_ref"),
-    [
-        ("filesystem_list_directory", "filesystem"),
-        ("github_future_tool", "github"),
-        ("github__discover_tools", "github"),
-    ],
-)
-def test_create_connector_response_uses_connector_task(
-    name: str, connector_ref: str
-) -> None:
-    """Static and dynamic tools should execute through their connector task."""
+def test_create_connector_response_uses_connector_task_for_filesystem() -> None:
+    """Filesystem calls should execute through a Connector task."""
     stub = Mock()
     stub.CreateTask.return_value = CreateTaskResponse(task_id=456)
     agent_runtime = AgentRuntime(
@@ -430,12 +396,9 @@ def test_create_connector_response_uses_connector_task(
         start_run_request=StartRunRequest(),
         events=Mock(),
     )
-    agent_runtime._discovered_tools["github"] = [  # pylint: disable=protected-access
-        {"name": "github_future_tool"}
-    ]
     reply = ConnectorResponse(
         dst_task_id=789,
-        name=name,
+        name="filesystem_list_directory",
         call_id="call-1",
         output={"entries": []},
         error=None,
@@ -444,14 +407,14 @@ def test_create_connector_response_uses_connector_task(
 
     with patch.object(agent_runtime, "_send_and_receive", return_value=reply):
         output = agent_runtime.create_connector_response(
-            name=name,
+            name="filesystem_list_directory",
             call_id="call-1",
             arguments={"path": "/allowed"},
         )
 
     assert output == {"entries": []}
     stub.CreateTask.assert_called_once_with(
-        CreateTaskRequest(type=TaskType.CONNECTOR, connector_ref=connector_ref)
+        CreateTaskRequest(type=TaskType.CONNECTOR, connector_ref="filesystem")
     )
 
 

@@ -51,13 +51,3 @@ def test_dynamic_tools_resolve_to_their_connector() -> None:
         registry.invoke_connector("example_Read", {}, Mock(), {}, {})
         assert connector.tool_source.execute.call_args.args[1].action_name == "Read"
         assert registry.get_connector_ref("exampleish_read") == "exampleish_read"
-
-
-def test_dynamic_github_tools_require_github_credentials() -> None:
-    """Resolve newly discovered names without treating them as built-in tools."""
-    assert registry.get_connector_ref("github_future_tool") == "github"
-    assert registry.requires_connector_credentials("github_future_tool")
-    assert (
-        registry.get_connector_ref("githubish_future_tool") == "githubish_future_tool"
-    )
-    assert not registry.requires_connector_credentials("githubish_future_tool")

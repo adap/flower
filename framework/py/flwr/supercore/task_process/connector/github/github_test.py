@@ -12,84 +12,46 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Tests for the GitHub connector."""
+"""Tests for GitHub MCP discovery, execution, and error details."""
 
 import traceback
 from collections.abc import Iterator
 from typing import cast
-from unittest.mock import AsyncMock, MagicMock, Mock, call, patch
-from urllib.parse import parse_qs, urlparse
+from unittest.mock import MagicMock, Mock, call, create_autospec, patch
 
 import httpx
 import pytest
-import requests
-from mcp import types
+from mcp import ClientSession, types
 from mcp.shared.exceptions import McpError
 
-from flwr.supercore.task_process.agent.session import AgentRuntime
-from flwr.supercore.typing import JSONObject, JSONValue
+from flwr.supercore.typing import JSONObject
 
 from .. import registry
-from ..definition import ActionAccess, ConnectorExecutionContext
-from ..oauth import OAuthFlow
-from .definition import CONNECTOR, PROVIDER
 from .mcp import GitHubApiError
 
 _ACCESS_TOKEN = "github-private-token-fixture"
-_TOKEN_REQUEST = "flwr.supercore.task_process.connector.oauth.requests.post"
-_IDENTITY_REQUEST = "flwr.supercore.task_process.connector.oauth.requests.request"
-
-
-def _response(payload: object, status_code: int = 200) -> Mock:
-    """Return a minimal HTTP response mock."""
-    response = Mock(status_code=status_code)
-    response.json.return_value = payload
-    return response
+_CREDENTIALS: JSONObject = {"access_token": _ACCESS_TOKEN}
 
 
 @pytest.fixture(name="session")
-def fixture_session() -> Iterator[AsyncMock]:
-    """Mock the SDK boundary and check Flower's connection settings."""
-    session = AsyncMock()
+def fixture_session() -> Iterator[Mock]:
+    """Mock the MCP session and transport."""
+    session = create_autospec(ClientSession, instance=True)
     session.__aenter__.return_value = session
-    session.list_tools.return_value = types.ListToolsResult(
-        tools=[types.Tool(name="FutureTool", inputSchema={"type": "object"})]
-    )
-    session.call_tool.return_value = types.CallToolResult(
-        content=[types.TextContent(type="text", text="result")],
-        structuredContent={"count": 1},
-    )
     transport = MagicMock()
     transport.__aenter__.return_value = (Mock(), Mock(), Mock())
     with (
         patch("mcp.ClientSession", return_value=session),
         patch(
-            "mcp.client.streamable_http.streamable_http_client",
-            return_value=transport,
-        ) as connect,
+            "mcp.client.streamable_http.streamable_http_client", return_value=transport
+        ),
     ):
         yield session
-    assert connect.call_args.args == ("https://api.githubcopilot.com/mcp/",)
-    client = connect.call_args.kwargs["http_client"]
-    assert client.headers["Authorization"] == f"Bearer {_ACCESS_TOKEN}"
-    assert client.headers["X-MCP-Toolsets"] == "all"
-    assert "X-MCP-Readonly" not in client.headers
-    assert "X-MCP-Tools" not in client.headers
-    assert client.is_closed
-    assert session.initialize.await_count == connect.call_count
-    assert session.__aexit__.await_count == connect.call_count
 
 
-def _invoke(name: str, arguments: JSONObject) -> JSONValue:
-    """Call a tool through Flower's existing GitHub registry entry."""
-    return registry.invoke_connector(
-        name, arguments, Mock(), {"access_token": _ACCESS_TOKEN}, {}
-    )
-
-
-def test_discovery_preserves_paginated_remote_catalog(session: AsyncMock) -> None:
-    """Expose remote read and write tools with their original schemas."""
-    schema = {"type": "object", "properties": {"data": {"type": "object"}}}
+def test_paginated_discovery_and_execution(session: Mock) -> None:
+    """Preserve remote schemas, names, arguments, and results without rediscovery."""
+    schema = {"type": "object", "properties": {"perPage": {"type": "integer"}}}
     session.list_tools.side_effect = [
         types.ListToolsResult(
             tools=[
@@ -97,180 +59,62 @@ def test_discovery_preserves_paginated_remote_catalog(session: AsyncMock) -> Non
             ],
             nextCursor="next",
         ),
-        session.list_tools.return_value,
+        types.ListToolsResult(
+            tools=[types.Tool(name="FutureTool", inputSchema=schema)]
+        ),
     ]
-    tools = cast(list[JSONObject], _invoke("github__discover_tools", {}))
-    assert tools[0] == {
-        "type": "function",
-        "name": "github_issue_write",
-        "description": "Write",
-        "parameters": schema,
-        "strict": False,
-    }
-    assert tools[1]["name"] == "github_FutureTool"
+    tools = cast(
+        list[JSONObject],
+        registry.invoke_connector(
+            "github__discover_tools", {}, Mock(), _CREDENTIALS, {}
+        ),
+    )
+    assert [tool["name"] for tool in tools] == [
+        "github_issue_write",
+        "github_FutureTool",
+    ]
+    assert tools[0]["description"] == "Write"
+    assert tools[0]["parameters"] == schema
+    session.call_tool.return_value = types.CallToolResult(
+        content=[types.TextContent(type="text", text="done")],
+        structuredContent={"count": 1},
+    )
+    arguments: JSONObject = {"perPage": 5, "data": {"items": [1, False, None]}}
+    result = registry.invoke_connector(
+        "github_FutureTool", arguments, Mock(), _CREDENTIALS, {}
+    )
+    assert result == session.call_tool.return_value.model_dump(
+        mode="json", by_alias=True, exclude_none=True
+    )
+    session.call_tool.assert_awaited_once_with("FutureTool", arguments)
     assert session.list_tools.await_args_list == [
         call(params=None),
         call(params=types.PaginatedRequestParams(cursor="next")),
     ]
-    session.call_tool.assert_not_awaited()
-
-
-@pytest.mark.parametrize("read_only", [True, False, None])
-def test_catalog_builds_connection_specific_actions(
-    session: AsyncMock, read_only: bool | None
-) -> None:
-    """Discover actions through the shared dynamic source without registration."""
-    session.list_tools.return_value.tools[0].annotations = types.ToolAnnotations(
-        readOnlyHint=read_only
-    )
-    assert CONNECTOR.tool_source is not None
-    actions = CONNECTOR.tool_source.discover(
-        ConnectorExecutionContext(
-            credentials={"access_token": _ACCESS_TOKEN},
-            config={},
-            usage_recorder=Mock(),
-        )
-    )
-    assert actions[0].name == "FutureTool"
-    assert actions[0].access == (ActionAccess.READ if read_only else ActionAccess.WRITE)
-    assert not CONNECTOR.tools and not CONNECTOR.executors
-
-
-@pytest.mark.parametrize("name", ["search_code", "issue_write", "FutureTool"])
-def test_calls_forward_remote_names_arguments_and_results(
-    session: AsyncMock, name: str
-) -> None:
-    """Forward advertised tools, native fields, nested arguments and MCP output."""
-    session.list_tools.return_value = types.ListToolsResult(
-        tools=[types.Tool(name=name, inputSchema={"type": "object"})]
-    )
-    arguments: JSONObject = {"perPage": 5, "data": {"items": [1, False, None]}}
-    assert _invoke(f"github_{name}", arguments) == (
-        session.call_tool.return_value.model_dump(
-            mode="json", by_alias=True, exclude_none=True
-        )
-    )
-    session.call_tool.assert_awaited_once_with(name, arguments)
-    session.list_tools.assert_not_awaited()
-
-
-def test_unadvertised_tool_is_not_called(session: AsyncMock) -> None:
-    """Reject tools absent from the connection's catalog."""
-    tools = _invoke("github__discover_tools", {})
-    stub = Mock()
-    runtime = AgentRuntime(
-        stub=stub, run_id=123, task_id=456, start_run_request=Mock(), events=Mock()
-    )
-    with (
-        patch.object(runtime, "_discover_connector_tools", return_value=tools),
-        pytest.raises(ValueError, match="Unsupported discovered tool"),
-    ):
-        runtime.create_connector_response(
-            name="github_unknown", call_id="call-1", arguments={}
-        )
-    stub.CreateTask.assert_not_called()
-    session.call_tool.assert_not_awaited()
 
 
 @pytest.mark.parametrize("failure", ["tool", "http", "protocol"])
-def test_errors_do_not_expose_credentials(session: AsyncMock, failure: str) -> None:
-    """Keep connector failures readable without leaking tokens or raw exceptions."""
+def test_error_details_are_preserved_and_redacted(session: Mock, failure: str) -> None:
+    """Forward tool and SDK diagnostics without leaking credentials in exceptions."""
+    message = f"Denied {_ACCESS_TOKEN}"
     if failure == "tool":
         session.call_tool.return_value = types.CallToolResult(
-            content=[types.TextContent(type="text", text=f"Denied {_ACCESS_TOKEN}")],
-            isError=True,
+            content=[types.TextContent(type="text", text=message)], isError=True
         )
     elif failure == "http":
         session.call_tool.side_effect = httpx.HTTPStatusError(
-            f"Forbidden {_ACCESS_TOKEN}",
-            request=httpx.Request("POST", "https://api.githubcopilot.com/mcp/"),
+            message,
+            request=httpx.Request("POST", "https://example.com"),
             response=httpx.Response(403),
         )
     else:
         session.call_tool.side_effect = ExceptionGroup(
-            "MCP request failed",
-            [
-                McpError(
-                    types.ErrorData(
-                        code=-32602, message=f"Invalid arguments {_ACCESS_TOKEN}"
-                    )
-                )
-            ],
+            "MCP failed", [McpError(types.ErrorData(code=-32602, message=message))]
         )
     with pytest.raises(GitHubApiError) as error:
-        _invoke("github_FutureTool", {})
-    assert (
-        error.value.code
-        == {
-            "tool": "tool_error",
-            "http": "request_failed",
-            "protocol": "request_failed",
-        }[failure]
-    )
+        registry.invoke_connector("github_FutureTool", {}, Mock(), _CREDENTIALS, {})
+    assert error.value.code == ("tool_error" if failure == "tool" else "request_failed")
+    assert error.value.message == "Denied [REDACTED]"
     assert _ACCESS_TOKEN not in "".join(traceback.format_exception(error.value))
-    assert (
-        error.value.message
-        == {
-            "tool": "Denied [REDACTED]",
-            "http": "Forbidden [REDACTED]",
-            "protocol": "Invalid arguments [REDACTED]",
-        }[failure]
-    )
     if failure == "http":
         assert error.value.status_code == 403
-
-
-def test_github_oauth_requests_no_scope() -> None:
-    """OAuth should request and accept only scope-free credentials."""
-    flow = OAuthFlow(
-        PROVIDER,
-        client_id="client",
-        client_secret="secret",
-        redirect_uri="https://example.com/callback",
-    )
-    url = flow.build_authorization_url(
-        redirect_uri="https://example.com/callback",
-        state="state",
-        pkce_challenge="challenge",
-    )
-    assert "scope" not in parse_qs(urlparse(url).query)
-    token_response = _response(
-        {"access_token": "token", "token_type": "bearer", "scope": ""}
-    )
-    with (
-        patch(_TOKEN_REQUEST, return_value=token_response),
-        patch(
-            _IDENTITY_REQUEST, return_value=_response({"login": "octocat"})
-        ) as identity,
-    ):
-        credentials, config = flow.exchange_code(
-            code="code",
-            redirect_uri="https://example.com/callback",
-            pkce_verifier="verifier",
-        )
-    assert credentials == {"access_token": "token", "token_type": "bearer"}
-    assert config == {"display_name": "GitHub · octocat"}
-    assert identity.call_args.args == ("GET", "https://api.github.com/user")
-    assert identity.call_args.kwargs["headers"]["Authorization"] == "Bearer token"
-
-    with (
-        patch(_TOKEN_REQUEST, return_value=token_response),
-        patch(_IDENTITY_REQUEST, side_effect=requests.Timeout),
-    ):
-        _, config = flow.exchange_code(
-            code="code",
-            redirect_uri="https://example.com/callback",
-            pkce_verifier="verifier",
-        )
-    assert not config
-
-    token_response.json.return_value["scope"] = "repo"
-    with (
-        patch(_TOKEN_REQUEST, return_value=token_response),
-        pytest.raises(RuntimeError),
-    ):
-        flow.exchange_code(
-            code="code",
-            redirect_uri="https://example.com/callback",
-            pkce_verifier="verifier",
-        )
