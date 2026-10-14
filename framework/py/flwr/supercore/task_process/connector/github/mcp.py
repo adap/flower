@@ -99,7 +99,17 @@ async def _request(name: str | None, arguments: JSONObject, token: str) -> JSONV
                     if not page.nextCursor:
                         return cast(JSONValue, tools)
                     params = types.PaginatedRequestParams(cursor=page.nextCursor)
-            result = await session.call_tool(name, arguments)
+            # Avoid call_tool's catalog fetch after executing a tool in a fresh session.
+            result = await session.send_request(
+                types.ClientRequest(
+                    types.CallToolRequest(
+                        params=types.CallToolRequestParams(
+                            name=name, arguments=arguments
+                        )
+                    )
+                ),
+                types.CallToolResult,
+            )
             if result.isError:
                 raise GitHubApiError(
                     "tool_error",
