@@ -389,16 +389,6 @@ def _unsupported_runtime_api_address(_value: str) -> str:
     )
 
 
-def _superlink_address(value: str) -> str:
-    """Reject URL prefixes in the SuperLink address."""
-    if "://" in value:
-        raise argparse.ArgumentTypeError(
-            "expected host:port (e.g. api.flower.ai:443) without a URL prefix. "
-            "HTTPS is enabled by default; use --insecure for HTTP."
-        )
-    return value
-
-
 def _parse_args_common(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--insecure",
@@ -415,7 +405,6 @@ def _parse_args_common(parser: argparse.ArgumentParser) -> None:
     )
     parser.add_argument(
         "--superlink",
-        type=_superlink_address,
         default=SUPERLINK_DEFAULT_CLIENT_ADDRESS,
         help="SuperLink Fleet API address as host:port (IPv4, IPv6, or a domain "
         "name), without a URL prefix. HTTPS is enabled by default.",
