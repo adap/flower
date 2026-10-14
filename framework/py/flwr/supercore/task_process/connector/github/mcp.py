@@ -85,6 +85,7 @@ async def _request(name: str | None, arguments: JSONObject, token: str) -> JSONV
             if name is None:
                 tools: list[JSONObject] = []
                 params: types.PaginatedRequestParams | None = None
+                seen_cursors: set[str] = set()
                 while True:
                     page = await session.list_tools(params=params)
                     tools.extend(
@@ -98,6 +99,9 @@ async def _request(name: str | None, arguments: JSONObject, token: str) -> JSONV
                     )
                     if not page.nextCursor:
                         return cast(JSONValue, tools)
+                    if page.nextCursor in seen_cursors:
+                        raise GitHubApiError("invalid_tools")
+                    seen_cursors.add(page.nextCursor)
                     params = types.PaginatedRequestParams(cursor=page.nextCursor)
             # Avoid call_tool's catalog fetch after executing a tool in a fresh session.
             result = await session.send_request(

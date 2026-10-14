@@ -107,6 +107,22 @@ def test_paginated_discovery_and_execution(send_request: AsyncMock) -> None:
     )
 
 
+@pytest.mark.parametrize("cursors", [("next", "next"), ("first", "second", "first")])
+def test_discovery_rejects_repeated_cursors(
+    send_request: AsyncMock, cursors: tuple[str, ...]
+) -> None:
+    """Stop at the first repeated cursor instead of fetching the same pages again."""
+    send_request.side_effect = [
+        types.ListToolsResult(tools=[], nextCursor=cursor) for cursor in cursors
+    ]
+    with pytest.raises(GitHubApiError) as error:
+        registry.invoke_connector(
+            "github__discover_tools", {}, Mock(), _CREDENTIALS, {}
+        )
+    assert error.value.code == "invalid_tools"
+    assert send_request.await_count == len(cursors)
+
+
 @pytest.mark.parametrize("failure", ["tool", "http", "protocol"])
 def test_error_details_are_preserved_and_redacted(
     send_request: AsyncMock, failure: str
