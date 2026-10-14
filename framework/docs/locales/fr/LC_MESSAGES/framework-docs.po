@@ -33789,7 +33789,7 @@ msgstr "Migrer vos workloads OpenFL vers Flower dans ce guide étape par étape"
 #: ../../source/how-to-migrate-from-openfl.rst:45
 #, fuzzy
 msgid "Migrate from OpenFL"
-msgstr "Migrer votre modèle"
+msgstr ""
 
 #: ../../source/how-to-migrate-from-openfl.rst:47
 msgid ""
@@ -34203,13 +34203,6 @@ msgid ""
 "same workflow applies to other Flower Apps, whether or not they are "
 "listed on Flower Hub."
 msgstr ""
-"Ce guide montre deux façons de lancer une application Flower sur "
-"SuperGrid : directement à partir de `Flower Hub "
-"<https://flower.ai/apps/>`__, et depuis un projet d'application Flower "
-"sur votre machine. Il utilise l'application `@flwrlabs/quickstart-numpy "
-"<https://flower.ai/apps/flwrlabs/quickstart-numpy/>`__ comme exemple, "
-"mais le même workflow s'applique aux autres applications Flower, qu'elles"
-" soient listées ou non sur la plateforme Flower."
 
 #: ../../source/how-to-run-flower-apps-on-supergrid.rst:26
 msgid "Run Flower Apps from Flower Hub"
@@ -34222,10 +34215,6 @@ msgid ""
 " an app page, for example `@flwrlabs/demo "
 "<https://flower.ai/apps/flwrlabs/demo/>`__, and click ``Run``."
 msgstr ""
-"Exécuter directement à partir de la plateforme Flower est la façon la "
-"plus rapide de commencer. Ouvrez une page d'application, par exemple "
-"`@flwrlabs/quickstart-numpy <https://flower.ai/apps/flwrlabs/quickstart-"
-"numpy/>`__, et cliquez sur ``Run``."
 
 #: ../../source/how-to-run-flower-apps-on-supergrid.rst:32
 msgid "Flower App page on Flower Hub"
@@ -34271,14 +34260,12 @@ msgid ""
 "If you visit the `All runs <https://flower.ai/runs>`__ page, the run "
 "appears in the list of your runs."
 msgstr ""
-"S'il vous revient à la page de la fédération, l'exécution apparaît dans "
-"la liste des exécutions pour cette fédération."
 
 #: ../../source/how-to-run-flower-apps-on-supergrid.rst:62
 #: ../../source/tutorial-series-get-started-with-flower.rst:93
 #, fuzzy
 msgid "All runs page showing the run that was launched"
-msgstr "Page de détails de la fédération montrant l'exécution qui a été lancée"
+msgstr ""
 
 #: ../../source/how-to-run-flower-apps-on-supergrid.rst:69
 msgid "Run Flower apps from your machine"
@@ -34339,7 +34326,7 @@ msgstr ""
 #: ../../source/tutorial-series-write-your-first-flower-app.rst:105
 #, fuzzy
 msgid "All runs page showing the newly started run"
-msgstr "Page des SuperNodes montrant un SuperNode enregistré"
+msgstr ""
 
 #: ../../source/how-to-run-flower-apps-on-supergrid.rst:113
 msgid "Customize the run configuration"
@@ -34353,11 +34340,6 @@ msgid ""
 "``demo`` app used in this guide defines ``num-server-rounds`` to control "
 "how many rounds its ``ServerApp`` runs:"
 msgstr ""
-"Flower Applications peuvent définir des paramètres de runtime par défaut "
-"dans la section ``[tool.flwr.app.config]`` de leur ``pyproject.toml``. "
-"L'application ``quickstart-numpy`` utilisée dans ce guide définit ``num-"
-"server-rounds`` pour contrôler le nombre de tours que son ``ServerApp`` "
-"exécute :"
 
 #: ../../source/how-to-run-flower-apps-on-supergrid.rst:124
 msgid ""
@@ -34377,10 +34359,6 @@ msgid ""
 "config`` flag. The following command runs ``demo`` on SuperGrid with "
 "``num-server-rounds`` set to ``5``:"
 msgstr ""
-"Vous pouvez surcharger les valeurs définies par l'application pour une "
-"seule exécution avec la flag ``--run-config``. La commande suivante "
-"exécute ``quickstart-numpy`` sur SuperGrid avec ``num-server-rounds`` "
-"défini à ``5`` :"
 
 #: ../../source/how-to-run-flower-apps-on-supergrid.rst:137
 msgid ""
@@ -42256,8 +42234,6 @@ msgid ""
 ":py:obj:`tools <flwr.agentapp.AgentConnectors.tools>`\\ \\(names\\, "
 "\\*\\[\\, refresh\\]\\)"
 msgstr ""
-":py:obj:`ServerApp <flwr.serverapp.ServerApp>`\\ \\(\\[server\\, "
-"config\\, strategy\\, ...\\]\\)"
 
 #: flwr.agentapp.base.AgentConnectors.call:1:<autosummary>:1
 #: flwr.agentapp.base.AgentConnectors.tools:1 of
@@ -63354,13 +63330,6 @@ msgid ""
 "SuperNodes and ran an existing Flower App across them. You also explored "
 "the SuperGrid dashboard to monitor your app's progress and view its logs."
 msgstr ""
-"Félicitations, vous avez réussi à exécuter votre première Application "
-"Flower sur SuperGrid ! Vous avez pris votre premier pas dans le monde de "
-"l'intelligence artificielle collaborative avec Flower. Dans ce tutoriel, "
-"vous avez créé une fédération avec des SuperNodes simulés et lancé une "
-"application Flower existante à travers eux. Vous avez également exploré "
-"le tableau de bord de SuperGrid pour surveiller les progrès de votre "
-"application et consulter ses journaux."
 
 #: ../../source/tutorial-series-get-started-with-flower.rst:90
 msgid ""
@@ -64618,17 +64587,11 @@ msgid ""
 "run, and inspect its logs. You should see the new messages printed by the"
 " ``ServerApp`` at the beginning and end of the logs."
 msgstr ""
-"Ensuite, si vous naviguez vers le `SuperGrid dashboard "
-"<https://flower.ai/federations/>`__, et ouvrez les journaux de la "
-"nouvelle exécution, vous devriez voir les nouveaux messages imprimés du "
-"``ServerApp`` au début et à la fin des journaux."
 
 #: ../../source/tutorial-series-write-your-first-flower-app.rst:163
 #, fuzzy
 msgid "Run logs highlighting the custom ServerApp goodbye message"
 msgstr ""
-"Journaux d'exécution SuperGrid montrant les déclarations de print "
-"ServerApp personnalisées"
 
 #: ../../source/tutorial-series-write-your-first-flower-app.rst:168
 msgid ""

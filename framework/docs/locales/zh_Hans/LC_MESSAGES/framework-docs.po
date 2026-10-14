@@ -35861,7 +35861,7 @@ msgstr ""
 msgid ""
 ":py:obj:`tools <flwr.agentapp.AgentConnectors.tools>`\\ \\(names\\, "
 "\\*\\[\\, refresh\\]\\)"
-msgstr ":py:obj:`pop <flwr.common.MetricsRecord.pop>`\\ \\(k\\[\\,d\\]\\)"
+msgstr ""
 
 #: flwr.agentapp.base.AgentConnectors.call:1:<autosummary>:1
 #: flwr.agentapp.base.AgentConnectors.tools:1 of
