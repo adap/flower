@@ -125,6 +125,43 @@ def test_parse_supernode_rejects_grpc_transport_flags(flag: str) -> None:
         _parse_args_run_supernode().parse_args([flag])
 
 
+@pytest.mark.parametrize(
+    "address",
+    ["https://api.flower.ai:443", "http://localhost:9092", "https://api.flower.ai"],
+)
+def test_parse_supernode_rejects_superlink_url_prefix(
+    address: str, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """Reject URL prefixes with guidance before starting the SuperNode."""
+    with pytest.raises(SystemExit) as exc_info:
+        _parse_args_run_supernode().parse_args(["--superlink", address])
+
+    assert exc_info.value.code == 2
+    error = capsys.readouterr().err
+    assert "argument --superlink" in error
+    assert "host:port" in error
+    assert "api.flower.ai:443" in error
+    assert "without a URL prefix" in error
+    assert "HTTPS is enabled by default" in error
+    assert "--insecure" in error
+
+
+@pytest.mark.parametrize(
+    "address", ["api.flower.ai:443", "127.0.0.1:9092", "[::1]:9092"]
+)
+@pytest.mark.parametrize("insecure", [False, True])
+def test_parse_supernode_accepts_superlink_address(
+    address: str, insecure: bool
+) -> None:
+    """Preserve host-port addresses and the separate TLS setting."""
+    args = _parse_args_run_supernode().parse_args(
+        ["--superlink", address] + (["--insecure"] if insecure else [])
+    )
+
+    assert args.superlink == address
+    assert args.insecure is insecure
+
+
 def test_parse_supernode_lifespan_config_preserves_tls_args(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
