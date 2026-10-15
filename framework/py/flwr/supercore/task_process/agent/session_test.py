@@ -18,6 +18,7 @@ from unittest.mock import Mock, call, patch
 
 import pytest
 
+from flwr.agentapp import RUN_SUMMARY_EVENT_TYPES
 from flwr.common.serde import user_config_to_proto
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     StartAutomationRequest,
@@ -132,8 +133,8 @@ def test_emit_event_requires_type() -> None:
     stub.PushTaskEvents.assert_not_called()
 
 
-def test_get_trace_gets_current_run_series_events() -> None:
-    """Get trace should return parsed event envelopes from the Runtime API."""
+def test_get_trace_forwards_filters_and_decodes_events() -> None:
+    """Forward event filters and return parsed event envelopes."""
     stub = Mock()
     stub.GetRunSeriesEvents.return_value = GetRunSeriesEventsResponse(
         events=[
@@ -149,10 +150,22 @@ def test_get_trace_gets_current_run_series_events() -> None:
     )
     events = RuntimeAgentEvents(stub)
 
-    trace = events.get_trace()
+    trace = events.get_trace(
+        event_types=RUN_SUMMARY_EVENT_TYPES,
+        after_event_id=10,
+        before_event_id=20,
+        last_n=1,
+    )
     events.close()
 
-    stub.GetRunSeriesEvents.assert_called_once_with(GetRunSeriesEventsRequest())
+    stub.GetRunSeriesEvents.assert_called_once_with(
+        GetRunSeriesEventsRequest(
+            event_types=RUN_SUMMARY_EVENT_TYPES,
+            after_event_id=10,
+            before_event_id=20,
+            last_n=1,
+        )
+    )
     assert trace == [
         {
             "id": 12,
@@ -163,6 +176,18 @@ def test_get_trace_gets_current_run_series_events() -> None:
             "data": {"type": "response.completed", "response": {"id": "resp_1"}},
         }
     ]
+
+
+def test_get_trace_without_filters_requests_all_events() -> None:
+    """Keep the default request unfiltered."""
+    stub = Mock()
+    stub.GetRunSeriesEvents.return_value = GetRunSeriesEventsResponse()
+    events = RuntimeAgentEvents(stub)
+
+    assert events.get_trace() == []
+    events.close()
+
+    stub.GetRunSeriesEvents.assert_called_once_with(GetRunSeriesEventsRequest())
 
 
 def test_agent_events_and_connector_items_use_same_publisher() -> None:

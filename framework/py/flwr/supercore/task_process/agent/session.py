@@ -87,9 +87,23 @@ class RuntimeAgentEvents(AgentEvents):
         )
         self._worker.start()
 
-    def get_trace(self) -> list[JSONObject]:
-        """Get events from all runs in the current run series."""
-        response = self._stub.GetRunSeriesEvents(GetRunSeriesEventsRequest())
+    def get_trace(
+        self,
+        *,
+        event_types: Sequence[str] | None = None,
+        after_event_id: int | None = None,
+        before_event_id: int | None = None,
+        last_n: int | None = None,
+    ) -> list[JSONObject]:
+        """Get matching events from the current run series."""
+        request = GetRunSeriesEventsRequest(event_types=event_types or [])
+        if after_event_id is not None:
+            request.after_event_id = after_event_id
+        if before_event_id is not None:
+            request.before_event_id = before_event_id
+        if last_n is not None:
+            request.last_n = last_n
+        response = self._stub.GetRunSeriesEvents(request)
         return [
             {
                 "id": event.id,

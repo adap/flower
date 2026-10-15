@@ -23,6 +23,14 @@ from collections.abc import Callable, Sequence
 from flwr.app import Context
 from flwr.supercore.typing import JSONObject
 
+RUN_SUMMARY_EVENT_TYPES: tuple[str, ...] = (
+    "message",
+    "response.completed",
+    "function_call",
+    "function_call_output",
+)
+"""Common event types for summarizing a run series."""
+
 
 class AgentConnectors(ABC):
     """Abstract base class for AgentApp connector execution."""
@@ -54,8 +62,33 @@ class AgentEvents(ABC):
     """Abstract base class for AgentApp run events."""
 
     @abstractmethod
-    def get_trace(self) -> list[JSONObject]:
-        """Get events from all runs in the current run series."""
+    def get_trace(
+        self,
+        *,
+        event_types: Sequence[str] | None = None,
+        after_event_id: int | None = None,
+        before_event_id: int | None = None,
+        last_n: int | None = None,
+    ) -> list[JSONObject]:
+        """Get matching events from all runs in the current run series.
+
+        Parameters
+        ----------
+        event_types : Optional[Sequence[str]] (default: None)
+            Filter by the given event types. If unset, include all event types.
+            Use `RUN_SUMMARY_EVENT_TYPES` for common summary inputs.
+        after_event_id : Optional[int] (default: None)
+            Return events with IDs greater than this value.
+        before_event_id : Optional[int] (default: None)
+            Return events with IDs less than this value.
+        last_n : Optional[int] (default: None)
+            Return the newest N matching events in ID order.
+
+        Returns
+        -------
+        list[JSONObject]
+            Matching event envelopes.
+        """
 
     @abstractmethod
     def emit(self, event: JSONObject) -> None:
