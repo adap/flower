@@ -24,6 +24,7 @@ def train(msg: Message, context: Context):
     # Load the model and initialize it with the received weights
     dataset_name = str(context.run_config["dataset-name"])
     data_distribution = str(context.run_config["data-distribution"])
+    fraction_evaluate = float(context.run_config["fraction-evaluate"])
     run_id = int(context.run_config["run-id"])
 
     if dataset_name == "uoft-cs/cifar10":
@@ -40,7 +41,7 @@ def train(msg: Message, context: Context):
     # Load the data
     partition_id = int(context.node_config["partition-id"])
     num_partitions = int(context.node_config["num-partitions"])
-    trainloader, _ = load_data(partition_id, num_partitions, dataset_name, data_distribution, run_id)
+    trainloader, _ = load_data(partition_id, num_partitions, dataset_name, data_distribution, fraction_evaluate, run_id)
     local_epochs = context.run_config["local-epochs"]
 
     # Slow client, for simulating stragglers in FedSaSync
@@ -79,6 +80,7 @@ def evaluate(msg: Message, context: Context):
     """Evaluate the model on local data."""
     # Load the model and initialize it with the received weights
     dataset_name = str(context.run_config["dataset-name"])
+    fraction_evaluate = float(context.run_config["fraction-evaluate"])
     run_id = int(context.run_config["run-id"])
 
     if dataset_name == "uoft-cs/cifar10":
@@ -97,7 +99,7 @@ def evaluate(msg: Message, context: Context):
     # Load the data
     partition_id = int(context.node_config["partition-id"])
     num_partitions = int(context.node_config["num-partitions"])
-    _, valloader = load_data(partition_id, num_partitions, dataset_name, run_id)
+    _, valloader = load_data(partition_id, num_partitions, dataset_name, fraction_evaluate, run_id)
 
     # Call the evaluation function
     eval_loss, eval_acc = test_fn(model, valloader, device, image)

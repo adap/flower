@@ -42,14 +42,17 @@ def main(grid: Grid, context: Context) -> None:
         raise ValueError(f"Unknown dataset: {dataset_name}")
     arrays = ArrayRecord(global_model.state_dict())
 
-    testloader = load_centralized_testloader(
-        dataset_name, batch_size=64
-    )
-
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    evaluate_fn = get_evaluate_fn(
-        global_model, testloader, device
-    )
+    if fraction_evaluate > 0.0:
+        evaluate_fn = None
+    else:
+        testloader = load_centralized_testloader(
+                dataset_name, batch_size=64
+        )
+        
+        evaluate_fn = get_evaluate_fn(
+            global_model, testloader, device
+        )
 
     # Initialize FedSaSync strategy
     strategy = FedSaSync(
