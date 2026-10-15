@@ -146,6 +146,7 @@ python _static/data_prep.py
 python _static/graphing.py          # For base FedSaSync experiments
 python _static/graphing_100.py      # For 100-client scalability experiments
 python _static/graphing_FedProx.py  # For FedProx reusability experiments
+```
 
 Results for CIFAR10 IID:
 
