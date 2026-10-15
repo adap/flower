@@ -17,7 +17,7 @@
 # pylint: disable=too-many-lines
 
 from abc import ABC, abstractmethod
-from collections.abc import Sequence
+from collections.abc import Collection, Sequence
 from datetime import datetime
 from typing import Literal
 
@@ -382,6 +382,110 @@ class CoreState(ABC):  # pylint: disable=R0904
         bool
             `True` if the session was completed. `False` if the session is missing,
             belongs to another account, is expired, or was already completed.
+        """
+
+    @abstractmethod
+    def store_messages(self, messages: Sequence[Message]) -> list[bool]:
+        """Store one or more Messages.
+
+        Each Message is accepted or rejected independently. If a Message has
+        already been stored, it is accepted without changing its delivery status.
+        A Message can be accepted before its body has been fully uploaded.
+
+        Parameters
+        ----------
+        messages : Sequence[Message]
+            The Messages to store.
+
+        Returns
+        -------
+        list[bool]
+            A list of booleans indicating whether each Message was accepted,
+            in the same order as the provided Messages.
+        """
+
+    @abstractmethod
+    def get_messages(
+        self,
+        *,
+        dst_node_id: int,
+        run_id: int | None = None,
+        reply_to_message_ids: Collection[str] | None = None,
+        limit: int | None = None,
+    ) -> list[Message]:
+        """Get pending Messages for the provided destination node ID.
+
+        If multiple filters are provided, they are combined using AND logic.
+        Retrieved Messages are not acknowledged and can be returned again by
+        subsequent calls until they are acknowledged, cancelled, or expired.
+
+        Parameters
+        ----------
+        dst_node_id : int
+            The destination node ID to filter Messages by.
+        run_id : int | None (default: None)
+            The run ID to filter by. If None, Messages from all runs are included.
+        reply_to_message_ids : Collection[str] | None (default: None)
+            The Message IDs to filter reply_to_message_id by. If None, no
+            correlation filter is applied. If empty, no Messages are returned.
+        limit : int | None (default: None)
+            Maximum number of Messages to return. If None, no limit is applied.
+
+        Returns
+        -------
+        list[Message]
+            A list of unexpired pending Messages matching the specified filters,
+            ordered by created_at and then message_id.
+
+        Raises
+        ------
+        ValueError
+            If limit is less than or equal to zero.
+        """
+
+    @abstractmethod
+    def acknowledge_messages(self, message_ids: Collection[str]) -> None:
+        """Acknowledge Messages based on the provided Message IDs.
+
+        Acknowledged Messages are no longer returned by get_messages. Their
+        bodies are released, but their metadata is retained.
+
+        If a Message ID is unknown or already acknowledged, it is ignored.
+
+        Parameters
+        ----------
+        message_ids : Collection[str]
+            The IDs of Messages to acknowledge after receiving them in full.
+            If empty, no Messages are acknowledged.
+        """
+
+    @abstractmethod
+    def cancel_messages(
+        self,
+        *,
+        message_ids: Collection[str] | None = None,
+        run_id: int | None = None,
+    ) -> None:
+        """Cancel pending Messages based on the specified filters.
+
+        If multiple filters are provided, they are combined using AND logic.
+        Cancelled Messages are no longer returned by get_messages. Their bodies
+        are released, but their metadata is retained.
+
+        If a Message is no longer pending, it is ignored.
+
+        Parameters
+        ----------
+        message_ids : Collection[str] | None (default: None)
+            The Message IDs to filter by. If None, no ID filter is applied.
+            If empty, no Messages are cancelled.
+        run_id : int | None (default: None)
+            The run ID to filter by. If None, no run filter is applied.
+
+        Raises
+        ------
+        ValueError
+            If neither message_ids nor run_id is supplied.
         """
 
     @abstractmethod
