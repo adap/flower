@@ -241,7 +241,6 @@ def get_run_series_events(
 ) -> GetRunSeriesEventsResponse:
     """Get locally available AgentApp events from the authenticated run series."""
     log(DEBUG, "Runtime.GetRunSeriesEvents")
-
     run = state.get_run(task.run_id)
     if run is None:
         raise FlowerError(
@@ -257,7 +256,17 @@ def get_run_series_events(
         if candidate_run is not None and candidate_run.series_id == run.series_id:
             agent_task_ids.append(candidate.task_id)
 
-    events = state.get_task_events(task_ids=agent_task_ids)
+    events = state.get_task_events(
+        task_ids=agent_task_ids,
+        event_types=request.event_types or None,
+        after_task_event_id=(
+            request.after_event_id if request.HasField("after_event_id") else None
+        ),
+        before_task_event_id=(
+            request.before_event_id if request.HasField("before_event_id") else None
+        ),
+        last_n=request.last_n or None,
+    )
     return GetRunSeriesEventsResponse(events=events)
 
 
