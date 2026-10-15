@@ -340,17 +340,18 @@ class PutCompactedContextRequest(google.protobuf.message.Message):
 
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
 
-    THROUGH_EVENT_ID_FIELD_NUMBER: builtins.int
-    TEXT_FIELD_NUMBER: builtins.int
-    through_event_id: builtins.int
-    text: builtins.str
+    CONTEXT_FIELD_NUMBER: builtins.int
+    @property
+    def context(self) -> flwr.proto.runseries_pb2.CompactedContext:
+        """The server assigns id, series_id, and created_at."""
+
     def __init__(
         self,
         *,
-        through_event_id: builtins.int = ...,
-        text: builtins.str = ...,
+        context: flwr.proto.runseries_pb2.CompactedContext | None = ...,
     ) -> None: ...
-    def ClearField(self, field_name: typing.Literal["text", b"text", "through_event_id", b"through_event_id"]) -> None: ...
+    def HasField(self, field_name: typing.Literal["context", b"context"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing.Literal["context", b"context"]) -> None: ...
 
 global___PutCompactedContextRequest = PutCompactedContextRequest
 
