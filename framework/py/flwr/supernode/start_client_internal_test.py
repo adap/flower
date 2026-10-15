@@ -556,7 +556,7 @@ def test_push_messages_pushes_each_requested_object_once() -> None:
     }
 
     state = Mock()
-    state.get_messages.return_value = [reply]
+    state.get_messages_legacy.return_value = [reply]
     state.get_message_processing_duration.return_value = 0.1
     object_store = Mock()
     object_store.get_object_tree.return_value = object_tree

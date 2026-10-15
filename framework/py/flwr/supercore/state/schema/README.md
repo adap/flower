@@ -25,6 +25,14 @@ erDiagram
     TIMESTAMP updated_at
   }
 
+  compacted_contexts {
+    BIGINT id PK
+    TIMESTAMP created_at
+    BIGINT series_id
+    TEXT text
+    BIGINT through_event_id
+  }
+
   connector {
     INTEGER connector_id PK
     VARCHAR config_json
