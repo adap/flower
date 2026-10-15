@@ -3038,6 +3038,33 @@ class SqlFileBasedTest(SqlInMemoryStateTest):
             raise exceptions[0]
         return results
 
+    def test_connector_credential_updates_serialize_across_replicas(self) -> None:
+        """A concurrent update must read the previous update's persisted credentials."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            state = self._create_shared_sql_states(self._shared_sql_database(tmpdir))[0]
+            connector_id = state.create_connector(
+                "@bob/fed-a", "calendar", '{"generation":0}', "{}", "account-a"
+            )
+            assert connector_id is not None
+
+            def rotate(credentials_json: str) -> str:
+                generation = json.loads(credentials_json)["generation"]
+                time.sleep(0.05)  # Allow the other replica to attempt a refresh.
+                return json.dumps({"generation": generation + 1})
+
+            results = self._query_states_in_parallel(
+                lambda replica: replica.update_connector_credentials(
+                    connector_id, rotate
+                )
+            )
+            assert sorted(json.loads(result)["generation"] for result in results) == [
+                1,
+                2,
+            ]
+            stored = state.get_connector_by_id(connector_id)
+            assert stored is not None
+            assert json.loads(stored.credentials_json) == {"generation": 2}
+
     # pylint: disable-next=too-many-locals
     def test_get_message_ins_claim_is_unique_across_replicas(self) -> None:
         """Ensure concurrent replicas cannot both claim the same instruction."""

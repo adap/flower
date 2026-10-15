@@ -18,7 +18,7 @@
 import hashlib
 import secrets
 from bisect import bisect_right
-from collections.abc import Collection, Sequence
+from collections.abc import Callable, Collection, Sequence
 from dataclasses import dataclass, replace
 from datetime import UTC, datetime, timedelta
 from logging import ERROR
@@ -582,6 +582,20 @@ class InMemoryCoreState(
         """Return a connector by ID, if present."""
         with self.lock_connector_store:
             return self.connector_store.get(connector_id)
+
+    def update_connector_credentials(
+        self, connector_id: int, update_credentials: Callable[[str], str]
+    ) -> str | None:
+        """Serialize credential refresh and persist its result atomically."""
+        with self.lock_connector_store:
+            connector = self.connector_store.get(connector_id)
+            if connector is None:
+                return None
+            credentials_json = update_credentials(connector.credentials_json)
+            self.connector_store[connector_id] = replace(
+                connector, credentials_json=credentials_json
+            )
+            return credentials_json
 
     def delete_connector(self, federation_id: str, connector_id: int) -> bool:
         """Delete a federation's connector if it exists."""

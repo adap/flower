@@ -17,7 +17,7 @@
 # pylint: disable=too-many-lines
 
 from abc import ABC, abstractmethod
-from collections.abc import Collection, Sequence
+from collections.abc import Callable, Collection, Sequence
 from datetime import datetime
 from typing import Literal
 
@@ -279,6 +279,17 @@ class CoreState(ABC):  # pylint: disable=R0904
     @abstractmethod
     def get_connector_by_id(self, connector_id: int) -> ConnectorRecord | None:
         """Return a connector by ID, if present."""
+
+    @abstractmethod
+    def update_connector_credentials(
+        self, connector_id: int, update_credentials: Callable[[str], str]
+    ) -> str | None:
+        """Atomically read, transform, and persist one connector's credentials.
+
+        Serialize updates, including the callback, so rotating refresh tokens are
+        never used concurrently. Return the persisted JSON, or ``None`` if the
+        connector no longer exists. Callback errors leave state unchanged.
+        """
 
     @abstractmethod
     def delete_connector(self, federation_id: str, connector_id: int) -> bool:

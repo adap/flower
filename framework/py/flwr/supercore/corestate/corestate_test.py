@@ -260,6 +260,39 @@ class StateTest(unittest.TestCase):  # pylint: disable=R0904
             [first_id],
         )
 
+    def test_update_connector_credentials(self) -> None:
+        """Persist credential updates and roll back failures without changing config."""
+        state = self.state_factory()
+        connector_id = state.create_connector(
+            "@bob/fed-a",
+            "calendar",
+            '{"token":"old"}',
+            '{"calendar":"work"}',
+            "account-a",
+        )
+        assert connector_id is not None
+
+        def rotate(credentials_json: str) -> str:
+            assert credentials_json == '{"token":"old"}'
+            return '{"token":"new"}'
+
+        assert (
+            state.update_connector_credentials(connector_id, rotate)
+            == '{"token":"new"}'
+        )
+        stored = state.get_connector_by_id(connector_id)
+        assert stored is not None
+        assert stored.credentials_json == '{"token":"new"}'
+        assert stored.config_json == '{"calendar":"work"}'
+
+        def fail(_credentials_json: str) -> str:
+            raise RuntimeError("refresh failed")
+
+        with self.assertRaisesRegex(RuntimeError, "refresh failed"):
+            state.update_connector_credentials(connector_id, fail)
+        assert state.get_connector_by_id(connector_id) == stored
+        assert state.update_connector_credentials(connector_id + 1, fail) is None
+
     def test_bind_and_get_run_connectors(self) -> None:
         """Run connector bindings should be deterministic and idempotent."""
         state = self.state_factory()

@@ -23,6 +23,7 @@ import os
 import tempfile
 import threading
 import unittest
+from collections.abc import Callable
 from datetime import UTC, datetime
 from unittest.mock import Mock, patch
 
@@ -83,6 +84,7 @@ from flwr.supercore.inflatable.inflatable_object import (
 from flwr.supercore.object_store import ObjectStoreFactory
 from flwr.supercore.servicer.runtime import runtime_handlers as core_runtime_handlers
 from flwr.supercore.task_process.connector import registry as connector_registry
+from flwr.supercore.task_process.connector.notion.definition import PROVIDER
 from flwr.supercore.task_process.connector.oauth import OAuthFlow
 from flwr.superlink.federation import NoOpFederationManager
 from flwr.superlink.servicer.runtime import runtime_handlers
@@ -288,6 +290,14 @@ class TestGetConnector(unittest.TestCase):
             credentials_json='{"access_token":"old-token","refresh_token":"refresh-secret"}',
             config_json="{}",
         )
+
+        def update_credentials(_connector_id: int, update: Callable[[str], str]) -> str:
+            connector = self.state.get_connector_by_id.return_value
+            credentials_json = update(connector.credentials_json)
+            connector.credentials_json = credentials_json
+            return credentials_json
+
+        self.state.update_connector_credentials.side_effect = update_credentials
         flow = Mock(spec=OAuthFlow)
         self.enterContext(
             patch.object(
@@ -295,23 +305,114 @@ class TestGetConnector(unittest.TestCase):
             )
         )
         self.enterContext(
-            patch.object(connector_registry, "get_oauth_flow", return_value=flow)
+            patch.dict(connector_registry.OAUTH_FLOWS, {"example": flow}, clear=True)
         )
         return Task(type=TaskType.CONNECTOR, connector_id=42, run_id=123), flow
 
-    def test_refreshes_credentials_on_superlink(self) -> None:
-        """Return refreshed credentials to the authorized connector task."""
+    def test_persists_rotated_refresh_tokens_for_successive_requests(self) -> None:
+        """Use the rotated token on the next refresh and preserve it if omitted."""
         task, flow = self._configure_refresh_connector()
-        flow.refresh_credentials.return_value = {"access_token": "fresh-token"}
+        flow.refresh_credentials.side_effect = OAuthFlow(
+            PROVIDER,
+            client_id="client",
+            client_secret="secret",
+            redirect_uri="https://example.com/callback",
+        ).refresh_credentials
+        token_response = Mock(status_code=200)
+        token_response.json.side_effect = [
+            {
+                "access_token": "first-token",
+                "refresh_token": "rotated-token",
+                "expires_in": 3600,
+            },
+            {"access_token": "second-token", "expires_in": 3600},
+        ]
+        with (
+            patch(
+                "flwr.supercore.task_process.connector.oauth.time", return_value=1000
+            ) as clock,
+            patch(
+                "flwr.supercore.task_process.connector.oauth.requests.post",
+                return_value=token_response,
+            ) as post,
+        ):
+            first = runtime_handlers.get_connector(
+                GetConnectorRequest(), self.state, task
+            )
+            clock.return_value = 5000
+            second = runtime_handlers.get_connector(
+                GetConnectorRequest(), self.state, task
+            )
 
-        response = runtime_handlers.get_connector(
-            GetConnectorRequest(), self.state, task
+        assert json.loads(first.credentials_json) == {
+            "access_token": "first-token",
+            "expires_in": 3600,
+            "expires_at": 4600,
+        }
+        assert json.loads(second.credentials_json) == {
+            "access_token": "second-token",
+            "expires_in": 3600,
+            "expires_at": 8600,
+        }
+        assert [
+            call.kwargs["json"]["refresh_token"] for call in post.call_args_list
+        ] == ["refresh-secret", "rotated-token"]
+        stored = json.loads(
+            self.state.get_connector_by_id.return_value.credentials_json
         )
+        assert stored == {
+            **json.loads(second.credentials_json),
+            "refresh_token": "rotated-token",
+        }
 
-        assert json.loads(response.credentials_json) == {"access_token": "fresh-token"}
-        flow.refresh_credentials.assert_called_once_with(
-            {"access_token": "old-token", "refresh_token": "refresh-secret"}
+    def test_access_token_only_without_oauth_configuration(self) -> None:
+        """Manually supplied access tokens do not require an OAuth application."""
+        task, flow = self._configure_refresh_connector()
+        self.state.get_connector_by_id.return_value.credentials_json = (
+            '{"access_token":"manual-token"}'
         )
+        with patch.dict(connector_registry.OAUTH_FLOWS, {}, clear=True):
+            response = runtime_handlers.get_connector(
+                GetConnectorRequest(), self.state, task
+            )
+
+        assert json.loads(response.credentials_json) == {"access_token": "manual-token"}
+        flow.refresh_credentials.assert_not_called()
+        self.state.update_connector_credentials.assert_not_called()
+
+    @parameterized.expand([(5000, False), (1060, True), (999, True)])  # type: ignore
+    def test_refreshes_only_near_expiry(
+        self, expires_at: int, should_refresh: bool
+    ) -> None:
+        """Reuse valid access tokens and keep refresh tokens out of every response."""
+        task, flow = self._configure_refresh_connector()
+        credentials = {
+            "access_token": "old-token",
+            "refresh_token": "refresh-secret",
+            "expires_at": expires_at,
+        }
+        self.state.get_connector_by_id.return_value.credentials_json = json.dumps(
+            credentials
+        )
+        flow.refresh_credentials.return_value = {
+            **credentials,
+            "access_token": "fresh-token",
+            "expires_at": 4600,
+        }
+        with patch(
+            "flwr.supercore.task_process.connector.oauth.time", return_value=1000
+        ):
+            response = runtime_handlers.get_connector(
+                GetConnectorRequest(), self.state, task
+            )
+
+        assert flow.refresh_credentials.call_count == int(should_refresh)
+        assert "refresh_token" not in json.loads(response.credentials_json)
+        assert json.loads(response.credentials_json)["access_token"] == (
+            "fresh-token" if should_refresh else "old-token"
+        )
+        if not should_refresh:
+            self.state.update_connector_credentials.assert_not_called()
 
     def test_refresh_failure_does_not_expose_credentials(self) -> None:
         """Hide refresh errors instead of returning stale or secret credentials."""

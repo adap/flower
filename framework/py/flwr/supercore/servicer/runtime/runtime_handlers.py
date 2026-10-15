@@ -257,7 +257,7 @@ def _validate_create_task_request(
             return
 
         try:
-            connector_registry.get_oauth_flow(connector_ref)
+            connector_registry.get_connector_tools(connector_ref)
         except ValueError as err:
             raise FlowerError(ApiErrorCode.CONNECTOR_NOT_FOUND, str(err)) from err
 

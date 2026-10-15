@@ -518,11 +518,11 @@ def _resolve_run_connector_refs(
     connector_ids: list[int] = []
     for connector_ref in canonical_refs:
         try:
-            connector_registry.get_oauth_flow(connector_ref)
+            connector_registry.get_connector_tools(connector_ref)
         except ValueError:
             raise FlowerError(
                 ApiErrorCode.CONNECTOR_NOT_FOUND,
-                f"OAuth flow for connector '{connector_ref}' was not found.",
+                f"Connector '{connector_ref}' was not found.",
             ) from None
         matching_connectors = state.get_connectors_by_ref(federation_id, connector_ref)
         if not matching_connectors:
