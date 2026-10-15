@@ -106,6 +106,32 @@ class OAuthFlow:
             if not pkce_verifier:
                 raise self._error("exchange failed")
             data["code_verifier"] = pkce_verifier
+        payload = self._request_token(data, failure="exchange failed")
+        credentials, config = self._parse_token_response(payload)
+        access_token = cast(str, credentials["access_token"])
+        name = self._connection_name(payload, access_token)
+        if name:
+            config["display_name"] = f"{self.display_name} · {name}"
+        return credentials, config
+
+    def refresh_credentials(self, credentials: JSONObject) -> JSONObject:
+        """Refresh on the OAuth service and return credentials for one task."""
+        refresh_token = credentials.get("refresh_token")
+        if refresh_token is None:
+            return credentials
+        if not isinstance(refresh_token, str) or not refresh_token:
+            raise self._error("refresh failed")
+        payload = self._request_token(
+            {"grant_type": "refresh_token", "refresh_token": refresh_token},
+            failure="refresh failed",
+        )
+        refreshed, _ = self._parse_token_response(payload)
+        # Refresh tokens stay with the service that owns the OAuth application.
+        refreshed.pop("refresh_token", None)
+        return refreshed
+
+    def _request_token(self, data: dict[str, str], *, failure: str) -> JSONObject:
+        """Send a token request using the service's OAuth client configuration."""
         auth = None
         if self._oauth.token_auth_method == "client_secret_basic":
             auth = (self._client_id, self._client_secret)
@@ -132,22 +158,16 @@ class OAuthFlow:
                     timeout=30.0,
                 )
         except requests.RequestException:
-            raise self._error("exchange failed") from None
+            raise self._error(failure) from None
         if response.status_code >= 400:
-            raise self._error("exchange failed")
+            raise self._error(failure)
         try:
             response_payload = response.json()
         except ValueError:
             raise self._error("returned an invalid response") from None
         if not isinstance(response_payload, dict):
             raise self._error("returned an invalid response")
-        payload = cast(JSONObject, response_payload)
-        credentials, config = self._parse_token_response(payload)
-        access_token = cast(str, credentials["access_token"])
-        name = self._connection_name(payload, access_token)
-        if name:
-            config["display_name"] = f"{self.display_name} · {name}"
-        return credentials, config
+        return cast(JSONObject, response_payload)
 
     def _connection_name(self, token_payload: JSONObject, access_token: str) -> str:
         """Read the connection name from the token or provider identity."""

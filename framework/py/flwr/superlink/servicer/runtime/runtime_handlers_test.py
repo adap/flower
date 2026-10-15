@@ -18,13 +18,17 @@
 
 
 import hashlib
+import json
 import os
 import tempfile
 import threading
+import traceback
 import unittest
+from dataclasses import replace
 from datetime import UTC, datetime
 from unittest.mock import Mock, patch
 
+import requests
 from parameterized import parameterized
 
 from flwr.app import ConfigRecord, Context, Error, Message, RecordDict
@@ -81,6 +85,14 @@ from flwr.supercore.inflatable.inflatable_object import (
 )
 from flwr.supercore.object_store import ObjectStoreFactory
 from flwr.supercore.servicer.runtime import runtime_handlers as core_runtime_handlers
+from flwr.supercore.task_process.connector import registry as connector_registry
+from flwr.supercore.task_process.connector.definition import (
+    ConnectorDefinition,
+    OAuth2Definition,
+    ProviderDefinition,
+)
+from flwr.supercore.task_process.connector.oauth import OAuthFlow
+from flwr.supercore.typing import ConnectorRecord
 from flwr.superlink.federation import NoOpFederationManager
 from flwr.superlink.servicer.runtime import runtime_handlers
 
@@ -274,6 +286,173 @@ class TestGetConnector(unittest.TestCase):
     def setUp(self) -> None:
         """Create mocked state."""
         self.state = Mock(spec=LinkState)
+
+    def _configure_refresh_connector(self) -> tuple[Task, OAuthFlow]:
+        """Configure a fake provider that opts into SuperLink-owned refresh."""
+        provider = ProviderDefinition(
+            ref="example",
+            display_name="Example",
+            description="Example OAuth connector.",
+            actions=(),
+            oauth=OAuth2Definition(
+                authorization_url="https://provider.example/authorize",
+                token_url="https://provider.example/token",
+                client_id_env="EXAMPLE_CLIENT_ID",
+                client_secret_env="EXAMPLE_CLIENT_SECRET",
+                redirect_uri_env="EXAMPLE_REDIRECT_URI",
+                token_auth_method="client_secret_post",
+                expected_token_type="Bearer",
+                refresh_before_use=True,
+            ),
+        )
+        connector = ConnectorDefinition.from_provider(provider, executors={})
+        self.enterContext(
+            patch.dict(
+                connector_registry._CONNECTORS_BY_REF,  # pylint: disable=protected-access
+                {"example": connector},
+            )
+        )
+        flow = OAuthFlow(
+            provider,
+            client_id="server-client-id",
+            client_secret="server-client-secret",
+            redirect_uri="https://example.com/callback",
+        )
+        self.state.get_run_info.return_value = [Mock(federation_id="@bob/fed-a")]
+        self.state.get_run_connector_ids.return_value = [42]
+        self.state.get_connector_by_id.return_value = ConnectorRecord(
+            connector_id=42,
+            federation_id="@bob/fed-a",
+            connector_ref="example",
+            credentials_json='{"access_token":"old-token","refresh_token":"refresh-secret"}',
+            config_json='{"display_name":"Example account"}',
+        )
+        return Task(type=TaskType.CONNECTOR, connector_id=42, run_id=123), flow
+
+    def test_refreshes_credentials_on_superlink(self) -> None:
+        """Return fresh task credentials using only SuperLink's client settings."""
+        task, flow = self._configure_refresh_connector()
+        token_response = Mock(status_code=200)
+        token_response.json.return_value = {
+            "access_token": "fresh-token",
+            "token_type": "Bearer",
+            "expires_in": 3600,
+            "refresh_token": "refresh-secret",
+        }
+        with (
+            patch.dict(connector_registry.OAUTH_FLOWS, {"example": flow}),
+            patch.dict(os.environ, {}, clear=True),
+            patch(
+                "flwr.supercore.task_process.connector.oauth.requests.post",
+                return_value=token_response,
+            ) as refresh,
+        ):
+            response = runtime_handlers.get_connector(
+                GetConnectorRequest(), self.state, task
+            )
+        assert json.loads(response.credentials_json) == {
+            "access_token": "fresh-token",
+            "token_type": "Bearer",
+            "expires_in": 3600,
+        }
+        assert response.connector_ref == "example"
+        assert response.config_json == '{"display_name":"Example account"}'
+        assert "secret" not in response.credentials_json
+        refresh.assert_called_once_with(
+            "https://provider.example/token",
+            auth=None,
+            headers={},
+            data={
+                "grant_type": "refresh_token",
+                "refresh_token": "refresh-secret",
+                "client_id": "server-client-id",
+                "client_secret": "server-client-secret",
+            },
+            timeout=30.0,
+        )
+
+    @parameterized.expand([("http_error", 400), ("invalid_response", 200)])  # type: ignore
+    def test_refresh_failure_does_not_return_stale_credentials(
+        self, _name: str, status_code: int
+    ) -> None:
+        """Fail the credential request when the provider's token response is invalid."""
+        task, flow = self._configure_refresh_connector()
+        token_response = Mock(status_code=status_code)
+        token_response.json.return_value = {"error": "invalid_grant refresh-secret"}
+        with (
+            patch.dict(connector_registry.OAUTH_FLOWS, {"example": flow}),
+            patch(
+                "flwr.supercore.task_process.connector.oauth.requests.post",
+                return_value=token_response,
+            ),
+            self.assertRaises(FlowerError) as error,
+        ):
+            runtime_handlers.get_connector(GetConnectorRequest(), self.state, task)
+        assert error.exception.code == ApiErrorCode.CONNECTOR_FAILURE
+        assert "refresh-secret" not in str(error.exception)
+
+    def test_refresh_network_error_does_not_expose_secrets(self) -> None:
+        """Suppress secret-bearing HTTP exceptions at the credential boundary."""
+        task, flow = self._configure_refresh_connector()
+        with (
+            patch.dict(connector_registry.OAUTH_FLOWS, {"example": flow}),
+            patch(
+                "flwr.supercore.task_process.connector.oauth.requests.post",
+                side_effect=requests.ConnectionError(
+                    "server-client-secret refresh-secret old-token"
+                ),
+            ),
+            self.assertRaises(FlowerError) as error,
+        ):
+            runtime_handlers.get_connector(GetConnectorRequest(), self.state, task)
+        assert error.exception.code == ApiErrorCode.CONNECTOR_FAILURE
+        diagnostic = "".join(traceback.format_exception(error.exception))
+        assert "secret" not in diagnostic
+        assert "old-token" not in diagnostic
+
+    def test_does_not_refresh_an_unbound_connector(self) -> None:
+        """Authorize the task before refreshing or releasing any credentials."""
+        task, flow = self._configure_refresh_connector()
+        self.state.get_run_connector_ids.return_value = []
+        with (
+            patch.dict(connector_registry.OAUTH_FLOWS, {"example": flow}),
+            patch(
+                "flwr.supercore.task_process.connector.oauth.requests.post"
+            ) as refresh,
+            self.assertRaises(FlowerError) as error,
+        ):
+            runtime_handlers.get_connector(GetConnectorRequest(), self.state, task)
+        assert error.exception.code == ApiErrorCode.CONNECTOR_NOT_FOUND
+        refresh.assert_not_called()
+
+    def test_refresh_requires_superlink_oauth_configuration(self) -> None:
+        """Never release stored refresh tokens when server settings are absent."""
+        task, _ = self._configure_refresh_connector()
+        with (
+            patch.dict(connector_registry.OAUTH_FLOWS, {}, clear=True),
+            self.assertRaises(FlowerError) as error,
+        ):
+            runtime_handlers.get_connector(GetConnectorRequest(), self.state, task)
+        assert error.exception.code == ApiErrorCode.CONNECTOR_FAILURE
+
+    def test_access_token_only_credentials_require_no_refresh(self) -> None:
+        """Continue accepting manually supplied access tokens."""
+        task, flow = self._configure_refresh_connector()
+        self.state.get_connector_by_id.return_value = replace(
+            self.state.get_connector_by_id.return_value,
+            credentials_json='{"access_token":"manual-token"}',
+        )
+        with (
+            patch.dict(connector_registry.OAUTH_FLOWS, {"example": flow}),
+            patch(
+                "flwr.supercore.task_process.connector.oauth.requests.post"
+            ) as refresh,
+        ):
+            response = runtime_handlers.get_connector(
+                GetConnectorRequest(), self.state, task
+            )
+        assert json.loads(response.credentials_json) == {"access_token": "manual-token"}
+        refresh.assert_not_called()
 
     def test_returns_authenticated_task_credentials(self) -> None:
         """GetConnector should return the run owner's matching credentials."""

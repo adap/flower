@@ -68,6 +68,8 @@ from flwr.supercore.constant import AUTOMATION_BATCH_LIMIT, TaskType
 from flwr.supercore.error import ApiErrorCode, FlowerError
 from flwr.supercore.object_store import NoObjectInStoreError
 from flwr.supercore.servicer.runtime import runtime_handlers as core_runtime_handlers
+from flwr.supercore.task_process.connector import registry as connector_registry
+from flwr.supercore.utils import strict_json_dumps, strict_json_loads
 from flwr.superlink.servicer.control.control_handlers import process_due_automations
 from flwr.superlink.servicer.control.control_handlers import (
     start_automation as start_control_automation,
@@ -231,10 +233,26 @@ def get_connector(
     if connector is None:
         raise FlowerError(ApiErrorCode.CONNECTOR_NOT_FOUND, "Connector not found.")
 
+    credentials_json = connector.credentials_json
+    if connector_registry.requires_connector_refresh(connector.connector_ref):
+        try:
+            flow = connector_registry.get_oauth_flow(connector.connector_ref)
+            credentials = strict_json_loads(credentials_json)
+            if not isinstance(credentials, dict):
+                raise ValueError("Connector credentials must be an object.")
+            credentials_json = strict_json_dumps(
+                flow.refresh_credentials(credentials), compact=True
+            )
+        except Exception:  # pylint: disable=broad-exception-caught
+            raise FlowerError(
+                ApiErrorCode.CONNECTOR_FAILURE,
+                "Connector credentials could not be refreshed.",
+            ) from None
+
     return GetConnectorResponse(
         connector_id=connector.connector_id,
         connector_ref=connector.connector_ref,
-        credentials_json=connector.credentials_json,
+        credentials_json=credentials_json,
         config_json=connector.config_json,
     )
 

@@ -80,6 +80,7 @@ class OAuth2Definition:
     token_response_path: tuple[str, ...] = ()
     success_field: str | None = None
     use_pkce: bool = False
+    refresh_before_use: bool = False
     authorization_params: Mapping[str, str] = field(default_factory=dict)
     token_request_format: Literal["form", "json"] = "form"
     token_headers: Mapping[str, str] = field(default_factory=dict)
