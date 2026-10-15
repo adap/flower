@@ -28,6 +28,7 @@ from typing import cast
 from uuid import uuid4
 
 from google.protobuf.json_format import ParseDict
+from httpx import HTTPStatusError
 
 from flwr.agentapp import AgentConnectors, AgentEvents, AgentGrid, AgentSession
 from flwr.app import Message
@@ -46,6 +47,7 @@ from flwr.proto.task_pb2 import TaskEvent
 
 # pylint: enable=E0611
 from flwr.supercore.constant import TaskType
+from flwr.supercore.error import ApiErrorCode, FlowerError
 from flwr.supercore.json_message.connector_message import (
     ConnectorRequest,
     ConnectorResponse,
@@ -286,9 +288,19 @@ class AgentRuntime:
         tools = get_connector_tools(connector_ref)
         if get_connector_discovery_tool(connector_ref) is None:
             return tools
-        discovered = deepcopy(
-            self._discover_connector_tools(connector_ref, refresh=refresh)
-        )
+        try:
+            discovered = deepcopy(
+                self._discover_connector_tools(connector_ref, refresh=refresh)
+            )
+        except HTTPStatusError as exc:
+            error = FlowerError.from_json(exc.response.text)
+            if (
+                exc.response.status_code == 403
+                and error is not None
+                and error.code == ApiErrorCode.RUNTIME_CONNECTOR_NOT_AVAILABLE
+            ):
+                return []
+            raise
         for tool in discovered:
             tool["name"] = cast(str, tool["name"]).lower()
         return tools + discovered

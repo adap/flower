@@ -16,6 +16,7 @@
 
 from unittest.mock import Mock, call, patch
 
+import httpx
 import pytest
 
 from flwr.agentapp import RUN_SUMMARY_EVENT_TYPES
@@ -36,6 +37,7 @@ from flwr.proto.runtime_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.task_pb2 import TaskEvent  # pylint: disable=E0611
 from flwr.supercore.constant import TaskType
+from flwr.supercore.error import ApiErrorCode
 from flwr.supercore.json_message.connector_message import ConnectorResponse
 from flwr.supercore.task_identity import TaskIdentity
 from flwr.supercore.task_process.connector import registry as connector_registry
@@ -499,3 +501,46 @@ def test_runtime_discovers_and_caches_tools() -> None:
         discover.assert_called_once()
         connectors.tools(["example"], refresh=True)
         assert discover.call_count == 2
+
+
+@pytest.mark.parametrize(
+    "status,code,unavailable",
+    [
+        (403, ApiErrorCode.RUNTIME_CONNECTOR_NOT_AVAILABLE, True),
+        (403, ApiErrorCode.NO_PERMISSIONS, False),
+        (500, ApiErrorCode.RUNTIME_CONNECTOR_NOT_AVAILABLE, False),
+    ],
+)
+def test_discovery_skips_only_connectors_unavailable_to_run(
+    status: int, code: int, unavailable: bool
+) -> None:
+    """Optional discovery must not abort an Agent without connector access."""
+    response = httpx.Response(
+        status,
+        json={"code": code, "detail": "Connector is not available to this run."},
+        request=httpx.Request("POST", "https://runtime/v1/runtime/create-task"),
+    )
+    error = httpx.HTTPStatusError(
+        "Discovery failed", request=response.request, response=response
+    )
+    stub = Mock()
+    stub.CreateTask.side_effect = error
+    runtime = AgentRuntime(
+        stub=stub,
+        run_id=123,
+        task_id=789,
+        start_run_request=StartRunRequest(),
+        events=Mock(),
+    )
+    connectors = RuntimeAgentConnectors(runtime)
+    if unavailable:
+        assert connectors.tools(
+            ["github", "web_search"]
+        ) == connector_registry.get_connector_tools("web_search")
+    else:
+        with pytest.raises(httpx.HTTPStatusError) as raised:
+            connectors.tools(["github"])
+        assert raised.value is error
+    stub.CreateTask.assert_called_once_with(
+        CreateTaskRequest(type=TaskType.CONNECTOR, connector_ref="github")
+    )
