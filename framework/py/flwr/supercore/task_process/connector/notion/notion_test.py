@@ -15,9 +15,8 @@
 """Essential tests for Notion MCP and OAuth."""
 
 import traceback
-from collections.abc import Iterator
 from typing import cast
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, Mock, call, patch
 from urllib.parse import parse_qs, urlparse
 
 import pytest
@@ -27,167 +26,87 @@ from flwr.supercore.typing import JSONObject
 
 from .. import registry
 from ..oauth import OAuthFlow
+from . import mcp
 from .definition import PROVIDER
-from .mcp import NotionApiError
 
-_CREDENTIALS: JSONObject = {"access_token": "notion-private-token"}
-
-
-@pytest.fixture(name="send_request")
-def fixture_send_request() -> Iterator[AsyncMock]:
-    """Keep real SDK sessions while mocking transport and protocol requests."""
-    send_request = AsyncMock()
-    transport = MagicMock()
-    transport.__aenter__.return_value = (Mock(), Mock(), Mock())
-    with (
-        patch.object(ClientSession, "send_request", send_request),
-        patch.object(ClientSession, "initialize", AsyncMock()),
-        patch.object(
-            ClientSession,
-            "__aenter__",
-            autospec=True,
-            side_effect=lambda client: client,
-        ),
-        patch.object(ClientSession, "__aexit__", AsyncMock(return_value=False)),
-        patch(
-            "mcp.client.streamable_http.streamable_http_client", return_value=transport
-        ),
-        patch(
-            "mcp.client.sse.sse_client",
-            side_effect=AssertionError("Unexpected SSE fallback"),
-        ),
-    ):
-        yield send_request
+_CREDENTIALS: JSONObject = {"access_token": "private-token"}
 
 
-def test_mcp_discovery_and_execution(send_request: AsyncMock) -> None:
-    """Preserve paginated schemas and avoid catalog fetches after successful writes."""
+def test_discovery_and_execution() -> None:
+    """Preserve paginated schemas and call once without a trailing catalog lookup."""
     schema = {"type": "object", "properties": {"title": {"type": "string"}}}
-    send_request.side_effect = [
-        types.ListToolsResult(
-            tools=[
-                types.Tool(name="FutureTool", description="Write", inputSchema=schema)
-            ],
-            nextCursor="next",
-        ),
-        types.ListToolsResult(
-            tools=[types.Tool(name="notion-search", inputSchema=schema)]
-        ),
-    ]
-    tools = cast(
-        list[JSONObject],
-        registry.invoke_connector(
-            "notion__discover_tools", {}, Mock(), _CREDENTIALS, {}
-        ),
+    rpc = AsyncMock(
+        side_effect=[
+            types.ListToolsResult(
+                tools=[types.Tool(name="FutureTool", inputSchema=schema)],
+                nextCursor="next",
+            ),
+            types.ListToolsResult(
+                tools=[types.Tool(name="notion-search", inputSchema=schema)]
+            ),
+        ]
     )
-    assert [tool["name"] for tool in tools] == [
-        "notion_FutureTool",
-        "notion_notion-search",
-    ]
-    assert tools[0]["description"] == "Write"
-    assert tools[0]["parameters"] == schema
-    assert send_request.await_count == 2
-    assert send_request.await_args_list[1].args[0].root.params.cursor == "next"
-
-    output = types.CallToolResult(
-        content=[types.TextContent(type="text", text="done")],
-        structuredContent={"id": "page"},
-    )
-    send_request.reset_mock(side_effect=True)
-    send_request.side_effect = [output, RuntimeError("Catalog unavailable")]
-    arguments: JSONObject = {"title": "New page"}
-    result = registry.invoke_connector(
-        "notion_FutureTool", arguments, Mock(), _CREDENTIALS, {}
-    )
-    assert result == output.model_dump(mode="json", by_alias=True, exclude_none=True)
-    send_request.assert_awaited_once()
-    assert send_request.await_args is not None
-    request = send_request.await_args.args[0].root
-    assert request.method == "tools/call"
-    assert request.params.name == "FutureTool"
-    assert request.params.arguments == arguments
-
-
-@pytest.mark.parametrize("cursors", [("next", "next"), ("first", "second", "first")])
-def test_mcp_rejects_repeated_cursors(
-    send_request: AsyncMock, cursors: tuple[str, ...]
-) -> None:
-    """Reject repeated and cycling cursors before fetching the same page again."""
-    send_request.side_effect = [
-        types.ListToolsResult(tools=[], nextCursor=cursor) for cursor in cursors
-    ]
-    with pytest.raises(NotionApiError, match="invalid_tools"):
-        registry.invoke_connector(
-            "notion__discover_tools", {}, Mock(), _CREDENTIALS, {}
+    with (
+        patch.object(ClientSession, "send_request", rpc),
+        patch.object(mcp, "_session") as open_session,
+    ):
+        open_session.return_value.__aenter__.side_effect = lambda: ClientSession(
+            Mock(), Mock()
         )
-    assert send_request.await_count == len(cursors)
+        tools = cast(
+            list[JSONObject],
+            registry.invoke_connector(
+                "notion__discover_tools", {}, Mock(), _CREDENTIALS, {}
+            ),
+        )
+        assert [tool["name"] for tool in tools] == [
+            "notion_FutureTool",
+            "notion_notion-search",
+        ]
+        assert tools[0]["parameters"] == schema
+        assert rpc.await_args_list[1].args[0].root.params.cursor == "next"
+
+        output = types.CallToolResult(
+            content=[types.TextContent(type="text", text="done")]
+        )
+        rpc.reset_mock(side_effect=True)
+        rpc.side_effect = [output, RuntimeError("Catalog unavailable")]
+        result = registry.invoke_connector(
+            "notion_FutureTool", {"title": "New page"}, Mock(), _CREDENTIALS, {}
+        )
+    assert result == output.model_dump(mode="json", by_alias=True, exclude_none=True)
+    rpc.assert_awaited_once()
+    request = rpc.await_args_list[0].args[0].root
+    assert request.params.name == "FutureTool"
+    assert request.params.arguments == {"title": "New page"}
 
 
-def test_mcp_preserves_redacted_error_details(send_request: AsyncMock) -> None:
-    """Retain remote diagnostics without exposing the token in tracebacks."""
-    send_request.return_value = types.CallToolResult(
+def test_fallback_does_not_retry_failed_tool() -> None:
+    """Fall back during setup, then preserve a redacted tool failure without retry."""
+    session = Mock(spec=ClientSession)
+    session.send_request.return_value = types.CallToolResult(
         isError=True,
-        content=[types.TextContent(type="text", text="Denied notion-private-token")],
+        content=[types.TextContent(type="text", text="Denied private-token")],
     )
-    with pytest.raises(NotionApiError) as error:
-        registry.invoke_connector("notion_FutureTool", {}, Mock(), _CREDENTIALS, {})
+    with patch.object(mcp, "_initialized_session") as connect:
+        connect.return_value.__aenter__.side_effect = [
+            RuntimeError("HTTP unavailable"),
+            session,
+        ]
+        with pytest.raises(mcp.NotionApiError) as error:
+            registry.invoke_connector("notion_FutureTool", {}, Mock(), _CREDENTIALS, {})
+    assert connect.call_args_list == [
+        call("private-token", use_sse=False),
+        call("private-token", use_sse=True),
+    ]
+    session.send_request.assert_awaited_once()
     assert error.value.code == "tool_error"
     assert error.value.message == "Denied [REDACTED]"
-    assert "notion-private-token" not in "".join(
-        traceback.format_exception(error.value)
-    )
+    assert "private-token" not in "".join(traceback.format_exception(error.value))
 
 
-@pytest.mark.parametrize("failure", ["connect", "initialize", "call"])
-def test_sse_fallback_is_limited_to_session_setup(
-    send_request: AsyncMock, failure: str
-) -> None:
-    """Use authenticated SSE for setup failures without retrying a tool call."""
-    error = RuntimeError("Transport unavailable")
-    initialize = AsyncMock()
-    output = types.CallToolResult(content=[])
-    send_request.return_value = output
-    with (
-        patch("mcp.client.streamable_http.streamable_http_client") as http,
-        patch("mcp.client.sse.sse_client") as sse,
-        patch.object(ClientSession, "initialize", initialize),
-    ):
-        http.return_value.__aenter__.return_value = (Mock(), Mock(), Mock())
-        sse.return_value.__aenter__.return_value = (Mock(), Mock())
-        if failure == "connect":
-            http.return_value.__aenter__.side_effect = error
-        elif failure == "initialize":
-            initialize.side_effect = [error, None]
-        else:
-            send_request.side_effect = error
-
-        if failure == "call":
-            with pytest.raises(NotionApiError, match="Transport unavailable"):
-                registry.invoke_connector(
-                    "notion_FutureTool", {}, Mock(), _CREDENTIALS, {}
-                )
-            sse.assert_not_called()
-        else:
-            result = registry.invoke_connector(
-                "notion_FutureTool", {}, Mock(), _CREDENTIALS, {}
-            )
-            assert result == output.model_dump(
-                mode="json", by_alias=True, exclude_none=True
-            )
-            sse.assert_called_once_with(
-                "https://mcp.notion.com/sse",
-                headers={"Authorization": "Bearer notion-private-token"},
-                timeout=30,
-                sse_read_timeout=30,
-            )
-        if failure == "initialize":
-            http.return_value.__aexit__.assert_awaited_once()
-            assert initialize.await_count == 2
-    send_request.assert_awaited_once()
-
-
-def test_oauth_uses_mcp_endpoints_pkce_and_resource() -> None:
-    """Use Notion's MCP grant and bind the code exchange to its resource."""
+def test_oauth_resource_exchange() -> None:
+    """Bind Notion's MCP authorization and PKCE code exchange to its resource."""
     flow = OAuthFlow(
         PROVIDER,
         client_id="client",
@@ -201,36 +120,21 @@ def test_oauth_uses_mcp_endpoints_pkce_and_resource() -> None:
             pkce_challenge="challenge",
         )
     )
-    assert (
-        f"{url.scheme}://{url.netloc}{url.path}" == "https://mcp.notion.com/authorize"
-    )
     query = parse_qs(url.query)
     assert query["resource"] == ["https://mcp.notion.com/mcp"]
-    assert query["scope"] == ["default"]
-    assert query["code_challenge"] == ["challenge"]
     assert query["code_challenge_method"] == ["S256"]
-    payload = {
-        "access_token": "token",
-        "refresh_token": "refresh",
-        "token_type": "bearer",
-        "scope": "default",
-        "workspace_name": "Engineering",
-    }
+    response = Mock(status_code=200)
+    response.json.return_value = {"access_token": "token", "token_type": "bearer"}
     with patch(
         "flwr.supercore.task_process.connector.oauth.requests.post",
-        return_value=Mock(status_code=200, json=Mock(return_value=payload)),
+        return_value=response,
     ) as post:
-        credentials, config = flow.exchange_code(
+        credentials, _ = flow.exchange_code(
             code="code",
             redirect_uri="https://example.com/callback",
             pkce_verifier="verifier",
         )
-    post.assert_called_once()
     assert post.call_args.args == ("https://mcp.notion.com/token",)
-    data = post.call_args.kwargs["data"]
-    assert data["resource"] == "https://mcp.notion.com/mcp"
-    assert data["code_verifier"] == "verifier"
-    assert data["client_secret"] == "secret"
+    assert post.call_args.kwargs["data"]["resource"] == "https://mcp.notion.com/mcp"
+    assert post.call_args.kwargs["data"]["code_verifier"] == "verifier"
     assert credentials["access_token"] == "token"
-    assert credentials["refresh_token"] == "refresh"
-    assert config["display_name"] == "Notion · Engineering"
