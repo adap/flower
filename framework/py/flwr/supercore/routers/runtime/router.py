@@ -39,6 +39,8 @@ from flwr.proto.runtime_pb2 import (  # pylint: disable=E0611
     AcquireTaskResponse,
     CreateTaskRequest,
     CreateTaskResponse,
+    GetCompactedContextsRequest,
+    GetCompactedContextsResponse,
     GetConnectorRequest,
     GetConnectorResponse,
     GetNodesRequest,
@@ -233,6 +235,17 @@ def get_run_series_events(
 ) -> GetRunSeriesEventsResponse:
     """Get events from the authenticated task's run series."""
     return handlers.get_run_series_events(request, state, task)
+
+
+@router.post("/get-compacted-contexts")
+def get_compacted_contexts(
+    request: Annotated[GetCompactedContextsRequest, PROTOBUF_REQUEST_DEPENDENCY],
+    state: RuntimeStateDependency,
+    handlers: RuntimeHandlersDependency,
+    task: TaskDependency,
+) -> GetCompactedContextsResponse:
+    """Get summaries from the authenticated task's run series."""
+    return handlers.get_compacted_contexts(request, state, task)
 
 
 @router.post("/pull-task-message")

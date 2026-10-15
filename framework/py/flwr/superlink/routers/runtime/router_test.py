@@ -27,6 +27,8 @@ from pytest import MonkeyPatch
 
 from flwr.proto.runtime_pb2 import (  # pylint: disable=E0611
     AcquireTaskRequest,
+    GetCompactedContextsRequest,
+    GetCompactedContextsResponse,
     GetNodesRequest,
     GetNodesResponse,
     GetRunSeriesEventsRequest,
@@ -129,7 +131,7 @@ def test_all_runtime_routes_have_protobuf_request_types() -> None:
         if route_key[1].startswith("/v1/runtime/")
     }
 
-    assert len(route_keys) == 19
+    assert len(route_keys) == 20
     assert route_keys == runtime_request_types
 
 
@@ -203,6 +205,25 @@ def test_get_run_series_events_delegates_with_authenticated_task(
 
     assert response.status_code == 200
     assert GetRunSeriesEventsResponse.FromString(response.content) == expected
+    handler.assert_called_once_with(request, state, task)
+
+
+def test_get_compacted_contexts_delegates_with_authenticated_task(
+    monkeypatch: MonkeyPatch,
+) -> None:
+    """The summary route passes the authenticated task to its handler."""
+    state = Mock(spec=LinkState)
+    task = Task(task_id=123)
+    client = TestClient(_create_app(state, task=task))
+    request = GetCompactedContextsRequest()
+    expected = GetCompactedContextsResponse()
+    handler = Mock(return_value=expected)
+    monkeypatch.setattr(runtime_handlers, "get_compacted_contexts", handler)
+
+    response = _post(client, "/v1/runtime/get-compacted-contexts", request)
+
+    assert response.status_code == 200
+    assert GetCompactedContextsResponse.FromString(response.content) == expected
     handler.assert_called_once_with(request, state, task)
 
 

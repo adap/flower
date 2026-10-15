@@ -26,10 +26,12 @@ from flwr.proto.log_pb2 import (  # pylint: disable=E0611
     PushLogsRequest,
     PushLogsResponse,
 )
+from flwr.proto.runseries_pb2 import CompactedContext  # pylint: disable=E0611
 from flwr.proto.runtime_pb2 import (  # pylint: disable=E0611
     AcquireTaskRequest,
     CreateTaskRequest,
     CreateTaskResponse,
+    GetCompactedContextsRequest,
     PullTaskMessageRequest,
     PushTaskEventsRequest,
     PushTaskEventsResponse,
@@ -53,6 +55,30 @@ class TestRuntimeHandlers(unittest.TestCase):  # pylint: disable=R0904
         """Set up test fixture."""
         self.state = Mock()
         self.state.get_tasks.return_value = []
+
+    def test_get_compacted_contexts(self) -> None:
+        """Apply the default limit and reject zero."""
+        context = CompactedContext(
+            id=1, series_id=42, through_event_id=9, text="Summary"
+        )
+        self.state.get_compacted_contexts.return_value = [context]
+
+        got = runtime_handlers.get_compacted_contexts(
+            GetCompactedContextsRequest(), self.state, 42
+        )
+        self.assertEqual(list(got.contexts), [context])
+        self.state.get_compacted_contexts.assert_called_once_with(
+            42, limit=1, before_context_id=None
+        )
+
+        with self.assertRaises(FlowerError) as error:
+            runtime_handlers.get_compacted_contexts(
+                GetCompactedContextsRequest(limit=0), self.state, 42
+            )
+        self.assertEqual(
+            error.exception.code,
+            ApiErrorCode.RUNTIME_INVALID_COMPACTED_CONTEXT_REQUEST,
+        )
 
     def _create_connector_task(self, connector_ref: str) -> CreateTaskResponse:
         """Create a connector task as an authenticated AgentApp task."""
