@@ -12,19 +12,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Discover and call GitHub's official remote MCP tools."""
+"""Discover and execute tools through GitHub's official MCP server."""
+
+from __future__ import annotations
 
 import asyncio
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 from datetime import timedelta
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 import httpx
 
-from flwr.supercore.typing import JSONObject, JSONValue
+from flwr.supercore.typing import JSONObject
 
+from ..definition import ActionAccess, ActionDefinition, ConnectorExecutionContext
 from ..http import ConnectorApiError
 
-_URL = "https://api.githubcopilot.com/mcp/"
+if TYPE_CHECKING:
+    from mcp import ClientSession
+
+_MCP_URL = "https://api.githubcopilot.com/mcp/"
 
 
 class GitHubApiError(ConnectorApiError):
@@ -33,15 +41,37 @@ class GitHubApiError(ConnectorApiError):
     provider = "GitHub"
 
 
-def request(
-    name: str | None, arguments: JSONObject, credentials: JSONObject
-) -> JSONValue:
-    """Discover tools or call one, forwarding errors without exposing the token."""
-    token = credentials.get("access_token")
+@asynccontextmanager
+async def _session(context: ConnectorExecutionContext) -> AsyncIterator[ClientSession]:
+    """Open an authenticated MCP session using this task's bound credentials."""
+    # pylint: disable=import-outside-toplevel
+    try:
+        from mcp import ClientSession
+        from mcp.client.streamable_http import streamable_http_client
+    except ModuleNotFoundError:
+        raise ImportError(
+            "GitHub MCP requires the optional 'flwr[agent]' dependencies."
+        ) from None
+
+    token = context.credentials.get("access_token")
     if not isinstance(token, str) or not token:
         raise GitHubApiError("invalid_credentials")
     try:
-        return asyncio.run(_request(name, arguments, token))
+        async with (
+            asyncio.timeout(120),
+            httpx.AsyncClient(
+                headers={"Authorization": f"Bearer {token}", "X-MCP-Toolsets": "all"},
+                timeout=30,
+                follow_redirects=False,
+            ) as client,
+            streamable_http_client(_MCP_URL, http_client=client) as (read, write, _),
+        ):
+            async with ClientSession(
+                read, write, read_timeout_seconds=timedelta(seconds=30)
+            ) as session:
+                await session.initialize()
+                yield session
+        return
     except Exception as ex:  # pylint: disable=broad-exception-caught
         while isinstance(ex, ExceptionGroup):
             ex = ex.exceptions[0]  # pylint: disable=no-member
@@ -58,72 +88,81 @@ def request(
         error = GitHubApiError(
             code, status, (message or "").replace(token, "[REDACTED]")
         )
-    # Raise outside the handler so the original exception cannot expose the token.
-    raise error
+    # Suppress the original exception so tracebacks cannot expose the token.
+    raise error from None
 
 
-async def _request(name: str | None, arguments: JSONObject, token: str) -> JSONValue:
-    """Initialize a task-local MCP session and discover or call remote tools."""
-    from mcp import ClientSession, types  # pylint: disable=import-outside-toplevel
-    from mcp.client.streamable_http import (  # pylint: disable=import-outside-toplevel
-        streamable_http_client,
-    )
+def discover_tools(context: ConnectorExecutionContext) -> list[ActionDefinition]:
+    """Discover account-specific tools from GitHub's MCP server."""
+    return asyncio.run(_discover_tools(context))
 
-    async with (
-        asyncio.timeout(120),
-        httpx.AsyncClient(
-            headers={"Authorization": f"Bearer {token}", "X-MCP-Toolsets": "all"},
-            timeout=30,
-            follow_redirects=False,
-        ) as client,
-        streamable_http_client(_URL, http_client=client) as (read, write, _),
-    ):
-        async with ClientSession(
-            read, write, read_timeout_seconds=timedelta(seconds=30)
-        ) as session:
-            await session.initialize()
-            if name is None:
-                tools: list[JSONObject] = []
-                params: types.PaginatedRequestParams | None = None
-                seen_cursors: set[str] = set()
-                while True:
-                    page = await session.list_tools(params=params)
-                    tools.extend(
-                        cast(
-                            JSONObject,
-                            tool.model_dump(
-                                mode="json", by_alias=True, exclude_none=True
-                            ),
-                        )
-                        for tool in page.tools
+
+async def _discover_tools(context: ConnectorExecutionContext) -> list[ActionDefinition]:
+    """Follow tools/list cursors and preserve GitHub's remote schemas and names."""
+    actions: list[ActionDefinition] = []
+    cursor: str | None = None
+    seen_cursors: set[str] = set()
+    async with _session(context) as session:
+        while True:
+            page = await session.list_tools(cursor=cursor)
+            for tool in page.tools:
+                actions.append(
+                    ActionDefinition(
+                        name=tool.name,
+                        description=tool.description or "",
+                        access=(
+                            ActionAccess.READ
+                            if tool.annotations and tool.annotations.readOnlyHint
+                            else ActionAccess.WRITE
+                        ),
+                        input_schema=cast(JSONObject, tool.inputSchema),
                     )
-                    if not page.nextCursor:
-                        return cast(JSONValue, tools)
-                    if page.nextCursor in seen_cursors:
-                        raise GitHubApiError("invalid_tools")
-                    seen_cursors.add(page.nextCursor)
-                    params = types.PaginatedRequestParams(cursor=page.nextCursor)
-            # Avoid call_tool's catalog fetch after executing a tool in a fresh session.
-            result = await session.send_request(
-                types.ClientRequest(
-                    types.CallToolRequest(
-                        params=types.CallToolRequestParams(
-                            name=name, arguments=arguments
-                        )
-                    )
-                ),
-                types.CallToolResult,
-            )
-            if result.isError:
-                raise GitHubApiError(
-                    "tool_error",
-                    message=" ".join(
-                        item.text
-                        for item in result.content
-                        if isinstance(item, types.TextContent)
-                    ),
                 )
-            return cast(
-                JSONObject,
-                result.model_dump(mode="json", by_alias=True, exclude_none=True),
+            cursor = page.nextCursor
+            if not cursor:
+                return actions
+            if cursor in seen_cursors:
+                raise GitHubApiError("invalid_tools")
+            seen_cursors.add(cursor)
+
+
+def execute_tool(
+    arguments: JSONObject, context: ConnectorExecutionContext
+) -> JSONObject:
+    """Execute a discovered action without fetching the catalog again."""
+    return asyncio.run(_execute_tool(arguments, context))
+
+
+async def _execute_tool(
+    arguments: JSONObject, context: ConnectorExecutionContext
+) -> JSONObject:
+    """Forward the original remote name and retain the MCP result content."""
+    if not context.action_name:
+        raise GitHubApiError("invalid_tool")
+    async with _session(context) as session:
+        # pylint: disable-next=import-outside-toplevel
+        from mcp import types
+
+        # call_tool also lists tools to validate output schemas in a fresh session.
+        result = await session.send_request(
+            types.ClientRequest(
+                types.CallToolRequest(
+                    params=types.CallToolRequestParams(
+                        name=context.action_name, arguments=arguments
+                    )
+                )
+            ),
+            types.CallToolResult,
+        )
+        if result.isError:
+            raise GitHubApiError(
+                "tool_error",
+                message=" ".join(
+                    item.text
+                    for item in result.content
+                    if isinstance(item, types.TextContent)
+                ),
             )
+    return cast(
+        JSONObject, result.model_dump(mode="json", by_alias=True, exclude_none=True)
+    )

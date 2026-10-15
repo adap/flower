@@ -21,8 +21,7 @@ from ..definition import (
     ProviderDefinition,
 )
 from ..oauth import load_oauth_flow
-from .actions import discover_tools
-from .executors import execute
+from .mcp import discover_tools, execute_tool
 
 GITHUB_CONNECTOR_REF = "github"
 
@@ -40,6 +39,7 @@ PROVIDER = ProviderDefinition(
         token_auth_method="client_secret_post",
         token_headers={"Accept": "application/json"},
         use_pkce=True,
+        # GitHub Apps use installation permissions instead of OAuth scopes.
         allow_additional_scopes=False,
         expected_token_type="bearer",
         display_name_fields=("login",),
@@ -56,5 +56,5 @@ CONNECTOR = ConnectorDefinition.from_provider(
     provider=PROVIDER,
     executors={},
     oauth_flow=load_oauth_flow(PROVIDER),
-    tool_source=ConnectorToolSource(discover=discover_tools, execute=execute),
+    tool_source=ConnectorToolSource(discover=discover_tools, execute=execute_tool),
 )
