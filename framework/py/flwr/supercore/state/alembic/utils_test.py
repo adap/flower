@@ -301,6 +301,38 @@ class TestAlembicRun(unittest.TestCase):
         finally:
             engine.dispose()
 
+    def test_task_event_id_migration_preserves_sqlite_autoincrement(self) -> None:
+        """Keep stored events and generate IDs past the signed 32-bit limit."""
+        engine = self.create_engine("task_event_id.db")
+        insert_event = text(
+            "INSERT INTO task_event (id, timestamp, run_id, task_id, event, data) "
+            "VALUES (:id, '2026-10-15 00:00:00+00:00', 1, 1, 'message', '{}')"
+        )
+        try:
+            self.upgrade_to_revision(engine, "8f4785e2dc47")
+            with engine.begin() as connection:
+                connection.execute(insert_event, {"id": 2**31 - 1})
+
+            self.upgrade_to_revision(engine, "70dd3c19bc7a")
+            with engine.begin() as connection:
+                connection.execute(insert_event, {"id": None})
+                self.assertEqual(
+                    connection.execute(text("SELECT id FROM task_event ORDER BY id"))
+                    .scalars()
+                    .all(),
+                    [2**31 - 1, 2**31],
+                )
+
+            self.downgrade_to_revision(engine, "8f4785e2dc47")
+            with engine.begin() as connection:
+                connection.execute(insert_event, {"id": None})
+                self.assertEqual(
+                    connection.execute(text("SELECT MAX(id) FROM task_event")).scalar(),
+                    2**31 + 1,
+                )
+        finally:
+            engine.dispose()
+
     def test_hub_origin_migration_preserves_unknown_legacy_rows(self) -> None:
         """Ensure legacy federation apps retain unknown Hub provenance."""
         engine = self.create_engine("federation_app_hub_origin.db")
