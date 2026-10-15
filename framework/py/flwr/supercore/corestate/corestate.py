@@ -1142,7 +1142,8 @@ class CoreState(ABC):  # pylint: disable=R0904
         event_types : Optional[Sequence[str]] (default: None)
             Return only events with one of these types.
         last_n : Optional[int] (default: None)
-            Return the newest N matching events. Must be non-negative.
+            Return the newest N matching events. Zero means no limit. Must be
+            non-negative.
 
         Returns
         -------

@@ -65,8 +65,9 @@ message GetRunSeriesEventsRequest {
   // ID bounds are exclusive.
   optional uint64 after_event_id = 2;
   optional uint64 before_event_id = 3;
-  // Select newest matching events; response remains in ascending ID order.
-  optional uint32 last_n = 4;
+  // Select newest matching events; zero means no limit.
+  // Response remains in ascending ID order.
+  uint32 last_n = 4;
 }
 message GetRunSeriesEventsResponse { repeated TaskEvent events = 1; }
 

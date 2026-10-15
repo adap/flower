@@ -1981,7 +1981,7 @@ class StateTest(unittest.TestCase):  # pylint: disable=R0904
         )
 
         self.assertEqual(list(filtered), [events[2], events[3]])
-        self.assertEqual(state.get_task_events(run_ids=[run_id], last_n=0), [])
+        self.assertEqual(state.get_task_events(run_ids=[run_id], last_n=0), events)
 
     def test_get_task_events_rejects_negative_last_n(self) -> None:
         """Reject negative limits consistently across state implementations."""

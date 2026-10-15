@@ -246,7 +246,9 @@ class GetRunSeriesEventsRequest(google.protobuf.message.Message):
     """ID bounds are exclusive."""
     before_event_id: builtins.int
     last_n: builtins.int
-    """Select newest matching events; response remains in ascending ID order."""
+    """Select newest matching events; zero means no limit.
+    Response remains in ascending ID order.
+    """
     @property
     def event_types(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.str]:
         """Empty means all event types."""
@@ -257,16 +259,14 @@ class GetRunSeriesEventsRequest(google.protobuf.message.Message):
         event_types: collections.abc.Iterable[builtins.str] | None = ...,
         after_event_id: builtins.int | None = ...,
         before_event_id: builtins.int | None = ...,
-        last_n: builtins.int | None = ...,
+        last_n: builtins.int = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["_after_event_id", b"_after_event_id", "_before_event_id", b"_before_event_id", "_last_n", b"_last_n", "after_event_id", b"after_event_id", "before_event_id", b"before_event_id", "last_n", b"last_n"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["_after_event_id", b"_after_event_id", "_before_event_id", b"_before_event_id", "_last_n", b"_last_n", "after_event_id", b"after_event_id", "before_event_id", b"before_event_id", "event_types", b"event_types", "last_n", b"last_n"]) -> None: ...
+    def HasField(self, field_name: typing.Literal["_after_event_id", b"_after_event_id", "_before_event_id", b"_before_event_id", "after_event_id", b"after_event_id", "before_event_id", b"before_event_id"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing.Literal["_after_event_id", b"_after_event_id", "_before_event_id", b"_before_event_id", "after_event_id", b"after_event_id", "before_event_id", b"before_event_id", "event_types", b"event_types", "last_n", b"last_n"]) -> None: ...
     @typing.overload
     def WhichOneof(self, oneof_group: typing.Literal["_after_event_id", b"_after_event_id"]) -> typing.Literal["after_event_id"] | None: ...
     @typing.overload
     def WhichOneof(self, oneof_group: typing.Literal["_before_event_id", b"_before_event_id"]) -> typing.Literal["before_event_id"] | None: ...
-    @typing.overload
-    def WhichOneof(self, oneof_group: typing.Literal["_last_n", b"_last_n"]) -> typing.Literal["last_n"] | None: ...
 
 global___GetRunSeriesEventsRequest = GetRunSeriesEventsRequest
 

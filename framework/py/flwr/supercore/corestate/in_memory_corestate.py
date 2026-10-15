@@ -1424,8 +1424,6 @@ class InMemoryCoreState(
         """Return task-produced run events matching the filters."""
         if last_n is not None and last_n < 0:
             raise ValueError("last_n must be non-negative")
-        if last_n == 0:
-            return []
         cursor = after_task_event_id if after_task_event_id is not None else 0
         with self.lock_task_event_store:
             if run_ids is not None and not run_ids:
@@ -1455,7 +1453,7 @@ class InMemoryCoreState(
             and (run_id_set is None or event.run_id in run_id_set)
             and (task_id_set is None or event.task_id in task_id_set)
         ]
-        return matching[-last_n:] if last_n is not None else matching
+        return matching[-last_n:] if last_n else matching
 
     def _cleanup_expired_task_tokens_locked(self) -> None:
         """Remove expired task tokens.

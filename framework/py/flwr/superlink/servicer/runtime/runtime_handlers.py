@@ -96,7 +96,7 @@ def get_run_series_events(
         before_task_event_id=(
             request.before_event_id if request.HasField("before_event_id") else None
         ),
-        last_n=request.last_n if request.HasField("last_n") else None,
+        last_n=request.last_n or None,
     )
     return GetRunSeriesEventsResponse(events=events)
 

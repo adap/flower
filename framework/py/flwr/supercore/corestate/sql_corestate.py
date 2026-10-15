@@ -1775,13 +1775,13 @@ class SqlCoreState(CoreState, SqlMixin):  # pylint: disable=R0904
             sint64_task_ids = [uint64_to_int64(task_id) for task_id in task_ids]
             query = query.where(TaskEventModel.task_id.in_(sint64_task_ids))
         query = query.order_by(
-            TaskEventModel.id.desc() if last_n is not None else TaskEventModel.id.asc()
+            TaskEventModel.id.desc() if last_n else TaskEventModel.id.asc()
         )
-        if last_n is not None:
+        if last_n:
             query = query.limit(last_n)
         with self.session() as session:
             rows = list(session.scalars(query).all())
-            if last_n is not None:
+            if last_n:
                 rows.reverse()
             return [_task_event_from_model(row) for row in rows]
 
