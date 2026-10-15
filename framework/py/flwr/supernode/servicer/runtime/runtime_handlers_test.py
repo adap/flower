@@ -291,12 +291,37 @@ class TestSuperNodeRuntimeHandlers(unittest.TestCase):
         self.state.get_task_events.return_value = expected_events
 
         response = runtime_handlers.get_run_series_events(
-            GetRunSeriesEventsRequest(), self.state, tasks[0]
+            GetRunSeriesEventsRequest(
+                event_types=["function_call_output"],
+                after_event_id=1,
+                before_event_id=9,
+                last_n=2,
+            ),
+            self.state,
+            tasks[0],
         )
 
         self.assertIsInstance(response, GetRunSeriesEventsResponse)
         self.assertEqual(list(response.events), expected_events)
-        self.state.get_task_events.assert_called_once_with(task_ids=[100, 101])
+        self.state.get_task_events.assert_called_once_with(
+            task_ids=[100, 101],
+            event_types=["function_call_output"],
+            after_task_event_id=1,
+            before_task_event_id=9,
+            last_n=2,
+        )
+
+        self.state.get_task_events.reset_mock()
+        runtime_handlers.get_run_series_events(
+            GetRunSeriesEventsRequest(after_event_id=1), self.state, tasks[0]
+        )
+        self.state.get_task_events.assert_called_once_with(
+            task_ids=[100, 101],
+            event_types=None,
+            after_task_event_id=1,
+            before_task_event_id=None,
+            last_n=None,
+        )
 
     def test_get_run_series_events_rejects_unknown_run(self) -> None:
         """GetRunSeriesEvents should reject an unknown authenticated run."""
