@@ -177,7 +177,11 @@ class CompactedContext(FlwrBase):
         Index("idx_compacted_contexts_series_id_id", "series_id", "id"),
     )
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(
+        BigInteger().with_variant(Integer, "sqlite"),
+        primary_key=True,
+        autoincrement=True,
+    )
     series_id: Mapped[int] = mapped_column(BigInteger, nullable=False)
     through_event_id: Mapped[int] = mapped_column(BigInteger, nullable=False)
     text: Mapped[str] = mapped_column(Text, nullable=False)
