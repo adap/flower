@@ -23,6 +23,7 @@ from collections.abc import Callable, Sequence
 from flwr.app import Context
 from flwr.supercore.typing import JSONObject
 
+# Common event types for summarizing a run series.
 RUN_SUMMARY_EVENT_TYPES: tuple[str, ...] = (
     "message",
     "response.completed",
@@ -30,7 +31,6 @@ RUN_SUMMARY_EVENT_TYPES: tuple[str, ...] = (
     "function_call",
     "function_call_output",
 )
-"""Common event types for summarizing a run series."""
 
 
 class AgentConnectors(ABC):
