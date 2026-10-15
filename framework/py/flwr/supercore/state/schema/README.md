@@ -26,7 +26,7 @@ erDiagram
   }
 
   compacted_contexts {
-    INTEGER id PK
+    BIGINT id PK
     TIMESTAMP created_at
     BIGINT series_id
     TEXT text
