@@ -36,6 +36,7 @@ from flwr.proto.runtime_pb2 import (  # pylint: disable=E0611
     PushTaskEventsRequest,
     PushTaskEventsResponse,
     PushTaskMessageRequest,
+    PutCompactedContextRequest,
     RecordTaskUsageRequest,
     SendTaskHeartbeatRequest,
 )
@@ -79,6 +80,31 @@ class TestRuntimeHandlers(unittest.TestCase):  # pylint: disable=R0904
             error.exception.code,
             ApiErrorCode.RUNTIME_INVALID_COMPACTED_CONTEXT_REQUEST,
         )
+
+    def test_put_compacted_context(self) -> None:
+        """Store only a valid summary for the authenticated series."""
+        request = PutCompactedContextRequest(
+            context=CompactedContext(series_id=42, through_event_id=9, text="Summary")
+        )
+
+        response = runtime_handlers.put_compacted_context(request, self.state, 42)
+
+        self.assertFalse(response.ListFields())
+        self.state.store_compacted_context.assert_called_once_with(42, 9, "Summary")
+
+        request.context.series_id = 43
+        with self.assertRaises(FlowerError) as error:
+            runtime_handlers.put_compacted_context(request, self.state, 42)
+        self.assertEqual(
+            error.exception.code,
+            ApiErrorCode.RUNTIME_INVALID_COMPACTED_CONTEXT_REQUEST,
+        )
+        self.state.store_compacted_context.assert_called_once()
+
+        with self.assertRaises(FlowerError):
+            runtime_handlers.put_compacted_context(
+                PutCompactedContextRequest(), self.state, 42
+            )
 
     def _create_connector_task(self, connector_ref: str) -> CreateTaskResponse:
         """Create a connector task as an authenticated AgentApp task."""

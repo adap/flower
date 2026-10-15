@@ -42,6 +42,7 @@ from flwr.proto.runtime_pb2 import (  # pylint:disable=E0611
     PushAppMessagesRequest,
     PushTaskOutputRequest,
     PushTaskOutputResponse,
+    PutCompactedContextRequest,
 )
 from flwr.proto.task_pb2 import Task, TaskEvent  # pylint:disable=E0611
 from flwr.supercore.constant import TaskType
@@ -75,6 +76,18 @@ class TestSuperNodeRuntimeHandlers(unittest.TestCase):
         self.state.get_compacted_contexts.assert_called_once_with(
             456, limit=1, before_context_id=None
         )
+
+    def test_put_compacted_context_uses_authenticated_series(self) -> None:
+        """Summary writes derive the series from the authenticated run."""
+        self.state.get_run.return_value = Run.create_empty(run_id=123)
+        self.state.get_run.return_value.series_id = 456
+        request = PutCompactedContextRequest(
+            context={"through_event_id": 9, "text": "Summary"}
+        )
+
+        runtime_handlers.put_compacted_context(request, self.state, Task(run_id=123))
+
+        self.state.store_compacted_context.assert_called_once_with(456, 9, "Summary")
 
     def test_pull_task_input_activates_task(self) -> None:
         """PullTaskInput should activate the authenticated task."""

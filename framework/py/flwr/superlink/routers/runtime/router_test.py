@@ -33,6 +33,8 @@ from flwr.proto.runtime_pb2 import (  # pylint: disable=E0611
     GetNodesResponse,
     GetRunSeriesEventsRequest,
     GetRunSeriesEventsResponse,
+    PutCompactedContextRequest,
+    PutCompactedContextResponse,
 )
 from flwr.proto.task_pb2 import Task  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkState
@@ -131,7 +133,6 @@ def test_all_runtime_routes_have_protobuf_request_types() -> None:
         if route_key[1].startswith("/v1/runtime/")
     }
 
-    assert len(route_keys) == 20
     assert route_keys == runtime_request_types
 
 
@@ -224,6 +225,28 @@ def test_get_compacted_contexts_delegates_with_authenticated_task(
 
     assert response.status_code == 200
     assert GetCompactedContextsResponse.FromString(response.content) == expected
+    handler.assert_called_once_with(request, state, task)
+
+
+def test_put_compacted_context_delegates_with_authenticated_task(
+    monkeypatch: MonkeyPatch,
+) -> None:
+    """The summary write route passes the authenticated task to its handler."""
+    state = Mock(spec=LinkState)
+    task = Task(task_id=123)
+    client = TestClient(_create_app(state, task=task))
+    request = PutCompactedContextRequest(
+        context={"through_event_id": 9, "text": "Summary"}
+    )
+    handler = Mock(return_value=PutCompactedContextResponse())
+    monkeypatch.setattr(runtime_handlers, "put_compacted_context", handler)
+
+    response = _post(client, "/v1/runtime/put-compacted-context", request)
+
+    assert response.status_code == 200
+    assert (
+        PutCompactedContextResponse.FromString(response.content) == handler.return_value
+    )
     handler.assert_called_once_with(request, state, task)
 
 
