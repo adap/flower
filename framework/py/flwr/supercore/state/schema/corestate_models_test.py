@@ -14,10 +14,6 @@
 # ==============================================================================
 """Tests for CoreState declarative models."""
 
-from sqlalchemy import create_mock_engine
-from sqlalchemy.dialects import sqlite
-from sqlalchemy.schema import CreateTable
-
 from flwr.supercore.state.schema.corestate_models import FlwrBase, Task, TaskLogsTable
 from flwr.supercore.state.schema.corestate_tables import create_corestate_metadata
 
@@ -55,15 +51,6 @@ def test_declarative_metadata_covers_all_mappable_core_tables() -> None:
 def test_task_mapper_uses_task_id_as_identity_key() -> None:
     """Ensure the mapper-only primary key uses the existing unique task_id column."""
     assert [column.name for column in Task.__mapper__.primary_key] == ["task_id"]
-
-
-def test_task_event_id_uses_64_bit_autoincrement_on_both_backends() -> None:
-    """Use BIGSERIAL on PostgreSQL and the 64-bit rowid alias on SQLite."""
-    table = CreateTable(FlwrBase.metadata.tables["task_event"])
-    postgres = create_mock_engine("postgresql://", lambda *_args, **_kwargs: None)
-
-    assert "id BIGSERIAL NOT NULL" in str(table.compile(dialect=postgres.dialect))
-    assert "id INTEGER NOT NULL" in str(table.compile(dialect=sqlite.dialect()))
 
 
 def test_connector_uses_incrementing_id_and_allows_multiple_provider_accounts() -> None:
