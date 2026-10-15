@@ -359,12 +359,12 @@ def aggregate_and_save_config(
 
 
 if __name__ == "__main__":
-    BASE_PATH = "_static"
-    DATASETS = ["cifar10", "mnist"]
+    BASE_PATH = "_static"    # _static for local experiments, remote for remote experiments
+    DATASETS = ["cifar10"]
     DATA_DISTS = ["dirichlet", "iid"]
-    STRATEGIES = ["FedAvg", "FedSaSync"]
-    FRACTION_SLOWS = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5]
-    M_VALUES = [8, 10, 12, 14, 16, 18, 20]
+    STRATEGIES = ["FedSaSync_100"]  # FedSaSync for main experiments, FedProxSaSync for FedProx
+    FRACTION_SLOWS = [0.2]
+    M_VALUES = [65, 75, 80, 85, 95]
 
     aggregate_and_save_config(
         BASE_PATH,

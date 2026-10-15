@@ -383,12 +383,13 @@ class FedSaSync(FedAvg):
             self.min_train_nodes,
         )
 
-        if self.strategy_name == "FedSaSync":
-            # For FedSaSync, sync_deg is determined by the semiasync_deg parameter (semi-async)
-            sync_deg = min(self.semiasync_deg, train_clients)
-        else:
-            # For any strategy, sync_deg is equal to the number of training clients (fully sync)
+        if self.strategy_name == "FedAvg":
+            # For FedAvg, sync_deg is equal to the number of training clients (fully sync)
             sync_deg = train_clients
+        else:
+            # For any strategy, sync_deg is determined by the semiasync_deg parameter (semi-async)
+            sync_deg = min(self.semiasync_deg, train_clients)
+            
 
         # print("Sync degree:", sync_deg)
 
@@ -402,6 +403,7 @@ class FedSaSync(FedAvg):
 
             # Call strategy to configure training round
             # Send messages and wait for replies
+            init_train = time.time()
             train_replies = self.send_and_receive_semiasync(
                 grid=grid,
                 messages=self.configure_train(
@@ -431,6 +433,7 @@ class FedSaSync(FedAvg):
             if agg_train_metrics is not None:
                 log(INFO, "\t└──> Aggregated MetricRecord: %s", agg_train_metrics)
                 result.train_metrics_clientapp[current_round] = agg_train_metrics
+            end_train = time.time()
 
             # -----------------------------------------------------------------
             # --- EVALUATION (CLIENTAPP-SIDE) ---------------------------------
@@ -438,6 +441,7 @@ class FedSaSync(FedAvg):
 
             # Call strategy to configure evaluation round
             # Send messages and wait for replies
+            init_ev = time.time()
             evaluate_replies = grid.send_and_receive(
                 messages=self.configure_evaluate(
                     current_round,
@@ -474,6 +478,9 @@ class FedSaSync(FedAvg):
                 log(INFO, "\t└──> MetricRecord: %s", res)
                 if res is not None:
                     result.evaluate_metrics_serverapp[current_round] = res
+
+            end_ev = time.time()
+            print(f"Train time {end_train - init_train:.2f}s, Eval time {end_ev - init_ev:.2f}s")
 
         log(INFO, "")
         log(INFO, "Strategy execution finished in %.2fs", time.time() - t_start)

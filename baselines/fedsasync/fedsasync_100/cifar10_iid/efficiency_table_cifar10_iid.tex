@@ -1,0 +1,24 @@
+\begin{table*}[t]
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{0.85}
+\caption{Comprehensive performance and efficiency metrics for cifar10\_iid.}
+\label{tab:comprehensive_cifar10_iid}
+\noindent\textbf{Slow = 20\%} \\[0.2em]
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lccccccc}
+\hline
+Strategy & $\Delta_{loss}/time$ & Final Acc. & Max Acc. & TTA 50\% & TTA 58\% & Acc@15s & Acc@25s \\
+\hline
+FedSaSync ($M = 65$) & 0.0035 $\pm$ 0.0006 & 52.7 $\pm$ 1.1\% & 52.7 $\pm$ 1.1\% & 268.2 $\pm$ 43.6s & N/A & 18.1 $\pm$ 2.4\% & 23.8 $\pm$ 1.5\% \\
+FedSaSync ($M = 75$) & 0.0036 $\pm$ 0.0006 & 53.5 $\pm$ 1.2\% & 53.5 $\pm$ 1.2\% & 258.0 $\pm$ 76.3s & N/A & 16.8 $\pm$ 2.0\% & 21.4 $\pm$ 3.9\% \\
+FedSaSync ($M = 80$) & \textbf{0.0036 $\pm$ 0.0002} & 53.9 $\pm$ 1.1\% & 53.9 $\pm$ 1.1\% & \textbf{221.9 $\pm$ 18.8s} & N/A & \textbf{19.2 $\pm$ 3.3\%} & \textbf{24.8 $\pm$ 2.5\%} \\
+FedSaSync ($M = 85$) & 0.0033 $\pm$ 0.0001 & 54.3 $\pm$ 1.0\% & 54.3 $\pm$ 1.0\% & 225.9 $\pm$ 9.8s & N/A & 14.5 $\pm$ 1.5\% & 21.4 $\pm$ 1.8\% \\
+FedSaSync ($M = 95$) & 0.0018 $\pm$ 0.0000 & \textbf{55.2 $\pm$ 0.5\%} & \textbf{55.2 $\pm$ 0.5\%} & 390.3 $\pm$ 22.3s & N/A & 11.5 $\pm$ 1.6\% & 15.4 $\pm$ 2.0\% \\
+\hline
+\end{tabular}%
+}
+\par\vspace{0.8em}
+\raggedright \footnotesize \textit{Note:} Superscripts indicate the number of successful runs out of 5 repetitions when not all runs finished within the target.
+\end{table*}

@@ -522,7 +522,15 @@ def generate_efficiency_table(base_path: str, datasets: list, data_dists: list, 
         
     TARGET_ACCS = [50.0, 58.0]
     TARGET_TIMES = [15.0, 25.0]
-    metrics_names = [r"$\Delta_{loss}/time$", "Max Acc.", "TTA 50\\%", "TTA 58\\%", "Acc@15s", "Acc@25s"]
+    metrics_names = [
+        r"$\Delta_{loss}/time$", 
+        "Final Acc.",
+        "Max Acc.", 
+        "TTA 50\\%", 
+        "TTA 58\\%", 
+        "Acc@15s", 
+        "Acc@25s"
+    ]
     num_metrics = len(metrics_names)
     
     def parse_metric_tuple(val_str, metric_idx):
@@ -551,7 +559,7 @@ def generate_efficiency_table(base_path: str, datasets: list, data_dists: list, 
             return None
 
     def is_lower_better(metric_idx):
-        return metric_idx in [2, 3]
+        return metric_idx in [3, 4]
 
     for dataset in datasets:
         for data_dist in data_dists:
@@ -574,7 +582,7 @@ def generate_efficiency_table(base_path: str, datasets: list, data_dists: list, 
                     csv_path = os.path.join(d, "agg.csv")
                     json_path = os.path.join(d, "agg.json")
                     
-                    eff, max_acc = "-", "-"
+                    eff, final_acc, max_acc = "-", "-", "-"
                     tta_results = ["N/A", "N/A"]
                     acc_at_times = ["N/A", "N/A"]
                     
@@ -596,10 +604,19 @@ def generate_efficiency_table(base_path: str, datasets: list, data_dists: list, 
                         df = pd.read_csv(csv_path)
                         if "eval_acc_mean" in df.columns and len(df) > 0:
                             acc_values = df["eval_acc_mean"].values.copy()
-                            acc_std_values = df["eval_acc_std"].values if "eval_acc_std" in df.columns else np.zeros_like(acc_values)
+                            acc_std_values = (
+                                df["eval_acc_std"].values 
+                                if "eval_acc_std" in df.columns 
+                                else np.zeros_like(acc_values)
+                            )
                             if acc_values.max() <= 1.0:
                                 acc_values = acc_values * 100.0
                                 acc_std_values = acc_std_values * 100.0
+
+                            # Final accuracy
+                            final_idx = -1
+                            final_acc = final_acc = f"{acc_values[final_idx]:.1f} $\\pm$ {acc_std_values[final_idx]:.1f}\\%"
+
                             max_idx = np.argmax(acc_values)
                             max_acc = f"{acc_values[max_idx]:.1f} $\\pm$ {acc_std_values[max_idx]:.1f}\\%"
 
@@ -634,7 +651,7 @@ def generate_efficiency_table(base_path: str, datasets: list, data_dists: list, 
                                 acc_std *= 100.0
                             acc_at_times[i] = f"{acc_mean:.1f} $\\pm$ {acc_std:.1f}\\%"
 
-                    row_values.extend([eff, max_acc, tta_results[0], tta_results[1], acc_at_times[0], acc_at_times[1]])
+                    row_values.extend([eff, final_acc, max_acc, tta_results[0], tta_results[1], acc_at_times[0], acc_at_times[1]])
                 table_rows_data.append(row_values)
                 
             best_tuples_map = {}
@@ -669,7 +686,7 @@ def generate_efficiency_table(base_path: str, datasets: list, data_dists: list, 
                 
                 latex_lines.append(f"\\noindent\\textbf{{Slow = {int(round(fs * 100))}\\%}} \\\\[0.2em]")
                 latex_lines.append(r"\resizebox{\textwidth}{!}{%")
-                latex_lines.append(r"\begin{tabular}{lcccccc}")
+                latex_lines.append(r"\begin{tabular}{lccccccc}")
                 latex_lines.append(r"\hline")
                 latex_lines.append(" & ".join(["Strategy"] + metrics_names) + r" \\")
                 latex_lines.append(r"\hline")
@@ -886,6 +903,9 @@ def generate_scheduler_metrics_table(base_path: str, datasets: list, data_dists:
                 f.write("\n".join(latex_lines))
 
 
+# ==========================================
+# 5.1. TABLA COMPREHENSIVA for MD
+# ==========================================
 def generate_efficiency_md(base_path: str, datasets: list, data_dists: list, strategies: list, fraction_slows: list, m_values: list):
     """Genera una tabla Markdown vertical agrupada por fraction_slow con métricas de rendimiento y eficiencia."""
     m_filtered = [m for m in m_values if m != 4]
@@ -895,7 +915,7 @@ def generate_efficiency_md(base_path: str, datasets: list, data_dists: list, str
         
     TARGET_ACCS = [50.0, 58.0]
     TARGET_TIMES = [15.0, 25.0]
-    metrics_names = ["Δloss/time", "Max Acc.", "TTA 50%", "TTA 58%", "Acc@15s", "Acc@25s"]
+    metrics_names = ["Δloss/time", "Final Acc.", "Max Acc.", "TTA 50%", "TTA 58%", "Acc@15s", "Acc@25s"]
     num_metrics = len(metrics_names)
     
     def parse_metric_tuple(val_str, metric_idx):
@@ -924,7 +944,7 @@ def generate_efficiency_md(base_path: str, datasets: list, data_dists: list, str
             return None
 
     def is_lower_better(metric_idx):
-        return metric_idx in [2, 3]
+        return metric_idx in [3, 4]
 
     for dataset in datasets:
         for data_dist in data_dists:
@@ -947,7 +967,7 @@ def generate_efficiency_md(base_path: str, datasets: list, data_dists: list, str
                     csv_path = os.path.join(d, "agg.csv")
                     json_path = os.path.join(d, "agg.json")
                     
-                    eff, max_acc = "-", "-"
+                    eff, final_acc, max_acc = "-", "-", "-"
                     tta_results = ["N/A", "N/A"]
                     acc_at_times = ["N/A", "N/A"]
                     
@@ -973,6 +993,10 @@ def generate_efficiency_md(base_path: str, datasets: list, data_dists: list, str
                             if acc_values.max() <= 1.0:
                                 acc_values = acc_values * 100.0
                                 acc_std_values = acc_std_values * 100.0
+
+                            final_idx = -1
+                            final_acc = f"{acc_values[final_idx]:.1f} ± {acc_std_values[final_idx]:.1f}%"
+                            
                             max_idx = np.argmax(acc_values)
                             max_acc = f"{acc_values[max_idx]:.1f} ± {acc_std_values[max_idx]:.1f}%"
 
@@ -1007,7 +1031,7 @@ def generate_efficiency_md(base_path: str, datasets: list, data_dists: list, str
                                 acc_std *= 100.0
                             acc_at_times[i] = f"{acc_mean:.1f} ± {acc_std:.1f}%"
 
-                    row_values.extend([eff, max_acc, tta_results[0], tta_results[1], acc_at_times[0], acc_at_times[1]])
+                    row_values.extend([eff, final_acc, max_acc, tta_results[0], tta_results[1], acc_at_times[0], acc_at_times[1]])
                 table_rows_data.append(row_values)
                 
             best_tuples_map = {}
@@ -1067,6 +1091,9 @@ def generate_efficiency_md(base_path: str, datasets: list, data_dists: list, str
                 f.write("\n".join(md_lines))
 
 
+# ==========================================
+# 5.2. TABLA DE SCHEDULER for MD
+# ==========================================
 def generate_scheduler_metrics_md(base_path: str, datasets: list, data_dists: list, strategies: list, fraction_slows: list, m_values: list):
     """Genera una tabla Markdown vertical agrupada por fraction_slow para métricas de comunicación y scheduler."""
     m_filtered = [m for m in m_values if m != 4]
@@ -1218,8 +1245,8 @@ if __name__ == "__main__":
     BASE_PATH = "_static"
     DATASETS = ["cifar10", "mnist"]
     DATA_DISTS = ["dirichlet", "iid"]
-    STRATEGIES = ["FedAvg", "FedSaSync"]
-    FRACTION_SLOWS = [0.0, 0.2, 0.5]
+    STRATEGIES = ["FedSaSync", "FedAvg"]
+    FRACTION_SLOWS = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5]
     M_VALUES = [8, 10, 12, 14, 16, 18, 20]
 
     # Execute all graphing scripts

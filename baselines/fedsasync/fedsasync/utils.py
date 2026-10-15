@@ -1,12 +1,142 @@
 """FedSaSync: Semi-asynchronous Federated Learning in Flower."""
 import csv
+import torch
 import json
 import os
 from logging import INFO
 
+from datasets import load_dataset
+from torch.utils.data import DataLoader
+from torchvision.transforms import Compose, Normalize, ToTensor
 from flwr.common import MetricRecord, RecordDict, log
 from flwr.serverapp.strategy.strategy_utils import aggregate_metricrecords
+from sklearn.model_selection import train_test_split
 
+def load_centralized_testloader(
+    dataset_name: str = "uoft-cs/cifar10", batch_size: int = 64, max_samples: int = 2000
+):
+    """Carga el dataset de test oficial/global directamente para el ServerApp."""
+    test_ds = load_dataset(dataset_name, split="test")
+
+    # Data stratification for non-iid scenarios: select max_samples while maintaining class proportions
+    if max_samples and max_samples < len(test_ds):
+        labels = test_ds["label"]
+        indices = list(range(len(test_ds)))
+        
+        # Selecciona max_samples manteniendo la proporción exacta de clases de CIFAR-10
+        sub_indices, _ = train_test_split(
+            indices, 
+            train_size=max_samples, 
+            stratify=labels, 
+            random_state=42
+        )
+        test_ds = test_ds.select(sub_indices)
+
+    if dataset_name == "uoft-cs/cifar10":
+        pytorch_transforms = Compose(
+            [ToTensor(), Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
+        )
+        img_key = "img"
+    elif dataset_name == "ylecun/mnist":
+        pytorch_transforms = Compose(
+            [ToTensor(), Normalize((0.1307,), (0.3081,))]
+        )
+        img_key = "image"
+    else:
+        raise ValueError(f"Dataset no soportado: {dataset_name}")
+
+    def apply_transforms(batch):
+        batch[img_key] = [pytorch_transforms(img) for img in batch[img_key]]
+        return batch
+
+    test_ds = test_ds.with_transform(apply_transforms)
+
+    def collate_fn(batch):
+        images = torch.stack([item[img_key] for item in batch])
+        labels = torch.tensor([item["label"] for item in batch])
+        return images, labels
+
+    return DataLoader(
+        test_ds, batch_size=batch_size, shuffle=False, collate_fn=collate_fn
+    )
+
+
+def get_evaluate_fn(model, testloader, device):
+
+    def evaluate_fn(server_round: int, arrays):
+        if arrays:
+            state_dict = {}
+
+            # 1. Si es un ArrayRecord de Flower o un diccionario de parámetros
+            if hasattr(arrays, "items") or isinstance(arrays, dict):
+                for k, v in arrays.items():
+                    # Si el valor es un objeto Array de Flower, extraemos el numpy array
+                    if hasattr(v, "numpy"):
+                        val = v.numpy()
+                    elif hasattr(v, "to_numpy"):
+                        val = v.to_numpy()
+                    else:
+                        val = v
+
+                    if isinstance(val, torch.Tensor):
+                        state_dict[k] = val
+                    elif not isinstance(val, str):
+                        state_dict[k] = torch.from_numpy(val) if hasattr(val, "dtype") else torch.as_tensor(val)
+
+            # 2. Si es una lista o tupla de arrays
+            elif isinstance(arrays, (list, tuple)):
+                model_keys = list(model.state_dict().keys())
+                for k, v in zip(model_keys, arrays):
+                    if hasattr(v, "numpy"):
+                        val = v.numpy()
+                    elif hasattr(v, "to_numpy"):
+                        val = v.to_numpy()
+                    else:
+                        val = v
+
+                    if isinstance(val, str):
+                        continue
+                    if isinstance(val, torch.Tensor):
+                        state_dict[k] = val
+                    else:
+                        state_dict[k] = torch.from_numpy(val) if hasattr(val, "dtype") else torch.as_tensor(val)
+
+            # Carga de los pesos extraídos
+            if state_dict:
+                model.load_state_dict(state_dict, strict=False)
+
+        # Configuración para evaluación
+        model.to(device)
+        model.eval()
+
+        criterion = torch.nn.CrossEntropyLoss()
+        total_loss = 0.0
+        correct = 0
+        total = 0
+
+        with torch.no_grad():
+            for images, labels in testloader:
+                images, labels = images.to(device), labels.to(device)
+                outputs = model(images)
+
+                loss = criterion(outputs, labels)
+                total_loss += loss.item() * labels.size(0)
+
+                _, predicted = torch.max(outputs.data, 1)
+                total += labels.size(0)
+                correct += (predicted == labels).sum().item()
+
+        eval_loss = total_loss / total
+        eval_acc = correct / total
+
+        return MetricRecord(
+            {
+                "eval_loss": float(eval_loss),
+                "eval_acc": float(eval_acc),
+            }
+        )
+
+    return evaluate_fn
 
 def train_metrics_aggr_fn(
     records: list[RecordDict], weighting_metric_name: str
@@ -20,14 +150,14 @@ def train_metrics_aggr_fn(
 
         train_times.append(float(value))
         record.metric_records["metrics"].pop("train_time", None)
-    mean_time = sum(train_times) / len(train_times)
+    train_time = max(train_times)
 
     # Call original default function
     aggregated_metrics = aggregate_metricrecords(
         records,
         weighting_metric_name,
     )
-    aggregated_metrics["train_time"] = mean_time
+    aggregated_metrics["train_time"] = train_time
     aggregated_metrics["qtty_records"] = len(records)
     return aggregated_metrics
 
@@ -50,10 +180,10 @@ def save_logs(
     }
     dataset = dataset_map.get(dataset_name, dataset_name)
 
-    if strategy_name == "FedSaSync":
-        config_dir = f"{strategy_name}_fs{fraction_slow}_m{semiasync_deg}"
-    else:
+    if strategy_name == "FedAvg":
         config_dir = f"{strategy_name}_fs{fraction_slow}"
+    else:
+        config_dir = f"{strategy_name}_fs{fraction_slow}_m{semiasync_deg}"
 
     base_dir = f"_static/{dataset}_{data_distribution}/{config_dir}"
     os.makedirs(base_dir, exist_ok=True)
@@ -66,10 +196,11 @@ def save_logs(
     
     header = None
     for rnd in rounds:
-        ev = result.evaluate_metrics_clientapp.get(rnd, {}) or {}
+        ev_cl = result.evaluate_metrics_clientapp.get(rnd, {}) or {}
+        ev_sr = result.evaluate_metrics_serverapp.get(rnd, {}) or {}
         tr = result.train_metrics_clientapp.get(rnd, {}) or {}
-        if ev or tr:
-            header = list(ev.keys()) + [k for k in tr.keys() if k not in ev]
+        if ev_cl or ev_sr or tr:
+            header = list(dict.fromkeys(list(ev_cl.keys()) + list(ev_sr.keys()) + list(tr.keys())))
             break
 
     if header:
@@ -78,16 +209,19 @@ def save_logs(
             writer.writerow(header)
 
             for rnd in rounds:
-                eval_metrics = result.evaluate_metrics_clientapp.get(rnd, {}) or {}
+                eval_metrics_cl = result.evaluate_metrics_clientapp.get(rnd, {}) or {}
+                eval_metrics_sr = result.evaluate_metrics_serverapp.get(rnd, {}) or {}
                 train_metrics = result.train_metrics_clientapp.get(rnd, {}) or {}
 
-                if not eval_metrics and not train_metrics:
+                if not eval_metrics_cl and not eval_metrics_sr and not train_metrics:
                     continue
 
                 row = []
                 for key in header:
-                    if eval_metrics and key in eval_metrics:
-                        row.append(eval_metrics[key])
+                    if eval_metrics_cl and key in eval_metrics_cl:
+                        row.append(eval_metrics_cl[key])
+                    elif eval_metrics_sr and key in eval_metrics_sr:
+                        row.append(eval_metrics_sr[key])
                     elif train_metrics and key in train_metrics:
                         row.append(train_metrics[key])
                     else:

@@ -7,7 +7,11 @@ from flwr.serverapp import Grid, ServerApp
 from fedsasync.model import Net
 
 from .strategy import FedSaSync
-from .utils import train_metrics_aggr_fn
+from .utils import (
+    train_metrics_aggr_fn,
+    load_centralized_testloader,
+    get_evaluate_fn
+)
 
 # Create ServerApp
 app = ServerApp()
@@ -38,6 +42,15 @@ def main(grid: Grid, context: Context) -> None:
         raise ValueError(f"Unknown dataset: {dataset_name}")
     arrays = ArrayRecord(global_model.state_dict())
 
+    testloader = load_centralized_testloader(
+        dataset_name, batch_size=64
+    )
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    evaluate_fn = get_evaluate_fn(
+        global_model, testloader, device
+    )
+
     # Initialize FedSaSync strategy
     strategy = FedSaSync(
         fraction_train=fraction_train,
@@ -58,5 +71,6 @@ def main(grid: Grid, context: Context) -> None:
         grid=grid,
         initial_arrays=arrays,
         num_rounds=num_rounds,
+        evaluate_fn=evaluate_fn,
         polling_interval=float(polling_interval)
     )

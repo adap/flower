@@ -48,7 +48,11 @@ def load_data(
     seed = 42 + run_id
     
     # Divide data on each node: 80% train, 20% test
-    partition_train_test = partition.train_test_split(test_size=0.2, seed=seed)
+    # partition_train_test = partition.train_test_split(test_size=0.2, seed=seed)
+    partition_train_test = {
+        "train": partition,
+        "test": partition.select(range(0)),
+    }
 
     if dataset_name == "uoft-cs/cifar10":
         pytorch_transforms = Compose(
@@ -64,7 +68,13 @@ def load_data(
         batch[image] = [pytorch_transforms(img) for img in batch[image]]
         return batch
 
-    partition_train_test = partition_train_test.with_transform(apply_transforms)
+    # partition_train_test = partition_train_test.with_transform(apply_transforms)
+    if hasattr(partition_train_test, "with_transform"):
+        partition_train_test = partition_train_test.with_transform(apply_transforms)
+    else:
+        partition_train_test["train"] = partition_train_test["train"].with_transform(apply_transforms)
+        partition_train_test["test"] = partition_train_test["test"].with_transform(apply_transforms)
+        
     trainloader = DataLoader(
         partition_train_test["train"],
         batch_size=32,

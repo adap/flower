@@ -17,11 +17,11 @@ dataset: [CIFAR10, MNIST]
 
 ## About this baseline
 
-**What’s implemented:** The code in this directory is used to execute the experiments proposed in *Semi-asynchronous Federated Learning in Flower: Framework Extension and Performance Assessment* (Hidalgo et al., 2026) for CIFAR10 and MNIST, which proposed the FedSaSync algorithm. Concretely, the results are exposed for both datasets in Figures 4-10, and in Tables 4 and 5
+**What’s implemented:** The code in this directory is used to execute the experiments proposed in *Semi-asynchronous Federated Learning in Flower: Framework Extension and Performance Assessment* (Hidalgo et al., 2026). This encompasses three main experimental sets: the base **FedSaSync** evaluation on CIFAR10 and MNIST (with results exposed in Figures 4–10 and Tables 4–5), framework reusability assessments integrating **FedProx** (`FedProxSaSync`), and **cross-silo scalability** evaluations conducted with 100 clients (with results exposed in Figure 11).
 
 **Datasets:** CIFAR10, MNIST
 
-**Hardware Setup:** These experiments were run on a desktop machine with an 12th Gen Intel(R) Core(TM) i7-12700 (20 CPU threads). Any machine with with 4 CPU cores or more would be able to run it in a reasonable amount of time. Note: the entire experiment runs on a CPU-only mode, but GPU support is included on code. Furthermore, execution concurrency is constrained by Ray's resource scheduling, which limits the number of parallel virtual clients based on the CPU cores assigned per actor.
+**Hardware Setup:** The main experiments were run on a desktop machine with an 12th Gen Intel(R) Core(TM) i7-12700 (20 CPU threads). Any machine with 4 CPU cores or more would be able to run it in a reasonable amount of time. Note: the entire experiment runs on a CPU-only mode, but GPU support is included in code. Furthermore, execution concurrency is constrained by Ray's resource scheduling, which limits the number of parallel virtual clients based on the CPU cores assigned per actor. To address large-scale evaluation, we deployed a multi-node Ray cluster across a wired local subnet using three computation nodes: two identical nodes equipped with dual-socket Intel Xeon E5-2650 v2 processors (30 logical CPUs each) and a third node with Intel Xeon E5-2650 v4 processors (40 logical CPUs), totaling 100 logical CPUs (one per client).
 
 **Contributors:** Víctor Hidalgo-Izquierdo, Carmen Carrión, Blanca Caminero
 
@@ -58,16 +58,23 @@ dataset: [CIFAR10, MNIST]
 | polling-interval        | 0.05                                               |
 | run-id                  | 1                                                  |
 
-**Experiment configurations:** The following table shows the configurations to be used on the experiments, defined in `run_cifar10_experiments.sh` and `run_mnist_experiments.sh` (these configurations will later overwrite the default values with the `--run-config` option during `flwr run .`)
+**Experiment configurations:** The configurations used for the **main experiments** (defined in `run_cifar10_experiments.sh` and `run_mnist_experiments.sh`) overwrite default values using the `--run-config` option during `flwr run .`:
+
 | dataset name | slow clients (frac.) | semiasynchronous degree | number of rounds | learning rate | data distribution | polling interval |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
 | {CIFAR10, MNIST} | {0.0, 0.1, 0.2, 0.3, 0.4, 0.5} | {8, 10, 12, 14, 16, 18, 20, FedAvg} | *fixed according to the experiment* | *fixed according to the experiment* | {IID, non-IID} | 0.05 |
+
+In addition to the main evaluation, the other two experimental suites are orchestrated through specialized scripts:
+* **Framework Reusability (FedProx):** Managed by `run_cifar10_FedProx_experiments.sh`, located within the `/FedProxSaSync` directory.
+* **Cross-Silo Scalability (100 Clients):** Executed using `run_cifar10_100_experiments.sh`. Note that this script configures `local_epochs = 3` (to increase local training depth per client) and `fraction-evaluate = 0.0` (to switch to server-side evaluation). 
+
+> **Important Deployment Note for the 100-Client Scalability Test:** Before launching `run_cifar10_100_experiments.sh`, ensure the multi-node Ray cluster is fully deployed across your computational nodes, and execute the script directly on the designated **head node**.
 
 Note: `number of rounds` is 50 for CIFAR10, and 25 for MNIST; `learning rate` is 0.01 for CIFAR10, and 0.05 for MNIST
 
 ## Environment Setup
 
-To construct the Python environment, simply run:
+To construct the Python environment, run:
 
 ```bash
 # Create the virtual environment
@@ -93,19 +100,52 @@ flwr run . --run-config "name='FedAvg' fraction-slow=0.1"   # for FedAvg with 10
 flwr run . --run-config "num-server-rounds=25 semiasync-deg=8 fraction-slow=0.2 dataset-name='ylecun/mnist'"    
 ```
 
-The baseline includes the scripts `run_cifar10_experiments.sh` and `run_mnist_experiments.sh`, which are designed to execute the experiments reported in the paper using the predefined configurations. The configurations are described on the table below, at Experimental Setup:
+The baseline includes the scripts `run_cifar10_experiments.sh` and `run_mnist_experiments.sh`, which are designed to execute the main experiments reported in the paper using the predefined configurations. The configurations are described on the table below, at Experimental Setup:
 
 ```bash
 bash run_cifar10_experiments.sh # CIFAR10
 bash run_mnist_experiments.sh   # MNIST
 ```
 
-We include two python scripts to automatically prepare data and print several graphs to summarise the executions (see `_static/data_prep.py` and `_static/graphing.py`). Depending on the experiments performed, change the global configuration to define what will be printed on the plots. All results are saved in `_static`. Each experiment generates four visualizations and two tables: four comparative plots grouped by the number of fraction slows to analyze the impact of different semi-asynchronous degrees (loss, accuracy, fairness, and staleness), and two summary tables showing several performance metrics of the model and the scheduler. To generate these visualizations, proceed as follows:
+The Framework Reusability (FedProx) command is designed to demonstrate code reusability with FedAvg-like strategies:
+```bash
+cd FedProxSaSync    # Directory
+bash run_cifar10_FedProx_experiments.sh # FedProxSaSync
+```
+
+The Cross-Silo scalability (100 clients) command is designed to demonstrate code scalability among more realistic FL deployments:
+```bash
+bash run_cifar10_100_experiments.sh # 100 clients experiment
+```
+
+> **Important Deployment Note for the 100-Client Scalability Test:** Before launching `run_cifar10_100_experiments.sh`, ensure the multi-node Ray cluster is fully deployed across your computational nodes, and execute the script directly on the designated **head node**.
+
+On the Head Node (e.g., node with 40 logical CPUs):
+```bash
+ray start --head --port=6379 --num-cpus=40
+```
+
+On each Worker Node (e.g., nodes with 30 logical CPUs each):
+```bash
+ray start --address="<HEAD_NODE_IP>:6379" --num-cpus=30
+```
+
+We include Python scripts to automatically prepare data and generate summaries of the executions (e.g., `_static/data_prep.py` for data preparation, along with `_static/graphing.py`, `_static/graphing_100.py`, and `_static/graphing_FedProx.py` for visualization depending on the specific experimental suite). 
+
+Depending on the experiments performed, adjust the global configuration within the scripts to define what will be plotted. Results are saved in the designated output directory (`_static` for smaller experiments (20 clients) or a `fedsasync_100` for the 100 clients experiments). 
+
+Each main experiment typically generates four visualizations and two tables: four comparative plots grouped by the fraction of slow clients to analyze the impact of different semi-asynchronous degrees (loss, accuracy, fairness, and staleness), and two summary tables showing model and scheduler performance metrics.
+
+To process data and generate these visualizations, proceed as follows:
 
 ```bash
-python _static/data_prep.py # Prepare data for the graphing step
-python _static/graphing.py  # Plot the results after executing
-```
+# 1. Prepare data for the graphing step
+python _static/data_prep.py
+
+# 2. Generate plots after executing experiments (choose the corresponding script)
+python _static/graphing.py          # For base FedSaSync experiments
+python _static/graphing_100.py      # For 100-client scalability experiments
+python _static/graphing_FedProx.py  # For FedProx reusability experiments
 
 Results for CIFAR10 IID:
 
@@ -142,3 +182,18 @@ Results for MNIST non-IID:
 ![MNIST staleness heatmap per round](_static/mnist_dirichlet/heatmap_staleness_mnist_dirichlet_complete.svg)
 ![MNIST model efficiency](_static/mnist_dirichlet/efficiency_table_mnist_dirichlet.md)
 ![MNIST scheduler efficiency](_static/mnist_dirichlet//scheduler_table_mnist_dirichlet.md)
+
+Results for FedProxSaSync for CIFAR10 IID:
+
+![FedProxSaSync loss over time comparison](_static/cifar10_iid/eval_loss_FedProxSaSync_fs0.2_cifar10_iid.pdf)
+![FedProxSaSync accuracy over time comparison](_static/cifar10_iid/eval_acc_FedProxSaSync_fs0.2_cifar10_iid.pdf)
+
+Results for 100 clients experiment:
+
+![FedSaSync_100 general comparison for CIFAR10 IID](_static/cifar10_iid/metrics_grid_cifar10_iid.pdf)
+![FedSaSync_100 model efficiency for CIFAR10 IID](_static/cifar10_iid/efficiency_table_100_cifar10_iid.md)
+![FedSaSync_100 scheduler efficiency for CIFAR10 IID](_static/cifar10_iid/scheduler_table_100_cifar10_iid.md)
+
+![FedSaSync_100 general comparison for CIFAR10 non-IID](_static/cifar10_dirichlet/metrics_grid_cifar10_iid.pdf)
+![FedSaSync_100 model efficiency for CIFAR10 non-IID](_static/cifar10_dirichlet/efficiency_table_100_cifar10_iid.md)
+![FedSaSync_100 scheduler efficiency for CIFAR10 IID](_static/cifar10_iid/scheduler_table_100_cifar10_iid.md)

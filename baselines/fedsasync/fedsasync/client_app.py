@@ -48,7 +48,7 @@ def train(msg: Message, context: Context):
     number_slow = round(fraction_slow * num_partitions)
 
     if partition_id < number_slow:
-        time.sleep(5)
+        time.sleep(5 * local_epochs)  # Simulate slow client
 
     # Call the training function
     train_loss = train_fn(
