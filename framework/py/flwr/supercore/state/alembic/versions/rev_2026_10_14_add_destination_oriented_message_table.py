@@ -74,21 +74,21 @@ def upgrade() -> None:
             ["dst_node_id", "created_at", "message_id"],
             unique=False,
             postgresql_where=sa.text("cleared = false"),
-            sqlite_where=sa.text("cleared = false"),
+            sqlite_where=sa.text("cleared = 0"),
         )
         batch_op.create_index(
             "idx_message_pending_dst_run_created_at",
             ["dst_node_id", "run_id", "created_at", "message_id"],
             unique=False,
             postgresql_where=sa.text("cleared = false"),
-            sqlite_where=sa.text("cleared = false"),
+            sqlite_where=sa.text("cleared = 0"),
         )
         batch_op.create_index(
             "idx_message_pending_run_id",
             ["run_id"],
             unique=False,
             postgresql_where=sa.text("cleared = false"),
-            sqlite_where=sa.text("cleared = false"),
+            sqlite_where=sa.text("cleared = 0"),
         )
         batch_op.create_index(
             "idx_message_reply_to_message_id", ["reply_to_message_id"], unique=False
@@ -102,17 +102,17 @@ def downgrade() -> None:
         batch_op.drop_index(
             "idx_message_pending_run_id",
             postgresql_where=sa.text("cleared = false"),
-            sqlite_where=sa.text("cleared = false"),
+            sqlite_where=sa.text("cleared = 0"),
         )
         batch_op.drop_index(
             "idx_message_pending_dst_run_created_at",
             postgresql_where=sa.text("cleared = false"),
-            sqlite_where=sa.text("cleared = false"),
+            sqlite_where=sa.text("cleared = 0"),
         )
         batch_op.drop_index(
             "idx_message_pending_dst_created_at",
             postgresql_where=sa.text("cleared = false"),
-            sqlite_where=sa.text("cleared = false"),
+            sqlite_where=sa.text("cleared = 0"),
         )
 
     # SQLite checks self-referencing FKs during the implicit DELETE in DROP TABLE.

@@ -79,6 +79,7 @@ class Message(FlwrBase):
     The expires_at deadline is always set, regardless of the closing outcome.
     Clearing ends delivery and releases the ObjectStore reference while retaining
     metadata. Acknowledgment and cancellation timestamps are mutually exclusive.
+    Pending queries use ``cleared == false()`` to match the SQLite partial indexes.
     """
 
     __tablename__ = "message"
@@ -97,7 +98,7 @@ class Message(FlwrBase):
             "created_at",
             "message_id",
             postgresql_where=text("cleared = false"),
-            sqlite_where=text("cleared = false"),
+            sqlite_where=text("cleared = 0"),
         ),
         Index(
             "idx_message_pending_dst_run_created_at",
@@ -106,13 +107,13 @@ class Message(FlwrBase):
             "created_at",
             "message_id",
             postgresql_where=text("cleared = false"),
-            sqlite_where=text("cleared = false"),
+            sqlite_where=text("cleared = 0"),
         ),
         Index(
             "idx_message_pending_run_id",
             "run_id",
             postgresql_where=text("cleared = false"),
-            sqlite_where=text("cleared = false"),
+            sqlite_where=text("cleared = 0"),
         ),
         Index("idx_message_reply_to_message_id", "reply_to_message_id"),
     )
