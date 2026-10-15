@@ -15,7 +15,7 @@
 """Add compacted contexts table.
 
 Revision ID: d90a2f91f23c
-Revises: 70dd3c19bc7a
+Revises: 6e5225b231fc
 Create Date: 2026-10-13 20:39:42.666061
 """
 from collections.abc import Sequence
@@ -27,7 +27,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "d90a2f91f23c"
-down_revision: str | Sequence[str] | None = "70dd3c19bc7a"
+down_revision: str | Sequence[str] | None = "6e5225b231fc"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 

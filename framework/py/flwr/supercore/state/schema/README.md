@@ -78,6 +78,24 @@ erDiagram
     TIMESTAMP updated_at
   }
 
+  message {
+    VARCHAR message_id PK
+    VARCHAR reply_to_message_id FK "nullable"
+    TIMESTAMP acknowledged_at "nullable"
+    TIMESTAMP cancelled_at "nullable"
+    BOOLEAN cleared
+    DOUBLE created_at
+    BIGINT dst_node_id
+    BIGINT dst_task_id "nullable"
+    TIMESTAMP expires_at
+    VARCHAR group_id
+    VARCHAR message_type
+    BIGINT run_id
+    BIGINT src_node_id
+    BIGINT src_task_id "nullable"
+    DOUBLE ttl
+  }
+
   message_ins {
     BIGINT run_id FK "nullable"
     BLOB content "nullable"
@@ -270,6 +288,7 @@ erDiagram
     VARCHAR usage_type
   }
 
+  message ||--o{ message : reply_to_message_id
   run ||--o{ message_ins : run_id
   run ||--o{ message_res : run_id
   objects ||--o| object_children : parent_id

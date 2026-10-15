@@ -19,7 +19,9 @@ from datetime import datetime
 from sqlalchemy import (
     BigInteger,
     Boolean,
+    CheckConstraint,
     Column,
+    Double,
     Float,
     ForeignKey,
     Index,
@@ -31,11 +33,12 @@ from sqlalchemy import (
     Table,
     Text,
     UniqueConstraint,
+    column,
     text,
 )
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
-from flwr.supercore.state.schema.types import UTCDateTime
+from flwr.supercore.state.schema.types import UInt64, UTCDateTime
 
 
 class FlwrBase(DeclarativeBase):
@@ -63,6 +66,81 @@ class Fab(FlwrBase):
     fab_hash: Mapped[str] = mapped_column(String, primary_key=True)
     content: Mapped[bytes] = mapped_column(LargeBinary, nullable=False)
     verifications: Mapped[str] = mapped_column(String, nullable=False)
+
+
+class Message(FlwrBase):
+    """Represent message delivery with retained metadata.
+
+    Delivery state is inferred from the flag, deadline, and closing timestamps:
+
+    - Not cleared, deadline in the future: pending and eligible for retrieval.
+    - Not cleared, deadline reached: expired, awaiting passive cleanup.
+    - Cleared, acknowledged_at set: acknowledged.
+    - Cleared, cancelled_at set: cancelled.
+    - Cleared, neither closing timestamp set: expired and cleaned up.
+
+    The expires_at deadline is always set, regardless of the closing outcome.
+    Clearing ends delivery and releases the ObjectStore reference while retaining
+    metadata. Acknowledgment and cancellation timestamps are mutually exclusive.
+    """
+
+    __tablename__ = "message"
+    __table_args__ = (
+        CheckConstraint(
+            "acknowledged_at IS NULL OR cancelled_at IS NULL",
+            name="ck_message_terminal_timestamps_exclusive",
+        ),
+        CheckConstraint(
+            "cleared OR (acknowledged_at IS NULL AND cancelled_at IS NULL)",
+            name="ck_message_terminal_timestamps_require_cleared",
+        ),
+        Index(
+            "idx_message_pending_dst_created_at",
+            "dst_node_id",
+            "created_at",
+            "message_id",
+            postgresql_where=column("cleared", Boolean).is_(False),
+            sqlite_where=column("cleared", Boolean).is_(False),
+        ),
+        Index(
+            "idx_message_pending_dst_run_created_at",
+            "dst_node_id",
+            "run_id",
+            "created_at",
+            "message_id",
+            postgresql_where=column("cleared", Boolean).is_(False),
+            sqlite_where=column("cleared", Boolean).is_(False),
+        ),
+        Index(
+            "idx_message_pending_run_id",
+            "run_id",
+            postgresql_where=column("cleared", Boolean).is_(False),
+            sqlite_where=column("cleared", Boolean).is_(False),
+        ),
+        Index("idx_message_reply_to_message_id", "reply_to_message_id"),
+    )
+
+    message_id: Mapped[str] = mapped_column(String, primary_key=True, nullable=False)
+    run_id: Mapped[int] = mapped_column(UInt64(), nullable=False)
+    src_node_id: Mapped[int] = mapped_column(UInt64(), nullable=False)
+    dst_node_id: Mapped[int] = mapped_column(UInt64(), nullable=False)
+    src_task_id: Mapped[int | None] = mapped_column(UInt64(), nullable=True)
+    dst_task_id: Mapped[int | None] = mapped_column(UInt64(), nullable=True)
+    reply_to_message_id: Mapped[str | None] = mapped_column(
+        String, ForeignKey("message.message_id", ondelete="RESTRICT"), nullable=True
+    )
+    group_id: Mapped[str] = mapped_column(String, nullable=False)
+    created_at: Mapped[float] = mapped_column(Double, nullable=False)
+    ttl: Mapped[float] = mapped_column(Double, nullable=False)
+    message_type: Mapped[str] = mapped_column(String, nullable=False)
+    expires_at: Mapped[datetime] = mapped_column(UTCDateTime(), nullable=False)
+    cleared: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, server_default=text("false")
+    )
+    acknowledged_at: Mapped[datetime | None] = mapped_column(
+        UTCDateTime(), nullable=True
+    )
+    cancelled_at: Mapped[datetime | None] = mapped_column(UTCDateTime(), nullable=True)
 
 
 class RunSeries(FlwrBase):
