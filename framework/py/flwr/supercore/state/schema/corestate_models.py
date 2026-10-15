@@ -67,7 +67,7 @@ class Fab(FlwrBase):
 
 
 class Message(FlwrBase):
-    """Represent independent message delivery with retained metadata.
+    """Represent message delivery with retained metadata.
 
     Delivery state is inferred from the flag, deadline, and closing timestamps:
 
