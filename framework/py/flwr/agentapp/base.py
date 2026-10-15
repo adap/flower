@@ -26,6 +26,7 @@ from flwr.supercore.typing import JSONObject
 RUN_SUMMARY_EVENT_TYPES: tuple[str, ...] = (
     "message",
     "response.completed",
+    "response.incomplete",
     "function_call",
     "function_call_output",
 )
@@ -82,7 +83,7 @@ class AgentEvents(ABC):
         before_event_id : Optional[int] (default: None)
             Return events with IDs less than this value.
         last_n : Optional[int] (default: None)
-            Return the newest N matching events in ID order.
+            Return the newest N matching events in ID order. Zero means no limit.
 
         Returns
         -------

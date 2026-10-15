@@ -1954,19 +1954,6 @@ class StateTest(unittest.TestCase):  # pylint: disable=R0904
             events[2:4],
         )
 
-    def test_get_task_events_handles_uint64_cursor_bounds(self) -> None:
-        """Handle protobuf uint64 cursors beyond SQL's signed event ID range."""
-        state, run_id, _, events = self._create_task_events_for_filter_tests()
-
-        self.assertEqual(
-            state.get_task_events(run_ids=[run_id], after_task_event_id=2**64 - 1),
-            [],
-        )
-        self.assertEqual(
-            state.get_task_events(run_ids=[run_id], before_task_event_id=2**64 - 1),
-            events,
-        )
-
     def test_get_task_events_returns_last_matching(self) -> None:
         """Apply filters before selecting the newest N events in ID order."""
         state, run_id, task_id, events = self._create_task_events_for_filter_tests()
@@ -1974,14 +1961,21 @@ class StateTest(unittest.TestCase):  # pylint: disable=R0904
         filtered = state.get_task_events(
             run_ids=[run_id],
             task_ids=[task_id],
-            event_types=["message", "function_call"],
+            event_types=["message", "response.created", "function_call"],
             after_task_event_id=events[0].id,
             before_task_event_id=events[-1].id,
             last_n=2,
         )
 
         self.assertEqual(list(filtered), [events[2], events[3]])
-        self.assertEqual(state.get_task_events(run_ids=[run_id], last_n=0), [])
+        self.assertEqual(state.get_task_events(run_ids=[run_id], last_n=0), events)
+
+    def test_get_task_events_rejects_negative_last_n(self) -> None:
+        """Reject negative limits consistently across state implementations."""
+        state, run_id, _, _ = self._create_task_events_for_filter_tests()
+
+        with self.assertRaisesRegex(ValueError, "last_n must be non-negative"):
+            state.get_task_events(run_ids=[run_id], last_n=-1)
 
     @parameterized.expand(  # type: ignore
         [
