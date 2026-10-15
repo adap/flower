@@ -51,7 +51,7 @@ msgstr "更新日志"
 #: ../../source/changelog/v1.40.0.md:2
 #, fuzzy
 msgid "v1.40.0 (2026-10-14)"
-msgstr "v1.1.0 (2022-10-31)"
+msgstr ""
 
 #: ../../source/changelog/v1.0.0.md:11 ../../source/changelog/v1.1.0.md:4
 #: ../../source/changelog/v1.10.0.md:4 ../../source/changelog/v1.11.0.md:4
@@ -115,11 +115,6 @@ msgid ""
 "Nugraha`, `Dimitris Stripelis`, `Heng Pan`, `Istiaque Ahmed`, `Javier`, "
 "`Julian Rußmeyer`, `Ruth Galindo`, `Stephane Moroso`, `Taner Topal`"
 msgstr ""
-"`Adam Narozniak`, `Anass Anhari`, `Charles Beauville`, `Dana-Farber`, "
-"`Daniel J. Beutel`, `Daniel Nata Nugraha`, `Edoardo Gabrielli`, `Gustavo "
-"Bertoli`, `Heng Pan`, `Javier`, `Mahdi`, `Steven Hé (Sīchàng)`, `Taner "
-"Topal`, `achiverram28`, `danielnugraha`, `eunchung`, `ruthgal` <!---"
-"TOKEN_v1.5.0-->"
 
 #: ../../source/changelog/v0.13.0.md:4 ../../source/changelog/v0.14.0.md:4
 #: ../../source/changelog/v0.15.0.md:4 ../../source/changelog/v0.16.0.md:4
@@ -176,17 +171,6 @@ msgid ""
 "[#8325](https://github.com/flwrlabs/flower/pull/8325), "
 "[#8333](https://github.com/flwrlabs/flower/pull/8333))"
 msgstr ""
-"**更新Example** ([#1772](https://github.com/adap/flower/pull/1772), "
-"[#1873](https://github.com/adap/flower/pull/1873), "
-"[#1981](https://github.com/adap/flower/pull/1981), "
-"[#1988](https://github.com/adap/flower/pull/1988), "
-"[#1984](https://github.com/adap/flower/pull/1984), "
-"[#1982](https://github.com/adap/flower/pull/1982), "
-"[#2112](https://github.com/adap/flower/pull/2112), "
-"[#2144](https://github.com/adap/flower/pull/2144), "
-"[#2174](https://github.com/adap/flower/pull/2174), "
-"[#2225](https://github.com/adap/flower/pull/2225), "
-"[#2183](https://github.com/adap/flower/pull/2183))"
 
 #: ../../source/changelog/v1.40.0.md:14
 msgid ""
@@ -208,11 +192,6 @@ msgid ""
 "[#8306](https://github.com/flwrlabs/flower/pull/8306), "
 "[#8323](https://github.com/flwrlabs/flower/pull/8323))"
 msgstr ""
-"**引入新的 Flower Baseline： FedProx MNIST** "
-"（[#1513](https://github.com/adap/flower/pull/1513), "
-"[#1680](https://github.com/adap/flower/pull/1680), "
-"[#1681](https://github.com/adap/flower/pull/1681), "
-"[#1679](https://github.com/adap/flower/pull/1679)"
 
 #: ../../source/changelog/v1.40.0.md:18
 msgid ""
@@ -227,7 +206,7 @@ msgstr ""
 msgid ""
 "**Continue conversations in `@flwrlabs/agent` app** "
 "([#8274](https://github.com/flwrlabs/flower/pull/8274))"
-msgstr "**新的 scikit-learn 代码示例** ([#748](https://github.com/adap/flower/pull/748))"
+msgstr ""
 
 #: ../../source/changelog/v1.40.0.md:22
 msgid ""
@@ -242,7 +221,7 @@ msgstr ""
 msgid ""
 "**Set federation icons** "
 "([#8273](https://github.com/flwrlabs/flower/pull/8273))"
-msgstr "FedPer [#2266](https://github.com/adap/flower/pull/2266)"
+msgstr ""
 
 #: ../../source/changelog/v1.40.0.md:26
 msgid ""
@@ -255,7 +234,7 @@ msgstr ""
 msgid ""
 "**Set up Endeavor with a Flower API key** "
 "([#8324](https://github.com/flwrlabs/flower/pull/8324))"
-msgstr "** 支持 Python 3.10** ([#1320](https://github.com/adap/flower/pull/1320))"
+msgstr ""
 
 #: ../../source/changelog/v1.40.0.md:30
 msgid ""
@@ -272,9 +251,6 @@ msgid ""
 "([#8348](https://github.com/flwrlabs/flower/pull/8348), "
 "[#8355](https://github.com/flwrlabs/flower/pull/8355))"
 msgstr ""
-"**介绍 Flower Swift SDK** "
-"([#1858](https://github.com/adap/flower/pull/1858), "
-"[#1897](https://github.com/adap/flower/pull/1897))"
 
 #: ../../source/changelog/v1.40.0.md:34
 msgid ""
@@ -310,17 +286,6 @@ msgid ""
 "[#8347](https://github.com/flwrlabs/flower/pull/8347), "
 "[#8354](https://github.com/flwrlabs/flower/pull/8354))"
 msgstr ""
-"**更新Example** ([#1772](https://github.com/adap/flower/pull/1772), "
-"[#1873](https://github.com/adap/flower/pull/1873), "
-"[#1981](https://github.com/adap/flower/pull/1981), "
-"[#1988](https://github.com/adap/flower/pull/1988), "
-"[#1984](https://github.com/adap/flower/pull/1984), "
-"[#1982](https://github.com/adap/flower/pull/1982), "
-"[#2112](https://github.com/adap/flower/pull/2112), "
-"[#2144](https://github.com/adap/flower/pull/2144), "
-"[#2174](https://github.com/adap/flower/pull/2174), "
-"[#2225](https://github.com/adap/flower/pull/2225), "
-"[#2183](https://github.com/adap/flower/pull/2183))"
 
 #: ../../source/changelog/v1.10.0.md:68 ../../source/changelog/v1.11.0.md:65
 #: ../../source/changelog/v1.12.0.md:64 ../../source/changelog/v1.13.0.md:69
@@ -371,7 +336,7 @@ msgstr "不兼容的更改"
 msgid ""
 "**Require `cryptography` 50 on all platforms** "
 "([#8344](https://github.com/flwrlabs/flower/pull/8344))"
-msgstr "**引入 start_driver**（[#1697](https://github.com/adap/flower/pull/1697)）"
+msgstr ""
 
 #: ../../source/changelog/v1.40.0.md:44
 msgid ""
