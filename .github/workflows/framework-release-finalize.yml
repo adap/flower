@@ -154,7 +154,7 @@ jobs:
 
               # Add stable aliases explicitly for the current release variants.
               case "${repository_name}:${tag_suffix}" in
-                "superlink:-py3.13-alpine3.22"|"supernode:-py3.13-alpine3.22")
+                "superlink:-py3.13-alpine3.23"|"supernode:-py3.13-alpine3.23")
                   tag_args+=(-t "${repository}:${VERSION}")
                   ;;
                 "superlink:-py3.13-ubuntu24.04"|"supernode:-py3.13-ubuntu24.04")

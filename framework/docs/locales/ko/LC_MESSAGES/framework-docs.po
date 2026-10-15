@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-10 00:11+0000\n"
+"POT-Creation-Date: 2026-10-15 00:09+0000\n"
 "PO-Revision-Date: 2026-05-23 06:53+0000\n"
 "Last-Translator: Seulki Yun <icstuckyi@gmail.com>\n"
 "Language: ko\n"
@@ -48,8 +48,8 @@ msgstr "문제 중심의 방법 가이드는 특정 목표를 달성하는 방�
 msgid "Changelog"
 msgstr ""
 
-#: ../../source/changelog/v1.39.0.md:2
-msgid "v1.39.0 (2026-09-28)"
+#: ../../source/changelog/v1.40.0.md:2
+msgid "v1.40.0 (2026-10-14)"
 msgstr ""
 
 #: ../../source/changelog/v1.0.0.md:11 ../../source/changelog/v1.1.0.md:4
@@ -72,9 +72,10 @@ msgstr ""
 #: ../../source/changelog/v1.34.0.md:4 ../../source/changelog/v1.35.0.md:4
 #: ../../source/changelog/v1.36.0.md:4 ../../source/changelog/v1.37.0.md:4
 #: ../../source/changelog/v1.38.0.md:4 ../../source/changelog/v1.39.0.md:4
-#: ../../source/changelog/v1.4.0.md:4 ../../source/changelog/v1.5.0.md:4
-#: ../../source/changelog/v1.6.0.md:4 ../../source/changelog/v1.7.0.md:4
-#: ../../source/changelog/v1.8.0.md:4 ../../source/changelog/v1.9.0.md:4
+#: ../../source/changelog/v1.4.0.md:4 ../../source/changelog/v1.40.0.md:4
+#: ../../source/changelog/v1.5.0.md:4 ../../source/changelog/v1.6.0.md:4
+#: ../../source/changelog/v1.7.0.md:4 ../../source/changelog/v1.8.0.md:4
+#: ../../source/changelog/v1.9.0.md:4
 msgid "Thanks to our contributors"
 msgstr ""
 
@@ -97,18 +98,20 @@ msgstr ""
 #: ../../source/changelog/v1.34.0.md:6 ../../source/changelog/v1.35.0.md:6
 #: ../../source/changelog/v1.36.0.md:6 ../../source/changelog/v1.37.0.md:6
 #: ../../source/changelog/v1.38.0.md:6 ../../source/changelog/v1.39.0.md:6
-#: ../../source/changelog/v1.4.0.md:6 ../../source/changelog/v1.5.0.md:6
-#: ../../source/changelog/v1.6.0.md:6 ../../source/changelog/v1.7.0.md:6
-#: ../../source/changelog/v1.8.0.md:6 ../../source/changelog/v1.9.0.md:6
+#: ../../source/changelog/v1.4.0.md:6 ../../source/changelog/v1.40.0.md:6
+#: ../../source/changelog/v1.5.0.md:6 ../../source/changelog/v1.6.0.md:6
+#: ../../source/changelog/v1.7.0.md:6 ../../source/changelog/v1.8.0.md:6
+#: ../../source/changelog/v1.9.0.md:6
 msgid ""
 "We would like to give our special thanks to all the contributors who made"
 " the new version of Flower possible (in `git shortlog` order):"
 msgstr ""
 
-#: ../../source/changelog/v1.39.0.md:8
+#: ../../source/changelog/v1.40.0.md:8
 msgid ""
-"`Charles Beauville`, `Daniel J. Beutel`, `Daniel Nata Nugraha`, `Dimitris"
-" Stripelis`, `Heng Pan`, `Javier`, `Riyasat Ohib`, `Taner Topal`"
+"`Charles Beauville`, `Chong Shen Ng`, `Daniel J. Beutel`, `Daniel Nata "
+"Nugraha`, `Dimitris Stripelis`, `Heng Pan`, `Istiaque Ahmed`, `Javier`, "
+"`Julian Rußmeyer`, `Ruth Galindo`, `Stephane Moroso`, `Taner Topal`"
 msgstr ""
 
 #: ../../source/changelog/v0.13.0.md:4 ../../source/changelog/v0.14.0.md:4
@@ -134,10 +137,213 @@ msgstr ""
 #: ../../source/changelog/v1.34.0.md:10 ../../source/changelog/v1.35.0.md:10
 #: ../../source/changelog/v1.36.0.md:10 ../../source/changelog/v1.37.0.md:10
 #: ../../source/changelog/v1.38.0.md:10 ../../source/changelog/v1.39.0.md:10
-#: ../../source/changelog/v1.4.0.md:10 ../../source/changelog/v1.5.0.md:10
-#: ../../source/changelog/v1.6.0.md:10 ../../source/changelog/v1.7.0.md:10
-#: ../../source/changelog/v1.8.0.md:10 ../../source/changelog/v1.9.0.md:10
+#: ../../source/changelog/v1.4.0.md:10 ../../source/changelog/v1.40.0.md:10
+#: ../../source/changelog/v1.5.0.md:10 ../../source/changelog/v1.6.0.md:10
+#: ../../source/changelog/v1.7.0.md:10 ../../source/changelog/v1.8.0.md:10
+#: ../../source/changelog/v1.9.0.md:10
 msgid "What's new?"
+msgstr ""
+
+#: ../../source/changelog/v1.40.0.md:12
+msgid ""
+"**Connect SuperNodes to the Fleet API over HTTP** "
+"([#8301](https://github.com/flwrlabs/flower/pull/8301), "
+"[#8303](https://github.com/flwrlabs/flower/pull/8303), "
+"[#8304](https://github.com/flwrlabs/flower/pull/8304), "
+"[#8305](https://github.com/flwrlabs/flower/pull/8305), "
+"[#8307](https://github.com/flwrlabs/flower/pull/8307), "
+"[#8308](https://github.com/flwrlabs/flower/pull/8308), "
+"[#8309](https://github.com/flwrlabs/flower/pull/8309), "
+"[#8310](https://github.com/flwrlabs/flower/pull/8310), "
+"[#8311](https://github.com/flwrlabs/flower/pull/8311), "
+"[#8313](https://github.com/flwrlabs/flower/pull/8313), "
+"[#8314](https://github.com/flwrlabs/flower/pull/8314), "
+"[#8315](https://github.com/flwrlabs/flower/pull/8315), "
+"[#8316](https://github.com/flwrlabs/flower/pull/8316), "
+"[#8317](https://github.com/flwrlabs/flower/pull/8317), "
+"[#8318](https://github.com/flwrlabs/flower/pull/8318), "
+"[#8320](https://github.com/flwrlabs/flower/pull/8320), "
+"[#8321](https://github.com/flwrlabs/flower/pull/8321), "
+"[#8322](https://github.com/flwrlabs/flower/pull/8322), "
+"[#8325](https://github.com/flwrlabs/flower/pull/8325), "
+"[#8333](https://github.com/flwrlabs/flower/pull/8333))"
+msgstr ""
+
+#: ../../source/changelog/v1.40.0.md:14
+msgid ""
+"SuperNodes now connect to the Fleet API over HTTP on the SuperLink's "
+"shared `--host` and `--port`, using port `8000` by default. The HTTP API "
+"supports SuperNode authentication, version checks, and event logging. "
+"SuperLink no longer enables the gRPC Fleet API by default, its `--fleet-"
+"api-type` and `--fleet-api-address` options are deprecated, and SuperNode"
+" no longer accepts the `--grpc-rere` and `--grpc-adapter` transport "
+"options."
+msgstr ""
+
+#: ../../source/changelog/v1.40.0.md:16
+msgid ""
+"**Search Slack and query Notion meeting notes** "
+"([#8264](https://github.com/flwrlabs/flower/pull/8264), "
+"[#8290](https://github.com/flwrlabs/flower/pull/8290), "
+"[#8306](https://github.com/flwrlabs/flower/pull/8306), "
+"[#8323](https://github.com/flwrlabs/flower/pull/8323))"
+msgstr ""
+
+#: ../../source/changelog/v1.40.0.md:18
+msgid ""
+"Search public Slack channels and, when access allows, private "
+"conversations. You can also filter Notion AI meeting notes to find "
+"relevant notes, with clearer guidance on finding and reading their "
+"contents."
+msgstr ""
+
+#: ../../source/changelog/v1.40.0.md:20
+msgid ""
+"**Continue conversations in `@flwrlabs/agent` app** "
+"([#8274](https://github.com/flwrlabs/flower/pull/8274))"
+msgstr ""
+
+#: ../../source/changelog/v1.40.0.md:22
+msgid ""
+"The [@flwrlabs/agent](https://flower.ai/apps/flwrlabs/agent) in Flower "
+"Hub now now allows follow-up prompts to retain context across runs in the"
+" same conversation. This app is a minimal agent that you can extend "
+"easily for your particular use case."
+msgstr ""
+
+#: ../../source/changelog/v1.40.0.md:24
+msgid ""
+"**Set federation icons** "
+"([#8273](https://github.com/flwrlabs/flower/pull/8273))"
+msgstr ""
+
+#: ../../source/changelog/v1.40.0.md:26
+msgid ""
+"Federations can now store an optional icon key, update or clear it. This "
+"helps identifying federations."
+msgstr ""
+
+#: ../../source/changelog/v1.40.0.md:28
+msgid ""
+"**Set up Endeavor with a Flower API key** "
+"([#8324](https://github.com/flwrlabs/flower/pull/8324))"
+msgstr ""
+
+#: ../../source/changelog/v1.40.0.md:30
+msgid ""
+"The Endeavor documentation now includes a dedicated Flower API key setup "
+"guide for the macOS CLI and desktop app, with clearer navigation across "
+"the Codex and OpenCode guides. Read more in the [Endeavor "
+"1.0](https://flower.ai/docs/model/endeavor.html) documentation."
+msgstr ""
+
+#: ../../source/changelog/v1.40.0.md:32
+msgid ""
+"**Improve security in Docker containers** "
+"([#8348](https://github.com/flwrlabs/flower/pull/8348), "
+"[#8355](https://github.com/flwrlabs/flower/pull/8355))"
+msgstr ""
+
+#: ../../source/changelog/v1.40.0.md:34
+msgid ""
+"Alpine-based Flower container images now use Alpine 3.23, upgrade "
+"installed packages in their final build stage, and omit `pip` and "
+"`ensurepip` from the runtime image. New releases no longer build Alpine "
+"3.22 variants; historical release tags remain available. Ubuntu images "
+"continue to include `pip`."
+msgstr ""
+
+#: ../../source/changelog/v1.40.0.md:36
+msgid ""
+"**General improvements** "
+"([#8037](https://github.com/flwrlabs/flower/pull/8037), "
+"[#8269](https://github.com/flwrlabs/flower/pull/8269), "
+"[#8276](https://github.com/flwrlabs/flower/pull/8276), "
+"[#8277](https://github.com/flwrlabs/flower/pull/8277), "
+"[#8278](https://github.com/flwrlabs/flower/pull/8278), "
+"[#8281](https://github.com/flwrlabs/flower/pull/8281), "
+"[#8286](https://github.com/flwrlabs/flower/pull/8286), "
+"[#8289](https://github.com/flwrlabs/flower/pull/8289), "
+"[#8312](https://github.com/flwrlabs/flower/pull/8312), "
+"[#8326](https://github.com/flwrlabs/flower/pull/8326), "
+"[#8327](https://github.com/flwrlabs/flower/pull/8327), "
+"[#8332](https://github.com/flwrlabs/flower/pull/8332), "
+"[#8334](https://github.com/flwrlabs/flower/pull/8334), "
+"[#8335](https://github.com/flwrlabs/flower/pull/8335), "
+"[#8336](https://github.com/flwrlabs/flower/pull/8336), "
+"[#8338](https://github.com/flwrlabs/flower/pull/8338), "
+"[#8340](https://github.com/flwrlabs/flower/pull/8340), "
+"[#8342](https://github.com/flwrlabs/flower/pull/8342), "
+"[#8347](https://github.com/flwrlabs/flower/pull/8347), "
+"[#8354](https://github.com/flwrlabs/flower/pull/8354))"
+msgstr ""
+
+#: ../../source/changelog/v1.10.0.md:68 ../../source/changelog/v1.11.0.md:65
+#: ../../source/changelog/v1.12.0.md:64 ../../source/changelog/v1.13.0.md:69
+#: ../../source/changelog/v1.13.1.md:32 ../../source/changelog/v1.14.0.md:63
+#: ../../source/changelog/v1.15.0.md:80 ../../source/changelog/v1.16.0.md:54
+#: ../../source/changelog/v1.17.0.md:85 ../../source/changelog/v1.18.0.md:50
+#: ../../source/changelog/v1.19.0.md:68 ../../source/changelog/v1.20.0.md:66
+#: ../../source/changelog/v1.21.0.md:56 ../../source/changelog/v1.22.0.md:40
+#: ../../source/changelog/v1.23.0.md:48 ../../source/changelog/v1.24.0.md:42
+#: ../../source/changelog/v1.25.0.md:36 ../../source/changelog/v1.26.0.md:44
+#: ../../source/changelog/v1.27.0.md:50 ../../source/changelog/v1.28.0.md:50
+#: ../../source/changelog/v1.29.0.md:46 ../../source/changelog/v1.30.0.md:34
+#: ../../source/changelog/v1.31.0.md:50 ../../source/changelog/v1.32.0.md:44
+#: ../../source/changelog/v1.33.0.md:50 ../../source/changelog/v1.34.0.md:54
+#: ../../source/changelog/v1.35.0.md:50 ../../source/changelog/v1.36.0.md:30
+#: ../../source/changelog/v1.37.0.md:40 ../../source/changelog/v1.38.0.md:36
+#: ../../source/changelog/v1.39.0.md:28 ../../source/changelog/v1.40.0.md:38
+msgid ""
+"As always, many parts of the Flower framework and quality infrastructure "
+"were improved and updated."
+msgstr ""
+
+#: ../../source/changelog/v0.16.0.md:21 ../../source/changelog/v0.17.0.md:33
+#: ../../source/changelog/v0.18.0.md:62 ../../source/changelog/v0.19.0.md:58
+#: ../../source/changelog/v1.0.0.md:17 ../../source/changelog/v1.1.0.md:60
+#: ../../source/changelog/v1.10.0.md:90 ../../source/changelog/v1.11.0.md:78
+#: ../../source/changelog/v1.11.1.md:30 ../../source/changelog/v1.12.0.md:66
+#: ../../source/changelog/v1.13.0.md:77 ../../source/changelog/v1.14.0.md:65
+#: ../../source/changelog/v1.15.0.md:82 ../../source/changelog/v1.16.0.md:56
+#: ../../source/changelog/v1.18.0.md:52 ../../source/changelog/v1.2.0.md:67
+#: ../../source/changelog/v1.20.0.md:68 ../../source/changelog/v1.21.0.md:58
+#: ../../source/changelog/v1.23.0.md:50 ../../source/changelog/v1.24.0.md:44
+#: ../../source/changelog/v1.25.0.md:38 ../../source/changelog/v1.26.0.md:46
+#: ../../source/changelog/v1.27.0.md:52 ../../source/changelog/v1.28.0.md:52
+#: ../../source/changelog/v1.29.0.md:48 ../../source/changelog/v1.3.0.md:56
+#: ../../source/changelog/v1.30.0.md:36 ../../source/changelog/v1.31.0.md:52
+#: ../../source/changelog/v1.32.0.md:46 ../../source/changelog/v1.33.0.md:52
+#: ../../source/changelog/v1.34.0.md:56 ../../source/changelog/v1.35.0.md:52
+#: ../../source/changelog/v1.37.0.md:42 ../../source/changelog/v1.4.0.md:62
+#: ../../source/changelog/v1.40.0.md:40 ../../source/changelog/v1.5.0.md:82
+#: ../../source/changelog/v1.6.0.md:90 ../../source/changelog/v1.7.0.md:73
+#: ../../source/changelog/v1.8.0.md:62 ../../source/changelog/v1.9.0.md:88
+msgid "Incompatible changes"
+msgstr ""
+
+#: ../../source/changelog/v1.40.0.md:42
+msgid ""
+"**Require `cryptography` 50 on all platforms** "
+"([#8344](https://github.com/flwrlabs/flower/pull/8344))"
+msgstr ""
+
+#: ../../source/changelog/v1.40.0.md:44
+msgid ""
+"Flower 1.40.0 requires `cryptography` 50.x on every platform. Systems "
+"that cannot install it cannot upgrade to this Flower version. This may "
+"affect 32-bit Windows and Intel-based macOS, for which `cryptography` 50 "
+"no longer provides prebuilt wheels."
+msgstr ""
+
+#: ../../source/changelog/v1.39.0.md:2
+msgid "v1.39.0 (2026-09-28)"
+msgstr ""
+
+#: ../../source/changelog/v1.39.0.md:8
+msgid ""
+"`Charles Beauville`, `Daniel J. Beutel`, `Daniel Nata Nugraha`, `Dimitris"
+" Stripelis`, `Heng Pan`, `Javier`, `Riyasat Ohib`, `Taner Topal`"
 msgstr ""
 
 #: ../../source/changelog/v1.39.0.md:12
@@ -226,27 +432,6 @@ msgid ""
 "[#8261](https://github.com/flwrlabs/flower/pull/8261), "
 "[#8268](https://github.com/flwrlabs/flower/pull/8268), "
 "[#8270](https://github.com/flwrlabs/flower/pull/8270))"
-msgstr ""
-
-#: ../../source/changelog/v1.10.0.md:68 ../../source/changelog/v1.11.0.md:65
-#: ../../source/changelog/v1.12.0.md:64 ../../source/changelog/v1.13.0.md:69
-#: ../../source/changelog/v1.13.1.md:32 ../../source/changelog/v1.14.0.md:63
-#: ../../source/changelog/v1.15.0.md:80 ../../source/changelog/v1.16.0.md:54
-#: ../../source/changelog/v1.17.0.md:85 ../../source/changelog/v1.18.0.md:50
-#: ../../source/changelog/v1.19.0.md:68 ../../source/changelog/v1.20.0.md:66
-#: ../../source/changelog/v1.21.0.md:56 ../../source/changelog/v1.22.0.md:40
-#: ../../source/changelog/v1.23.0.md:48 ../../source/changelog/v1.24.0.md:42
-#: ../../source/changelog/v1.25.0.md:36 ../../source/changelog/v1.26.0.md:44
-#: ../../source/changelog/v1.27.0.md:50 ../../source/changelog/v1.28.0.md:50
-#: ../../source/changelog/v1.29.0.md:46 ../../source/changelog/v1.30.0.md:34
-#: ../../source/changelog/v1.31.0.md:50 ../../source/changelog/v1.32.0.md:44
-#: ../../source/changelog/v1.33.0.md:50 ../../source/changelog/v1.34.0.md:54
-#: ../../source/changelog/v1.35.0.md:50 ../../source/changelog/v1.36.0.md:30
-#: ../../source/changelog/v1.37.0.md:40 ../../source/changelog/v1.38.0.md:36
-#: ../../source/changelog/v1.39.0.md:28
-msgid ""
-"As always, many parts of the Flower framework and quality infrastructure "
-"were improved and updated."
 msgstr ""
 
 #: ../../source/changelog/v1.38.0.md:2
@@ -585,29 +770,6 @@ msgid ""
 "[#8142](https://github.com/flwrlabs/flower/pull/8142), "
 "[#8144](https://github.com/flwrlabs/flower/pull/8144), "
 "[#8149](https://github.com/flwrlabs/flower/pull/8149))"
-msgstr ""
-
-#: ../../source/changelog/v0.16.0.md:21 ../../source/changelog/v0.17.0.md:33
-#: ../../source/changelog/v0.18.0.md:62 ../../source/changelog/v0.19.0.md:58
-#: ../../source/changelog/v1.0.0.md:17 ../../source/changelog/v1.1.0.md:60
-#: ../../source/changelog/v1.10.0.md:90 ../../source/changelog/v1.11.0.md:78
-#: ../../source/changelog/v1.11.1.md:30 ../../source/changelog/v1.12.0.md:66
-#: ../../source/changelog/v1.13.0.md:77 ../../source/changelog/v1.14.0.md:65
-#: ../../source/changelog/v1.15.0.md:82 ../../source/changelog/v1.16.0.md:56
-#: ../../source/changelog/v1.18.0.md:52 ../../source/changelog/v1.2.0.md:67
-#: ../../source/changelog/v1.20.0.md:68 ../../source/changelog/v1.21.0.md:58
-#: ../../source/changelog/v1.23.0.md:50 ../../source/changelog/v1.24.0.md:44
-#: ../../source/changelog/v1.25.0.md:38 ../../source/changelog/v1.26.0.md:46
-#: ../../source/changelog/v1.27.0.md:52 ../../source/changelog/v1.28.0.md:52
-#: ../../source/changelog/v1.29.0.md:48 ../../source/changelog/v1.3.0.md:56
-#: ../../source/changelog/v1.30.0.md:36 ../../source/changelog/v1.31.0.md:52
-#: ../../source/changelog/v1.32.0.md:46 ../../source/changelog/v1.33.0.md:52
-#: ../../source/changelog/v1.34.0.md:56 ../../source/changelog/v1.35.0.md:52
-#: ../../source/changelog/v1.37.0.md:42 ../../source/changelog/v1.4.0.md:62
-#: ../../source/changelog/v1.5.0.md:82 ../../source/changelog/v1.6.0.md:90
-#: ../../source/changelog/v1.7.0.md:73 ../../source/changelog/v1.8.0.md:62
-#: ../../source/changelog/v1.9.0.md:88
-msgid "Incompatible changes"
 msgstr ""
 
 #: ../../source/changelog/v1.37.0.md:44
@@ -12891,20 +13053,27 @@ msgstr ""
 
 #: ../../source/contributor-how-to-build-docker-images.rst:11
 msgid ""
+"Official Alpine images for Flower 1.40.0 and later use Alpine 3.23 and "
+"Python 3.13. The Alpine Dockerfile defaults to ``DISTRO_VERSION=3.23``. "
+"Alpine 3.22 is no longer included in the release image matrix."
+msgstr ""
+
+#: ../../source/contributor-how-to-build-docker-images.rst:15
+msgid ""
 "Before we can start, we need to meet a few prerequisites in our local "
 "development environment."
 msgstr "시작하기 전에, 로컬 개발 환경에서 몇 가지 전제 조건을 충족해야 합니다."
 
-#: ../../source/contributor-how-to-build-docker-images.rst:14
+#: ../../source/contributor-how-to-build-docker-images.rst:18
 #, fuzzy
 msgid "Clone the ``flower`` repository."
 msgstr "플라워 레포지토리를 클론합니다."
 
-#: ../../source/contributor-how-to-build-docker-images.rst:20
+#: ../../source/contributor-how-to-build-docker-images.rst:24
 msgid "Verify the Docker daemon is running."
 msgstr "Docker 데몬이 실행 중인지 확인하십시오."
 
-#: ../../source/contributor-how-to-build-docker-images.rst:22
+#: ../../source/contributor-how-to-build-docker-images.rst:26
 #, fuzzy
 msgid ""
 "The build instructions that assemble the images are located in the "
@@ -12914,7 +13083,7 @@ msgstr ""
 "이미지들을 조합하는 빌드 명령어들은 해당 Dockerfile에 있습니다. \"src/docker\" 의 하위 디렉토리에서 찾을 수 "
 "있습니다."
 
-#: ../../source/contributor-how-to-build-docker-images.rst:25
+#: ../../source/contributor-how-to-build-docker-images.rst:29
 msgid ""
 "Flower Docker images are configured via build arguments. Through build "
 "arguments, we can make the creation of images more flexible. For example,"
@@ -12929,18 +13098,18 @@ msgstr ""
 " 있습니다. 일부 빌드 전달인자들은 기본값이며, 이미지를 빌드할 때 지정해야 합니다. 각 이미지에 사용할 수 있는 모든 빌드 "
 "전달인자는 아래 표 중에 있습니다."
 
-#: ../../source/contributor-how-to-build-docker-images.rst:34
+#: ../../source/contributor-how-to-build-docker-images.rst:38
 #, fuzzy
 msgid "Building the Base Image"
 msgstr "기본 이미지 빌드"
 
-#: ../../source/contributor-how-to-build-docker-images.rst:40
-#: ../../source/contributor-how-to-build-docker-images.rst:107
+#: ../../source/contributor-how-to-build-docker-images.rst:44
+#: ../../source/contributor-how-to-build-docker-images.rst:111
 msgid "Build argument"
 msgstr "빌드 전달인자"
 
-#: ../../source/contributor-how-to-build-docker-images.rst:41
-#: ../../source/contributor-how-to-build-docker-images.rst:108
+#: ../../source/contributor-how-to-build-docker-images.rst:45
+#: ../../source/contributor-how-to-build-docker-images.rst:112
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:154
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:10
 #: ../../source/how-to-configure-audit-logging.rst:58
@@ -12964,126 +13133,126 @@ msgstr "빌드 전달인자"
 msgid "Description"
 msgstr "설명"
 
-#: ../../source/contributor-how-to-build-docker-images.rst:42
-#: ../../source/contributor-how-to-build-docker-images.rst:109
+#: ../../source/contributor-how-to-build-docker-images.rst:46
+#: ../../source/contributor-how-to-build-docker-images.rst:113
 msgid "Required"
 msgstr "필수"
 
-#: ../../source/contributor-how-to-build-docker-images.rst:43
-#: ../../source/contributor-how-to-build-docker-images.rst:110
+#: ../../source/contributor-how-to-build-docker-images.rst:47
+#: ../../source/contributor-how-to-build-docker-images.rst:114
 #: ../../source/docker/persist-superlink-state.rst:26
 #: ../../source/docker/pin-version.rst:18
 #: ../../source/docker/set-environment-variables.rst:14
 msgid "Example"
 msgstr "예시"
 
-#: ../../source/contributor-how-to-build-docker-images.rst:44
+#: ../../source/contributor-how-to-build-docker-images.rst:48
 msgid "``DISTRO``"
 msgstr "``DISTRO``"
 
-#: ../../source/contributor-how-to-build-docker-images.rst:45
+#: ../../source/contributor-how-to-build-docker-images.rst:49
 msgid "The Linux distribution to use as the base image."
 msgstr "기본 이미지 사용을 위한 Linux 배포판."
 
-#: ../../source/contributor-how-to-build-docker-images.rst:46
 #: ../../source/contributor-how-to-build-docker-images.rst:50
 #: ../../source/contributor-how-to-build-docker-images.rst:54
-#: ../../source/contributor-how-to-build-docker-images.rst:70
-#: ../../source/contributor-how-to-build-docker-images.rst:77
-#: ../../source/contributor-how-to-build-docker-images.rst:113
+#: ../../source/contributor-how-to-build-docker-images.rst:58
+#: ../../source/contributor-how-to-build-docker-images.rst:74
+#: ../../source/contributor-how-to-build-docker-images.rst:81
+#: ../../source/contributor-how-to-build-docker-images.rst:117
 msgid "No"
 msgstr "아니오"
 
-#: ../../source/contributor-how-to-build-docker-images.rst:47
+#: ../../source/contributor-how-to-build-docker-images.rst:51
 msgid "``ubuntu``"
 msgstr "``ubuntu``"
 
-#: ../../source/contributor-how-to-build-docker-images.rst:48
+#: ../../source/contributor-how-to-build-docker-images.rst:52
 msgid "``DISTRO_VERSION``"
 msgstr "``DISTRO_VERSION``"
 
-#: ../../source/contributor-how-to-build-docker-images.rst:49
+#: ../../source/contributor-how-to-build-docker-images.rst:53
 msgid "Version of the Linux distribution."
 msgstr "Linux 배포판 버전."
 
-#: ../../source/contributor-how-to-build-docker-images.rst:51
+#: ../../source/contributor-how-to-build-docker-images.rst:55
 msgid ":substitution-code:`|ubuntu_version|`"
 msgstr ""
 
-#: ../../source/contributor-how-to-build-docker-images.rst:52
+#: ../../source/contributor-how-to-build-docker-images.rst:56
 msgid "``PYTHON_VERSION``"
 msgstr "``PYTHON_VERSION``"
 
-#: ../../source/contributor-how-to-build-docker-images.rst:53
+#: ../../source/contributor-how-to-build-docker-images.rst:57
 msgid "Version of ``python`` to be installed."
 msgstr "설치 된 ``python`` 버전."
 
-#: ../../source/contributor-how-to-build-docker-images.rst:55
+#: ../../source/contributor-how-to-build-docker-images.rst:59
 msgid "``3.11`` or ``3.11.1``"
 msgstr "``3.11`` 또는 ``3.11.1``"
 
-#: ../../source/contributor-how-to-build-docker-images.rst:56
+#: ../../source/contributor-how-to-build-docker-images.rst:60
 msgid "``PIP_VERSION``"
 msgstr "``PIP_VERSION``"
 
-#: ../../source/contributor-how-to-build-docker-images.rst:57
+#: ../../source/contributor-how-to-build-docker-images.rst:61
 msgid "Version of ``pip`` to be installed."
 msgstr "설치 된 ``pip`` 버전."
 
-#: ../../source/contributor-how-to-build-docker-images.rst:58
 #: ../../source/contributor-how-to-build-docker-images.rst:62
 #: ../../source/contributor-how-to-build-docker-images.rst:66
-#: ../../source/contributor-how-to-build-docker-images.rst:117
+#: ../../source/contributor-how-to-build-docker-images.rst:70
+#: ../../source/contributor-how-to-build-docker-images.rst:121
 msgid "Yes"
 msgstr "예"
 
-#: ../../source/contributor-how-to-build-docker-images.rst:59
+#: ../../source/contributor-how-to-build-docker-images.rst:63
 msgid ":substitution-code:`|pip_version|`"
 msgstr ""
 
-#: ../../source/contributor-how-to-build-docker-images.rst:60
+#: ../../source/contributor-how-to-build-docker-images.rst:64
 msgid "``SETUPTOOLS_VERSION``"
 msgstr "``SETUPTOOLS_VERSION``"
 
-#: ../../source/contributor-how-to-build-docker-images.rst:61
+#: ../../source/contributor-how-to-build-docker-images.rst:65
 msgid "Version of ``setuptools`` to be installed."
 msgstr "설치 된 ``setuptools`` 버전."
 
-#: ../../source/contributor-how-to-build-docker-images.rst:63
+#: ../../source/contributor-how-to-build-docker-images.rst:67
 #, fuzzy
 msgid ":substitution-code:`|setuptools_version|`"
 msgstr "``SETUPTOOLS_VERSION``"
 
-#: ../../source/contributor-how-to-build-docker-images.rst:64
+#: ../../source/contributor-how-to-build-docker-images.rst:68
 msgid "``FLWR_VERSION``"
 msgstr "``FLWR_VERSION``"
 
-#: ../../source/contributor-how-to-build-docker-images.rst:65
+#: ../../source/contributor-how-to-build-docker-images.rst:69
 msgid "Version of Flower to be installed."
 msgstr "설치 된 Flower 버전."
 
-#: ../../source/contributor-how-to-build-docker-images.rst:67
+#: ../../source/contributor-how-to-build-docker-images.rst:71
 msgid ":substitution-code:`|stable_flwr_version|`"
 msgstr ""
 
-#: ../../source/contributor-how-to-build-docker-images.rst:68
+#: ../../source/contributor-how-to-build-docker-images.rst:72
 msgid "``FLWR_PACKAGE``"
 msgstr "``FLWR_PACKAGE``"
 
-#: ../../source/contributor-how-to-build-docker-images.rst:69
+#: ../../source/contributor-how-to-build-docker-images.rst:73
 msgid "The Flower package to be installed."
 msgstr "설치 할 Flower 패키지."
 
-#: ../../source/contributor-how-to-build-docker-images.rst:71
+#: ../../source/contributor-how-to-build-docker-images.rst:75
 msgid "``flwr`` or ``flwr-nightly``"
 msgstr "``flwr`` 또는 ``flwr-nightly``"
 
-#: ../../source/contributor-how-to-build-docker-images.rst:72
+#: ../../source/contributor-how-to-build-docker-images.rst:76
 #, fuzzy
 msgid "``FLWR_VERSION_REF``"
 msgstr "``FLWR_VERSION``"
 
-#: ../../source/contributor-how-to-build-docker-images.rst:73
+#: ../../source/contributor-how-to-build-docker-images.rst:77
 msgid ""
 "A `direct reference "
 "<https://packaging.python.org/en/latest/specifications/version-specifiers"
@@ -13092,12 +13261,12 @@ msgid ""
 "``FLWR_VERSION_REF`` has precedence."
 msgstr ""
 
-#: ../../source/contributor-how-to-build-docker-images.rst:78
+#: ../../source/contributor-how-to-build-docker-images.rst:82
 #, fuzzy
 msgid "`Direct Reference Examples`_"
 msgstr "예시 요청"
 
-#: ../../source/contributor-how-to-build-docker-images.rst:80
+#: ../../source/contributor-how-to-build-docker-images.rst:84
 #, fuzzy
 msgid ""
 "The following example creates a base Ubuntu/Alpine image with Python "
@@ -13108,7 +13277,7 @@ msgstr ""
 "다음 예시에서는 Python 3.11.0, pip 23.0.1, setuptools 및 Flower 1.8.0으로 기본 "
 "Ubuntu/Alpine 이미지를 만듭니다:"
 
-#: ../../source/contributor-how-to-build-docker-images.rst:95
+#: ../../source/contributor-how-to-build-docker-images.rst:99
 #, fuzzy
 msgid ""
 "In this example, we specify our image name as ``flwr_base`` and the tag "
@@ -13118,42 +13287,42 @@ msgstr ""
 "이미지의 이름은 ``flwr_base``이고 태그는 ``0.1.0``입니다. 필요에 따라 빌드 전달인자들 뿐만 아니라 이름과 태그도"
 " 정할 수 있습니다. 이 값들은 예시일 뿐입니다."
 
-#: ../../source/contributor-how-to-build-docker-images.rst:101
+#: ../../source/contributor-how-to-build-docker-images.rst:105
 #, fuzzy
 msgid "Building a Flower Binary Image"
 msgstr "기본 이미지 빌드"
 
-#: ../../source/contributor-how-to-build-docker-images.rst:111
+#: ../../source/contributor-how-to-build-docker-images.rst:115
 msgid "``BASE_REPOSITORY``"
 msgstr "``BASE_REPOSITORY``"
 
-#: ../../source/contributor-how-to-build-docker-images.rst:112
+#: ../../source/contributor-how-to-build-docker-images.rst:116
 msgid "The repository name of the base image."
 msgstr "기본 이미지의 레포지토리 이름."
 
-#: ../../source/contributor-how-to-build-docker-images.rst:114
+#: ../../source/contributor-how-to-build-docker-images.rst:118
 msgid "``flwr/base``"
 msgstr "``flwr/base``"
 
-#: ../../source/contributor-how-to-build-docker-images.rst:115
+#: ../../source/contributor-how-to-build-docker-images.rst:119
 msgid "``BASE_IMAGE``"
 msgstr "``BASE_IMAGE``"
 
-#: ../../source/contributor-how-to-build-docker-images.rst:116
+#: ../../source/contributor-how-to-build-docker-images.rst:120
 msgid "The Tag of the Flower base image."
 msgstr "Flower 기본 이미지의 태그."
 
-#: ../../source/contributor-how-to-build-docker-images.rst:118
+#: ../../source/contributor-how-to-build-docker-images.rst:122
 msgid ":substitution-code:`|stable_flwr_version|-py3.11-ubuntu|ubuntu_version|`"
 msgstr ""
 
-#: ../../source/contributor-how-to-build-docker-images.rst:120
+#: ../../source/contributor-how-to-build-docker-images.rst:124
 msgid ""
 "For example, to build a SuperLink image with the latest Flower version, "
 "Python 3.11 and Ubuntu 22.04, run the following:"
 msgstr ""
 
-#: ../../source/contributor-how-to-build-docker-images.rst:131
+#: ../../source/contributor-how-to-build-docker-images.rst:135
 #, fuzzy
 msgid ""
 "If you want to use your own base image instead of the official Flower "
@@ -13163,11 +13332,11 @@ msgstr ""
 "공식 Flower 기본 이미지 대신 자체 기본 이미지를 사용 하길 원한다면, ``BASE_REPOSITORY`` 빌드 전달인자들을 "
 "설정해야 합니다."
 
-#: ../../source/contributor-how-to-build-docker-images.rst:143
+#: ../../source/contributor-how-to-build-docker-images.rst:147
 msgid "After creating the image, we can test whether the image is working:"
 msgstr "이미지 생성 후에, 이미지가 작동하는지 테스트할 수 있습니다:"
 
-#: ../../source/contributor-how-to-build-docker-images.rst:151
+#: ../../source/contributor-how-to-build-docker-images.rst:155
 #, fuzzy
 msgid "Direct Reference Examples"
 msgstr "예시 요청"
@@ -14692,11 +14861,11 @@ msgstr "축하합니다! 이제 공식적으로 Flower 기여자가 되셨습니
 #: ../../source/contributor-tutorial-contribute-on-github.rst:354
 #: ../../source/tutorial-series-build-a-strategy-from-scratch-pytorch.rst:381
 #: ../../source/tutorial-series-customize-the-client-pytorch.rst:369
-#: ../../source/tutorial-series-get-started-with-flower.rst:105
+#: ../../source/tutorial-series-get-started-with-flower.rst:104
 #: ../../source/tutorial-series-use-a-federated-learning-strategy-pytorch.rst:361
 #: ../../source/tutorial-series-what-is-federated-learning.rst:362
 #: ../../source/tutorial-series-write-your-first-flower-app-pytorch.rst:603
-#: ../../source/tutorial-series-write-your-first-flower-app.rst:288
+#: ../../source/tutorial-series-write-your-first-flower-app.rst:287
 msgid "Next steps"
 msgstr "다음 단계"
 
@@ -15569,25 +15738,34 @@ msgstr ""
 
 #: ../../source/docker/index.rst:12
 msgid ""
+"Starting with Flower 1.40.0, the Alpine variants of ``flwr/base``, "
+"``flwr/superlink``, and ``flwr/supernode`` use Alpine 3.23 and Python "
+"3.13. Alpine 3.22 images are no longer built for new releases. When "
+"upgrading to Flower 1.40.0 or later, update the Flower version in an "
+"explicitly pinned tag and use the ``-py3.13-alpine3.23`` suffix."
+msgstr ""
+
+#: ../../source/docker/index.rst:17
+msgid ""
 "Our Quickstart guide walks you through containerizing a Flower project "
 "and running it end to end using Docker."
 msgstr ""
 
-#: ../../source/docker/index.rst:17
+#: ../../source/docker/index.rst:22
 #, fuzzy
 msgid "Getting Started"
 msgstr "시작하기"
 
-#: ../../source/docker/index.rst:26 ../../source/helm/index.rst:39
+#: ../../source/docker/index.rst:31 ../../source/helm/index.rst:39
 msgid "Running in Production"
 msgstr ""
 
-#: ../../source/docker/index.rst:36
+#: ../../source/docker/index.rst:41
 #, fuzzy
 msgid "Advanced Options"
 msgstr "고급 Docker 옵션"
 
-#: ../../source/docker/index.rst:49
+#: ../../source/docker/index.rst:54
 #, fuzzy
 msgid "Run Flower using Docker Compose"
 msgstr "Docker를 사용하여 Flower 실행"
@@ -19154,6 +19332,7 @@ msgstr ""
 
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:579
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:236
+#: ../../source/ref-api/flwr.agentapp.AgentConnectors.rst
 #: ../../source/ref-api/flwr.app.Array.rst
 #: ../../source/ref-api/flwr.app.ArrayRecord.rst
 #: ../../source/ref-api/flwr.app.ConfigRecord.rst
@@ -23859,14 +24038,14 @@ msgstr "flower 초연결"
 
 #: ../../source/how-to-connect-supernodes-to-supergrid.rst:211
 #: ../../source/how-to-create-and-manage-federations.rst:159
-#: ../../source/how-to-run-flower-apps-on-supergrid.rst:143
+#: ../../source/how-to-run-flower-apps-on-supergrid.rst:142
 #, fuzzy
 msgid "Advanced"
 msgstr "고급 Docker 옵션"
 
 #: ../../source/how-to-connect-supernodes-to-supergrid.rst:213
 #: ../../source/how-to-create-and-manage-federations.rst:161
-#: ../../source/how-to-run-flower-apps-on-supergrid.rst:145
+#: ../../source/how-to-run-flower-apps-on-supergrid.rst:144
 msgid ""
 "Everything shown above in the SuperGrid UI can also be done with the "
 ":doc:`Flower CLI <ref-api-cli>`."
@@ -23874,7 +24053,7 @@ msgstr ""
 
 #: ../../source/how-to-connect-supernodes-to-supergrid.rst:216
 #: ../../source/how-to-create-and-manage-federations.rst:164
-#: ../../source/how-to-run-flower-apps-on-supergrid.rst:148
+#: ../../source/how-to-run-flower-apps-on-supergrid.rst:147
 #, fuzzy
 msgid "Log in to SuperGrid:"
 msgstr "flower 초연결"
@@ -25496,9 +25675,8 @@ msgid "Migrate your OpenFL workloads to Flower in this step-by-step tutorial"
 msgstr ""
 
 #: ../../source/how-to-migrate-from-openfl.rst:45
-#, fuzzy
-msgid "OpenFL Migration Guide"
-msgstr "구성 값"
+msgid "Migrate from OpenFL"
+msgstr ""
 
 #: ../../source/how-to-migrate-from-openfl.rst:47
 msgid ""
@@ -25788,10 +25966,10 @@ msgstr ""
 msgid ""
 "This guide shows two ways to run a Flower App on SuperGrid: directly from"
 " `Flower Hub <https://flower.ai/apps/>`__, and from a Flower App project "
-"on your machine. It uses the `@flwrlabs/quickstart-numpy "
-"<https://flower.ai/apps/flwrlabs/quickstart-numpy/>`__ app as an example,"
-" but the same workflow applies to other Flower Apps, whether or not they "
-"are listed on Flower Hub."
+"on your machine. It uses the `@flwrlabs/demo "
+"<https://flower.ai/apps/flwrlabs/demo/>`__ app as an example, but the "
+"same workflow applies to other Flower Apps, whether or not they are "
+"listed on Flower Hub."
 msgstr ""
 
 #: ../../source/how-to-run-flower-apps-on-supergrid.rst:26
@@ -25802,9 +25980,8 @@ msgstr "Flower SuperNode를 실행합니다."
 #: ../../source/how-to-run-flower-apps-on-supergrid.rst:28
 msgid ""
 "Running directly from Flower Hub is the quickest way to get started. Open"
-" an app page, for example `@flwrlabs/quickstart-numpy "
-"<https://flower.ai/apps/flwrlabs/quickstart-numpy/>`__, and click "
-"``Run``."
+" an app page, for example `@flwrlabs/demo "
+"<https://flower.ai/apps/flwrlabs/demo/>`__, and click ``Run``."
 msgstr ""
 
 #: ../../source/how-to-run-flower-apps-on-supergrid.rst:32
@@ -25843,13 +26020,13 @@ msgstr ""
 
 #: ../../source/how-to-run-flower-apps-on-supergrid.rst:59
 msgid ""
-"If you return to the federation page, the run appears in the list of runs"
-" for that federation."
+"If you visit the `All runs <https://flower.ai/runs>`__ page, the run "
+"appears in the list of your runs."
 msgstr ""
 
 #: ../../source/how-to-run-flower-apps-on-supergrid.rst:62
-#: ../../source/tutorial-series-get-started-with-flower.rst:94
-msgid "Federation details page showing the run that was launched"
+#: ../../source/tutorial-series-get-started-with-flower.rst:93
+msgid "All runs page showing the run that was launched"
 msgstr ""
 
 #: ../../source/how-to-run-flower-apps-on-supergrid.rst:69
@@ -25890,12 +26067,12 @@ msgid ""
 msgstr ""
 
 #: ../../source/how-to-run-flower-apps-on-supergrid.rst:105
-msgid "The run appears in the same SuperGrid federation dashboard."
+msgid "The run appears on the `All runs <https://flower.ai/runs>`__ page."
 msgstr ""
 
 #: ../../source/how-to-run-flower-apps-on-supergrid.rst:107
-#: ../../source/tutorial-series-write-your-first-flower-app.rst:106
-msgid "SuperGrid dashboard showing the newly started run in the federation"
+#: ../../source/tutorial-series-write-your-first-flower-app.rst:105
+msgid "All runs page showing the newly started run"
 msgstr ""
 
 #: ../../source/how-to-run-flower-apps-on-supergrid.rst:113
@@ -25907,8 +26084,8 @@ msgstr "구성 값"
 msgid ""
 "Flower Apps can define default runtime settings in the "
 "``[tool.flwr.app.config]`` section of their ``pyproject.toml``. The "
-"``quickstart-numpy`` app used in this guide defines ``num-server-rounds``"
-" to control how many rounds its ``ServerApp`` runs:"
+"``demo`` app used in this guide defines ``num-server-rounds`` to control "
+"how many rounds its ``ServerApp`` runs:"
 msgstr ""
 
 #: ../../source/how-to-run-flower-apps-on-supergrid.rst:124
@@ -25921,22 +26098,22 @@ msgstr ""
 #: ../../source/how-to-run-flower-apps-on-supergrid.rst:127
 msgid ""
 "You can override app-defined values for a single run with the ``--run-"
-"config`` flag. The following command runs ``quickstart-numpy`` on "
-"SuperGrid with ``num-server-rounds`` set to ``5``:"
+"config`` flag. The following command runs ``demo`` on SuperGrid with "
+"``num-server-rounds`` set to ``5``:"
 msgstr ""
 
-#: ../../source/how-to-run-flower-apps-on-supergrid.rst:138
+#: ../../source/how-to-run-flower-apps-on-supergrid.rst:137
 msgid ""
 "For more details on Flower App configuration in ``pyproject.toml``, see "
 ":doc:`how-to-configure-pyproject-toml`."
 msgstr ""
 
-#: ../../source/how-to-run-flower-apps-on-supergrid.rst:154
+#: ../../source/how-to-run-flower-apps-on-supergrid.rst:153
 #, fuzzy
 msgid "Run an app directly from Flower Hub:"
 msgstr "Flower SuperNode를 실행합니다."
 
-#: ../../source/how-to-run-flower-apps-on-supergrid.rst:162
+#: ../../source/how-to-run-flower-apps-on-supergrid.rst:161
 msgid "Inspect runs and logs from the terminal:"
 msgstr ""
 
@@ -32241,13 +32418,138 @@ msgstr ""
 
 #: flwr.agentapp.base.AgentConnectors.call:1:<autosummary>:1 of
 #, fuzzy
-msgid ":py:obj:`tools <flwr.agentapp.AgentConnectors.tools>`\\ \\(names\\)"
+msgid ""
+":py:obj:`tools <flwr.agentapp.AgentConnectors.tools>`\\ \\(names\\, "
+"\\*\\[\\, refresh\\]\\)"
 msgstr ""
 
 #: flwr.agentapp.base.AgentConnectors.call:1:<autosummary>:1
 #: flwr.agentapp.base.AgentConnectors.tools:1 of
-msgid "Return model-facing tool schemas for built-in connectors."
+msgid "Return model-facing schemas for static and discovered connector tools."
 msgstr ""
+
+#: flwr.agentapp.base.AgentConnectors.tools:3 of
+msgid "Connector references to include, in order."
+msgstr ""
+
+#: flwr.agentapp.base.AgentConnectors.tools:5 of
+msgid ""
+"Rediscover the selected dynamic connectors. Schemas are otherwise cached "
+"for this agent runtime; static connectors require no discovery."
+msgstr ""
+
+#: ../../source/ref-api/flwr.agentapp.AgentConnectors.rst
+#: ../../source/ref-api/flwr.app.Array.rst
+#: ../../source/ref-api/flwr.app.ArrayRecord.rst
+#: ../../source/ref-api/flwr.app.ConfigRecord.rst
+#: ../../source/ref-api/flwr.app.Message.rst
+#: ../../source/ref-api/flwr.app.MetricRecord.rst
+#: ../../source/ref-api/flwr.app.RecordDict.rst
+#: ../../source/ref-api/flwr.client.Client.rst
+#: ../../source/ref-api/flwr.client.NumPyClient.rst
+#: ../../source/ref-api/flwr.common.Array.rst
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst
+#: ../../source/ref-api/flwr.common.Message.rst
+#: ../../source/ref-api/flwr.common.MetricRecord.rst
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst
+#: ../../source/ref-api/flwr.common.RecordDict.rst
+#: ../../source/ref-api/flwr.common.RecordSet.rst
+#: ../../source/ref-api/flwr.server.ClientManager.rst
+#: ../../source/ref-api/flwr.server.Driver.rst
+#: ../../source/ref-api/flwr.server.Grid.rst
+#: ../../source/ref-api/flwr.server.SimpleClientManager.rst
+#: ../../source/ref-api/flwr.server.strategy.DPFedAvgAdaptive.rst
+#: ../../source/ref-api/flwr.server.strategy.DPFedAvgFixed.rst
+#: ../../source/ref-api/flwr.server.strategy.Strategy.rst
+#: ../../source/ref-api/flwr.serverapp.Grid.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.Bulyan.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.DifferentialPrivacyClientSideAdaptiveClipping.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.DifferentialPrivacyClientSideFixedClipping.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.DifferentialPrivacyServerSideAdaptiveClipping.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.DifferentialPrivacyServerSideFixedClipping.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.FedAdagrad.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.FedAdam.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.FedAvg.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.FedAvgM.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.FedMedian.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.FedProx.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.FedTrimmedAvg.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.FedXgbBagging.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.FedXgbCyclic.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.FedYogi.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.Krum.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.MultiKrum.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.QFedAvg.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.Strategy.rst
+#: flwr.clientapp.client_app.ClientApp.evaluate
+#: flwr.clientapp.client_app.ClientApp.query
+#: flwr.clientapp.client_app.ClientApp.train
+#: flwr.compat.server.app.start_server
+#: flwr.serverapp.grid.grid.Grid.send_and_receive of
+#, fuzzy
+msgid "Returns"
+msgstr "반환"
+
+#: flwr.agentapp.base.AgentConnectors.tools:9 of
+msgid "Independent copies of the model-facing tool schemas."
+msgstr ""
+
+#: ../../source/ref-api/flwr.agentapp.AgentConnectors.rst
+#: ../../source/ref-api/flwr.app.Array.rst
+#: ../../source/ref-api/flwr.app.ArrayRecord.rst
+#: ../../source/ref-api/flwr.app.ConfigRecord.rst
+#: ../../source/ref-api/flwr.app.Message.rst
+#: ../../source/ref-api/flwr.app.MetricRecord.rst
+#: ../../source/ref-api/flwr.app.RecordDict.rst
+#: ../../source/ref-api/flwr.client.Client.rst
+#: ../../source/ref-api/flwr.client.NumPyClient.rst
+#: ../../source/ref-api/flwr.common.Array.rst
+#: ../../source/ref-api/flwr.common.ArrayRecord.rst
+#: ../../source/ref-api/flwr.common.ConfigRecord.rst
+#: ../../source/ref-api/flwr.common.ConfigsRecord.rst
+#: ../../source/ref-api/flwr.common.Message.rst
+#: ../../source/ref-api/flwr.common.MetricRecord.rst
+#: ../../source/ref-api/flwr.common.MetricsRecord.rst
+#: ../../source/ref-api/flwr.common.ParametersRecord.rst
+#: ../../source/ref-api/flwr.common.RecordDict.rst
+#: ../../source/ref-api/flwr.common.RecordSet.rst
+#: ../../source/ref-api/flwr.server.ClientManager.rst
+#: ../../source/ref-api/flwr.server.Driver.rst
+#: ../../source/ref-api/flwr.server.Grid.rst
+#: ../../source/ref-api/flwr.server.SimpleClientManager.rst
+#: ../../source/ref-api/flwr.server.strategy.DPFedAvgAdaptive.rst
+#: ../../source/ref-api/flwr.server.strategy.DPFedAvgFixed.rst
+#: ../../source/ref-api/flwr.server.strategy.Strategy.rst
+#: ../../source/ref-api/flwr.serverapp.Grid.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.Bulyan.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.DifferentialPrivacyClientSideAdaptiveClipping.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.DifferentialPrivacyClientSideFixedClipping.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.DifferentialPrivacyServerSideAdaptiveClipping.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.DifferentialPrivacyServerSideFixedClipping.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.FedAdagrad.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.FedAdam.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.FedAvg.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.FedAvgM.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.FedMedian.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.FedProx.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.FedTrimmedAvg.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.FedXgbBagging.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.FedXgbCyclic.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.FedYogi.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.Krum.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.MultiKrum.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.QFedAvg.rst
+#: ../../source/ref-api/flwr.serverapp.strategy.Strategy.rst
+#: flwr.clientapp.client_app.ClientApp.evaluate
+#: flwr.clientapp.client_app.ClientApp.query
+#: flwr.clientapp.client_app.ClientApp.train
+#: flwr.compat.server.app.start_server
+#: flwr.serverapp.grid.grid.Grid.send_and_receive of
+msgid "Return type"
+msgstr "반환 타입"
 
 #: ../../source/ref-api/flwr.agentapp.AgentEvents.rst:2
 #, fuzzy
@@ -32813,116 +33115,9 @@ msgid ""
 "children will raise a ``ValueError``."
 msgstr ""
 
-#: ../../source/ref-api/flwr.app.Array.rst
-#: ../../source/ref-api/flwr.app.ArrayRecord.rst
-#: ../../source/ref-api/flwr.app.ConfigRecord.rst
-#: ../../source/ref-api/flwr.app.Message.rst
-#: ../../source/ref-api/flwr.app.MetricRecord.rst
-#: ../../source/ref-api/flwr.app.RecordDict.rst
-#: ../../source/ref-api/flwr.client.Client.rst
-#: ../../source/ref-api/flwr.client.NumPyClient.rst
-#: ../../source/ref-api/flwr.common.Array.rst
-#: ../../source/ref-api/flwr.common.ArrayRecord.rst
-#: ../../source/ref-api/flwr.common.ConfigRecord.rst
-#: ../../source/ref-api/flwr.common.ConfigsRecord.rst
-#: ../../source/ref-api/flwr.common.Message.rst
-#: ../../source/ref-api/flwr.common.MetricRecord.rst
-#: ../../source/ref-api/flwr.common.MetricsRecord.rst
-#: ../../source/ref-api/flwr.common.ParametersRecord.rst
-#: ../../source/ref-api/flwr.common.RecordDict.rst
-#: ../../source/ref-api/flwr.common.RecordSet.rst
-#: ../../source/ref-api/flwr.server.ClientManager.rst
-#: ../../source/ref-api/flwr.server.Driver.rst
-#: ../../source/ref-api/flwr.server.Grid.rst
-#: ../../source/ref-api/flwr.server.SimpleClientManager.rst
-#: ../../source/ref-api/flwr.server.strategy.DPFedAvgAdaptive.rst
-#: ../../source/ref-api/flwr.server.strategy.DPFedAvgFixed.rst
-#: ../../source/ref-api/flwr.server.strategy.Strategy.rst
-#: ../../source/ref-api/flwr.serverapp.Grid.rst
-#: ../../source/ref-api/flwr.serverapp.strategy.Bulyan.rst
-#: ../../source/ref-api/flwr.serverapp.strategy.DifferentialPrivacyClientSideAdaptiveClipping.rst
-#: ../../source/ref-api/flwr.serverapp.strategy.DifferentialPrivacyClientSideFixedClipping.rst
-#: ../../source/ref-api/flwr.serverapp.strategy.DifferentialPrivacyServerSideAdaptiveClipping.rst
-#: ../../source/ref-api/flwr.serverapp.strategy.DifferentialPrivacyServerSideFixedClipping.rst
-#: ../../source/ref-api/flwr.serverapp.strategy.FedAdagrad.rst
-#: ../../source/ref-api/flwr.serverapp.strategy.FedAdam.rst
-#: ../../source/ref-api/flwr.serverapp.strategy.FedAvg.rst
-#: ../../source/ref-api/flwr.serverapp.strategy.FedAvgM.rst
-#: ../../source/ref-api/flwr.serverapp.strategy.FedMedian.rst
-#: ../../source/ref-api/flwr.serverapp.strategy.FedProx.rst
-#: ../../source/ref-api/flwr.serverapp.strategy.FedTrimmedAvg.rst
-#: ../../source/ref-api/flwr.serverapp.strategy.FedXgbBagging.rst
-#: ../../source/ref-api/flwr.serverapp.strategy.FedXgbCyclic.rst
-#: ../../source/ref-api/flwr.serverapp.strategy.FedYogi.rst
-#: ../../source/ref-api/flwr.serverapp.strategy.Krum.rst
-#: ../../source/ref-api/flwr.serverapp.strategy.MultiKrum.rst
-#: ../../source/ref-api/flwr.serverapp.strategy.QFedAvg.rst
-#: ../../source/ref-api/flwr.serverapp.strategy.Strategy.rst
-#: flwr.clientapp.client_app.ClientApp.evaluate
-#: flwr.clientapp.client_app.ClientApp.query
-#: flwr.clientapp.client_app.ClientApp.train
-#: flwr.compat.server.app.start_server
-#: flwr.serverapp.grid.grid.Grid.send_and_receive of
-#, fuzzy
-msgid "Returns"
-msgstr "반환"
-
 #: flwr.app.message.array.Array.inflate:9 of
 msgid "The inflated Array."
 msgstr ""
-
-#: ../../source/ref-api/flwr.app.Array.rst
-#: ../../source/ref-api/flwr.app.ArrayRecord.rst
-#: ../../source/ref-api/flwr.app.ConfigRecord.rst
-#: ../../source/ref-api/flwr.app.Message.rst
-#: ../../source/ref-api/flwr.app.MetricRecord.rst
-#: ../../source/ref-api/flwr.app.RecordDict.rst
-#: ../../source/ref-api/flwr.client.Client.rst
-#: ../../source/ref-api/flwr.client.NumPyClient.rst
-#: ../../source/ref-api/flwr.common.Array.rst
-#: ../../source/ref-api/flwr.common.ArrayRecord.rst
-#: ../../source/ref-api/flwr.common.ConfigRecord.rst
-#: ../../source/ref-api/flwr.common.ConfigsRecord.rst
-#: ../../source/ref-api/flwr.common.Message.rst
-#: ../../source/ref-api/flwr.common.MetricRecord.rst
-#: ../../source/ref-api/flwr.common.MetricsRecord.rst
-#: ../../source/ref-api/flwr.common.ParametersRecord.rst
-#: ../../source/ref-api/flwr.common.RecordDict.rst
-#: ../../source/ref-api/flwr.common.RecordSet.rst
-#: ../../source/ref-api/flwr.server.ClientManager.rst
-#: ../../source/ref-api/flwr.server.Driver.rst
-#: ../../source/ref-api/flwr.server.Grid.rst
-#: ../../source/ref-api/flwr.server.SimpleClientManager.rst
-#: ../../source/ref-api/flwr.server.strategy.DPFedAvgAdaptive.rst
-#: ../../source/ref-api/flwr.server.strategy.DPFedAvgFixed.rst
-#: ../../source/ref-api/flwr.server.strategy.Strategy.rst
-#: ../../source/ref-api/flwr.serverapp.Grid.rst
-#: ../../source/ref-api/flwr.serverapp.strategy.Bulyan.rst
-#: ../../source/ref-api/flwr.serverapp.strategy.DifferentialPrivacyClientSideAdaptiveClipping.rst
-#: ../../source/ref-api/flwr.serverapp.strategy.DifferentialPrivacyClientSideFixedClipping.rst
-#: ../../source/ref-api/flwr.serverapp.strategy.DifferentialPrivacyServerSideAdaptiveClipping.rst
-#: ../../source/ref-api/flwr.serverapp.strategy.DifferentialPrivacyServerSideFixedClipping.rst
-#: ../../source/ref-api/flwr.serverapp.strategy.FedAdagrad.rst
-#: ../../source/ref-api/flwr.serverapp.strategy.FedAdam.rst
-#: ../../source/ref-api/flwr.serverapp.strategy.FedAvg.rst
-#: ../../source/ref-api/flwr.serverapp.strategy.FedAvgM.rst
-#: ../../source/ref-api/flwr.serverapp.strategy.FedMedian.rst
-#: ../../source/ref-api/flwr.serverapp.strategy.FedProx.rst
-#: ../../source/ref-api/flwr.serverapp.strategy.FedTrimmedAvg.rst
-#: ../../source/ref-api/flwr.serverapp.strategy.FedXgbBagging.rst
-#: ../../source/ref-api/flwr.serverapp.strategy.FedXgbCyclic.rst
-#: ../../source/ref-api/flwr.serverapp.strategy.FedYogi.rst
-#: ../../source/ref-api/flwr.serverapp.strategy.Krum.rst
-#: ../../source/ref-api/flwr.serverapp.strategy.MultiKrum.rst
-#: ../../source/ref-api/flwr.serverapp.strategy.QFedAvg.rst
-#: ../../source/ref-api/flwr.serverapp.strategy.Strategy.rst
-#: flwr.clientapp.client_app.ClientApp.evaluate
-#: flwr.clientapp.client_app.ClientApp.query
-#: flwr.clientapp.client_app.ClientApp.train
-#: flwr.compat.server.app.start_server
-#: flwr.serverapp.grid.grid.Grid.send_and_receive of
-msgid "Return type"
-msgstr "반환 타입"
 
 #: ../../source/ref-api/flwr.app.ArrayRecord.rst:2
 #: ../../source/ref-api/flwr.common.ArrayRecord.rst:2
@@ -50557,11 +50752,11 @@ msgstr ""
 
 #: ../../source/tutorial-series-build-a-strategy-from-scratch-pytorch.rst:383
 #: ../../source/tutorial-series-customize-the-client-pytorch.rst:371
-#: ../../source/tutorial-series-get-started-with-flower.rst:107
+#: ../../source/tutorial-series-get-started-with-flower.rst:106
 #: ../../source/tutorial-series-use-a-federated-learning-strategy-pytorch.rst:363
 #: ../../source/tutorial-series-what-is-federated-learning.rst:364
 #: ../../source/tutorial-series-write-your-first-flower-app-pytorch.rst:605
-#: ../../source/tutorial-series-write-your-first-flower-app.rst:290
+#: ../../source/tutorial-series-write-your-first-flower-app.rst:289
 msgid ""
 "Before you continue, make sure to join the Flower community on Flower "
 "Discuss (`Join Flower Discuss <https://discuss.flower.ai>`__) and on "
@@ -50570,11 +50765,11 @@ msgstr ""
 
 #: ../../source/tutorial-series-build-a-strategy-from-scratch-pytorch.rst:387
 #: ../../source/tutorial-series-customize-the-client-pytorch.rst:375
-#: ../../source/tutorial-series-get-started-with-flower.rst:111
+#: ../../source/tutorial-series-get-started-with-flower.rst:110
 #: ../../source/tutorial-series-use-a-federated-learning-strategy-pytorch.rst:367
 #: ../../source/tutorial-series-what-is-federated-learning.rst:368
 #: ../../source/tutorial-series-write-your-first-flower-app-pytorch.rst:609
-#: ../../source/tutorial-series-write-your-first-flower-app.rst:294
+#: ../../source/tutorial-series-write-your-first-flower-app.rst:293
 msgid ""
 "There's a dedicated ``#questions`` Slack channel if you need help, but "
 "we'd also love to hear who you are in ``#introductions``!"
@@ -50937,28 +51132,25 @@ msgstr ""
 msgid ""
 "Congratulations, you have successfully run your first Flower App on "
 "SuperGrid! You've taken your first step into the world of collaborative "
-"AI with Flower. In this tutorial, you created a federation with simulated"
-" SuperNodes and ran an existing Flower App across them. You also explored"
-" the SuperGrid dashboard to monitor your app's progress and view its "
-"logs."
+"AI with Flower. In this tutorial, you used a federation with simulated "
+"SuperNodes and ran an existing Flower App across them. You also explored "
+"the SuperGrid dashboard to monitor your app's progress and view its logs."
 msgstr ""
 
 #: ../../source/tutorial-series-get-started-with-flower.rst:90
 msgid ""
-"If you return to the `Federations page "
-"<https://flower.ai/federations/>`__ and click your federation, you'll see"
-" the run you launched. You can click that run to open the same run "
-"details page you saw right after launching the app."
+"To find the run later, visit the `All runs <https://flower.ai/runs>`__ "
+"page. Click the run you launched to reopen its details page."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower.rst:99
+#: ../../source/tutorial-series-get-started-with-flower.rst:98
 msgid ""
 "In the next tutorial, you'll download an existing Flower App, run it from"
 " your local machine on SuperGrid, make a small customization, and learn "
 "how the main Flower App components fit together."
 msgstr ""
 
-#: ../../source/tutorial-series-get-started-with-flower.rst:114
+#: ../../source/tutorial-series-get-started-with-flower.rst:113
 msgid ""
 "The :doc:`Flower Collaborative AI Tutorial - Part 2: Write your first "
 "Flower App <tutorial-series-write-your-first-flower-app>` will walk you "
@@ -51740,7 +51932,7 @@ msgstr ""
 "사용자는 모든 워크로드, 머신러닝 프레임워크 및 모든 프로그래밍 언어를 통합할 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.rst:351
-#: ../../source/tutorial-series-write-your-first-flower-app.rst:267
+#: ../../source/tutorial-series-write-your-first-flower-app.rst:266
 msgid "Final Remarks"
 msgstr ""
 
@@ -51867,13 +52059,11 @@ msgstr ""
 
 #: ../../source/tutorial-series-write-your-first-flower-app.rst:102
 msgid ""
-"Then, if you navigate to the `SuperGrid dashboard "
-"<https://flower.ai/federations/>`__, you should see a new run in "
-"``@<your-account>/workspace``. Click on it to see the run details and "
-"logs."
+"Then, visit the `All runs <https://flower.ai/runs>`__ page. You should "
+"see the new run in the list. Click it to see the run details and logs."
 msgstr ""
 
-#: ../../source/tutorial-series-write-your-first-flower-app.rst:111
+#: ../../source/tutorial-series-write-your-first-flower-app.rst:110
 msgid ""
 "If you inspect the logs, you should see the same output as when you ran "
 "the app directly from the Flower Hub in the previous tutorial. This is "
@@ -51882,11 +52072,11 @@ msgid ""
 "make it your own!"
 msgstr ""
 
-#: ../../source/tutorial-series-write-your-first-flower-app.rst:118
+#: ../../source/tutorial-series-write-your-first-flower-app.rst:117
 msgid "Customizing your App"
 msgstr ""
 
-#: ../../source/tutorial-series-write-your-first-flower-app.rst:120
+#: ../../source/tutorial-series-write-your-first-flower-app.rst:119
 msgid ""
 "Now that you have the app running on SuperGrid, you can start customizing"
 " it. In this tutorial you'll make a small customization to the "
@@ -51896,25 +52086,24 @@ msgid ""
 "add the following two lines to the ``main()`` function:"
 msgstr ""
 
-#: ../../source/tutorial-series-write-your-first-flower-app.rst:152
+#: ../../source/tutorial-series-write-your-first-flower-app.rst:151
 msgid ""
 "If you now run the app again, you should see the new messages in the logs"
 " of your run on SuperGrid:"
 msgstr ""
 
-#: ../../source/tutorial-series-write-your-first-flower-app.rst:160
+#: ../../source/tutorial-series-write-your-first-flower-app.rst:159
 msgid ""
-"Then, if you navigate to the `SuperGrid dashboard "
-"<https://flower.ai/federations/>`__, and open the logs of the new run, "
-"you should see the new printed messages from the ``ServerApp`` at the "
-"beginning and end of the logs."
+"Then, visit the `All runs <https://flower.ai/runs>`__ page, open the new "
+"run, and inspect its logs. You should see the new messages printed by the"
+" ``ServerApp`` at the beginning and end of the logs."
 msgstr ""
 
-#: ../../source/tutorial-series-write-your-first-flower-app.rst:164
-msgid "SuperGrid run logs showing the custom ServerApp print statements"
+#: ../../source/tutorial-series-write-your-first-flower-app.rst:163
+msgid "Run logs highlighting the custom ServerApp goodbye message"
 msgstr ""
 
-#: ../../source/tutorial-series-write-your-first-flower-app.rst:169
+#: ../../source/tutorial-series-write-your-first-flower-app.rst:168
 msgid ""
 "You did it! You have successfully customized an existing Flower App and "
 "run it on SuperGrid. So far you have learned about two powerful Flower "
@@ -51924,18 +52113,18 @@ msgid ""
 "needs."
 msgstr ""
 
-#: ../../source/tutorial-series-write-your-first-flower-app.rst:175
+#: ../../source/tutorial-series-write-your-first-flower-app.rst:174
 msgid ""
 "In the next section, you'll learn about the main components of a Flower "
 "App and how they work together, using the demo app as a concrete example."
 msgstr ""
 
-#: ../../source/tutorial-series-write-your-first-flower-app.rst:180
+#: ../../source/tutorial-series-write-your-first-flower-app.rst:179
 #, fuzzy
 msgid "Flower App Components"
 msgstr "공통"
 
-#: ../../source/tutorial-series-write-your-first-flower-app.rst:182
+#: ../../source/tutorial-series-write-your-first-flower-app.rst:181
 msgid ""
 "All Flower Apps follow the same basic structure, which is designed to be "
 "flexible and powerful enough to support a wide variety of collaborative "
@@ -51943,7 +52132,7 @@ msgid ""
 "distributed training, and more. The main components of a Flower App are:"
 msgstr ""
 
-#: ../../source/tutorial-series-write-your-first-flower-app.rst:187
+#: ../../source/tutorial-series-write-your-first-flower-app.rst:186
 msgid ""
 "``ServerApp``: the server-side entry point for a run. In a typical "
 "federated learning setup, it defines how the run starts, which initial "
@@ -51952,7 +52141,7 @@ msgid ""
 "custom strategy or no strategy at all."
 msgstr ""
 
-#: ../../source/tutorial-series-write-your-first-flower-app.rst:191
+#: ../../source/tutorial-series-write-your-first-flower-app.rst:190
 msgid ""
 "``ClientApp``: the code that runs on each client (SuperNode). It defines "
 "what should happen when a SuperNode receives instructions from the server"
@@ -51961,7 +52150,7 @@ msgid ""
 "data\"."
 msgstr ""
 
-#: ../../source/tutorial-series-write-your-first-flower-app.rst:195
+#: ../../source/tutorial-series-write-your-first-flower-app.rst:194
 msgid ""
 "``pyproject.toml``: the app configuration file. It declares project "
 "metadata and dependencies, tells Flower where to import the ``ServerApp``"
@@ -51969,7 +52158,7 @@ msgid ""
 "hyperparameters) that the app can read at runtime."
 msgstr ""
 
-#: ../../source/tutorial-series-write-your-first-flower-app.rst:199
+#: ../../source/tutorial-series-write-your-first-flower-app.rst:198
 msgid ""
 "In summary, you can think of the ``ServerApp`` as the place where the "
 "federated run is launched, the ``Strategy`` as the algorithm that "
@@ -51981,28 +52170,28 @@ msgid ""
 "communicated between the server and SuperNodes during the run."
 msgstr ""
 
-#: ../../source/tutorial-series-write-your-first-flower-app.rst:208
+#: ../../source/tutorial-series-write-your-first-flower-app.rst:207
 msgid "How the demo app uses these components"
 msgstr ""
 
-#: ../../source/tutorial-series-write-your-first-flower-app.rst:210
+#: ../../source/tutorial-series-write-your-first-flower-app.rst:209
 msgid ""
 "The ``@flwrlabs/demo`` app is built as a deliberately small NumPy example"
 " so the Flower structure is easy to see."
 msgstr ""
 
-#: ../../source/tutorial-series-write-your-first-flower-app.rst:213
+#: ../../source/tutorial-series-write-your-first-flower-app.rst:212
 msgid ""
 "In ``quickstart_numpy/server_app.py``, the ``ServerApp`` is created and "
 "defines its main entry point with ``@app.main()``. When a run starts, "
 "this function:"
 msgstr ""
 
-#: ../../source/tutorial-series-write-your-first-flower-app.rst:216
+#: ../../source/tutorial-series-write-your-first-flower-app.rst:215
 msgid "reads ``num-server-rounds`` from ``context.run_config``;"
 msgstr ""
 
-#: ../../source/tutorial-series-write-your-first-flower-app.rst:217
+#: ../../source/tutorial-series-write-your-first-flower-app.rst:216
 msgid ""
 "creates the initial global model by calling ``get_dummy_model()`` from "
 "``quickstart_numpy/task.py``; For simplicity, the model is just a list of"
@@ -52010,42 +52199,42 @@ msgid ""
 "object such as a PyTorch model."
 msgstr ""
 
-#: ../../source/tutorial-series-write-your-first-flower-app.rst:221
+#: ../../source/tutorial-series-write-your-first-flower-app.rst:220
 msgid ""
 "wraps the model arrays in an ``ArrayRecord`` so Flower can send them to "
 "SuperNodes;"
 msgstr ""
 
-#: ../../source/tutorial-series-write-your-first-flower-app.rst:222
+#: ../../source/tutorial-series-write-your-first-flower-app.rst:221
 #, fuzzy
 msgid "creates a ``FedAvg`` strategy;"
 msgstr "새 페이지 만들기"
 
-#: ../../source/tutorial-series-write-your-first-flower-app.rst:223
+#: ../../source/tutorial-series-write-your-first-flower-app.rst:222
 msgid "launches the strategy by calling ``strategy.start()``."
 msgstr ""
 
-#: ../../source/tutorial-series-write-your-first-flower-app.rst:225
+#: ../../source/tutorial-series-write-your-first-flower-app.rst:224
 msgid ""
 "In ``quickstart_numpy/client_app.py``, a ``ClientApp`` is created and "
 "defines two handlers:"
 msgstr ""
 
-#: ../../source/tutorial-series-write-your-first-flower-app.rst:228
+#: ../../source/tutorial-series-write-your-first-flower-app.rst:227
 msgid ""
 "``@app.train()`` receives the current global model array, simulates local"
 " training by adding random noise to it, then replies with the updated "
 "array and a few metrics."
 msgstr ""
 
-#: ../../source/tutorial-series-write-your-first-flower-app.rst:230
+#: ../../source/tutorial-series-write-your-first-flower-app.rst:229
 msgid ""
 "``@app.evaluate()`` receives the current global model array and replies "
 "with evaluation metrics. It does not return an updated array because "
 "evaluation does not change the model."
 msgstr ""
 
-#: ../../source/tutorial-series-write-your-first-flower-app.rst:234
+#: ../../source/tutorial-series-write-your-first-flower-app.rst:233
 msgid ""
 "The strategy connects these two sides. In this demo, ``FedAvg`` sends the"
 " current global array to selected ``ClientApp`` instances for training, "
@@ -52053,7 +52242,7 @@ msgid ""
 " global model."
 msgstr ""
 
-#: ../../source/tutorial-series-write-your-first-flower-app.rst:240
+#: ../../source/tutorial-series-write-your-first-flower-app.rst:239
 msgid ""
 "In a real app, the ``ClientApp`` would likely have a more complex logic, "
 "for example it could load a model and data, perform actual training and "
@@ -52062,20 +52251,20 @@ msgid ""
 "Flower App that uses PyTorch and real training and evaluation logic."
 msgstr ""
 
-#: ../../source/tutorial-series-write-your-first-flower-app.rst:246
+#: ../../source/tutorial-series-write-your-first-flower-app.rst:245
 msgid ""
 "Finally, ``pyproject.toml`` makes the app components discoverable and "
 "configurable. The ``[tool.flwr.app.components]`` section points Flower to"
 " the objects it should import:"
 msgstr ""
 
-#: ../../source/tutorial-series-write-your-first-flower-app.rst:254
+#: ../../source/tutorial-series-write-your-first-flower-app.rst:253
 msgid ""
 "The ``[tool.flwr.app.config]`` section defines values available at "
 "runtime through ``context.run_config``. In this demo, it sets:"
 msgstr ""
 
-#: ../../source/tutorial-series-write-your-first-flower-app.rst:261
+#: ../../source/tutorial-series-write-your-first-flower-app.rst:260
 msgid ""
 "That is the value the ``ServerApp`` reads to decide how many federated "
 "learning rounds the ``FedAvg`` strategy should run. In a real app, you "
@@ -52083,7 +52272,7 @@ msgid ""
 "size, and more."
 msgstr ""
 
-#: ../../source/tutorial-series-write-your-first-flower-app.rst:269
+#: ../../source/tutorial-series-write-your-first-flower-app.rst:268
 msgid ""
 "Congratulations, you have successfully run your first custom Flower App "
 "on SuperGrid! You have also learned about the main components of a Flower"
@@ -52091,7 +52280,7 @@ msgid ""
 "across a federation of SuperNodes."
 msgstr ""
 
-#: ../../source/tutorial-series-write-your-first-flower-app.rst:275
+#: ../../source/tutorial-series-write-your-first-flower-app.rst:274
 msgid ""
 "This tutorial runs the app on SuperGrid with simulated SuperNodes. To run"
 " Flower Apps on SuperGrid with the Deployment Runtime instead, create a "
@@ -52100,7 +52289,7 @@ msgid ""
 ":doc:`how-to-connect-supernodes-to-supergrid`."
 msgstr ""
 
-#: ../../source/tutorial-series-write-your-first-flower-app.rst:281
+#: ../../source/tutorial-series-write-your-first-flower-app.rst:280
 msgid ""
 "In the next tutorial, you will take a look at a more complex Flower App "
 "that uses PyTorch and real training and evaluation logic. You will also "
@@ -52108,7 +52297,7 @@ msgid ""
 " development and debugging before running on SuperGrid."
 msgstr ""
 
-#: ../../source/tutorial-series-write-your-first-flower-app.rst:297
+#: ../../source/tutorial-series-write-your-first-flower-app.rst:296
 msgid ""
 "The :doc:`Flower Collaborative AI Tutorial - Part 3: Write a Flower App "
 "for a PyTorch model <tutorial-series-write-your-first-flower-app-"
@@ -89321,5 +89510,116 @@ msgstr ""
 #~ "SuperNodes connect to the SuperLink via"
 #~ " TLS-enabled gRPC using the Fleet "
 #~ "API. Node authentication can be enabled."
+#~ msgstr ""
+
+#~ msgid "OpenFL Migration Guide"
+#~ msgstr "구성 값"
+
+#~ msgid ""
+#~ "This guide shows two ways to run"
+#~ " a Flower App on SuperGrid: directly"
+#~ " from `Flower Hub <https://flower.ai/apps/>`__,"
+#~ " and from a Flower App project "
+#~ "on your machine. It uses the "
+#~ "`@flwrlabs/quickstart-numpy "
+#~ "<https://flower.ai/apps/flwrlabs/quickstart-numpy/>`__ app"
+#~ " as an example, but the same "
+#~ "workflow applies to other Flower Apps,"
+#~ " whether or not they are listed "
+#~ "on Flower Hub."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Running directly from Flower Hub is "
+#~ "the quickest way to get started. "
+#~ "Open an app page, for example "
+#~ "`@flwrlabs/quickstart-numpy "
+#~ "<https://flower.ai/apps/flwrlabs/quickstart-numpy/>`__, "
+#~ "and click ``Run``."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "If you return to the federation "
+#~ "page, the run appears in the list"
+#~ " of runs for that federation."
+#~ msgstr ""
+
+#~ msgid "Federation details page showing the run that was launched"
+#~ msgstr ""
+
+#~ msgid "The run appears in the same SuperGrid federation dashboard."
+#~ msgstr ""
+
+#~ msgid "SuperGrid dashboard showing the newly started run in the federation"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Flower Apps can define default runtime"
+#~ " settings in the ``[tool.flwr.app.config]`` "
+#~ "section of their ``pyproject.toml``. The "
+#~ "``quickstart-numpy`` app used in this"
+#~ " guide defines ``num-server-rounds`` "
+#~ "to control how many rounds its "
+#~ "``ServerApp`` runs:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "You can override app-defined values "
+#~ "for a single run with the "
+#~ "``--run-config`` flag. The following "
+#~ "command runs ``quickstart-numpy`` on "
+#~ "SuperGrid with ``num-server-rounds`` set"
+#~ " to ``5``:"
+#~ msgstr ""
+
+#~ msgid ":py:obj:`tools <flwr.agentapp.AgentConnectors.tools>`\\ \\(names\\)"
+#~ msgstr ""
+
+#~ msgid "Return model-facing tool schemas for built-in connectors."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Congratulations, you have successfully run "
+#~ "your first Flower App on SuperGrid! "
+#~ "You've taken your first step into "
+#~ "the world of collaborative AI with "
+#~ "Flower. In this tutorial, you created"
+#~ " a federation with simulated SuperNodes "
+#~ "and ran an existing Flower App "
+#~ "across them. You also explored the "
+#~ "SuperGrid dashboard to monitor your "
+#~ "app's progress and view its logs."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "If you return to the `Federations "
+#~ "page <https://flower.ai/federations/>`__ and click"
+#~ " your federation, you'll see the run"
+#~ " you launched. You can click that "
+#~ "run to open the same run details"
+#~ " page you saw right after launching"
+#~ " the app."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Then, if you navigate to the "
+#~ "`SuperGrid dashboard <https://flower.ai/federations/>`__,"
+#~ " you should see a new run in"
+#~ " ``@<your-account>/workspace``. Click on it"
+#~ " to see the run details and "
+#~ "logs."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Then, if you navigate to the "
+#~ "`SuperGrid dashboard <https://flower.ai/federations/>`__,"
+#~ " and open the logs of the new"
+#~ " run, you should see the new "
+#~ "printed messages from the ``ServerApp`` "
+#~ "at the beginning and end of the"
+#~ " logs."
+#~ msgstr ""
+
+#~ msgid "SuperGrid run logs showing the custom ServerApp print statements"
 #~ msgstr ""
 
