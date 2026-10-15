@@ -333,9 +333,9 @@ class GetCompactedContextsResponse(google.protobuf.message.Message):
 global___GetCompactedContextsResponse = GetCompactedContextsResponse
 
 @typing.final
-class CreateCompactedContextRequest(google.protobuf.message.Message):
-    """CreateCompactedContext messages
-    The new context belongs to the authenticated task's run series.
+class PutCompactedContextRequest(google.protobuf.message.Message):
+    """PutCompactedContext messages
+    The saved context belongs to the authenticated task's run series.
     """
 
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
@@ -352,10 +352,10 @@ class CreateCompactedContextRequest(google.protobuf.message.Message):
     ) -> None: ...
     def ClearField(self, field_name: typing.Literal["text", b"text", "through_event_id", b"through_event_id"]) -> None: ...
 
-global___CreateCompactedContextRequest = CreateCompactedContextRequest
+global___PutCompactedContextRequest = PutCompactedContextRequest
 
 @typing.final
-class CreateCompactedContextResponse(google.protobuf.message.Message):
+class PutCompactedContextResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
 
     CONTEXT_FIELD_NUMBER: builtins.int
@@ -369,7 +369,7 @@ class CreateCompactedContextResponse(google.protobuf.message.Message):
     def HasField(self, field_name: typing.Literal["context", b"context"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing.Literal["context", b"context"]) -> None: ...
 
-global___CreateCompactedContextResponse = CreateCompactedContextResponse
+global___PutCompactedContextResponse = PutCompactedContextResponse
 
 @typing.final
 class PullTaskMessageRequest(google.protobuf.message.Message):

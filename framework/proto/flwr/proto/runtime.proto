@@ -82,13 +82,13 @@ message GetCompactedContextsRequest {
 }
 message GetCompactedContextsResponse { repeated CompactedContext contexts = 1; }
 
-// CreateCompactedContext messages
-// The new context belongs to the authenticated task's run series.
-message CreateCompactedContextRequest {
+// PutCompactedContext messages
+// The saved context belongs to the authenticated task's run series.
+message PutCompactedContextRequest {
   uint64 through_event_id = 1;
   string text = 2;
 }
-message CreateCompactedContextResponse { CompactedContext context = 1; }
+message PutCompactedContextResponse { CompactedContext context = 1; }
 
 // PullTaskMessage messages
 message PullTaskMessageRequest {
