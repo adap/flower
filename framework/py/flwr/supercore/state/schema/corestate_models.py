@@ -31,6 +31,7 @@ from sqlalchemy import (
     PrimaryKeyConstraint,
     String,
     Table,
+    column,
     text,
 )
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
@@ -79,7 +80,6 @@ class Message(FlwrBase):
     The expires_at deadline is always set, regardless of the closing outcome.
     Clearing ends delivery and releases the ObjectStore reference while retaining
     metadata. Acknowledgment and cancellation timestamps are mutually exclusive.
-    Pending queries use ``cleared == false()`` to match the SQLite partial indexes.
     """
 
     __tablename__ = "message"
@@ -97,8 +97,8 @@ class Message(FlwrBase):
             "dst_node_id",
             "created_at",
             "message_id",
-            postgresql_where=text("cleared = false"),
-            sqlite_where=text("cleared = 0"),
+            postgresql_where=column("cleared", Boolean).is_(False),
+            sqlite_where=column("cleared", Boolean).is_(False),
         ),
         Index(
             "idx_message_pending_dst_run_created_at",
@@ -106,14 +106,14 @@ class Message(FlwrBase):
             "run_id",
             "created_at",
             "message_id",
-            postgresql_where=text("cleared = false"),
-            sqlite_where=text("cleared = 0"),
+            postgresql_where=column("cleared", Boolean).is_(False),
+            sqlite_where=column("cleared", Boolean).is_(False),
         ),
         Index(
             "idx_message_pending_run_id",
             "run_id",
-            postgresql_where=text("cleared = false"),
-            sqlite_where=text("cleared = 0"),
+            postgresql_where=column("cleared", Boolean).is_(False),
+            sqlite_where=column("cleared", Boolean).is_(False),
         ),
         Index("idx_message_reply_to_message_id", "reply_to_message_id"),
     )
