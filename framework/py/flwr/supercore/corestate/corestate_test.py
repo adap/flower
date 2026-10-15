@@ -1954,19 +1954,6 @@ class StateTest(unittest.TestCase):  # pylint: disable=R0904
             events[2:4],
         )
 
-    def test_get_task_events_handles_uint64_cursor_bounds(self) -> None:
-        """Handle protobuf uint64 cursors beyond SQL's signed event ID range."""
-        state, run_id, _, events = self._create_task_events_for_filter_tests()
-
-        self.assertEqual(
-            state.get_task_events(run_ids=[run_id], after_task_event_id=2**64 - 1),
-            [],
-        )
-        self.assertEqual(
-            state.get_task_events(run_ids=[run_id], before_task_event_id=2**64 - 1),
-            events,
-        )
-
     def test_get_task_events_returns_last_matching(self) -> None:
         """Apply filters before selecting the newest N events in ID order."""
         state, run_id, task_id, events = self._create_task_events_for_filter_tests()

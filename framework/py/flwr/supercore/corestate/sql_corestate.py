@@ -1755,12 +1755,9 @@ class SqlCoreState(CoreState, SqlMixin):  # pylint: disable=R0904
         """Return task-produced run events matching the filters."""
         if last_n is not None and last_n < 0:
             raise ValueError("last_n must be non-negative")
-        max_event_id = 2**63 - 1
-        if after_task_event_id is not None and after_task_event_id >= max_event_id:
-            return []
         cursor = after_task_event_id if after_task_event_id is not None else 0
         query = select(TaskEventModel).where(TaskEventModel.id > cursor)
-        if before_task_event_id is not None and before_task_event_id <= max_event_id:
+        if before_task_event_id is not None:
             query = query.where(TaskEventModel.id < before_task_event_id)
         if event_types is not None:
             query = query.where(TaskEventModel.event.in_(event_types))
