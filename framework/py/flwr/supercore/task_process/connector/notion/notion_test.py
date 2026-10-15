@@ -52,6 +52,10 @@ def fixture_send_request() -> Iterator[AsyncMock]:
         patch(
             "mcp.client.streamable_http.streamable_http_client", return_value=transport
         ),
+        patch(
+            "mcp.client.sse.sse_client",
+            side_effect=AssertionError("Unexpected SSE fallback"),
+        ),
     ):
         yield send_request
 
@@ -132,6 +136,54 @@ def test_mcp_preserves_redacted_error_details(send_request: AsyncMock) -> None:
     assert "notion-private-token" not in "".join(
         traceback.format_exception(error.value)
     )
+
+
+@pytest.mark.parametrize("failure", ["connect", "initialize", "call"])
+def test_sse_fallback_is_limited_to_session_setup(
+    send_request: AsyncMock, failure: str
+) -> None:
+    """Use authenticated SSE for setup failures without retrying a tool call."""
+    error = RuntimeError("Transport unavailable")
+    initialize = AsyncMock()
+    output = types.CallToolResult(content=[])
+    send_request.return_value = output
+    with (
+        patch("mcp.client.streamable_http.streamable_http_client") as http,
+        patch("mcp.client.sse.sse_client") as sse,
+        patch.object(ClientSession, "initialize", initialize),
+    ):
+        http.return_value.__aenter__.return_value = (Mock(), Mock(), Mock())
+        sse.return_value.__aenter__.return_value = (Mock(), Mock())
+        if failure == "connect":
+            http.return_value.__aenter__.side_effect = error
+        elif failure == "initialize":
+            initialize.side_effect = [error, None]
+        else:
+            send_request.side_effect = error
+
+        if failure == "call":
+            with pytest.raises(NotionApiError, match="Transport unavailable"):
+                registry.invoke_connector(
+                    "notion_FutureTool", {}, Mock(), _CREDENTIALS, {}
+                )
+            sse.assert_not_called()
+        else:
+            result = registry.invoke_connector(
+                "notion_FutureTool", {}, Mock(), _CREDENTIALS, {}
+            )
+            assert result == output.model_dump(
+                mode="json", by_alias=True, exclude_none=True
+            )
+            sse.assert_called_once_with(
+                "https://mcp.notion.com/sse",
+                headers={"Authorization": "Bearer notion-private-token"},
+                timeout=30,
+                sse_read_timeout=30,
+            )
+        if failure == "initialize":
+            http.return_value.__aexit__.assert_awaited_once()
+            assert initialize.await_count == 2
+    send_request.assert_awaited_once()
 
 
 def test_oauth_uses_mcp_endpoints_pkce_and_resource() -> None:

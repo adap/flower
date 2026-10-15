@@ -18,7 +18,7 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import AsyncIterator
-from contextlib import asynccontextmanager
+from contextlib import AsyncExitStack, asynccontextmanager
 from datetime import timedelta
 from typing import TYPE_CHECKING, cast
 
@@ -33,6 +33,7 @@ if TYPE_CHECKING:
     from mcp import ClientSession
 
 _MCP_URL = "https://mcp.notion.com/mcp"
+_SSE_URL = "https://mcp.notion.com/sse"
 
 
 class NotionApiError(ConnectorApiError):
@@ -43,34 +44,21 @@ class NotionApiError(ConnectorApiError):
 
 @asynccontextmanager
 async def _session(context: ConnectorExecutionContext) -> AsyncIterator[ClientSession]:
-    """Open an authenticated MCP session using this task's bound credentials."""
-    # pylint: disable=import-outside-toplevel
-    try:
-        from mcp import ClientSession
-        from mcp.client.streamable_http import streamable_http_client
-    except ModuleNotFoundError:
-        raise ImportError(
-            "Notion MCP requires the optional 'flwr[agent]' dependencies."
-        ) from None
-
+    """Try Streamable HTTP, falling back to SSE before handing out the session."""
     token = context.credentials.get("access_token")
     if not isinstance(token, str) or not token:
         raise NotionApiError("invalid_credentials")
     try:
-        async with (
-            asyncio.timeout(120),
-            httpx.AsyncClient(
-                headers={"Authorization": f"Bearer {token}"},
-                timeout=30,
-                follow_redirects=False,
-            ) as client,
-            streamable_http_client(_MCP_URL, http_client=client) as (read, write, _),
-        ):
-            async with ClientSession(
-                read, write, read_timeout_seconds=timedelta(seconds=30)
-            ) as session:
-                await session.initialize()
-                yield session
+        async with asyncio.timeout(120), AsyncExitStack() as stack:
+            try:
+                session = await stack.enter_async_context(
+                    _initialized_session(token, use_sse=False)
+                )
+            except Exception:  # pylint: disable=broad-exception-caught
+                session = await stack.enter_async_context(
+                    _initialized_session(token, use_sse=True)
+                )
+            yield session
         return
     except Exception as ex:  # pylint: disable=broad-exception-caught
         while isinstance(ex, ExceptionGroup):
@@ -90,6 +78,41 @@ async def _session(context: ConnectorExecutionContext) -> AsyncIterator[ClientSe
         )
     # Suppress the original exception so tracebacks cannot expose the token.
     raise error from None
+
+
+@asynccontextmanager
+async def _initialized_session(
+    token: str, *, use_sse: bool
+) -> AsyncIterator[ClientSession]:
+    """Open one transport and clean up if its connection or initialization fails."""
+    # pylint: disable=import-outside-toplevel
+    try:
+        from mcp import ClientSession
+        from mcp.client.sse import sse_client
+        from mcp.client.streamable_http import streamable_http_client
+    except ModuleNotFoundError:
+        raise ImportError(
+            "Notion MCP requires the optional 'flwr[agent]' dependencies."
+        ) from None
+
+    headers = {"Authorization": f"Bearer {token}"}
+    async with AsyncExitStack() as stack:
+        if use_sse:
+            read, write = await stack.enter_async_context(
+                sse_client(_SSE_URL, headers=headers, timeout=30, sse_read_timeout=30)
+            )
+        else:
+            client = await stack.enter_async_context(
+                httpx.AsyncClient(headers=headers, timeout=30, follow_redirects=False)
+            )
+            read, write, _ = await stack.enter_async_context(
+                streamable_http_client(_MCP_URL, http_client=client)
+            )
+        session = await stack.enter_async_context(
+            ClientSession(read, write, read_timeout_seconds=timedelta(seconds=30))
+        )
+        await session.initialize()
+        yield session
 
 
 def discover_tools(context: ConnectorExecutionContext) -> list[ActionDefinition]:
