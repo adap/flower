@@ -76,6 +76,9 @@ from flwr.supercore.fab import Fab
 from flwr.supercore.inflatable.inflatable_object import get_object_tree
 from flwr.supercore.object_store.object_store_factory import ObjectStoreFactory
 from flwr.supercore.primitives.asymmetric import generate_key_pairs, public_key_to_bytes
+from flwr.supercore.state.schema.corestate_models import (
+    CompactedContext as CompactedContextModel,
+)
 from flwr.supercore.state.schema.corestate_models import Connector as ConnectorModel
 from flwr.supercore.state.schema.corestate_models import Fab as FabModel
 from flwr.supercore.state.schema.linkstate_models import MessageIns as MessageInsModel
@@ -2605,6 +2608,49 @@ class SqlInMemoryStateTest(StateTest, unittest.TestCase):
         )
         state.initialize()
         return state
+
+    def test_get_compacted_contexts(self) -> None:
+        """Read only one series in newest-first order with an exclusive cursor."""
+        state = self.state_factory()
+        with state.session() as session:
+            rows = [
+                CompactedContextModel(
+                    series_id=series_id,
+                    through_event_id=event_id,
+                    text=text,
+                    created_at=now(),
+                )
+                for series_id, event_id, text in (
+                    (42, 10, "First"),
+                    (42, 20, "Second"),
+                    (43, 30, "Other"),
+                )
+            ]
+            session.add_all(rows)
+            session.flush()
+            first_id, second_id = rows[0].id, rows[1].id
+
+        self.assertEqual(
+            [context.text for context in state.get_compacted_contexts(42, limit=2)],
+            ["Second", "First"],
+        )
+        self.assertEqual(
+            [context.id for context in state.get_compacted_contexts(42)],
+            [second_id],
+        )
+        self.assertEqual(
+            [
+                context.id
+                for context in state.get_compacted_contexts(
+                    42, before_context_id=second_id
+                )
+            ],
+            [first_id],
+        )
+        self.assertEqual(
+            [context.text for context in state.get_compacted_contexts(43)],
+            ["Other"],
+        )
 
     def test_get_fab_refreshes_cached_row_in_shared_session(self) -> None:
         """Test get_fab observes raw SQL updates in a shared session."""

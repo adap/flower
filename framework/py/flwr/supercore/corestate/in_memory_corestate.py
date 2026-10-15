@@ -42,7 +42,10 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     StartRunRequest,
 )
 from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
-from flwr.proto.runseries_pb2 import RunSeries  # pylint: disable=E0611
+from flwr.proto.runseries_pb2 import (  # pylint: disable=E0611
+    CompactedContext,
+    RunSeries,
+)
 from flwr.proto.task_pb2 import (  # pylint: disable=E0611
     Task,
     TaskEvent,
@@ -739,6 +742,14 @@ class InMemoryCoreState(
         """Return the shared Context for the specified RunSeries, if present."""
         with self.lock_run_series_context_store:
             return self.run_series_context_store.get(series_id)
+
+    def get_compacted_contexts(
+        self, series_id: int, limit: int = 1, before_context_id: int | None = None
+    ) -> Sequence[CompactedContext]:
+        """Return a series's summaries newest first, before an optional ID."""
+        if limit <= 0:
+            raise ValueError("limit must be positive")
+        return []
 
     def set_run_series_context(self, series_id: int, context: Context) -> None:
         """Set the shared Context for the specified RunSeries."""
