@@ -20,6 +20,7 @@ from flwr.supercore.state.schema.corestate_tables import create_corestate_metada
 CORESTATE_TABLE_NAMES = {
     "nonce_store",
     "fab",
+    "message",
     "run_series",
     "series_context",
     "series_runs",
