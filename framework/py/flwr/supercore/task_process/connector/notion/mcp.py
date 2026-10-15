@@ -12,22 +12,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Discover and call Notion's official remote MCP tools."""
+"""Discover and execute tools through Notion's official MCP server."""
 
 from __future__ import annotations
 
 import asyncio
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 from datetime import timedelta
 from typing import TYPE_CHECKING, cast
 
 import httpx
 
-from flwr.supercore.typing import JSONObject, JSONValue
+from flwr.supercore.typing import JSONObject
 
+from ..definition import ActionAccess, ActionDefinition, ConnectorExecutionContext
 from ..http import ConnectorApiError
 
 if TYPE_CHECKING:
     from mcp import ClientSession
+
+_MCP_URL = "https://mcp.notion.com/mcp"
 
 
 class NotionApiError(ConnectorApiError):
@@ -36,17 +41,37 @@ class NotionApiError(ConnectorApiError):
     provider = "Notion"
 
 
-def request(
-    name: str | None,
-    arguments: JSONObject,
-    credentials: JSONObject,
-) -> JSONValue:
-    """Discover tools or call one, forwarding errors without exposing the token."""
-    token = credentials.get("access_token")
+@asynccontextmanager
+async def _session(context: ConnectorExecutionContext) -> AsyncIterator[ClientSession]:
+    """Open an authenticated MCP session using this task's bound credentials."""
+    # pylint: disable=import-outside-toplevel
+    try:
+        from mcp import ClientSession
+        from mcp.client.streamable_http import streamable_http_client
+    except ModuleNotFoundError:
+        raise ImportError(
+            "Notion MCP requires the optional 'flwr[agent]' dependencies."
+        ) from None
+
+    token = context.credentials.get("access_token")
     if not isinstance(token, str) or not token:
         raise NotionApiError("invalid_credentials")
     try:
-        return asyncio.run(_request(name, arguments, token))
+        async with (
+            asyncio.timeout(120),
+            httpx.AsyncClient(
+                headers={"Authorization": f"Bearer {token}"},
+                timeout=30,
+                follow_redirects=False,
+            ) as client,
+            streamable_http_client(_MCP_URL, http_client=client) as (read, write, _),
+        ):
+            async with ClientSession(
+                read, write, read_timeout_seconds=timedelta(seconds=30)
+            ) as session:
+                await session.initialize()
+                yield session
+        return
     except Exception as ex:  # pylint: disable=broad-exception-caught
         while isinstance(ex, ExceptionGroup):
             ex = ex.exceptions[0]  # pylint: disable=no-member
@@ -63,83 +88,81 @@ def request(
         error = NotionApiError(
             code, status, (message or "").replace(token, "[REDACTED]")
         )
-    # Raise outside the handler so the original exception cannot expose the token.
-    raise error
+    # Suppress the original exception so tracebacks cannot expose the token.
+    raise error from None
 
 
-async def _request(
-    name: str | None,
-    arguments: JSONObject,
-    token: str,
-) -> JSONValue:
-    """Initialize a task-local MCP session and discover or call remote tools."""
-    from mcp import ClientSession, types  # pylint: disable=import-outside-toplevel
-    from mcp.client.streamable_http import (  # pylint: disable=import-outside-toplevel
-        streamable_http_client,
-    )
-
-    async with (
-        asyncio.timeout(120),
-        httpx.AsyncClient(
-            headers={"Authorization": f"Bearer {token}"},
-            timeout=30,
-            follow_redirects=False,
-        ) as client,
-        streamable_http_client("https://mcp.notion.com/mcp", http_client=client) as (
-            read,
-            write,
-            _,
-        ),
-    ):
-        async with ClientSession(
-            read, write, read_timeout_seconds=timedelta(seconds=30)
-        ) as session:
-            await session.initialize()
-            if name is None:
-                return await _list_tools(session)
-            # Avoid call_tool's catalog fetch after executing a tool in a fresh session.
-            result = await session.send_request(
-                types.ClientRequest(
-                    types.CallToolRequest(
-                        params=types.CallToolRequestParams(
-                            name=name, arguments=arguments
-                        )
-                    )
-                ),
-                types.CallToolResult,
-            )
-            if result.isError:
-                raise NotionApiError(
-                    "tool_error",
-                    message=" ".join(
-                        item.text
-                        for item in result.content
-                        if isinstance(item, types.TextContent)
-                    ),
-                )
-            return cast(
-                JSONObject,
-                result.model_dump(mode="json", by_alias=True, exclude_none=True),
-            )
+def discover_tools(context: ConnectorExecutionContext) -> list[ActionDefinition]:
+    """Discover account-specific tools from Notion's MCP server."""
+    return asyncio.run(_discover_tools(context))
 
 
-async def _list_tools(session: ClientSession) -> JSONValue:
-    """Read every page of the authenticated tool catalog."""
-    tools: list[JSONObject] = []
+async def _discover_tools(context: ConnectorExecutionContext) -> list[ActionDefinition]:
+    """Follow tools/list cursors and preserve Notion's remote schemas and names."""
+    actions: list[ActionDefinition] = []
     cursor: str | None = None
     seen_cursors: set[str] = set()
-    while True:
-        page = await session.list_tools(cursor=cursor)
-        tools.extend(
-            cast(
-                JSONObject,
-                tool.model_dump(mode="json", by_alias=True, exclude_none=True),
-            )
-            for tool in page.tools
+    async with _session(context) as session:
+        while True:
+            page = await session.list_tools(cursor=cursor)
+            for tool in page.tools:
+                actions.append(
+                    ActionDefinition(
+                        name=tool.name,
+                        description=tool.description or "",
+                        access=(
+                            ActionAccess.READ
+                            if tool.annotations and tool.annotations.readOnlyHint
+                            else ActionAccess.WRITE
+                        ),
+                        input_schema=cast(JSONObject, tool.inputSchema),
+                    )
+                )
+            cursor = page.nextCursor
+            if not cursor:
+                return actions
+            if cursor in seen_cursors:
+                raise NotionApiError("invalid_tools")
+            seen_cursors.add(cursor)
+
+
+def execute_tool(
+    arguments: JSONObject, context: ConnectorExecutionContext
+) -> JSONObject:
+    """Execute a discovered action without fetching the catalog again."""
+    return asyncio.run(_execute_tool(arguments, context))
+
+
+async def _execute_tool(
+    arguments: JSONObject, context: ConnectorExecutionContext
+) -> JSONObject:
+    """Forward the original remote name and retain the MCP result content."""
+    if not context.action_name:
+        raise NotionApiError("invalid_tool")
+    async with _session(context) as session:
+        # pylint: disable-next=import-outside-toplevel
+        from mcp import types
+
+        # call_tool also lists tools to validate output schemas in a fresh session.
+        result = await session.send_request(
+            types.ClientRequest(
+                types.CallToolRequest(
+                    params=types.CallToolRequestParams(
+                        name=context.action_name, arguments=arguments
+                    )
+                )
+            ),
+            types.CallToolResult,
         )
-        cursor = page.nextCursor
-        if not cursor:
-            return cast(JSONValue, tools)
-        if cursor in seen_cursors:
-            raise NotionApiError("invalid_tools")
-        seen_cursors.add(cursor)
+        if result.isError:
+            raise NotionApiError(
+                "tool_error",
+                message=" ".join(
+                    item.text
+                    for item in result.content
+                    if isinstance(item, types.TextContent)
+                ),
+            )
+    return cast(
+        JSONObject, result.model_dump(mode="json", by_alias=True, exclude_none=True)
+    )
