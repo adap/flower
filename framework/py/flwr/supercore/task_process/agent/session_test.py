@@ -14,6 +14,7 @@
 # ==============================================================================
 """Runtime AgentApp session tests."""
 
+from logging import ERROR
 from unittest.mock import Mock, call, patch
 
 import httpx
@@ -512,7 +513,7 @@ def test_runtime_discovers_and_caches_tools() -> None:
     ],
 )
 def test_discovery_skips_only_connectors_unavailable_to_run(
-    status: int, code: int, unavailable: bool
+    status: int, code: int, unavailable: bool, caplog: pytest.LogCaptureFixture
 ) -> None:
     """Optional discovery must not abort an Agent without connector access."""
     response = httpx.Response(
@@ -537,6 +538,13 @@ def test_discovery_skips_only_connectors_unavailable_to_run(
         assert connectors.tools(
             ["github", "web_search"]
         ) == connector_registry.get_connector_tools("web_search")
+        assert any(
+            record.levelno == ERROR
+            and record.getMessage()
+            == "Skipping tool discovery for unavailable connector github "
+            "in run 123, task 789 (API error 3010)."
+            for record in caplog.records
+        )
     else:
         with pytest.raises(httpx.HTTPStatusError) as raised:
             connectors.tools(["github"])

@@ -22,6 +22,7 @@ import time
 from collections import defaultdict
 from collections.abc import Sequence
 from copy import deepcopy
+from logging import ERROR
 from queue import Empty, Queue
 from threading import Lock, Thread
 from typing import cast
@@ -32,6 +33,7 @@ from httpx import HTTPStatusError
 
 from flwr.agentapp import AgentConnectors, AgentEvents, AgentGrid, AgentSession
 from flwr.app import Message
+from flwr.common.logger import log
 from flwr.common.serde import message_from_proto, message_to_proto
 
 # pylint: disable=E0611
@@ -299,6 +301,15 @@ class AgentRuntime:
                 and error is not None
                 and error.code == ApiErrorCode.RUNTIME_CONNECTOR_NOT_AVAILABLE
             ):
+                log(
+                    ERROR,
+                    "Skipping tool discovery for unavailable connector %s "
+                    "in run %d, task %d (API error %d).",
+                    connector_ref,
+                    self._run_id,
+                    self._task_id,
+                    error.code,
+                )
                 return []
             raise
         for tool in discovered:
