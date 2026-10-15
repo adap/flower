@@ -246,7 +246,7 @@ class TaskEvent(FlwrBase):
     )
 
     id: Mapped[int] = mapped_column(
-        # SQLite requires INTEGER for autoincrement.
+        # Both are signed 64-bit; SQLite requires INTEGER for autoincrement.
         BigInteger().with_variant(Integer, "sqlite"),
         primary_key=True,
         autoincrement=True,
