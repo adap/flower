@@ -96,13 +96,14 @@ class RuntimeAgentEvents(AgentEvents):
         last_n: int | None = None,
     ) -> list[JSONObject]:
         """Get matching events from the current run series."""
-        request = GetRunSeriesEventsRequest(event_types=event_types or [])
+        request = GetRunSeriesEventsRequest(
+            event_types=event_types or [],
+            last_n=0 if last_n is None else last_n,
+        )
         if after_event_id is not None:
             request.after_event_id = after_event_id
         if before_event_id is not None:
             request.before_event_id = before_event_id
-        if last_n is not None:
-            request.last_n = last_n
         response = self._stub.GetRunSeriesEvents(request)
         return [
             {

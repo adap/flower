@@ -83,7 +83,8 @@ class AgentEvents(ABC):
         before_event_id : Optional[int] (default: None)
             Return events with IDs less than this value.
         last_n : Optional[int] (default: None)
-            Return the newest N matching events in ID order. Zero means no limit.
+            Return the newest N matching events in ID order. If unset or zero,
+            return all matching events.
 
         Returns
         -------
