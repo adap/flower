@@ -161,11 +161,16 @@ def test_get_run_series_events_uses_authenticated_task_series() -> None:
         id=11,
         run_id=120,
         task_id=780,
-        event="response.completed",
-        data='{"type":"response.completed"}',
+        event="response.created",
+        data='{"type":"response.created"}',
     )
     state.get_task_events.return_value = [expected_event]
-    request = GetRunSeriesEventsRequest()
+    request = GetRunSeriesEventsRequest(
+        event_types=["response.created"],
+        after_event_id=10,
+        before_event_id=20,
+        last_n=1,
+    )
 
     response = runtime_handlers.get_run_series_events(
         request,
@@ -176,7 +181,28 @@ def test_get_run_series_events_uses_authenticated_task_series() -> None:
     assert isinstance(response, GetRunSeriesEventsResponse)
     assert list(response.events) == [expected_event]
     state.get_run_series.assert_called_once_with(series_ids=[456])
-    state.get_task_events.assert_called_once_with(task_ids=[780, 789])
+    state.get_task_events.assert_called_once_with(
+        task_ids=[780, 789],
+        event_types=["response.created"],
+        after_task_event_id=10,
+        before_task_event_id=20,
+        last_n=1,
+    )
+
+    state.get_task_events.reset_mock()
+    state.get_run_info.side_effect = [[current_run], series_runs]
+    runtime_handlers.get_run_series_events(
+        GetRunSeriesEventsRequest(after_event_id=10, last_n=0),
+        state,
+        Task(task_id=790, run_id=123, type=TaskType.MODEL),
+    )
+    state.get_task_events.assert_called_once_with(
+        task_ids=[780, 789],
+        event_types=None,
+        after_task_event_id=10,
+        before_task_event_id=None,
+        last_n=None,
+    )
 
 
 def _create_shared_runtime(
