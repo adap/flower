@@ -40,6 +40,8 @@ from flwr.proto.task_pb2 import TaskEvent  # pylint: disable=E0611
 from flwr.supercore.constant import TaskType
 from flwr.supercore.error import ApiErrorCode
 from flwr.supercore.json_message.connector_message import ConnectorResponse
+from flwr.supercore.retry import make_simple_http_retry_invoker
+from flwr.supercore.runtime import RuntimeHttpClient
 from flwr.supercore.task_identity import TaskIdentity
 from flwr.supercore.task_process.connector import registry as connector_registry
 from flwr.supercore.task_process.connector.automation import START_AUTOMATION_TOOL_NAME
@@ -552,3 +554,51 @@ def test_discovery_skips_only_connectors_unavailable_to_run(
     stub.CreateTask.assert_called_once_with(
         CreateTaskRequest(type=TaskType.CONNECTOR, connector_ref="github")
     )
+
+
+def test_discovery_skips_unavailable_connectors_through_http_retry() -> None:
+    """Keep the Agent running when real transport rejects optional discovery."""
+    requests: list[CreateTaskRequest] = []
+
+    def respond(request: httpx.Request) -> httpx.Response:
+        assert request.url.path == "/v1/runtime/create-task"
+        requests.append(CreateTaskRequest.FromString(request.content))
+        return httpx.Response(
+            403,
+            json={
+                "code": ApiErrorCode.RUNTIME_CONNECTOR_NOT_AVAILABLE,
+                "detail": "Connector is not available to this run.",
+            },
+        )
+
+    with (
+        httpx.Client(transport=httpx.MockTransport(respond)) as transport_client,
+        patch(
+            "flwr.supercore.protobuf.client.httpx.Client",
+            return_value=transport_client,
+        ),
+        RuntimeHttpClient(
+            "http://runtime.example",
+            retry_invoker=make_simple_http_retry_invoker(),
+        ) as client,
+    ):
+        runtime = AgentRuntime(
+            stub=client,
+            run_id=123,
+            task_id=789,
+            start_run_request=StartRunRequest(),
+            events=Mock(),
+        )
+        assert RuntimeAgentConnectors(runtime).tools(
+            ["github", "web_search", "slack"]
+        ) == connector_registry.get_connector_tools("web_search")
+        # Calling a connector still reports the authorization failure.
+        with pytest.raises(httpx.HTTPStatusError):
+            runtime.create_connector_response(
+                name="github__discover_tools", call_id="call-1", arguments={}
+            )
+
+    assert requests == [
+        CreateTaskRequest(type=TaskType.CONNECTOR, connector_ref=ref)
+        for ref in ("github", "slack", "github")
+    ]
