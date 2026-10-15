@@ -1974,7 +1974,7 @@ class StateTest(unittest.TestCase):  # pylint: disable=R0904
         filtered = state.get_task_events(
             run_ids=[run_id],
             task_ids=[task_id],
-            event_types=["message", "function_call"],
+            event_types=["message", "response.created", "function_call"],
             after_task_event_id=events[0].id,
             before_task_event_id=events[-1].id,
             last_n=2,
@@ -1982,6 +1982,13 @@ class StateTest(unittest.TestCase):  # pylint: disable=R0904
 
         self.assertEqual(list(filtered), [events[2], events[3]])
         self.assertEqual(state.get_task_events(run_ids=[run_id], last_n=0), [])
+
+    def test_get_task_events_rejects_negative_last_n(self) -> None:
+        """Reject negative limits consistently across state implementations."""
+        state, run_id, _, _ = self._create_task_events_for_filter_tests()
+
+        with self.assertRaisesRegex(ValueError, "last_n must be non-negative"):
+            state.get_task_events(run_ids=[run_id], last_n=-1)
 
     @parameterized.expand(  # type: ignore
         [

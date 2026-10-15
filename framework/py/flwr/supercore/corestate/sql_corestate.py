@@ -1742,7 +1742,7 @@ class SqlCoreState(CoreState, SqlMixin):  # pylint: disable=R0904
 
         return True
 
-    def get_task_events(
+    def get_task_events(  # pylint: disable=too-many-arguments
         self,
         *,
         run_ids: Sequence[int] | None = None,
@@ -1753,6 +1753,8 @@ class SqlCoreState(CoreState, SqlMixin):  # pylint: disable=R0904
         last_n: int | None = None,
     ) -> Sequence[TaskEvent]:
         """Return task-produced run events matching the filters."""
+        if last_n is not None and last_n < 0:
+            raise ValueError("last_n must be non-negative")
         max_event_id = 2**63 - 1
         if after_task_event_id is not None and after_task_event_id >= max_event_id:
             return []

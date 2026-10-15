@@ -1411,7 +1411,7 @@ class InMemoryCoreState(
 
         return True
 
-    def get_task_events(
+    def get_task_events(  # pylint: disable=too-many-arguments
         self,
         *,
         run_ids: Sequence[int] | None = None,
@@ -1422,6 +1422,8 @@ class InMemoryCoreState(
         last_n: int | None = None,
     ) -> Sequence[TaskEvent]:
         """Return task-produced run events matching the filters."""
+        if last_n is not None and last_n < 0:
+            raise ValueError("last_n must be non-negative")
         if last_n == 0:
             return []
         cursor = after_task_event_id if after_task_event_id is not None else 0

@@ -1115,7 +1115,7 @@ class CoreState(ABC):  # pylint: disable=R0904
         """
 
     @abstractmethod
-    def get_task_events(
+    def get_task_events(  # pylint: disable=too-many-arguments
         self,
         *,
         run_ids: Sequence[int] | None = None,
@@ -1142,7 +1142,7 @@ class CoreState(ABC):  # pylint: disable=R0904
         event_types : Optional[Sequence[str]] (default: None)
             Return only events with one of these types.
         last_n : Optional[int] (default: None)
-            Return the newest N matching events.
+            Return the newest N matching events. Must be non-negative.
 
         Returns
         -------
