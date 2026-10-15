@@ -1900,6 +1900,89 @@ class StateTest(unittest.TestCase):  # pylint: disable=R0904
         self.assertEqual(excluded, [])
         self.assertEqual(no_runs, [])
 
+    def _create_task_events_for_filter_tests(
+        self,
+    ) -> tuple[CoreState, int, int, list[TaskEvent]]:
+        """Store task events with several types and return them in ID order."""
+        state = self.state_factory()
+        run_id = self.task_run_id(state)
+        task_id = state.create_task(task_type=TaskType.AGENT_APP, run_id=run_id)
+        assert task_id is not None
+        state.store_task_events(
+            [
+                TaskEvent(
+                    run_id=run_id,
+                    task_id=task_id,
+                    event=event_type,
+                    data=f'{{"type":"{event_type}"}}',
+                )
+                for event_type in (
+                    "message",
+                    "response.created",
+                    "function_call",
+                    "message",
+                    "function_call_output",
+                )
+            ]
+        )
+        return state, run_id, task_id, list(state.get_task_events(run_ids=[run_id]))
+
+    def test_get_task_events_filters_by_type(self) -> None:
+        """Return requested event types, including types outside the summary set."""
+        state, run_id, _, events = self._create_task_events_for_filter_tests()
+
+        self.assertEqual(
+            state.get_task_events(run_ids=[run_id], event_types=["message"]),
+            [events[0], events[3]],
+        )
+        self.assertEqual(
+            state.get_task_events(run_ids=[run_id], event_types=["response.created"]),
+            [events[1]],
+        )
+        self.assertEqual(state.get_task_events(run_ids=[run_id], event_types=[]), [])
+
+    def test_get_task_events_filters_by_id(self) -> None:
+        """Treat both event ID bounds as exclusive."""
+        state, run_id, _, events = self._create_task_events_for_filter_tests()
+
+        self.assertEqual(
+            state.get_task_events(
+                run_ids=[run_id],
+                after_task_event_id=events[1].id,
+                before_task_event_id=events[4].id,
+            ),
+            events[2:4],
+        )
+
+    def test_get_task_events_handles_uint64_cursor_bounds(self) -> None:
+        """Handle protobuf uint64 cursors beyond SQL's signed event ID range."""
+        state, run_id, _, events = self._create_task_events_for_filter_tests()
+
+        self.assertEqual(
+            state.get_task_events(run_ids=[run_id], after_task_event_id=2**64 - 1),
+            [],
+        )
+        self.assertEqual(
+            state.get_task_events(run_ids=[run_id], before_task_event_id=2**64 - 1),
+            events,
+        )
+
+    def test_get_task_events_returns_last_matching(self) -> None:
+        """Apply filters before selecting the newest N events in ID order."""
+        state, run_id, task_id, events = self._create_task_events_for_filter_tests()
+
+        filtered = state.get_task_events(
+            run_ids=[run_id],
+            task_ids=[task_id],
+            event_types=["message", "function_call"],
+            after_task_event_id=events[0].id,
+            before_task_event_id=events[-1].id,
+            last_n=2,
+        )
+
+        self.assertEqual(list(filtered), [events[2], events[3]])
+        self.assertEqual(state.get_task_events(run_ids=[run_id], last_n=0), [])
+
     @parameterized.expand(  # type: ignore
         [
             ("malformed", "{"),

@@ -1748,14 +1748,20 @@ class SqlCoreState(CoreState, SqlMixin):  # pylint: disable=R0904
         run_ids: Sequence[int] | None = None,
         task_ids: Sequence[int] | None = None,
         after_task_event_id: int | None = None,
+        before_task_event_id: int | None = None,
+        event_types: Sequence[str] | None = None,
+        last_n: int | None = None,
     ) -> Sequence[TaskEvent]:
-        """Return task-produced run events after the cursor."""
+        """Return task-produced run events matching the filters."""
+        max_event_id = 2**63 - 1
+        if after_task_event_id is not None and after_task_event_id >= max_event_id:
+            return []
         cursor = after_task_event_id if after_task_event_id is not None else 0
-        query = (
-            select(TaskEventModel)
-            .where(TaskEventModel.id > cursor)
-            .order_by(TaskEventModel.id.asc())
-        )
+        query = select(TaskEventModel).where(TaskEventModel.id > cursor)
+        if before_task_event_id is not None and before_task_event_id <= max_event_id:
+            query = query.where(TaskEventModel.id < before_task_event_id)
+        if event_types is not None:
+            query = query.where(TaskEventModel.event.in_(event_types))
         if run_ids is not None:
             if not run_ids:
                 return []
@@ -1766,8 +1772,15 @@ class SqlCoreState(CoreState, SqlMixin):  # pylint: disable=R0904
                 return []
             sint64_task_ids = [uint64_to_int64(task_id) for task_id in task_ids]
             query = query.where(TaskEventModel.task_id.in_(sint64_task_ids))
+        query = query.order_by(
+            TaskEventModel.id.desc() if last_n is not None else TaskEventModel.id.asc()
+        )
+        if last_n is not None:
+            query = query.limit(last_n)
         with self.session() as session:
-            rows = session.scalars(query).all()
+            rows = list(session.scalars(query).all())
+            if last_n is not None:
+                rows.reverse()
             return [_task_event_from_model(row) for row in rows]
 
     def _claim_task_message_models(

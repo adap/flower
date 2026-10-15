@@ -81,14 +81,23 @@ def get_run_series_events(
 ) -> GetRunSeriesEventsResponse:
     """Get events from all runs in the authenticated task's series."""
     log(DEBUG, "Runtime.GetRunSeriesEvents")
-
     run = state.get_run_info(run_ids=[task.run_id])[0]
     series = state.get_run_series(series_ids=[run.series_id])[0]
     series_runs = state.get_run_info(run_ids=series.run_ids)
     primary_task_ids = [
         run.primary_task_id for run in series_runs if run.primary_task_id is not None
     ]
-    events = state.get_task_events(task_ids=primary_task_ids)
+    events = state.get_task_events(
+        task_ids=primary_task_ids,
+        event_types=request.event_types or None,
+        after_task_event_id=(
+            request.after_event_id if request.HasField("after_event_id") else None
+        ),
+        before_task_event_id=(
+            request.before_event_id if request.HasField("before_event_id") else None
+        ),
+        last_n=request.last_n if request.HasField("last_n") else None,
+    )
     return GetRunSeriesEventsResponse(events=events)
 
 
