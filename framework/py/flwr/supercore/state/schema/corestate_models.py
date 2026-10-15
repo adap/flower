@@ -30,6 +30,7 @@ from sqlalchemy import (
     String,
     Table,
     Text,
+    UniqueConstraint,
     text,
 )
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
@@ -86,17 +87,23 @@ class SeriesContext(FlwrBase):
     context: Mapped[bytes | None] = mapped_column(LargeBinary)
 
 
-class RunSeriesSummary(FlwrBase):
-    """Represent a compacted conversation summary for a run series."""
+class CompactedContext(FlwrBase):
+    """Represent a compacted event context for a run series.
 
-    __tablename__ = "run_series_summary"
+    ``through_event_id`` is an inclusive event high-water mark for the series.
+    """
 
-    series_id: Mapped[int] = mapped_column(BigInteger, primary_key=True, nullable=False)
-    text: Mapped[str] = mapped_column(Text, nullable=False)
-    through_event_id: Mapped[int] = mapped_column(Integer, nullable=False)
-    generation_output_tokens: Mapped[int | None] = mapped_column(
-        BigInteger, nullable=True
+    __tablename__ = "compacted_contexts"
+    __table_args__ = (
+        UniqueConstraint("series_id", "through_event_id"),
+        Index("idx_compacted_contexts_series_id_id", "series_id", "id"),
     )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    series_id: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    through_event_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    text: Mapped[str] = mapped_column(Text, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime(), nullable=False)
 
 
 class SeriesRuns(FlwrBase):

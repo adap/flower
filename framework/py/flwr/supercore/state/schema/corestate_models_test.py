@@ -21,7 +21,7 @@ CORESTATE_TABLE_NAMES = {
     "nonce_store",
     "fab",
     "run_series",
-    "run_series_summary",
+    "compacted_contexts",
     "series_context",
     "series_runs",
     "automation",

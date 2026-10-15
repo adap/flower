@@ -25,6 +25,14 @@ erDiagram
     TIMESTAMP updated_at
   }
 
+  compacted_contexts {
+    INTEGER id PK
+    TIMESTAMP created_at
+    BIGINT series_id
+    TEXT text
+    INTEGER through_event_id
+  }
+
   connector {
     INTEGER connector_id PK
     VARCHAR config_json
@@ -190,13 +198,6 @@ erDiagram
     VARCHAR federation_id
     BOOLEAN is_agent
     TIMESTAMP updated_at
-  }
-
-  run_series_summary {
-    BIGINT series_id PK
-    BIGINT generation_output_tokens "nullable"
-    TEXT text
-    INTEGER through_event_id
   }
 
   series_context {
