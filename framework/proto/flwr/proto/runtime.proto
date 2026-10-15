@@ -73,19 +73,14 @@ message GetRunSeriesEventsRequest {
 message GetRunSeriesEventsResponse { repeated TaskEvent events = 1; }
 
 // GetCompactedContexts messages
-// Contexts belong to the authenticated task's run series.
 message GetCompactedContextsRequest {
-  // Omitted limit defaults to 1; zero is invalid. Results are newest first.
   optional uint32 limit = 1;
-  // Exclusive context ID bound for fetching older contexts.
   optional uint64 before_context_id = 2;
 }
 message GetCompactedContextsResponse { repeated CompactedContext contexts = 1; }
 
 // PutCompactedContext messages
-// The saved context belongs to the authenticated task's run series.
 message PutCompactedContextRequest {
-  // The server assigns id, series_id, and created_at.
   CompactedContext context = 1;
 }
 message PutCompactedContextResponse { CompactedContext context = 1; }

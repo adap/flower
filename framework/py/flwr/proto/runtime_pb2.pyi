@@ -289,18 +289,14 @@ global___GetRunSeriesEventsResponse = GetRunSeriesEventsResponse
 
 @typing.final
 class GetCompactedContextsRequest(google.protobuf.message.Message):
-    """GetCompactedContexts messages
-    Contexts belong to the authenticated task's run series.
-    """
+    """GetCompactedContexts messages"""
 
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
 
     LIMIT_FIELD_NUMBER: builtins.int
     BEFORE_CONTEXT_ID_FIELD_NUMBER: builtins.int
     limit: builtins.int
-    """Omitted limit defaults to 1; zero is invalid. Results are newest first."""
     before_context_id: builtins.int
-    """Exclusive context ID bound for fetching older contexts."""
     def __init__(
         self,
         *,
@@ -334,17 +330,13 @@ global___GetCompactedContextsResponse = GetCompactedContextsResponse
 
 @typing.final
 class PutCompactedContextRequest(google.protobuf.message.Message):
-    """PutCompactedContext messages
-    The saved context belongs to the authenticated task's run series.
-    """
+    """PutCompactedContext messages"""
 
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
 
     CONTEXT_FIELD_NUMBER: builtins.int
     @property
-    def context(self) -> flwr.proto.runseries_pb2.CompactedContext:
-        """The server assigns id, series_id, and created_at."""
-
+    def context(self) -> flwr.proto.runseries_pb2.CompactedContext: ...
     def __init__(
         self,
         *,
