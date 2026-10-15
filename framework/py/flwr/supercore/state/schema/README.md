@@ -30,7 +30,7 @@ erDiagram
     TIMESTAMP created_at
     BIGINT series_id
     TEXT text
-    INTEGER through_event_id
+    BIGINT through_event_id
   }
 
   connector {

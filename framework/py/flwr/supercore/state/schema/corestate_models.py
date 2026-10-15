@@ -101,7 +101,7 @@ class CompactedContext(FlwrBase):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     series_id: Mapped[int] = mapped_column(BigInteger, nullable=False)
-    through_event_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    through_event_id: Mapped[int] = mapped_column(BigInteger, nullable=False)
     text: Mapped[str] = mapped_column(Text, nullable=False)
     created_at: Mapped[datetime] = mapped_column(UTCDateTime(), nullable=False)
 

@@ -15,7 +15,7 @@
 """Add compacted contexts table.
 
 Revision ID: d90a2f91f23c
-Revises: 8f4785e2dc47
+Revises: 70dd3c19bc7a
 Create Date: 2026-10-13 20:39:42.666061
 """
 from collections.abc import Sequence
@@ -27,7 +27,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "d90a2f91f23c"
-down_revision: str | Sequence[str] | None = "8f4785e2dc47"
+down_revision: str | Sequence[str] | None = "70dd3c19bc7a"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
@@ -39,7 +39,7 @@ def upgrade() -> None:
         "compacted_contexts",
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
         sa.Column("series_id", sa.BigInteger(), nullable=False),
-        sa.Column("through_event_id", sa.Integer(), nullable=False),
+        sa.Column("through_event_id", sa.BigInteger(), nullable=False),
         sa.Column("text", sa.Text(), nullable=False),
         sa.Column("created_at", sa.TIMESTAMP(timezone=True), nullable=False),
         sa.PrimaryKeyConstraint("id"),
