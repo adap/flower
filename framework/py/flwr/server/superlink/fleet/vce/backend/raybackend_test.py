@@ -193,3 +193,57 @@ class TestRayBackend(TestCase):
 
         # Should calculate based on the worker node (8 CPUs).
         self.assertEqual(pool_size, 4)  # 8 / 2 CPUs required for each task
+
+    def test_gpus_requested_but_none_detected(self) -> None:
+        """Test that a GPU discovery failure is reported as such.
+
+        A cluster reporting GPUs=0 cannot satisfy any non-zero `num_gpus`, so the
+        generic "lowering these resources could help" advice does not apply.
+        """
+        client_resources: dict[str, int | float] = {"num_cpus": 2, "num_gpus": 0.25}
+        with patch(
+            "flwr.simulation.ray_transport.ray_actor.ray.nodes",
+            return_value=[{"Resources": {"CPU": 8}}],  # CPUs aplenty, no GPU
+        ):
+            with self.assertLogs("flwr", level="WARNING") as logs:
+                with self.assertRaises(ValueError):
+                    pool_size_from_resources(client_resources)
+
+        output = "\n".join(logs.output)
+        self.assertIn("GPU discovery failure", output)
+        self.assertNotIn("Lowering these resources could help", output)
+
+    def test_insufficient_cpus_keeps_generic_warning(self) -> None:
+        """Test that a genuine resource shortage still advises lowering resources."""
+        client_resources: dict[str, int | float] = {"num_cpus": 16, "num_gpus": 0}
+        with patch(
+            "flwr.simulation.ray_transport.ray_actor.ray.nodes",
+            return_value=[{"Resources": {"CPU": 8}}],  # Too few CPUs per client
+        ):
+            with self.assertLogs("flwr", level="WARNING") as logs:
+                with self.assertRaises(ValueError):
+                    pool_size_from_resources(client_resources)
+
+        output = "\n".join(logs.output)
+        self.assertIn("Lowering these resources could help", output)
+        self.assertNotIn("GPU discovery failure", output)
+
+    def test_case_with_no_usable_node(self) -> None:
+        """Test that a cluster with no usable node raises ValueError.
+
+        The reported CPU/GPU counts are only bound inside the per-node loop, so an
+        empty node list must not fall through to a NameError.
+        """
+        client_resources: dict[str, int | float] = {"num_cpus": 2, "num_gpus": 0}
+        node_lists: list[list[dict[str, dict[str, float]]]] = [
+            [],  # Ray reports no nodes at all
+            [{"Resources": {}}],  # A node that has detached, reporting no resources
+        ]
+        for nodes in node_lists:
+            with self.subTest(nodes=nodes):
+                with patch(
+                    "flwr.simulation.ray_transport.ray_actor.ray.nodes",
+                    return_value=nodes,
+                ):
+                    with self.assertRaises(ValueError):
+                        pool_size_from_resources(client_resources)
