@@ -15,7 +15,7 @@
 """Add destination-oriented message table.
 
 Revision ID: 6e5225b231fc
-Revises: 8f4785e2dc47
+Revises: 70dd3c19bc7a
 Create Date: 2026-10-14 15:53:15.931967
 """
 from collections.abc import Sequence
@@ -29,7 +29,7 @@ from flwr.supercore.state.schema.types import UInt64, UTCDateTime
 
 # revision identifiers, used by Alembic.
 revision: str = "6e5225b231fc"
-down_revision: str | Sequence[str] | None = "8f4785e2dc47"
+down_revision: str | Sequence[str] | None = "70dd3c19bc7a"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
