@@ -20,14 +20,17 @@ from .notion.definition import PROVIDER
 from .oauth import OAuthFlow
 
 
-def test_exchange_records_absolute_expiry() -> None:
-    """Record expiry on initial authorization so the first task can reuse its token."""
-    flow = OAuthFlow(
+def _flow() -> OAuthFlow:
+    return OAuthFlow(
         PROVIDER,
         client_id="client",
         client_secret="secret",
         redirect_uri="https://example.com/callback",
     )
+
+
+def test_exchange_records_absolute_expiry() -> None:
+    """Record expiry on initial authorization so the first task can reuse its token."""
     response = Mock(status_code=200)
     response.json.return_value = {
         "access_token": "token",
@@ -41,7 +44,7 @@ def test_exchange_records_absolute_expiry() -> None:
             return_value=response,
         ),
     ):
-        credentials, _ = flow.exchange_code(
+        credentials, _ = _flow().exchange_code(
             code="code", redirect_uri="https://example.com/callback", pkce_verifier=None
         )
 
@@ -50,4 +53,25 @@ def test_exchange_records_absolute_expiry() -> None:
         "refresh_token": "refresh",
         "expires_in": 3600,
         "expires_at": 4600,
+    }
+
+
+def test_refresh_preserves_replacement_and_omitted_refresh_tokens() -> None:
+    """Keep the replacement token when the following response omits one."""
+    flow = _flow()
+    response = Mock(status_code=200)
+    response.json.side_effect = [
+        {"access_token": "first-token", "refresh_token": "rotated-token"},
+        {"access_token": "second-token"},
+    ]
+    with patch(
+        "flwr.supercore.task_process.connector.oauth.requests.post",
+        return_value=response,
+    ):
+        credentials = flow.refresh_credentials({"refresh_token": "original-token"})
+        credentials = flow.refresh_credentials(credentials)
+
+    assert credentials == {
+        "access_token": "second-token",
+        "refresh_token": "rotated-token",
     }

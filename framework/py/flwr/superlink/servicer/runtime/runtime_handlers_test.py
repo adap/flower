@@ -84,7 +84,6 @@ from flwr.supercore.inflatable.inflatable_object import (
 from flwr.supercore.object_store import ObjectStoreFactory
 from flwr.supercore.servicer.runtime import runtime_handlers as core_runtime_handlers
 from flwr.supercore.task_process.connector import registry as connector_registry
-from flwr.supercore.task_process.connector.notion.definition import PROVIDER
 from flwr.supercore.task_process.connector.oauth import OAuthFlow
 from flwr.superlink.federation import NoOpFederationManager
 from flwr.superlink.servicer.runtime import runtime_handlers
@@ -274,212 +273,110 @@ def _activate_in_parallel(
 
 
 class TestGetConnector(unittest.TestCase):
-    """Test connector credential authorization with mocked state."""
+    """Test connector authorization and credential refresh with mocked state."""
 
     def setUp(self) -> None:
-        """Create mocked state."""
+        """Create an authorized connector task and mocked state."""
         self.state = Mock(spec=LinkState)
-
-    def _configure_refresh_connector(self) -> tuple[Task, Mock]:
-        """Configure an authorized connector task and its mocked OAuth flow."""
+        self.task = Task(type=TaskType.CONNECTOR, connector_id=42, run_id=123)
         self.state.get_run_info.return_value = [Mock(federation_id="@bob/fed-a")]
         self.state.get_run_connector_ids.return_value = [42]
-        self.state.get_connector_by_id.return_value = Mock(
+        self.connector = Mock(
             connector_id=42,
             connector_ref="example",
             credentials_json='{"access_token":"old-token","refresh_token":"refresh-secret"}',
-            config_json="{}",
+            config_json='{"workspace":"primary"}',
         )
-
-        def update_credentials(_connector_id: int, update: Callable[[str], str]) -> str:
-            connector = self.state.get_connector_by_id.return_value
-            credentials_json = update(connector.credentials_json)
-            connector.credentials_json = credentials_json
-            return credentials_json
-
-        self.state.update_connector_credentials.side_effect = update_credentials
-        flow = Mock(spec=OAuthFlow)
+        self.state.get_connector_by_id.return_value = self.connector
+        self.flow = Mock(spec=OAuthFlow)
         self.enterContext(
             patch.object(
                 connector_registry, "requires_connector_refresh", return_value=True
             )
         )
         self.enterContext(
-            patch.dict(connector_registry.OAUTH_FLOWS, {"example": flow}, clear=True)
+            patch.dict(
+                connector_registry.OAUTH_FLOWS, {"example": self.flow}, clear=True
+            )
         )
-        return Task(type=TaskType.CONNECTOR, connector_id=42, run_id=123), flow
 
     def test_persists_rotated_refresh_tokens_for_successive_requests(self) -> None:
-        """Use the rotated token on the next refresh and preserve it if omitted."""
-        task, flow = self._configure_refresh_connector()
-        flow.refresh_credentials.side_effect = OAuthFlow(
-            PROVIDER,
-            client_id="client",
-            client_secret="secret",
-            redirect_uri="https://example.com/callback",
-        ).refresh_credentials
-        token_response = Mock(status_code=200)
-        token_response.json.side_effect = [
+        """Reuse valid tokens, then refresh with the persisted replacement token."""
+
+        def update_credentials(_connector_id: int, update: Callable[[str], str]) -> str:
+            credentials_json = update(self.connector.credentials_json)
+            self.connector.credentials_json = credentials_json
+            return credentials_json
+
+        self.state.update_connector_credentials.side_effect = update_credentials
+        self.flow.refresh_credentials.side_effect = [
             {
                 "access_token": "first-token",
                 "refresh_token": "rotated-token",
-                "expires_in": 3600,
+                "expires_at": 4600,
             },
-            {"access_token": "second-token", "expires_in": 3600},
+            {"access_token": "second-token", "refresh_token": "rotated-token"},
         ]
-        with (
-            patch(
-                "flwr.supercore.task_process.connector.oauth.time", return_value=1000
-            ) as clock,
-            patch(
-                "flwr.supercore.task_process.connector.oauth.requests.post",
-                return_value=token_response,
-            ) as post,
-        ):
-            first = runtime_handlers.get_connector(
-                GetConnectorRequest(), self.state, task
-            )
-            clock.return_value = 5000
-            second = runtime_handlers.get_connector(
-                GetConnectorRequest(), self.state, task
-            )
+        request = GetConnectorRequest()
+        with patch(
+            "flwr.supercore.task_process.connector.oauth.time", return_value=1000
+        ) as clock:
+            first = runtime_handlers.get_connector(request, self.state, self.task)
+            reused = runtime_handlers.get_connector(request, self.state, self.task)
+            assert reused == first
+            clock.return_value = 4540  # Refresh within 60 seconds of expiry.
+            second = runtime_handlers.get_connector(request, self.state, self.task)
 
-        assert json.loads(first.credentials_json) == {
-            "access_token": "first-token",
-            "expires_in": 3600,
-            "expires_at": 4600,
-        }
-        assert json.loads(second.credentials_json) == {
-            "access_token": "second-token",
-            "expires_in": 3600,
-            "expires_at": 8600,
-        }
         assert [
-            call.kwargs["json"]["refresh_token"] for call in post.call_args_list
+            call.args[0]["refresh_token"]
+            for call in self.flow.refresh_credentials.call_args_list
         ] == ["refresh-secret", "rotated-token"]
-        stored = json.loads(
-            self.state.get_connector_by_id.return_value.credentials_json
-        )
-        assert stored == {
+        assert json.loads(self.connector.credentials_json) == {
             **json.loads(second.credentials_json),
             "refresh_token": "rotated-token",
         }
+        assert "refresh_token" not in first.credentials_json
+        assert "refresh_token" not in second.credentials_json
 
     def test_access_token_only_without_oauth_configuration(self) -> None:
-        """Manually supplied access tokens do not require an OAuth application."""
-        task, flow = self._configure_refresh_connector()
-        self.state.get_connector_by_id.return_value.credentials_json = (
-            '{"access_token":"manual-token"}'
-        )
+        """Return the authorized task's manual token without OAuth configuration."""
+        self.connector.credentials_json = '{"access_token":"manual-token"}'
         with patch.dict(connector_registry.OAUTH_FLOWS, {}, clear=True):
             response = runtime_handlers.get_connector(
-                GetConnectorRequest(), self.state, task
+                GetConnectorRequest(), self.state, self.task
             )
 
-        assert json.loads(response.credentials_json) == {"access_token": "manual-token"}
-        flow.refresh_credentials.assert_not_called()
+        assert response == GetConnectorResponse(
+            connector_id=42,
+            connector_ref="example",
+            credentials_json=self.connector.credentials_json,
+            config_json='{"workspace":"primary"}',
+        )
+        self.state.get_run_connector_ids.assert_called_once_with(123)
+        self.state.get_connector_by_id.assert_called_once_with(42)
         self.state.update_connector_credentials.assert_not_called()
-
-    @parameterized.expand([(5000, False), (1060, True), (999, True)])  # type: ignore
-    def test_refreshes_only_near_expiry(
-        self, expires_at: int, should_refresh: bool
-    ) -> None:
-        """Reuse valid access tokens and keep refresh tokens out of every response."""
-        task, flow = self._configure_refresh_connector()
-        credentials = {
-            "access_token": "old-token",
-            "refresh_token": "refresh-secret",
-            "expires_at": expires_at,
-        }
-        self.state.get_connector_by_id.return_value.credentials_json = json.dumps(
-            credentials
-        )
-        flow.refresh_credentials.return_value = {
-            **credentials,
-            "access_token": "fresh-token",
-            "expires_at": 4600,
-        }
-        with patch(
-            "flwr.supercore.task_process.connector.oauth.time", return_value=1000
-        ):
-            response = runtime_handlers.get_connector(
-                GetConnectorRequest(), self.state, task
-            )
-
-        assert flow.refresh_credentials.call_count == int(should_refresh)
-        assert "refresh_token" not in json.loads(response.credentials_json)
-        assert json.loads(response.credentials_json)["access_token"] == (
-            "fresh-token" if should_refresh else "old-token"
-        )
-        if not should_refresh:
-            self.state.update_connector_credentials.assert_not_called()
 
     def test_refresh_failure_does_not_expose_credentials(self) -> None:
         """Hide refresh errors instead of returning stale or secret credentials."""
-        task, flow = self._configure_refresh_connector()
-        flow.refresh_credentials.side_effect = RuntimeError("refresh-secret old-token")
+        self.state.update_connector_credentials.side_effect = RuntimeError(
+            "refresh-secret old-token"
+        )
 
         with self.assertRaises(FlowerError) as error:
-            runtime_handlers.get_connector(GetConnectorRequest(), self.state, task)
+            runtime_handlers.get_connector(GetConnectorRequest(), self.state, self.task)
 
         assert error.exception.code == ApiErrorCode.CONNECTOR_FAILURE
         assert str(error.exception) == "Connector credentials could not be refreshed."
 
-    def test_returns_authenticated_task_credentials(self) -> None:
-        """GetConnector should return the run owner's matching credentials."""
-        task = Mock(
-            type=TaskType.CONNECTOR,
-            connector_ref="",
-            connector_id=42,
-            run_id=123,
-        )
-        self.state.get_run_info.return_value = [Mock(federation_id="@bob/fed-a")]
-        self.state.get_run_connector_ids.return_value = [42]
-        self.state.get_connector_by_id.return_value = Mock(
-            connector_id=42,
-            federation_id="@bob/fed-a",
-            connector_ref="notion",
-            credentials_json='{"token":"secret"}',
-            config_json='{"workspace":"primary"}',
-        )
-
-        response = runtime_handlers.get_connector(
-            GetConnectorRequest(), self.state, task
-        )
-
-        self.assertEqual(
-            response,
-            GetConnectorResponse(
-                connector_id=42,
-                connector_ref="notion",
-                credentials_json='{"token":"secret"}',
-                config_json='{"workspace":"primary"}',
-            ),
-        )
-        self.state.get_run_connector_ids.assert_called_once_with(123)
-        self.state.get_connector_by_id.assert_called_once_with(42)
-
-    @parameterized.expand(  # type: ignore
-        [
-            ("wrong_task_type", TaskType.AGENT_APP, 42),
-            ("missing_id", TaskType.CONNECTOR, 0),
-        ]
-    )
+    @parameterized.expand([(TaskType.AGENT_APP, 42), (TaskType.CONNECTOR, 0)])  # type: ignore
     def test_rejects_wrong_task_identity(
-        self,
-        _name: str,
-        task_type: str,
-        connector_id: int,
+        self, task_type: str, connector_id: int
     ) -> None:
         """GetConnector should reject tasks without a connector identity."""
-        task = Mock(
-            type=task_type,
-            connector_ref="notion",
-            connector_id=connector_id,
-            run_id=123,
-        )
+        self.task.type = task_type
+        self.task.connector_id = connector_id
         with self.assertRaises(FlowerError) as error:
-            runtime_handlers.get_connector(GetConnectorRequest(), self.state, task)
+            runtime_handlers.get_connector(GetConnectorRequest(), self.state, self.task)
 
         self.assertEqual(
             error.exception.code,
