@@ -240,7 +240,7 @@ erDiagram
   }
 
   task_event {
-    INTEGER id PK
+    BIGINT id PK
     BIGINT task_id FK
     VARCHAR data
     VARCHAR event
