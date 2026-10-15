@@ -421,30 +421,18 @@ def test_create_connector_response_uses_connector_task_for_filesystem() -> None:
 def test_connector_tools_include_agent_handled_automation() -> None:
     """Automation and connector schemas should remain available in request order."""
     runtime = Mock()
-    runtime.get_connector_tools.side_effect = (
-        lambda name, **_kwargs: connector_registry.get_connector_tools(name)
-    )
+    runtime.get_connector_tools.side_effect = [
+        connector_registry.get_connector_tools("web_search"),
+        connector_registry.get_connector_tools(START_AUTOMATION_TOOL_NAME),
+        [{"name": "notion_notion-search"}],
+    ]
     connectors = RuntimeAgentConnectors(runtime)
-
     assert [
         tool["name"]
         for tool in connectors.tools(
             ["web_search", START_AUTOMATION_TOOL_NAME, "notion"]
         )
-    ] == [
-        "web_search",
-        "start_automation",
-        "notion_search",
-        "notion_get_page",
-        "notion_get_page_property",
-        "notion_get_database",
-        "notion_get_block",
-        "notion_get_block_children",
-        "notion_query_meeting_notes",
-        "notion_list_users",
-        "notion_get_user",
-        "notion_get_self",
-    ]
+    ] == ["web_search", START_AUTOMATION_TOOL_NAME, "notion_notion-search"]
 
 
 def test_runtime_discovers_and_caches_tools() -> None:

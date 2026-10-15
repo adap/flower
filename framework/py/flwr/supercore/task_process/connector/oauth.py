@@ -98,6 +98,7 @@ class OAuthFlow:
             raise self._error("exchange failed")
         redirect_uri = self.resolve_redirect_uri(redirect_uri)
         data = {
+            **self._oauth.token_params,
             "code": code,
             "grant_type": "authorization_code",
             "redirect_uri": redirect_uri,
