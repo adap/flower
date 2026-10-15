@@ -23,7 +23,9 @@ from collections.abc import Callable, Sequence
 from flwr.app import Context
 from flwr.supercore.typing import JSONObject
 
-# Common event types for summarizing a run series.
+# OpenResponses item types and streaming events used for run summaries.
+# See https://www.openresponses.org/reference
+# Schema: https://www.openresponses.org/openapi/openapi.json
 RUN_SUMMARY_EVENT_TYPES: tuple[str, ...] = (
     "message",
     "response.completed",
