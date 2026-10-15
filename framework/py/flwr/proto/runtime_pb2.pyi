@@ -243,10 +243,14 @@ class GetRunSeriesEventsRequest(google.protobuf.message.Message):
     BEFORE_EVENT_ID_FIELD_NUMBER: builtins.int
     LAST_N_FIELD_NUMBER: builtins.int
     after_event_id: builtins.int
+    """ID bounds are exclusive."""
     before_event_id: builtins.int
     last_n: builtins.int
+    """Select newest matching events; response remains in ascending ID order."""
     @property
-    def event_types(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.str]: ...
+    def event_types(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.str]:
+        """Empty means all event types."""
+
     def __init__(
         self,
         *,
