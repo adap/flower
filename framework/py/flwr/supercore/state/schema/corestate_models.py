@@ -66,7 +66,20 @@ class Fab(FlwrBase):
 
 
 class Message(FlwrBase):
-    """Represent independent message delivery with retained metadata."""
+    """Represent independent message delivery with retained metadata.
+
+    Delivery state is inferred from the flag, deadline, and closing timestamps:
+
+    - Not cleared, deadline in the future: pending and eligible for retrieval.
+    - Not cleared, deadline reached: expired, awaiting passive cleanup.
+    - Cleared, acknowledged_at set: acknowledged.
+    - Cleared, cancelled_at set: cancelled.
+    - Cleared, neither closing timestamp set: expired and cleaned up.
+
+    The expires_at deadline is always set, regardless of the closing outcome.
+    Clearing ends delivery and releases the ObjectStore reference while retaining
+    metadata. Acknowledgment and cancellation timestamps are mutually exclusive.
+    """
 
     __tablename__ = "message"
     __table_args__ = (
