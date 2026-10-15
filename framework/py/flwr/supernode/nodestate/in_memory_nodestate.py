@@ -110,7 +110,7 @@ class InMemoryNodeState(
             missing_objects = self.preregister_object_tree(object_tree, session_id)
             return True, missing_objects
 
-    def get_messages(
+    def get_messages(  # type: ignore[override]
         self,
         *,
         run_ids: Sequence[int] | None = None,
