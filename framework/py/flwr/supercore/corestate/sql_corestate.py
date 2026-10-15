@@ -972,6 +972,19 @@ class SqlCoreState(CoreState, SqlMixin):  # pylint: disable=R0904
                 _compacted_context_from_model(row) for row in session.scalars(query)
             ]
 
+    def store_compacted_context(
+        self, series_id: int, through_event_id: int, text: str
+    ) -> None:
+        """Store a new summary."""
+        with self.session() as session:
+            row = CompactedContextModel(
+                series_id=uint64_to_int64(series_id),
+                through_event_id=uint64_to_int64(through_event_id),
+                text=text,
+                created_at=now(),
+            )
+            session.add(row)
+
     def set_run_series_context(self, series_id: int, context: Context) -> None:
         """Set the shared Context for the specified RunSeries."""
         sint_series_id = uint64_to_int64(series_id)
