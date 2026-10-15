@@ -245,7 +245,12 @@ class TaskEvent(FlwrBase):
         Index("idx_task_event_task_id", "task_id"),
     )
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(
+        # Both are signed 64-bit; SQLite requires INTEGER for autoincrement.
+        BigInteger().with_variant(Integer, "sqlite"),
+        primary_key=True,
+        autoincrement=True,
+    )
     timestamp: Mapped[datetime] = mapped_column(UTCDateTime(), nullable=False)
     run_id: Mapped[int] = mapped_column(BigInteger, nullable=False)
     task_id: Mapped[int] = mapped_column(
