@@ -19,6 +19,7 @@
 import unittest
 from contextlib import ExitStack
 from datetime import UTC, datetime, timedelta
+from operator import attrgetter
 from typing import Any, cast
 from unittest.mock import call, patch
 
@@ -87,6 +88,15 @@ class StateTest(unittest.TestCase):  # pylint: disable=R0904
         mock_datetime.now.side_effect = timestamps
         return stack
 
+    def assert_message_metadata_equal(
+        self, actual: list[Message], expected: list[Message]
+    ) -> None:
+        """Compare complete Message metadata without regard to order."""
+        self.assertEqual(
+            sorted((msg.metadata for msg in actual), key=attrgetter("message_id")),
+            sorted((msg.metadata for msg in expected), key=attrgetter("message_id")),
+        )
+
     def test_store_messages_returns_acceptance_results(self) -> None:
         """Return per-Message results and accept duplicates before body upload."""
         # Prepare: Create valid and invalid Messages without uploading their bodies.
@@ -108,9 +118,9 @@ class StateTest(unittest.TestCase):  # pylint: disable=R0904
         self.assertEqual(state.store_messages([message, other]), [True, True])
 
         # Assert: Only the two accepted Messages remain pending.
-        self.assertCountEqual(
-            [msg.metadata for msg in state.get_messages(dst_node_id=SUPERLINK_NODE_ID)],
-            [message.metadata, other.metadata],
+        self.assert_message_metadata_equal(
+            state.get_messages(dst_node_id=SUPERLINK_NODE_ID),
+            [message, other],
         )
 
     def test_get_messages_intersects_destination_run_and_correlation(self) -> None:
@@ -156,14 +166,9 @@ class StateTest(unittest.TestCase):  # pylint: disable=R0904
         # Execute & Assert: Check each filter combination within the destination inbox.
         for filters, expected in cases:
             with self.subTest(filters=filters):
-                self.assertCountEqual(
-                    [
-                        msg.metadata
-                        for msg in state.get_messages(
-                            dst_node_id=SUPERLINK_NODE_ID, **filters
-                        )
-                    ],
-                    [msg.metadata for msg in expected],
+                self.assert_message_metadata_equal(
+                    state.get_messages(dst_node_id=SUPERLINK_NODE_ID, **filters),
+                    expected,
                 )
 
     def test_get_messages_orders_limits_and_keeps_pending(self) -> None:
@@ -303,9 +308,9 @@ class StateTest(unittest.TestCase):  # pylint: disable=R0904
         self.assertEqual(state.store_messages(messages), [True] * 3)
 
         # Assert: Only unmatched Messages remain pending and retain their bodies.
-        self.assertCountEqual(
-            [msg.metadata for msg in state.get_messages(dst_node_id=SUPERLINK_NODE_ID)],
-            [messages[index].metadata for index in remaining_indexes],
+        self.assert_message_metadata_equal(
+            state.get_messages(dst_node_id=SUPERLINK_NODE_ID),
+            [messages[index] for index in remaining_indexes],
         )
         for index, message in enumerate(messages):
             self.assertEqual(
