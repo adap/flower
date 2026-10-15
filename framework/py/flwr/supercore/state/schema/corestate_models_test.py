@@ -22,6 +22,7 @@ CORESTATE_TABLE_NAMES = {
     "fab",
     "message",
     "run_series",
+    "compacted_contexts",
     "series_context",
     "series_runs",
     "automation",
