@@ -99,11 +99,9 @@ class RuntimeAgentEvents(AgentEvents):
         request = GetRunSeriesEventsRequest(
             event_types=event_types or [],
             last_n=0 if last_n is None else last_n,
+            request.after_event_id=after_event_id,
+            request.before_event_id=before_event_id,
         )
-        if after_event_id is not None:
-            request.after_event_id = after_event_id
-        if before_event_id is not None:
-            request.before_event_id = before_event_id
         response = self._stub.GetRunSeriesEvents(request)
         return [
             {
