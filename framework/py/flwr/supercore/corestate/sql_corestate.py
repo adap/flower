@@ -48,7 +48,6 @@ from flwr.common.constant import (
     FLWR_TASK_TOKEN_LENGTH,
     HEARTBEAT_DEFAULT_INTERVAL,
     HEARTBEAT_PATIENCE,
-    INT64_MAX_VALUE,
     SERIES_ID_NUM_BYTES,
     TASK_ID_NUM_BYTES,
     Status,
