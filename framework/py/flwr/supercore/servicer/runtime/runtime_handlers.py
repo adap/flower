@@ -29,6 +29,8 @@ from flwr.proto.runtime_pb2 import (  # pylint: disable=E0611
     AcquireTaskResponse,
     CreateTaskRequest,
     CreateTaskResponse,
+    GetCompactedContextsRequest,
+    GetCompactedContextsResponse,
     PullTaskMessageRequest,
     PullTaskMessageResponse,
     PushTaskEventsRequest,
@@ -52,6 +54,26 @@ from flwr.supercore.constant import (
 from flwr.supercore.corestate import CoreState
 from flwr.supercore.error import ApiErrorCode, FlowerError
 from flwr.supercore.task_process.connector import registry as connector_registry
+
+
+def get_compacted_contexts(
+    request: GetCompactedContextsRequest, state: CoreState, series_id: int
+) -> GetCompactedContextsResponse:
+    """Get compacted contexts for the authenticated task's series."""
+    limit = request.limit if request.HasField("limit") else 1
+    if limit == 0:
+        raise FlowerError(
+            ApiErrorCode.RUNTIME_INVALID_COMPACTED_CONTEXT_REQUEST,
+            "Limit must be positive.",
+        )
+    contexts = state.get_compacted_contexts(
+        series_id,
+        limit=limit,
+        before_context_id=(
+            request.before_context_id if request.HasField("before_context_id") else None
+        ),
+    )
+    return GetCompactedContextsResponse(contexts=contexts)
 
 
 def acquire_task(request: AcquireTaskRequest, state: CoreState) -> AcquireTaskResponse:

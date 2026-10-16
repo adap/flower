@@ -65,7 +65,10 @@ from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
 
 # pylint: disable-next=E0611
 from flwr.proto.recorddict_pb2 import RecordDict as ProtoRecordDict
-from flwr.proto.runseries_pb2 import RunSeries  # pylint: disable=E0611
+from flwr.proto.runseries_pb2 import (  # pylint: disable=E0611
+    CompactedContext,
+    RunSeries,
+)
 from flwr.proto.task_pb2 import (  # pylint: disable=E0611
     Task,
     TaskEvent,
@@ -82,6 +85,9 @@ from flwr.supercore.date import now
 from flwr.supercore.fab import Fab
 from flwr.supercore.sql_mixin import SqlMixin
 from flwr.supercore.state.schema.corestate_models import Automation as AutomationModel
+from flwr.supercore.state.schema.corestate_models import (
+    CompactedContext as CompactedContextModel,
+)
 from flwr.supercore.state.schema.corestate_models import Connector as ConnectorModel
 from flwr.supercore.state.schema.corestate_models import (
     ConnectorOAuthSession as ConnectorOAuthSessionModel,
@@ -974,6 +980,24 @@ class SqlCoreState(CoreState, SqlMixin):  # pylint: disable=R0904
                 return None
             return context_from_bytes(row.context)
 
+    def get_compacted_contexts(
+        self, series_id: int, limit: int = 1, before_context_id: int | None = None
+    ) -> Sequence[CompactedContext]:
+        """Return a series's summaries newest first, before an optional ID."""
+        if limit <= 0:
+            raise ValueError("limit must be positive")
+        query = select(CompactedContextModel).where(
+            CompactedContextModel.series_id == uint64_to_int64(series_id)
+        )
+        # Autoincremented context IDs cannot exceed the signed BIGINT range.
+        if before_context_id is not None:
+            query = query.where(CompactedContextModel.id < before_context_id)
+        query = query.order_by(CompactedContextModel.id.desc()).limit(limit)
+        with self.session() as session:
+            return [
+                _compacted_context_from_model(row) for row in session.scalars(query)
+            ]
+
     def set_run_series_context(self, series_id: int, context: Context) -> None:
         """Set the shared Context for the specified RunSeries."""
         sint_series_id = uint64_to_int64(series_id)
@@ -1769,20 +1793,25 @@ class SqlCoreState(CoreState, SqlMixin):  # pylint: disable=R0904
 
         return True
 
-    def get_task_events(
+    def get_task_events(  # pylint: disable=too-many-arguments
         self,
         *,
         run_ids: Sequence[int] | None = None,
         task_ids: Sequence[int] | None = None,
         after_task_event_id: int | None = None,
+        before_task_event_id: int | None = None,
+        event_types: Sequence[str] | None = None,
+        last_n: int | None = None,
     ) -> Sequence[TaskEvent]:
-        """Return task-produced run events after the cursor."""
+        """Return task-produced run events matching the filters."""
+        if last_n is not None and last_n < 0:
+            raise ValueError("last_n must be non-negative")
         cursor = after_task_event_id if after_task_event_id is not None else 0
-        query = (
-            select(TaskEventModel)
-            .where(TaskEventModel.id > cursor)
-            .order_by(TaskEventModel.id.asc())
-        )
+        query = select(TaskEventModel).where(TaskEventModel.id > cursor)
+        if before_task_event_id is not None:
+            query = query.where(TaskEventModel.id < before_task_event_id)
+        if event_types is not None:
+            query = query.where(TaskEventModel.event.in_(event_types))
         if run_ids is not None:
             if not run_ids:
                 return []
@@ -1793,8 +1822,15 @@ class SqlCoreState(CoreState, SqlMixin):  # pylint: disable=R0904
                 return []
             sint64_task_ids = [uint64_to_int64(task_id) for task_id in task_ids]
             query = query.where(TaskEventModel.task_id.in_(sint64_task_ids))
+        query = query.order_by(
+            TaskEventModel.id.desc() if last_n else TaskEventModel.id.asc()
+        )
+        if last_n:
+            query = query.limit(last_n)
         with self.session() as session:
-            rows = session.scalars(query).all()
+            rows = list(session.scalars(query).all())
+            if last_n:
+                rows.reverse()
             return [_task_event_from_model(row) for row in rows]
 
     def _claim_task_message_models(
@@ -2093,6 +2129,17 @@ def _run_series_from_model(model: RunSeriesModel) -> RunSeries:
         description=model.description or "",
         created_at=timestamp_to_iso(model.created_at),
         updated_at=timestamp_to_iso(model.updated_at),
+    )
+
+
+def _compacted_context_from_model(model: CompactedContextModel) -> CompactedContext:
+    """Convert a compacted context model to its proto representation."""
+    return CompactedContext(
+        id=model.id,
+        series_id=int64_to_uint64(model.series_id),
+        through_event_id=int64_to_uint64(model.through_event_id),
+        text=model.text,
+        created_at=timestamp_to_iso(model.created_at),
     )
 
 

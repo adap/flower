@@ -42,7 +42,10 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     StartRunRequest,
 )
 from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
-from flwr.proto.runseries_pb2 import RunSeries  # pylint: disable=E0611
+from flwr.proto.runseries_pb2 import (  # pylint: disable=E0611
+    CompactedContext,
+    RunSeries,
+)
 from flwr.proto.task_pb2 import (  # pylint: disable=E0611
     Task,
     TaskEvent,
@@ -148,6 +151,8 @@ class InMemoryCoreState(
         self.lock_run_series_store = Lock()
         self.run_series_context_store: dict[int, Context] = {}
         self.lock_run_series_context_store = Lock()
+        self.compacted_context_store: dict[int, CompactedContext] = {}
+        self.lock_compacted_context_store = Lock()
         self.automation_store: dict[int, AutomationRecord] = {}
         self.lock_automation_store = RLock()
         self._next_automation_id = 1
@@ -758,6 +763,23 @@ class InMemoryCoreState(
         """Return the shared Context for the specified RunSeries, if present."""
         with self.lock_run_series_context_store:
             return self.run_series_context_store.get(series_id)
+
+    def get_compacted_contexts(
+        self, series_id: int, limit: int = 1, before_context_id: int | None = None
+    ) -> Sequence[CompactedContext]:
+        """Return a series's summaries newest first, before an optional ID."""
+        if limit <= 0:
+            raise ValueError("limit must be positive")
+        with self.lock_compacted_context_store:
+            contexts = [
+                context
+                for context in self.compacted_context_store.values()
+                if context.series_id == series_id
+                and (before_context_id is None or context.id < before_context_id)
+            ]
+            return sorted(contexts, key=lambda context: context.id, reverse=True)[
+                :limit
+            ]
 
     def set_run_series_context(self, series_id: int, context: Context) -> None:
         """Set the shared Context for the specified RunSeries."""
@@ -1430,14 +1452,19 @@ class InMemoryCoreState(
 
         return True
 
-    def get_task_events(
+    def get_task_events(  # pylint: disable=too-many-arguments
         self,
         *,
         run_ids: Sequence[int] | None = None,
         task_ids: Sequence[int] | None = None,
         after_task_event_id: int | None = None,
+        before_task_event_id: int | None = None,
+        event_types: Sequence[str] | None = None,
+        last_n: int | None = None,
     ) -> Sequence[TaskEvent]:
-        """Return task-produced run events after the cursor."""
+        """Return task-produced run events matching the filters."""
+        if last_n is not None and last_n < 0:
+            raise ValueError("last_n must be non-negative")
         cursor = after_task_event_id if after_task_event_id is not None else 0
         with self.lock_task_event_store:
             if run_ids is not None and not run_ids:
@@ -1458,13 +1485,16 @@ class InMemoryCoreState(
                 ]
 
         task_id_set = set(task_ids) if task_ids is not None else None
-        return [
+        matching = [
             event
             for event in sorted(events, key=lambda event: event.id)
             if event.id > cursor
+            and (before_task_event_id is None or event.id < before_task_event_id)
+            and (event_types is None or event.event in event_types)
             and (run_id_set is None or event.run_id in run_id_set)
             and (task_id_set is None or event.task_id in task_id_set)
         ]
+        return matching[-last_n:] if last_n else matching
 
     def _cleanup_expired_task_tokens_locked(self) -> None:
         """Remove expired task tokens.

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-14 00:09+0000\n"
+"POT-Creation-Date: 2026-10-15 00:09+0000\n"
 "PO-Revision-Date: 2026-06-11 04:01+0000\n"
 "Last-Translator: reducedradius <feixiang512@outlook.com>\n"
 "Language: zh_Hans\n"
@@ -48,9 +48,9 @@ msgstr "以问题为导向的 \"如何做 \"指南逐步展示如何实现特定
 msgid "Changelog"
 msgstr "更新日志"
 
-#: ../../source/changelog/v1.39.0.md:2
+#: ../../source/changelog/v1.40.0.md:2
 #, fuzzy
-msgid "v1.39.0 (2026-09-28)"
+msgid "v1.40.0 (2026-10-14)"
 msgstr ""
 
 #: ../../source/changelog/v1.0.0.md:11 ../../source/changelog/v1.1.0.md:4
@@ -73,9 +73,10 @@ msgstr ""
 #: ../../source/changelog/v1.34.0.md:4 ../../source/changelog/v1.35.0.md:4
 #: ../../source/changelog/v1.36.0.md:4 ../../source/changelog/v1.37.0.md:4
 #: ../../source/changelog/v1.38.0.md:4 ../../source/changelog/v1.39.0.md:4
-#: ../../source/changelog/v1.4.0.md:4 ../../source/changelog/v1.5.0.md:4
-#: ../../source/changelog/v1.6.0.md:4 ../../source/changelog/v1.7.0.md:4
-#: ../../source/changelog/v1.8.0.md:4 ../../source/changelog/v1.9.0.md:4
+#: ../../source/changelog/v1.4.0.md:4 ../../source/changelog/v1.40.0.md:4
+#: ../../source/changelog/v1.5.0.md:4 ../../source/changelog/v1.6.0.md:4
+#: ../../source/changelog/v1.7.0.md:4 ../../source/changelog/v1.8.0.md:4
+#: ../../source/changelog/v1.9.0.md:4
 msgid "Thanks to our contributors"
 msgstr "感谢我们的贡献者"
 
@@ -98,19 +99,21 @@ msgstr "感谢我们的贡献者"
 #: ../../source/changelog/v1.34.0.md:6 ../../source/changelog/v1.35.0.md:6
 #: ../../source/changelog/v1.36.0.md:6 ../../source/changelog/v1.37.0.md:6
 #: ../../source/changelog/v1.38.0.md:6 ../../source/changelog/v1.39.0.md:6
-#: ../../source/changelog/v1.4.0.md:6 ../../source/changelog/v1.5.0.md:6
-#: ../../source/changelog/v1.6.0.md:6 ../../source/changelog/v1.7.0.md:6
-#: ../../source/changelog/v1.8.0.md:6 ../../source/changelog/v1.9.0.md:6
+#: ../../source/changelog/v1.4.0.md:6 ../../source/changelog/v1.40.0.md:6
+#: ../../source/changelog/v1.5.0.md:6 ../../source/changelog/v1.6.0.md:6
+#: ../../source/changelog/v1.7.0.md:6 ../../source/changelog/v1.8.0.md:6
+#: ../../source/changelog/v1.9.0.md:6
 msgid ""
 "We would like to give our special thanks to all the contributors who made"
 " the new version of Flower possible (in `git shortlog` order):"
 msgstr "在此，我们要特别感谢所有为 Flower 的新版本做出贡献的人员（按 `git shortlog` 顺序排列）："
 
-#: ../../source/changelog/v1.39.0.md:8
+#: ../../source/changelog/v1.40.0.md:8
 #, fuzzy
 msgid ""
-"`Charles Beauville`, `Daniel J. Beutel`, `Daniel Nata Nugraha`, `Dimitris"
-" Stripelis`, `Heng Pan`, `Javier`, `Riyasat Ohib`, `Taner Topal`"
+"`Charles Beauville`, `Chong Shen Ng`, `Daniel J. Beutel`, `Daniel Nata "
+"Nugraha`, `Dimitris Stripelis`, `Heng Pan`, `Istiaque Ahmed`, `Javier`, "
+"`Julian Rußmeyer`, `Ruth Galindo`, `Stephane Moroso`, `Taner Topal`"
 msgstr ""
 
 #: ../../source/changelog/v0.13.0.md:4 ../../source/changelog/v0.14.0.md:4
@@ -136,11 +139,224 @@ msgstr ""
 #: ../../source/changelog/v1.34.0.md:10 ../../source/changelog/v1.35.0.md:10
 #: ../../source/changelog/v1.36.0.md:10 ../../source/changelog/v1.37.0.md:10
 #: ../../source/changelog/v1.38.0.md:10 ../../source/changelog/v1.39.0.md:10
-#: ../../source/changelog/v1.4.0.md:10 ../../source/changelog/v1.5.0.md:10
-#: ../../source/changelog/v1.6.0.md:10 ../../source/changelog/v1.7.0.md:10
-#: ../../source/changelog/v1.8.0.md:10 ../../source/changelog/v1.9.0.md:10
+#: ../../source/changelog/v1.4.0.md:10 ../../source/changelog/v1.40.0.md:10
+#: ../../source/changelog/v1.5.0.md:10 ../../source/changelog/v1.6.0.md:10
+#: ../../source/changelog/v1.7.0.md:10 ../../source/changelog/v1.8.0.md:10
+#: ../../source/changelog/v1.9.0.md:10
 msgid "What's new?"
 msgstr "有什么新内容？"
+
+#: ../../source/changelog/v1.40.0.md:12
+#, fuzzy
+msgid ""
+"**Connect SuperNodes to the Fleet API over HTTP** "
+"([#8301](https://github.com/flwrlabs/flower/pull/8301), "
+"[#8303](https://github.com/flwrlabs/flower/pull/8303), "
+"[#8304](https://github.com/flwrlabs/flower/pull/8304), "
+"[#8305](https://github.com/flwrlabs/flower/pull/8305), "
+"[#8307](https://github.com/flwrlabs/flower/pull/8307), "
+"[#8308](https://github.com/flwrlabs/flower/pull/8308), "
+"[#8309](https://github.com/flwrlabs/flower/pull/8309), "
+"[#8310](https://github.com/flwrlabs/flower/pull/8310), "
+"[#8311](https://github.com/flwrlabs/flower/pull/8311), "
+"[#8313](https://github.com/flwrlabs/flower/pull/8313), "
+"[#8314](https://github.com/flwrlabs/flower/pull/8314), "
+"[#8315](https://github.com/flwrlabs/flower/pull/8315), "
+"[#8316](https://github.com/flwrlabs/flower/pull/8316), "
+"[#8317](https://github.com/flwrlabs/flower/pull/8317), "
+"[#8318](https://github.com/flwrlabs/flower/pull/8318), "
+"[#8320](https://github.com/flwrlabs/flower/pull/8320), "
+"[#8321](https://github.com/flwrlabs/flower/pull/8321), "
+"[#8322](https://github.com/flwrlabs/flower/pull/8322), "
+"[#8325](https://github.com/flwrlabs/flower/pull/8325), "
+"[#8333](https://github.com/flwrlabs/flower/pull/8333))"
+msgstr ""
+
+#: ../../source/changelog/v1.40.0.md:14
+msgid ""
+"SuperNodes now connect to the Fleet API over HTTP on the SuperLink's "
+"shared `--host` and `--port`, using port `8000` by default. The HTTP API "
+"supports SuperNode authentication, version checks, and event logging. "
+"SuperLink no longer enables the gRPC Fleet API by default, its `--fleet-"
+"api-type` and `--fleet-api-address` options are deprecated, and SuperNode"
+" no longer accepts the `--grpc-rere` and `--grpc-adapter` transport "
+"options."
+msgstr ""
+
+#: ../../source/changelog/v1.40.0.md:16
+#, fuzzy
+msgid ""
+"**Search Slack and query Notion meeting notes** "
+"([#8264](https://github.com/flwrlabs/flower/pull/8264), "
+"[#8290](https://github.com/flwrlabs/flower/pull/8290), "
+"[#8306](https://github.com/flwrlabs/flower/pull/8306), "
+"[#8323](https://github.com/flwrlabs/flower/pull/8323))"
+msgstr ""
+
+#: ../../source/changelog/v1.40.0.md:18
+msgid ""
+"Search public Slack channels and, when access allows, private "
+"conversations. You can also filter Notion AI meeting notes to find "
+"relevant notes, with clearer guidance on finding and reading their "
+"contents."
+msgstr ""
+
+#: ../../source/changelog/v1.40.0.md:20
+#, fuzzy
+msgid ""
+"**Continue conversations in `@flwrlabs/agent` app** "
+"([#8274](https://github.com/flwrlabs/flower/pull/8274))"
+msgstr ""
+
+#: ../../source/changelog/v1.40.0.md:22
+msgid ""
+"The [@flwrlabs/agent](https://flower.ai/apps/flwrlabs/agent) in Flower "
+"Hub now now allows follow-up prompts to retain context across runs in the"
+" same conversation. This app is a minimal agent that you can extend "
+"easily for your particular use case."
+msgstr ""
+
+#: ../../source/changelog/v1.40.0.md:24
+#, fuzzy
+msgid ""
+"**Set federation icons** "
+"([#8273](https://github.com/flwrlabs/flower/pull/8273))"
+msgstr ""
+
+#: ../../source/changelog/v1.40.0.md:26
+msgid ""
+"Federations can now store an optional icon key, update or clear it. This "
+"helps identifying federations."
+msgstr ""
+
+#: ../../source/changelog/v1.40.0.md:28
+#, fuzzy
+msgid ""
+"**Set up Endeavor with a Flower API key** "
+"([#8324](https://github.com/flwrlabs/flower/pull/8324))"
+msgstr ""
+
+#: ../../source/changelog/v1.40.0.md:30
+msgid ""
+"The Endeavor documentation now includes a dedicated Flower API key setup "
+"guide for the macOS CLI and desktop app, with clearer navigation across "
+"the Codex and OpenCode guides. Read more in the [Endeavor "
+"1.0](https://flower.ai/docs/model/endeavor.html) documentation."
+msgstr ""
+
+#: ../../source/changelog/v1.40.0.md:32
+#, fuzzy
+msgid ""
+"**Improve security in Docker containers** "
+"([#8348](https://github.com/flwrlabs/flower/pull/8348), "
+"[#8355](https://github.com/flwrlabs/flower/pull/8355))"
+msgstr ""
+
+#: ../../source/changelog/v1.40.0.md:34
+msgid ""
+"Alpine-based Flower container images now use Alpine 3.23, upgrade "
+"installed packages in their final build stage, and omit `pip` and "
+"`ensurepip` from the runtime image. New releases no longer build Alpine "
+"3.22 variants; historical release tags remain available. Ubuntu images "
+"continue to include `pip`."
+msgstr ""
+
+#: ../../source/changelog/v1.40.0.md:36
+#, fuzzy
+msgid ""
+"**General improvements** "
+"([#8037](https://github.com/flwrlabs/flower/pull/8037), "
+"[#8269](https://github.com/flwrlabs/flower/pull/8269), "
+"[#8276](https://github.com/flwrlabs/flower/pull/8276), "
+"[#8277](https://github.com/flwrlabs/flower/pull/8277), "
+"[#8278](https://github.com/flwrlabs/flower/pull/8278), "
+"[#8281](https://github.com/flwrlabs/flower/pull/8281), "
+"[#8286](https://github.com/flwrlabs/flower/pull/8286), "
+"[#8289](https://github.com/flwrlabs/flower/pull/8289), "
+"[#8312](https://github.com/flwrlabs/flower/pull/8312), "
+"[#8326](https://github.com/flwrlabs/flower/pull/8326), "
+"[#8327](https://github.com/flwrlabs/flower/pull/8327), "
+"[#8332](https://github.com/flwrlabs/flower/pull/8332), "
+"[#8334](https://github.com/flwrlabs/flower/pull/8334), "
+"[#8335](https://github.com/flwrlabs/flower/pull/8335), "
+"[#8336](https://github.com/flwrlabs/flower/pull/8336), "
+"[#8338](https://github.com/flwrlabs/flower/pull/8338), "
+"[#8340](https://github.com/flwrlabs/flower/pull/8340), "
+"[#8342](https://github.com/flwrlabs/flower/pull/8342), "
+"[#8347](https://github.com/flwrlabs/flower/pull/8347), "
+"[#8354](https://github.com/flwrlabs/flower/pull/8354))"
+msgstr ""
+
+#: ../../source/changelog/v1.10.0.md:68 ../../source/changelog/v1.11.0.md:65
+#: ../../source/changelog/v1.12.0.md:64 ../../source/changelog/v1.13.0.md:69
+#: ../../source/changelog/v1.13.1.md:32 ../../source/changelog/v1.14.0.md:63
+#: ../../source/changelog/v1.15.0.md:80 ../../source/changelog/v1.16.0.md:54
+#: ../../source/changelog/v1.17.0.md:85 ../../source/changelog/v1.18.0.md:50
+#: ../../source/changelog/v1.19.0.md:68 ../../source/changelog/v1.20.0.md:66
+#: ../../source/changelog/v1.21.0.md:56 ../../source/changelog/v1.22.0.md:40
+#: ../../source/changelog/v1.23.0.md:48 ../../source/changelog/v1.24.0.md:42
+#: ../../source/changelog/v1.25.0.md:36 ../../source/changelog/v1.26.0.md:44
+#: ../../source/changelog/v1.27.0.md:50 ../../source/changelog/v1.28.0.md:50
+#: ../../source/changelog/v1.29.0.md:46 ../../source/changelog/v1.30.0.md:34
+#: ../../source/changelog/v1.31.0.md:50 ../../source/changelog/v1.32.0.md:44
+#: ../../source/changelog/v1.33.0.md:50 ../../source/changelog/v1.34.0.md:54
+#: ../../source/changelog/v1.35.0.md:50 ../../source/changelog/v1.36.0.md:30
+#: ../../source/changelog/v1.37.0.md:40 ../../source/changelog/v1.38.0.md:36
+#: ../../source/changelog/v1.39.0.md:28 ../../source/changelog/v1.40.0.md:38
+msgid ""
+"As always, many parts of the Flower framework and quality infrastructure "
+"were improved and updated."
+msgstr ""
+
+#: ../../source/changelog/v0.16.0.md:21 ../../source/changelog/v0.17.0.md:33
+#: ../../source/changelog/v0.18.0.md:62 ../../source/changelog/v0.19.0.md:58
+#: ../../source/changelog/v1.0.0.md:17 ../../source/changelog/v1.1.0.md:60
+#: ../../source/changelog/v1.10.0.md:90 ../../source/changelog/v1.11.0.md:78
+#: ../../source/changelog/v1.11.1.md:30 ../../source/changelog/v1.12.0.md:66
+#: ../../source/changelog/v1.13.0.md:77 ../../source/changelog/v1.14.0.md:65
+#: ../../source/changelog/v1.15.0.md:82 ../../source/changelog/v1.16.0.md:56
+#: ../../source/changelog/v1.18.0.md:52 ../../source/changelog/v1.2.0.md:67
+#: ../../source/changelog/v1.20.0.md:68 ../../source/changelog/v1.21.0.md:58
+#: ../../source/changelog/v1.23.0.md:50 ../../source/changelog/v1.24.0.md:44
+#: ../../source/changelog/v1.25.0.md:38 ../../source/changelog/v1.26.0.md:46
+#: ../../source/changelog/v1.27.0.md:52 ../../source/changelog/v1.28.0.md:52
+#: ../../source/changelog/v1.29.0.md:48 ../../source/changelog/v1.3.0.md:56
+#: ../../source/changelog/v1.30.0.md:36 ../../source/changelog/v1.31.0.md:52
+#: ../../source/changelog/v1.32.0.md:46 ../../source/changelog/v1.33.0.md:52
+#: ../../source/changelog/v1.34.0.md:56 ../../source/changelog/v1.35.0.md:52
+#: ../../source/changelog/v1.37.0.md:42 ../../source/changelog/v1.4.0.md:62
+#: ../../source/changelog/v1.40.0.md:40 ../../source/changelog/v1.5.0.md:82
+#: ../../source/changelog/v1.6.0.md:90 ../../source/changelog/v1.7.0.md:73
+#: ../../source/changelog/v1.8.0.md:62 ../../source/changelog/v1.9.0.md:88
+msgid "Incompatible changes"
+msgstr "不兼容的更改"
+
+#: ../../source/changelog/v1.40.0.md:42
+#, fuzzy
+msgid ""
+"**Require `cryptography` 50 on all platforms** "
+"([#8344](https://github.com/flwrlabs/flower/pull/8344))"
+msgstr ""
+
+#: ../../source/changelog/v1.40.0.md:44
+msgid ""
+"Flower 1.40.0 requires `cryptography` 50.x on every platform. Systems "
+"that cannot install it cannot upgrade to this Flower version. This may "
+"affect 32-bit Windows and Intel-based macOS, for which `cryptography` 50 "
+"no longer provides prebuilt wheels."
+msgstr ""
+
+#: ../../source/changelog/v1.39.0.md:2
+#, fuzzy
+msgid "v1.39.0 (2026-09-28)"
+msgstr ""
+
+#: ../../source/changelog/v1.39.0.md:8
+#, fuzzy
+msgid ""
+"`Charles Beauville`, `Daniel J. Beutel`, `Daniel Nata Nugraha`, `Dimitris"
+" Stripelis`, `Heng Pan`, `Javier`, `Riyasat Ohib`, `Taner Topal`"
+msgstr ""
 
 #: ../../source/changelog/v1.39.0.md:12
 #, fuzzy
@@ -233,27 +449,6 @@ msgid ""
 "[#8261](https://github.com/flwrlabs/flower/pull/8261), "
 "[#8268](https://github.com/flwrlabs/flower/pull/8268), "
 "[#8270](https://github.com/flwrlabs/flower/pull/8270))"
-msgstr ""
-
-#: ../../source/changelog/v1.10.0.md:68 ../../source/changelog/v1.11.0.md:65
-#: ../../source/changelog/v1.12.0.md:64 ../../source/changelog/v1.13.0.md:69
-#: ../../source/changelog/v1.13.1.md:32 ../../source/changelog/v1.14.0.md:63
-#: ../../source/changelog/v1.15.0.md:80 ../../source/changelog/v1.16.0.md:54
-#: ../../source/changelog/v1.17.0.md:85 ../../source/changelog/v1.18.0.md:50
-#: ../../source/changelog/v1.19.0.md:68 ../../source/changelog/v1.20.0.md:66
-#: ../../source/changelog/v1.21.0.md:56 ../../source/changelog/v1.22.0.md:40
-#: ../../source/changelog/v1.23.0.md:48 ../../source/changelog/v1.24.0.md:42
-#: ../../source/changelog/v1.25.0.md:36 ../../source/changelog/v1.26.0.md:44
-#: ../../source/changelog/v1.27.0.md:50 ../../source/changelog/v1.28.0.md:50
-#: ../../source/changelog/v1.29.0.md:46 ../../source/changelog/v1.30.0.md:34
-#: ../../source/changelog/v1.31.0.md:50 ../../source/changelog/v1.32.0.md:44
-#: ../../source/changelog/v1.33.0.md:50 ../../source/changelog/v1.34.0.md:54
-#: ../../source/changelog/v1.35.0.md:50 ../../source/changelog/v1.36.0.md:30
-#: ../../source/changelog/v1.37.0.md:40 ../../source/changelog/v1.38.0.md:36
-#: ../../source/changelog/v1.39.0.md:28
-msgid ""
-"As always, many parts of the Flower framework and quality infrastructure "
-"were improved and updated."
 msgstr ""
 
 #: ../../source/changelog/v1.38.0.md:2
@@ -610,29 +805,6 @@ msgid ""
 "[#8144](https://github.com/flwrlabs/flower/pull/8144), "
 "[#8149](https://github.com/flwrlabs/flower/pull/8149))"
 msgstr ""
-
-#: ../../source/changelog/v0.16.0.md:21 ../../source/changelog/v0.17.0.md:33
-#: ../../source/changelog/v0.18.0.md:62 ../../source/changelog/v0.19.0.md:58
-#: ../../source/changelog/v1.0.0.md:17 ../../source/changelog/v1.1.0.md:60
-#: ../../source/changelog/v1.10.0.md:90 ../../source/changelog/v1.11.0.md:78
-#: ../../source/changelog/v1.11.1.md:30 ../../source/changelog/v1.12.0.md:66
-#: ../../source/changelog/v1.13.0.md:77 ../../source/changelog/v1.14.0.md:65
-#: ../../source/changelog/v1.15.0.md:82 ../../source/changelog/v1.16.0.md:56
-#: ../../source/changelog/v1.18.0.md:52 ../../source/changelog/v1.2.0.md:67
-#: ../../source/changelog/v1.20.0.md:68 ../../source/changelog/v1.21.0.md:58
-#: ../../source/changelog/v1.23.0.md:50 ../../source/changelog/v1.24.0.md:44
-#: ../../source/changelog/v1.25.0.md:38 ../../source/changelog/v1.26.0.md:46
-#: ../../source/changelog/v1.27.0.md:52 ../../source/changelog/v1.28.0.md:52
-#: ../../source/changelog/v1.29.0.md:48 ../../source/changelog/v1.3.0.md:56
-#: ../../source/changelog/v1.30.0.md:36 ../../source/changelog/v1.31.0.md:52
-#: ../../source/changelog/v1.32.0.md:46 ../../source/changelog/v1.33.0.md:52
-#: ../../source/changelog/v1.34.0.md:56 ../../source/changelog/v1.35.0.md:52
-#: ../../source/changelog/v1.37.0.md:42 ../../source/changelog/v1.4.0.md:62
-#: ../../source/changelog/v1.5.0.md:82 ../../source/changelog/v1.6.0.md:90
-#: ../../source/changelog/v1.7.0.md:73 ../../source/changelog/v1.8.0.md:62
-#: ../../source/changelog/v1.9.0.md:88
-msgid "Incompatible changes"
-msgstr "不兼容的更改"
 
 #: ../../source/changelog/v1.37.0.md:44
 #, fuzzy

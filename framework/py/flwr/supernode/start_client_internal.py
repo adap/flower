@@ -466,7 +466,7 @@ def _push_messages(
     """Push reply messages to the SuperLink."""
     # This is to ensure that only one message is processed at a time
     # Wait until a reply message is available
-    while not (reply_messages := state.get_messages(is_reply=True)):
+    while not (reply_messages := state.get_messages_legacy(is_reply=True)):
         time.sleep(0.5)
 
     for message in reply_messages:
