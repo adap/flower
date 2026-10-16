@@ -31,6 +31,7 @@ from flwr.proto.message_pb2 import (  # pylint:disable=E0611
     PushObjectRequest,
 )
 from flwr.proto.runtime_pb2 import (  # pylint:disable=E0611
+    GetCompactedContextsRequest,
     GetConnectorRequest,
     GetNodesRequest,
     GetRunSeriesEventsRequest,
@@ -59,6 +60,21 @@ class TestSuperNodeRuntimeHandlers(unittest.TestCase):
         """Initialize test state."""
         self.maker = RecordMaker()
         self.state = Mock()
+
+    def test_get_compacted_contexts_uses_authenticated_series(self) -> None:
+        """Summary requests derive the series from the authenticated run."""
+        self.state.get_run.return_value = Run.create_empty(run_id=123)
+        self.state.get_run.return_value.series_id = 456
+        self.state.get_compacted_contexts.return_value = []
+        task = Task(run_id=123)
+
+        runtime_handlers.get_compacted_contexts(
+            GetCompactedContextsRequest(), self.state, task
+        )
+
+        self.state.get_compacted_contexts.assert_called_once_with(
+            456, limit=1, before_context_id=None
+        )
 
     def test_pull_task_input_activates_task(self) -> None:
         """PullTaskInput should activate the authenticated task."""

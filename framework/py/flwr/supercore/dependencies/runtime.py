@@ -33,6 +33,8 @@ from flwr.proto.message_pb2 import (  # pylint: disable=E0611
 from flwr.proto.runtime_pb2 import (  # pylint: disable=E0611
     AcquireTaskRequest,
     AcquireTaskResponse,
+    GetCompactedContextsRequest,
+    GetCompactedContextsResponse,
     GetConnectorRequest,
     GetConnectorResponse,
     GetNodesRequest,
@@ -134,6 +136,11 @@ class RuntimeHandlers(Protocol[StateT_contra]):
         task: Task,
     ) -> GetRunSeriesEventsResponse:
         """Get events from the authenticated task's run series."""
+
+    def get_compacted_contexts(
+        self, request: GetCompactedContextsRequest, state: StateT_contra, task: Task
+    ) -> GetCompactedContextsResponse:
+        """Get summaries from the authenticated task's run series."""
 
 
 def get_runtime_state(request: Request) -> CoreState:

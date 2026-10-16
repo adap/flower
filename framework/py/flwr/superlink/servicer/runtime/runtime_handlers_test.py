@@ -46,6 +46,7 @@ from flwr.proto.node_pb2 import Node, NodeInfo  # pylint: disable=E0611
 from flwr.proto.runtime_pb2 import (  # pylint: disable=E0611
     AcquireTaskRequest,
     CreateTaskRequest,
+    GetCompactedContextsRequest,
     GetConnectorRequest,
     GetConnectorResponse,
     GetNodesRequest,
@@ -202,6 +203,20 @@ def test_get_run_series_events_uses_authenticated_task_series() -> None:
         after_task_event_id=10,
         before_task_event_id=None,
         last_n=None,
+    )
+
+
+def test_get_compacted_contexts_uses_authenticated_series() -> None:
+    """Summary requests use the authenticated task's series."""
+    state = Mock(spec=LinkState)
+    state.get_run_info.return_value = [Mock(series_id=456)]
+    state.get_compacted_contexts.return_value = []
+    task = Task(run_id=123)
+
+    runtime_handlers.get_compacted_contexts(GetCompactedContextsRequest(), state, task)
+
+    state.get_compacted_contexts.assert_called_once_with(
+        456, limit=1, before_context_id=None
     )
 
 
