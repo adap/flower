@@ -48,7 +48,6 @@ from flwr.common.constant import (
     FLWR_TASK_TOKEN_LENGTH,
     HEARTBEAT_DEFAULT_INTERVAL,
     HEARTBEAT_PATIENCE,
-    INT64_MAX_VALUE,
     SERIES_ID_NUM_BYTES,
     TASK_ID_NUM_BYTES,
     Status,
@@ -964,7 +963,7 @@ class SqlCoreState(CoreState, SqlMixin):  # pylint: disable=R0904
             CompactedContextModel.series_id == uint64_to_int64(series_id)
         )
         # Autoincremented context IDs cannot exceed the signed BIGINT range.
-        if before_context_id is not None and before_context_id <= INT64_MAX_VALUE:
+        if before_context_id is not None:
             query = query.where(CompactedContextModel.id < before_context_id)
         query = query.order_by(CompactedContextModel.id.desc()).limit(limit)
         with self.session() as session:
