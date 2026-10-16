@@ -43,7 +43,10 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     StartRunRequest,
 )
 from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
-from flwr.proto.runseries_pb2 import RunSeries  # pylint: disable=E0611
+from flwr.proto.runseries_pb2 import (  # pylint: disable=E0611
+    CompactedContext,
+    RunSeries,
+)
 from flwr.proto.task_pb2 import (  # pylint: disable=E0611
     Task,
     TaskEvent,
@@ -161,6 +164,8 @@ class InMemoryCoreState(
         self.lock_run_series_store = Lock()
         self.run_series_context_store: dict[int, Context] = {}
         self.lock_run_series_context_store = Lock()
+        self.compacted_context_store: dict[int, CompactedContext] = {}
+        self.lock_compacted_context_store = Lock()
         self.automation_store: dict[int, AutomationRecord] = {}
         self.lock_automation_store = RLock()
         self._next_automation_id = 1
@@ -859,6 +864,23 @@ class InMemoryCoreState(
         """Return the shared Context for the specified RunSeries, if present."""
         with self.lock_run_series_context_store:
             return self.run_series_context_store.get(series_id)
+
+    def get_compacted_contexts(
+        self, series_id: int, limit: int = 1, before_context_id: int | None = None
+    ) -> Sequence[CompactedContext]:
+        """Return a series's summaries newest first, before an optional ID."""
+        if limit <= 0:
+            raise ValueError("limit must be positive")
+        with self.lock_compacted_context_store:
+            contexts = [
+                context
+                for context in self.compacted_context_store.values()
+                if context.series_id == series_id
+                and (before_context_id is None or context.id < before_context_id)
+            ]
+            return sorted(contexts, key=lambda context: context.id, reverse=True)[
+                :limit
+            ]
 
     def set_run_series_context(self, series_id: int, context: Context) -> None:
         """Set the shared Context for the specified RunSeries."""
