@@ -93,8 +93,6 @@ def validate_message_metadata(metadata: Metadata) -> list[str]:
         errors.append("Message expiration is outside the supported timestamp range")
     if metadata.created_at + metadata.ttl <= now().timestamp():
         errors.append("Message TTL has expired")
-    if not metadata.message_type:
-        errors.append("`metadata.message_type` MUST be set")
     return errors
 
 
