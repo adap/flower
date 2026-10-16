@@ -24,6 +24,7 @@ from typing import Any, cast
 from unittest.mock import call, patch
 
 from parameterized import parameterized
+from sqlalchemy.exc import IntegrityError
 
 from flwr.app import Context, Message, RecordDict
 from flwr.common.constant import (
@@ -560,6 +561,33 @@ class StateTest(unittest.TestCase):  # pylint: disable=R0904
         self.assertEqual(updated.run_id, updated_context.run_id)
         self.assertEqual(updated.node_config, updated_context.node_config)
         self.assertEqual(updated.run_config, updated_context.run_config)
+
+    def test_store_compacted_context(self) -> None:
+        """Store summaries at distinct event boundaries in a series."""
+        state = self.state_factory()
+        state.store_compacted_context(42, 2**63, "First")
+        with self.assertRaises((ValueError, IntegrityError)):
+            state.store_compacted_context(42, 2**63, "Duplicate")
+        state.store_compacted_context(42, 2**63 + 100, "Second")
+        state.store_compacted_context(43, 2**63, "Other")
+
+        second, first = state.get_compacted_contexts(42, limit=2)
+        (other,) = state.get_compacted_contexts(43)
+
+        self.assertGreater(first.id, 0)
+        self.assertLess(first.id, second.id)
+        self.assertTrue(first.created_at)
+        self.assertEqual(first.series_id, 42)
+        self.assertEqual(first.through_event_id, 2**63)
+        self.assertEqual(first.text, "First")
+        self.assertEqual(second.through_event_id, 2**63 + 100)
+        self.assertEqual(second.text, "Second")
+        self.assertNotEqual(second.id, first.id)
+        self.assertEqual(
+            state.get_compacted_contexts(42, before_context_id=second.id), [first]
+        )
+        self.assertEqual(other.series_id, 43)
+        self.assertEqual(other.text, "Other")
 
     def test_connector_oauth_session_lifecycle(self) -> None:
         """An OAuth session can be created, retrieved, and completed once."""

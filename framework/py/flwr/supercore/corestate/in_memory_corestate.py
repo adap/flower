@@ -167,6 +167,7 @@ class InMemoryCoreState(
         self.lock_run_series_context_store = Lock()
         self.compacted_context_store: dict[int, CompactedContext] = {}
         self.lock_compacted_context_store = Lock()
+        self._next_compacted_context_id = 1
         self.automation_store: dict[int, AutomationRecord] = {}
         self.lock_automation_store = RLock()
         self._next_automation_id = 1
@@ -883,6 +884,28 @@ class InMemoryCoreState(
             return sorted(contexts, key=lambda context: context.id, reverse=True)[
                 :limit
             ]
+
+    def store_compacted_context(
+        self, series_id: int, through_event_id: int, text: str
+    ) -> None:
+        """Store a new summary."""
+        with self.lock_compacted_context_store:
+            if any(
+                context.series_id == series_id
+                and context.through_event_id == through_event_id
+                for context in self.compacted_context_store.values()
+            ):
+                raise ValueError("Compacted context already exists for this event")
+
+            context = CompactedContext(
+                id=self._next_compacted_context_id,
+                series_id=series_id,
+                through_event_id=through_event_id,
+                text=text,
+                created_at=now().isoformat(),
+            )
+            self.compacted_context_store[context.id] = context
+            self._next_compacted_context_id += 1
 
     def set_run_series_context(self, series_id: int, context: Context) -> None:
         """Set the shared Context for the specified RunSeries."""
