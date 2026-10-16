@@ -19,6 +19,7 @@ import hashlib
 import secrets
 from bisect import bisect_right
 from collections.abc import Collection, Sequence
+from copy import deepcopy
 from dataclasses import dataclass, replace
 from datetime import UTC, datetime, timedelta
 from logging import ERROR
@@ -27,6 +28,7 @@ from typing import Literal, cast
 from uuid import uuid4
 
 from flwr.app import Context, Message
+from flwr.app.metadata import Metadata
 from flwr.common.constant import (
     FLWR_TASK_TOKEN_LENGTH,
     HEARTBEAT_DEFAULT_INTERVAL,
@@ -66,6 +68,7 @@ from ..object_store import ObjectStore
 from .corestate import CoreState
 from .utils import (
     generate_rand_int_from_bytes,
+    validate_message_metadata,
     validate_task_event_data,
     validate_task_message,
 )
@@ -126,6 +129,14 @@ class ObjectPushSession:
     pending_object_ids: set[str]
 
 
+@dataclass
+class MessageRecord:
+    """Retain metadata after releasing the pending Message reference."""
+
+    metadata: Metadata
+    message: Message | None
+
+
 class InMemoryCoreState(
     CoreState
 ):  # pylint: disable=R0904,too-many-instance-attributes
@@ -133,6 +144,9 @@ class InMemoryCoreState(
 
     def __init__(self, object_store: ObjectStore) -> None:
         self._object_store = object_store
+        self.message_store: dict[str, MessageRecord] = {}
+        self.pending_message_ids_by_dst: dict[int, set[str]] = {}
+        self.lock_message_store = Lock()
         self.fab_store: dict[str, Fab] = {}
         self.lock_fab_store = Lock()
         self.federation_app_store: dict[tuple[str, str], FederationAppRecord] = {}
@@ -185,7 +199,40 @@ class InMemoryCoreState(
 
     def store_messages(self, messages: Sequence[Message]) -> list[bool]:
         """Store one or more Messages."""
-        raise NotImplementedError
+        results = []
+        with self.lock_message_store:
+            for message in messages:
+                # Validate metadata before handling duplicate Message IDs.
+                metadata = message.metadata
+                errors = validate_message_metadata(metadata)
+                if errors:
+                    log(ERROR, errors)
+                    results.append(False)
+                    continue
+
+                # Accept duplicates without changing their delivery state.
+                if metadata.message_id in self.message_store:
+                    results.append(True)
+                    continue
+
+                # Reject correlation references to unknown Messages.
+                if metadata.reply_to_message_id and (
+                    metadata.reply_to_message_id not in self.message_store
+                ):
+                    results.append(False)
+                    continue
+
+                # Share Messages for flwr-simulation; snapshot retained metadata.
+                self.message_store[metadata.message_id] = MessageRecord(
+                    metadata=deepcopy(metadata), message=message
+                )
+
+                # Index pending delivery under the Message's destination.
+                self.pending_message_ids_by_dst.setdefault(
+                    metadata.dst_node_id, set()
+                ).add(metadata.message_id)
+                results.append(True)
+        return results
 
     def get_messages(
         self,
@@ -196,11 +243,47 @@ class InMemoryCoreState(
         limit: int | None = None,
     ) -> list[Message]:
         """Get pending Messages for the provided destination node ID."""
-        raise NotImplementedError
+        # Reject invalid limits.
+        if limit is not None and limit <= 0:
+            raise ValueError("`limit` must be greater than zero")
+
+        current = now().timestamp()
+        messages = []
+        with self.lock_message_store:
+            # Snapshot this inbox's pending IDs so expiration can remove entries.
+            pending_ids = self.pending_message_ids_by_dst.get(dst_node_id, set())
+            for message_id in pending_ids.copy():
+                # Narrow the destination inbox to the optional run.
+                record = self.message_store[message_id]
+                message = cast(Message, record.message)  # Only pending are indexed
+                metadata = record.metadata
+                if run_id is not None and metadata.run_id != run_id:
+                    continue
+
+                # Release our reference without mutating Messages used by simulation.
+                if metadata.created_at + metadata.ttl <= current:
+                    self._clear_message_locked(message_id)
+                    continue
+
+                # Apply reply-to filtering.
+                if reply_to_message_ids is not None:
+                    if metadata.reply_to_message_id not in reply_to_message_ids:
+                        continue
+
+                messages.append(message)
+
+        # Apply a stable order before limiting the live results.
+        messages.sort(
+            key=lambda msg: (msg.metadata.created_at, msg.metadata.message_id)
+        )
+        return messages[:limit]
 
     def acknowledge_messages(self, message_ids: Collection[str]) -> None:
         """Acknowledge Messages based on the provided Message IDs."""
-        raise NotImplementedError
+        # Release each pending delivery without mutating Messages held by callers.
+        with self.lock_message_store:
+            for message_id in message_ids:
+                self._clear_message_locked(message_id)
 
     def cancel_messages(
         self,
@@ -209,7 +292,46 @@ class InMemoryCoreState(
         run_id: int | None = None,
     ) -> None:
         """Cancel pending Messages based on the specified filters."""
-        raise NotImplementedError
+        # Require an explicit scope to prevent accidental cancellation of all inboxes.
+        if message_ids is None and run_id is None:
+            raise ValueError("Either `message_ids` or `run_id` must be supplied")
+
+        with self.lock_message_store:
+            if message_ids is not None:
+                candidates = message_ids
+            else:
+                # Snapshot pending IDs when cancelling across destination inboxes.
+                candidates = [
+                    message_id
+                    for pending_ids in self.pending_message_ids_by_dst.values()
+                    for message_id in pending_ids
+                ]
+
+            # Intersect the ID and run filters before releasing matching Messages.
+            for message_id in candidates:
+                record = self.message_store.get(message_id)
+                if record is not None and (
+                    run_id is None or record.metadata.run_id == run_id
+                ):
+                    self._clear_message_locked(message_id)
+
+    def _clear_message_locked(self, message_id: str) -> None:
+        """End pending delivery while holding the message-store lock."""
+        # Unknown and already cleared Messages have no further side effects.
+        record = self.message_store.get(message_id)
+        if record is None or record.message is None:
+            return
+
+        # Retain metadata without mutating the Message used by simulation.
+        self.object_store.delete(message_id)
+        record.message = None
+
+        # Remove the delivery from its destination index and drop empty inboxes.
+        dst_node_id = record.metadata.dst_node_id
+        pending_ids = self.pending_message_ids_by_dst[dst_node_id]
+        pending_ids.remove(message_id)
+        if not pending_ids:
+            del self.pending_message_ids_by_dst[dst_node_id]
 
     def start_session(self, run_id: int) -> str:
         """Start a run-scoped object push session."""
@@ -768,6 +890,13 @@ class InMemoryCoreState(
     ) -> None:
         """Store a new summary."""
         with self.lock_compacted_context_store:
+            if any(
+                context.series_id == series_id
+                and context.through_event_id == through_event_id
+                for context in self.compacted_context_store.values()
+            ):
+                raise ValueError("Compacted context already exists for this event")
+
             context = CompactedContext(
                 id=self._next_compacted_context_id,
                 series_id=series_id,

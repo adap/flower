@@ -203,7 +203,7 @@ class TestSuperNodeRuntimeHandlers(unittest.TestCase):
 
     def test_pull_messages_returns_empty_response(self) -> None:
         """PullMessages should return an empty response when none is available."""
-        self.state.get_messages.return_value = []
+        self.state.get_messages_legacy.return_value = []
         task = Task(run_id=61016)
 
         response = runtime_handlers.pull_messages(

@@ -55,6 +55,7 @@ from flwr.proto.federation_config_pb2 import SimulationConfig  # pylint: disable
 from flwr.proto.message_pb2 import Message as ProtoMessage
 from flwr.proto.message_pb2 import Metadata as ProtoMetadata
 from flwr.proto.recorddict_pb2 import RecordDict as ProtoRecordDict
+from flwr.proto.runseries_pb2 import CompactedContext  # pylint: disable=E0611
 from flwr.proto.task_pb2 import TaskEvent  # pylint: disable=E0611
 
 # pylint: enable=E0611
@@ -2580,6 +2581,39 @@ class InMemoryStateTest(StateTest):
     def state_factory(self) -> InMemoryLinkState:
         """Return InMemoryState."""
         return InMemoryLinkState(NoOpFederationManager(), ObjectStoreFactory().store())
+
+    def test_get_compacted_contexts(self) -> None:
+        """Read one series newest first with an exclusive cursor."""
+        state = self.state_factory()
+        state.compacted_context_store = {
+            context.id: context
+            for context in (
+                CompactedContext(id=1, series_id=42, through_event_id=10, text="First"),
+                CompactedContext(
+                    id=2, series_id=42, through_event_id=20, text="Second"
+                ),
+                CompactedContext(id=3, series_id=43, through_event_id=30, text="Other"),
+            )
+        }
+
+        self.assertEqual(
+            [context.text for context in state.get_compacted_contexts(42, limit=2)],
+            ["Second", "First"],
+        )
+        self.assertEqual(
+            [context.id for context in state.get_compacted_contexts(42)], [2]
+        )
+        self.assertEqual(
+            [
+                context.id
+                for context in state.get_compacted_contexts(42, before_context_id=2)
+            ],
+            [1],
+        )
+        self.assertEqual(
+            [context.text for context in state.get_compacted_contexts(43)],
+            ["Other"],
+        )
 
     def test_owner_aid_index(self) -> None:
         """Test that the owner_aid index works correctly."""

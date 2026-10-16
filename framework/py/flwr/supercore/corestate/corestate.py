@@ -589,7 +589,7 @@ class CoreState(ABC):  # pylint: disable=R0904
     def store_compacted_context(
         self, series_id: int, through_event_id: int, text: str
     ) -> None:
-        """Store a new summary."""
+        """Store a new summary, rejecting an existing series/event pair."""
 
     @abstractmethod
     def set_run_series_context(self, series_id: int, context: Context) -> None:

@@ -171,7 +171,7 @@ def pull_messages(
     run_id = task.run_id
 
     # Retrieve message for this run
-    messages = state.get_messages(run_ids=[run_id], is_reply=False, limit=1)
+    messages = state.get_messages_legacy(run_ids=[run_id], is_reply=False, limit=1)
     if not messages:
         return PullAppMessagesResponse()
     message = messages[0]

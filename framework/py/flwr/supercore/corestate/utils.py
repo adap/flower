@@ -15,10 +15,11 @@
 """Utility functions for CoreState."""
 
 
-from datetime import datetime
+from datetime import UTC, datetime
 from os import urandom
 
 from flwr.app import Context, Message
+from flwr.app.metadata import Metadata
 from flwr.common import serde
 from flwr.proto.message_pb2 import Context as ProtoContext  # pylint: disable=E0611
 from flwr.supercore.date import now
@@ -75,6 +76,24 @@ def validate_task_event_data(data: str) -> None:
     payload = strict_json_loads(data)
     if not isinstance(payload, dict):
         raise ValueError("Task event data must be a JSON object.")
+
+
+def validate_message_metadata(metadata: Metadata) -> list[str]:
+    """Validate destination-addressed Message metadata independently of its body."""
+    errors = []
+    if not metadata.message_id:
+        errors.append("empty `metadata.message_id`")
+    if metadata.created_at < _MIN_VALID_MESSAGE_CREATED_AT:
+        errors.append("`metadata.created_at` must be a valid Unix timestamp")
+    if metadata.ttl <= 0:
+        errors.append("`metadata.ttl` must be higher than zero")
+    try:
+        datetime.fromtimestamp(metadata.created_at + metadata.ttl, tz=UTC)
+    except (OverflowError, ValueError, OSError):
+        errors.append("Message expiration is outside the supported timestamp range")
+    if metadata.created_at + metadata.ttl <= now().timestamp():
+        errors.append("Message TTL has expired")
+    return errors
 
 
 def validate_task_message(
