@@ -41,7 +41,7 @@ from sqlalchemy.dialects.sqlite import Insert as SQLiteInsert
 from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 from sqlalchemy.exc import IntegrityError
 
-from flwr.app import Context, Message
+from flwr.app import Context, Message, RecordDict
 from flwr.app.message import make_message
 from flwr.app.metadata import Metadata
 from flwr.common.constant import (
@@ -90,6 +90,7 @@ from flwr.supercore.state.schema.corestate_models import Fab as FabModel
 from flwr.supercore.state.schema.corestate_models import (
     FederationApp as FederationAppModel,
 )
+from flwr.supercore.state.schema.corestate_models import Message as MessageModel
 from flwr.supercore.state.schema.corestate_models import NonceStore as NonceStoreModel
 from flwr.supercore.state.schema.corestate_models import (
     ObjectPushSession as ObjectPushSessionModel,
@@ -129,6 +130,7 @@ from .utils import (
     context_to_bytes,
     generate_rand_int_from_bytes,
     timestamp_to_iso,
+    validate_message_metadata,
     validate_task_event_data,
     validate_task_message,
 )
@@ -171,7 +173,48 @@ class SqlCoreState(CoreState, SqlMixin):  # pylint: disable=R0904
 
     def store_messages(self, messages: Sequence[Message]) -> list[bool]:
         """Store one or more Messages."""
-        raise NotImplementedError
+        results = []
+        with self.session() as session:
+            for message in messages:
+                # Validate each Message before attempting storage.
+                metadata = message.metadata
+                errors = validate_message_metadata(metadata)
+                if errors:
+                    log(ERROR, errors)
+                    results.append(False)
+                    continue
+
+                # Persist metadata; ObjectStore owns the message body.
+                stmt = self.dialect_insert(MessageModel).values(
+                    message_id=metadata.message_id,
+                    run_id=metadata.run_id,
+                    src_node_id=metadata.src_node_id,
+                    dst_node_id=metadata.dst_node_id,
+                    src_task_id=metadata.src_task_id,
+                    dst_task_id=metadata.dst_task_id,
+                    reply_to_message_id=metadata.reply_to_message_id or None,
+                    group_id=metadata.group_id,
+                    created_at=metadata.created_at,
+                    ttl=metadata.ttl,
+                    message_type=metadata.message_type,
+                    expires_at=datetime.fromtimestamp(
+                        metadata.created_at + metadata.ttl, tz=UTC
+                    ),
+                )
+
+                # Preserve the delivery state of an existing Message ID.
+                stmt = stmt.on_conflict_do_nothing(
+                    index_elements=[MessageModel.message_id]
+                )
+
+                # Isolate constraint failures so the remaining batch can proceed.
+                try:
+                    with session.begin_nested():
+                        session.execute(stmt)
+                    results.append(True)
+                except IntegrityError:
+                    results.append(False)
+        return results
 
     def get_messages(
         self,
@@ -182,7 +225,65 @@ class SqlCoreState(CoreState, SqlMixin):  # pylint: disable=R0904
         limit: int | None = None,
     ) -> list[Message]:
         """Get pending Messages for the provided destination node ID."""
-        raise NotImplementedError
+        # Reject invalid limits.
+        if limit is not None and limit <= 0:
+            raise ValueError("`limit` must be greater than zero")
+
+        # Scope both expiration and retrieval to the destination and optional run.
+        current = now()
+        filters = [
+            MessageModel.dst_node_id == dst_node_id,
+            MessageModel.cleared.is_(False),
+        ]
+        if run_id is not None:
+            filters.append(MessageModel.run_id == run_id)
+        with self.session() as session:
+            # Clear expired deliveries while retaining their correlation metadata.
+            expired_ids = session.scalars(
+                update(MessageModel)
+                .where(*filters, MessageModel.expires_at <= current)
+                .values(cleared=True)
+                .returning(MessageModel.message_id)
+            ).all()
+
+            # Release expired body roots and their unreferenced descendants.
+            for message_id in expired_ids:
+                self.object_store.delete(message_id)
+
+            # Intersect live delivery candidates with any correlation filter.
+            stmt = select(MessageModel).where(
+                *filters, MessageModel.expires_at > current
+            )
+            if reply_to_message_ids is not None:
+                stmt = stmt.where(
+                    MessageModel.reply_to_message_id.in_(reply_to_message_ids)
+                )
+
+            # Apply a stable order before limiting the live results.
+            stmt = stmt.order_by(
+                MessageModel.created_at, MessageModel.message_id
+            ).limit(limit)
+
+            # Return metadata envelopes; recipients obtain bodies from ObjectStore.
+            return [
+                make_message(
+                    metadata=Metadata(
+                        message_id=row.message_id,
+                        run_id=row.run_id,
+                        src_node_id=row.src_node_id,
+                        dst_node_id=row.dst_node_id,
+                        src_task_id=row.src_task_id,
+                        dst_task_id=row.dst_task_id,
+                        reply_to_message_id=row.reply_to_message_id or "",
+                        group_id=row.group_id,
+                        created_at=row.created_at,
+                        ttl=row.ttl,
+                        message_type=row.message_type,
+                    ),
+                    content=RecordDict(),
+                )
+                for row in session.scalars(stmt)
+            ]
 
     def acknowledge_messages(self, message_ids: Collection[str]) -> None:
         """Acknowledge Messages based on the provided Message IDs."""

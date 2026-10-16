@@ -27,6 +27,7 @@ from typing import Literal, cast
 from uuid import uuid4
 
 from flwr.app import Context, Message
+from flwr.app.metadata import Metadata
 from flwr.common.constant import (
     FLWR_TASK_TOKEN_LENGTH,
     HEARTBEAT_DEFAULT_INTERVAL,
@@ -63,6 +64,7 @@ from ..object_store import ObjectStore
 from .corestate import CoreState
 from .utils import (
     generate_rand_int_from_bytes,
+    validate_message_metadata,
     validate_task_event_data,
     validate_task_message,
 )
@@ -123,6 +125,14 @@ class ObjectPushSession:
     pending_object_ids: set[str]
 
 
+@dataclass
+class MessageRecord:
+    """Retain metadata after releasing the pending Message reference."""
+
+    metadata: Metadata
+    message: Message | None
+
+
 class InMemoryCoreState(
     CoreState
 ):  # pylint: disable=R0904,too-many-instance-attributes
@@ -130,6 +140,9 @@ class InMemoryCoreState(
 
     def __init__(self, object_store: ObjectStore) -> None:
         self._object_store = object_store
+        self.message_store: dict[str, MessageRecord] = {}
+        self.pending_message_ids_by_dst: dict[int, set[str]] = {}
+        self.lock_message_store = Lock()
         self.fab_store: dict[str, Fab] = {}
         self.lock_fab_store = Lock()
         self.federation_app_store: dict[tuple[str, str], FederationAppRecord] = {}
@@ -179,7 +192,39 @@ class InMemoryCoreState(
 
     def store_messages(self, messages: Sequence[Message]) -> list[bool]:
         """Store one or more Messages."""
-        raise NotImplementedError
+        results = []
+        with self.lock_message_store:
+            for message in messages:
+                # Validate metadata before handling duplicate Message IDs.
+                metadata = message.metadata
+                errors = validate_message_metadata(metadata)
+                if errors:
+                    log(ERROR, errors)
+                    results.append(False)
+                    continue
+
+                # Accept duplicates without changing their delivery state.
+                if metadata.message_id in self.message_store:
+                    results.append(True)
+                    continue
+
+                # Reject correlation references to unknown Messages.
+                if metadata.reply_to_message_id and (
+                    metadata.reply_to_message_id not in self.message_store
+                ):
+                    continue
+
+                # flwr-simulation expects complete Messages stored without copying.
+                self.message_store[metadata.message_id] = MessageRecord(
+                    metadata=metadata, message=message
+                )
+
+                # Index pending delivery under the Message's destination.
+                self.pending_message_ids_by_dst.setdefault(
+                    metadata.dst_node_id, set()
+                ).add(metadata.message_id)
+                results.append(True)
+        return results
 
     def get_messages(
         self,
@@ -190,7 +235,46 @@ class InMemoryCoreState(
         limit: int | None = None,
     ) -> list[Message]:
         """Get pending Messages for the provided destination node ID."""
-        raise NotImplementedError
+        # Reject invalid limits.
+        if limit is not None and limit <= 0:
+            raise ValueError("`limit` must be greater than zero")
+
+        current = now().timestamp()
+        messages = []
+        with self.lock_message_store:
+            # Snapshot this inbox's pending IDs so expiration can remove entries.
+            pending_ids = self.pending_message_ids_by_dst.get(dst_node_id, set())
+            for message_id in pending_ids.copy():
+                # Narrow the destination inbox to the optional run.
+                record = self.message_store[message_id]
+                message = cast(Message, record.message)  # Only pending are indexed
+                metadata = record.metadata
+                if run_id is not None and metadata.run_id != run_id:
+                    continue
+
+                # Release our reference without mutating Messages used by simulation.
+                if metadata.created_at + metadata.ttl <= current:
+                    self.object_store.delete(metadata.message_id)
+                    record.message = None
+                    pending_ids.remove(message_id)
+                    continue
+
+                # Apply reply-to filtering.
+                if reply_to_message_ids is not None:
+                    if metadata.reply_to_message_id not in reply_to_message_ids:
+                        continue
+
+                messages.append(message)
+
+            # Drop empty inboxes after expiration cleanup.
+            if not pending_ids:
+                self.pending_message_ids_by_dst.pop(dst_node_id, None)
+
+        # Apply a stable order before limiting the live results.
+        messages.sort(
+            key=lambda msg: (msg.metadata.created_at, msg.metadata.message_id)
+        )
+        return messages[:limit]
 
     def acknowledge_messages(self, message_ids: Collection[str]) -> None:
         """Acknowledge Messages based on the provided Message IDs."""
