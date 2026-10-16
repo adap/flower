@@ -287,7 +287,25 @@ class SqlCoreState(CoreState, SqlMixin):  # pylint: disable=R0904
 
     def acknowledge_messages(self, message_ids: Collection[str]) -> None:
         """Acknowledge Messages based on the provided Message IDs."""
-        raise NotImplementedError
+        # Empty acknowledgments leave delivery state and objects untouched.
+        if not message_ids:
+            return
+
+        # Close only pending deliveries, preserving prior terminal timestamps.
+        stmt = (
+            update(MessageModel)
+            .where(
+                MessageModel.message_id.in_(message_ids),
+                MessageModel.cleared.is_(False),
+            )
+            .values(cleared=True, acknowledged_at=now())
+            .returning(MessageModel.message_id)
+        )
+        with self.session() as session:
+            # Release body roots while retaining metadata for future correlation.
+            acknowledged_ids = session.scalars(stmt).all()
+            for message_id in acknowledged_ids:
+                self.object_store.delete(message_id)
 
     def cancel_messages(
         self,
@@ -296,7 +314,24 @@ class SqlCoreState(CoreState, SqlMixin):  # pylint: disable=R0904
         run_id: int | None = None,
     ) -> None:
         """Cancel pending Messages based on the specified filters."""
-        raise NotImplementedError
+        # Require an explicit scope to prevent accidental cancellation of all inboxes.
+        if message_ids is None and run_id is None:
+            raise ValueError("Either `message_ids` or `run_id` must be supplied")
+
+        # Intersect all supplied filters and leave prior terminal outcomes unchanged.
+        stmt = update(MessageModel).where(MessageModel.cleared.is_(False))
+        if message_ids is not None:
+            stmt = stmt.where(MessageModel.message_id.in_(message_ids))
+        if run_id is not None:
+            stmt = stmt.where(MessageModel.run_id == run_id)
+        stmt = stmt.values(cleared=True, cancelled_at=now()).returning(
+            MessageModel.message_id
+        )
+        with self.session() as session:
+            # Release body roots while retaining metadata for future correlation.
+            cancelled_ids = session.scalars(stmt).all()
+            for message_id in cancelled_ids:
+                self.object_store.delete(message_id)
 
     def start_session(self, run_id: int) -> str:
         """Start a run-scoped object push session."""

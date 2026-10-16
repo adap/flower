@@ -254,9 +254,7 @@ class InMemoryCoreState(
 
                 # Release our reference without mutating Messages used by simulation.
                 if metadata.created_at + metadata.ttl <= current:
-                    self.object_store.delete(metadata.message_id)
-                    record.message = None
-                    pending_ids.remove(message_id)
+                    self._clear_message_locked(message_id)
                     continue
 
                 # Apply reply-to filtering.
@@ -266,10 +264,6 @@ class InMemoryCoreState(
 
                 messages.append(message)
 
-            # Drop empty inboxes after expiration cleanup.
-            if not pending_ids:
-                self.pending_message_ids_by_dst.pop(dst_node_id, None)
-
         # Apply a stable order before limiting the live results.
         messages.sort(
             key=lambda msg: (msg.metadata.created_at, msg.metadata.message_id)
@@ -278,7 +272,10 @@ class InMemoryCoreState(
 
     def acknowledge_messages(self, message_ids: Collection[str]) -> None:
         """Acknowledge Messages based on the provided Message IDs."""
-        raise NotImplementedError
+        # Release each pending delivery without mutating Messages held by callers.
+        with self.lock_message_store:
+            for message_id in message_ids:
+                self._clear_message_locked(message_id)
 
     def cancel_messages(
         self,
@@ -287,7 +284,46 @@ class InMemoryCoreState(
         run_id: int | None = None,
     ) -> None:
         """Cancel pending Messages based on the specified filters."""
-        raise NotImplementedError
+        # Require an explicit scope to prevent accidental cancellation of all inboxes.
+        if message_ids is None and run_id is None:
+            raise ValueError("Either `message_ids` or `run_id` must be supplied")
+
+        with self.lock_message_store:
+            if message_ids is not None:
+                candidates = message_ids
+            else:
+                # Snapshot pending IDs when cancelling across destination inboxes.
+                candidates = [
+                    message_id
+                    for pending_ids in self.pending_message_ids_by_dst.values()
+                    for message_id in pending_ids
+                ]
+
+            # Intersect the ID and run filters before releasing matching Messages.
+            for message_id in candidates:
+                record = self.message_store.get(message_id)
+                if record is not None and (
+                    run_id is None or record.metadata.run_id == run_id
+                ):
+                    self._clear_message_locked(message_id)
+
+    def _clear_message_locked(self, message_id: str) -> None:
+        """End pending delivery while holding the message-store lock."""
+        # Unknown and already cleared Messages have no further side effects.
+        record = self.message_store.get(message_id)
+        if record is None or record.message is None:
+            return
+
+        # Retain metadata without mutating the Message used by simulation.
+        self.object_store.delete(message_id)
+        record.message = None
+
+        # Remove the delivery from its destination index and drop empty inboxes.
+        dst_node_id = record.metadata.dst_node_id
+        pending_ids = self.pending_message_ids_by_dst[dst_node_id]
+        pending_ids.remove(message_id)
+        if not pending_ids:
+            del self.pending_message_ids_by_dst[dst_node_id]
 
     def start_session(self, run_id: int) -> str:
         """Start a run-scoped object push session."""
