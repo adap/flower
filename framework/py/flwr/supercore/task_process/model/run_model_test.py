@@ -82,7 +82,7 @@ def test_run_model_once_cleans_up_fresh_task_state(
     monkeypatch.setattr(run_model_module, "event", telemetry)
     monkeypatch.setattr(run_model_module, "_register_resident_signal_handlers", Mock())
     monkeypatch.setattr(run_model_module.threading, "Timer", timer_cls)
-    flush = Mock(side_effect=lambda: client.close.assert_called_once_with())
+    flush = Mock(side_effect=client.close.assert_called_once_with)
     monkeypatch.setattr(run_model_module, "flush_traces", flush)
 
     assert (
