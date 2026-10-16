@@ -18,6 +18,8 @@
 
 from logging import DEBUG, ERROR
 
+from sqlalchemy.exc import IntegrityError
+
 from flwr.common.constant import Status
 from flwr.common.serde import message_from_proto, message_to_proto
 from flwr.proto.log_pb2 import (  # pylint: disable=E0611
@@ -93,7 +95,14 @@ def put_compacted_context(
             ApiErrorCode.RUNTIME_INVALID_COMPACTED_CONTEXT_REQUEST,
             "Compacted context series does not match the authenticated task.",
         )
-    state.store_compacted_context(series_id, context.through_event_id, context.text)
+    try:
+        state.store_compacted_context(series_id, context.through_event_id, context.text)
+    except (ValueError, IntegrityError) as exc:
+        raise FlowerError(
+            ApiErrorCode.RUNTIME_COMPACTED_CONTEXT_ALREADY_EXISTS,
+            f"Compacted context already exists for series {series_id} "
+            f"and event {context.through_event_id}.",
+        ) from exc
     return PutCompactedContextResponse()
 
 
