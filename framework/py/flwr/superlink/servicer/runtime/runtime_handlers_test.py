@@ -43,6 +43,7 @@ from flwr.proto.message_pb2 import (  # pylint: disable=E0611
     PushObjectRequest,
 )
 from flwr.proto.node_pb2 import Node, NodeInfo  # pylint: disable=E0611
+from flwr.proto.runseries_pb2 import CompactedContext  # pylint: disable=E0611
 from flwr.proto.runtime_pb2 import (  # pylint: disable=E0611
     AcquireTaskRequest,
     CreateTaskRequest,
@@ -226,7 +227,7 @@ def test_put_compacted_context_uses_authenticated_series() -> None:
     state = Mock(spec=LinkState)
     state.get_run_info.return_value = [Mock(series_id=456)]
     request = PutCompactedContextRequest(
-        context={"through_event_id": 9, "text": "Summary"}
+        context=CompactedContext(through_event_id=9, text="Summary")
     )
 
     runtime_handlers.put_compacted_context(request, state, Task(run_id=123))

@@ -30,6 +30,7 @@ from flwr.proto.message_pb2 import (  # pylint:disable=E0611
     PullObjectResponse,
     PushObjectRequest,
 )
+from flwr.proto.runseries_pb2 import CompactedContext  # pylint:disable=E0611
 from flwr.proto.runtime_pb2 import (  # pylint:disable=E0611
     GetCompactedContextsRequest,
     GetConnectorRequest,
@@ -82,7 +83,7 @@ class TestSuperNodeRuntimeHandlers(unittest.TestCase):
         self.state.get_run.return_value = Run.create_empty(run_id=123)
         self.state.get_run.return_value.series_id = 456
         request = PutCompactedContextRequest(
-            context={"through_event_id": 9, "text": "Summary"}
+            context=CompactedContext(through_event_id=9, text="Summary")
         )
 
         runtime_handlers.put_compacted_context(request, self.state, Task(run_id=123))

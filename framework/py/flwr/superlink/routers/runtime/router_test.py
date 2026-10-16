@@ -25,6 +25,7 @@ from google.protobuf.message import Message
 from httpx import Response
 from pytest import MonkeyPatch
 
+from flwr.proto.runseries_pb2 import CompactedContext  # pylint: disable=E0611
 from flwr.proto.runtime_pb2 import (  # pylint: disable=E0611
     AcquireTaskRequest,
     GetCompactedContextsRequest,
@@ -236,7 +237,7 @@ def test_put_compacted_context_delegates_with_authenticated_task(
     task = Task(task_id=123)
     client = TestClient(_create_app(state, task=task))
     request = PutCompactedContextRequest(
-        context={"through_event_id": 9, "text": "Summary"}
+        context=CompactedContext(through_event_id=9, text="Summary")
     )
     handler = Mock(return_value=PutCompactedContextResponse())
     monkeypatch.setattr(runtime_handlers, "put_compacted_context", handler)
