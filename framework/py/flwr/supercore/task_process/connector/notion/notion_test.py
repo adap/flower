@@ -105,8 +105,8 @@ def test_fallback_does_not_retry_failed_tool() -> None:
     assert "private-token" not in "".join(traceback.format_exception(error.value))
 
 
-def test_oauth_resource_exchange() -> None:
-    """Bind Notion's MCP authorization and PKCE code exchange to its resource."""
+def test_oauth_resource_exchange_and_refresh() -> None:
+    """Bind Notion's authorization, code exchange, and refresh to its resource."""
     flow = OAuthFlow(
         PROVIDER,
         client_id="client",
@@ -134,7 +134,13 @@ def test_oauth_resource_exchange() -> None:
             redirect_uri="https://example.com/callback",
             pkce_verifier="verifier",
         )
-    assert post.call_args.args == ("https://mcp.notion.com/token",)
-    assert post.call_args.kwargs["data"]["resource"] == "https://mcp.notion.com/mcp"
-    assert post.call_args.kwargs["data"]["code_verifier"] == "verifier"
+        flow.refresh_credentials(
+            {**credentials, "refresh_token": "refresh", "expires_at": 0}
+        )
+    exchange, refresh = post.call_args_list
+    for request in (exchange, refresh):
+        assert request.args == ("https://mcp.notion.com/token",)
+        assert request.kwargs["data"]["resource"] == "https://mcp.notion.com/mcp"
+    assert exchange.kwargs["data"]["code_verifier"] == "verifier"
+    assert refresh.kwargs["data"]["grant_type"] == "refresh_token"
     assert credentials["access_token"] == "token"

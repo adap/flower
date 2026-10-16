@@ -100,7 +100,6 @@ class OAuthFlow:
             raise self._error("exchange failed")
         redirect_uri = self.resolve_redirect_uri(redirect_uri)
         data = {
-            **self._oauth.token_params,
             "code": code,
             "grant_type": "authorization_code",
             "redirect_uri": redirect_uri,
@@ -152,6 +151,7 @@ class OAuthFlow:
 
     def _request_token(self, data: dict[str, str], *, failure: str) -> JSONObject:
         """Send a token request using the service's OAuth client configuration."""
+        data = {**self._oauth.token_params, **data}
         auth = None
         if self._oauth.token_auth_method == "client_secret_basic":
             auth = (self._client_id, self._client_secret)
