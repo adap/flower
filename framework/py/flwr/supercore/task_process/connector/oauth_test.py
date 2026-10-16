@@ -18,7 +18,10 @@ from unittest.mock import Mock, patch
 
 import pytest
 
+from flwr.supercore.typing import JSONObject
+
 from .definition import ProviderDefinition
+from .github.definition import PROVIDER as GITHUB_PROVIDER
 from .notion.definition import PROVIDER as NOTION_PROVIDER
 from .oauth import OAuthFlow
 from .slack.definition import PROVIDER as SLACK_PROVIDER
@@ -61,26 +64,56 @@ def test_exchange_records_absolute_expiry() -> None:
 
 
 @pytest.mark.parametrize(
-    "provider", [NOTION_PROVIDER, SLACK_PROVIDER], ids=["notion", "slack"]
+    ("provider", "token_type"),
+    [
+        (GITHUB_PROVIDER, "bearer"),
+        (NOTION_PROVIDER, "bearer"),
+        (SLACK_PROVIDER, "user"),
+    ],
+    ids=["github", "notion", "slack"],
 )
 def test_refresh_preserves_replacement_and_omitted_refresh_tokens(
     provider: ProviderDefinition,
+    token_type: str,
 ) -> None:
     """Keep the replacement token when the following response omits one."""
     flow = _flow(provider)
     response = Mock(status_code=200)
     response.json.side_effect = [
-        {"ok": True, "access_token": "first-token", "refresh_token": "rotated-token"},
-        {"ok": True, "access_token": "second-token"},
+        {
+            "ok": True,
+            "access_token": "first-token",
+            "refresh_token": "rotated-token",
+            "token_type": token_type,
+            "expires_in": 3600,
+        },
+        {"ok": True, "access_token": "second-token", "token_type": token_type},
     ]
-    with patch(
-        "flwr.supercore.task_process.connector.oauth.requests.post",
-        return_value=response,
+    with (
+        patch(
+            "flwr.supercore.task_process.connector.oauth.time", return_value=1000
+        ) as clock,
+        patch(
+            "flwr.supercore.task_process.connector.oauth.requests.post",
+            return_value=response,
+        ),
     ):
-        credentials = flow.refresh_credentials({"refresh_token": "original-token"})
+        credentials = flow.refresh_credentials(
+            {"refresh_token": "original-token", "expires_at": 0}
+        )
+        clock.return_value = 4540
         credentials = flow.refresh_credentials(credentials)
 
     assert credentials == {
         "access_token": "second-token",
         "refresh_token": "rotated-token",
+        "token_type": token_type,
     }
+
+
+def test_credentials_without_expiry_are_reused() -> None:
+    """Do not refresh tokens whose provider does not report an expiry."""
+    credentials: JSONObject = {"access_token": "token", "refresh_token": "refresh"}
+    with patch("flwr.supercore.task_process.connector.oauth.requests.post") as post:
+        assert _flow().refresh_credentials(credentials) == credentials
+    post.assert_not_called()

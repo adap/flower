@@ -284,7 +284,10 @@ class TestGetConnector(unittest.TestCase):
         self.connector = Mock(
             connector_id=42,
             connector_ref="example",
-            credentials_json='{"access_token":"old-token","refresh_token":"refresh-secret"}',
+            credentials_json=(
+                '{"access_token":"old-token","refresh_token":"refresh-secret",'
+                '"expires_at":0}'
+            ),
             config_json='{"workspace":"primary"}',
         )
         self.state.get_connector_by_id.return_value = self.connector

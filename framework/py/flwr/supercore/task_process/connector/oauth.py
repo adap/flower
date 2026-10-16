@@ -120,15 +120,14 @@ class OAuthFlow:
 
     @staticmethod
     def credentials_need_refresh(credentials: JSONObject) -> bool:
-        """Refresh tokens with unknown expiry or within 60 seconds of expiry."""
+        """Refresh only when the known expiry is within 60 seconds."""
         if credentials.get("refresh_token") is None:
             return False
         expires_at = credentials.get("expires_at")
-        return not (
-            credentials.get("access_token")
-            and isinstance(expires_at, (int, float))
+        return (
+            isinstance(expires_at, (int, float))
             and not isinstance(expires_at, bool)
-            and expires_at > time() + 60
+            and expires_at <= time() + 60
         )
 
     def refresh_credentials(self, credentials: JSONObject) -> JSONObject:
