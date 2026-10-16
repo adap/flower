@@ -15,8 +15,7 @@
 """Utility functions for CoreState."""
 
 
-from datetime import datetime
-from math import isfinite
+from datetime import UTC, datetime
 from os import urandom
 
 from flwr.app import Context, Message
@@ -84,13 +83,14 @@ def validate_message_metadata(metadata: Metadata) -> list[str]:
     errors = []
     if not metadata.message_id:
         errors.append("empty `metadata.message_id`")
-    if (
-        not isfinite(metadata.created_at)
-        or metadata.created_at < _MIN_VALID_MESSAGE_CREATED_AT
-    ):
+    if metadata.created_at < _MIN_VALID_MESSAGE_CREATED_AT:
         errors.append("`metadata.created_at` must be a valid Unix timestamp")
-    if not isfinite(metadata.ttl) or metadata.ttl <= 0:
-        errors.append("`metadata.ttl` must be finite and higher than zero")
+    if metadata.ttl <= 0:
+        errors.append("`metadata.ttl` must be higher than zero")
+    try:
+        datetime.fromtimestamp(metadata.created_at + metadata.ttl, tz=UTC)
+    except (OverflowError, ValueError, OSError):
+        errors.append("Message expiration is outside the supported timestamp range")
     if metadata.created_at + metadata.ttl <= now().timestamp():
         errors.append("Message TTL has expired")
     if not metadata.message_type:

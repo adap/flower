@@ -325,14 +325,17 @@ class SqlCoreState(CoreState, SqlMixin):  # pylint: disable=R0904
             raise ValueError("Either `message_ids` or `run_id` must be supplied")
 
         # Intersect all supplied filters and leave prior terminal outcomes unchanged.
+        current = now()
         stmt = update(MessageModel).where(MessageModel.cleared.is_(False))
         if message_ids is not None:
             stmt = stmt.where(MessageModel.message_id.in_(message_ids))
         if run_id is not None:
             stmt = stmt.where(MessageModel.run_id == run_id)
-        stmt = stmt.values(cleared=True, cancelled_at=now()).returning(
-            MessageModel.message_id
-        )
+        # Expired deliveries are cleared without relabelling them as cancelled.
+        stmt = stmt.values(
+            cleared=True,
+            cancelled_at=case((MessageModel.expires_at > current, current)),
+        ).returning(MessageModel.message_id)
         with self.session() as session:
             # Release body roots while retaining metadata for future correlation.
             cancelled_ids = session.scalars(stmt).all()
