@@ -38,6 +38,7 @@ _UNARY_UNARY_PATHS = (
     "push-task-message",
     "push-task-events",
     "get-run-series-events",
+    "get-compacted-contexts",
     "pull-task-message",
     "record-task-usage",
     "get-connector",
