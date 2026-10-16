@@ -768,6 +768,13 @@ class InMemoryCoreState(
     ) -> None:
         """Store a new summary."""
         with self.lock_compacted_context_store:
+            if any(
+                context.series_id == series_id
+                and context.through_event_id == through_event_id
+                for context in self.compacted_context_store.values()
+            ):
+                raise ValueError("Compacted context already exists for this event")
+
             context = CompactedContext(
                 id=self._next_compacted_context_id,
                 series_id=series_id,

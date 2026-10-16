@@ -23,6 +23,7 @@ from typing import Any, cast
 from unittest.mock import call, patch
 
 from parameterized import parameterized
+from sqlalchemy.exc import IntegrityError
 
 from flwr.app import Context, RecordDict
 from flwr.common.constant import (
@@ -325,8 +326,10 @@ class StateTest(unittest.TestCase):  # pylint: disable=R0904
         """Store summaries at distinct event boundaries in a series."""
         state = self.state_factory()
         state.store_compacted_context(42, 2**63, "First")
+        with self.assertRaises((ValueError, IntegrityError)):
+            state.store_compacted_context(42, 2**63, "Duplicate")
         state.store_compacted_context(42, 2**63 + 100, "Second")
-        state.store_compacted_context(43, 10, "Other")
+        state.store_compacted_context(43, 2**63, "Other")
 
         second, first = state.get_compacted_contexts(42, limit=2)
         (other,) = state.get_compacted_contexts(43)
