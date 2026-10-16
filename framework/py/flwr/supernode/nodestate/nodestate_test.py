@@ -145,13 +145,13 @@ class StateTest(CoreStateTest):  # pylint: disable=R0904
         self.state.store_message(msg)
 
         # Basic retrieval with no filters
-        retrieved_msg = self.state.get_messages()[0]
+        retrieved_msg = self.state.get_messages_legacy()[0]
 
         self.assertIn("test_msg", retrieved_msg.metadata.message_id)
         self.assertEqual(retrieved_msg, msg)
 
         # Ensure message won't be retrieved again
-        result = self.state.get_messages()
+        result = self.state.get_messages_legacy()
         self.assertEqual(len(result), 0)
 
     def test_store_message_and_object_tree(self) -> None:
@@ -169,7 +169,7 @@ class StateTest(CoreStateTest):  # pylint: disable=R0904
         self.assertTrue(stored)
         self.assertIn(msg.metadata.message_id, missing_objects)
         self.assertTrue(msg.metadata.message_id in self.state.object_store)
-        self.assertEqual(self.state.get_messages()[0], msg)
+        self.assertEqual(self.state.get_messages_legacy()[0], msg)
 
     def test_store_message_duplicate_same_message_is_idempotent(self) -> None:
         """Test storing a duplicate message returns its message ID."""
@@ -179,7 +179,7 @@ class StateTest(CoreStateTest):  # pylint: disable=R0904
         # Execute
         first_msg_id = self.state.store_message(msg)
         second_msg_id = self.state.store_message(msg)
-        messages = self.state.get_messages()
+        messages = self.state.get_messages_legacy()
 
         # Assert
         self.assertEqual(first_msg_id, "test_msg")
@@ -211,7 +211,7 @@ class StateTest(CoreStateTest):  # pylint: disable=R0904
         self.state.store_message(make_dummy_message(3, True, "msg4"))
 
         # Execute
-        result = self.state.get_messages(**filters)
+        result = self.state.get_messages_legacy(**filters)
         result_ids = {msg.metadata.message_id for msg in result}
 
         # Assert
@@ -233,7 +233,7 @@ class StateTest(CoreStateTest):  # pylint: disable=R0904
         self.state.delete_messages(message_ids=["msg1"])
 
         # Assert: msg1 should be deleted, msg2 should remain
-        msgs = self.state.get_messages()
+        msgs = self.state.get_messages_legacy()
         msg_ids = {msg.metadata.message_id for msg in msgs}
         self.assertNotIn("msg1", msg_ids)
         self.assertIn("msg2", msg_ids)
@@ -246,7 +246,7 @@ class StateTest(CoreStateTest):  # pylint: disable=R0904
             {"msg1"}
         )
 
-        self.assertEqual(self.state.get_messages(), [])
+        self.assertEqual(self.state.get_messages_legacy(), [])
 
     def test_get_error_reply_when_running_task_claim_expires(self) -> None:
         """Test that error replies are created when running task claims expire."""
@@ -259,7 +259,7 @@ class StateTest(CoreStateTest):  # pylint: disable=R0904
         # Prepare: store and retrieve a message for the run
         msg = make_dummy_message(run_id=run_id)
         self.state.store_message(msg)
-        assert self.state.get_messages(run_ids=[run_id])
+        assert self.state.get_messages_legacy(run_ids=[run_id])
         self.state.record_message_processing_start(msg.metadata.message_id)
 
         # Execute: retrieve
@@ -268,7 +268,7 @@ class StateTest(CoreStateTest):  # pylint: disable=R0904
             mock_datetime.now.return_value = created_at + timedelta(seconds=1e5)
 
             # Retrieve replies
-            replies = self.state.get_messages(is_reply=True)
+            replies = self.state.get_messages_legacy(is_reply=True)
 
         # Assert: error replies should be created for the message
         self.assertEqual(len(replies), 1)
@@ -288,12 +288,12 @@ class StateTest(CoreStateTest):  # pylint: disable=R0904
         assert self.state.activate_task(task_id)
         msg = make_dummy_message(run_id=run_id)
         self.state.store_message(msg)
-        assert self.state.get_messages(run_ids=[run_id], is_reply=False) == [msg]
+        assert self.state.get_messages_legacy(run_ids=[run_id], is_reply=False) == [msg]
         self.state.record_message_processing_start(msg.metadata.message_id)
 
         assert self.state.finish_task(task_id, SubStatus.FAILED, "AgentApp crashed")
 
-        replies = self.state.get_messages(is_reply=True)
+        replies = self.state.get_messages_legacy(is_reply=True)
         self.assertEqual(len(replies), 1)
         self.assertEqual(
             replies[0].metadata.reply_to_message_id, msg.metadata.message_id
@@ -310,14 +310,14 @@ class StateTest(CoreStateTest):  # pylint: disable=R0904
         assert self.state.activate_task(task_id)
         msg = make_dummy_message(run_id=run_id)
         self.state.store_message(msg)
-        assert self.state.get_messages(run_ids=[run_id], is_reply=False) == [msg]
+        assert self.state.get_messages_legacy(run_ids=[run_id], is_reply=False) == [msg]
         reply = Message(RecordDict(), reply_to=msg)
         reply.metadata.__dict__["_message_id"] = reply.object_id
         self.state.store_message(reply)
 
         assert self.state.finish_task(task_id, SubStatus.FAILED, "AgentApp crashed")
 
-        self.assertEqual(self.state.get_messages(is_reply=True), [reply])
+        self.assertEqual(self.state.get_messages_legacy(is_reply=True), [reply])
 
     def test_expired_agent_task_creates_error_reply(self) -> None:
         """An AgentApp that exits without reporting failure should still reply."""
@@ -329,12 +329,12 @@ class StateTest(CoreStateTest):  # pylint: disable=R0904
         assert self.state.activate_task(task_id)
         msg = make_dummy_message(run_id=run_id)
         self.state.store_message(msg)
-        assert self.state.get_messages(run_ids=[run_id], is_reply=False) == [msg]
+        assert self.state.get_messages_legacy(run_ids=[run_id], is_reply=False) == [msg]
         self.state.record_message_processing_start(msg.metadata.message_id)
 
         with patch("datetime.datetime") as mock_datetime:
             mock_datetime.now.return_value = created_at + timedelta(seconds=1e5)
-            replies = self.state.get_messages(is_reply=True)
+            replies = self.state.get_messages_legacy(is_reply=True)
 
         self.assertEqual(len(replies), 1)
         self.assertEqual(

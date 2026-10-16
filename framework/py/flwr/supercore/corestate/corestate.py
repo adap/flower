@@ -28,7 +28,10 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     StartRunRequest,
 )
 from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
-from flwr.proto.runseries_pb2 import RunSeries  # pylint: disable=E0611
+from flwr.proto.runseries_pb2 import (  # pylint: disable=E0611
+    CompactedContext,
+    RunSeries,
+)
 from flwr.proto.task_pb2 import Task, TaskEvent, TaskUsage  # pylint: disable=E0611
 from flwr.supercore.fab import Fab
 from flwr.supercore.inflatable.inflatable_object import (
@@ -575,6 +578,12 @@ class CoreState(ABC):  # pylint: disable=R0904
         Context | None
             The shared RunSeries context, or `None` if no context is stored.
         """
+
+    @abstractmethod
+    def get_compacted_contexts(
+        self, series_id: int, limit: int = 1, before_context_id: int | None = None
+    ) -> Sequence[CompactedContext]:
+        """Return a series's summaries newest first, before an optional ID."""
 
     @abstractmethod
     def set_run_series_context(self, series_id: int, context: Context) -> None:
