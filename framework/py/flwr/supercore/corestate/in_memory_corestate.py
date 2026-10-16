@@ -217,6 +217,7 @@ class InMemoryCoreState(
                 if metadata.reply_to_message_id and (
                     metadata.reply_to_message_id not in self.message_store
                 ):
+                    results.append(False)
                     continue
 
                 # flwr-simulation expects complete Messages stored without copying.
