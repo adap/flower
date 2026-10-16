@@ -41,6 +41,8 @@ from flwr.proto.message_pb2 import (  # pylint: disable=E0611
 from flwr.proto.runtime_pb2 import (  # pylint: disable=E0611
     AcquireTaskRequest,
     AcquireTaskResponse,
+    GetCompactedContextsRequest,
+    GetCompactedContextsResponse,
     GetConnectorRequest,
     GetConnectorResponse,
     GetNodesRequest,
@@ -167,7 +169,7 @@ def pull_messages(
     run_id = task.run_id
 
     # Retrieve message for this run
-    messages = state.get_messages(run_ids=[run_id], is_reply=False, limit=1)
+    messages = state.get_messages_legacy(run_ids=[run_id], is_reply=False, limit=1)
     if not messages:
         return PullAppMessagesResponse()
     message = messages[0]
@@ -268,6 +270,18 @@ def get_run_series_events(
         last_n=request.last_n or None,
     )
     return GetRunSeriesEventsResponse(events=events)
+
+
+def get_compacted_contexts(
+    request: GetCompactedContextsRequest, state: NodeState, task: Task
+) -> GetCompactedContextsResponse:
+    """Get summaries for the authenticated task's run series."""
+    run = state.get_run(task.run_id)
+    if run is None:
+        raise FlowerError(
+            ApiErrorCode.RUN_ID_NOT_FOUND, f"Run {task.run_id} not found."
+        )
+    return core_runtime_handlers.get_compacted_contexts(request, state, run.series_id)
 
 
 def start_automation(

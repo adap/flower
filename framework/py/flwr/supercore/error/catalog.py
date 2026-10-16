@@ -439,4 +439,9 @@ API_ERROR_MAP: Final[dict[int, ApiErrorSpec]] = {
         http_status_code=status.HTTP_403_FORBIDDEN,
         public_message="Message run ID does not match the authenticated task.",
     ),
+    ApiErrorCode.RUNTIME_INVALID_COMPACTED_CONTEXT_REQUEST: ApiErrorSpec(
+        status_code=StatusCode.INVALID_ARGUMENT,
+        http_status_code=status.HTTP_400_BAD_REQUEST,
+        public_message="Invalid compacted context request.",
+    ),
 }

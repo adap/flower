@@ -87,6 +87,7 @@ from flwr.proto.run_pb2 import GetRunRequest  # pylint: disable=E0611
 from flwr.proto.runtime_pb2 import (  # pylint: disable=E0611
     AcquireTaskRequest,
     CreateTaskRequest,
+    GetCompactedContextsRequest,
     GetConnectorRequest,
     GetNodesRequest,
     GetRunSeriesEventsRequest,
@@ -195,6 +196,7 @@ PROTOBUF_REQUEST_TYPES: dict[RouteKey, type[Message]] = {
     ("POST", "/v1/runtime/push-task-message"): PushTaskMessageRequest,
     ("POST", "/v1/runtime/push-task-events"): PushTaskEventsRequest,
     ("POST", "/v1/runtime/get-run-series-events"): GetRunSeriesEventsRequest,
+    ("POST", "/v1/runtime/get-compacted-contexts"): GetCompactedContextsRequest,
     ("POST", "/v1/runtime/pull-task-message"): PullTaskMessageRequest,
     ("POST", "/v1/runtime/record-task-usage"): RecordTaskUsageRequest,
     ("POST", "/v1/runtime/get-connector"): GetConnectorRequest,

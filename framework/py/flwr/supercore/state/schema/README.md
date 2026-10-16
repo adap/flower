@@ -25,6 +25,14 @@ erDiagram
     TIMESTAMP updated_at
   }
 
+  compacted_contexts {
+    BIGINT id PK
+    TIMESTAMP created_at
+    BIGINT series_id
+    TEXT text
+    BIGINT through_event_id
+  }
+
   connector {
     INTEGER connector_id PK
     VARCHAR config_json
@@ -68,6 +76,24 @@ erDiagram
     VARCHAR fab_hash
     BOOLEAN is_hub_app "nullable"
     TIMESTAMP updated_at
+  }
+
+  message {
+    VARCHAR message_id PK
+    VARCHAR reply_to_message_id FK "nullable"
+    TIMESTAMP acknowledged_at "nullable"
+    TIMESTAMP cancelled_at "nullable"
+    BOOLEAN cleared
+    DOUBLE created_at
+    BIGINT dst_node_id
+    BIGINT dst_task_id "nullable"
+    TIMESTAMP expires_at
+    VARCHAR group_id
+    VARCHAR message_type
+    BIGINT run_id
+    BIGINT src_node_id
+    BIGINT src_task_id "nullable"
+    DOUBLE ttl
   }
 
   message_ins {
@@ -262,6 +288,7 @@ erDiagram
     VARCHAR usage_type
   }
 
+  message ||--o{ message : reply_to_message_id
   run ||--o{ message_ins : run_id
   run ||--o{ message_res : run_id
   objects ||--o| object_children : parent_id
