@@ -92,17 +92,6 @@ def get_connector_ref(tool_name: str) -> str:
     return connector.ref if connector is not None else tool_name
 
 
-def requires_connector_refresh(connector_ref: str) -> bool:
-    """Return whether SuperLink must refresh credentials before releasing them."""
-    connector = _CONNECTORS_BY_REF.get(connector_ref)
-    return bool(
-        connector is not None
-        and connector.provider is not None
-        and connector.provider.oauth is not None
-        and connector.provider.oauth.refresh_before_use
-    )
-
-
 def get_connector_tools(connector_ref: str) -> list[JSONObject]:
     """Return model-facing tools for a connector or agent-handled automation."""
     if connector_ref == START_AUTOMATION_TOOL_NAME:

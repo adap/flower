@@ -32,19 +32,6 @@ if TYPE_CHECKING:
     from .definition import ProviderDefinition
 
 
-def credentials_need_refresh(credentials: JSONObject) -> bool:
-    """Refresh tokens with unknown expiry or within 60 seconds of expiry."""
-    if credentials.get("refresh_token") is None:
-        return False
-    expires_at = credentials.get("expires_at")
-    return not (
-        credentials.get("access_token")
-        and isinstance(expires_at, (int, float))
-        and not isinstance(expires_at, bool)
-        and expires_at > time() + 60
-    )
-
-
 class OAuthFlow:
     """Run OAuth from a provider's declarative configuration."""
 
@@ -122,16 +109,31 @@ class OAuthFlow:
                 raise self._error("exchange failed")
             data["code_verifier"] = pkce_verifier
         payload = self._request_token(data, failure="exchange failed")
-        credentials, config = self._parse_token_response(payload)
+        credentials, config = self._parse_token_response(
+            payload, token_response_path=self._oauth.token_response_path
+        )
         access_token = cast(str, credentials["access_token"])
         name = self._connection_name(payload, access_token)
         if name:
             config["display_name"] = f"{self.display_name} · {name}"
         return credentials, config
 
+    @staticmethod
+    def credentials_need_refresh(credentials: JSONObject) -> bool:
+        """Refresh tokens with unknown expiry or within 60 seconds of expiry."""
+        if credentials.get("refresh_token") is None:
+            return False
+        expires_at = credentials.get("expires_at")
+        return not (
+            credentials.get("access_token")
+            and isinstance(expires_at, (int, float))
+            and not isinstance(expires_at, bool)
+            and expires_at > time() + 60
+        )
+
     def refresh_credentials(self, credentials: JSONObject) -> JSONObject:
         """Return fresh credentials, preserving or replacing the refresh token."""
-        if not credentials_need_refresh(credentials):
+        if not self.credentials_need_refresh(credentials):
             return credentials
         refresh_token = credentials.get("refresh_token")
         if not isinstance(refresh_token, str) or not refresh_token:
@@ -223,7 +225,7 @@ class OAuthFlow:
         return " / ".join(names)
 
     def _parse_token_response(
-        self, payload: JSONObject
+        self, payload: JSONObject, *, token_response_path: tuple[str, ...] = ()
     ) -> tuple[JSONObject, JSONObject]:
         """Validate and extract credentials from a token response."""
         if (
@@ -233,7 +235,7 @@ class OAuthFlow:
         ):
             raise self._error("exchange failed")
         token_payload = payload
-        for key in self._oauth.token_response_path:
+        for key in token_response_path:
             value = token_payload.get(key)
             if not isinstance(value, dict):
                 raise self._error("returned an invalid response")

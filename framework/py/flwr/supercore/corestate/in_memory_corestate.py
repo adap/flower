@@ -584,14 +584,19 @@ class InMemoryCoreState(
             return self.connector_store.get(connector_id)
 
     def update_connector_credentials(
-        self, connector_id: int, update_credentials: Callable[[str], str]
+        self,
+        connector_id: int,
+        current_credentials: str,
+        update_credentials: Callable[[], str],
     ) -> str | None:
         """Serialize credential refresh and persist its result atomically."""
         with self.lock_connector_store:
             connector = self.connector_store.get(connector_id)
             if connector is None:
                 return None
-            credentials_json = update_credentials(connector.credentials_json)
+            if connector.credentials_json != current_credentials:
+                return connector.credentials_json
+            credentials_json = update_credentials()
             self.connector_store[connector_id] = replace(
                 connector, credentials_json=credentials_json
             )

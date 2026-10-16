@@ -732,7 +732,10 @@ class SqlCoreState(CoreState, SqlMixin):  # pylint: disable=R0904
             return _connector_from_model(row)
 
     def update_connector_credentials(
-        self, connector_id: int, update_credentials: Callable[[str], str]
+        self,
+        connector_id: int,
+        current_credentials: str,
+        update_credentials: Callable[[], str],
     ) -> str | None:
         """Serialize credential refresh and persist its result atomically."""
         with self.session() as session:
@@ -745,7 +748,9 @@ class SqlCoreState(CoreState, SqlMixin):  # pylint: disable=R0904
             )
             if credentials_json is None:
                 return None
-            credentials_json = update_credentials(credentials_json)
+            if credentials_json != current_credentials:
+                return credentials_json
+            credentials_json = update_credentials()
             session.execute(
                 update(ConnectorModel)
                 .where(ConnectorModel.connector_id == connector_id)

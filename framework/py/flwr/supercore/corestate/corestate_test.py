@@ -272,12 +272,11 @@ class StateTest(unittest.TestCase):  # pylint: disable=R0904
         )
         assert connector_id is not None
 
-        def rotate(credentials_json: str) -> str:
-            assert credentials_json == '{"token":"old"}'
+        def rotate() -> str:
             return '{"token":"new"}'
 
         assert (
-            state.update_connector_credentials(connector_id, rotate)
+            state.update_connector_credentials(connector_id, '{"token":"old"}', rotate)
             == '{"token":"new"}'
         )
         stored = state.get_connector_by_id(connector_id)
@@ -285,13 +284,22 @@ class StateTest(unittest.TestCase):  # pylint: disable=R0904
         assert stored.credentials_json == '{"token":"new"}'
         assert stored.config_json == '{"calendar":"work"}'
 
-        def fail(_credentials_json: str) -> str:
+        def fail() -> str:
             raise RuntimeError("refresh failed")
 
+        assert (
+            state.update_connector_credentials(connector_id, '{"token":"old"}', fail)
+            == '{"token":"new"}'
+        )
         with self.assertRaisesRegex(RuntimeError, "refresh failed"):
-            state.update_connector_credentials(connector_id, fail)
+            state.update_connector_credentials(connector_id, '{"token":"new"}', fail)
         assert state.get_connector_by_id(connector_id) == stored
-        assert state.update_connector_credentials(connector_id + 1, fail) is None
+        assert (
+            state.update_connector_credentials(
+                connector_id + 1, '{"token":"new"}', fail
+            )
+            is None
+        )
 
     def test_bind_and_get_run_connectors(self) -> None:
         """Run connector bindings should be deterministic and idempotent."""

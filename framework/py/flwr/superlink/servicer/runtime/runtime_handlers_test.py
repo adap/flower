@@ -290,11 +290,6 @@ class TestGetConnector(unittest.TestCase):
         self.state.get_connector_by_id.return_value = self.connector
         self.flow = Mock(spec=OAuthFlow)
         self.enterContext(
-            patch.object(
-                connector_registry, "requires_connector_refresh", return_value=True
-            )
-        )
-        self.enterContext(
             patch.dict(
                 connector_registry.OAUTH_FLOWS, {"example": self.flow}, clear=True
             )
@@ -303,8 +298,10 @@ class TestGetConnector(unittest.TestCase):
     def test_persists_rotated_refresh_tokens_for_successive_requests(self) -> None:
         """Reuse valid tokens, then refresh with the persisted replacement token."""
 
-        def update_credentials(_connector_id: int, update: Callable[[str], str]) -> str:
-            credentials_json = update(self.connector.credentials_json)
+        def update_credentials(
+            _connector_id: int, _current_credentials: str, update: Callable[[], str]
+        ) -> str:
+            credentials_json = update()
             self.connector.credentials_json = credentials_json
             return credentials_json
 

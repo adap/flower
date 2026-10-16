@@ -16,13 +16,17 @@
 
 from unittest.mock import Mock, patch
 
-from .notion.definition import PROVIDER
+import pytest
+
+from .definition import ProviderDefinition
+from .notion.definition import PROVIDER as NOTION_PROVIDER
 from .oauth import OAuthFlow
+from .slack.definition import PROVIDER as SLACK_PROVIDER
 
 
-def _flow() -> OAuthFlow:
+def _flow(provider: ProviderDefinition = NOTION_PROVIDER) -> OAuthFlow:
     return OAuthFlow(
-        PROVIDER,
+        provider,
         client_id="client",
         client_secret="secret",
         redirect_uri="https://example.com/callback",
@@ -56,13 +60,18 @@ def test_exchange_records_absolute_expiry() -> None:
     }
 
 
-def test_refresh_preserves_replacement_and_omitted_refresh_tokens() -> None:
+@pytest.mark.parametrize(
+    "provider", [NOTION_PROVIDER, SLACK_PROVIDER], ids=["notion", "slack"]
+)
+def test_refresh_preserves_replacement_and_omitted_refresh_tokens(
+    provider: ProviderDefinition,
+) -> None:
     """Keep the replacement token when the following response omits one."""
-    flow = _flow()
+    flow = _flow(provider)
     response = Mock(status_code=200)
     response.json.side_effect = [
-        {"access_token": "first-token", "refresh_token": "rotated-token"},
-        {"access_token": "second-token"},
+        {"ok": True, "access_token": "first-token", "refresh_token": "rotated-token"},
+        {"ok": True, "access_token": "second-token"},
     ]
     with patch(
         "flwr.supercore.task_process.connector.oauth.requests.post",

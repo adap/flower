@@ -282,13 +282,16 @@ class CoreState(ABC):  # pylint: disable=R0904
 
     @abstractmethod
     def update_connector_credentials(
-        self, connector_id: int, update_credentials: Callable[[str], str]
+        self,
+        connector_id: int,
+        current_credentials: str,
+        update_credentials: Callable[[], str],
     ) -> str | None:
         """Atomically read, transform, and persist one connector's credentials.
 
-        Serialize updates, including the callback, so rotating refresh tokens are
-        never used concurrently. Return the persisted JSON, or ``None`` if the
-        connector no longer exists. Callback errors leave state unchanged.
+        Invoke the callback only if stored credentials still match the caller's
+        snapshot. Otherwise return the newer stored credentials. Return ``None``
+        if the connector no longer exists. Callback errors leave state unchanged.
         """
 
     @abstractmethod
