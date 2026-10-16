@@ -19,12 +19,13 @@
 import unittest
 from contextlib import ExitStack
 from datetime import UTC, datetime, timedelta
+from operator import attrgetter
 from typing import Any, cast
 from unittest.mock import call, patch
 
 from parameterized import parameterized
 
-from flwr.app import Context, RecordDict
+from flwr.app import Context, Message, RecordDict
 from flwr.common.constant import (
     HEARTBEAT_DEFAULT_INTERVAL,
     HEARTBEAT_PATIENCE,
@@ -86,6 +87,245 @@ class StateTest(unittest.TestCase):  # pylint: disable=R0904
         )
         mock_datetime.now.side_effect = timestamps
         return stack
+
+    def assert_message_metadata_equal(
+        self, actual: list[Message], expected: list[Message]
+    ) -> None:
+        """Compare complete Message metadata without regard to order."""
+        self.assertEqual(
+            sorted((msg.metadata for msg in actual), key=attrgetter("message_id")),
+            sorted((msg.metadata for msg in expected), key=attrgetter("message_id")),
+        )
+
+    def test_store_messages_returns_acceptance_results(self) -> None:
+        """Return per-Message results and accept duplicates before body upload."""
+        # Prepare: Create valid and invalid Messages without uploading their bodies.
+        state = self.state_factory()
+        run_id = self.task_run_id(state)
+        message = create_task_message(run_id=run_id)
+        invalid = create_task_message(run_id=run_id)
+        invalid.metadata.__dict__["_message_id"] = ""
+        other = create_task_message(run_id=run_id, has_error=True)
+
+        # Execute & Assert: Empty batches succeed and the first body is unuploaded.
+        self.assertEqual(state.store_messages([]), [])
+        self.assertIsNone(state.object_store.get(message.metadata.message_id))
+
+        # Execute & Assert: Reject only the invalid Message and accept duplicates.
+        self.assertEqual(
+            state.store_messages([message, invalid, other]), [True, False, True]
+        )
+        self.assertEqual(state.store_messages([message, other]), [True, True])
+
+        # Assert: Only the two accepted Messages remain pending.
+        self.assert_message_metadata_equal(
+            state.get_messages(dst_node_id=SUPERLINK_NODE_ID),
+            [message, other],
+        )
+
+    def test_get_messages_intersects_destination_run_and_correlation(self) -> None:
+        """Destination always applies; omitted and empty filters differ."""
+        # Prepare: Store a Message whose ID will be used in reply_to_message_id.
+        state = self.state_factory()
+        run_id = self.task_run_id(state)
+        other_run_id = self.other_task_run_id(state)
+        message = create_task_message(run_id=run_id)
+        self.assertEqual(state.store_messages([message]), [True])
+        reply_to_message_id = message.metadata.message_id
+
+        # Prepare: Vary destination, run, and reply_to_message_id across Messages.
+        matching_message = create_task_message(
+            run_id=run_id, reply_to_message_id=reply_to_message_id
+        )
+        other_destination = create_task_message(
+            run_id=run_id, reply_to_message_id=reply_to_message_id
+        )
+        other_destination.metadata.dst_node_id = 123
+        other_destination.metadata.__dict__["_message_id"] = other_destination.object_id
+        other_run = create_task_message(run_id=other_run_id)
+        messages = [matching_message, other_destination, other_run]
+        self.assertEqual(state.store_messages(messages), [True] * len(messages))
+
+        # Prepare: Define results for omitted, intersecting, and empty filters.
+        cases: list[tuple[dict[str, Any], list[Message]]] = [
+            ({}, [message, matching_message, other_run]),
+            ({"run_id": run_id}, [message, matching_message]),
+            ({"reply_to_message_ids": {reply_to_message_id}}, [matching_message]),
+            (
+                {"run_id": run_id, "reply_to_message_ids": {reply_to_message_id}},
+                [matching_message],
+            ),
+            (
+                {"run_id": other_run_id, "reply_to_message_ids": {reply_to_message_id}},
+                [],
+            ),
+            ({"reply_to_message_ids": set()}, []),
+            ({"reply_to_message_ids": {"unknown"}}, []),
+        ]
+
+        # Execute & Assert: Check each filter combination within the destination inbox.
+        for filters, expected in cases:
+            with self.subTest(filters=filters):
+                self.assert_message_metadata_equal(
+                    state.get_messages(dst_node_id=SUPERLINK_NODE_ID, **filters),
+                    expected,
+                )
+
+    def test_get_messages_orders_limits_and_keeps_pending(self) -> None:
+        """Filter TTL before LIMIT and order by creation time, then Message ID."""
+        # Prepare: Create Messages with different deadlines and tied creation times.
+        state = self.state_factory()
+        run_id = self.task_run_id(state)
+        current = now()
+        expired = create_task_message(
+            run_id=run_id, created_at=current.timestamp() - 2, ttl=3
+        )
+        first = create_task_message(run_id=run_id, created_at=current.timestamp() - 1)
+        tied = [
+            create_task_message(run_id=run_id, created_at=current.timestamp()),
+            create_task_message(
+                run_id=run_id, created_at=current.timestamp(), has_error=True
+            ),
+        ]
+        tied.sort(key=lambda msg: msg.metadata.message_id)
+
+        # Prepare: Freeze time and store Messages out of retrieval order.
+        with patch("datetime.datetime") as mock_datetime:
+            mock_datetime.now.return_value = current
+            self.assertEqual(
+                state.store_messages([tied[1], expired, tied[0], first]), [True] * 4
+            )
+
+            # Execute: Advance time past the oldest Message's TTL.
+            mock_datetime.now.return_value = current + timedelta(seconds=2)
+
+            # Execute & Assert: Limited reads return the same first two live Messages.
+            for _ in range(2):
+                self.assertEqual(
+                    [
+                        msg.metadata
+                        for msg in state.get_messages(
+                            dst_node_id=SUPERLINK_NODE_ID, limit=2
+                        )
+                    ],
+                    [first.metadata, tied[0].metadata],
+                )
+
+            # Execute & Assert: An unlimited read returns all live Messages in order.
+            self.assertEqual(
+                [
+                    msg.metadata
+                    for msg in state.get_messages(dst_node_id=SUPERLINK_NODE_ID)
+                ],
+                [msg.metadata for msg in [first, *tied]],
+            )
+
+    @parameterized.expand([(0,), (-1,)])  # type: ignore
+    def test_get_messages_rejects_non_positive_limit(self, limit: int) -> None:
+        """A limit must be positive even for an empty inbox."""
+        # Prepare: Use an empty inbox with the parameterized non-positive limit.
+        state = self.state_factory()
+
+        # Execute & Assert: Reject the invalid limit with ValueError.
+        with self.assertRaises(ValueError):
+            state.get_messages(dst_node_id=SUPERLINK_NODE_ID, limit=limit)
+
+    def test_acknowledge_messages_releases_only_acknowledged_bodies(self) -> None:
+        """ACK removes selected Messages from retrieval and releases their bodies."""
+        # Prepare: Store two Messages, including their bodies.
+        state = self.state_factory()
+        run_id = self.task_run_id(state)
+        message = create_task_message(run_id=run_id)
+        message_id = message.metadata.message_id
+        other = create_task_message(run_id=run_id, has_error=True)
+        self.assertEqual(state.store_messages([message, other]), [True, True])
+        for msg in (message, other):
+            state._store_generated_message(msg)  # pylint: disable=protected-access
+
+        # Execute & Assert: An empty ACK preserves the Message's body.
+        state.acknowledge_messages([])
+        self.assertIsNotNone(state.object_store.get(message_id))
+
+        # Execute: ACK the same Message twice and include an unknown ID.
+        state.acknowledge_messages([message_id, "unknown"])
+        state.acknowledge_messages([message_id])
+
+        # Assert: Only the acknowledged body is released.
+        self.assertIsNone(state.object_store.get(message_id))
+        self.assertIsNotNone(state.object_store.get(other.metadata.message_id))
+
+        # Execute & Assert: Re-storing an acknowledged Message keeps its status.
+        self.assertEqual(state.store_messages([message]), [True])
+        self.assertEqual(
+            [msg.metadata for msg in state.get_messages(dst_node_id=SUPERLINK_NODE_ID)],
+            [other.metadata],
+        )
+
+    @parameterized.expand(  # type: ignore
+        [
+            ("ids", [0, 2], False, [1]),
+            ("run", None, True, [2]),
+            ("intersection", [0, 2], True, [1, 2]),
+            ("empty_ids", [], False, [0, 1, 2]),
+            ("empty_ids_with_run", [], True, [0, 1, 2]),
+        ]
+    )
+    def test_cancel_messages_intersects_filters_and_releases_bodies(
+        self,
+        _name: str,
+        message_indexes: list[int] | None,
+        filter_run: bool,
+        remaining_indexes: list[int],
+    ) -> None:
+        """Cancel matching pending Messages without affecting other Messages."""
+        # Prepare: Store three Messages across two runs, including their bodies.
+        state = self.state_factory()
+        run_id = self.task_run_id(state)
+        other_run_id = self.other_task_run_id(state)
+        messages = [
+            create_task_message(run_id=run_id),
+            create_task_message(run_id=run_id, has_error=True),
+            create_task_message(run_id=other_run_id),
+        ]
+        self.assertEqual(state.store_messages(messages), [True] * 3)
+        for message in messages:
+            state._store_generated_message(message)  # pylint: disable=protected-access
+
+        # Prepare: Select Message IDs and an optional run filter for this case.
+        message_ids = (
+            None
+            if message_indexes is None
+            else [messages[index].metadata.message_id for index in message_indexes]
+        )
+
+        # Execute: Repeat cancellation to verify idempotency.
+        for _ in range(2):
+            state.cancel_messages(
+                message_ids=message_ids, run_id=run_id if filter_run else None
+            )
+
+        # Execute & Assert: Re-storing Messages preserves their delivery status.
+        self.assertEqual(state.store_messages(messages), [True] * 3)
+
+        # Assert: Only unmatched Messages remain pending and retain their bodies.
+        self.assert_message_metadata_equal(
+            state.get_messages(dst_node_id=SUPERLINK_NODE_ID),
+            [messages[index] for index in remaining_indexes],
+        )
+        for index, message in enumerate(messages):
+            self.assertEqual(
+                state.object_store.get(message.metadata.message_id) is not None,
+                index in remaining_indexes,
+            )
+
+    def test_cancel_messages_requires_a_filter(self) -> None:
+        """Cancellation without an ID or run filter must fail."""
+        # Prepare: Use an empty state without cancellation filters.
+        state = self.state_factory()
+
+        # Execute & Assert: Reject unfiltered cancellation with ValueError.
+        with self.assertRaises(ValueError):
+            state.cancel_messages()
 
     def test_store_list_and_delete_apps(self) -> None:
         """Federation apps can be stored, listed, limited, and deleted."""
