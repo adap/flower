@@ -20,8 +20,8 @@ import asyncio
 import json
 import os
 import time
-from collections.abc import AsyncIterator, Iterator
-from contextlib import contextmanager
+from collections.abc import AsyncGenerator, Iterator
+from contextlib import aclosing, contextmanager
 from dataclasses import dataclass
 from logging import ERROR
 from typing import cast
@@ -83,6 +83,14 @@ class _Exchange:
 
     agent_task_id: int
     model_task_id: int
+
+
+@dataclass
+class _StreamProgress:
+    """Retain relay progress for error framing and child-task cleanup."""
+
+    complete: bool = False
+    sequence_number: int = 0
 
 
 class _ResponsesError(Exception):
@@ -300,12 +308,10 @@ async def _wait_for_response(
 
 async def _stream_response(
     state: CoreState, task: Task, model_payload: JSONObject
-) -> AsyncIterator[str]:
+) -> AsyncGenerator[str, None]:
     """Create an exchange and relay its events as Server-Sent Events."""
     with _trace_model_exchange(task):
-        cursor: int | None = None
-        complete = False
-        sequence_number = 0
+        progress = _StreamProgress()
         exchange: _Exchange | None = None
         try:
             exchange = await run_in_threadpool(
@@ -314,63 +320,21 @@ async def _stream_response(
                 task,
                 model_payload,
             )
-            started_at = time.monotonic()
-            launch_deadline = started_at + _model_task_launch_timeout()
-            response_deadline = started_at + _model_response_timeout()
             with trace_span("model.response_wait"):
-                while True:
-                    # The model task stores all stream events before its final reply.
-                    response = await run_in_threadpool(
-                        _claim_response_or_raise_for_model_task_state,
-                        state,
-                        exchange,
-                        launch_deadline,
-                        response_deadline,
-                    )
-                    events = await run_in_threadpool(
-                        state.get_task_events,
-                        task_ids=[exchange.model_task_id],
-                        after_task_event_id=cursor,
-                    )
-                    for event in events:
-                        cursor = event.id
-                        if event.event in _TERMINAL_EVENTS:
-                            if response is None:
-                                await _wait_for_terminal_reply(
-                                    state,
-                                    exchange,
-                                    launch_deadline,
-                                    response_deadline,
-                                )
-                            complete = True
-                            yield _sse_frame(event)
-                            return
-                        yield _sse_frame(event)
-                        sequence_number += 1
-
-                    if response is not None:
-                        complete = True
-                        yield _stream_error(
-                            (
-                                _response_error_message(response)
-                                if response.get("status") == "failed"
-                                else "Model stream ended before a terminal event."
-                            ),
-                            "model_stream_failed",
-                            sequence_number,
-                        )
-                        return
-
-                    await asyncio.sleep(_POLL_INTERVAL)
+                async with aclosing(
+                    _relay_model_events(state, exchange, progress)
+                ) as relay:
+                    async for frame in relay:
+                        yield frame
         except _ResponsesError as err:
-            yield _stream_error(err.message, err.code, sequence_number)
+            yield _stream_error(err.message, err.code, progress.sequence_number)
         except Exception as err:  # pylint: disable=broad-exception-caught
             log(ERROR, "Runtime Responses stream failed unexpectedly", exc_info=err)
             yield _stream_error(
-                "Internal server error.", "internal_error", sequence_number
+                "Internal server error.", "internal_error", progress.sequence_number
             )
         finally:
-            if exchange is not None and not complete:
+            if exchange is not None and not progress.complete:
                 with CancelScope(shield=True):
                     await run_in_threadpool(
                         _stop_model_task,
@@ -378,6 +342,57 @@ async def _stream_response(
                         exchange,
                         "Responses stream ended early.",
                     )
+
+
+async def _relay_model_events(
+    state: CoreState, exchange: _Exchange, progress: _StreamProgress
+) -> AsyncGenerator[str, None]:
+    """Poll one model exchange and relay its ordered SSE frames."""
+    cursor: int | None = None
+    started_at = time.monotonic()
+    launch_deadline = started_at + _model_task_launch_timeout()
+    response_deadline = started_at + _model_response_timeout()
+    while True:
+        # The model task stores all stream events before its final reply.
+        response = await run_in_threadpool(
+            _claim_response_or_raise_for_model_task_state,
+            state,
+            exchange,
+            launch_deadline,
+            response_deadline,
+        )
+        events = await run_in_threadpool(
+            state.get_task_events,
+            task_ids=[exchange.model_task_id],
+            after_task_event_id=cursor,
+        )
+        for event in events:
+            cursor = event.id
+            if event.event in _TERMINAL_EVENTS:
+                if response is None:
+                    await _wait_for_terminal_reply(
+                        state, exchange, launch_deadline, response_deadline
+                    )
+                progress.complete = True
+                yield _sse_frame(event)
+                return
+            yield _sse_frame(event)
+            progress.sequence_number += 1
+
+        if response is not None:
+            progress.complete = True
+            yield _stream_error(
+                (
+                    _response_error_message(response)
+                    if response.get("status") == "failed"
+                    else "Model stream ended before a terminal event."
+                ),
+                "model_stream_failed",
+                progress.sequence_number,
+            )
+            return
+
+        await asyncio.sleep(_POLL_INTERVAL)
 
 
 async def _wait_for_terminal_reply(
