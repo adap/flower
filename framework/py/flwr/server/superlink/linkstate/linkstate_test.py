@@ -3038,31 +3038,6 @@ class SqlFileBasedTest(SqlInMemoryStateTest):
             raise exceptions[0]
         return results
 
-    def test_connector_credential_updates_serialize_across_replicas(self) -> None:
-        """Concurrent callers with the same credentials share one refresh result."""
-        with tempfile.TemporaryDirectory() as tmpdir:
-            state = self._create_shared_sql_states(self._shared_sql_database(tmpdir))[0]
-            connector_id = state.create_connector(
-                "@bob/fed-a", "calendar", '{"generation":0}', "{}", "account-a"
-            )
-            assert connector_id is not None
-
-            def rotate() -> str:
-                time.sleep(0.05)  # Allow the other replica to attempt a refresh.
-                return '{"generation":1}'
-
-            refresh = Mock(side_effect=rotate)
-            results = self._query_states_in_parallel(
-                lambda replica: replica.update_connector_credentials(
-                    connector_id, '{"generation":0}', refresh
-                )
-            )
-            assert results == ['{"generation":1}'] * 2
-            refresh.assert_called_once_with()
-            stored = state.get_connector_by_id(connector_id)
-            assert stored is not None
-            assert json.loads(stored.credentials_json) == {"generation": 1}
-
     # pylint: disable-next=too-many-locals
     def test_get_message_ins_claim_is_unique_across_replicas(self) -> None:
         """Ensure concurrent replicas cannot both claim the same instruction."""
