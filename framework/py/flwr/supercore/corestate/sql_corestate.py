@@ -41,7 +41,7 @@ from sqlalchemy.dialects.sqlite import Insert as SQLiteInsert
 from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 from sqlalchemy.exc import IntegrityError
 
-from flwr.app import Context, Message
+from flwr.app import Context, Message, RecordDict
 from flwr.app.message import make_message
 from flwr.app.metadata import Metadata
 from flwr.common.constant import (
@@ -96,6 +96,7 @@ from flwr.supercore.state.schema.corestate_models import Fab as FabModel
 from flwr.supercore.state.schema.corestate_models import (
     FederationApp as FederationAppModel,
 )
+from flwr.supercore.state.schema.corestate_models import Message as MessageModel
 from flwr.supercore.state.schema.corestate_models import NonceStore as NonceStoreModel
 from flwr.supercore.state.schema.corestate_models import (
     ObjectPushSession as ObjectPushSessionModel,
@@ -135,6 +136,7 @@ from .utils import (
     context_to_bytes,
     generate_rand_int_from_bytes,
     timestamp_to_iso,
+    validate_message_metadata,
     validate_task_event_data,
     validate_task_message,
 )
@@ -177,7 +179,48 @@ class SqlCoreState(CoreState, SqlMixin):  # pylint: disable=R0904
 
     def store_messages(self, messages: Sequence[Message]) -> list[bool]:
         """Store one or more Messages."""
-        raise NotImplementedError
+        results = []
+        with self.session() as session:
+            for message in messages:
+                # Validate each Message before attempting storage.
+                metadata = message.metadata
+                errors = validate_message_metadata(metadata)
+                if errors:
+                    log(ERROR, errors)
+                    results.append(False)
+                    continue
+
+                # Persist metadata; ObjectStore owns the message body.
+                stmt = self.dialect_insert(MessageModel).values(
+                    message_id=metadata.message_id,
+                    run_id=metadata.run_id,
+                    src_node_id=metadata.src_node_id,
+                    dst_node_id=metadata.dst_node_id,
+                    src_task_id=metadata.src_task_id,
+                    dst_task_id=metadata.dst_task_id,
+                    reply_to_message_id=metadata.reply_to_message_id or None,
+                    group_id=metadata.group_id,
+                    created_at=metadata.created_at,
+                    ttl=metadata.ttl,
+                    message_type=metadata.message_type,
+                    expires_at=datetime.fromtimestamp(
+                        metadata.created_at + metadata.ttl, tz=UTC
+                    ),
+                )
+
+                # Preserve the delivery state of an existing Message ID.
+                stmt = stmt.on_conflict_do_nothing(
+                    index_elements=[MessageModel.message_id]
+                )
+
+                # Isolate constraint failures so the remaining batch can proceed.
+                try:
+                    with session.begin_nested():
+                        session.execute(stmt)
+                    results.append(True)
+                except IntegrityError:
+                    results.append(False)
+        return results
 
     def get_messages(
         self,
@@ -188,11 +231,87 @@ class SqlCoreState(CoreState, SqlMixin):  # pylint: disable=R0904
         limit: int | None = None,
     ) -> list[Message]:
         """Get pending Messages for the provided destination node ID."""
-        raise NotImplementedError
+        # Reject invalid limits.
+        if limit is not None and limit <= 0:
+            raise ValueError("`limit` must be greater than zero")
+
+        # Scope both expiration and retrieval to the destination and optional run.
+        current = now()
+        filters = [
+            MessageModel.dst_node_id == dst_node_id,
+            MessageModel.cleared.is_(False),
+        ]
+        if run_id is not None:
+            filters.append(MessageModel.run_id == run_id)
+        with self.session() as session:
+            # Clear expired deliveries while retaining their correlation metadata.
+            expired_ids = session.scalars(
+                update(MessageModel)
+                .where(*filters, MessageModel.expires_at <= current)
+                .values(cleared=True)
+                .returning(MessageModel.message_id)
+            ).all()
+
+            # Release expired body roots and their unreferenced descendants.
+            for message_id in expired_ids:
+                self.object_store.delete(message_id)
+
+            # Intersect live delivery candidates with any correlation filter.
+            stmt = select(MessageModel).where(
+                *filters, MessageModel.expires_at > current
+            )
+            if reply_to_message_ids is not None:
+                stmt = stmt.where(
+                    MessageModel.reply_to_message_id.in_(reply_to_message_ids)
+                )
+
+            # Apply a stable order before limiting the live results.
+            stmt = stmt.order_by(
+                MessageModel.created_at, MessageModel.message_id
+            ).limit(limit)
+
+            # Return metadata envelopes; recipients obtain bodies from ObjectStore.
+            return [
+                make_message(
+                    metadata=Metadata(
+                        message_id=row.message_id,
+                        run_id=row.run_id,
+                        src_node_id=row.src_node_id,
+                        dst_node_id=row.dst_node_id,
+                        src_task_id=row.src_task_id,
+                        dst_task_id=row.dst_task_id,
+                        reply_to_message_id=row.reply_to_message_id or "",
+                        group_id=row.group_id,
+                        created_at=row.created_at,
+                        ttl=row.ttl,
+                        message_type=row.message_type,
+                    ),
+                    content=RecordDict(),
+                )
+                for row in session.scalars(stmt)
+            ]
 
     def acknowledge_messages(self, message_ids: Collection[str]) -> None:
         """Acknowledge Messages based on the provided Message IDs."""
-        raise NotImplementedError
+        # Empty acknowledgments leave delivery state and objects untouched.
+        if not message_ids:
+            return
+
+        # Close only pending deliveries, preserving prior terminal timestamps.
+        stmt = (
+            update(MessageModel)
+            .where(
+                MessageModel.message_id.in_(message_ids),
+                MessageModel.cleared.is_(False),
+            )
+            .values(cleared=True, acknowledged_at=now())
+            .returning(MessageModel.message_id)
+        )
+        with self.session() as session:
+            # Release body roots while retaining metadata for future correlation.
+            acknowledged_ids = session.scalars(stmt).all()
+            for message_id in acknowledged_ids:
+                self.object_store.delete(message_id)
 
     def cancel_messages(
         self,
@@ -201,7 +320,27 @@ class SqlCoreState(CoreState, SqlMixin):  # pylint: disable=R0904
         run_id: int | None = None,
     ) -> None:
         """Cancel pending Messages based on the specified filters."""
-        raise NotImplementedError
+        # Require an explicit scope to prevent accidental cancellation of all inboxes.
+        if message_ids is None and run_id is None:
+            raise ValueError("Either `message_ids` or `run_id` must be supplied")
+
+        # Intersect all supplied filters and leave prior terminal outcomes unchanged.
+        current = now()
+        stmt = update(MessageModel).where(MessageModel.cleared.is_(False))
+        if message_ids is not None:
+            stmt = stmt.where(MessageModel.message_id.in_(message_ids))
+        if run_id is not None:
+            stmt = stmt.where(MessageModel.run_id == run_id)
+        # Expired deliveries are cleared without relabelling them as cancelled.
+        stmt = stmt.values(
+            cleared=True,
+            cancelled_at=case((MessageModel.expires_at > current, current)),
+        ).returning(MessageModel.message_id)
+        with self.session() as session:
+            # Release body roots while retaining metadata for future correlation.
+            cancelled_ids = session.scalars(stmt).all()
+            for message_id in cancelled_ids:
+                self.object_store.delete(message_id)
 
     def start_session(self, run_id: int) -> str:
         """Start a run-scoped object push session."""
