@@ -70,6 +70,9 @@ from flwr.supercore.constant import AUTOMATION_BATCH_LIMIT, TaskType
 from flwr.supercore.error import ApiErrorCode, FlowerError
 from flwr.supercore.object_store import NoObjectInStoreError
 from flwr.supercore.servicer.runtime import runtime_handlers as core_runtime_handlers
+from flwr.supercore.task_process.connector import registry as connector_registry
+from flwr.supercore.task_process.connector.oauth import OAuthFlow
+from flwr.supercore.utils import strict_json_dumps, strict_json_loads_object
 from flwr.superlink.servicer.control.control_handlers import process_due_automations
 from flwr.superlink.servicer.control.control_handlers import (
     start_automation as start_control_automation,
@@ -256,10 +259,35 @@ def get_connector(
     if connector is None:
         raise FlowerError(ApiErrorCode.CONNECTOR_NOT_FOUND, "Connector not found.")
 
+    credentials_json = connector.credentials_json
+    try:
+        credentials = strict_json_loads_object(credentials_json)
+        if OAuthFlow.credentials_need_refresh(credentials):
+
+            def refresh() -> str:
+                flow = connector_registry.get_oauth_flow(connector.connector_ref)
+                return strict_json_dumps(
+                    flow.refresh_credentials(credentials), compact=True
+                )
+
+            stored_credentials = state.update_connector_credentials(
+                connector.connector_id, credentials_json, refresh
+            )
+            if stored_credentials is None:
+                raise ValueError("Connector no longer exists.")
+            credentials = strict_json_loads_object(stored_credentials)
+        credentials.pop("refresh_token", None)
+        credentials_json = strict_json_dumps(credentials, compact=True)
+    except Exception:  # pylint: disable=broad-exception-caught
+        raise FlowerError(
+            ApiErrorCode.CONNECTOR_FAILURE,
+            "Connector credentials could not be refreshed.",
+        ) from None
+
     return GetConnectorResponse(
         connector_id=connector.connector_id,
         connector_ref=connector.connector_ref,
-        credentials_json=connector.credentials_json,
+        credentials_json=credentials_json,
         config_json=connector.config_json,
     )
 

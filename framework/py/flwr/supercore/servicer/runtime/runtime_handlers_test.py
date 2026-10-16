@@ -215,8 +215,10 @@ class TestRuntimeHandlers(unittest.TestCase):  # pylint: disable=R0904
                 )
                 self.assertEqual(response.task_id, 456)
 
-    def test_create_task_resolves_single_bound_oauth_connector(self) -> None:
-        """CreateTask should resolve the run-bound connector reference to its ID."""
+    def test_create_task_resolves_bound_connector_without_oauth_configuration(
+        self,
+    ) -> None:
+        """Resolve a run-bound connector without requiring an OAuth application."""
         self.state.get_run_connector_ids.return_value = [42]
         self.state.get_connector_by_id.return_value = SimpleNamespace(
             connector_ref="notion"
@@ -226,7 +228,7 @@ class TestRuntimeHandlers(unittest.TestCase):  # pylint: disable=R0904
         with patch.object(
             connector_registry,
             "OAUTH_FLOWS",
-            {"notion": Mock(connector_ref="notion")},
+            {},
         ):
             response = self._create_connector_task("notion")
 

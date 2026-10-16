@@ -534,11 +534,11 @@ class TestControlServicer(unittest.TestCase):  # pylint: disable=R0904
         self.assertEqual(start_run.call_args.kwargs["source"], "unknown")
 
     def test_start_run_validates_and_binds_oauth_connectors(self) -> None:
-        """StartRun should bind connected OAuth connector IDs."""
+        """Bind stored connectors and validate references without OAuth config."""
         connector_id = self.state.create_connector(
             federation_id=CONNECTOR_FEDERATION_ID,
             connector_ref="slack",
-            credentials_json="{}",
+            credentials_json='{"access_token":"manual-token"}',
             config_json="{}",
             created_by=self.aid,
         )
@@ -559,6 +559,7 @@ class TestControlServicer(unittest.TestCase):  # pylint: disable=R0904
         request.fab.content = b"test FAB content with connector IDs"
 
         with (
+            patch.dict(connector_registry.OAUTH_FLOWS, {}, clear=True),
             patch(
                 "flwr.superlink.servicer.control.control_handlers.get_fab_config",
                 return_value={"tool": {"flwr": {"app": {}}}},

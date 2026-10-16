@@ -193,7 +193,7 @@ def test_oauth_builds_url_and_exchanges_code(
     with pytest.raises(ValueError):
         _flow().resolve_redirect_uri("https://attacker.example/callback")
 
-    response = _response({"access_token": "attio-access"})
+    response = _response({"access_token": "attio-access", "token_type": "Bearer"})
     with (
         patch(_TOKEN_REQUEST, return_value=response) as post,
         patch(
@@ -206,8 +206,10 @@ def test_oauth_builds_url_and_exchanges_code(
             redirect_uri=_REDIRECT_URI,
             pkce_verifier="shared-pkce-verifier",
         )
+        assert _flow().refresh_credentials(credentials) == credentials
 
-    assert credentials == {"access_token": "attio-access"}
+    post.assert_called_once()
+    assert credentials == {"access_token": "attio-access", "token_type": "Bearer"}
     assert config == {"display_name": expected_name}
     assert identity.call_args.args == ("GET", "https://api.attio.com/v2/self")
     assert post.call_args.kwargs["data"] == {

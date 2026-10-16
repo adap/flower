@@ -18,7 +18,7 @@
 import hashlib
 import json
 import secrets
-from collections.abc import Collection, Sequence
+from collections.abc import Callable, Collection, Sequence
 from datetime import UTC, datetime, timedelta
 from logging import ERROR
 from typing import Any, Literal, cast
@@ -875,6 +875,33 @@ class SqlCoreState(CoreState, SqlMixin):  # pylint: disable=R0904
             if row is None:
                 return None
             return _connector_from_model(row)
+
+    def update_connector_credentials(
+        self,
+        connector_id: int,
+        current_credentials: str,
+        update_credentials: Callable[[], str],
+    ) -> str | None:
+        """Serialize credential refresh and persist its result atomically."""
+        with self.session() as session:
+            # Lock before reading, including on SQLite where FOR UPDATE is ignored.
+            credentials_json = session.scalar(
+                update(ConnectorModel)
+                .where(ConnectorModel.connector_id == connector_id)
+                .values(credentials_json=ConnectorModel.credentials_json)
+                .returning(ConnectorModel.credentials_json)
+            )
+            if credentials_json is None:
+                return None
+            if credentials_json != current_credentials:
+                return credentials_json
+            credentials_json = update_credentials()
+            session.execute(
+                update(ConnectorModel)
+                .where(ConnectorModel.connector_id == connector_id)
+                .values(credentials_json=credentials_json)
+            )
+            return credentials_json
 
     def delete_connector(self, federation_id: str, connector_id: int) -> bool:
         """Delete a federation's connector if it exists."""
