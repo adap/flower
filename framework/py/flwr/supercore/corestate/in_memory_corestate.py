@@ -19,6 +19,7 @@ import hashlib
 import secrets
 from bisect import bisect_right
 from collections.abc import Collection, Sequence
+from copy import deepcopy
 from dataclasses import dataclass, replace
 from datetime import UTC, datetime, timedelta
 from logging import ERROR
@@ -220,9 +221,9 @@ class InMemoryCoreState(
                     results.append(False)
                     continue
 
-                # flwr-simulation expects complete Messages stored without copying.
+                # Share Messages for flwr-simulation; snapshot retained metadata.
                 self.message_store[metadata.message_id] = MessageRecord(
-                    metadata=metadata, message=message
+                    metadata=deepcopy(metadata), message=message
                 )
 
                 # Index pending delivery under the Message's destination.
