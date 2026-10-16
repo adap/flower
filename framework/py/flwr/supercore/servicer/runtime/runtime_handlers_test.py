@@ -26,10 +26,12 @@ from flwr.proto.log_pb2 import (  # pylint: disable=E0611
     PushLogsRequest,
     PushLogsResponse,
 )
+from flwr.proto.runseries_pb2 import CompactedContext  # pylint: disable=E0611
 from flwr.proto.runtime_pb2 import (  # pylint: disable=E0611
     AcquireTaskRequest,
     CreateTaskRequest,
     CreateTaskResponse,
+    GetCompactedContextsRequest,
     PullTaskMessageRequest,
     PushTaskEventsRequest,
     PushTaskEventsResponse,
@@ -53,6 +55,30 @@ class TestRuntimeHandlers(unittest.TestCase):  # pylint: disable=R0904
         """Set up test fixture."""
         self.state = Mock()
         self.state.get_tasks.return_value = []
+
+    def test_get_compacted_contexts(self) -> None:
+        """Apply the default limit and reject zero."""
+        context = CompactedContext(
+            id=1, series_id=42, through_event_id=9, text="Summary"
+        )
+        self.state.get_compacted_contexts.return_value = [context]
+
+        got = runtime_handlers.get_compacted_contexts(
+            GetCompactedContextsRequest(), self.state, 42
+        )
+        self.assertEqual(list(got.contexts), [context])
+        self.state.get_compacted_contexts.assert_called_once_with(
+            42, limit=1, before_context_id=None
+        )
+
+        with self.assertRaises(FlowerError) as error:
+            runtime_handlers.get_compacted_contexts(
+                GetCompactedContextsRequest(limit=0), self.state, 42
+            )
+        self.assertEqual(
+            error.exception.code,
+            ApiErrorCode.RUNTIME_INVALID_COMPACTED_CONTEXT_REQUEST,
+        )
 
     def _create_connector_task(self, connector_ref: str) -> CreateTaskResponse:
         """Create a connector task as an authenticated AgentApp task."""
@@ -189,8 +215,10 @@ class TestRuntimeHandlers(unittest.TestCase):  # pylint: disable=R0904
                 )
                 self.assertEqual(response.task_id, 456)
 
-    def test_create_task_resolves_single_bound_oauth_connector(self) -> None:
-        """CreateTask should resolve the run-bound connector reference to its ID."""
+    def test_create_task_resolves_bound_connector_without_oauth_configuration(
+        self,
+    ) -> None:
+        """Resolve a run-bound connector without requiring an OAuth application."""
         self.state.get_run_connector_ids.return_value = [42]
         self.state.get_connector_by_id.return_value = SimpleNamespace(
             connector_ref="notion"
@@ -200,7 +228,7 @@ class TestRuntimeHandlers(unittest.TestCase):  # pylint: disable=R0904
         with patch.object(
             connector_registry,
             "OAUTH_FLOWS",
-            {"notion": Mock(connector_ref="notion")},
+            {},
         ):
             response = self._create_connector_task("notion")
 
