@@ -255,3 +255,24 @@ def test_differential_privacy_with_integer_arrays() -> None:
     add_gaussian_noise_inplace(updates2, std_dev=0.5)
     assert updates2[1][0] == 20
 
+
+def test_zero_norm_counter_only_update() -> None:
+    """Test zero norm does not cause ZeroDivisionError when only counter changes."""
+    # Zero float updates (no parameter change) and changed integer counter
+    float_array = np.array([0.0, 0.0], dtype=np.float32)
+    int_array = np.array([5], dtype=np.int64)
+    updates = [float_array, int_array]
+
+    norm = get_norm(updates)
+    assert norm == 0.0
+
+    # clip_inputs_inplace should return gracefully without ZeroDivisionError
+    clip_inputs_inplace(updates, clipping_norm=1.0)
+    assert updates[0][0] == 0.0
+    assert updates[1][0] == 5
+
+    # adaptive_clip_inputs_inplace should return False
+    clipped = adaptive_clip_inputs_inplace(updates, clipping_norm=1.0)
+    assert clipped is False
+
+
