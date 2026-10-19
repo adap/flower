@@ -29,10 +29,11 @@ covers the AMD-specific setup that keeps the two in agreement.
     ``torch.device("cuda")`` and ``torch.cuda.is_available()`` refer to the AMD GPU via
     HIP. No change to your ``ClientApp`` code is required.
 
-The steps below were validated on a single-node Instinct-class GPU. Consumer Radeon
-cards may additionally need ``HSA_OVERRIDE_GFX_VERSION`` to be set for the ML framework
--- a ROCm concern rather than a Flower one; see AMD's ROCm documentation. Multi-GPU and
-multi-node placement follow the same discovery rules described here, but are not covered
+The steps below were validated on a single-node AMD Instinct MI300X (gfx942) running
+ROCm; other Instinct-class cards behave the same way. Consumer Radeon cards may
+additionally need ``HSA_OVERRIDE_GFX_VERSION`` to be set for the ML framework -- a ROCm
+concern rather than a Flower one; see AMD's ROCm documentation. Multi-GPU and multi-node
+placement follow the same discovery rules described here, but are not covered
 separately.
 
 ***********************************
@@ -55,7 +56,13 @@ Flower in a container, pass the devices through instead:
 
 .. code-block:: shell
 
-    docker run --device=/dev/kfd --device=/dev/dri --group-add video ...
+    docker run --device=/dev/kfd --device=/dev/dri \
+        --group-add video --group-add render ...
+
+``render`` matters as much as ``video``: ``/dev/kfd`` is owned by it, so a non-root
+container that adds only ``video`` still sees zero GPUs. If your distribution owns the
+devices with a differently named group, add that one instead -- the ``ls -l`` above
+reports it.
 
 The rest of this guide addresses the opposite, more confusing case: ROCm works and your
 ML framework sees the GPU, but Ray does not.
@@ -90,6 +97,29 @@ framework, and only then install Flower:
     ``pip`` select the default PyPI ``torch`` wheel, which is built for CUDA and will
     never see an AMD GPU. The installation succeeds and only fails later, at the point
     where your ``ClientApp`` tries to use the device.
+
+.. important::
+
+    Installing ROCm wheels into your own environment is not always sufficient. ``flwr
+    run`` may build an isolated environment for the run, and a plain ``torch``
+    dependency resolves there to the default CUDA wheel -- bypassing the ROCm install
+    you just verified. Pin the index in your project's ``pyproject.toml`` so the run
+    environment resolves the same wheels:
+
+    .. code-block:: toml
+
+        [[tool.uv.index]]
+        name = "rocm"
+        url = "https://download.pytorch.org/whl/rocm6.4"
+        explicit = true
+
+        [tool.uv.sources]
+        torch = { index = "rocm" }
+        torchvision = { index = "rocm" }
+
+    Setting ``RAY_ENABLE_UV_RUN_RUNTIME_ENV=0`` is a quicker alternative: it keeps Ray
+    from building a separate environment, so the run uses the interpreter you launched
+    from. Pinning the index is the more durable fix, since it travels with the project.
 
 ***********************************
  Point Ray at the ROCm SMI library
@@ -146,15 +176,30 @@ ROCR_VISIBLE_DEVICES``.
 The failure occurs at **import** time, not at ``ray.init()``. Because every Ray worker
 re-imports Ray on startup, this also surfaces indirectly as workers that never register.
 
-Export the device list under the name Ray expects:
+Move the device selection to the name Ray expects, rather than setting both:
 
 .. code-block:: shell
 
     if [ -n "${ROCR_VISIBLE_DEVICES:-}" ] && [ -z "${HIP_VISIBLE_DEVICES:-}" ]; then
         export HIP_VISIBLE_DEVICES="$ROCR_VISIBLE_DEVICES"
+        unset ROCR_VISIBLE_DEVICES
     fi
 
-If both variables are set, they must name the same devices.
+.. important::
+
+    Unset ``ROCR_VISIBLE_DEVICES`` rather than leaving both set. The two masks
+    *compose*: ``HIP_VISIBLE_DEVICES`` indexes into the set that
+    ``ROCR_VISIBLE_DEVICES`` has already filtered down to. Copying a value such as ``2``
+    into both therefore asks HIP for index 2 of a one-device set and exposes no GPU at
+    all -- the copy is only safe once ROCr has stopped filtering.
+
+.. important::
+
+    These exports apply to the shell you run them in. A managed SuperLink that is
+    already running keeps the environment it started with, and ``flwr run`` reuses that
+    process rather than starting a fresh one. After changing ``ROCM_PATH`` or
+    ``HIP_VISIBLE_DEVICES``, stop the running SuperLink so the next run picks up the new
+    values.
 
 *************************************
  Verify that Ray detects the AMD GPU
@@ -211,14 +256,18 @@ The preceding warning names the mismatch:
 
 .. code-block:: text
 
-    WARNING : Ray reports no GPUs (GPUs=0) but each client requests num_gpus=0.25.
-    This is a GPU discovery failure, not a resource shortage: lowering `num_gpus`
-    will not help.
+    WARNING : Ray reports no GPUs (GPUs=0) but each client requests num_gpus=0.25,
+    which no node can satisfy. Either this cluster has no GPU, in which case set
+    `num_gpus=0`, or Ray failed to discover one that is present.
 
-This is a *discovery* failure, not a resource shortage, so lowering
-``client-resources-num-gpus`` will not help: no non-zero value can be satisfied by a
-cluster reporting ``GPUs=0``. Work through `Point Ray at the ROCm SMI library`_ and `Set
-HIP_VISIBLE_DEVICES for Ray`_, then re-run the verification above.
+On a host where ROCm reaches the GPU, it is the second case: the GPU is present and Ray
+did not find it. Lowering ``client-resources-num-gpus`` will not help, because no
+non-zero value can be satisfied by a cluster reporting ``GPUs=0``. Work through `Point
+Ray at the ROCm SMI library`_ and `Set HIP_VISIBLE_DEVICES for Ray`_, then re-run the
+verification above.
+
+When ``/dev/kfd`` is present, Flower follows that warning with a second one naming the
+``ROCM_PATH`` requirement directly.
 
 Note that ``torch.cuda.is_available()`` commonly reports ``True`` in exactly this
 situation, because your ML framework locates HIP without consulting ``ROCM_PATH``.
