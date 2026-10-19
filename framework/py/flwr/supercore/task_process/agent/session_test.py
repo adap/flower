@@ -199,8 +199,8 @@ def test_get_trace_without_filters_requests_all_events() -> None:
     stub.GetRunSeriesEvents.assert_called_once_with(GetRunSeriesEventsRequest())
 
 
-def test_get_compacted_contexts_emits_returned_ids() -> None:
-    """Return summaries and emit their IDs."""
+def test_get_compacted_contexts_returns_without_emitting() -> None:
+    """Return summaries without publishing a run event."""
     stub = Mock()
     stub.GetCompactedContexts.return_value = GetCompactedContextsResponse(
         contexts=[
@@ -231,101 +231,40 @@ def test_get_compacted_contexts_emits_returned_ids() -> None:
             "created_at": "2026-10-16T12:00:00+00:00",
         }
     ]
-    emit.assert_called_once_with(
-        {"type": "compacted_contexts.get.completed", "context_ids": [12]}
-    )
+    emit.assert_not_called()
 
 
-def test_put_compacted_context_queues_start_and_success() -> None:
-    """Queue lifecycle events around a successful write."""
+def test_put_compacted_context_forwards_without_emitting() -> None:
+    """Forward the summary without publishing a run event."""
     stub = Mock()
     events = RuntimeAgentEvents(stub)
-    order: list[JSONObject | str] = []
 
-    def record_emit(event: JSONObject) -> None:
-        order.append(event)
-
-    stub.PutCompactedContext.side_effect = lambda _request: order.append("request")
-
-    with patch.object(events, "emit", side_effect=record_emit):
+    with patch.object(events, "emit") as emit:
         events.put_compacted_context(through_event_id=9, text="Private summary")
     events.close()
 
-    assert order == [
-        {"type": "compacted_context.put.started", "through_event_id": 9},
-        "request",
-        {"type": "compacted_context.put.succeeded", "through_event_id": 9},
-    ]
     stub.PutCompactedContext.assert_called_once_with(
         PutCompactedContextRequest(
             context=CompactedContext(through_event_id=9, text="Private summary")
         )
     )
+    emit.assert_not_called()
 
 
-def test_put_compacted_context_emits_failure_and_reraises() -> None:
-    """Emit a safe error code and re-raise the request failure."""
+def test_put_compacted_context_propagates_error_without_emitting() -> None:
+    """Preserve the request failure without publishing a run event."""
     stub = Mock()
-    request = httpx.Request("POST", "https://example.com/put-compacted-context")
-    response = httpx.Response(
-        409,
-        json={
-            "code": ApiErrorCode.RUNTIME_COMPACTED_CONTEXT_ALREADY_EXISTS,
-            "detail": "Compacted context already exists.",
-        },
-        request=request,
-    )
-    error = httpx.HTTPStatusError("Duplicate", request=request, response=response)
+    error = RuntimeError("Write failed")
     stub.PutCompactedContext.side_effect = error
     events = RuntimeAgentEvents(stub)
 
     with patch.object(events, "emit") as emit:
-        with pytest.raises(httpx.HTTPStatusError) as caught:
+        with pytest.raises(RuntimeError) as caught:
             events.put_compacted_context(through_event_id=9, text="Private summary")
     events.close()
 
     assert caught.value is error
-    assert emit.call_args_list == [
-        call({"type": "compacted_context.put.started", "through_event_id": 9}),
-        call(
-            {
-                "type": "compacted_context.put.failed",
-                "through_event_id": 9,
-                "error_type": "HTTPStatusError",
-                "error_code": ApiErrorCode.RUNTIME_COMPACTED_CONTEXT_ALREADY_EXISTS,
-            }
-        ),
-    ]
-
-
-def test_context_event_upload_failure_surfaces_on_close() -> None:
-    """Handle metadata upload failures like other event publication failures."""
-    stub = Mock()
-    stub.PushTaskEvents.side_effect = RuntimeError("Publisher failed")
-    events = RuntimeAgentEvents(stub)
-
-    events.put_compacted_context(through_event_id=9, text="Summary")
-    with pytest.raises(RuntimeError, match="Failed to publish AgentApp events"):
-        events.close()
-
-    stub.PutCompactedContext.assert_called_once()
-
-
-def test_failed_write_keeps_original_error_if_failure_event_cannot_queue() -> None:
-    """Do not mask the write error with an event publisher error."""
-    stub = Mock()
-    failure = ValueError("Write failed")
-    stub.PutCompactedContext.side_effect = failure
-    events = RuntimeAgentEvents(stub)
-
-    with patch.object(
-        events, "emit", side_effect=[None, RuntimeError("Publisher failed")]
-    ):
-        with pytest.raises(ValueError) as caught:
-            events.put_compacted_context(through_event_id=9, text="Summary")
-    events.close()
-
-    assert caught.value is failure
+    emit.assert_not_called()
 
 
 def test_agent_events_and_connector_items_use_same_publisher() -> None:

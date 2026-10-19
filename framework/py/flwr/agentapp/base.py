@@ -102,11 +102,11 @@ class AgentEvents(ABC):
     def get_compacted_contexts(
         self, *, limit: int = 1, before_context_id: int | None = None
     ) -> list[JSONObject]:
-        """Return the newest summaries and emit their IDs."""
+        """Return the newest summaries."""
 
     @abstractmethod
     def put_compacted_context(self, *, through_event_id: int, text: str) -> None:
-        """Store a summary and emit the request outcome."""
+        """Store a summary."""
 
 
 class AgentGrid(ABC):

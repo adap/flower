@@ -125,18 +125,11 @@ class RuntimeAgentEvents(AgentEvents):
     def get_compacted_contexts(
         self, *, limit: int = 1, before_context_id: int | None = None
     ) -> list[JSONObject]:
-        """Get summaries from the current run series and emit their IDs."""
+        """Get summaries from the current run series."""
         response = self._stub.GetCompactedContexts(
             GetCompactedContextsRequest(
                 limit=limit, before_context_id=before_context_id
             )
-        )
-        # Keep summary text out of the run-event log; IDs are enough to trace reads.
-        self.emit(
-            {
-                "type": "compacted_contexts.get.completed",
-                "context_ids": [context.id for context in response.contexts],
-            }
         )
         return [
             {
@@ -150,43 +143,11 @@ class RuntimeAgentEvents(AgentEvents):
         ]
 
     def put_compacted_context(self, *, through_event_id: int, text: str) -> None:
-        """Store a summary and emit the write outcome."""
-        # Queue the start event before the write; publication remains asynchronous.
-        self.emit(
-            {
-                "type": "compacted_context.put.started",
-                "through_event_id": through_event_id,
-            }
-        )
-        try:
-            self._stub.PutCompactedContext(
-                PutCompactedContextRequest(
-                    context=CompactedContext(
-                        through_event_id=through_event_id, text=text
-                    )
-                )
+        """Store a summary in the current run series."""
+        self._stub.PutCompactedContext(
+            PutCompactedContextRequest(
+                context=CompactedContext(through_event_id=through_event_id, text=text)
             )
-        except Exception as exc:
-            event: JSONObject = {
-                "type": "compacted_context.put.failed",
-                "through_event_id": through_event_id,
-                "error_type": type(exc).__name__,
-            }
-            if isinstance(exc, HTTPStatusError):
-                # Record the API code without copying response details into run events.
-                error = FlowerError.from_json(exc.response.text)
-                if error is not None:
-                    event["error_code"] = error.code
-            try:
-                self.emit(event)
-            except Exception:  # pylint: disable=broad-exception-caught
-                log(ERROR, "Failed to publish compacted context event.", exc_info=True)
-            raise
-        self.emit(
-            {
-                "type": "compacted_context.put.succeeded",
-                "through_event_id": through_event_id,
-            }
         )
 
     def emit(self, event: JSONObject) -> None:
