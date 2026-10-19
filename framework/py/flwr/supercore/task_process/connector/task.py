@@ -32,7 +32,7 @@ from flwr.supercore.json_message.connector_message import (
 from flwr.supercore.runtime import RuntimeHttpClient
 from flwr.supercore.task_process.usage import TaskUsageRecorder
 from flwr.supercore.typing import JSONObject
-from flwr.supercore.utils import strict_json_loads
+from flwr.supercore.utils import strict_json_loads_object
 
 from .http import ConnectorApiError
 from .registry import (
@@ -127,12 +127,9 @@ def _pull_connector_request(client: RuntimeHttpClient) -> ConnectorRequest:
 def _parse_connector_json(value: str) -> JSONObject:
     """Parse one connector JSON object without exposing its content in errors."""
     try:
-        parsed = strict_json_loads(value)
+        return strict_json_loads_object(value)
     except (TypeError, ValueError):
         raise RuntimeError("Connector credentials could not be loaded.") from None
-    if not isinstance(parsed, dict):
-        raise RuntimeError("Connector credentials could not be loaded.")
-    return parsed
 
 
 def _make_error_response(ex: Exception | None) -> JSONObject:
