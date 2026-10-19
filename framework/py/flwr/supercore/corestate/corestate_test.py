@@ -24,7 +24,6 @@ from typing import Any, cast
 from unittest.mock import call, patch
 
 from parameterized import parameterized
-from sqlalchemy.exc import IntegrityError
 
 from flwr.app import Context, Message, RecordDict
 from flwr.common.constant import (
@@ -501,6 +500,47 @@ class StateTest(unittest.TestCase):  # pylint: disable=R0904
             [first_id],
         )
 
+    def test_update_connector_credentials(self) -> None:
+        """Persist credential updates and roll back failures without changing config."""
+        state = self.state_factory()
+        connector_id = state.create_connector(
+            "@bob/fed-a",
+            "calendar",
+            '{"token":"old"}',
+            '{"calendar":"work"}',
+            "account-a",
+        )
+        assert connector_id is not None
+
+        def rotate() -> str:
+            return '{"token":"new"}'
+
+        assert (
+            state.update_connector_credentials(connector_id, '{"token":"old"}', rotate)
+            == '{"token":"new"}'
+        )
+        stored = state.get_connector_by_id(connector_id)
+        assert stored is not None
+        assert stored.credentials_json == '{"token":"new"}'
+        assert stored.config_json == '{"calendar":"work"}'
+
+        def fail() -> str:
+            raise RuntimeError("refresh failed")
+
+        assert (
+            state.update_connector_credentials(connector_id, '{"token":"old"}', fail)
+            == '{"token":"new"}'
+        )
+        with self.assertRaisesRegex(RuntimeError, "refresh failed"):
+            state.update_connector_credentials(connector_id, '{"token":"new"}', fail)
+        assert state.get_connector_by_id(connector_id) == stored
+        assert (
+            state.update_connector_credentials(
+                connector_id + 1, '{"token":"new"}', fail
+            )
+            is None
+        )
+
     def test_bind_and_get_run_connectors(self) -> None:
         """Run connector bindings should be deterministic and idempotent."""
         state = self.state_factory()
@@ -566,7 +606,7 @@ class StateTest(unittest.TestCase):  # pylint: disable=R0904
         """Store summaries at distinct event boundaries in a series."""
         state = self.state_factory()
         state.store_compacted_context(42, 2**63, "First")
-        with self.assertRaises((ValueError, IntegrityError)):
+        with self.assertRaises(ValueError):
             state.store_compacted_context(42, 2**63, "Duplicate")
         state.store_compacted_context(42, 2**63 + 100, "Second")
         state.store_compacted_context(43, 2**63, "Other")

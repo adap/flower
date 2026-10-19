@@ -18,7 +18,7 @@
 import hashlib
 import json
 import secrets
-from collections.abc import Collection, Sequence
+from collections.abc import Callable, Collection, Sequence
 from datetime import UTC, datetime, timedelta
 from logging import ERROR
 from typing import Any, Literal, cast
@@ -876,6 +876,33 @@ class SqlCoreState(CoreState, SqlMixin):  # pylint: disable=R0904
                 return None
             return _connector_from_model(row)
 
+    def update_connector_credentials(
+        self,
+        connector_id: int,
+        current_credentials: str,
+        update_credentials: Callable[[], str],
+    ) -> str | None:
+        """Serialize credential refresh and persist its result atomically."""
+        with self.session() as session:
+            # Lock before reading, including on SQLite where FOR UPDATE is ignored.
+            credentials_json = session.scalar(
+                update(ConnectorModel)
+                .where(ConnectorModel.connector_id == connector_id)
+                .values(credentials_json=ConnectorModel.credentials_json)
+                .returning(ConnectorModel.credentials_json)
+            )
+            if credentials_json is None:
+                return None
+            if credentials_json != current_credentials:
+                return credentials_json
+            credentials_json = update_credentials()
+            session.execute(
+                update(ConnectorModel)
+                .where(ConnectorModel.connector_id == connector_id)
+                .values(credentials_json=credentials_json)
+            )
+            return credentials_json
+
     def delete_connector(self, federation_id: str, connector_id: int) -> bool:
         """Delete a federation's connector if it exists."""
         if not federation_id or connector_id <= 0:
@@ -1114,14 +1141,25 @@ class SqlCoreState(CoreState, SqlMixin):  # pylint: disable=R0904
         self, series_id: int, through_event_id: int, text: str
     ) -> None:
         """Store a new summary."""
-        with self.session() as session:
-            row = CompactedContextModel(
+        stmt = (
+            self.dialect_insert(CompactedContextModel)
+            .values(
                 series_id=uint64_to_int64(series_id),
                 through_event_id=uint64_to_int64(through_event_id),
                 text=text,
                 created_at=now(),
             )
-            session.add(row)
+            .on_conflict_do_nothing(
+                index_elements=[
+                    CompactedContextModel.series_id,
+                    CompactedContextModel.through_event_id,
+                ]
+            )
+            .returning(CompactedContextModel.id)
+        )
+        with self.session() as session:
+            if session.scalar(stmt) is None:
+                raise ValueError("Compacted context already exists for this event")
 
     def set_run_series_context(self, series_id: int, context: Context) -> None:
         """Set the shared Context for the specified RunSeries."""

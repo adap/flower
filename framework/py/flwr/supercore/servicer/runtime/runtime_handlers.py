@@ -18,8 +18,6 @@
 
 from logging import DEBUG, ERROR
 
-from sqlalchemy.exc import IntegrityError
-
 from flwr.common.constant import Status
 from flwr.common.serde import message_from_proto, message_to_proto
 from flwr.proto.log_pb2 import (  # pylint: disable=E0611
@@ -97,7 +95,7 @@ def put_compacted_context(
         )
     try:
         state.store_compacted_context(series_id, context.through_event_id, context.text)
-    except (ValueError, IntegrityError) as exc:
+    except ValueError as exc:
         raise FlowerError(
             ApiErrorCode.RUNTIME_COMPACTED_CONTEXT_ALREADY_EXISTS,
             f"Compacted context already exists for series {series_id} "
@@ -309,7 +307,7 @@ def _validate_create_task_request(
             return
 
         try:
-            connector_registry.get_oauth_flow(connector_ref)
+            connector_registry.get_connector_tools(connector_ref)
         except ValueError as err:
             raise FlowerError(ApiErrorCode.CONNECTOR_NOT_FOUND, str(err)) from err
 

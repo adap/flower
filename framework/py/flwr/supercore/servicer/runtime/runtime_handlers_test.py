@@ -21,7 +21,6 @@ from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
 from fastapi import status
-from sqlalchemy.exc import IntegrityError
 
 from flwr.common.constant import SUPERLINK_NODE_ID
 from flwr.common.serde import message_to_proto
@@ -111,24 +110,17 @@ class TestRuntimeHandlers(unittest.TestCase):  # pylint: disable=R0904
             )
 
     def test_put_compacted_context_rejects_duplicates(self) -> None:
-        """Map duplicate writes from either backend to a conflict response."""
+        """Map duplicate writes to a conflict response."""
         request = PutCompactedContextRequest(
             context=CompactedContext(through_event_id=9, text="Summary")
         )
-        errors = (
-            ValueError("Duplicate"),
-            IntegrityError("INSERT", {}, Exception("Duplicate")),
+        self.state.store_compacted_context.side_effect = ValueError("Duplicate")
+        with self.assertRaises(FlowerError) as caught:
+            runtime_handlers.put_compacted_context(request, self.state, 42)
+        self.assertEqual(
+            caught.exception.code,
+            ApiErrorCode.RUNTIME_COMPACTED_CONTEXT_ALREADY_EXISTS,
         )
-
-        for error in errors:
-            with self.subTest(error=type(error).__name__):
-                self.state.store_compacted_context.side_effect = error
-                with self.assertRaises(FlowerError) as caught:
-                    runtime_handlers.put_compacted_context(request, self.state, 42)
-                self.assertEqual(
-                    caught.exception.code,
-                    ApiErrorCode.RUNTIME_COMPACTED_CONTEXT_ALREADY_EXISTS,
-                )
         self.assertEqual(
             API_ERROR_MAP[
                 ApiErrorCode.RUNTIME_COMPACTED_CONTEXT_ALREADY_EXISTS
@@ -271,8 +263,10 @@ class TestRuntimeHandlers(unittest.TestCase):  # pylint: disable=R0904
                 )
                 self.assertEqual(response.task_id, 456)
 
-    def test_create_task_resolves_single_bound_oauth_connector(self) -> None:
-        """CreateTask should resolve the run-bound connector reference to its ID."""
+    def test_create_task_resolves_bound_connector_without_oauth_configuration(
+        self,
+    ) -> None:
+        """Resolve a run-bound connector without requiring an OAuth application."""
         self.state.get_run_connector_ids.return_value = [42]
         self.state.get_connector_by_id.return_value = SimpleNamespace(
             connector_ref="notion"
@@ -282,7 +276,7 @@ class TestRuntimeHandlers(unittest.TestCase):  # pylint: disable=R0904
         with patch.object(
             connector_registry,
             "OAUTH_FLOWS",
-            {"notion": Mock(connector_ref="notion")},
+            {},
         ):
             response = self._create_connector_task("notion")
 
