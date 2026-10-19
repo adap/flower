@@ -21,6 +21,7 @@ import logging
 import subprocess
 import sys
 import threading
+from contextlib import nullcontext
 from inspect import signature
 from io import StringIO
 from pathlib import Path
@@ -686,6 +687,9 @@ def test_launch_dispatches_compatible_ready_pod_and_replenishes_idle_capacity(
 ) -> None:  # pylint: disable=too-many-locals
     """A dispatched warm Pod should be replaced before its child exits."""
     # pylint: disable=too-many-locals
+    span = Mock()
+    tracing = Mock(side_effect=lambda *_: nullcontext(span))
+    monkeypatch.setattr(warm_executor_dispatch, "trace_span", tracing)
     client = Mock()
     pool_key = _warm_executor_pool_key(
         task_type=task_type, runtime_image="ghcr.io/flwrlabs/taskexecutor:dev"
@@ -728,6 +732,14 @@ def test_launch_dispatches_compatible_ready_pod_and_replenishes_idle_capacity(
     )
 
     assert result.status == LaunchResultStatus.ACCEPTED
+    assert [entry.args[0] for entry in tracing.call_args_list] == [
+        "executor.reserve",
+        "executor.replenish",
+        "executor.dispatch_open",
+        "executor.token_send",
+        "executor.accept_wait",
+    ]
+    span.set_attribute.assert_called_once_with("flwr.executor.accepted", True)
     assert stream.return_value.written == ["task-token\n"]
     assert stream.return_value.is_open()
     if insecure:

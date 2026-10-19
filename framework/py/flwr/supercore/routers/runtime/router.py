@@ -39,6 +39,8 @@ from flwr.proto.runtime_pb2 import (  # pylint: disable=E0611
     AcquireTaskResponse,
     CreateTaskRequest,
     CreateTaskResponse,
+    GetCompactedContextsRequest,
+    GetCompactedContextsResponse,
     GetConnectorRequest,
     GetConnectorResponse,
     GetNodesRequest,
@@ -59,6 +61,8 @@ from flwr.proto.runtime_pb2 import (  # pylint: disable=E0611
     PushTaskMessageResponse,
     PushTaskOutputRequest,
     PushTaskOutputResponse,
+    PutCompactedContextRequest,
+    PutCompactedContextResponse,
     RecordTaskUsageRequest,
     RecordTaskUsageResponse,
     SendTaskHeartbeatRequest,
@@ -74,6 +78,7 @@ from flwr.supercore.dependencies.version import VersionDependency
 from flwr.supercore.protobuf.routing import ProtobufRoute
 from flwr.supercore.protobuf.translation import PROTOBUF_REQUEST_DEPENDENCY
 from flwr.supercore.servicer.runtime import runtime_handlers as core_runtime_handlers
+from flwr.supercore.tracing import trace_span
 
 from .tracing import TaskCompletionTracingDependency
 
@@ -135,7 +140,14 @@ def pull_task_input(
     task: TaskDependency,
 ) -> PullTaskInputResponse:
     """Pull app process inputs."""
-    return handlers.pull_task_input(request, state, task)
+    with trace_span(
+        "task.input",
+        attributes={
+            "flwr.run_id": str(task.run_id),
+            "flwr.task_id": str(task.task_id),
+        },
+    ):
+        return handlers.pull_task_input(request, state, task)
 
 
 @router.post("/push-task-output")
@@ -233,6 +245,28 @@ def get_run_series_events(
 ) -> GetRunSeriesEventsResponse:
     """Get events from the authenticated task's run series."""
     return handlers.get_run_series_events(request, state, task)
+
+
+@router.post("/get-compacted-contexts")
+def get_compacted_contexts(
+    request: Annotated[GetCompactedContextsRequest, PROTOBUF_REQUEST_DEPENDENCY],
+    state: RuntimeStateDependency,
+    handlers: RuntimeHandlersDependency,
+    task: TaskDependency,
+) -> GetCompactedContextsResponse:
+    """Get summaries from the authenticated task's run series."""
+    return handlers.get_compacted_contexts(request, state, task)
+
+
+@router.post("/put-compacted-context")
+def put_compacted_context(
+    request: Annotated[PutCompactedContextRequest, PROTOBUF_REQUEST_DEPENDENCY],
+    state: RuntimeStateDependency,
+    handlers: RuntimeHandlersDependency,
+    task: TaskDependency,
+) -> PutCompactedContextResponse:
+    """Store a summary in the authenticated task's run series."""
+    return handlers.put_compacted_context(request, state, task)
 
 
 @router.post("/pull-task-message")

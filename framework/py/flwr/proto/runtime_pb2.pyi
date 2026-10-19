@@ -24,6 +24,7 @@ import flwr.proto.federation_config_pb2
 import flwr.proto.message_pb2
 import flwr.proto.node_pb2
 import flwr.proto.run_pb2
+import flwr.proto.runseries_pb2
 import flwr.proto.task_pb2
 import google.protobuf.descriptor
 import google.protobuf.internal.containers
@@ -285,6 +286,76 @@ class GetRunSeriesEventsResponse(google.protobuf.message.Message):
     def ClearField(self, field_name: typing.Literal["events", b"events"]) -> None: ...
 
 global___GetRunSeriesEventsResponse = GetRunSeriesEventsResponse
+
+@typing.final
+class GetCompactedContextsRequest(google.protobuf.message.Message):
+    """GetCompactedContexts messages"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    LIMIT_FIELD_NUMBER: builtins.int
+    BEFORE_CONTEXT_ID_FIELD_NUMBER: builtins.int
+    limit: builtins.int
+    before_context_id: builtins.int
+    def __init__(
+        self,
+        *,
+        limit: builtins.int | None = ...,
+        before_context_id: builtins.int | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing.Literal["_before_context_id", b"_before_context_id", "_limit", b"_limit", "before_context_id", b"before_context_id", "limit", b"limit"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing.Literal["_before_context_id", b"_before_context_id", "_limit", b"_limit", "before_context_id", b"before_context_id", "limit", b"limit"]) -> None: ...
+    @typing.overload
+    def WhichOneof(self, oneof_group: typing.Literal["_before_context_id", b"_before_context_id"]) -> typing.Literal["before_context_id"] | None: ...
+    @typing.overload
+    def WhichOneof(self, oneof_group: typing.Literal["_limit", b"_limit"]) -> typing.Literal["limit"] | None: ...
+
+global___GetCompactedContextsRequest = GetCompactedContextsRequest
+
+@typing.final
+class GetCompactedContextsResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    CONTEXTS_FIELD_NUMBER: builtins.int
+    @property
+    def contexts(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[flwr.proto.runseries_pb2.CompactedContext]: ...
+    def __init__(
+        self,
+        *,
+        contexts: collections.abc.Iterable[flwr.proto.runseries_pb2.CompactedContext] | None = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing.Literal["contexts", b"contexts"]) -> None: ...
+
+global___GetCompactedContextsResponse = GetCompactedContextsResponse
+
+@typing.final
+class PutCompactedContextRequest(google.protobuf.message.Message):
+    """PutCompactedContext messages"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    CONTEXT_FIELD_NUMBER: builtins.int
+    @property
+    def context(self) -> flwr.proto.runseries_pb2.CompactedContext: ...
+    def __init__(
+        self,
+        *,
+        context: flwr.proto.runseries_pb2.CompactedContext | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing.Literal["context", b"context"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing.Literal["context", b"context"]) -> None: ...
+
+global___PutCompactedContextRequest = PutCompactedContextRequest
+
+@typing.final
+class PutCompactedContextResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    def __init__(
+        self,
+    ) -> None: ...
+
+global___PutCompactedContextResponse = PutCompactedContextResponse
 
 @typing.final
 class PullTaskMessageRequest(google.protobuf.message.Message):

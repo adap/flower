@@ -17,7 +17,7 @@
 # pylint: disable=too-many-lines
 
 from abc import ABC, abstractmethod
-from collections.abc import Collection, Sequence
+from collections.abc import Callable, Collection, Sequence
 from datetime import datetime
 from typing import Literal
 
@@ -28,7 +28,10 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     StartRunRequest,
 )
 from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
-from flwr.proto.runseries_pb2 import RunSeries  # pylint: disable=E0611
+from flwr.proto.runseries_pb2 import (  # pylint: disable=E0611
+    CompactedContext,
+    RunSeries,
+)
 from flwr.proto.task_pb2 import Task, TaskEvent, TaskUsage  # pylint: disable=E0611
 from flwr.supercore.fab import Fab
 from flwr.supercore.inflatable.inflatable_object import (
@@ -279,6 +282,20 @@ class CoreState(ABC):  # pylint: disable=R0904
     @abstractmethod
     def get_connector_by_id(self, connector_id: int) -> ConnectorRecord | None:
         """Return a connector by ID, if present."""
+
+    @abstractmethod
+    def update_connector_credentials(
+        self,
+        connector_id: int,
+        current_credentials: str,
+        update_credentials: Callable[[], str],
+    ) -> str | None:
+        """Atomically read, transform, and persist one connector's credentials.
+
+        Invoke the callback only if stored credentials still match the caller's
+        snapshot. Otherwise return the newer stored credentials. Return ``None``
+        if the connector no longer exists. Callback errors leave state unchanged.
+        """
 
     @abstractmethod
     def delete_connector(self, federation_id: str, connector_id: int) -> bool:
@@ -575,6 +592,18 @@ class CoreState(ABC):  # pylint: disable=R0904
         Context | None
             The shared RunSeries context, or `None` if no context is stored.
         """
+
+    @abstractmethod
+    def get_compacted_contexts(
+        self, series_id: int, limit: int = 1, before_context_id: int | None = None
+    ) -> Sequence[CompactedContext]:
+        """Return a series's summaries newest first, before an optional ID."""
+
+    @abstractmethod
+    def store_compacted_context(
+        self, series_id: int, through_event_id: int, text: str
+    ) -> None:
+        """Store a summary; raise ValueError for an existing series/event pair."""
 
     @abstractmethod
     def set_run_series_context(self, series_id: int, context: Context) -> None:

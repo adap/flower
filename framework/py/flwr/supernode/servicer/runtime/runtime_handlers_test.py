@@ -30,7 +30,9 @@ from flwr.proto.message_pb2 import (  # pylint:disable=E0611
     PullObjectResponse,
     PushObjectRequest,
 )
+from flwr.proto.runseries_pb2 import CompactedContext  # pylint:disable=E0611
 from flwr.proto.runtime_pb2 import (  # pylint:disable=E0611
+    GetCompactedContextsRequest,
     GetConnectorRequest,
     GetNodesRequest,
     GetRunSeriesEventsRequest,
@@ -41,6 +43,7 @@ from flwr.proto.runtime_pb2 import (  # pylint:disable=E0611
     PushAppMessagesRequest,
     PushTaskOutputRequest,
     PushTaskOutputResponse,
+    PutCompactedContextRequest,
 )
 from flwr.proto.task_pb2 import Task, TaskEvent  # pylint:disable=E0611
 from flwr.supercore.constant import TaskType
@@ -59,6 +62,33 @@ class TestSuperNodeRuntimeHandlers(unittest.TestCase):
         """Initialize test state."""
         self.maker = RecordMaker()
         self.state = Mock()
+
+    def test_get_compacted_contexts_uses_authenticated_series(self) -> None:
+        """Summary requests derive the series from the authenticated run."""
+        self.state.get_run.return_value = Run.create_empty(run_id=123)
+        self.state.get_run.return_value.series_id = 456
+        self.state.get_compacted_contexts.return_value = []
+        task = Task(run_id=123)
+
+        runtime_handlers.get_compacted_contexts(
+            GetCompactedContextsRequest(), self.state, task
+        )
+
+        self.state.get_compacted_contexts.assert_called_once_with(
+            456, limit=1, before_context_id=None
+        )
+
+    def test_put_compacted_context_uses_authenticated_series(self) -> None:
+        """Summary writes derive the series from the authenticated run."""
+        self.state.get_run.return_value = Run.create_empty(run_id=123)
+        self.state.get_run.return_value.series_id = 456
+        request = PutCompactedContextRequest(
+            context=CompactedContext(through_event_id=9, text="Summary")
+        )
+
+        runtime_handlers.put_compacted_context(request, self.state, Task(run_id=123))
+
+        self.state.store_compacted_context.assert_called_once_with(456, 9, "Summary")
 
     def test_pull_task_input_activates_task(self) -> None:
         """PullTaskInput should activate the authenticated task."""
@@ -174,7 +204,7 @@ class TestSuperNodeRuntimeHandlers(unittest.TestCase):
 
     def test_pull_messages_returns_empty_response(self) -> None:
         """PullMessages should return an empty response when none is available."""
-        self.state.get_messages.return_value = []
+        self.state.get_messages_legacy.return_value = []
         task = Task(run_id=61016)
 
         response = runtime_handlers.pull_messages(
