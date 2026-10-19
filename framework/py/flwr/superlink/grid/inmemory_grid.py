@@ -137,7 +137,7 @@ class InMemoryGrid(Grid):
         # shortcut: legacy simulation requires IDs until its storage API is migrated.
         if reply_to_message_ids is None:
             raise NotImplementedError(
-                "Unfiltered pulls are not supported by InMemoryGrid. Use HttpGrid."
+                "Unfiltered pulls are not supported by InMemoryGrid."
             )
         msg_ids = set(reply_to_message_ids)
         # Pull Messages
