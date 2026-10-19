@@ -98,6 +98,16 @@ class AgentEvents(ABC):
     def emit(self, event: JSONObject) -> None:
         """Emit one structured run event."""
 
+    @abstractmethod
+    def get_compacted_contexts(
+        self, *, limit: int = 1, before_context_id: int | None = None
+    ) -> list[JSONObject]:
+        """Return the newest summaries."""
+
+    @abstractmethod
+    def put_compacted_context(self, *, through_event_id: int, text: str) -> None:
+        """Store a summary."""
+
 
 class AgentGrid(ABC):
     """Model-facing access to the federation Grid."""

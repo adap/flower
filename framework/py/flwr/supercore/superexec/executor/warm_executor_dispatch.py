@@ -34,6 +34,7 @@ from flwr.supercore.constant import (
     TASK_TYPE_TO_COMMAND,
     TaskType,
 )
+from flwr.supercore.tracing import trace_span
 from flwr.supercore.warm_executor_constants import (
     WARM_AGENTAPP_EXECUTOR_MODULE,
     WARM_CONNECTOR_EXECUTOR_MODULE,
@@ -431,33 +432,38 @@ class WarmExecutorPoolManager:  # pylint: disable=too-many-instance-attributes,t
                 self._log_dispatch(primary_pool, "setup_unavailable")
                 return None
             try:
-                claimed = self._take_ready_pod(candidates)
+                with trace_span("executor.reserve"):
+                    claimed = self._take_ready_pod(candidates)
             except WarmExecutorUnavailable:
                 self._log_dispatch(primary_pool, "setup_unavailable")
                 return None
             if claimed is None:
-                for candidate in candidates:
-                    self._ensure_pool_capacity(candidate, reserved_pod_capacity=1)
+                with trace_span("executor.replenish"):
+                    for candidate in candidates:
+                        self._ensure_pool_capacity(candidate, reserved_pod_capacity=1)
                 self._log_dispatch(primary_pool, "capacity_unavailable")
                 return None
             pool, pod_name = claimed
-            for candidate in candidates:
-                self._ensure_pool_capacity(candidate)
+            with trace_span("executor.replenish"):
+                for candidate in candidates:
+                    self._ensure_pool_capacity(candidate)
 
         try:
-            dispatch = self._open_dispatch(
-                pod_name=pod_name,
-                spec=spec,
-                pool_key=pool.key,
-                runtime_root_certificates=runtime_root_certificates,
-            )
+            with trace_span("executor.dispatch_open"):
+                dispatch = self._open_dispatch(
+                    pod_name=pod_name,
+                    spec=spec,
+                    pool_key=pool.key,
+                    runtime_root_certificates=runtime_root_certificates,
+                )
         except WarmExecutorUnavailable:
             self._retire_unavailable_pod(pod_name, pool.key)
             self._log_dispatch(pool, "setup_unavailable")
             return None
 
         try:
-            dispatch.send_token(spec.token)
+            with trace_span("executor.token_send"):
+                dispatch.send_token(spec.token)
         except Exception:  # pylint: disable=broad-exception-caught
             # End stdin if delivery stopped mid-frame. Reconciliation will
             # preserve the Pod if a task nevertheless started.
@@ -469,7 +475,11 @@ class WarmExecutorPoolManager:  # pylint: disable=too-many-instance-attributes,t
             )
 
         try:
-            accepted = dispatch.wait_for_acceptance(_WARM_EXECUTOR_ACK_TIMEOUT_SECONDS)
+            with trace_span("executor.accept_wait") as acceptance:
+                accepted = dispatch.wait_for_acceptance(
+                    _WARM_EXECUTOR_ACK_TIMEOUT_SECONDS
+                )
+                acceptance.set_attribute("flwr.executor.accepted", accepted)
         except Exception:  # pylint: disable=broad-exception-caught
             dispatch.close()
             self._retire_after_dispatch(pod_name, pool.key, dispatch)
