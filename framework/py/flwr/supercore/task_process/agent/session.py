@@ -131,6 +131,7 @@ class RuntimeAgentEvents(AgentEvents):
                 limit=limit, before_context_id=before_context_id
             )
         )
+        # Keep summary text out of the run-event log; IDs are enough to trace reads.
         self._emit_compacted_context_event(
             {
                 "type": "compacted_contexts.get.completed",
@@ -171,6 +172,7 @@ class RuntimeAgentEvents(AgentEvents):
                 "error_type": type(exc).__name__,
             }
             if isinstance(exc, HTTPStatusError):
+                # Record the API code without copying response details into run events.
                 error = FlowerError.from_json(exc.response.text)
                 if error is not None:
                     event["error_code"] = error.code

@@ -98,6 +98,7 @@ class AgentEvents(ABC):
     def emit(self, event: JSONObject) -> None:
         """Emit one structured run event."""
 
+    # Keep new capabilities optional for existing AgentEvents subclasses.
     def get_compacted_contexts(
         self, *, limit: int = 1, before_context_id: int | None = None
     ) -> list[JSONObject]:
