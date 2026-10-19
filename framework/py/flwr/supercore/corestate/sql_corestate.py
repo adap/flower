@@ -1141,14 +1141,25 @@ class SqlCoreState(CoreState, SqlMixin):  # pylint: disable=R0904
         self, series_id: int, through_event_id: int, text: str
     ) -> None:
         """Store a new summary."""
-        with self.session() as session:
-            row = CompactedContextModel(
+        stmt = (
+            self.dialect_insert(CompactedContextModel)
+            .values(
                 series_id=uint64_to_int64(series_id),
                 through_event_id=uint64_to_int64(through_event_id),
                 text=text,
                 created_at=now(),
             )
-            session.add(row)
+            .on_conflict_do_nothing(
+                index_elements=[
+                    CompactedContextModel.series_id,
+                    CompactedContextModel.through_event_id,
+                ]
+            )
+            .returning(CompactedContextModel.id)
+        )
+        with self.session() as session:
+            if session.scalar(stmt) is None:
+                raise ValueError("Compacted context already exists for this event")
 
     def set_run_series_context(self, series_id: int, context: Context) -> None:
         """Set the shared Context for the specified RunSeries."""
