@@ -38,12 +38,15 @@ from flwr.common.serde import message_from_proto, message_to_proto
 
 # pylint: disable=E0611
 from flwr.proto.control_pb2 import StartAutomationRequest, StartRunRequest
+from flwr.proto.runseries_pb2 import CompactedContext
 from flwr.proto.runtime_pb2 import (
     CreateTaskRequest,
+    GetCompactedContextsRequest,
     GetRunSeriesEventsRequest,
     PullTaskMessageRequest,
     PushTaskEventsRequest,
     PushTaskMessageRequest,
+    PutCompactedContextRequest,
 )
 from flwr.proto.task_pb2 import TaskEvent
 
@@ -118,6 +121,34 @@ class RuntimeAgentEvents(AgentEvents):
             }
             for event in response.events
         ]
+
+    def get_compacted_contexts(
+        self, *, limit: int = 1, before_context_id: int | None = None
+    ) -> list[JSONObject]:
+        """Get summaries from the current run series."""
+        response = self._stub.GetCompactedContexts(
+            GetCompactedContextsRequest(
+                limit=limit, before_context_id=before_context_id
+            )
+        )
+        return [
+            {
+                "id": context.id,
+                "series_id": context.series_id,
+                "through_event_id": context.through_event_id,
+                "text": context.text,
+                "created_at": context.created_at,
+            }
+            for context in response.contexts
+        ]
+
+    def put_compacted_context(self, *, through_event_id: int, text: str) -> None:
+        """Store a summary in the current run series."""
+        self._stub.PutCompactedContext(
+            PutCompactedContextRequest(
+                context=CompactedContext(through_event_id=through_event_id, text=text)
+            )
+        )
 
     def emit(self, event: JSONObject) -> None:
         """Queue one event for publication to run-event subscribers."""
