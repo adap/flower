@@ -29,6 +29,7 @@ from flwr.common.constant import CLIENT_OCTET, SUPERLINK_NODE_ID, ErrorCode
 from flwr.common.serde import message_to_proto
 from flwr.proto.message_pb2 import (  # pylint: disable=E0611
     ConfirmMessageReceivedRequest,
+    MessageIDs,
 )
 from flwr.proto.node_pb2 import Node, NodeInfo  # pylint: disable=E0611
 from flwr.proto.runtime_pb2 import (  # pylint: disable=E0611
@@ -301,18 +302,20 @@ class HttpGrid(Grid):  # pylint: disable=too-many-instance-attributes
 
         return message_ids
 
-    def pull_messages(self, message_ids: Iterable[str]) -> Iterable[Message]:
-        """Pull messages based on message IDs.
-
-        This method is used to collect messages from the SuperLink that correspond to a
-        set of given message IDs.
-        """
+    def pull_messages(
+        self, reply_to_message_ids: Iterable[str] | None = None
+    ) -> Iterable[Message]:
+        """Pull messages with an optional correlation filter."""
         run_id = cast(Run, self._run).run_id
         try:
             # Pull Messages
             res: PullAppMessagesResponse = self._runtime_client.PullMessages(
                 PullAppMessagesRequest(
-                    message_ids=message_ids,
+                    reply_to_message_ids=(
+                        MessageIDs(message_ids=reply_to_message_ids)
+                        if reply_to_message_ids is not None
+                        else None
+                    ),
                 )
             )
             # Pull Messages from store

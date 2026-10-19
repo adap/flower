@@ -126,13 +126,20 @@ class InMemoryGrid(Grid):
 
         return msg_ids
 
-    def pull_messages(self, message_ids: Iterable[str]) -> Iterable[Message]:
+    def pull_messages(
+        self, reply_to_message_ids: Iterable[str] | None = None
+    ) -> Iterable[Message]:
         """Pull messages based on message IDs.
 
         This method is used to collect messages from the SuperLink that correspond to a
         set of given message IDs.
         """
-        msg_ids = set(message_ids)
+        # shortcut: legacy simulation requires IDs until its storage API is migrated.
+        if reply_to_message_ids is None:
+            raise NotImplementedError(
+                "Unfiltered pulls are not supported by InMemoryGrid. Use HttpGrid."
+            )
+        msg_ids = set(reply_to_message_ids)
         # Pull Messages
         message_res_list = self.state.get_message_res(
             message_ids=msg_ids, run_id=cast(Run, self._run).run_id

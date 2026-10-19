@@ -203,6 +203,14 @@ class TestInMemoryGrid(unittest.TestCase):
         # Ensure messages are deleted
         self.state.delete_messages.assert_called_once_with(message_ins_ids=set(msg_ids))
 
+    def test_pull_messages_without_filter_is_unsupported(self) -> None:
+        """Keep unfiltered pulls out of the legacy simulation implementation."""
+        with self.assertRaisesRegex(NotImplementedError, "Use HttpGrid"):
+            self.grid.pull_messages()
+        with self.assertRaisesRegex(NotImplementedError, "Use HttpGrid"):
+            self.grid.pull_messages(None)
+        self.state.get_message_res.assert_not_called()
+
     def test_send_and_receive_messages_complete(self) -> None:
         """Test send and receive all messages successfully."""
         # Prepare

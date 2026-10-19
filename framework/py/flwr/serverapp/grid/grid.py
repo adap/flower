@@ -108,21 +108,28 @@ class Grid(ABC):
         """
 
     @abstractmethod
-    def pull_messages(self, message_ids: Iterable[str]) -> Iterable[Message]:
-        """Pull messages based on message IDs.
+    def pull_messages(
+        self, reply_to_message_ids: Iterable[str] | None = None
+    ) -> Iterable[Message]:
+        """Pull messages with an optional correlation filter.
 
-        This method is used to collect messages from the SuperLink
-        that correspond to a set of given message IDs.
+        Messages are addressed to this Grid's node and belong to its run.
 
         Parameters
         ----------
-        message_ids : Iterable[str]
-            An iterable of message IDs for which reply messages are to be retrieved.
+        reply_to_message_ids : Iterable[str] | None (default: None)
+            Message IDs to filter ``reply_to_message_id`` by. If ``None``, no
+            correlation filter is applied. An empty iterable matches no messages.
 
         Returns
         -------
         messages : Iterable[Message]
             An iterable of messages received.
+
+        Raises
+        ------
+        NotImplementedError
+            If no correlation filter is provided to the legacy ``InMemoryGrid``.
         """
 
     @abstractmethod

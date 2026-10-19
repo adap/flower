@@ -192,6 +192,22 @@ class ObjectIDs(google.protobuf.message.Message):
 global___ObjectIDs = ObjectIDs
 
 @typing.final
+class MessageIDs(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    MESSAGE_IDS_FIELD_NUMBER: builtins.int
+    @property
+    def message_ids(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.str]: ...
+    def __init__(
+        self,
+        *,
+        message_ids: collections.abc.Iterable[builtins.str] | None = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing.Literal["message_ids", b"message_ids"]) -> None: ...
+
+global___MessageIDs = MessageIDs
+
+@typing.final
 class ObjectTree(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
 

@@ -190,7 +190,7 @@ def message_to_prompt(message: Message) -> str:
 
 def pull_prompt(grid: HttpGrid) -> tuple[str, Metadata]:
     """Pull and serialize the initial AgentApp instruction and retain its metadata."""
-    instructions = list(grid.pull_messages([]))
+    instructions = list(grid.pull_messages())
     if len(instructions) != 1:
         raise RuntimeError("Expected exactly one initial AgentApp instruction.")
     instruction = instructions[0]

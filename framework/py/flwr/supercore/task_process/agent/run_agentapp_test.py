@@ -135,7 +135,7 @@ def test_pull_prompt_requires_instruction() -> None:
 
     with pytest.raises(RuntimeError, match="exactly one"):
         pull_prompt(grid)
-    grid.pull_messages.assert_called_once_with([])
+    grid.pull_messages.assert_called_once_with()
 
 
 def test_pull_prompt_serializes_instruction() -> None:

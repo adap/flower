@@ -30,14 +30,17 @@ from flwr.common.constant import SUPERLINK_NODE_ID
 # pylint: disable=E0611
 from flwr.proto import transport_pb2 as pb2
 from flwr.proto.fab_pb2 import Fab as ProtoFab
+from flwr.proto.fleet_pb2 import PullMessagesRequest
 from flwr.proto.message_pb2 import Context as ProtoContext
 from flwr.proto.message_pb2 import Message as ProtoMessage
+from flwr.proto.message_pb2 import MessageIDs
 from flwr.proto.recorddict_pb2 import Array as ProtoArray
 from flwr.proto.recorddict_pb2 import ArrayRecord as ProtoArrayRecord
 from flwr.proto.recorddict_pb2 import ConfigRecord as ProtoConfigRecord
 from flwr.proto.recorddict_pb2 import MetricRecord as ProtoMetricRecord
 from flwr.proto.recorddict_pb2 import RecordDict as ProtoRecordDict
 from flwr.proto.run_pb2 import Run as ProtoRun
+from flwr.proto.runtime_pb2 import PullAppMessagesRequest
 from flwr.supercore.constant import TaskType
 from flwr.supercore.date import now
 from flwr.supercore.fab import Fab
@@ -72,6 +75,30 @@ from .serde import (
     status_from_proto,
     status_to_proto,
 )
+
+
+@pytest.mark.parametrize("request_type", [PullAppMessagesRequest, PullMessagesRequest])
+@pytest.mark.parametrize("message_ids", [None, [], ["message-1", "message-2"]])
+def test_correlation_filter_round_trip(
+    request_type: type[PullAppMessagesRequest | PullMessagesRequest],
+    message_ids: list[str] | None,
+) -> None:
+    """Preserve absent, empty, and populated filters across the wire."""
+    request = request_type(
+        reply_to_message_ids=(
+            MessageIDs(message_ids=message_ids) if message_ids is not None else None
+        )
+    )
+
+    restored = request_type.FromString(request.SerializeToString())
+
+    assert restored.HasField("reply_to_message_ids") == (message_ids is not None)
+    restored_ids = (
+        list(restored.reply_to_message_ids.message_ids)
+        if restored.HasField("reply_to_message_ids")
+        else None
+    )
+    assert restored_ids == message_ids
 
 
 def test_serialisation_deserialisation() -> None:
