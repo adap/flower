@@ -21,6 +21,7 @@ import "flwr/proto/fab.proto";
 import "flwr/proto/federation_config.proto";
 import "flwr/proto/message.proto";
 import "flwr/proto/node.proto";
+import "flwr/proto/recorddict.proto";
 import "flwr/proto/run.proto";
 import "flwr/proto/runseries.proto";
 import "flwr/proto/task.proto";
@@ -43,7 +44,7 @@ message PushAppMessagesResponse {
 // PullAppMessages messages
 message PullAppMessagesRequest {
   // Absent means no correlation filter; present with no IDs matches nothing.
-  optional MessageIDs reply_to_message_ids = 3;
+  optional StringList reply_to_message_ids = 3;
 }
 message PullAppMessagesResponse {
   repeated Message messages_list = 1;

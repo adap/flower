@@ -29,9 +29,9 @@ from flwr.common.constant import CLIENT_OCTET, SUPERLINK_NODE_ID, ErrorCode
 from flwr.common.serde import message_to_proto
 from flwr.proto.message_pb2 import (  # pylint: disable=E0611
     ConfirmMessageReceivedRequest,
-    MessageIDs,
 )
 from flwr.proto.node_pb2 import Node, NodeInfo  # pylint: disable=E0611
+from flwr.proto.recorddict_pb2 import StringList  # pylint: disable=E0611
 from flwr.proto.runtime_pb2 import (  # pylint: disable=E0611
     GetNodesRequest,
     GetNodesResponse,
@@ -312,7 +312,7 @@ class HttpGrid(Grid):  # pylint: disable=too-many-instance-attributes
             res: PullAppMessagesResponse = self._runtime_client.PullMessages(
                 PullAppMessagesRequest(
                     reply_to_message_ids=(
-                        MessageIDs(message_ids=reply_to_message_ids)
+                        StringList(vals=reply_to_message_ids)
                         if reply_to_message_ids is not None
                         else None
                     ),

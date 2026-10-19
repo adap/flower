@@ -191,7 +191,7 @@ class TestHttpGrid(unittest.TestCase):
         self.assertIsInstance(args[0], PullAppMessagesRequest)
         self.assertTrue(args[0].HasField("reply_to_message_ids"))
         self.assertEqual(
-            args[0].reply_to_message_ids.message_ids, [ins1.object_id, ins2.object_id]
+            args[0].reply_to_message_ids.vals, [ins1.object_id, ins2.object_id]
         )
         self.assertEqual(msgs[0].metadata, ok_msg.metadata)
         self.assertEqual(msgs[0].content, ok_msg.content)
@@ -224,9 +224,7 @@ class TestHttpGrid(unittest.TestCase):
             request.HasField("reply_to_message_ids"), expected_ids is not None
         )
         if expected_ids is not None:
-            self.assertEqual(
-                list(request.reply_to_message_ids.message_ids), expected_ids
-            )
+            self.assertEqual(list(request.reply_to_message_ids.vals), expected_ids)
 
     def test_pull_messages_without_arguments(self) -> None:
         """Omit the correlation filter by default."""
