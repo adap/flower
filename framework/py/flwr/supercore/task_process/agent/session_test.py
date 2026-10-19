@@ -236,8 +236,8 @@ def test_get_compacted_contexts_emits_returned_ids() -> None:
     )
 
 
-def test_put_compacted_context_emits_start_and_success() -> None:
-    """Emit events before and after a successful write."""
+def test_put_compacted_context_queues_start_and_success() -> None:
+    """Queue lifecycle events around a successful write."""
     stub = Mock()
     events = RuntimeAgentEvents(stub)
     order: list[JSONObject | str] = []
@@ -298,16 +298,34 @@ def test_put_compacted_context_emits_failure_and_reraises() -> None:
     ]
 
 
-def test_context_event_failure_does_not_change_write_outcome() -> None:
-    """A failed event publisher must not turn a successful write into an error."""
+def test_context_event_upload_failure_surfaces_on_close() -> None:
+    """Handle metadata upload failures like other event publication failures."""
     stub = Mock()
+    stub.PushTaskEvents.side_effect = RuntimeError("Publisher failed")
     events = RuntimeAgentEvents(stub)
 
-    with patch.object(events, "emit", side_effect=RuntimeError("Publisher failed")):
-        events.put_compacted_context(through_event_id=9, text="Summary")
-    events.close()
+    events.put_compacted_context(through_event_id=9, text="Summary")
+    with pytest.raises(RuntimeError, match="Failed to publish AgentApp events"):
+        events.close()
 
     stub.PutCompactedContext.assert_called_once()
+
+
+def test_failed_write_keeps_original_error_if_failure_event_cannot_queue() -> None:
+    """Do not mask the write error with an event publisher error."""
+    stub = Mock()
+    failure = ValueError("Write failed")
+    stub.PutCompactedContext.side_effect = failure
+    events = RuntimeAgentEvents(stub)
+
+    with patch.object(
+        events, "emit", side_effect=[None, RuntimeError("Publisher failed")]
+    ):
+        with pytest.raises(ValueError) as caught:
+            events.put_compacted_context(through_event_id=9, text="Summary")
+    events.close()
+
+    assert caught.value is failure
 
 
 def test_agent_events_and_connector_items_use_same_publisher() -> None:

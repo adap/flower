@@ -132,7 +132,7 @@ class RuntimeAgentEvents(AgentEvents):
             )
         )
         # Keep summary text out of the run-event log; IDs are enough to trace reads.
-        self._emit_compacted_context_event(
+        self.emit(
             {
                 "type": "compacted_contexts.get.completed",
                 "context_ids": [context.id for context in response.contexts],
@@ -151,7 +151,8 @@ class RuntimeAgentEvents(AgentEvents):
 
     def put_compacted_context(self, *, through_event_id: int, text: str) -> None:
         """Store a summary and emit the write outcome."""
-        self._emit_compacted_context_event(
+        # Queue the start event before the write; publication remains asynchronous.
+        self.emit(
             {
                 "type": "compacted_context.put.started",
                 "through_event_id": through_event_id,
@@ -176,9 +177,12 @@ class RuntimeAgentEvents(AgentEvents):
                 error = FlowerError.from_json(exc.response.text)
                 if error is not None:
                     event["error_code"] = error.code
-            self._emit_compacted_context_event(event)
+            try:
+                self.emit(event)
+            except Exception:  # pylint: disable=broad-exception-caught
+                log(ERROR, "Failed to publish compacted context event.", exc_info=True)
             raise
-        self._emit_compacted_context_event(
+        self.emit(
             {
                 "type": "compacted_context.put.succeeded",
                 "through_event_id": through_event_id,
@@ -253,13 +257,6 @@ class RuntimeAgentEvents(AgentEvents):
             error = self._error
         if error is not None:
             raise RuntimeError("Failed to publish AgentApp events.") from error
-
-    def _emit_compacted_context_event(self, event: JSONObject) -> None:
-        """Keep event publication failures from changing summary request outcomes."""
-        try:
-            self.emit(event)
-        except Exception:  # pylint: disable=broad-exception-caught
-            log(ERROR, "Failed to publish compacted context event.", exc_info=True)
 
 
 class RuntimeAgentSession(AgentSession):
