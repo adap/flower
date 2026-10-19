@@ -228,6 +228,29 @@ class TestRayBackend(TestCase):
         self.assertIn("Lowering these resources could help", output)
         self.assertNotIn("GPU discovery failure", output)
 
+    def test_gpu_on_another_node_keeps_generic_warning(self) -> None:
+        """Test that a GPU on any node rules out a discovery failure.
+
+        The per-node counts only retain the last node's values, so a cluster whose GPU
+        sits on an earlier node must not be reported as having no GPU at all. Here the
+        GPU exists but is smaller than requested, which lowering `num_gpus` would fix.
+        """
+        client_resources: dict[str, int | float] = {"num_cpus": 2, "num_gpus": 4}
+        with patch(
+            "flwr.simulation.ray_transport.ray_actor.ray.nodes",
+            return_value=[
+                {"Resources": {"CPU": 8, "GPU": 1}},  # Has a GPU, fewer than requested
+                {"Resources": {"CPU": 8}},  # No GPU, and it is the last node
+            ],
+        ):
+            with self.assertLogs("flwr", level="WARNING") as logs:
+                with self.assertRaises(ValueError):
+                    pool_size_from_resources(client_resources)
+
+        output = "\n".join(logs.output)
+        self.assertIn("Lowering these resources could help", output)
+        self.assertNotIn("GPU discovery failure", output)
+
     def test_case_with_no_usable_node(self) -> None:
         """Test that a cluster with no usable node raises ValueError.
 

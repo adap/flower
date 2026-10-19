@@ -95,6 +95,9 @@ def pool_size_from_resources(client_resources: dict[str, int | float]) -> int:
     # every node reporting empty resources), and both are read in the error path below.
     num_cpus: int | float = 0
     num_gpus: int | float = 0
+    # `num_gpus` above only retains the last node's value, so it cannot answer "does
+    # this cluster have a GPU at all?". Track that separately across every node.
+    cluster_num_gpus: int | float = 0
 
     # We calculate the number of actors that fit in a node per node basis. This is
     # the right way of doing it otherwise situations like the following arise: imagine
@@ -115,6 +118,7 @@ def pool_size_from_resources(client_resources: dict[str, int | float]) -> int:
         # e.g.: node without GPU; head node set up not to run tasks (zero resources)
         num_cpus = node_resources.get("CPU", 0)
         num_gpus = node_resources.get("GPU", 0)
+        cluster_num_gpus = max(cluster_num_gpus, num_gpus)
         num_actors = int(num_cpus / client_resources["num_cpus"])
 
         # If a GPU is present and client resources do require one
@@ -130,11 +134,13 @@ def pool_size_from_resources(client_resources: dict[str, int | float]) -> int:
 
     if total_num_actors == 0:
         requested_gpus = client_resources.get("num_gpus", 0)
-        if requested_gpus > 0 and not num_gpus:
-            # Ray detected no GPU at all while each client asks for a fraction of one.
-            # That is a GPU *discovery* failure rather than a resource shortage, so the
-            # usual "lower your resources" advice is actively misleading here: no
-            # non-zero `num_gpus` can be satisfied by a cluster reporting GPUs=0.
+        if requested_gpus > 0 and not cluster_num_gpus:
+            # No node in the cluster reported a GPU while each client asks for a
+            # fraction of one. That is a GPU *discovery* failure rather than a resource
+            # shortage, so the usual "lower your resources" advice is actively
+            # misleading here: no non-zero `num_gpus` can be satisfied by a cluster
+            # reporting GPUs=0. A cluster that does have a GPU somewhere, just not
+            # enough of one, falls through to the generic warning instead.
             log(
                 WARNING,
                 "Ray reports no GPUs (GPUs=%s) but each client requests num_gpus=%s. "
@@ -144,7 +150,7 @@ def pool_size_from_resources(client_resources: dict[str, int | float]) -> int:
                 "Note that an ML framework reporting a usable GPU (for instance "
                 "`torch.cuda.is_available()` returning True) does not imply Ray found "
                 "one -- they discover devices independently.",
-                num_gpus,
+                cluster_num_gpus,
                 requested_gpus,
             )
             if os.path.exists("/dev/kfd"):
