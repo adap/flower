@@ -35,6 +35,7 @@ from uuid import uuid4
 from google.protobuf.message import DecodeError
 from parameterized import parameterized
 from sqlalchemy import event, insert, select, update
+from sqlalchemy.exc import OperationalError
 from sqlalchemy.sql.dml import Update
 
 from flwr.app import DEFAULT_TTL, Error, Message, RecordDict
@@ -73,6 +74,7 @@ from flwr.supercore.corestate import CoreState
 from flwr.supercore.corestate.corestate_test import StateTest as CoreStateTest
 from flwr.supercore.corestate.utils_test import create_task_message
 from flwr.supercore.date import now
+from flwr.supercore.error import ApiErrorCode, FlowerError
 from flwr.supercore.fab import Fab
 from flwr.supercore.inflatable.inflatable_object import get_object_tree
 from flwr.supercore.object_store.object_store_factory import ObjectStoreFactory
@@ -112,6 +114,149 @@ class StateTest(CoreStateTest):
         """Create a P-384 public key for node creation."""
         _, public_key = generate_key_pairs()
         return public_key_to_bytes(public_key)
+
+    def test_check_message_policy_empty_batch(self) -> None:
+        """Skip all lookups for an empty batch."""
+        # Prepare: Track run and federation lookups on a fresh state.
+        state = self.state_factory()
+        with (
+            patch.object(state, "get_run_info") as get_runs,
+            patch.object(state.federation_manager, "filter_nodes") as filter_nodes,
+        ):
+            # Execute & Assert: An empty batch produces no policy results.
+            # pylint: disable-next=protected-access
+            assert state._check_message_policy([]) == []
+        # Assert: No run or federation lookup was needed.
+        get_runs.assert_not_called()
+        filter_nodes.assert_not_called()
+
+    @parameterized.expand([(0, True), (1, True), (2, True), (3, False)])  # type: ignore
+    def test_check_message_policy_run_status(
+        self, transitions: int, expected: bool
+    ) -> None:
+        """Allow unfinished runs, including a pending SuperLink prompt."""
+        # Prepare: Create a SuperLink message for a run in the requested status.
+        state = self.state_factory()
+        run_id = create_dummy_run(state)
+        transition_run_status(state, run_id, transitions)
+        message = create_ins_message_obj(SUPERLINK_NODE_ID, SUPERLINK_NODE_ID, run_id)
+        with patch.object(
+            state.federation_manager,
+            "filter_nodes",
+            wraps=state.federation_manager.filter_nodes,
+        ) as filter_nodes:
+            # Execute & Assert: Accept the message only while the run is unfinished.
+            # pylint: disable-next=protected-access
+            assert state._check_message_policy((message,)) == [expected]
+        # Assert: Only unfinished runs require a federation membership lookup.
+        if expected:
+            filter_nodes.assert_called_once_with(
+                {SUPERLINK_NODE_ID}, NOOP_FEDERATION_ID
+            )
+        else:
+            filter_nodes.assert_not_called()
+
+    def test_check_message_policy_batches_runs_and_federations(self) -> None:
+        """Check both endpoints independently while sharing federation lookups."""
+        # Prepare: Mix runs, federations, and allowed and disallowed node IDs.
+        state = self.state_factory()
+        run_a = create_dummy_run(state)
+        run_b = create_dummy_run(state)
+        run_c = create_dummy_run(state, federation_id="other")
+        finished = create_dummy_run(state, federation_id="finished")
+        transition_run_status(state, finished, 3)
+        messages = [
+            create_ins_message_obj(10, 20, run_a),
+            create_ins_message_obj(30, 20, run_b),
+            create_ins_message_obj(SUPERLINK_NODE_ID, 10, run_b),
+            create_ins_message_obj(10, 30, run_a),
+            create_ins_message_obj(40, 40, run_c),
+            create_ins_message_obj(30, 30, run_a),
+            create_ins_message_obj(10, 20, finished),
+            create_ins_message_obj(10, 20, 0),
+        ]
+        members = {
+            NOOP_FEDERATION_ID: {SUPERLINK_NODE_ID, 10, 20},
+            "other": {40},
+        }
+        with (
+            patch.object(state, "get_run_info", wraps=state.get_run_info) as get_runs,
+            patch.object(
+                state.federation_manager,
+                "filter_nodes",
+                side_effect=lambda nodes, federation: nodes & members[federation],
+            ) as filter_nodes,
+        ):
+            # Execute & Assert: Each message receives its policy result in input order.
+            # pylint: disable-next=protected-access
+            assert state._check_message_policy(messages) == [
+                True,
+                False,
+                True,
+                False,
+                True,
+                False,
+                False,
+                False,
+            ]
+        # Assert: Share lookups across messages without storing any messages.
+        get_runs.assert_called_once_with(
+            run_ids=sorted({run_a, run_b, run_c, finished, 0})
+        )
+        assert filter_nodes.call_count == 2
+        filter_nodes.assert_any_call(
+            {SUPERLINK_NODE_ID, 10, 20, 30}, NOOP_FEDERATION_ID
+        )
+        filter_nodes.assert_any_call({40}, "other")
+        assert state.num_message_ins() == 0
+        assert state.num_message_res() == 0
+
+    def test_check_message_policy_missing_federation(self) -> None:
+        """Propagate the manager's error when a federation does not exist."""
+        # Prepare: Mix messages from missing and existing federations.
+        state = self.state_factory()
+        missing = create_dummy_run(state, federation_id="missing")
+        valid = create_dummy_run(state)
+        messages = [
+            create_ins_message_obj(SUPERLINK_NODE_ID, SUPERLINK_NODE_ID, missing),
+            create_ins_message_obj(SUPERLINK_NODE_ID, SUPERLINK_NODE_ID, valid),
+        ]
+
+        # Execute & Assert: A missing federation raises instead of rejecting a message.
+        with self.assertRaises(ValueError):
+            # pylint: disable-next=protected-access
+            state._check_message_policy(messages)
+
+    @parameterized.expand(  # type: ignore
+        [
+            ("get_run_info", OperationalError("select", {}, RuntimeError("offline"))),
+            ("filter_nodes", OperationalError("select", {}, RuntimeError("offline"))),
+            (
+                "filter_nodes",
+                FlowerError(
+                    ApiErrorCode.FEDERATION_NOT_FOUND_OR_NO_PERMISSION, "missing"
+                ),
+            ),
+            ("filter_nodes", FlowerError(ApiErrorCode.NO_PERMISSIONS, "denied")),
+            ("filter_nodes", ValueError("unexpected failure")),
+        ]
+    )
+    def test_check_message_policy_propagates_errors(
+        self, method: str, error: Exception
+    ) -> None:
+        """Propagate all lookup errors without converting them to policy rejection."""
+        # Prepare: Make the selected lookup raise the supplied error.
+        state = self.state_factory()
+        run_id = create_dummy_run(state)
+        message = create_ins_message_obj(SUPERLINK_NODE_ID, SUPERLINK_NODE_ID, run_id)
+        target = state if method == "get_run_info" else state.federation_manager
+        with patch.object(target, method, side_effect=error):
+            # Execute & Assert: Policy evaluation propagates the lookup error.
+            with self.assertRaises(type(error)) as caught:
+                # pylint: disable-next=protected-access
+                state._check_message_policy([message])
+        # Assert: The caller receives the original exception unchanged.
+        assert caught.exception is error
 
     def test_store_and_get_fab(self) -> None:
         """Test storing and retrieving a FAB."""
