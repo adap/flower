@@ -30,7 +30,6 @@ from flwr.common.constant import SUPERLINK_NODE_ID
 # pylint: disable=E0611
 from flwr.proto import transport_pb2 as pb2
 from flwr.proto.fab_pb2 import Fab as ProtoFab
-from flwr.proto.fleet_pb2 import PullMessagesRequest
 from flwr.proto.message_pb2 import Context as ProtoContext
 from flwr.proto.message_pb2 import Message as ProtoMessage
 from flwr.proto.message_pb2 import MessageIDs
@@ -77,20 +76,18 @@ from .serde import (
 )
 
 
-@pytest.mark.parametrize("request_type", [PullAppMessagesRequest, PullMessagesRequest])
 @pytest.mark.parametrize("message_ids", [None, [], ["message-1", "message-2"]])
 def test_correlation_filter_round_trip(
-    request_type: type[PullAppMessagesRequest | PullMessagesRequest],
     message_ids: list[str] | None,
 ) -> None:
     """Preserve absent, empty, and populated filters across the wire."""
-    request = request_type(
+    request = PullAppMessagesRequest(
         reply_to_message_ids=(
             MessageIDs(message_ids=message_ids) if message_ids is not None else None
         )
     )
 
-    restored = request_type.FromString(request.SerializeToString())
+    restored = PullAppMessagesRequest.FromString(request.SerializeToString())
 
     assert restored.HasField("reply_to_message_ids") == (message_ids is not None)
     restored_ids = (

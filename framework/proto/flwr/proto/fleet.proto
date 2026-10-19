@@ -89,10 +89,7 @@ message UnregisterNodeFleetResponse {}
 // PullMessages messages
 message PullMessagesRequest {
   Node node = 1;
-  reserved 2;
-  reserved "message_ids";
-  // Absent means no correlation filter; present with no IDs matches nothing.
-  optional MessageIDs reply_to_message_ids = 3;
+  repeated string message_ids = 2;
 }
 message PullMessagesResponse {
   Reconnect reconnect = 1;

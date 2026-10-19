@@ -42,8 +42,6 @@ message PushAppMessagesResponse {
 
 // PullAppMessages messages
 message PullAppMessagesRequest {
-  reserved 2;
-  reserved "message_ids";
   // Absent means no correlation filter; present with no IDs matches nothing.
   optional MessageIDs reply_to_message_ids = 3;
 }

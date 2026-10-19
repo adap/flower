@@ -156,22 +156,19 @@ class PullMessagesRequest(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
 
     NODE_FIELD_NUMBER: builtins.int
-    REPLY_TO_MESSAGE_IDS_FIELD_NUMBER: builtins.int
+    MESSAGE_IDS_FIELD_NUMBER: builtins.int
     @property
     def node(self) -> flwr.proto.node_pb2.Node: ...
     @property
-    def reply_to_message_ids(self) -> flwr.proto.message_pb2.MessageIDs:
-        """Absent means no correlation filter; present with no IDs matches nothing."""
-
+    def message_ids(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.str]: ...
     def __init__(
         self,
         *,
         node: flwr.proto.node_pb2.Node | None = ...,
-        reply_to_message_ids: flwr.proto.message_pb2.MessageIDs | None = ...,
+        message_ids: collections.abc.Iterable[builtins.str] | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["_reply_to_message_ids", b"_reply_to_message_ids", "node", b"node", "reply_to_message_ids", b"reply_to_message_ids"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["_reply_to_message_ids", b"_reply_to_message_ids", "node", b"node", "reply_to_message_ids", b"reply_to_message_ids"]) -> None: ...
-    def WhichOneof(self, oneof_group: typing.Literal["_reply_to_message_ids", b"_reply_to_message_ids"]) -> typing.Literal["reply_to_message_ids"] | None: ...
+    def HasField(self, field_name: typing.Literal["node", b"node"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing.Literal["message_ids", b"message_ids", "node", b"node"]) -> None: ...
 
 global___PullMessagesRequest = PullMessagesRequest
 
