@@ -123,6 +123,7 @@ def test_mcp_tool_error_preserves_redacted_diagnostics(
 def test_mcp_session_error_preserves_redacted_diagnostics(failure: str) -> None:
     """Preserve nested session failures without exposing the bound token."""
     message = "Denied xoxp-secret"
+    credentials: JSONObject = {"access_token": "xoxp-secret"}
     session = create_autospec(ClientSession, instance=True)
     session.__aenter__.return_value = session
     cause: Exception
@@ -146,7 +147,7 @@ def test_mcp_session_error_preserves_redacted_diagnostics(failure: str) -> None:
         transport.return_value.__aenter__.return_value = (Mock(), Mock(), Mock())
         with pytest.raises(slack_mcp.SlackApiError) as error:
             registry.invoke_connector(
-                "slack__discover_tools", {}, Mock(), {"access_token": "xoxp-secret"}, {}
+                "slack__discover_tools", {}, Mock(), credentials, {}
             )
     assert error.value.code == (
         "invalid_tools" if failure == "connector" else "request_failed"
