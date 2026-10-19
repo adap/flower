@@ -11,217 +11,309 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# ===============================================================================
-"""Tests for the Attio connector."""
+# ==============================================================================
+"""Tests for Attio MCP discovery, execution, and OAuth."""
 
+import traceback
+from collections.abc import Iterator
 from typing import cast
-from unittest.mock import Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 from urllib.parse import parse_qs, urlparse
 
+import httpx
 import pytest
+from mcp import ClientSession, types
+from mcp.shared.exceptions import McpError
 
 from flwr.supercore.typing import JSONObject, JSONValue
 
 from .. import registry
-from ..definition import ActionAccess
+from ..definition import ActionAccess, ConnectorExecutionContext
 from ..oauth import OAuthFlow
-from .actions import ACTIONS
-from .definition import ATTIO_CONNECTOR_REF, PROVIDER
-from .executors import AttioApiError
+from .definition import ATTIO_CONNECTOR_REF, CONNECTOR, PROVIDER
+from .mcp import AttioApiError, discover_tools, execute_tool
 
-_HTTP_REQUEST = "flwr.supercore.task_process.connector.http.requests.request"
-_TOKEN_REQUEST = "flwr.supercore.task_process.connector.oauth.requests.post"
-_IDENTITY_REQUEST = "flwr.supercore.task_process.connector.oauth.requests.request"
-_CREDENTIALS: JSONObject = {"access_token": "attio-secret"}
+_ACCESS_TOKEN = "attio-private-token-fixture"
+_CREDENTIALS: JSONObject = {"access_token": _ACCESS_TOKEN}
 _REDIRECT_URI = "https://client.example/oauth/attio"
+_TOKEN_REQUEST = "flwr.supercore.task_process.connector.oauth.requests.post"
 
 
-def _response(payload: object, status_code: int = 200) -> Mock:
-    """Return a minimal HTTP response mock."""
-    response = Mock(status_code=status_code)
-    response.json.return_value = payload
-    return response
+@pytest.fixture(name="send_request")
+def fixture_send_request() -> Iterator[AsyncMock]:
+    """Use fresh SDK sessions with mocked transport and protocol requests."""
+    send_request = AsyncMock()
+    transport = MagicMock()
+    transport.__aenter__.return_value = (Mock(), Mock(), Mock())
+    with (
+        patch.object(ClientSession, "send_request", send_request),
+        patch.object(ClientSession, "initialize", AsyncMock()),
+        patch.object(
+            ClientSession,
+            "__aenter__",
+            autospec=True,
+            side_effect=lambda client: client,
+        ),
+        patch.object(ClientSession, "__aexit__", AsyncMock(return_value=False)),
+        patch(
+            "mcp.client.streamable_http.streamable_http_client", return_value=transport
+        ),
+    ):
+        yield send_request
 
 
-def _flow() -> OAuthFlow:
-    return OAuthFlow(
+def _context() -> ConnectorExecutionContext:
+    return ConnectorExecutionContext(
+        credentials=_CREDENTIALS, config={}, usage_recorder=Mock()
+    )
+
+
+def test_paginated_discovery_and_execution(send_request: AsyncMock) -> None:
+    """Preserve native names, schemas, and results without rediscovery on calls."""
+    schema = {"type": "object", "properties": {"query": {"type": "string"}}}
+    send_request.side_effect = [
+        types.ListToolsResult(
+            tools=[
+                types.Tool(
+                    name="search-records",
+                    description="Search records",
+                    inputSchema=schema,
+                )
+            ],
+            nextCursor="next",
+        ),
+        types.ListToolsResult(
+            tools=[types.Tool(name="create-note", inputSchema=schema)]
+        ),
+    ]
+    assert not registry.get_connector_tools(ATTIO_CONNECTOR_REF)
+    assert CONNECTOR.executors == {}
+    assert registry.get_connector_discovery_tool(ATTIO_CONNECTOR_REF) == (
+        "attio__discover_tools"
+    )
+    tools = cast(
+        list[JSONObject],
+        registry.invoke_connector(
+            "attio__discover_tools", {}, Mock(), _CREDENTIALS, {}
+        ),
+    )
+    assert [tool["name"] for tool in tools] == [
+        "attio_search-records",
+        "attio_create-note",
+    ]
+    assert tools[0]["description"] == "Search records"
+    assert tools[0]["parameters"] == schema
+    assert send_request.await_count == 2
+    assert send_request.await_args_list[1].args[0].root.params.cursor == "next"
+    output = types.CallToolResult(
+        content=[
+            types.TextContent(type="text", text="done"),
+            types.ImageContent(type="image", data="eA==", mimeType="image/png"),
+        ],
+        structuredContent={"count": 1},
+    )
+    send_request.reset_mock(side_effect=True)
+    send_request.side_effect = [output, RuntimeError("Catalog unavailable")]
+    arguments: JSONObject = {"query": "Flower", "data": {"items": [1, False, None]}}
+    result = registry.invoke_connector(
+        "attio_search-records", arguments, Mock(), _CREDENTIALS, {}
+    )
+    assert result == output.model_dump(mode="json", by_alias=True, exclude_none=True)
+    send_request.assert_awaited_once_with(
+        types.ClientRequest(
+            types.CallToolRequest(
+                params=types.CallToolRequestParams(
+                    name="search-records", arguments=arguments
+                )
+            )
+        ),
+        types.CallToolResult,
+    )
+
+
+def test_discovery_access_and_authenticated_transport(send_request: AsyncMock) -> None:
+    """Use the bound token and classify tools conservatively from annotations."""
+    send_request.return_value = types.ListToolsResult(
+        tools=[
+            types.Tool(
+                name="whoami",
+                inputSchema={},
+                annotations=types.ToolAnnotations(readOnlyHint=True),
+            ),
+            types.Tool(
+                name="create-note",
+                inputSchema={},
+                annotations=types.ToolAnnotations(readOnlyHint=False),
+            ),
+            types.Tool(name="future-tool", inputSchema={}),
+        ]
+    )
+    with patch(
+        "flwr.supercore.task_process.connector.attio.mcp.httpx.AsyncClient",
+        wraps=httpx.AsyncClient,
+    ) as client:
+        actions = discover_tools(_context())
+    assert [action.access for action in actions] == [
+        ActionAccess.READ,
+        ActionAccess.WRITE,
+        ActionAccess.WRITE,
+    ]
+    assert client.call_args.kwargs["headers"] == {
+        "Authorization": f"Bearer {_ACCESS_TOKEN}"
+    }
+    assert client.call_args.kwargs["follow_redirects"] is False
+
+
+@pytest.mark.parametrize("cursors", [("next", "next"), ("first", "second", "first")])
+def test_discovery_rejects_repeated_cursors(
+    send_request: AsyncMock, cursors: tuple[str, ...]
+) -> None:
+    """Stop at the first repeated cursor instead of looping indefinitely."""
+    send_request.side_effect = [
+        types.ListToolsResult(tools=[], nextCursor=cursor) for cursor in cursors
+    ]
+    with pytest.raises(AttioApiError) as error:
+        discover_tools(_context())
+    assert error.value.code == "invalid_tools"
+    assert send_request.await_count == len(cursors)
+
+
+@pytest.mark.parametrize("failure", ["tool", "http", "protocol"])
+def test_error_details_are_preserved_and_redacted(
+    send_request: AsyncMock, failure: str
+) -> None:
+    """Forward diagnostics without leaking credentials through exceptions."""
+    message = f"Denied {_ACCESS_TOKEN}"
+    if failure == "tool":
+        send_request.return_value = types.CallToolResult(
+            content=[types.TextContent(type="text", text=message)], isError=True
+        )
+    elif failure == "http":
+        send_request.side_effect = httpx.HTTPStatusError(
+            message,
+            request=httpx.Request("POST", "https://mcp.attio.com/mcp"),
+            response=httpx.Response(403),
+        )
+    else:
+        send_request.side_effect = ExceptionGroup(
+            "MCP failed", [McpError(types.ErrorData(code=-32602, message=message))]
+        )
+    with pytest.raises(AttioApiError) as error:
+        registry.invoke_connector("attio_whoami", {}, Mock(), _CREDENTIALS, {})
+    assert error.value.code == ("tool_error" if failure == "tool" else "request_failed")
+    assert error.value.message == "Denied [REDACTED]"
+    assert _ACCESS_TOKEN not in "".join(traceback.format_exception(error.value))
+    if failure == "http":
+        assert error.value.status_code == 403
+
+
+@pytest.mark.parametrize("token", [None, "", 42])
+def test_invalid_credentials(token: JSONValue) -> None:
+    """Reject missing or invalid access tokens before opening a connection."""
+    context = ConnectorExecutionContext(
+        credentials={"access_token": token}, config={}, usage_recorder=Mock()
+    )
+    with pytest.raises(AttioApiError) as error:
+        discover_tools(context)
+    assert error.value.code == "invalid_credentials"
+
+
+def test_execution_requires_action_name() -> None:
+    """Reject calls without a remote tool name."""
+    with pytest.raises(AttioApiError) as error:
+        execute_tool({}, _context())
+    assert error.value.code == "invalid_tool"
+
+
+def test_oauth_uses_mcp_endpoints_and_pkce() -> None:
+    """Use Attio's MCP OAuth flow and refresh tokens without REST identity calls."""
+    flow = OAuthFlow(
         PROVIDER,
         client_id="client-id",
         client_secret="client-secret",
         redirect_uri=_REDIRECT_URI,
     )
-
-
-def _invoke(name: str, arguments: JSONObject) -> JSONValue:
-    return registry.invoke_connector(name, arguments, Mock(), _CREDENTIALS, {})
-
-
-def test_attio_actions_are_registered_as_read_only() -> None:
-    """Attio should expose six account-scoped read actions."""
-    assert [action.name for action in ACTIONS] == [
-        "identify",
-        "get_workspace_member",
-        "search_records",
-        "list_meetings",
-        "list_call_recordings",
-        "get_call_transcript",
-    ]
-    assert all(action.access is ActionAccess.READ for action in ACTIONS)
-    tools = registry.get_connector_tools(ATTIO_CONNECTOR_REF)
-    assert [tool["name"] for tool in tools] == [
-        f"{ATTIO_CONNECTOR_REF}_{action.name}" for action in ACTIONS
-    ]
-    schemas = {action.name: action.input_schema for action in ACTIONS}
-    search_schema = schemas["search_records"]
-    assert "request_as" in cast(list[JSONValue], search_schema["required"])
-    meeting_properties = cast(JSONObject, schemas["list_meetings"]["properties"])
-    assert cast(JSONObject, meeting_properties["participants"])["type"] == "string"
-    for schema in schemas.values():
-        properties = cast(JSONObject, schema["properties"])
-        if limit := properties.get("limit"):
-            assert "maximum" not in cast(JSONObject, limit)
-
-
-def test_attio_actions_forward_requests() -> None:
-    """Attio actions should forward inputs without semantic rewriting."""
-    member_id = "CB59AB17-AD15-460C-A126-0715617C0853"
-    search: JSONObject = {
-        "query": "",
-        "objects": ["people"],
-        "limit": 26,
-        "request_as": {"type": "workspace"},
-    }
-    meetings: JSONObject = {
-        "limit": 201,
-        "cursor": "0",
-        "linked_record_id": "me",
-        "participants": "me",
-        "sort": "latest",
-        "ends_from": "2026-08-01T00:00:00Z",
-        "starts_before": "2026-09-01T00:00:00Z",
-        "timezone": "Europe/Berlin",
-    }
-    cases: list[tuple[str, JSONObject, str, str, JSONObject]] = [
-        ("attio_identify", {}, "GET", "/self", {"params": {}}),
-        (
-            "attio_get_workspace_member",
-            {"workspace_member_id": member_id},
-            "GET",
-            f"/workspace_members/{member_id}",
-            {"params": {}},
-        ),
-        (
-            "attio_search_records",
-            search,
-            "POST",
-            "/objects/records/search",
-            {"json": search},
-        ),
-        (
-            "attio_list_meetings",
-            meetings,
-            "GET",
-            "/meetings",
-            {"params": {key: str(value) for key, value in meetings.items()}},
-        ),
-        ("attio_list_meetings", {}, "GET", "/meetings", {"params": {}}),
-    ]
-    response = _response({"data": []})
-    for name, arguments, method, path, expected_kwargs in cases:
-        with patch(_HTTP_REQUEST, return_value=response) as request:
-            assert _invoke(name, arguments) == {"data": []}
-
-        assert request.call_args.args == (method, f"https://api.attio.com/v2{path}")
-        for key, value in expected_kwargs.items():
-            assert request.call_args.kwargs[key] == value
-
-
-def test_api_errors_include_attio_code_and_message() -> None:
-    """Attio's documented error fields should remain readable to callers."""
-    with (
-        patch(
-            _HTTP_REQUEST,
-            return_value=_response(
-                {
-                    "code": "invalid_query",
-                    "message": "Participants must be email addresses",
-                },
-                status_code=400,
-            ),
-        ),
-        pytest.raises(AttioApiError) as error,
-    ):
-        _invoke(
-            "attio_search_records",
-            {
-                "query": "Flower",
-                "objects": ["people"],
-                "request_as": {"type": "workspace"},
-            },
+    url = urlparse(
+        flow.build_authorization_url(
+            redirect_uri=_REDIRECT_URI,
+            state="oauth-state",
+            pkce_challenge="pkce-challenge",
         )
-
-    assert error.value.code == "invalid_query"
-    assert str(error.value) == (
-        "Attio API request failed: invalid_query (400): "
-        "Participants must be email addresses."
     )
-
-
-@pytest.mark.parametrize(
-    ("identity_payload", "expected_name"),
-    [
-        ({"data": {"workspace": {"name": "Salarya"}}}, "Attio · Salarya"),
-        ({"active": True, "workspace_name": "Salarya"}, "Attio · Salarya"),
-        (
-            {"active": True, "sub": "workspace-1", "client_id": "app-1"},
-            "Attio · workspace-1",
-        ),
-    ],
-)
-def test_oauth_builds_url_and_exchanges_code(
-    identity_payload: JSONObject, expected_name: str
-) -> None:
-    """OAuth should validate redirects and return Attio credentials."""
-    url = _flow().build_authorization_url(
-        redirect_uri=_REDIRECT_URI,
-        state="oauth-state",
-        pkce_challenge="shared-pkce-challenge",
+    assert f"{url.scheme}://{url.netloc}{url.path}" == (
+        "https://app.attio.com/oidc/authorize"
     )
-    query = parse_qs(urlparse(url).query)
-    assert query["redirect_uri"] == [_REDIRECT_URI]
-    assert "code_challenge" not in query
-    with pytest.raises(ValueError):
-        _flow().resolve_redirect_uri("https://attacker.example/callback")
+    assert parse_qs(url.query) == {
+        "client_id": ["client-id"],
+        "redirect_uri": [_REDIRECT_URI],
+        "response_type": ["code"],
+        "state": ["oauth-state"],
+        "scope": ["mcp offline_access"],
+        "code_challenge": ["pkce-challenge"],
+        "code_challenge_method": ["S256"],
+    }
+    with pytest.raises(ValueError, match="PKCE"):
+        flow.build_authorization_url(
+            redirect_uri=_REDIRECT_URI, state="oauth-state", pkce_challenge=None
+        )
+    with pytest.raises(ValueError, match="redirect URI"):
+        flow.resolve_redirect_uri("https://attacker.example/callback")
+    with pytest.raises(RuntimeError, match="exchange failed"):
+        flow.exchange_code(code="code", redirect_uri=_REDIRECT_URI, pkce_verifier=None)
 
-    response = _response({"access_token": "attio-access", "token_type": "Bearer"})
+    response = Mock(status_code=200)
+    response.json.return_value = {
+        "access_token": "mcp-access",
+        "token_type": "Bearer",
+        "refresh_token": "mcp-refresh",
+        "expires_in": 3600,
+        "scope": "mcp offline_access",
+    }
     with (
+        patch("flwr.supercore.task_process.connector.oauth.time", return_value=1000),
         patch(_TOKEN_REQUEST, return_value=response) as post,
         patch(
-            _IDENTITY_REQUEST,
-            return_value=_response(identity_payload),
+            "flwr.supercore.task_process.connector.oauth.requests.request"
         ) as identity,
     ):
-        credentials, config = _flow().exchange_code(
+        credentials, config = flow.exchange_code(
             code="authorization-code",
             redirect_uri=_REDIRECT_URI,
-            pkce_verifier="shared-pkce-verifier",
+            pkce_verifier="pkce-verifier",
         )
-        assert _flow().refresh_credentials(credentials) == credentials
-
-    post.assert_called_once()
-    assert credentials == {"access_token": "attio-access", "token_type": "Bearer"}
-    assert config == {"display_name": expected_name}
-    assert identity.call_args.args == ("GET", "https://api.attio.com/v2/self")
-    assert post.call_args.kwargs["data"] == {
-        "client_id": "client-id",
-        "client_secret": "client-secret",
-        "grant_type": "authorization_code",
-        "code": "authorization-code",
-        "redirect_uri": _REDIRECT_URI,
-    }
-    with pytest.raises(ValueError):
-        _flow().exchange_code(
-            code="authorization-code",
-            redirect_uri="https://attacker.example/callback",
-            pkce_verifier="shared-pkce-verifier",
-        )
+        post.assert_called_once()
+        assert post.call_args.args == ("https://app.attio.com/oidc/token",)
+        assert post.call_args.kwargs["data"] == {
+            "client_id": "client-id",
+            "client_secret": "client-secret",
+            "grant_type": "authorization_code",
+            "code": "authorization-code",
+            "redirect_uri": _REDIRECT_URI,
+            "code_verifier": "pkce-verifier",
+        }
+        assert credentials == {
+            "access_token": "mcp-access",
+            "token_type": "Bearer",
+            "refresh_token": "mcp-refresh",
+            "expires_in": 3600,
+            "expires_at": 4600,
+        }
+        assert not config
+        identity.assert_not_called()
+        response.json.return_value = {
+            "access_token": "refreshed-access",
+            "token_type": "Bearer",
+            "refresh_token": "rotated-refresh",
+            "expires_in": 3600,
+        }
+        credentials["expires_at"] = 0
+        refreshed = flow.refresh_credentials(credentials)
+        assert refreshed["access_token"] == "refreshed-access"
+        assert refreshed["refresh_token"] == "rotated-refresh"
+        assert post.call_args.args == ("https://app.attio.com/oidc/token",)
+        assert post.call_args.kwargs["data"] == {
+            "client_id": "client-id",
+            "client_secret": "client-secret",
+            "grant_type": "refresh_token",
+            "refresh_token": "mcp-refresh",
+        }
