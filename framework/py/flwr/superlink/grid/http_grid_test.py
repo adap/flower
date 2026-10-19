@@ -212,7 +212,7 @@ class TestHttpGrid(unittest.TestCase):
         reply_to_message_ids: Iterable[str] | None,
         expected_ids: list[str] | None,
     ) -> None:
-        """Preserve correlation filter presence, including empty iterables."""
+        """Preserve correlation filter presence across the wire."""
         self.mock_client.PullMessages.return_value = Mock(
             messages_list=[], message_object_trees=[]
         )
@@ -220,6 +220,7 @@ class TestHttpGrid(unittest.TestCase):
         self.assertEqual(list(self.grid.pull_messages(reply_to_message_ids)), [])
 
         request = self.mock_client.PullMessages.call_args.args[0]
+        request = PullAppMessagesRequest.FromString(request.SerializeToString())
         self.assertEqual(
             request.HasField("reply_to_message_ids"), expected_ids is not None
         )
