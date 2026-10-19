@@ -125,11 +125,6 @@ class Grid(ABC):
         -------
         messages : Iterable[Message]
             An iterable of messages received.
-
-        Raises
-        ------
-        NotImplementedError
-            If no correlation filter is provided to the legacy ``InMemoryGrid``.
         """
 
     @abstractmethod
