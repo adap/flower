@@ -44,6 +44,8 @@ from flwr.proto.message_pb2 import (  # pylint: disable=E0611
 from flwr.proto.runtime_pb2 import (  # pylint: disable=E0611
     AcquireTaskRequest,
     AcquireTaskResponse,
+    GetCompactedContextsRequest,
+    GetCompactedContextsResponse,
     GetConnectorRequest,
     GetConnectorResponse,
     GetNodesRequest,
@@ -58,6 +60,8 @@ from flwr.proto.runtime_pb2 import (  # pylint: disable=E0611
     PushAppMessagesResponse,
     PushTaskOutputRequest,
     PushTaskOutputResponse,
+    PutCompactedContextRequest,
+    PutCompactedContextResponse,
 )
 from flwr.proto.task_pb2 import Task  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkState
@@ -68,6 +72,9 @@ from flwr.supercore.constant import AUTOMATION_BATCH_LIMIT, TaskType
 from flwr.supercore.error import ApiErrorCode, FlowerError
 from flwr.supercore.object_store import NoObjectInStoreError
 from flwr.supercore.servicer.runtime import runtime_handlers as core_runtime_handlers
+from flwr.supercore.task_process.connector import registry as connector_registry
+from flwr.supercore.task_process.connector.oauth import OAuthFlow
+from flwr.supercore.utils import strict_json_dumps, strict_json_loads_object
 from flwr.superlink.servicer.control.control_handlers import process_due_automations
 from flwr.superlink.servicer.control.control_handlers import (
     start_automation as start_control_automation,
@@ -81,15 +88,52 @@ def get_run_series_events(
 ) -> GetRunSeriesEventsResponse:
     """Get events from all runs in the authenticated task's series."""
     log(DEBUG, "Runtime.GetRunSeriesEvents")
-
     run = state.get_run_info(run_ids=[task.run_id])[0]
     series = state.get_run_series(series_ids=[run.series_id])[0]
     series_runs = state.get_run_info(run_ids=series.run_ids)
     primary_task_ids = [
         run.primary_task_id for run in series_runs if run.primary_task_id is not None
     ]
-    events = state.get_task_events(task_ids=primary_task_ids)
+    events = state.get_task_events(
+        task_ids=primary_task_ids,
+        event_types=request.event_types or None,
+        after_task_event_id=(
+            request.after_event_id if request.HasField("after_event_id") else None
+        ),
+        before_task_event_id=(
+            request.before_event_id if request.HasField("before_event_id") else None
+        ),
+        last_n=request.last_n or None,
+    )
     return GetRunSeriesEventsResponse(events=events)
+
+
+def get_compacted_contexts(
+    request: GetCompactedContextsRequest, state: LinkState, task: Task
+) -> GetCompactedContextsResponse:
+    """Get summaries for the authenticated task's run series."""
+    runs = state.get_run_info(run_ids=[task.run_id])
+    if not runs:
+        raise FlowerError(
+            ApiErrorCode.RUN_ID_NOT_FOUND, f"Run {task.run_id} not found."
+        )
+    return core_runtime_handlers.get_compacted_contexts(
+        request, state, runs[0].series_id
+    )
+
+
+def put_compacted_context(
+    request: PutCompactedContextRequest, state: LinkState, task: Task
+) -> PutCompactedContextResponse:
+    """Store a summary for the authenticated task's run series."""
+    runs = state.get_run_info(run_ids=[task.run_id])
+    if not runs:
+        raise FlowerError(
+            ApiErrorCode.RUN_ID_NOT_FOUND, f"Run {task.run_id} not found."
+        )
+    return core_runtime_handlers.put_compacted_context(
+        request, state, runs[0].series_id
+    )
 
 
 def acquire_task(request: AcquireTaskRequest, state: LinkState) -> AcquireTaskResponse:
@@ -231,10 +275,35 @@ def get_connector(
     if connector is None:
         raise FlowerError(ApiErrorCode.CONNECTOR_NOT_FOUND, "Connector not found.")
 
+    credentials_json = connector.credentials_json
+    try:
+        credentials = strict_json_loads_object(credentials_json)
+        if OAuthFlow.credentials_need_refresh(credentials):
+
+            def refresh() -> str:
+                flow = connector_registry.get_oauth_flow(connector.connector_ref)
+                return strict_json_dumps(
+                    flow.refresh_credentials(credentials), compact=True
+                )
+
+            stored_credentials = state.update_connector_credentials(
+                connector.connector_id, credentials_json, refresh
+            )
+            if stored_credentials is None:
+                raise ValueError("Connector no longer exists.")
+            credentials = strict_json_loads_object(stored_credentials)
+        credentials.pop("refresh_token", None)
+        credentials_json = strict_json_dumps(credentials, compact=True)
+    except Exception:  # pylint: disable=broad-exception-caught
+        raise FlowerError(
+            ApiErrorCode.CONNECTOR_FAILURE,
+            "Connector credentials could not be refreshed.",
+        ) from None
+
     return GetConnectorResponse(
         connector_id=connector.connector_id,
         connector_ref=connector.connector_ref,
-        credentials_json=connector.credentials_json,
+        credentials_json=credentials_json,
         config_json=connector.config_json,
     )
 

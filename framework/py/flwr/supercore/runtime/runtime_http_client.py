@@ -35,6 +35,8 @@ from flwr.proto.runtime_pb2 import (  # pylint: disable=E0611
     AcquireTaskResponse,
     CreateTaskRequest,
     CreateTaskResponse,
+    GetCompactedContextsRequest,
+    GetCompactedContextsResponse,
     GetConnectorRequest,
     GetConnectorResponse,
     GetNodesRequest,
@@ -55,6 +57,8 @@ from flwr.proto.runtime_pb2 import (  # pylint: disable=E0611
     PushTaskMessageResponse,
     PushTaskOutputRequest,
     PushTaskOutputResponse,
+    PutCompactedContextRequest,
+    PutCompactedContextResponse,
     RecordTaskUsageRequest,
     RecordTaskUsageResponse,
     SendTaskHeartbeatRequest,
@@ -220,6 +224,28 @@ class RuntimeHttpClient(ProtobufClient):  # pylint: disable=too-many-public-meth
             rpc_method="/flwr.proto.Runtime/GetRunSeriesEvents",
             request=request,
             response_type=GetRunSeriesEventsResponse,
+        )
+
+    def GetCompactedContexts(
+        self, request: GetCompactedContextsRequest
+    ) -> GetCompactedContextsResponse:
+        """Get summaries from the authenticated task's run series."""
+        return self._unary_unary(
+            path="/v1/runtime/get-compacted-contexts",
+            rpc_method="/flwr.proto.Runtime/GetCompactedContexts",
+            request=request,
+            response_type=GetCompactedContextsResponse,
+        )
+
+    def PutCompactedContext(
+        self, request: PutCompactedContextRequest
+    ) -> PutCompactedContextResponse:
+        """Store a summary in the authenticated task's run series."""
+        return self._unary_unary(
+            path="/v1/runtime/put-compacted-context",
+            rpc_method="/flwr.proto.Runtime/PutCompactedContext",
+            request=request,
+            response_type=PutCompactedContextResponse,
         )
 
     def PullTaskMessage(

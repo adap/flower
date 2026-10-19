@@ -23,6 +23,17 @@ from collections.abc import Callable, Sequence
 from flwr.app import Context
 from flwr.supercore.typing import JSONObject
 
+# OpenResponses item types and streaming events used for run summaries.
+# See https://www.openresponses.org/reference
+# Schema: https://www.openresponses.org/openapi/openapi.json
+RUN_SUMMARY_EVENT_TYPES: tuple[str, ...] = (
+    "message",
+    "response.completed",
+    "response.incomplete",
+    "function_call",
+    "function_call_output",
+)
+
 
 class AgentConnectors(ABC):
     """Abstract base class for AgentApp connector execution."""
@@ -54,12 +65,48 @@ class AgentEvents(ABC):
     """Abstract base class for AgentApp run events."""
 
     @abstractmethod
-    def get_trace(self) -> list[JSONObject]:
-        """Get events from all runs in the current run series."""
+    def get_trace(
+        self,
+        *,
+        event_types: Sequence[str] | None = None,
+        after_event_id: int | None = None,
+        before_event_id: int | None = None,
+        last_n: int | None = None,
+    ) -> list[JSONObject]:
+        """Get matching events from all runs in the current run series.
+
+        Parameters
+        ----------
+        event_types : Optional[Sequence[str]] (default: None)
+            Filter by the given event types. If unset, include all event types.
+            Use `RUN_SUMMARY_EVENT_TYPES` for common summary inputs.
+        after_event_id : Optional[int] (default: None)
+            Return events with IDs greater than this value.
+        before_event_id : Optional[int] (default: None)
+            Return events with IDs less than this value.
+        last_n : Optional[int] (default: None)
+            Return the newest N matching events in ID order. If unset or zero,
+            return all matching events.
+
+        Returns
+        -------
+        list[JSONObject]
+            Matching event envelopes.
+        """
 
     @abstractmethod
     def emit(self, event: JSONObject) -> None:
         """Emit one structured run event."""
+
+    @abstractmethod
+    def get_compacted_contexts(
+        self, *, limit: int = 1, before_context_id: int | None = None
+    ) -> list[JSONObject]:
+        """Return the newest summaries."""
+
+    @abstractmethod
+    def put_compacted_context(self, *, through_event_id: int, text: str) -> None:
+        """Store a summary."""
 
 
 class AgentGrid(ABC):

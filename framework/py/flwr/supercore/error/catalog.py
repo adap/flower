@@ -439,4 +439,14 @@ API_ERROR_MAP: Final[dict[int, ApiErrorSpec]] = {
         http_status_code=status.HTTP_403_FORBIDDEN,
         public_message="Message run ID does not match the authenticated task.",
     ),
+    ApiErrorCode.RUNTIME_INVALID_COMPACTED_CONTEXT_REQUEST: ApiErrorSpec(
+        status_code=StatusCode.INVALID_ARGUMENT,
+        http_status_code=status.HTTP_400_BAD_REQUEST,
+        public_message="Invalid compacted context request.",
+    ),
+    ApiErrorCode.RUNTIME_COMPACTED_CONTEXT_ALREADY_EXISTS: ApiErrorSpec(
+        status_code=StatusCode.ALREADY_EXISTS,
+        http_status_code=status.HTTP_409_CONFLICT,
+        public_message="Compacted context already exists for this event in the series.",
+    ),
 }
