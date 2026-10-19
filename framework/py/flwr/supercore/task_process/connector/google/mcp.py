@@ -27,8 +27,8 @@ import httpx
 
 from flwr.supercore.typing import JSONObject
 
-from .definition import ActionAccess, ActionDefinition, ConnectorExecutionContext
-from .http import ConnectorApiError
+from ..definition import ActionAccess, ActionDefinition, ConnectorExecutionContext
+from ..http import ConnectorApiError
 
 if TYPE_CHECKING:
     from mcp import ClientSession

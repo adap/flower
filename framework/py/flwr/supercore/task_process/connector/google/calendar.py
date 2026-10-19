@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Google Drive connector definition."""
+"""Google Calendar connector definition."""
 
 from ..definition import (
     ConnectorDefinition,
@@ -21,19 +21,20 @@ from ..definition import (
     ProviderDefinition,
 )
 from ..oauth import load_oauth_flow
-from .mcp import create_client
+from .mcp import GoogleMcpClient
 
-GOOGLE_DRIVE_CONNECTOR_REF = "google_drive"
+GOOGLE_CALENDAR_CONNECTOR_REF = "google_calendar"
 
 OAUTH = OAuth2Definition(
     authorization_url="https://accounts.google.com/o/oauth2/v2/auth",
     token_url="https://oauth2.googleapis.com/token",
-    client_id_env="FLWR_GOOGLE_DRIVE_CLIENT_ID",
-    client_secret_env="FLWR_GOOGLE_DRIVE_CLIENT_SECRET",
-    redirect_uri_env="FLWR_GOOGLE_DRIVE_REDIRECT_URI",
+    client_id_env="FLWR_GOOGLE_CALENDAR_CLIENT_ID",
+    client_secret_env="FLWR_GOOGLE_CALENDAR_CLIENT_SECRET",
+    redirect_uri_env="FLWR_GOOGLE_CALENDAR_REDIRECT_URI",
     scopes=(
-        "https://www.googleapis.com/auth/drive.readonly",
-        "https://www.googleapis.com/auth/drive.file",
+        "https://www.googleapis.com/auth/calendar.calendarlist.readonly",
+        "https://www.googleapis.com/auth/calendar.events",
+        "https://www.googleapis.com/auth/calendar.events.freebusy",
         "https://www.googleapis.com/auth/userinfo.email",
     ),
     token_auth_method="client_secret_post",
@@ -46,14 +47,14 @@ OAUTH = OAuth2Definition(
 )
 
 PROVIDER = ProviderDefinition(
-    ref=GOOGLE_DRIVE_CONNECTOR_REF,
-    display_name="Google Drive",
-    description="Search, read, copy, and create Google Drive files.",
+    ref=GOOGLE_CALENDAR_CONNECTOR_REF,
+    display_name="Google Calendar",
+    description="Read Google calendars, find availability, and manage events.",
     actions=(),
     oauth=OAUTH,
 )
 
-CLIENT = create_client()
+CLIENT = GoogleMcpClient(url="https://calendarmcp.googleapis.com/mcp/v1")
 
 CONNECTOR = ConnectorDefinition.from_provider(
     provider=PROVIDER,

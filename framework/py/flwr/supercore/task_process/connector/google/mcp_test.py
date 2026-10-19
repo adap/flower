@@ -23,8 +23,8 @@ from mcp.types import CallToolResult, ListToolsResult, TextContent, Tool
 
 from flwr.supercore.typing import JSONObject
 
-from . import registry
-from .google_mcp import GoogleMcpApiError, GoogleMcpClient
+from .. import registry
+from .mcp import GoogleMcpApiError, GoogleMcpClient
 
 _CREDENTIALS: JSONObject = {
     "access_token": "access-token",

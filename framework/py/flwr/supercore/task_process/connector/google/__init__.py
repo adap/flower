@@ -12,11 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Gmail MCP client construction."""
+"""Google Workspace connectors."""
 
-from ..google_mcp import GoogleMcpClient
+from .definition import CONNECTORS
 
-
-def create_client() -> GoogleMcpClient:
-    """Build the Gmail MCP client."""
-    return GoogleMcpClient(url="https://gmailmcp.googleapis.com/mcp/v1")
+__all__ = [
+    "CONNECTORS",
+]

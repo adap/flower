@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Google Calendar connector definition."""
+"""Gmail connector definition."""
 
 from ..definition import (
     ConnectorDefinition,
@@ -21,20 +21,18 @@ from ..definition import (
     ProviderDefinition,
 )
 from ..oauth import load_oauth_flow
-from .mcp import create_client
+from .mcp import GoogleMcpClient
 
-GOOGLE_CALENDAR_CONNECTOR_REF = "google_calendar"
+GMAIL_CONNECTOR_REF = "gmail"
 
 OAUTH = OAuth2Definition(
     authorization_url="https://accounts.google.com/o/oauth2/v2/auth",
     token_url="https://oauth2.googleapis.com/token",
-    client_id_env="FLWR_GOOGLE_CALENDAR_CLIENT_ID",
-    client_secret_env="FLWR_GOOGLE_CALENDAR_CLIENT_SECRET",
-    redirect_uri_env="FLWR_GOOGLE_CALENDAR_REDIRECT_URI",
+    client_id_env="FLWR_GMAIL_CLIENT_ID",
+    client_secret_env="FLWR_GMAIL_CLIENT_SECRET",
+    redirect_uri_env="FLWR_GMAIL_REDIRECT_URI",
     scopes=(
-        "https://www.googleapis.com/auth/calendar.calendarlist.readonly",
-        "https://www.googleapis.com/auth/calendar.events",
-        "https://www.googleapis.com/auth/calendar.events.freebusy",
+        "https://www.googleapis.com/auth/gmail.modify",
         "https://www.googleapis.com/auth/userinfo.email",
     ),
     token_auth_method="client_secret_post",
@@ -47,14 +45,14 @@ OAUTH = OAuth2Definition(
 )
 
 PROVIDER = ProviderDefinition(
-    ref=GOOGLE_CALENDAR_CONNECTOR_REF,
-    display_name="Google Calendar",
-    description="Read Google calendars, find availability, and manage events.",
+    ref=GMAIL_CONNECTOR_REF,
+    display_name="Gmail",
+    description="Search and read Gmail messages, manage labels, and create drafts.",
     actions=(),
     oauth=OAUTH,
 )
 
-CLIENT = create_client()
+CLIENT = GoogleMcpClient(url="https://gmailmcp.googleapis.com/mcp/v1")
 
 CONNECTOR = ConnectorDefinition.from_provider(
     provider=PROVIDER,

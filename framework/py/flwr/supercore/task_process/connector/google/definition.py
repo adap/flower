@@ -12,11 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Google Calendar MCP client construction."""
+"""Register the Google Workspace connectors as one package."""
 
-from ..google_mcp import GoogleMcpClient
+from .calendar import CONNECTOR as GOOGLE_CALENDAR_CONNECTOR
+from .drive import CONNECTOR as GOOGLE_DRIVE_CONNECTOR
+from .gmail import CONNECTOR as GMAIL_CONNECTOR
 
-
-def create_client() -> GoogleMcpClient:
-    """Build the Google Calendar MCP client."""
-    return GoogleMcpClient(url="https://calendarmcp.googleapis.com/mcp/v1")
+CONNECTORS = (GMAIL_CONNECTOR, GOOGLE_CALENDAR_CONNECTOR, GOOGLE_DRIVE_CONNECTOR)
