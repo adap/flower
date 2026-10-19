@@ -20,6 +20,7 @@ import importlib
 import os
 import signal
 import threading
+from contextlib import nullcontext
 from unittest.mock import Mock
 
 import pytest
@@ -57,6 +58,11 @@ def test_run_model_once_cleans_up_fresh_task_state(
     details: str,
 ) -> None:
     """One invocation should own, report, and close its task-scoped state."""
+    span = Mock()
+    monkeypatch.setattr(
+        run_model_module, "trace_span", lambda *_, **__: nullcontext(span)
+    )
+    monkeypatch.setattr(run_model_module, "monotonic", Mock(side_effect=[1.0, 1.125]))
     client = Mock()
     client.PullTaskInput.return_value = PullTaskInputResponse(
         task_id=17,
@@ -95,6 +101,7 @@ def test_run_model_once_cleans_up_fresh_task_state(
         42,
         99,
     )
+    span.set_attribute.assert_any_call("flwr.task.bootstrap_ms", 125.0)
     output = client.PushTaskOutput.call_args.args[0]
     assert (output.sub_status, output.details) == (sub_status, details)
     assert retry_invoker.max_tries == 1
