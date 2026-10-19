@@ -134,11 +134,6 @@ class InMemoryGrid(Grid):
         This method is used to collect messages from the SuperLink that correspond to a
         set of given message IDs.
         """
-        # shortcut: legacy simulation requires IDs until its storage API is migrated.
-        if reply_to_message_ids is None:
-            raise NotImplementedError(
-                "Unfiltered pulls are not supported by InMemoryGrid."
-            )
         msg_ids = set(reply_to_message_ids)
         # Pull Messages
         message_res_list = self.state.get_message_res(
