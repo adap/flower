@@ -40,6 +40,8 @@ PROVIDER = ProviderDefinition(
         scopes=("mcp", "offline_access"),
         token_auth_method="client_secret_post",
         use_pkce=True,
+        authorization_params={"resource": "https://mcp.attio.com/mcp"},
+        token_params={"resource": "https://mcp.attio.com/mcp"},
         expected_token_type="bearer",
     ),
 )

@@ -108,7 +108,7 @@ def test_mcp_tool_error_redacts_credentials(session: Mock) -> None:
 
 
 def test_oauth_uses_mcp_endpoints_and_pkce() -> None:
-    """Authorize and exchange codes using Attio's MCP endpoints, scopes, and PKCE."""
+    """Target Attio's MCP resource during authorization, exchange, and refresh."""
     redirect_uri = "https://client.example/oauth/attio"
     flow = OAuthFlow(
         PROVIDER,
@@ -125,6 +125,7 @@ def test_oauth_uses_mcp_endpoints_and_pkce() -> None:
         "https://app.attio.com/oidc/authorize"
     )
     query = parse_qs(url.query)
+    assert query["resource"] == ["https://mcp.attio.com/mcp"]
     assert query["scope"] == ["mcp offline_access"]
     assert query["code_challenge"] == ["challenge"]
     assert query["code_challenge_method"] == ["S256"]
@@ -138,6 +139,12 @@ def test_oauth_uses_mcp_endpoints_and_pkce() -> None:
         credentials, _ = flow.exchange_code(
             code="code", redirect_uri=redirect_uri, pkce_verifier="verifier"
         )
-    assert post.call_args.args == ("https://app.attio.com/oidc/token",)
-    assert post.call_args.kwargs["data"]["code_verifier"] == "verifier"
+        assert post.call_args.args == ("https://app.attio.com/oidc/token",)
+        assert post.call_args.kwargs["data"]["code_verifier"] == "verifier"
+        assert post.call_args.kwargs["data"]["resource"] == "https://mcp.attio.com/mcp"
+
+        flow.refresh_credentials({"refresh_token": "refresh", "expires_at": 0})
+        assert post.call_count == 2
+        assert post.call_args.kwargs["data"]["grant_type"] == "refresh_token"
+        assert post.call_args.kwargs["data"]["resource"] == "https://mcp.attio.com/mcp"
     assert credentials["access_token"] == "mcp-access"
