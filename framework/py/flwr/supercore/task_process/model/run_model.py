@@ -24,6 +24,7 @@ from collections.abc import Callable, Iterator
 from concurrent.futures import Future
 from contextlib import ExitStack, contextmanager
 from logging import DEBUG, ERROR
+from time import monotonic
 from types import FrameType
 from typing import Any
 
@@ -71,6 +72,7 @@ class _ModelTaskLifecycle:  # pylint: disable=too-many-instance-attributes
         insecure: bool,
         certificates: bytes | None,
     ) -> None:
+        self._bootstrap_started = monotonic()
         self._runtime_api_address = runtime_api_address
         self._token = token
         self._insecure = insecure
@@ -96,6 +98,11 @@ class _ModelTaskLifecycle:  # pylint: disable=too-many-instance-attributes
             with trace_span(
                 "task.initialize", attributes=self._trace_attributes
             ) as initialization:
+                # Runtime client setup and token acceptance precede this span.
+                initialization.set_attribute(
+                    "flwr.task.bootstrap_ms",
+                    (monotonic() - self._bootstrap_started) * 1000,
+                )
                 self._heartbeat_sender = HeartbeatSender(
                     make_task_heartbeat_fn_http(self._client)
                 )
