@@ -20,6 +20,7 @@ from __future__ import annotations
 import json
 import os
 from collections.abc import Callable, Iterator
+from time import monotonic
 from typing import cast
 
 import requests
@@ -111,17 +112,23 @@ def invoke_model_provider(
         headers["Authorization"] = f"Bearer {api_key}"
     payload = dict(request)
     with trace_span("model.provider", attributes={"flwr.component": "model"}) as span:
+        started_at = monotonic()
+        if isinstance(request.get("model"), str):
+            span.set_attribute("flwr.model.name", cast(str, request["model"]))
         first_text = False
 
         def forward_event(event: JSONObject) -> None:
             nonlocal first_text
             if not first_text and event.get("type") == "response.output_text.delta":
                 first_text = True
+                span.set_attribute(
+                    "flwr.model.first_text_ms", (monotonic() - started_at) * 1000
+                )
                 span.add_event("provider.first_text")
             if on_stream_event is not None:
                 on_stream_event(event)
 
-        return _invoke_provider_response(
+        response = _invoke_provider_response(
             responses_url=responses_url,
             headers=headers,
             timeout=model_api_timeout(),
@@ -130,6 +137,17 @@ def invoke_model_provider(
             usage_recorder=usage_recorder,
             provider=_provider_from_request(payload),
         )
+        usage = response.get("usage")
+        if isinstance(usage, dict):
+            for key in ("input_tokens", "output_tokens"):
+                count = usage.get(key)
+                if (
+                    isinstance(count, int)
+                    and not isinstance(count, bool)
+                    and count >= 0
+                ):
+                    span.set_attribute(f"flwr.model.{key}", count)
+        return response
 
 
 def _invoke_provider_response(  # pylint: disable=too-many-locals,too-many-branches,too-many-arguments,too-many-statements
