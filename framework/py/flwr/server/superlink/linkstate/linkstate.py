@@ -21,7 +21,7 @@ from typing import Literal
 
 from flwr.app import Context, Message, RecordDict
 from flwr.app.user_config import UserConfig
-from flwr.common.constant import SUPERLINK_NODE_ID
+from flwr.common.constant import SUPERLINK_NODE_ID, Status
 from flwr.proto.federation_config_pb2 import SimulationConfig  # pylint: disable=E0611
 from flwr.proto.node_pb2 import NodeInfo  # pylint: disable=E0611
 from flwr.proto.task_pb2 import TaskEvent  # pylint: disable=E0611
@@ -41,6 +41,49 @@ class LinkState(CoreState):  # pylint: disable=R0904
     @abc.abstractmethod
     def federation_manager(self) -> FederationManager:
         """Return the FederationManager instance."""
+
+    def _check_message_policy(self, messages: Sequence[Message]) -> list[bool]:
+        """Check run and federation policy in input order without changing state.
+
+        Run and federation lookup errors propagate to the caller.
+        All run and membership lookups are scoped to this batch.
+        """
+        # Avoid lookups when there are no messages to check.
+        if not messages:
+            return []
+
+        # Fetch distinct runs once and retain only those that can exchange messages.
+        run_ids = sorted({message.metadata.run_id for message in messages})
+        runs = {
+            run.run_id: run
+            for run in self.get_run_info(run_ids=run_ids)
+            if run.status.status in (Status.PENDING, Status.STARTING, Status.RUNNING)
+        }
+
+        # Merge node IDs by federation to share membership checks across runs.
+        federation_nodes: dict[str, set[int]] = {}
+        for message in messages:
+            if (run := runs.get(message.metadata.run_id)) is not None:
+                federation_nodes.setdefault(run.federation_id, set()).update(
+                    (message.metadata.src_node_id, message.metadata.dst_node_id)
+                )
+
+        # Filter node IDs once per federation, delegating SuperLink address rules.
+        for federation_id, node_ids in federation_nodes.items():
+            federation_nodes[federation_id] = self.federation_manager.filter_nodes(
+                node_ids, federation_id
+            )
+
+        # Preserve input order and require both nodes to belong to the federation.
+        results: list[bool] = []
+        for message in messages:
+            run = runs.get(message.metadata.run_id)
+            if run is None:
+                results.append(False)
+                continue
+            node_ids = {message.metadata.src_node_id, message.metadata.dst_node_id}
+            results.append(node_ids <= federation_nodes[run.federation_id])
+        return results
 
     @abc.abstractmethod
     def store_message_ins(self, message: Message) -> str | None:
