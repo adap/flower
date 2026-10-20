@@ -26,6 +26,7 @@ from dataclasses import dataclass
 from logging import DEBUG, ERROR
 from pathlib import Path
 from queue import Queue
+from time import monotonic
 from types import FrameType
 from typing import Any, cast
 
@@ -211,6 +212,7 @@ class _AgentAppTaskLifecycle:  # pylint: disable=too-many-instance-attributes,pr
         runtime_dependency_install: bool,
         preloaded: PreloadedAgentApp | None,
     ) -> None:
+        self._bootstrap_started = monotonic()
         self._runtime_api_address = runtime_api_address
         self._log_queue = log_queue
         self._token = token
@@ -247,6 +249,11 @@ class _AgentAppTaskLifecycle:  # pylint: disable=too-many-instance-attributes,pr
             with trace_span(
                 "task.initialize", attributes=self._trace_attributes
             ) as initialization:
+                # Keep pre-input setup correlated without extending the span.
+                initialization.set_attribute(
+                    "flwr.task.bootstrap_ms",
+                    (monotonic() - self._bootstrap_started) * 1000,
+                )
                 self._heartbeat_sender = HeartbeatSender(
                     make_task_heartbeat_fn_http(grid._runtime_client)
                 )
