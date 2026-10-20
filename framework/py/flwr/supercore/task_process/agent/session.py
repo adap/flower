@@ -19,30 +19,40 @@ from __future__ import annotations
 
 import json
 import time
+from collections import defaultdict
 from collections.abc import Sequence
+from copy import deepcopy
+from logging import ERROR
 from queue import Empty, Queue
 from threading import Lock, Thread
 from typing import cast
+from uuid import uuid4
 
 from google.protobuf.json_format import ParseDict
+from httpx import HTTPStatusError
 
 from flwr.agentapp import AgentConnectors, AgentEvents, AgentGrid, AgentSession
 from flwr.app import Message
+from flwr.common.logger import log
 from flwr.common.serde import message_from_proto, message_to_proto
 
 # pylint: disable=E0611
 from flwr.proto.control_pb2 import StartAutomationRequest, StartRunRequest
+from flwr.proto.runseries_pb2 import CompactedContext
 from flwr.proto.runtime_pb2 import (
     CreateTaskRequest,
+    GetCompactedContextsRequest,
     GetRunSeriesEventsRequest,
     PullTaskMessageRequest,
     PushTaskEventsRequest,
     PushTaskMessageRequest,
+    PutCompactedContextRequest,
 )
 from flwr.proto.task_pb2 import TaskEvent
 
 # pylint: enable=E0611
 from flwr.supercore.constant import TaskType
+from flwr.supercore.error import ApiErrorCode, FlowerError
 from flwr.supercore.json_message.connector_message import (
     ConnectorRequest,
     ConnectorResponse,
@@ -50,8 +60,10 @@ from flwr.supercore.json_message.connector_message import (
 from flwr.supercore.runtime import RuntimeHttpClient
 from flwr.supercore.task_process.connector.automation import START_AUTOMATION_TOOL_NAME
 from flwr.supercore.task_process.connector.registry import (
+    get_connector_discovery_tool,
     get_connector_ref,
     get_connector_tools,
+    is_dynamic_connector_tool,
 )
 from flwr.supercore.typing import JSONObject, JSONValue
 from flwr.supercore.utils import strict_json_dumps, strict_json_loads
@@ -82,9 +94,22 @@ class RuntimeAgentEvents(AgentEvents):
         )
         self._worker.start()
 
-    def get_trace(self) -> list[JSONObject]:
-        """Get events from all runs in the current run series."""
-        response = self._stub.GetRunSeriesEvents(GetRunSeriesEventsRequest())
+    def get_trace(
+        self,
+        *,
+        event_types: Sequence[str] | None = None,
+        after_event_id: int | None = None,
+        before_event_id: int | None = None,
+        last_n: int | None = None,
+    ) -> list[JSONObject]:
+        """Get matching events from the current run series."""
+        request = GetRunSeriesEventsRequest(
+            event_types=event_types or [],
+            last_n=0 if last_n is None else last_n,
+            after_event_id=after_event_id,
+            before_event_id=before_event_id,
+        )
+        response = self._stub.GetRunSeriesEvents(request)
         return [
             {
                 "id": event.id,
@@ -96,6 +121,34 @@ class RuntimeAgentEvents(AgentEvents):
             }
             for event in response.events
         ]
+
+    def get_compacted_contexts(
+        self, *, limit: int = 1, before_context_id: int | None = None
+    ) -> list[JSONObject]:
+        """Get summaries from the current run series."""
+        response = self._stub.GetCompactedContexts(
+            GetCompactedContextsRequest(
+                limit=limit, before_context_id=before_context_id
+            )
+        )
+        return [
+            {
+                "id": context.id,
+                "series_id": context.series_id,
+                "through_event_id": context.through_event_id,
+                "text": context.text,
+                "created_at": context.created_at,
+            }
+            for context in response.contexts
+        ]
+
+    def put_compacted_context(self, *, through_event_id: int, text: str) -> None:
+        """Store a summary in the current run series."""
+        self._stub.PutCompactedContext(
+            PutCompactedContextRequest(
+                context=CompactedContext(through_event_id=through_event_id, text=text)
+            )
+        )
 
     def emit(self, event: JSONObject) -> None:
         """Queue one event for publication to run-event subscribers."""
@@ -209,9 +262,13 @@ class RuntimeAgentConnectors(AgentConnectors):
     def __init__(self, agent_runtime: AgentRuntime) -> None:
         self._agent_runtime = agent_runtime
 
-    def tools(self, names: Sequence[str]) -> list[JSONObject]:
-        """Return model-facing tool schemas for the requested connectors."""
-        return [tool for name in names for tool in get_connector_tools(name)]
+    def tools(self, names: Sequence[str], *, refresh: bool = False) -> list[JSONObject]:
+        """Return schemas, optionally refreshing the runtime discovery cache."""
+        return [
+            tool
+            for name in names
+            for tool in self._agent_runtime.get_connector_tools(name, refresh=refresh)
+        ]
 
     def call(self, tool_call: JSONObject) -> JSONObject:
         """Execute one model function_call and return a function_call_output item."""
@@ -235,6 +292,7 @@ class RuntimeAgentConnectors(AgentConnectors):
         )
 
 
+# pylint: disable-next=too-many-instance-attributes
 class AgentRuntime:
     """Coordinate AgentApp operations with Runtime services."""
 
@@ -252,6 +310,89 @@ class AgentRuntime:
         self._task_id = task_id
         self._start_run_request = start_run_request
         self._events = events
+        self._discovered_tools: dict[str, list[JSONObject]] = {}
+        self._discovery_locks: defaultdict[str, Lock] = defaultdict(Lock)
+        self._discovery_lock = Lock()
+
+    def get_connector_tools(
+        self, connector_ref: str, *, refresh: bool = False
+    ) -> list[JSONObject]:
+        """Return static tools plus a copied, run-scoped dynamic catalog."""
+        tools = get_connector_tools(connector_ref)
+        if get_connector_discovery_tool(connector_ref) is None:
+            return tools
+        try:
+            discovered = deepcopy(
+                self._discover_connector_tools(connector_ref, refresh=refresh)
+            )
+        except HTTPStatusError as exc:
+            error = FlowerError.from_json(exc.response.text)
+            if (
+                exc.response.status_code == 403
+                and error is not None
+                and error.code == ApiErrorCode.RUNTIME_CONNECTOR_NOT_AVAILABLE
+            ):
+                log(
+                    ERROR,
+                    "Skipping tool discovery for unavailable connector %s "
+                    "in run %d, task %d (API error %d).",
+                    connector_ref,
+                    self._run_id,
+                    self._task_id,
+                    error.code,
+                )
+                return []
+            raise
+        for tool in discovered:
+            tool["name"] = cast(str, tool["name"]).lower()
+        return tools + discovered
+
+    def _discover_connector_tools(
+        self, connector_ref: str, *, refresh: bool = False
+    ) -> list[JSONObject]:
+        """Cache tool metadata and serialize discovery only within each connector."""
+        with self._discovery_lock:
+            lock = self._discovery_locks[connector_ref]
+        with lock:
+            if refresh:
+                self._discovered_tools.pop(connector_ref, None)
+            if connector_ref in self._discovered_tools:
+                return self._discovered_tools[connector_ref]
+            operation = get_connector_discovery_tool(connector_ref)
+            if operation is None:
+                raise ValueError(
+                    f"Connector '{connector_ref}' has no discovery source."
+                )
+            result = self.create_connector_response(
+                name=operation, call_id=uuid4().hex, arguments={}
+            )
+            if not isinstance(result, list) or not all(
+                isinstance(tool, dict) for tool in result
+            ):
+                raise RuntimeError(
+                    f"Connector '{connector_ref}' returned invalid tools."
+                )
+            tools = cast(list[JSONObject], result)
+            names: set[str] = {operation}
+            names.update(
+                cast(str, tool["name"]).lower()
+                for tool in get_connector_tools(connector_ref)
+            )
+            for tool in tools:
+                name = tool.get("name")
+                if (
+                    not isinstance(name, str)
+                    or not name.startswith(f"{connector_ref}_")
+                    or name == f"{connector_ref}_"
+                    or name.lower() in names
+                    or get_connector_ref(name.lower()) != connector_ref
+                ):
+                    raise RuntimeError(
+                        f"Connector '{connector_ref}' returned invalid tool names."
+                    )
+                names.add(name.lower())
+            self._discovered_tools[connector_ref] = tools
+            return tools
 
     def create_connector_response(
         self, *, name: str, call_id: str, arguments: JSONObject
@@ -259,6 +400,15 @@ class AgentRuntime:
         """Create one connector response."""
         name = name.strip().lower()
         connector_ref = get_connector_ref(name)
+        if is_dynamic_connector_tool(name):
+            catalog = self._discover_connector_tools(connector_ref)
+            tool = next(
+                (tool for tool in catalog if cast(str, tool["name"]).lower() == name),
+                None,
+            )
+            if tool is None:
+                raise ValueError(f"Unsupported discovered tool '{name}'.")
+            name = cast(str, tool["name"])
         create_res = self._stub.CreateTask(
             CreateTaskRequest(type=TaskType.CONNECTOR, connector_ref=connector_ref)
         )

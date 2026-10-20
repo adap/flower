@@ -35,7 +35,7 @@ from flwr.supercore import log
 from flwr.supercore.version import package_version as flwr_version
 
 from .constant import APP_ID_PATTERN, APP_VERSION_PATTERN, MAX_NAME_LENGTH
-from .typing import JSONValue
+from .typing import JSONObject, JSONValue
 
 T = TypeVar("T", str, bytes)
 PR_SET_DUMPABLE = 4  # from /usr/include/linux/prctl.h
@@ -78,6 +78,14 @@ def strict_json_loads(raw: str | bytes | bytearray) -> JSONValue:
         JSONValue,
         json.loads(raw, parse_constant=_reject_non_finite_strict_json),
     )
+
+
+def strict_json_loads_object(raw: str | bytes | bytearray) -> JSONObject:
+    """Parse a strict JSON value and require an object."""
+    value = strict_json_loads(raw)
+    if not isinstance(value, dict):
+        raise ValueError("JSON value must be an object.")
+    return value
 
 
 def strict_json_dumps(value: JSONValue, *, compact: bool = False) -> str:

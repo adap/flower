@@ -12,161 +12,146 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Tests for Slack request mapping and API errors."""
+"""Tests for Slack MCP discovery and execution."""
 
+import traceback
 from typing import cast
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, call, create_autospec, patch
 
+import httpx
 import pytest
+from mcp import ClientSession
+from mcp.shared.exceptions import McpError
+from mcp.types import (
+    CallToolResult,
+    ErrorData,
+    ImageContent,
+    ListToolsResult,
+    TextContent,
+    Tool,
+)
 
 from flwr.supercore.typing import JSONObject
 
 from .. import registry
-from .executors import SlackApiError
+from . import mcp as slack_mcp
 
-_HTTP_REQUEST = "flwr.supercore.task_process.connector.http.requests.request"
-_CREDENTIALS: JSONObject = {"access_token": "xoxp-secret"}
+
+def test_mcp_discovery_and_execution() -> None:
+    """Discover all Slack tools and execute former static names through MCP."""
+    session = create_autospec(ClientSession, instance=True)
+    session.list_tools.side_effect = [
+        ListToolsResult(
+            tools=[
+                Tool(name="slack_search_public", inputSchema={"type": "object"}),
+                Tool(name="slack_read_channel", inputSchema={"type": "object"}),
+            ],
+            nextCursor="next",
+        ),
+        ListToolsResult(tools=[]),
+    ]
+    session.send_request.return_value = CallToolResult(
+        content=[TextContent(type="text", text="done")]
+    )
+    credentials: JSONObject = {"access_token": "xoxp-secret"}
+    assert not registry.get_connector_tools("slack")
+    assert registry.is_dynamic_connector_tool("slack_search_public")
+    with patch.object(slack_mcp, "_session") as open_session:
+        open_session.return_value.__aenter__.return_value = session
+        tools = registry.invoke_connector(
+            "slack__discover_tools", {}, Mock(), credentials, {}
+        )
+        assert isinstance(tools, list)
+        assert [cast(JSONObject, tool)["name"] for tool in tools] == [
+            "slack_search_public",
+            "slack_read_channel",
+        ]
+        result = registry.invoke_connector(
+            "slack_search_public",
+            {"query": "release"},
+            Mock(),
+            credentials,
+            {},
+        )
+    assert session.list_tools.await_args_list == [
+        call(cursor=None),
+        call(cursor="next"),
+    ]
+    request = session.send_request.await_args.args[0].root
+    assert request.params.name == "slack_search_public"
+    assert request.params.arguments == {"query": "release"}
+    assert isinstance(result, dict)
+    assert result["content"] == [{"type": "text", "text": "done"}]
 
 
 @pytest.mark.parametrize(
-    ("tool_name", "channel_types"),
-    (
-        ("slack_search_public", ["public_channel"]),
+    ("result", "message"),
+    [
         (
-            "slack_search_public_and_private",
-            ["public_channel", "private_channel", "mpim", "im"],
+            CallToolResult(
+                isError=True,
+                content=[
+                    TextContent(type="text", text="Denied xoxp-secret"),
+                    ImageContent(type="image", data="eA==", mimeType="image/png"),
+                    TextContent(type="text", text="Missing scope: chat:write"),
+                ],
+            ),
+            "Denied [REDACTED] Missing scope: chat:write",
         ),
-    ),
+        (CallToolResult(isError=True, content=[]), ""),
+    ],
 )
-def test_search_request(tool_name: str, channel_types: list[str]) -> None:
-    """Map search fields and return Slack's response unchanged."""
-    payload: JSONObject = {"ok": True, "results": {"messages": []}}
-    response = Mock(status_code=200)
-    response.json.return_value = payload
-    with patch(_HTTP_REQUEST, return_value=response) as request:
-        result = registry.invoke_connector(
-            tool_name,
-            {
-                "keywords": ["alpha", "beta"],
-                "filters": "in:<#C1>",
-                "natural_language_query": "release plan",
-                "content_types": "messages,files",
-                "after": "1700000000",
-                "limit": 21,
-                "include_context": False,
-            },
-            Mock(),
-            _CREDENTIALS,
-            {},
+def test_mcp_tool_error_preserves_redacted_diagnostics(
+    result: CallToolResult, message: str
+) -> None:
+    """Preserve error text without exposing the bound token or non-text blocks."""
+    session = create_autospec(ClientSession, instance=True)
+    session.send_request.return_value = result
+    credentials: JSONObject = {"access_token": "xoxp-secret"}
+    with patch.object(slack_mcp, "_session") as open_session:
+        open_session.return_value.__aenter__.return_value = session
+        with pytest.raises(slack_mcp.SlackApiError) as error:
+            registry.invoke_connector(
+                "slack_search_public", {"query": "release"}, Mock(), credentials, {}
+            )
+    assert error.value.code == "mcp_tool_error"
+    assert error.value.message == message
+    assert "xoxp-secret" not in "".join(traceback.format_exception(error.value))
+
+
+@pytest.mark.parametrize("failure", ["http", "protocol", "connector"])
+def test_mcp_session_error_preserves_redacted_diagnostics(failure: str) -> None:
+    """Preserve nested session failures without exposing the bound token."""
+    message = "Denied xoxp-secret"
+    credentials: JSONObject = {"access_token": "xoxp-secret"}
+    session = create_autospec(ClientSession, instance=True)
+    session.__aenter__.return_value = session
+    cause: Exception
+    if failure == "http":
+        cause = httpx.HTTPStatusError(
+            message,
+            request=httpx.Request("POST", "https://mcp.slack.com/mcp"),
+            response=httpx.Response(401),
         )
-    assert result is payload
-    request.assert_called_once()
-    assert request.call_args.args == (
-        "POST",
-        "https://slack.com/api/assistant.search.context",
-    )
-    assert request.call_args.kwargs["json"] == {
-        "query": "release plan in:<#C1>",
-        "term_clauses": ["alpha", "beta"],
-        "modifiers": "in:<#C1>",
-        "content_types": ["messages", "files"],
-        "channel_types": channel_types,
-        "after": 1700000000,
-        "limit": 21,
-        "include_bots": False,
-        "include_context_messages": False,
-    }
-
-
-def test_slack_api_error() -> None:
-    """Surface Slack's error without retrying through another API."""
-    response = Mock(status_code=200)
-    response.json.return_value = {"ok": False, "error": "invalid_arguments"}
-    with (
-        patch(_HTTP_REQUEST, return_value=response) as request,
-        pytest.raises(SlackApiError, match="invalid_arguments"),
-    ):
-        registry.invoke_connector(
-            "slack_search_public", {"query": "release"}, Mock(), _CREDENTIALS, {}
-        )
-    request.assert_called_once()
-
-
-@pytest.mark.parametrize("response_format", ("detailed", "concise"))
-@pytest.mark.parametrize("file_error", (None, "access_denied"))
-def test_search_options(response_format: str, file_error: str | None) -> None:
-    """Filter joined conversations and honor context length and concise output."""
-    pages = [
-        {
-            "ok": True,
-            "results": {
-                "messages": [
-                    {
-                        "channel_id": "C1",
-                        "content": "release",
-                        "blocks": [],
-                        "context_messages": {
-                            "before": [{"text": "before text"}],
-                            "after": [{"text": "after text"}],
-                        },
-                    },
-                    {"channel_id": "C2", "content": "not joined"},
-                ],
-                "files": [
-                    {"file_id": "F1", "title": "joined file", "file_type": "pdf"},
-                    {"file_id": "F2", "title": "not joined"},
-                ],
-            },
-            "response_metadata": {"next_cursor": "search-next"},
-        },
-        {
-            "ok": True,
-            "channels": [{"id": "C1"}],
-            "response_metadata": {"next_cursor": "membership-next"},
-        },
-        {"ok": True, "channels": [{"id": "C3"}]},
-        {"ok": True, "file": {"channels": ["C3"]}},
-        (
-            {"ok": False, "error": file_error}
-            if file_error
-            else {"ok": True, "file": {"channels": ["C2"]}}
-        ),
-    ]
-    with patch(
-        _HTTP_REQUEST,
-        side_effect=[
-            Mock(status_code=200, json=Mock(return_value=page)) for page in pages
-        ],
-    ) as request:
-        result = registry.invoke_connector(
-            "slack_search_public",
-            {
-                "query": "release",
-                "content_types": "messages,files",
-                "only_my_channels": True,
-                "max_context_length": 5,
-                "response_format": response_format,
-            },
-            Mock(),
-            _CREDENTIALS,
-            {},
-        )
-    assert request.call_count == 5
-    assert request.call_args_list[2].kwargs["params"]["cursor"] == "membership-next"
-    assert isinstance(result, dict)
-    assert result["response_metadata"] == {"next_cursor": "search-next"}
-    results = cast(dict[str, list[JSONObject]], result["results"])
-    message = results["messages"][0]
-    file = results["files"][0]
-    assert len(results["messages"]) == 1
-    assert len(results["files"]) == 1
-    assert message["channel_id"] == "C1"
-    assert file["file_id"] == "F1"
-    if response_format == "concise":
-        assert message == {"channel_id": "C1", "content": "release"}
-        assert file == {"file_id": "F1", "title": "joined file"}
+    elif failure == "protocol":
+        cause = McpError(ErrorData(code=-32602, message=message))
     else:
-        assert message["context_messages"] == {
-            "before": [{"text": "befor"}],
-            "after": [{"text": "after"}],
-        }
+        cause = slack_mcp.SlackApiError("invalid_tools", message=message)
+    session.list_tools.side_effect = ExceptionGroup(
+        "MCP failed", [ExceptionGroup("Transport failed", [cause])]
+    )
+    with (
+        patch("mcp.ClientSession", return_value=session),
+        patch("mcp.client.streamable_http.streamable_http_client") as transport,
+    ):
+        transport.return_value.__aenter__.return_value = (Mock(), Mock(), Mock())
+        with pytest.raises(slack_mcp.SlackApiError) as error:
+            registry.invoke_connector(
+                "slack__discover_tools", {}, Mock(), credentials, {}
+            )
+    assert error.value.code == (
+        "invalid_tools" if failure == "connector" else "request_failed"
+    )
+    assert error.value.status_code == (401 if failure == "http" else None)
+    assert error.value.message == "Denied [REDACTED]"
+    assert "xoxp-secret" not in "".join(traceback.format_exception(error.value))

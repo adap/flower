@@ -50,7 +50,7 @@ class NodeState(CoreState):
         """
 
     @abstractmethod
-    def get_messages(
+    def get_messages_legacy(
         self,
         *,
         run_ids: Sequence[int] | None = None,

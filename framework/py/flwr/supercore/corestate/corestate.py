@@ -17,7 +17,7 @@
 # pylint: disable=too-many-lines
 
 from abc import ABC, abstractmethod
-from collections.abc import Sequence
+from collections.abc import Callable, Collection, Sequence
 from datetime import datetime
 from typing import Literal
 
@@ -28,7 +28,10 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     StartRunRequest,
 )
 from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
-from flwr.proto.runseries_pb2 import RunSeries  # pylint: disable=E0611
+from flwr.proto.runseries_pb2 import (  # pylint: disable=E0611
+    CompactedContext,
+    RunSeries,
+)
 from flwr.proto.task_pb2 import Task, TaskEvent, TaskUsage  # pylint: disable=E0611
 from flwr.supercore.fab import Fab
 from flwr.supercore.inflatable.inflatable_object import (
@@ -281,6 +284,20 @@ class CoreState(ABC):  # pylint: disable=R0904
         """Return a connector by ID, if present."""
 
     @abstractmethod
+    def update_connector_credentials(
+        self,
+        connector_id: int,
+        current_credentials: str,
+        update_credentials: Callable[[], str],
+    ) -> str | None:
+        """Atomically read, transform, and persist one connector's credentials.
+
+        Invoke the callback only if stored credentials still match the caller's
+        snapshot. Otherwise return the newer stored credentials. Return ``None``
+        if the connector no longer exists. Callback errors leave state unchanged.
+        """
+
+    @abstractmethod
     def delete_connector(self, federation_id: str, connector_id: int) -> bool:
         """Delete a federation's connector if it exists.
 
@@ -385,6 +402,110 @@ class CoreState(ABC):  # pylint: disable=R0904
         """
 
     @abstractmethod
+    def store_messages(self, messages: Sequence[Message]) -> list[bool]:
+        """Store one or more Messages.
+
+        Each Message is accepted or rejected independently. If a Message has
+        already been stored, it is accepted without changing its delivery status.
+        A Message can be accepted before its body has been fully uploaded.
+
+        Parameters
+        ----------
+        messages : Sequence[Message]
+            The Messages to store.
+
+        Returns
+        -------
+        list[bool]
+            A list of booleans indicating whether each Message was accepted,
+            in the same order as the provided Messages.
+        """
+
+    @abstractmethod
+    def get_messages(
+        self,
+        *,
+        dst_node_id: int,
+        run_id: int | None = None,
+        reply_to_message_ids: Collection[str] | None = None,
+        limit: int | None = None,
+    ) -> list[Message]:
+        """Get pending Messages for the provided destination node ID.
+
+        If multiple filters are provided, they are combined using AND logic.
+        Retrieved Messages are not acknowledged and can be returned again by
+        subsequent calls until they are acknowledged, cancelled, or expired.
+
+        Parameters
+        ----------
+        dst_node_id : int
+            The destination node ID to filter Messages by.
+        run_id : int | None (default: None)
+            The run ID to filter by. If None, Messages from all runs are included.
+        reply_to_message_ids : Collection[str] | None (default: None)
+            The Message IDs to filter reply_to_message_id by. If None, no
+            correlation filter is applied. If empty, no Messages are returned.
+        limit : int | None (default: None)
+            Maximum number of Messages to return. If None, no limit is applied.
+
+        Returns
+        -------
+        list[Message]
+            A list of unexpired pending Messages matching the specified filters,
+            ordered by created_at and then message_id.
+
+        Raises
+        ------
+        ValueError
+            If limit is less than or equal to zero.
+        """
+
+    @abstractmethod
+    def acknowledge_messages(self, message_ids: Collection[str]) -> None:
+        """Acknowledge Messages based on the provided Message IDs.
+
+        Acknowledged Messages are no longer returned by get_messages. Their
+        bodies are released, but their metadata is retained.
+
+        If a Message ID is unknown or already acknowledged, it is ignored.
+
+        Parameters
+        ----------
+        message_ids : Collection[str]
+            The IDs of Messages to acknowledge after receiving them in full.
+            If empty, no Messages are acknowledged.
+        """
+
+    @abstractmethod
+    def cancel_messages(
+        self,
+        *,
+        message_ids: Collection[str] | None = None,
+        run_id: int | None = None,
+    ) -> None:
+        """Cancel pending Messages based on the specified filters.
+
+        If multiple filters are provided, they are combined using AND logic.
+        Cancelled Messages are no longer returned by get_messages. Their bodies
+        are released, but their metadata is retained.
+
+        If a Message is no longer pending, it is ignored.
+
+        Parameters
+        ----------
+        message_ids : Collection[str] | None (default: None)
+            The Message IDs to filter by. If None, no ID filter is applied.
+            If empty, no Messages are cancelled.
+        run_id : int | None (default: None)
+            The run ID to filter by. If None, no run filter is applied.
+
+        Raises
+        ------
+        ValueError
+            If neither message_ids nor run_id is supplied.
+        """
+
+    @abstractmethod
     def store_message_and_object_tree(
         self, message: Message, object_tree: ObjectTree, session_id: str
     ) -> tuple[bool, list[str]]:
@@ -471,6 +592,18 @@ class CoreState(ABC):  # pylint: disable=R0904
         Context | None
             The shared RunSeries context, or `None` if no context is stored.
         """
+
+    @abstractmethod
+    def get_compacted_contexts(
+        self, series_id: int, limit: int = 1, before_context_id: int | None = None
+    ) -> Sequence[CompactedContext]:
+        """Return a series's summaries newest first, before an optional ID."""
+
+    @abstractmethod
+    def store_compacted_context(
+        self, series_id: int, through_event_id: int, text: str
+    ) -> None:
+        """Store a summary; raise ValueError for an existing series/event pair."""
 
     @abstractmethod
     def set_run_series_context(self, series_id: int, context: Context) -> None:
@@ -1011,12 +1144,15 @@ class CoreState(ABC):  # pylint: disable=R0904
         """
 
     @abstractmethod
-    def get_task_events(
+    def get_task_events(  # pylint: disable=too-many-arguments
         self,
         *,
         run_ids: Sequence[int] | None = None,
         task_ids: Sequence[int] | None = None,
         after_task_event_id: int | None = None,
+        before_task_event_id: int | None = None,
+        event_types: Sequence[str] | None = None,
+        last_n: int | None = None,
     ) -> Sequence[TaskEvent]:
         """Return task-produced run events matching the filters.
 
@@ -1030,6 +1166,13 @@ class CoreState(ABC):  # pylint: disable=R0904
         after_task_event_id : Optional[int] (default: None)
             Return only events with an ID greater than this cursor. If set to
             `None`, retrieve all events.
+        before_task_event_id : Optional[int] (default: None)
+            Return only events with an ID less than this cursor.
+        event_types : Optional[Sequence[str]] (default: None)
+            Return only events with one of these types.
+        last_n : Optional[int] (default: None)
+            Return the newest N matching events. Zero means no limit. Must be
+            non-negative.
 
         Returns
         -------

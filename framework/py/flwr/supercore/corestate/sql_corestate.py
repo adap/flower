@@ -18,7 +18,7 @@
 import hashlib
 import json
 import secrets
-from collections.abc import Sequence
+from collections.abc import Callable, Collection, Sequence
 from datetime import UTC, datetime, timedelta
 from logging import ERROR
 from typing import Any, Literal, cast
@@ -41,7 +41,7 @@ from sqlalchemy.dialects.sqlite import Insert as SQLiteInsert
 from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 from sqlalchemy.exc import IntegrityError
 
-from flwr.app import Context, Message
+from flwr.app import Context, Message, RecordDict
 from flwr.app.message import make_message
 from flwr.app.metadata import Metadata
 from flwr.common.constant import (
@@ -65,7 +65,10 @@ from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
 
 # pylint: disable-next=E0611
 from flwr.proto.recorddict_pb2 import RecordDict as ProtoRecordDict
-from flwr.proto.runseries_pb2 import RunSeries  # pylint: disable=E0611
+from flwr.proto.runseries_pb2 import (  # pylint: disable=E0611
+    CompactedContext,
+    RunSeries,
+)
 from flwr.proto.task_pb2 import (  # pylint: disable=E0611
     Task,
     TaskEvent,
@@ -82,6 +85,9 @@ from flwr.supercore.date import now
 from flwr.supercore.fab import Fab
 from flwr.supercore.sql_mixin import SqlMixin
 from flwr.supercore.state.schema.corestate_models import Automation as AutomationModel
+from flwr.supercore.state.schema.corestate_models import (
+    CompactedContext as CompactedContextModel,
+)
 from flwr.supercore.state.schema.corestate_models import Connector as ConnectorModel
 from flwr.supercore.state.schema.corestate_models import (
     ConnectorOAuthSession as ConnectorOAuthSessionModel,
@@ -90,6 +96,7 @@ from flwr.supercore.state.schema.corestate_models import Fab as FabModel
 from flwr.supercore.state.schema.corestate_models import (
     FederationApp as FederationAppModel,
 )
+from flwr.supercore.state.schema.corestate_models import Message as MessageModel
 from flwr.supercore.state.schema.corestate_models import NonceStore as NonceStoreModel
 from flwr.supercore.state.schema.corestate_models import (
     ObjectPushSession as ObjectPushSessionModel,
@@ -129,6 +136,7 @@ from .utils import (
     context_to_bytes,
     generate_rand_int_from_bytes,
     timestamp_to_iso,
+    validate_message_metadata,
     validate_task_event_data,
     validate_task_message,
 )
@@ -168,6 +176,171 @@ class SqlCoreState(CoreState, SqlMixin):  # pylint: disable=R0904
     def object_store(self) -> ObjectStore:
         """Return the ObjectStore instance used by this CoreState."""
         return self._object_store
+
+    def store_messages(self, messages: Sequence[Message]) -> list[bool]:
+        """Store one or more Messages."""
+        results = []
+        with self.session() as session:
+            for message in messages:
+                # Validate each Message before attempting storage.
+                metadata = message.metadata
+                errors = validate_message_metadata(metadata)
+                if errors:
+                    log(ERROR, errors)
+                    results.append(False)
+                    continue
+
+                # Persist metadata; ObjectStore owns the message body.
+                stmt = self.dialect_insert(MessageModel).values(
+                    message_id=metadata.message_id,
+                    run_id=metadata.run_id,
+                    src_node_id=metadata.src_node_id,
+                    dst_node_id=metadata.dst_node_id,
+                    src_task_id=metadata.src_task_id,
+                    dst_task_id=metadata.dst_task_id,
+                    reply_to_message_id=metadata.reply_to_message_id or None,
+                    group_id=metadata.group_id,
+                    created_at=metadata.created_at,
+                    ttl=metadata.ttl,
+                    message_type=metadata.message_type,
+                    expires_at=datetime.fromtimestamp(
+                        metadata.created_at + metadata.ttl, tz=UTC
+                    ),
+                )
+
+                # Preserve the delivery state of an existing Message ID.
+                stmt = stmt.on_conflict_do_nothing(
+                    index_elements=[MessageModel.message_id]
+                )
+
+                # Isolate constraint failures so the remaining batch can proceed.
+                try:
+                    with session.begin_nested():
+                        session.execute(stmt)
+                    results.append(True)
+                except IntegrityError:
+                    results.append(False)
+        return results
+
+    def get_messages(
+        self,
+        *,
+        dst_node_id: int,
+        run_id: int | None = None,
+        reply_to_message_ids: Collection[str] | None = None,
+        limit: int | None = None,
+    ) -> list[Message]:
+        """Get pending Messages for the provided destination node ID."""
+        # Reject invalid limits.
+        if limit is not None and limit <= 0:
+            raise ValueError("`limit` must be greater than zero")
+
+        # Scope both expiration and retrieval to the destination and optional run.
+        current = now()
+        filters = [
+            MessageModel.dst_node_id == dst_node_id,
+            MessageModel.cleared.is_(False),
+        ]
+        if run_id is not None:
+            filters.append(MessageModel.run_id == run_id)
+        with self.session() as session:
+            # Clear expired deliveries while retaining their correlation metadata.
+            expired_ids = session.scalars(
+                update(MessageModel)
+                .where(*filters, MessageModel.expires_at <= current)
+                .values(cleared=True)
+                .returning(MessageModel.message_id)
+            ).all()
+
+            # Release expired body roots and their unreferenced descendants.
+            for message_id in expired_ids:
+                self.object_store.delete(message_id)
+
+            # Intersect live delivery candidates with any correlation filter.
+            stmt = select(MessageModel).where(
+                *filters, MessageModel.expires_at > current
+            )
+            if reply_to_message_ids is not None:
+                stmt = stmt.where(
+                    MessageModel.reply_to_message_id.in_(reply_to_message_ids)
+                )
+
+            # Apply a stable order before limiting the live results.
+            stmt = stmt.order_by(
+                MessageModel.created_at, MessageModel.message_id
+            ).limit(limit)
+
+            # Return metadata envelopes; recipients obtain bodies from ObjectStore.
+            return [
+                make_message(
+                    metadata=Metadata(
+                        message_id=row.message_id,
+                        run_id=row.run_id,
+                        src_node_id=row.src_node_id,
+                        dst_node_id=row.dst_node_id,
+                        src_task_id=row.src_task_id,
+                        dst_task_id=row.dst_task_id,
+                        reply_to_message_id=row.reply_to_message_id or "",
+                        group_id=row.group_id,
+                        created_at=row.created_at,
+                        ttl=row.ttl,
+                        message_type=row.message_type,
+                    ),
+                    content=RecordDict(),
+                )
+                for row in session.scalars(stmt)
+            ]
+
+    def acknowledge_messages(self, message_ids: Collection[str]) -> None:
+        """Acknowledge Messages based on the provided Message IDs."""
+        # Empty acknowledgments leave delivery state and objects untouched.
+        if not message_ids:
+            return
+
+        # Close only pending deliveries, preserving prior terminal timestamps.
+        stmt = (
+            update(MessageModel)
+            .where(
+                MessageModel.message_id.in_(message_ids),
+                MessageModel.cleared.is_(False),
+            )
+            .values(cleared=True, acknowledged_at=now())
+            .returning(MessageModel.message_id)
+        )
+        with self.session() as session:
+            # Release body roots while retaining metadata for future correlation.
+            acknowledged_ids = session.scalars(stmt).all()
+            for message_id in acknowledged_ids:
+                self.object_store.delete(message_id)
+
+    def cancel_messages(
+        self,
+        *,
+        message_ids: Collection[str] | None = None,
+        run_id: int | None = None,
+    ) -> None:
+        """Cancel pending Messages based on the specified filters."""
+        # Require an explicit scope to prevent accidental cancellation of all inboxes.
+        if message_ids is None and run_id is None:
+            raise ValueError("Either `message_ids` or `run_id` must be supplied")
+
+        # Intersect all supplied filters and leave prior terminal outcomes unchanged.
+        current = now()
+        stmt = update(MessageModel).where(MessageModel.cleared.is_(False))
+        if message_ids is not None:
+            stmt = stmt.where(MessageModel.message_id.in_(message_ids))
+        if run_id is not None:
+            stmt = stmt.where(MessageModel.run_id == run_id)
+        # Expired deliveries are cleared without relabelling them as cancelled.
+        stmt = stmt.values(
+            cleared=True,
+            cancelled_at=case((MessageModel.expires_at > current, current)),
+        ).returning(MessageModel.message_id)
+        with self.session() as session:
+            # Release body roots while retaining metadata for future correlation.
+            cancelled_ids = session.scalars(stmt).all()
+            for message_id in cancelled_ids:
+                self.object_store.delete(message_id)
 
     def start_session(self, run_id: int) -> str:
         """Start a run-scoped object push session."""
@@ -703,6 +876,33 @@ class SqlCoreState(CoreState, SqlMixin):  # pylint: disable=R0904
                 return None
             return _connector_from_model(row)
 
+    def update_connector_credentials(
+        self,
+        connector_id: int,
+        current_credentials: str,
+        update_credentials: Callable[[], str],
+    ) -> str | None:
+        """Serialize credential refresh and persist its result atomically."""
+        with self.session() as session:
+            # Lock before reading, including on SQLite where FOR UPDATE is ignored.
+            credentials_json = session.scalar(
+                update(ConnectorModel)
+                .where(ConnectorModel.connector_id == connector_id)
+                .values(credentials_json=ConnectorModel.credentials_json)
+                .returning(ConnectorModel.credentials_json)
+            )
+            if credentials_json is None:
+                return None
+            if credentials_json != current_credentials:
+                return credentials_json
+            credentials_json = update_credentials()
+            session.execute(
+                update(ConnectorModel)
+                .where(ConnectorModel.connector_id == connector_id)
+                .values(credentials_json=credentials_json)
+            )
+            return credentials_json
+
     def delete_connector(self, federation_id: str, connector_id: int) -> bool:
         """Delete a federation's connector if it exists."""
         if not federation_id or connector_id <= 0:
@@ -918,6 +1118,48 @@ class SqlCoreState(CoreState, SqlMixin):  # pylint: disable=R0904
             if row is None or row.context is None:
                 return None
             return context_from_bytes(row.context)
+
+    def get_compacted_contexts(
+        self, series_id: int, limit: int = 1, before_context_id: int | None = None
+    ) -> Sequence[CompactedContext]:
+        """Return a series's summaries newest first, before an optional ID."""
+        if limit <= 0:
+            raise ValueError("limit must be positive")
+        query = select(CompactedContextModel).where(
+            CompactedContextModel.series_id == uint64_to_int64(series_id)
+        )
+        # Autoincremented context IDs cannot exceed the signed BIGINT range.
+        if before_context_id is not None:
+            query = query.where(CompactedContextModel.id < before_context_id)
+        query = query.order_by(CompactedContextModel.id.desc()).limit(limit)
+        with self.session() as session:
+            return [
+                _compacted_context_from_model(row) for row in session.scalars(query)
+            ]
+
+    def store_compacted_context(
+        self, series_id: int, through_event_id: int, text: str
+    ) -> None:
+        """Store a new summary."""
+        stmt = (
+            self.dialect_insert(CompactedContextModel)
+            .values(
+                series_id=uint64_to_int64(series_id),
+                through_event_id=uint64_to_int64(through_event_id),
+                text=text,
+                created_at=now(),
+            )
+            .on_conflict_do_nothing(
+                index_elements=[
+                    CompactedContextModel.series_id,
+                    CompactedContextModel.through_event_id,
+                ]
+            )
+            .returning(CompactedContextModel.id)
+        )
+        with self.session() as session:
+            if session.scalar(stmt) is None:
+                raise ValueError("Compacted context already exists for this event")
 
     def set_run_series_context(self, series_id: int, context: Context) -> None:
         """Set the shared Context for the specified RunSeries."""
@@ -1714,20 +1956,25 @@ class SqlCoreState(CoreState, SqlMixin):  # pylint: disable=R0904
 
         return True
 
-    def get_task_events(
+    def get_task_events(  # pylint: disable=too-many-arguments
         self,
         *,
         run_ids: Sequence[int] | None = None,
         task_ids: Sequence[int] | None = None,
         after_task_event_id: int | None = None,
+        before_task_event_id: int | None = None,
+        event_types: Sequence[str] | None = None,
+        last_n: int | None = None,
     ) -> Sequence[TaskEvent]:
-        """Return task-produced run events after the cursor."""
+        """Return task-produced run events matching the filters."""
+        if last_n is not None and last_n < 0:
+            raise ValueError("last_n must be non-negative")
         cursor = after_task_event_id if after_task_event_id is not None else 0
-        query = (
-            select(TaskEventModel)
-            .where(TaskEventModel.id > cursor)
-            .order_by(TaskEventModel.id.asc())
-        )
+        query = select(TaskEventModel).where(TaskEventModel.id > cursor)
+        if before_task_event_id is not None:
+            query = query.where(TaskEventModel.id < before_task_event_id)
+        if event_types is not None:
+            query = query.where(TaskEventModel.event.in_(event_types))
         if run_ids is not None:
             if not run_ids:
                 return []
@@ -1738,8 +1985,15 @@ class SqlCoreState(CoreState, SqlMixin):  # pylint: disable=R0904
                 return []
             sint64_task_ids = [uint64_to_int64(task_id) for task_id in task_ids]
             query = query.where(TaskEventModel.task_id.in_(sint64_task_ids))
+        query = query.order_by(
+            TaskEventModel.id.desc() if last_n else TaskEventModel.id.asc()
+        )
+        if last_n:
+            query = query.limit(last_n)
         with self.session() as session:
-            rows = session.scalars(query).all()
+            rows = list(session.scalars(query).all())
+            if last_n:
+                rows.reverse()
             return [_task_event_from_model(row) for row in rows]
 
     def _claim_task_message_models(
@@ -2038,6 +2292,17 @@ def _run_series_from_model(model: RunSeriesModel) -> RunSeries:
         description=model.description or "",
         created_at=timestamp_to_iso(model.created_at),
         updated_at=timestamp_to_iso(model.updated_at),
+    )
+
+
+def _compacted_context_from_model(model: CompactedContextModel) -> CompactedContext:
+    """Convert a compacted context model to its proto representation."""
+    return CompactedContext(
+        id=model.id,
+        series_id=int64_to_uint64(model.series_id),
+        through_event_id=int64_to_uint64(model.through_event_id),
+        text=model.text,
+        created_at=timestamp_to_iso(model.created_at),
     )
 
 
