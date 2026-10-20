@@ -109,7 +109,10 @@ class Grid(ABC):
 
     @abstractmethod
     def pull_messages(
-        self, reply_to_message_ids: Iterable[str] | None = None
+        self,
+        reply_to_message_ids: Iterable[str] | None = None,
+        *,
+        message_ids: Iterable[str] | None = None,
     ) -> Iterable[Message]:
         """Pull messages with an optional correlation filter.
 
@@ -120,6 +123,9 @@ class Grid(ABC):
         reply_to_message_ids : Iterable[str] | None (default: None)
             Message IDs to filter ``reply_to_message_id`` by. If ``None``, no
             correlation filter is applied. An empty iterable matches no messages.
+        message_ids : Iterable[str] | None (default: None)
+            Deprecated alias for ``reply_to_message_ids``. Only one of the two
+            parameters may be non-``None``.
 
         Returns
         -------

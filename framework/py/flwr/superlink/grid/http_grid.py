@@ -303,9 +303,21 @@ class HttpGrid(Grid):  # pylint: disable=too-many-instance-attributes
         return message_ids
 
     def pull_messages(
-        self, reply_to_message_ids: Iterable[str] | None = None
+        self,
+        reply_to_message_ids: Iterable[str] | None = None,
+        *,
+        message_ids: Iterable[str] | None = None,
     ) -> Iterable[Message]:
         """Pull messages with an optional correlation filter."""
+        if message_ids is not None:
+            if reply_to_message_ids is not None:
+                raise TypeError(
+                    "Specify only one of `reply_to_message_ids` and `message_ids`."
+                )
+            warn_deprecated_feature(
+                "`message_ids` is deprecated. Use `reply_to_message_ids` instead."
+            )
+            reply_to_message_ids = message_ids
         run_id = cast(Run, self._run).run_id
         try:
             # Pull Messages

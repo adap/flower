@@ -127,13 +127,25 @@ class InMemoryGrid(Grid):
         return msg_ids
 
     def pull_messages(
-        self, reply_to_message_ids: Iterable[str] | None = None
+        self,
+        reply_to_message_ids: Iterable[str] | None = None,
+        *,
+        message_ids: Iterable[str] | None = None,
     ) -> Iterable[Message]:
         """Pull messages based on message IDs.
 
         This method is used to collect messages from the SuperLink that correspond to a
         set of given message IDs.
         """
+        if message_ids is not None:
+            if reply_to_message_ids is not None:
+                raise TypeError(
+                    "Specify only one of `reply_to_message_ids` and `message_ids`."
+                )
+            warn_deprecated_feature(
+                "`message_ids` is deprecated. Use `reply_to_message_ids` instead."
+            )
+            reply_to_message_ids = message_ids
         msg_ids = set(reply_to_message_ids)
         # Pull Messages
         message_res_list = self.state.get_message_res(
