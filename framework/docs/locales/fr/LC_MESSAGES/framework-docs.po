@@ -32430,8 +32430,6 @@ msgid ""
 "The latest :doc:`Flower release installed <how-to-install-flower>` on the"
 " compute nodes"
 msgstr ""
-"Le ``flwr`` CLI est :doc:`installed <../how-to-install-flower>` "
-"localement."
 
 #: ../../source/how-to-deploy-supernode-using-slurm.rst:26
 msgid "A registered SuperNode private key that is readable from the compute node"
@@ -42557,8 +42555,6 @@ msgid ""
 "<flwr.agentapp.AgentEvents.get_compacted_contexts>`\\ \\(\\*\\[\\, "
 "limit\\, ...\\]\\)"
 msgstr ""
-":py:obj:`ServerApp <flwr.serverapp.ServerApp>`\\ \\(\\[server\\, "
-"config\\, strategy\\, ...\\]\\)"
 
 #: flwr.agentapp.base.AgentEvents.emit:1:<autosummary>:1
 #: flwr.agentapp.base.AgentEvents.get_compacted_contexts:1 of
@@ -42571,8 +42567,6 @@ msgid ""
 ":py:obj:`get_trace <flwr.agentapp.AgentEvents.get_trace>`\\ \\(\\*\\[\\, "
 "event\\_types\\, after\\_event\\_id\\, ...\\]\\)"
 msgstr ""
-":py:obj:`Krum <flwr.serverapp.strategy.Krum>`\\ \\(\\[fraction\\_train\\,"
-" fraction\\_evaluate\\, ...\\]\\)"
 
 #: flwr.agentapp.base.AgentEvents.emit:1:<autosummary>:1
 #: flwr.agentapp.base.AgentEvents.get_trace:1 of
@@ -58500,8 +58494,6 @@ msgid ""
 " name, IPv4, or IPv6 address with a port number, without a URL prefix "
 "such as ``http://`` or ``https://``."
 msgstr ""
-"L'adresse fournie est invalide et ne peut pas être interprétée. Elle doit"
-" être une adresse URL, IPv4 ou IPv6 valide."
 
 #: ../../source/ref-exit-codes/600.rst:17
 msgid "Verify that the address is correctly formatted as one of the following:"

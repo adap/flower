@@ -36187,7 +36187,7 @@ msgid ""
 ":py:obj:`get_compacted_contexts "
 "<flwr.agentapp.AgentEvents.get_compacted_contexts>`\\ \\(\\*\\[\\, "
 "limit\\, ...\\]\\)"
-msgstr "server.strategy.Strategy"
+msgstr ""
 
 #: flwr.agentapp.base.AgentEvents.emit:1:<autosummary>:1
 #: flwr.agentapp.base.AgentEvents.get_compacted_contexts:1 of
@@ -36200,8 +36200,6 @@ msgid ""
 ":py:obj:`get_trace <flwr.agentapp.AgentEvents.get_trace>`\\ \\(\\*\\[\\, "
 "event\\_types\\, after\\_event\\_id\\, ...\\]\\)"
 msgstr ""
-":py:obj:`Krum <flwr.server.strategy.Krum>`\\ \\(\\*\\[\\, "
-"fraction\\_fit\\, fraction\\_evaluate\\, ...\\]\\)"
 
 #: flwr.agentapp.base.AgentEvents.emit:1:<autosummary>:1
 #: flwr.agentapp.base.AgentEvents.get_trace:1 of
