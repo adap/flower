@@ -126,7 +126,7 @@ def test_http_heartbeat_returns_false_on_transport_error() -> None:
     assert make_task_heartbeat_fn_http(client)() is False
 
 
-@pytest.mark.parametrize("status_code", [503, 504])
+@pytest.mark.parametrize("status_code", [502, 503, 504])
 def test_http_heartbeat_returns_false_on_transient_status(status_code: int) -> None:
     """HTTP heartbeat should report transient statuses as retryable failures."""
     client = Mock()

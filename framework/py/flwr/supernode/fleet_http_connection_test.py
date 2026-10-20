@@ -108,6 +108,12 @@ def test_http_connection_provides_worker_callbacks(  # pylint: disable=R0914,R09
         client.SendNodeHeartbeat.side_effect = httpx.ConnectError("unavailable")
         assert heartbeat_fns[0]() is False
         client.SendNodeHeartbeat.side_effect = httpx.HTTPStatusError(
+            "bad gateway",
+            request=httpx.Request("POST", "https://fleet.example"),
+            response=httpx.Response(502),
+        )
+        assert heartbeat_fns[0]() is False
+        client.SendNodeHeartbeat.side_effect = httpx.HTTPStatusError(
             "unauthorized",
             request=httpx.Request("POST", "https://fleet.example"),
             response=httpx.Response(401),

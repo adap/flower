@@ -64,6 +64,7 @@ def _make_test_invoker() -> RetryInvoker:
         _transport_error(httpx.ReadTimeout),
         _transport_error(httpx.WriteTimeout),
         _transport_error(httpx.PoolTimeout),
+        _http_status_error(httpx.codes.BAD_GATEWAY),
         _http_status_error(httpx.codes.SERVICE_UNAVAILABLE),
         _http_status_error(httpx.codes.GATEWAY_TIMEOUT),
     ],
