@@ -62,8 +62,6 @@ def main(grid: Grid, context: Context) -> None:
         embeddings, node_pos_mapping = get_remote_embeddings(
             grid=grid,
             node_ids=node_ids,
-            num_examples=len(labels),
-            embedding_dim=out_feature_dim_clientapp,
             timeout=reply_timeout,
         )
 
@@ -132,10 +130,6 @@ def send_gradients_to_clients(
             raise RuntimeError(
                 f"Gradient update failed at node {node_id}: {reply.error}"
             )
-        if node_id not in node_pos_mapping or node_id in acknowledged:
-            raise RuntimeError(
-                f"Unexpected gradient acknowledgement from node {node_id}"
-            )
         acknowledged.add(node_id)
     if acknowledged != set(node_pos_mapping):
         raise RuntimeError("Did not receive all gradient update acknowledgements")
@@ -144,8 +138,6 @@ def send_gradients_to_clients(
 def get_remote_embeddings(
     grid: Grid,
     node_ids: list[int],
-    num_examples: int,
-    embedding_dim: int,
     timeout: float,
 ) -> tuple[torch.Tensor, dict[int, int]]:
     """Get embeddings from sampled remote nodes."""
@@ -177,25 +169,12 @@ def get_remote_embeddings(
             raise RuntimeError(
                 f"Embedding query failed at node {node_id}: {reply.error}"
             )
-        if node_id not in node_ids or node_id in node_pos_mapping:
-            raise RuntimeError(f"Unexpected embedding reply from node {node_id}")
         pos = reply.content["config"]["pos"]
-        if (
-            not isinstance(pos, int)
-            or pos not in range(len(node_ids))
-            or pos in embeddings
-        ):
-            raise RuntimeError(f"Invalid or duplicate feature partition: {pos}")
-        embd = torch.from_numpy(reply.content["arrays"]["embedding"].numpy())
-        if (
-            embd.shape != (num_examples, embedding_dim)
-            or not torch.isfinite(embd).all()
-        ):
-            raise RuntimeError(f"Invalid embeddings from node {node_id}")
-        embeddings[pos] = embd
+        embeddings[pos] = torch.from_numpy(reply.content["arrays"]["embedding"].numpy())
         node_pos_mapping[node_id] = pos
 
-    if set(node_pos_mapping) != set(node_ids):
+    # VFL needs every feature block; a missing party cannot be replaced by zeros.
+    if set(embeddings) != set(range(len(node_ids))):
         raise RuntimeError("Did not receive embeddings from every feature party")
     ordered_embeddings = [embeddings[pos] for pos in range(len(node_ids))]
     return torch.cat(ordered_embeddings, dim=1).requires_grad_(), node_pos_mapping

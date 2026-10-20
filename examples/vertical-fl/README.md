@@ -101,8 +101,8 @@ the partitioning emulates data ownership rather than enforcing access control.
 Each round has two exchanges. The server first collects one embedding block from
 every feature party, concatenates them in partition order and computes the loss
 and gradients. It then sends each block's gradient back to its party and waits
-for all updates to be acknowledged before starting the next round. Missing,
-failed or duplicate replies abort the run. Each exchange waits up to
+for all updates to be acknowledged before starting the next round. Errors or
+missing feature blocks or acknowledgements abort the run. Each exchange waits up to
 `reply-timeout` seconds (120 by default). Increase this setting if a cold dataset
 download or a slow deployment needs longer.
 
@@ -133,6 +133,22 @@ Training loss and accuracy are logged every 25 rounds and in the final round.
 Both metrics come from the same forward pass before that round's model updates.
 They are measured on the training rows, not a held-out test set, so they do not
 estimate generalization performance. Results vary with model initialization.
+
+For example, a three-client CPU simulation with the default configuration produced:
+
+```text
+INFO :      === Final Results ===
+INFO :      Round 25 -> Loss: 0.3622 | Accuracy: 84.55%
+INFO :      Round 50 -> Loss: 0.3201 | Accuracy: 87.71%
+INFO :      Round 75 -> Loss: 0.2897 | Accuracy: 87.71%
+INFO :      Round 100 -> Loss: 0.2638 | Accuracy: 89.18%
+INFO :      Round 125 -> Loss: 0.2265 | Accuracy: 90.42%
+INFO :      Round 150 -> Loss: 0.2497 | Accuracy: 89.97%
+INFO :      Round 175 -> Loss: 0.1962 | Accuracy: 91.43%
+INFO :      Round 200 -> Loss: 0.2136 | Accuracy: 91.43%
+INFO :      Round 225 -> Loss: 0.1802 | Accuracy: 92.11%
+INFO :      Round 250 -> Loss: 0.1484 | Accuracy: 94.25%
+```
 
 You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example:
 
