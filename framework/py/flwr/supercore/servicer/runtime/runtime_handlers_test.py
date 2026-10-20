@@ -87,13 +87,17 @@ class TestRuntimeHandlers(unittest.TestCase):  # pylint: disable=R0904
     def test_put_compacted_context(self) -> None:
         """Store only a valid summary for the authenticated series."""
         request = PutCompactedContextRequest(
-            context=CompactedContext(series_id=42, through_event_id=9, text="Summary")
+            context=CompactedContext(
+                series_id=42, through_event_id=9, text="Summary", token_count=123
+            )
         )
 
         response = runtime_handlers.put_compacted_context(request, self.state, 42)
 
         self.assertFalse(response.ListFields())
-        self.state.store_compacted_context.assert_called_once_with(42, 9, "Summary")
+        self.state.store_compacted_context.assert_called_once_with(
+            42, 9, "Summary", 123
+        )
 
         request.context.series_id = 43
         with self.assertRaises(FlowerError) as error:

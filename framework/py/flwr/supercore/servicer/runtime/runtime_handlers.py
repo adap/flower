@@ -94,7 +94,12 @@ def put_compacted_context(
             "Compacted context series does not match the authenticated task.",
         )
     try:
-        state.store_compacted_context(series_id, context.through_event_id, context.text)
+        state.store_compacted_context(
+            series_id,
+            context.through_event_id,
+            context.text,
+            context.token_count,
+        )
     except ValueError as exc:
         raise FlowerError(
             ApiErrorCode.RUNTIME_COMPACTED_CONTEXT_ALREADY_EXISTS,

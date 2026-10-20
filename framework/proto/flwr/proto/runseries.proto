@@ -35,4 +35,5 @@ message CompactedContext {
   uint64 through_event_id = 3;
   string text = 4;
   string created_at = 5;
+  uint64 token_count = 6;
 }
