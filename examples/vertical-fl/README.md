@@ -144,16 +144,3 @@ flwr run . --run-config "num-server-rounds=500 learning-rate=0.05"
 
 Follow this [how-to guide](https://flower.ai/docs/framework/how-to-run-flower-with-deployment-engine.html) to run the same app in this example but with Flower's Deployment Engine. After that, you might be intersted in setting up [secure TLS-enabled communications](https://flower.ai/docs/framework/how-to-enable-tls-connections.html) and [SuperNode authentication](https://flower.ai/docs/framework/how-to-authenticate-supernodes.html) in your federation.
 If you are already familiar with how the Deployment Engine works, you may want to learn how to run it using Docker. Check out the [Flower with Docker](https://flower.ai/docs/framework/docker/index.html) documentation.
-
-## Regression checks
-
-After installing the example dependencies, run the offline tests from this directory:
-
-```bash
-python -m unittest discover -s tests -v
-```
-
-The tests check feature/label row alignment, first-forward model persistence,
-three rounds of split updates against a joint network with persistent Adam,
-complete embedding and update replies, and BatchNorm training mode across metric
-reporting. They use synthetic data and do not download Titanic.
