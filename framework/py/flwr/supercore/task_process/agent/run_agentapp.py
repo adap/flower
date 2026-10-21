@@ -345,7 +345,6 @@ class _AgentAppTaskLifecycle:  # pylint: disable=too-many-instance-attributes,pr
                         agent_app = _load_agentapp_component(agent_app_attr, app_path)
             with trace_span(
                 "agentapp.execute",
-                traceparent=grid._tracing.take_task_traceparent(task_id),
                 attributes=self._trace_attributes,
             ):
                 agent_app(agent=agent, context=self._context)
