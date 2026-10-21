@@ -605,14 +605,15 @@ class StateTest(unittest.TestCase):  # pylint: disable=R0904
     def test_store_compacted_context(self) -> None:
         """Store summaries at distinct event boundaries in a series."""
         state = self.state_factory()
+        other_series_id = 2**63 + 43
         state.store_compacted_context(42, 2**63, "First", token_count=123)
         with self.assertRaises(ValueError):
             state.store_compacted_context(42, 2**63, "Duplicate", token_count=123)
         state.store_compacted_context(42, 2**63 + 100, "Second", token_count=2**63)
-        state.store_compacted_context(43, 2**63, "Other", token_count=789)
+        state.store_compacted_context(other_series_id, 2**63, "Other", token_count=789)
 
         second, first = state.get_compacted_contexts(42, limit=2)
-        (other,) = state.get_compacted_contexts(43)
+        (other,) = state.get_compacted_contexts(other_series_id)
 
         self.assertGreater(first.id, 0)
         self.assertLess(first.id, second.id)
@@ -628,7 +629,7 @@ class StateTest(unittest.TestCase):  # pylint: disable=R0904
         self.assertEqual(
             state.get_compacted_contexts(42, before_context_id=second.id), [first]
         )
-        self.assertEqual(other.series_id, 43)
+        self.assertEqual(other.series_id, other_series_id)
         self.assertEqual(other.text, "Other")
 
     def test_connector_oauth_session_lifecycle(self) -> None:
