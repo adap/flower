@@ -31,6 +31,8 @@ from sqlalchemy import (
     PrimaryKeyConstraint,
     String,
     Table,
+    Text,
+    UniqueConstraint,
     column,
     text,
 )
@@ -161,6 +163,30 @@ class SeriesContext(FlwrBase):
 
     series_id: Mapped[int] = mapped_column(BigInteger, primary_key=True, nullable=False)
     context: Mapped[bytes | None] = mapped_column(LargeBinary)
+
+
+class CompactedContext(FlwrBase):
+    """Represent a compacted event context for a run series.
+
+    ``through_event_id`` is an inclusive event high-water mark for the series.
+    """
+
+    __tablename__ = "compacted_contexts"
+    __table_args__ = (
+        UniqueConstraint("series_id", "through_event_id"),
+        Index("idx_compacted_contexts_series_id_id", "series_id", "id"),
+    )
+
+    id: Mapped[int] = mapped_column(
+        BigInteger().with_variant(Integer, "sqlite"),
+        primary_key=True,
+        autoincrement=True,
+    )
+    series_id: Mapped[int] = mapped_column(UInt64(), nullable=False)
+    through_event_id: Mapped[int] = mapped_column(UInt64(), nullable=False)
+    text: Mapped[str] = mapped_column(Text, nullable=False)
+    token_count: Mapped[int] = mapped_column(UInt64(), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime(), nullable=False)
 
 
 class SeriesRuns(FlwrBase):

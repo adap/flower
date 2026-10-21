@@ -141,6 +141,11 @@ def test_invoke_model_provider_records_static_usage_type_and_provider(
     expected_provider: str,
 ) -> None:
     """Model usage should include its static type and requested provider."""
+    span = Mock()
+    monkeypatch.setattr(
+        "flwr.supercore.task_process.model.provider.trace_span",
+        lambda *args, **kwargs: nullcontext(span),
+    )
     monkeypatch.setenv("FLWR_MODEL_API_ENDPOINT", "http://proxy/v1/responses")
     _patch_post(
         monkeypatch,
@@ -163,6 +168,10 @@ def test_invoke_model_provider_records_static_usage_type_and_provider(
     usage = usage_recorder.record.call_args.args[0]
     assert usage.usage_type == "model_inference"
     assert usage.provider == expected_provider
+    span.set_attribute.assert_any_call("flwr.model.input_tokens", 10)
+    span.set_attribute.assert_any_call("flwr.model.output_tokens", 20)
+    if "model" in request_payload:
+        span.set_attribute.assert_any_call("flwr.model.name", request_payload["model"])
 
 
 def test_invoke_model_provider_collects_stream_events(
@@ -171,6 +180,10 @@ def test_invoke_model_provider_collects_stream_events(
     """Streaming calls should collect events and accept incomplete terminals."""
     monkeypatch.setenv("FLWR_MODEL_API_KEY", "fk_test")
     span = Mock()
+    monkeypatch.setattr(
+        "flwr.supercore.task_process.model.provider.monotonic",
+        Mock(side_effect=[10.0, 10.25, 11.0]),
+    )
     monkeypatch.setattr(
         "flwr.supercore.task_process.model.provider.trace_span",
         lambda *args, **kwargs: nullcontext(span),
@@ -203,6 +216,7 @@ def test_invoke_model_provider_collects_stream_events(
 
     assert result == {"id": "resp_1", "output_text": "hel"}
     span.add_event.assert_called_once_with("provider.first_text")
+    span.set_attribute.assert_any_call("flwr.model.first_text_ms", 250.0)
     assert streamed_events == [
         {"type": "response.created", "response": {"id": "resp_1"}},
         {"delta": "hel", "type": "response.output_text.delta"},

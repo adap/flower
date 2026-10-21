@@ -22,6 +22,7 @@ import "flwr/proto/federation_config.proto";
 import "flwr/proto/message.proto";
 import "flwr/proto/node.proto";
 import "flwr/proto/run.proto";
+import "flwr/proto/runseries.proto";
 import "flwr/proto/task.proto";
 
 // SendTaskHeartbeat messages
@@ -70,6 +71,17 @@ message GetRunSeriesEventsRequest {
   uint32 last_n = 4;
 }
 message GetRunSeriesEventsResponse { repeated TaskEvent events = 1; }
+
+// GetCompactedContexts messages
+message GetCompactedContextsRequest {
+  optional uint32 limit = 1;
+  optional uint64 before_context_id = 2;
+}
+message GetCompactedContextsResponse { repeated CompactedContext contexts = 1; }
+
+// PutCompactedContext messages
+message PutCompactedContextRequest { CompactedContext context = 1; }
+message PutCompactedContextResponse {}
 
 // PullTaskMessage messages
 message PullTaskMessageRequest {
