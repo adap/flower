@@ -141,6 +141,7 @@ class Strategy(ABC):
         train_config: ConfigRecord | None = None,
         evaluate_config: ConfigRecord | None = None,
         evaluate_fn: Callable[[int, ArrayRecord], MetricRecord | None] | None = None,
+        stop_fn: Callable[[int, Result], bool] | None = None,
     ) -> Result:
         """Execute the federated learning strategy.
 
@@ -155,7 +156,7 @@ class Strategy(ABC):
         initial_arrays : ArrayRecord
             Initial model parameters (arrays) to be used for federated learning.
         num_rounds : int (default: 3)
-            Number of federated learning rounds to execute.
+            Maximum number of federated learning rounds to execute.
         timeout : float (default: 3600)
             Timeout in seconds for waiting for node responses.
         train_config : ConfigRecord, optional
@@ -169,6 +170,13 @@ class Strategy(ABC):
             server round number and array record, returns a MetricRecord or None. If
             provided, will be called before the first round and after each round.
             Defaults to None.
+        stop_fn : Callable[[int, Result], bool], optional
+            Optional stopping predicate, called after each completed round with
+            the round number and accumulated results. Return True to stop early
+            and return the final model and metrics collected so far. Called after
+            training, federated evaluation, and optional centralized evaluation,
+            but not after the initial evaluation at round zero. Treat the results
+            as read-only. Defaults to None, which runs all rounds.
 
         Returns
         -------
@@ -186,7 +194,7 @@ class Strategy(ABC):
         # Initialize if None
         train_config = ConfigRecord() if train_config is None else train_config
         evaluate_config = ConfigRecord() if evaluate_config is None else evaluate_config
-        result = Result()
+        result = Result(arrays=initial_arrays)
 
         t_start = time.time()
         # Evaluate starting global parameters
@@ -270,6 +278,10 @@ class Strategy(ABC):
                 log(INFO, "\t└──> MetricRecord: %s", res)
                 if res is not None:
                     result.evaluate_metrics_serverapp[current_round] = res
+
+            if stop_fn is not None and stop_fn(current_round, result):
+                log(INFO, "Stopping early after round %s", current_round)
+                break
 
         log(INFO, "")
         log(INFO, "Strategy execution finished in %.2fs", time.time() - t_start)
