@@ -127,7 +127,6 @@ class _ModelTaskLifecycle:  # pylint: disable=too-many-instance-attributes
             event(EventType.FLWR_MODEL_RUN_ENTER)
             with trace_span(
                 "model.execute",
-                traceparent=self._tracing.take_task_traceparent(task_input.task_id),
                 attributes=self._trace_attributes,
             ):
                 handle_task(client=self._client)

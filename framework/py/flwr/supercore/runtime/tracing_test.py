@@ -88,6 +88,7 @@ def test_direct_request_context_without_persisted_task_parent(
             response = server.post(
                 request.url.path, content=request.content, headers=dict(request.headers)
             )
+            assert "traceparent" not in response.headers
             return httpx.Response(
                 response.status_code,
                 headers=response.headers,
@@ -99,18 +100,17 @@ def test_direct_request_context_without_persisted_task_parent(
             client._client, "send", side_effect=send  # pylint: disable=protected-access
         ):
             assert client.AcquireTask(AcquireTaskRequest()).task.task_id == 5
-            assert interceptor.take_task_traceparent(5) == ""
             assert client.PullTaskInput(PullTaskInputRequest()).task_id == 5
-            assert interceptor.take_task_traceparent(5) == ""
 
 
-@pytest.mark.parametrize("failure", ["current_traceparent", "validate_traceparent"])
 def test_tracing_interceptor_failure_preserves_response(
-    monkeypatch: pytest.MonkeyPatch, failure: str
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """Telemetry failures preserve responses and do not swallow transport errors."""
     monkeypatch.setattr(
-        tracing, failure, Mock(side_effect=RuntimeError("telemetry failure"))
+        tracing,
+        "current_traceparent",
+        Mock(side_effect=RuntimeError("telemetry failure")),
     )
     request = httpx.Request("POST", "http://runtime.example")
     context = ProtobufRequestContext(
@@ -118,8 +118,6 @@ def test_tracing_interceptor_failure_preserves_response(
     )
     response = httpx.Response(
         200,
-        headers={"traceparent": _CARRIER},
-        content=PullTaskInputResponse(task_id=5).SerializeToString(),
         request=request,
     )
     error = httpx.ConnectError("transport failure")
