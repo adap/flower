@@ -105,7 +105,9 @@ class AgentEvents(ABC):
         """Return the newest summaries."""
 
     @abstractmethod
-    def put_compacted_context(self, *, through_event_id: int, text: str) -> None:
+    def put_compacted_context(
+        self, *, through_event_id: int, text: str, token_count: int
+    ) -> None:
         """Store a summary."""
 
 

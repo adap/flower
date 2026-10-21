@@ -905,7 +905,11 @@ class InMemoryCoreState(
             ]
 
     def store_compacted_context(
-        self, series_id: int, through_event_id: int, text: str
+        self,
+        series_id: int,
+        through_event_id: int,
+        text: str,
+        token_count: int,
     ) -> None:
         """Store a new summary."""
         with self.lock_compacted_context_store:
@@ -921,6 +925,7 @@ class InMemoryCoreState(
                 series_id=series_id,
                 through_event_id=through_event_id,
                 text=text,
+                token_count=token_count,
                 created_at=now().isoformat(),
             )
             self.compacted_context_store[context.id] = context

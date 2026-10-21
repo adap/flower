@@ -231,12 +231,12 @@ def test_put_compacted_context_uses_authenticated_series() -> None:
     state = Mock(spec=LinkState)
     state.get_run_info.return_value = [Mock(series_id=456)]
     request = PutCompactedContextRequest(
-        context=CompactedContext(through_event_id=9, text="Summary")
+        context=CompactedContext(through_event_id=9, text="Summary", token_count=123)
     )
 
     runtime_handlers.put_compacted_context(request, state, Task(run_id=123))
 
-    state.store_compacted_context.assert_called_once_with(456, 9, "Summary")
+    state.store_compacted_context.assert_called_once_with(456, 9, "Summary", 123)
 
 
 def _create_shared_runtime(
