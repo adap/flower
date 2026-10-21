@@ -678,14 +678,14 @@ def test_launch_warm_executor_is_inert_and_becomes_ready(
         (TaskType.CONNECTOR, "flwr-connector"),
     ],
 )
-def test_launch_dispatches_compatible_ready_pod_and_replenishes_idle_capacity(
+def test_warm_launch_defers_replenishment(
     monkeypatch: pytest.MonkeyPatch,
     insecure: bool,
     transport_args: list[str],
     task_type: TaskType,
     task_command: str,
 ) -> None:  # pylint: disable=too-many-locals
-    """A dispatched warm Pod should be replaced before its child exits."""
+    """A warm task receives its token before replacement work begins."""
     # pylint: disable=too-many-locals
     span = Mock()
     tracing = Mock(side_effect=lambda *_: nullcontext(span))
@@ -734,7 +734,6 @@ def test_launch_dispatches_compatible_ready_pod_and_replenishes_idle_capacity(
     assert result.status == LaunchResultStatus.ACCEPTED
     assert [entry.args[0] for entry in tracing.call_args_list] == [
         "executor.reserve",
-        "executor.replenish",
         "executor.dispatch_open",
         "executor.token_send",
         "executor.accept_wait",
@@ -742,12 +741,7 @@ def test_launch_dispatches_compatible_ready_pod_and_replenishes_idle_capacity(
     span.set_attribute.assert_called_once_with("flwr.executor.accepted", True)
     assert stream.return_value.written == ["task-token\n"]
     assert stream.return_value.is_open()
-    if insecure:
-        client.create_namespaced_secret.assert_not_called()
-    else:
-        assert _as_dict(client.create_namespaced_secret.call_args.args[1])[
-            "stringData"
-        ] == {"ca.crt": "root-ca"}
+    client.create_namespaced_secret.assert_not_called()
     client.patch_namespaced_pod.assert_called_once_with(
         name="flwr-taskexecutor-warm-ready",
         namespace="flower-system",
@@ -759,22 +753,11 @@ def test_launch_dispatches_compatible_ready_pod_and_replenishes_idle_capacity(
             }
         },
     )
-    client.create_namespaced_pod.assert_called_once()
+    client.create_namespaced_pod.assert_not_called()
     worker_module = {
         TaskType.CONNECTOR: WARM_CONNECTOR_EXECUTOR_MODULE,
         TaskType.MODEL: WARM_MODEL_EXECUTOR_MODULE,
     }.get(task_type)
-    expected_warm_command = (
-        ["python", "-m", worker_module, "serve"]
-        if worker_module is not None
-        else ["python", "-m", WARM_EXECUTOR_MODULE]
-    )
-    assert (
-        _as_dict(client.create_namespaced_pod.call_args.args[1])["spec"]["containers"][
-            0
-        ]["command"]
-        == expected_warm_command
-    )
     assert stream.call_args.args[0] is client.connect_get_namespaced_pod_exec
     assert stream.call_args.kwargs["container"] == "taskexecutor"
     expected_dispatch_command = (
@@ -798,6 +781,10 @@ def test_launch_dispatches_compatible_ready_pod_and_replenishes_idle_capacity(
     )
     assert dispatch._log_output is suppress_output  # pylint: disable=protected-access
     assert started[0][1][-1] is (not suppress_output)
+
+    executor.reconcile()
+    client.create_namespaced_pod.assert_called_once()
+    assert stream.return_value.is_open()
 
 
 @pytest.mark.parametrize(
@@ -993,7 +980,7 @@ def test_launch_preserves_outcome_when_cleanup_thread_cannot_start(
     assert response.written == ([] if send_error else ["task-token\n"])
     assert not response.is_open()
     client.create_namespaced_secret.assert_not_called()
-    client.create_namespaced_pod.assert_called_once()
+    client.create_namespaced_pod.assert_not_called()
     client.delete_namespaced_pod.assert_not_called()
 
 

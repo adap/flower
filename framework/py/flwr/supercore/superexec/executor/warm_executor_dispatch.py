@@ -444,9 +444,7 @@ class WarmExecutorPoolManager:  # pylint: disable=too-many-instance-attributes,t
                 self._log_dispatch(primary_pool, "capacity_unavailable")
                 return None
             pool, pod_name = claimed
-            with trace_span("executor.replenish"):
-                for candidate in candidates:
-                    self._ensure_pool_capacity(candidate)
+            # Reconciliation replenishes consumed capacity after dispatch.
 
         try:
             with trace_span("executor.dispatch_open"):
