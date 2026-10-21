@@ -51,7 +51,7 @@ msgstr "更新日志"
 #: ../../source/changelog/v1.41.0.md:2
 #, fuzzy
 msgid "v1.41.0 (2026-10-20)"
-msgstr "v1.3.0 (2023-02-06)"
+msgstr ""
 
 #: ../../source/changelog/v1.0.0.md:11 ../../source/changelog/v1.1.0.md:4
 #: ../../source/changelog/v1.10.0.md:4 ../../source/changelog/v1.11.0.md:4
@@ -114,11 +114,6 @@ msgid ""
 "`Charles Beauville`, `Chong Shen Ng`, `Daniel Nata Nugraha`, `Heng Pan`, "
 "`Javier`, `Taner Topal`"
 msgstr ""
-"`Adam Narozniak`, `Anass Anhari`, `Charles Beauville`, `Dana-Farber`, "
-"`Daniel J. Beutel`, `Daniel Nata Nugraha`, `Edoardo Gabrielli`, `Gustavo "
-"Bertoli`, `Heng Pan`, `Javier`, `Mahdi`, `Steven Hé (Sīchàng)`, `Taner "
-"Topal`, `achiverram28`, `danielnugraha`, `eunchung`, `ruthgal` <!---"
-"TOKEN_v1.5.0-->"
 
 #: ../../source/changelog/v0.13.0.md:4 ../../source/changelog/v0.14.0.md:4
 #: ../../source/changelog/v0.15.0.md:4 ../../source/changelog/v0.16.0.md:4
@@ -160,10 +155,6 @@ msgid ""
 "[#8362](https://github.com/flwrlabs/flower/pull/8362), "
 "[#8382](https://github.com/flwrlabs/flower/pull/8382))"
 msgstr ""
-"** 更新 C++ SDK** ([#2537](https://github/com/adap/flower/pull/2537), "
-"[#2528](https://github/com/adap/flower/pull/2528), "
-"[#2523](https://github.com/adap/flower/pull/2523), "
-"[#2522](https://github.com/adap/flower/pull/2522))"
 
 #: ../../source/changelog/v1.41.0.md:14
 msgid ""
@@ -187,12 +178,6 @@ msgid ""
 "[#8377](https://github.com/flwrlabs/flower/pull/8377), "
 "[#8380](https://github.com/flwrlabs/flower/pull/8380))"
 msgstr ""
-"** 支持 SSL 的服务器和客户端** ([#842](https://github.com/adap/flower/pull/842), "
-"[#844](https://github.com/adap/flower/pull/844), "
-"[#845](https://github.com/adap/flower/pull/845), "
-"[#847](https://github.com/adap/flower/pull/847), "
-"[#993](https://github.com/adap/flower/pull/993), "
-"[#994](https://github.com/adap/flower/pull/994))"
 
 #: ../../source/changelog/v1.41.0.md:18
 msgid ""
@@ -209,8 +194,6 @@ msgid ""
 "([#8375](https://github.com/flwrlabs/flower/pull/8375), "
 "[#8388](https://github.com/flwrlabs/flower/pull/8388))"
 msgstr ""
-"**新的内置策略**（[#828](https://github.com/adap/flower/pull/828) "
-"[#822](https://github.com/adap/flower/pull/822)"
 
 #: ../../source/changelog/v1.41.0.md:22
 #, fuzzy
@@ -236,12 +219,6 @@ msgid ""
 "[#8389](https://github.com/flwrlabs/flower/pull/8389), "
 "[#8394](https://github.com/flwrlabs/flower/pull/8394))"
 msgstr ""
-"**改进教程** ([#1468](https://github.com/adap/flower/pull/1468), "
-"[#1470](https://github.com/adap/flower/pull/1470), "
-"[#1472](https://github.com/adap/flower/pull/1472), "
-"[#1473](https://github.com/adap/flower/pull/1473), "
-"[#1474](https://github.com/adap/flower/pull/1474), "
-"[#1475](https://github.com/adap/flower/pull/1475)))"
 
 #: ../../source/changelog/v1.10.0.md:68 ../../source/changelog/v1.11.0.md:65
 #: ../../source/changelog/v1.12.0.md:64 ../../source/changelog/v1.13.0.md:69

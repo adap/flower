@@ -116,8 +116,6 @@ msgid ""
 "`Charles Beauville`, `Chong Shen Ng`, `Daniel Nata Nugraha`, `Heng Pan`, "
 "`Javier`, `Taner Topal`"
 msgstr ""
-"`Charles Beauville`, `Chong Shen Ng`, `Daniel J. Beutel`, `Heng Pan`, "
-"`Javier`, `Taner Topal` <!---TOKEN_v1.26.1-->"
 
 #: ../../source/changelog/v0.13.0.md:4 ../../source/changelog/v0.14.0.md:4
 #: ../../source/changelog/v0.15.0.md:4 ../../source/changelog/v0.16.0.md:4
@@ -159,12 +157,6 @@ msgid ""
 "[#8362](https://github.com/flwrlabs/flower/pull/8362), "
 "[#8382](https://github.com/flwrlabs/flower/pull/8382))"
 msgstr ""
-"**General updates to Flower Examples** "
-"([#2384](https://github.com/flwrlabs/flower/pull/2384), "
-"[#2425](https://github.com/flwrlabs/flower/pull/2425), "
-"[#2526](https://github.com/flwrlabs/flower/pull/2526), "
-"[#2302](https://github.com/flwrlabs/flower/pull/2302), "
-"[#2545](https://github.com/flwrlabs/flower/pull/2545))"
 
 #: ../../source/changelog/v1.41.0.md:14
 msgid ""
@@ -188,16 +180,6 @@ msgid ""
 "[#8377](https://github.com/flwrlabs/flower/pull/8377), "
 "[#8380](https://github.com/flwrlabs/flower/pull/8380))"
 msgstr ""
-"**Introduce built-in Differential Privacy (preview)** "
-"([#2798](https://github.com/flwrlabs/flower/pull/2798), "
-"[#2959](https://github.com/flwrlabs/flower/pull/2959), "
-"[#3038](https://github.com/flwrlabs/flower/pull/3038), "
-"[#3147](https://github.com/flwrlabs/flower/pull/3147), "
-"[#2909](https://github.com/flwrlabs/flower/pull/2909), "
-"[#2893](https://github.com/flwrlabs/flower/pull/2893), "
-"[#2892](https://github.com/flwrlabs/flower/pull/2892), "
-"[#3039](https://github.com/flwrlabs/flower/pull/3039), "
-"[#3074](https://github.com/flwrlabs/flower/pull/3074))"
 
 #: ../../source/changelog/v1.41.0.md:18
 msgid ""
@@ -214,9 +196,6 @@ msgid ""
 "([#8375](https://github.com/flwrlabs/flower/pull/8375), "
 "[#8388](https://github.com/flwrlabs/flower/pull/8388))"
 msgstr ""
-"**Introduce `WorkloadState`** "
-"([#2564](https://github.com/flwrlabs/flower/pull/2564), "
-"[#2632](https://github.com/flwrlabs/flower/pull/2632))"
 
 #: ../../source/changelog/v1.41.0.md:22
 #, fuzzy
@@ -242,18 +221,6 @@ msgid ""
 "[#8389](https://github.com/flwrlabs/flower/pull/8389), "
 "[#8394](https://github.com/flwrlabs/flower/pull/8394))"
 msgstr ""
-"**Refactor Flower Simulation Engine** "
-"([#3581](https://github.com/flwrlabs/flower/pull/3581), "
-"[#3471](https://github.com/flwrlabs/flower/pull/3471), "
-"[#3804](https://github.com/flwrlabs/flower/pull/3804), "
-"[#3468](https://github.com/flwrlabs/flower/pull/3468), "
-"[#3839](https://github.com/flwrlabs/flower/pull/3839), "
-"[#3806](https://github.com/flwrlabs/flower/pull/3806), "
-"[#3861](https://github.com/flwrlabs/flower/pull/3861), "
-"[#3543](https://github.com/flwrlabs/flower/pull/3543), "
-"[#3472](https://github.com/flwrlabs/flower/pull/3472), "
-"[#3829](https://github.com/flwrlabs/flower/pull/3829), "
-"[#3469](https://github.com/flwrlabs/flower/pull/3469))"
 
 #: ../../source/changelog/v1.10.0.md:68 ../../source/changelog/v1.11.0.md:65
 #: ../../source/changelog/v1.12.0.md:64 ../../source/changelog/v1.13.0.md:69
