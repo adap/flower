@@ -210,6 +210,7 @@ def test_get_compacted_contexts_returns_without_emitting() -> None:
                 through_event_id=9,
                 text="Private summary",
                 created_at="2026-10-16T12:00:00+00:00",
+                token_count=123,
             )
         ]
     )
@@ -229,6 +230,7 @@ def test_get_compacted_contexts_returns_without_emitting() -> None:
             "through_event_id": 9,
             "text": "Private summary",
             "created_at": "2026-10-16T12:00:00+00:00",
+            "token_count": 123,
         }
     ]
     emit.assert_not_called()
@@ -240,12 +242,16 @@ def test_put_compacted_context_forwards_without_emitting() -> None:
     events = RuntimeAgentEvents(stub)
 
     with patch.object(events, "emit") as emit:
-        events.put_compacted_context(through_event_id=9, text="Private summary")
+        events.put_compacted_context(
+            through_event_id=9, text="Private summary", token_count=123
+        )
     events.close()
 
     stub.PutCompactedContext.assert_called_once_with(
         PutCompactedContextRequest(
-            context=CompactedContext(through_event_id=9, text="Private summary")
+            context=CompactedContext(
+                through_event_id=9, text="Private summary", token_count=123
+            )
         )
     )
     emit.assert_not_called()
@@ -260,7 +266,9 @@ def test_put_compacted_context_propagates_error_without_emitting() -> None:
 
     with patch.object(events, "emit") as emit:
         with pytest.raises(RuntimeError) as caught:
-            events.put_compacted_context(through_event_id=9, text="Private summary")
+            events.put_compacted_context(
+                through_event_id=9, text="Private summary", token_count=123
+            )
     events.close()
 
     assert caught.value is error

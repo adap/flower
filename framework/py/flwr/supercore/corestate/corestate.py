@@ -601,7 +601,11 @@ class CoreState(ABC):  # pylint: disable=R0904
 
     @abstractmethod
     def store_compacted_context(
-        self, series_id: int, through_event_id: int, text: str
+        self,
+        series_id: int,
+        through_event_id: int,
+        text: str,
+        token_count: int,
     ) -> None:
         """Store a summary; raise ValueError for an existing series/event pair."""
 

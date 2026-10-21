@@ -83,12 +83,16 @@ class TestSuperNodeRuntimeHandlers(unittest.TestCase):
         self.state.get_run.return_value = Run.create_empty(run_id=123)
         self.state.get_run.return_value.series_id = 456
         request = PutCompactedContextRequest(
-            context=CompactedContext(through_event_id=9, text="Summary")
+            context=CompactedContext(
+                through_event_id=9, text="Summary", token_count=123
+            )
         )
 
         runtime_handlers.put_compacted_context(request, self.state, Task(run_id=123))
 
-        self.state.store_compacted_context.assert_called_once_with(456, 9, "Summary")
+        self.state.store_compacted_context.assert_called_once_with(
+            456, 9, "Summary", 123
+        )
 
     def test_pull_task_input_activates_task(self) -> None:
         """PullTaskInput should activate the authenticated task."""

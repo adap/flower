@@ -185,6 +185,7 @@ class CompactedContext(FlwrBase):
     series_id: Mapped[int] = mapped_column(BigInteger, nullable=False)
     through_event_id: Mapped[int] = mapped_column(BigInteger, nullable=False)
     text: Mapped[str] = mapped_column(Text, nullable=False)
+    token_count: Mapped[int] = mapped_column(BigInteger, nullable=False)
     created_at: Mapped[datetime] = mapped_column(UTCDateTime(), nullable=False)
 
 
