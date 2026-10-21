@@ -43,10 +43,14 @@ ARG SETUPTOOLS_VERSION
 # whether the subsequent image build runs as root or app.
 # Update the bundled installer too, since the managed Python tree is copied
 # into the runtime image alongside the virtual environment.
-RUN python -m pip install -U --no-cache-dir --break-system-packages \
+RUN pip_wheel='pip @ https://files.pythonhosted.org/packages/3f/06/3e4420302363fbb71be3c7f35ce042f54bfca330e3e66b3a2e3c4cca579f/pip-26.2.2-py3-none-any.whl#sha256=fd7f4dfa8190e014013b9f08f3e973f4e4c26ffd179a204895533a7254813a70' \
+    && test "${PIP_VERSION}" = "26.2.2" \
+    && python -m pip install -U --no-cache-dir --break-system-packages "${pip_wheel}" \
+    && python -m pip install -U --no-cache-dir --break-system-packages \
     pip==${PIP_VERSION} \
     setuptools==${SETUPTOOLS_VERSION} \
     && python -m venv /python/venv \
+    && /python/venv/bin/python -m pip install -U --no-cache-dir "${pip_wheel}" \
     && /python/venv/bin/python -m pip install -U --no-cache-dir \
     pip==${PIP_VERSION} \
     setuptools==${SETUPTOOLS_VERSION}
