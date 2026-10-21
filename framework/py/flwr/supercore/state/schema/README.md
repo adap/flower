@@ -31,6 +31,7 @@ erDiagram
     BIGINT series_id
     TEXT text
     BIGINT through_event_id
+    BIGINT token_count
   }
 
   connector {

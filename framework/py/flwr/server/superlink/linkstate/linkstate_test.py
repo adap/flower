@@ -2797,6 +2797,7 @@ class SqlInMemoryStateTest(StateTest, unittest.TestCase):
                     series_id=series_id,
                     through_event_id=event_id,
                     text=text,
+                    token_count=1,
                     created_at=now(),
                 )
                 for series_id, event_id, text in (

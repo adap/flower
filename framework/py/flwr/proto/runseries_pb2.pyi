@@ -72,11 +72,13 @@ class CompactedContext(google.protobuf.message.Message):
     THROUGH_EVENT_ID_FIELD_NUMBER: builtins.int
     TEXT_FIELD_NUMBER: builtins.int
     CREATED_AT_FIELD_NUMBER: builtins.int
+    TOKEN_COUNT_FIELD_NUMBER: builtins.int
     id: builtins.int
     series_id: builtins.int
     through_event_id: builtins.int
     text: builtins.str
     created_at: builtins.str
+    token_count: builtins.int
     def __init__(
         self,
         *,
@@ -85,7 +87,8 @@ class CompactedContext(google.protobuf.message.Message):
         through_event_id: builtins.int = ...,
         text: builtins.str = ...,
         created_at: builtins.str = ...,
+        token_count: builtins.int = ...,
     ) -> None: ...
-    def ClearField(self, field_name: typing.Literal["created_at", b"created_at", "id", b"id", "series_id", b"series_id", "text", b"text", "through_event_id", b"through_event_id"]) -> None: ...
+    def ClearField(self, field_name: typing.Literal["created_at", b"created_at", "id", b"id", "series_id", b"series_id", "text", b"text", "through_event_id", b"through_event_id", "token_count", b"token_count"]) -> None: ...
 
 global___CompactedContext = CompactedContext

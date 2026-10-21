@@ -138,15 +138,22 @@ class RuntimeAgentEvents(AgentEvents):
                 "through_event_id": context.through_event_id,
                 "text": context.text,
                 "created_at": context.created_at,
+                "token_count": context.token_count,
             }
             for context in response.contexts
         ]
 
-    def put_compacted_context(self, *, through_event_id: int, text: str) -> None:
+    def put_compacted_context(
+        self, *, through_event_id: int, text: str, token_count: int
+    ) -> None:
         """Store a summary in the current run series."""
         self._stub.PutCompactedContext(
             PutCompactedContextRequest(
-                context=CompactedContext(through_event_id=through_event_id, text=text)
+                context=CompactedContext(
+                    through_event_id=through_event_id,
+                    text=text,
+                    token_count=token_count,
+                )
             )
         )
 
