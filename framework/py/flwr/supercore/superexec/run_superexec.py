@@ -262,9 +262,6 @@ def run_superexec(  # pylint: disable=R0912,R0913,R0914,R0915,R0917
             if combined_res.HasField("task") and combined_res.token:
                 with trace_span(
                     "task.dispatch",
-                    traceparent=tracing.take_task_traceparent(
-                        combined_res.task.task_id
-                    ),
                     attributes={
                         "flwr.component": "superexec",
                         "flwr.task_id": str(combined_res.task.task_id),
