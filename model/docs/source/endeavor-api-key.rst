@@ -56,22 +56,12 @@ fails, check the error message and confirm that your key has Endeavor access.
  Set the key for Desktop use
 *****************************
 
-Fully quit your desktop client. On macOS, run the following **in the same terminal where
-you set the key**:
+Desktop apps may not inherit environment variables set in a terminal. Fully quit your
+client, then launch it from the terminal where you set ``FLOWER_API_KEY``. Use the
+command in the desktop section of your client guide below.
 
-.. code-block:: zsh
-
-    launchctl setenv FLOWER_API_KEY "$FLOWER_API_KEY"
-
-This makes the key available to apps opened from the Dock. Reopen your client after
-running the command. Set the environment variable again and rerun this command after
-signing out of or restarting macOS.
-
-To remove the key from the desktop environment, quit your client and run:
-
-.. code-block:: zsh
-
-    launchctl unsetenv FLOWER_API_KEY
+The launch command passes the key to the new app process. It does not update an app that
+is already running. Repeat the command each time you start the desktop client.
 
 *********************************
  Continue with your client guide

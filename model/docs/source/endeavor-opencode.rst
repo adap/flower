@@ -70,8 +70,7 @@ For context window and API limit details, see :ref:`Context window and limits
  2. Set your Flower API key
 ****************************
 
-Follow :doc:`endeavor-api-key` to set ``FLOWER_API_KEY`` in your terminal. For desktop
-use, also complete that guide's desktop setup before reopening OpenCode. Keep the
+Follow :doc:`endeavor-api-key` to set ``FLOWER_API_KEY`` in your terminal. Keep the
 terminal open for the next step.
 
 *************************
@@ -94,9 +93,16 @@ in :doc:`endeavor-api-key` when starting from a new terminal session.
 OpenCode Desktop on macOS
 =========================
 
-After completing the desktop key setup in :doc:`endeavor-api-key`, reopen OpenCode, open
-a local project, start a new session, and select **Endeavor** from **Flower Labs** in
-the model selector. Send a prompt to begin.
+Fully quit OpenCode. In the same terminal where you set ``FLOWER_API_KEY``, launch
+OpenCode with the key:
+
+.. code-block:: zsh
+
+    open -a OpenCode --env FLOWER_API_KEY="$FLOWER_API_KEY"
+
+Open a local project, start a new session, and select **Endeavor** from **Flower Labs**
+in the model selector. Send a prompt to begin. Repeat this launch command each time you
+start OpenCode Desktop. Opening it from the Dock may not supply the key.
 
 **********
  Get help
