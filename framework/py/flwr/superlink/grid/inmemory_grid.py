@@ -146,7 +146,7 @@ class InMemoryGrid(Grid):
                 "`message_ids` is deprecated. Use `reply_to_message_ids` instead."
             )
             reply_to_message_ids = message_ids
-        msg_ids = set(reply_to_message_ids)
+        msg_ids = set(reply_to_message_ids)  # type: ignore
         # Pull Messages
         message_res_list = self.state.get_message_res(
             message_ids=msg_ids, run_id=cast(Run, self._run).run_id
