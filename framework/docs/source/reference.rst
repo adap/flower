@@ -16,6 +16,11 @@ Information-oriented API reference and other reference material.
 
     flwr
 
+.. seealso::
+
+    :class:`flwr.serverapp.strategy.MetricThreshold` provides metric-based early
+    stopping for strategies. See :doc:`how-to-use-strategies` for usage.
+
 .. toctree::
     :maxdepth: 2
 

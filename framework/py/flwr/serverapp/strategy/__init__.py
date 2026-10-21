@@ -35,6 +35,7 @@ from .fedxgb_bagging import FedXgbBagging
 from .fedxgb_cyclic import FedXgbCyclic
 from .fedyogi import FedYogi
 from .krum import Krum
+from .metric_threshold import MetricThreshold as MetricThreshold
 from .multikrum import MultiKrum
 from .qfedavg import QFedAvg
 from .result import Result
@@ -57,6 +58,7 @@ __all__ = [
     "FedXgbCyclic",
     "FedYogi",
     "Krum",
+    "MetricThreshold",
     "MultiKrum",
     "QFedAvg",
     "Result",

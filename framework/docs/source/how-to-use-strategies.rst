@@ -353,3 +353,40 @@ ServerApp can continue with saving the model or other application logic.
 rounds run as before. Errors raised by the predicate propagate normally. Custom
 strategies that override ``start`` must forward ``stop_fn`` to the base implementation
 or invoke it in their own round loop.
+
+Metric thresholds
+=================
+
+Pass a :class:`~flwr.serverapp.strategy.MetricThreshold` as ``stop_fn`` to stop early
+when a metric reaches a target. For example, stop when aggregated federated evaluation
+accuracy reaches 90%:
+
+.. code-block:: python
+
+    from flwr.serverapp.strategy import FedAvg, MetricThreshold
+
+    strategy = FedAvg()
+    result = strategy.start(
+        grid=grid,
+        initial_arrays=arrays,
+        num_rounds=100,
+        stop_fn=MetricThreshold(
+            source="evaluate_metrics_clientapp",
+            metric="accuracy",
+            threshold=0.90,
+            comparison=">=",
+        ),
+    )
+
+The ``source`` selects a metric history in :class:`~flwr.serverapp.strategy.Result`:
+
+- ``"train_metrics_clientapp"`` monitors aggregated training metrics
+- ``"evaluate_metrics_clientapp"`` monitors aggregated federated evaluation metrics
+- ``"evaluate_metrics_serverapp"`` monitors centralized metrics returned by
+  ``evaluate_fn``
+
+Use ``comparison="<="`` for targets such as validation loss. Both comparisons include
+equality. The selected metric and threshold must be finite scalar numbers. If the
+current round has no record for the selected source, training continues. A missing
+metric key in an existing record raises ``ValueError``. Previous rounds are never used
+in place of a missing current-round record.
