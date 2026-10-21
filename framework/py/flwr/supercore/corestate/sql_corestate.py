@@ -1151,7 +1151,7 @@ class SqlCoreState(CoreState, SqlMixin):  # pylint: disable=R0904
                 series_id=uint64_to_int64(series_id),
                 through_event_id=uint64_to_int64(through_event_id),
                 text=text,
-                token_count=uint64_to_int64(token_count),
+                token_count=token_count,
                 created_at=now(),
             )
             .on_conflict_do_nothing(
@@ -2307,7 +2307,7 @@ def _compacted_context_from_model(model: CompactedContextModel) -> CompactedCont
         series_id=int64_to_uint64(model.series_id),
         through_event_id=int64_to_uint64(model.through_event_id),
         text=model.text,
-        token_count=int64_to_uint64(model.token_count),
+        token_count=model.token_count,
         created_at=timestamp_to_iso(model.created_at),
     )
 
