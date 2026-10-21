@@ -14,11 +14,13 @@
 # ==============================================================================
 """Tests for the Control API router."""
 
+# pylint: disable=too-many-lines
 
+import inspect
 from collections import Counter
 from collections.abc import Callable
 from datetime import datetime
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, call, patch
 
 import pytest
 from fastapi import FastAPI, HTTPException, Request, Response, status
@@ -123,6 +125,40 @@ def test_all_control_routes_have_protobuf_request_types() -> None:
         if route_key[1].startswith("/v1/control/")
     }
     assert route_keys == control_request_types
+
+
+def test_all_control_routes_declare_protobuf_openapi_contracts() -> None:
+    """Document every Control route as protobuf-over-HTTP."""
+    schema = _create_app().openapi()
+    control_routes = [route for route in router.routes if isinstance(route, APIRoute)]
+    stream_paths = {
+        "/v1/control/stream-logs",
+        "/v1/control/stream-run-events",
+    }
+
+    assert control_routes
+    for route in control_routes:
+        operation = schema["paths"][route.path]["post"]
+        request_body = operation["requestBody"]
+        success_content = operation["responses"]["200"]["content"]
+        expected_media_type = (
+            PROTOBUF_STREAM_MEDIA_TYPE
+            if route.path in stream_paths
+            else PROTOBUF_MEDIA_TYPE
+        )
+
+        assert operation["description"] == inspect.getdoc(
+            inspect.unwrap(route.endpoint)
+        )
+        assert request_body["required"] is True
+        assert request_body["content"] == {
+            PROTOBUF_MEDIA_TYPE: {"schema": {"type": "string", "format": "binary"}}
+        }
+        assert set(success_content) == {expected_media_type}
+        assert success_content[expected_media_type]["schema"] == {
+            "type": "string",
+            "format": "binary",
+        }
 
 
 def test_control_http_routes_cover_all_grpc_methods() -> None:
@@ -458,7 +494,14 @@ def test_start_run_forwards_resolved_source() -> None:
         "flwr.superlink.routers.control.router.control_handlers.start_run",
         return_value=expected,
     ) as start_run:
-        response = start_run_route(request, linkstate, _ACCOUNT, "grpc-rere", "unknown")
+        response = start_run_route(
+            request,
+            linkstate,
+            _ACCOUNT,
+            "grpc-rere",
+            "unknown",
+            Mock(),
+        )
 
     assert response is expected
     start_run.assert_called_once_with(
@@ -486,6 +529,7 @@ def test_start_run_forwards_caller_provided_source() -> None:
             _ACCOUNT,
             fleet_api_type="grpc-rere",
             run_source="cli",
+            tracing=Mock(),
         )
 
     assert start_run.call_args.kwargs["source"] == "cli"
@@ -672,8 +716,18 @@ def test_non_protobuf_request_in_state_returns_internal_error() -> None:
     }
 
 
-def test_list_runs_returns_runs_from_linkstate() -> None:
-    """ListRuns serializes the runs returned by LinkState."""
+@pytest.mark.parametrize(
+    ("proto_request", "expected_limit", "expected_skip"),
+    [
+        (ListRunsRequest(), 20, 0),
+        (ListRunsRequest(limit=1), 1, 0),
+        (ListRunsRequest(limit=1, skip=2), 1, 2),
+    ],
+)
+def test_list_runs_returns_runs_from_linkstate(
+    proto_request: ListRunsRequest, expected_limit: int, expected_skip: int
+) -> None:
+    """ListRuns applies the default and requested pagination."""
     linkstate = Mock(spec=LinkState)
     run = Run.create_empty(7)
     run.flwr_aid = _ACCOUNT.flwr_aid
@@ -684,7 +738,7 @@ def test_list_runs_returns_runs_from_linkstate() -> None:
 
     response = client.post(
         "/v1/control/list-runs",
-        content=ListRunsRequest(limit=1).SerializeToString(),
+        content=proto_request.SerializeToString(),
         headers={
             "authorization": "Bearer access-token",
             "content-type": PROTOBUF_MEDIA_TYPE,
@@ -697,12 +751,39 @@ def test_list_runs_returns_runs_from_linkstate() -> None:
     assert set(proto_response.run_dict) == {7}
     assert proto_response.run_dict[7].account_name == _ACCOUNT.account_name
     assert datetime.fromisoformat(proto_response.now)
-    linkstate.get_run_info.assert_called_once_with(
-        flwr_aids=[_ACCOUNT.flwr_aid],
-        order_by="pending_at",
-        ascending=False,
-        limit=1,
+    assert linkstate.get_run_info.call_args_list == [
+        call(
+            flwr_aids=[_ACCOUNT.flwr_aid],
+            order_by="pending_at",
+            ascending=False,
+            limit=expected_limit,
+            skip=expected_skip,
+        )
+    ]
+
+
+def test_list_runs_cleans_finished_runs_on_page() -> None:
+    """ListRuns cleans up finished runs returned on the page."""
+    linkstate = Mock(spec=LinkState)
+    page_run = Run.create_empty(7)
+    page_run.flwr_aid = _ACCOUNT.flwr_aid
+    page_run.status.status = Status.FINISHED
+    linkstate.get_run_info.return_value = [page_run]
+    app = _create_app()
+    app.dependency_overrides[get_linkstate] = lambda: linkstate
+
+    response = TestClient(app).post(
+        "/v1/control/list-runs",
+        content=ListRunsRequest(limit=1).SerializeToString(),
+        headers={
+            "authorization": "Bearer access-token",
+            "content-type": PROTOBUF_MEDIA_TYPE,
+        },
     )
+
+    assert response.status_code == 200
+    assert set(ListRunsResponse.FromString(response.content).run_dict) == {7}
+    linkstate.cleanup_run.assert_called_once_with(7)
 
 
 def test_list_runs_rejects_invalid_token_without_refresh() -> None:

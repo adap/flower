@@ -24,6 +24,7 @@ import flwr.proto.federation_config_pb2
 import flwr.proto.message_pb2
 import flwr.proto.node_pb2
 import flwr.proto.run_pb2
+import flwr.proto.runseries_pb2
 import flwr.proto.task_pb2
 import google.protobuf.descriptor
 import google.protobuf.internal.containers
@@ -31,68 +32,6 @@ import google.protobuf.message
 import typing
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
-
-@typing.final
-class PullPendingTasksRequest(google.protobuf.message.Message):
-    """PullPendingTasks messages"""
-
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
-
-    def __init__(
-        self,
-    ) -> None: ...
-
-global___PullPendingTasksRequest = PullPendingTasksRequest
-
-@typing.final
-class PullPendingTasksResponse(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
-
-    TASKS_FIELD_NUMBER: builtins.int
-    @property
-    def tasks(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[flwr.proto.task_pb2.Task]: ...
-    def __init__(
-        self,
-        *,
-        tasks: collections.abc.Iterable[flwr.proto.task_pb2.Task] | None = ...,
-    ) -> None: ...
-    def ClearField(self, field_name: typing.Literal["tasks", b"tasks"]) -> None: ...
-
-global___PullPendingTasksResponse = PullPendingTasksResponse
-
-@typing.final
-class ClaimTaskRequest(google.protobuf.message.Message):
-    """ClaimTask messages"""
-
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
-
-    TASK_ID_FIELD_NUMBER: builtins.int
-    task_id: builtins.int
-    def __init__(
-        self,
-        *,
-        task_id: builtins.int = ...,
-    ) -> None: ...
-    def ClearField(self, field_name: typing.Literal["task_id", b"task_id"]) -> None: ...
-
-global___ClaimTaskRequest = ClaimTaskRequest
-
-@typing.final
-class ClaimTaskResponse(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
-
-    TOKEN_FIELD_NUMBER: builtins.int
-    token: builtins.str
-    def __init__(
-        self,
-        *,
-        token: builtins.str | None = ...,
-    ) -> None: ...
-    def HasField(self, field_name: typing.Literal["_token", b"_token", "token", b"token"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["_token", b"_token", "token", b"token"]) -> None: ...
-    def WhichOneof(self, oneof_group: typing.Literal["_token", b"_token"]) -> typing.Literal["token"] | None: ...
-
-global___ClaimTaskResponse = ClaimTaskResponse
 
 @typing.final
 class SendTaskHeartbeatRequest(google.protobuf.message.Message):
@@ -300,9 +239,35 @@ class GetRunSeriesEventsRequest(google.protobuf.message.Message):
 
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
 
+    EVENT_TYPES_FIELD_NUMBER: builtins.int
+    AFTER_EVENT_ID_FIELD_NUMBER: builtins.int
+    BEFORE_EVENT_ID_FIELD_NUMBER: builtins.int
+    LAST_N_FIELD_NUMBER: builtins.int
+    after_event_id: builtins.int
+    """ID bounds are exclusive."""
+    before_event_id: builtins.int
+    last_n: builtins.int
+    """Select newest matching events; zero means no limit.
+    Response remains in ascending ID order.
+    """
+    @property
+    def event_types(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.str]:
+        """Empty means all event types."""
+
     def __init__(
         self,
+        *,
+        event_types: collections.abc.Iterable[builtins.str] | None = ...,
+        after_event_id: builtins.int | None = ...,
+        before_event_id: builtins.int | None = ...,
+        last_n: builtins.int = ...,
     ) -> None: ...
+    def HasField(self, field_name: typing.Literal["_after_event_id", b"_after_event_id", "_before_event_id", b"_before_event_id", "after_event_id", b"after_event_id", "before_event_id", b"before_event_id"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing.Literal["_after_event_id", b"_after_event_id", "_before_event_id", b"_before_event_id", "after_event_id", b"after_event_id", "before_event_id", b"before_event_id", "event_types", b"event_types", "last_n", b"last_n"]) -> None: ...
+    @typing.overload
+    def WhichOneof(self, oneof_group: typing.Literal["_after_event_id", b"_after_event_id"]) -> typing.Literal["after_event_id"] | None: ...
+    @typing.overload
+    def WhichOneof(self, oneof_group: typing.Literal["_before_event_id", b"_before_event_id"]) -> typing.Literal["before_event_id"] | None: ...
 
 global___GetRunSeriesEventsRequest = GetRunSeriesEventsRequest
 
@@ -321,6 +286,76 @@ class GetRunSeriesEventsResponse(google.protobuf.message.Message):
     def ClearField(self, field_name: typing.Literal["events", b"events"]) -> None: ...
 
 global___GetRunSeriesEventsResponse = GetRunSeriesEventsResponse
+
+@typing.final
+class GetCompactedContextsRequest(google.protobuf.message.Message):
+    """GetCompactedContexts messages"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    LIMIT_FIELD_NUMBER: builtins.int
+    BEFORE_CONTEXT_ID_FIELD_NUMBER: builtins.int
+    limit: builtins.int
+    before_context_id: builtins.int
+    def __init__(
+        self,
+        *,
+        limit: builtins.int | None = ...,
+        before_context_id: builtins.int | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing.Literal["_before_context_id", b"_before_context_id", "_limit", b"_limit", "before_context_id", b"before_context_id", "limit", b"limit"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing.Literal["_before_context_id", b"_before_context_id", "_limit", b"_limit", "before_context_id", b"before_context_id", "limit", b"limit"]) -> None: ...
+    @typing.overload
+    def WhichOneof(self, oneof_group: typing.Literal["_before_context_id", b"_before_context_id"]) -> typing.Literal["before_context_id"] | None: ...
+    @typing.overload
+    def WhichOneof(self, oneof_group: typing.Literal["_limit", b"_limit"]) -> typing.Literal["limit"] | None: ...
+
+global___GetCompactedContextsRequest = GetCompactedContextsRequest
+
+@typing.final
+class GetCompactedContextsResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    CONTEXTS_FIELD_NUMBER: builtins.int
+    @property
+    def contexts(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[flwr.proto.runseries_pb2.CompactedContext]: ...
+    def __init__(
+        self,
+        *,
+        contexts: collections.abc.Iterable[flwr.proto.runseries_pb2.CompactedContext] | None = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing.Literal["contexts", b"contexts"]) -> None: ...
+
+global___GetCompactedContextsResponse = GetCompactedContextsResponse
+
+@typing.final
+class PutCompactedContextRequest(google.protobuf.message.Message):
+    """PutCompactedContext messages"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    CONTEXT_FIELD_NUMBER: builtins.int
+    @property
+    def context(self) -> flwr.proto.runseries_pb2.CompactedContext: ...
+    def __init__(
+        self,
+        *,
+        context: flwr.proto.runseries_pb2.CompactedContext | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing.Literal["context", b"context"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing.Literal["context", b"context"]) -> None: ...
+
+global___PutCompactedContextRequest = PutCompactedContextRequest
+
+@typing.final
+class PutCompactedContextResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    def __init__(
+        self,
+    ) -> None: ...
+
+global___PutCompactedContextResponse = PutCompactedContextResponse
 
 @typing.final
 class PullTaskMessageRequest(google.protobuf.message.Message):

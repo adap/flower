@@ -20,6 +20,7 @@ from __future__ import annotations
 import json
 import os
 from collections.abc import Callable, Iterator
+from time import monotonic
 from typing import cast
 
 import requests
@@ -28,10 +29,11 @@ from flwr.supercore.task_process.usage import (
     TaskUsageRecorder,
     task_usage_from_open_response,
 )
+from flwr.supercore.tracing import trace_span
 from flwr.supercore.typing import JSONObject, JSONValue
 
 DEFAULT_MODEL_API_ENDPOINT = "https://api.flower.ai/v1/responses"
-DEFAULT_MODEL_API_TIMEOUT = 180.0
+DEFAULT_MODEL_API_TIMEOUT = 600.0
 _DEFAULT_PROVIDER = "unknown"
 _STREAM_CONTENT_TYPE = "text/event-stream"
 _TERMINAL_SUCCESS_EVENTS = frozenset({"response.completed", "response.incomplete"})
@@ -59,6 +61,19 @@ class ModelProviderError(RuntimeError):
             super().__init__(f"{message}: {formatted_detail}")
         else:
             super().__init__(f"{message}: {status_code} {formatted_detail}")
+
+
+def model_api_timeout() -> float:
+    """Return the configured model provider request timeout."""
+    raw_timeout = os.getenv(
+        "FLWR_MODEL_API_TIMEOUT",
+        str(DEFAULT_MODEL_API_TIMEOUT),
+    )
+    try:
+        timeout = float(raw_timeout.strip())
+    except ValueError:
+        timeout = DEFAULT_MODEL_API_TIMEOUT
+    return max(1.0, timeout)
 
 
 def invoke_model_provider(
@@ -91,30 +106,48 @@ def invoke_model_provider(
     if not api_key and responses_url == DEFAULT_MODEL_API_ENDPOINT:
         raise RuntimeError("Model API key is not set (FLWR_MODEL_API_KEY).")
 
-    raw_timeout = os.getenv(
-        "FLWR_MODEL_API_TIMEOUT",
-        str(DEFAULT_MODEL_API_TIMEOUT),
-    )
-    try:
-        timeout = float(raw_timeout.strip())
-    except ValueError:
-        timeout = DEFAULT_MODEL_API_TIMEOUT
-    timeout = max(1.0, timeout)
-
     # Build request metadata once, then execute the shared provider path.
     headers = {"Content-Type": "application/json"}
     if api_key:
         headers["Authorization"] = f"Bearer {api_key}"
     payload = dict(request)
-    return _invoke_provider_response(
-        responses_url=responses_url,
-        headers=headers,
-        timeout=timeout,
-        request=payload,
-        on_stream_event=on_stream_event,
-        usage_recorder=usage_recorder,
-        provider=_provider_from_request(payload),
-    )
+    with trace_span("model.provider", attributes={"flwr.component": "model"}) as span:
+        started_at = monotonic()
+        if isinstance(request.get("model"), str):
+            span.set_attribute("flwr.model.name", cast(str, request["model"]))
+        first_text = False
+
+        def forward_event(event: JSONObject) -> None:
+            nonlocal first_text
+            if not first_text and event.get("type") == "response.output_text.delta":
+                first_text = True
+                span.set_attribute(
+                    "flwr.model.first_text_ms", (monotonic() - started_at) * 1000
+                )
+                span.add_event("provider.first_text")
+            if on_stream_event is not None:
+                on_stream_event(event)
+
+        response = _invoke_provider_response(
+            responses_url=responses_url,
+            headers=headers,
+            timeout=model_api_timeout(),
+            request=payload,
+            on_stream_event=forward_event,
+            usage_recorder=usage_recorder,
+            provider=_provider_from_request(payload),
+        )
+        usage = response.get("usage")
+        if isinstance(usage, dict):
+            for key in ("input_tokens", "output_tokens"):
+                count = usage.get(key)
+                if (
+                    isinstance(count, int)
+                    and not isinstance(count, bool)
+                    and count >= 0
+                ):
+                    span.set_attribute(f"flwr.model.{key}", count)
+        return response
 
 
 def _invoke_provider_response(  # pylint: disable=too-many-locals,too-many-branches,too-many-arguments,too-many-statements

@@ -14,6 +14,7 @@
 # ==============================================================================
 """Tests for the Runtime API router."""
 
+import inspect
 from typing import cast
 from unittest.mock import Mock
 
@@ -24,14 +25,17 @@ from google.protobuf.message import Message
 from httpx import Response
 from pytest import MonkeyPatch
 
+from flwr.proto.runseries_pb2 import CompactedContext  # pylint: disable=E0611
 from flwr.proto.runtime_pb2 import (  # pylint: disable=E0611
     AcquireTaskRequest,
-    ClaimTaskRequest,
-    ClaimTaskResponse,
+    GetCompactedContextsRequest,
+    GetCompactedContextsResponse,
     GetNodesRequest,
     GetNodesResponse,
     GetRunSeriesEventsRequest,
     GetRunSeriesEventsResponse,
+    PutCompactedContextRequest,
+    PutCompactedContextResponse,
 )
 from flwr.proto.task_pb2 import Task  # pylint: disable=E0611
 from flwr.server.superlink.linkstate import LinkState
@@ -41,7 +45,7 @@ from flwr.supercore.constant import (
     FLWR_PACKAGE_VERSION_METADATA_KEY,
 )
 from flwr.supercore.dependencies.runtime import get_runtime_state, get_task
-from flwr.supercore.dependencies.runtime_version import RuntimeVersionDependency
+from flwr.supercore.dependencies.version import VersionDependency
 from flwr.supercore.error import ApiErrorCode, http_error_translator
 from flwr.supercore.protobuf.constants import PROTOBUF_MEDIA_TYPE
 from flwr.supercore.protobuf.translation import (
@@ -49,13 +53,10 @@ from flwr.supercore.protobuf.translation import (
     ProtobufTranslationMiddleware,
 )
 from flwr.supercore.routers.runtime import router
-from flwr.supercore.servicer.runtime import runtime_handlers as core_runtime_handlers
 from flwr.superlink.servicer.runtime import runtime_handlers
 
 _SUPEREXEC_PATHS = {
-    "/v1/runtime/pull-pending-tasks",
     "/v1/runtime/acquire-task",
-    "/v1/runtime/claim-task",
 }
 
 
@@ -73,7 +74,7 @@ def _create_app(
         router,
         dependencies=[
             Depends(
-                RuntimeVersionDependency(
+                VersionDependency(
                     component_name="SuperLink",
                     connection_name="Caller <-> SuperLink Runtime API",
                 )
@@ -105,8 +106,8 @@ def test_runtime_route_rejects_incompatible_version() -> None:
     client = TestClient(_create_app(Mock(spec=LinkState)))
 
     response = client.post(
-        "/v1/runtime/claim-task",
-        content=ClaimTaskRequest(task_id=123).SerializeToString(),
+        "/v1/runtime/acquire-task",
+        content=AcquireTaskRequest().SerializeToString(),
         headers={
             "content-type": PROTOBUF_MEDIA_TYPE,
             FLWR_PACKAGE_NAME_METADATA_KEY: "flwr",
@@ -133,8 +134,30 @@ def test_all_runtime_routes_have_protobuf_request_types() -> None:
         if route_key[1].startswith("/v1/runtime/")
     }
 
-    assert len(route_keys) == 21
     assert route_keys == runtime_request_types
+
+
+def test_all_runtime_routes_declare_protobuf_openapi_contracts() -> None:
+    """Document every Runtime route as protobuf-over-HTTP."""
+    schema = _create_app(Mock(spec=LinkState)).openapi()
+    runtime_routes = [route for route in router.routes if isinstance(route, APIRoute)]
+
+    assert runtime_routes
+    for route in runtime_routes:
+        operation = schema["paths"][route.path]["post"]
+        request_body = operation["requestBody"]
+        success_content = operation["responses"]["200"]["content"]
+
+        assert operation["description"] == inspect.getdoc(
+            inspect.unwrap(route.endpoint)
+        )
+        assert request_body["required"] is True
+        assert request_body["content"] == {
+            PROTOBUF_MEDIA_TYPE: {"schema": {"type": "string", "format": "binary"}}
+        }
+        assert success_content == {
+            PROTOBUF_MEDIA_TYPE: {"schema": {"type": "string", "format": "binary"}}
+        }
 
 
 def test_runtime_routes_declare_expected_security() -> None:
@@ -147,22 +170,6 @@ def test_runtime_routes_declare_expected_security() -> None:
             assert security == []
         else:
             assert security == [{"RuntimeTaskToken": []}]
-
-
-def test_claim_task_delegates_to_shared_handler(monkeypatch: MonkeyPatch) -> None:
-    """ClaimTask translates protobuf payloads and calls the shared handler."""
-    state = Mock(spec=LinkState)
-    expected = ClaimTaskResponse(token="task-token")
-    handler = Mock(return_value=expected)
-    monkeypatch.setattr(core_runtime_handlers, "claim_task", handler)
-    client = TestClient(_create_app(state))
-    request = ClaimTaskRequest(task_id=123)
-
-    response = _post(client, "/v1/runtime/claim-task", request)
-
-    assert response.status_code == 200
-    assert ClaimTaskResponse.FromString(response.content) == expected
-    handler.assert_called_once_with(request, state)
 
 
 def test_get_nodes_delegates_with_authenticated_task(
@@ -200,6 +207,47 @@ def test_get_run_series_events_delegates_with_authenticated_task(
 
     assert response.status_code == 200
     assert GetRunSeriesEventsResponse.FromString(response.content) == expected
+    handler.assert_called_once_with(request, state, task)
+
+
+def test_get_compacted_contexts_delegates_with_authenticated_task(
+    monkeypatch: MonkeyPatch,
+) -> None:
+    """The summary route passes the authenticated task to its handler."""
+    state = Mock(spec=LinkState)
+    task = Task(task_id=123)
+    client = TestClient(_create_app(state, task=task))
+    request = GetCompactedContextsRequest()
+    expected = GetCompactedContextsResponse()
+    handler = Mock(return_value=expected)
+    monkeypatch.setattr(runtime_handlers, "get_compacted_contexts", handler)
+
+    response = _post(client, "/v1/runtime/get-compacted-contexts", request)
+
+    assert response.status_code == 200
+    assert GetCompactedContextsResponse.FromString(response.content) == expected
+    handler.assert_called_once_with(request, state, task)
+
+
+def test_put_compacted_context_delegates_with_authenticated_task(
+    monkeypatch: MonkeyPatch,
+) -> None:
+    """The summary write route passes the authenticated task to its handler."""
+    state = Mock(spec=LinkState)
+    task = Task(task_id=123)
+    client = TestClient(_create_app(state, task=task))
+    request = PutCompactedContextRequest(
+        context=CompactedContext(through_event_id=9, text="Summary")
+    )
+    handler = Mock(return_value=PutCompactedContextResponse())
+    monkeypatch.setattr(runtime_handlers, "put_compacted_context", handler)
+
+    response = _post(client, "/v1/runtime/put-compacted-context", request)
+
+    assert response.status_code == 200
+    assert (
+        PutCompactedContextResponse.FromString(response.content) == handler.return_value
+    )
     handler.assert_called_once_with(request, state, task)
 
 

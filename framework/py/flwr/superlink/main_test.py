@@ -28,6 +28,7 @@ from flwr.supercore.constant import FLWR_IN_MEMORY_DB_NAME
 from flwr.supercore.error import http_error_translator
 from flwr.supercore.protobuf.translation import ProtobufTranslationMiddleware
 from flwr.supercore.routers.health.router import health
+from flwr.supercore.routers.runtime.tracing import RuntimeTracingMiddleware
 from flwr.superlink.federation import NoOpFederationManager
 from flwr.superlink.routers.control.middlewares import (
     ControlAuthenticationMiddleware,
@@ -35,6 +36,8 @@ from flwr.superlink.routers.control.middlewares import (
     ControlLicenseMiddleware,
     ControlSensitiveResponseMiddleware,
 )
+from flwr.superlink.routers.fleet.middlewares import FleetEventLogMiddleware
+from flwr.superlink.routers.fleet.node_auth import NodeAuthMiddleware
 
 from . import extensions, main
 
@@ -60,14 +63,17 @@ def _create_app(
 
 
 def _control_middleware_classes() -> list[type[object]]:
-    """Return Control middleware classes in request execution order."""
+    """Return API middleware classes in request execution order."""
     return [
         ControlSensitiveResponseMiddleware,
         BaseHTTPMiddleware,
         ControlAuthenticationMiddleware,
         ControlLicenseMiddleware,
         ProtobufTranslationMiddleware,
+        RuntimeTracingMiddleware,
         ControlEventLogMiddleware,
+        NodeAuthMiddleware,
+        FleetEventLogMiddleware,
     ]
 
 
@@ -152,10 +158,10 @@ def test_create_app_places_extension_middleware_before_control_middleware(
     ]
 
 
-def test_create_app_exposes_configured_control_dependencies(
+def test_create_app_exposes_configured_dependencies(
     monkeypatch: MonkeyPatch,
 ) -> None:
-    """Expose lifespan configuration to Control HTTP dependencies."""
+    """Expose lifespan configuration to HTTP dependencies and middleware."""
     monkeypatch.setattr(extensions, "get_middleware", lambda: ())
     monkeypatch.setattr(extensions, "configure_app", lambda _: None)
     monkeypatch.setattr(
@@ -164,6 +170,7 @@ def test_create_app_exposes_configured_control_dependencies(
         lambda is_simulation: NoOpFederationManager(),
     )
     artifact_provider = Mock()
+    fleet_event_log_plugin = Mock()
     config = Mock(
         simulation=False,
         database=FLWR_IN_MEMORY_DB_NAME,
@@ -172,6 +179,7 @@ def test_create_app_exposes_configured_control_dependencies(
         fleet_api_type="grpc-rere",
         authn_plugin=Mock(),
         event_log_plugin=None,
+        fleet_event_log_plugin=fleet_event_log_plugin,
     )
     lifespan_class = Mock()
 
@@ -179,4 +187,5 @@ def test_create_app_exposes_configured_control_dependencies(
 
     assert app.state.artifact_provider is artifact_provider
     assert app.state.fleet_api_type == "grpc-rere"
+    assert app.state.fleet_event_log_plugin is fleet_event_log_plugin
     lifespan_class.assert_called_once()

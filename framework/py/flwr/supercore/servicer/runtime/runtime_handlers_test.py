@@ -20,34 +20,33 @@ from logging import ERROR
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
-from flwr.common.constant import SUPERLINK_NODE_ID, Status
+from fastapi import status
+
+from flwr.common.constant import SUPERLINK_NODE_ID
 from flwr.common.serde import message_to_proto
 from flwr.proto.log_pb2 import (  # pylint: disable=E0611
     PushLogsRequest,
     PushLogsResponse,
 )
+from flwr.proto.runseries_pb2 import CompactedContext  # pylint: disable=E0611
 from flwr.proto.runtime_pb2 import (  # pylint: disable=E0611
     AcquireTaskRequest,
-    ClaimTaskRequest,
     CreateTaskRequest,
     CreateTaskResponse,
-    PullPendingTasksRequest,
+    GetCompactedContextsRequest,
     PullTaskMessageRequest,
     PushTaskEventsRequest,
     PushTaskEventsResponse,
     PushTaskMessageRequest,
+    PutCompactedContextRequest,
     RecordTaskUsageRequest,
     SendTaskHeartbeatRequest,
 )
-from flwr.proto.task_pb2 import (  # pylint: disable=E0611
-    Task,
-    TaskEvent,
-    TaskStatus,
-    TaskUsage,
-)
+from flwr.proto.task_pb2 import Task, TaskEvent, TaskUsage  # pylint: disable=E0611
 from flwr.supercore.constant import TASK_TYPES_ALLOWED_TO_CREATE_TASKS, TaskType
 from flwr.supercore.corestate.utils_test import create_task_message
 from flwr.supercore.error import ApiErrorCode, FlowerError
+from flwr.supercore.error.catalog import API_ERROR_MAP
 from flwr.supercore.task_process.connector import registry as connector_registry
 
 from . import runtime_handlers
@@ -61,6 +60,78 @@ class TestRuntimeHandlers(unittest.TestCase):  # pylint: disable=R0904
         self.state = Mock()
         self.state.get_tasks.return_value = []
 
+    def test_get_compacted_contexts(self) -> None:
+        """Apply the default limit and reject zero."""
+        context = CompactedContext(
+            id=1, series_id=42, through_event_id=9, text="Summary"
+        )
+        self.state.get_compacted_contexts.return_value = [context]
+
+        got = runtime_handlers.get_compacted_contexts(
+            GetCompactedContextsRequest(), self.state, 42
+        )
+        self.assertEqual(list(got.contexts), [context])
+        self.state.get_compacted_contexts.assert_called_once_with(
+            42, limit=1, before_context_id=None
+        )
+
+        with self.assertRaises(FlowerError) as error:
+            runtime_handlers.get_compacted_contexts(
+                GetCompactedContextsRequest(limit=0), self.state, 42
+            )
+        self.assertEqual(
+            error.exception.code,
+            ApiErrorCode.RUNTIME_INVALID_COMPACTED_CONTEXT_REQUEST,
+        )
+
+    def test_put_compacted_context(self) -> None:
+        """Store only a valid summary for the authenticated series."""
+        request = PutCompactedContextRequest(
+            context=CompactedContext(
+                series_id=42, through_event_id=9, text="Summary", token_count=123
+            )
+        )
+
+        response = runtime_handlers.put_compacted_context(request, self.state, 42)
+
+        self.assertFalse(response.ListFields())
+        self.state.store_compacted_context.assert_called_once_with(
+            42, 9, "Summary", 123
+        )
+
+        request.context.series_id = 43
+        with self.assertRaises(FlowerError) as error:
+            runtime_handlers.put_compacted_context(request, self.state, 42)
+        self.assertEqual(
+            error.exception.code,
+            ApiErrorCode.RUNTIME_INVALID_COMPACTED_CONTEXT_REQUEST,
+        )
+        self.state.store_compacted_context.assert_called_once()
+
+        with self.assertRaises(FlowerError):
+            runtime_handlers.put_compacted_context(
+                PutCompactedContextRequest(), self.state, 42
+            )
+
+    def test_put_compacted_context_rejects_duplicates(self) -> None:
+        """Map duplicate writes to a conflict response."""
+        request = PutCompactedContextRequest(
+            context=CompactedContext(through_event_id=9, text="Summary")
+        )
+        self.state.store_compacted_context.side_effect = ValueError("Duplicate")
+        with self.assertRaises(FlowerError) as caught:
+            runtime_handlers.put_compacted_context(request, self.state, 42)
+        self.assertEqual(
+            caught.exception.code,
+            ApiErrorCode.RUNTIME_COMPACTED_CONTEXT_ALREADY_EXISTS,
+        )
+        self.assertEqual(
+            API_ERROR_MAP[
+                ApiErrorCode.RUNTIME_COMPACTED_CONTEXT_ALREADY_EXISTS
+            ].http_status_code,
+            status.HTTP_409_CONFLICT,
+        )
+
     def _create_connector_task(self, connector_ref: str) -> CreateTaskResponse:
         """Create a connector task as an authenticated AgentApp task."""
         request = CreateTaskRequest(
@@ -72,28 +143,6 @@ class TestRuntimeHandlers(unittest.TestCase):  # pylint: disable=R0904
             self.state,
             Mock(task_id=789, run_id=123, type=TaskType.AGENT_APP),
         )
-
-    def test_pull_pending_tasks_returns_pending_tasks(self) -> None:
-        """PullPendingTasks should return pending tasks from state."""
-        # Prepare
-        task = Task(
-            task_id=123,
-            run_id=456,
-            status=TaskStatus(status=Status.PENDING, sub_status="", details=""),
-        )
-        self.state.get_tasks.return_value = [task]
-
-        # Execute
-        response = runtime_handlers.pull_pending_tasks(
-            PullPendingTasksRequest(), self.state
-        )
-
-        # Assert
-        self.state.get_tasks.assert_called_once_with(
-            statuses=[Status.PENDING], order_by="pending_at", ascending=True
-        )
-        self.assertEqual(len(response.tasks), 1)
-        self.assertEqual(response.tasks[0].task_id, 123)
 
     def test_acquire_task_returns_empty_when_queue_is_empty(self) -> None:
         """An empty queue must not claim a task."""
@@ -143,34 +192,6 @@ class TestRuntimeHandlers(unittest.TestCase):  # pylint: disable=R0904
 
         self.assertEqual(response.task, tasks[2])
         self.state.claim_task.assert_called_once_with(3)
-
-    def test_claim_task_returns_token_when_claim_succeeds(self) -> None:
-        """ClaimTask should return the token from state."""
-        # Prepare
-        self.state.claim_task.return_value = "task-token"
-
-        # Execute
-        response = runtime_handlers.claim_task(
-            ClaimTaskRequest(task_id=123), self.state
-        )
-
-        # Assert
-        self.state.claim_task.assert_called_once_with(123)
-        self.assertEqual(response.token, "task-token")
-
-    def test_claim_task_returns_empty_token_when_claim_fails(self) -> None:
-        """ClaimTask should return an empty token if the claim fails."""
-        # Prepare
-        self.state.claim_task.return_value = None
-
-        # Execute
-        response = runtime_handlers.claim_task(
-            ClaimTaskRequest(task_id=123), self.state
-        )
-
-        # Assert
-        self.state.claim_task.assert_called_once_with(123)
-        self.assertFalse(response.HasField("token"))
 
     def test_send_task_heartbeat_acknowledges_authenticated_task(self) -> None:
         """SendTaskHeartbeat should use the authenticated task ID."""
@@ -246,8 +267,10 @@ class TestRuntimeHandlers(unittest.TestCase):  # pylint: disable=R0904
                 )
                 self.assertEqual(response.task_id, 456)
 
-    def test_create_task_resolves_single_bound_oauth_connector(self) -> None:
-        """CreateTask should resolve the run-bound connector reference to its ID."""
+    def test_create_task_resolves_bound_connector_without_oauth_configuration(
+        self,
+    ) -> None:
+        """Resolve a run-bound connector without requiring an OAuth application."""
         self.state.get_run_connector_ids.return_value = [42]
         self.state.get_connector_by_id.return_value = SimpleNamespace(
             connector_ref="notion"
@@ -257,7 +280,7 @@ class TestRuntimeHandlers(unittest.TestCase):  # pylint: disable=R0904
         with patch.object(
             connector_registry,
             "OAUTH_FLOWS",
-            {"notion": Mock(connector_ref="notion")},
+            {},
         ):
             response = self._create_connector_task("notion")
 

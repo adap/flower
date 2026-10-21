@@ -41,6 +41,8 @@ from flwr.proto.message_pb2 import (  # pylint: disable=E0611
 from flwr.proto.runtime_pb2 import (  # pylint: disable=E0611
     AcquireTaskRequest,
     AcquireTaskResponse,
+    GetCompactedContextsRequest,
+    GetCompactedContextsResponse,
     GetConnectorRequest,
     GetConnectorResponse,
     GetNodesRequest,
@@ -49,14 +51,14 @@ from flwr.proto.runtime_pb2 import (  # pylint: disable=E0611
     GetRunSeriesEventsResponse,
     PullAppMessagesRequest,
     PullAppMessagesResponse,
-    PullPendingTasksRequest,
-    PullPendingTasksResponse,
     PullTaskInputRequest,
     PullTaskInputResponse,
     PushAppMessagesRequest,
     PushAppMessagesResponse,
     PushTaskOutputRequest,
     PushTaskOutputResponse,
+    PutCompactedContextRequest,
+    PutCompactedContextResponse,
 )
 from flwr.proto.task_pb2 import Task  # pylint: disable=E0611
 from flwr.supercore import log
@@ -64,13 +66,6 @@ from flwr.supercore.constant import TaskType
 from flwr.supercore.error import ApiErrorCode, FlowerError
 from flwr.supercore.servicer.runtime import runtime_handlers as core_runtime_handlers
 from flwr.supernode.nodestate import NodeState
-
-
-def pull_pending_tasks(
-    request: PullPendingTasksRequest, state: NodeState
-) -> PullPendingTasksResponse:
-    """Pull pending tasks."""
-    return core_runtime_handlers.pull_pending_tasks(request, state)
 
 
 def acquire_task(request: AcquireTaskRequest, state: NodeState) -> AcquireTaskResponse:
@@ -176,7 +171,7 @@ def pull_messages(
     run_id = task.run_id
 
     # Retrieve message for this run
-    messages = state.get_messages(run_ids=[run_id], is_reply=False, limit=1)
+    messages = state.get_messages_legacy(run_ids=[run_id], is_reply=False, limit=1)
     if not messages:
         return PullAppMessagesResponse()
     message = messages[0]
@@ -250,7 +245,6 @@ def get_run_series_events(
 ) -> GetRunSeriesEventsResponse:
     """Get locally available AgentApp events from the authenticated run series."""
     log(DEBUG, "Runtime.GetRunSeriesEvents")
-
     run = state.get_run(task.run_id)
     if run is None:
         raise FlowerError(
@@ -266,8 +260,42 @@ def get_run_series_events(
         if candidate_run is not None and candidate_run.series_id == run.series_id:
             agent_task_ids.append(candidate.task_id)
 
-    events = state.get_task_events(task_ids=agent_task_ids)
+    events = state.get_task_events(
+        task_ids=agent_task_ids,
+        event_types=request.event_types or None,
+        after_task_event_id=(
+            request.after_event_id if request.HasField("after_event_id") else None
+        ),
+        before_task_event_id=(
+            request.before_event_id if request.HasField("before_event_id") else None
+        ),
+        last_n=request.last_n or None,
+    )
     return GetRunSeriesEventsResponse(events=events)
+
+
+def get_compacted_contexts(
+    request: GetCompactedContextsRequest, state: NodeState, task: Task
+) -> GetCompactedContextsResponse:
+    """Get summaries for the authenticated task's run series."""
+    run = state.get_run(task.run_id)
+    if run is None:
+        raise FlowerError(
+            ApiErrorCode.RUN_ID_NOT_FOUND, f"Run {task.run_id} not found."
+        )
+    return core_runtime_handlers.get_compacted_contexts(request, state, run.series_id)
+
+
+def put_compacted_context(
+    request: PutCompactedContextRequest, state: NodeState, task: Task
+) -> PutCompactedContextResponse:
+    """Store a summary for the authenticated task's run series."""
+    run = state.get_run(task.run_id)
+    if run is None:
+        raise FlowerError(
+            ApiErrorCode.RUN_ID_NOT_FOUND, f"Run {task.run_id} not found."
+        )
+    return core_runtime_handlers.put_compacted_context(request, state, run.series_id)
 
 
 def start_automation(

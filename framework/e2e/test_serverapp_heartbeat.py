@@ -195,8 +195,8 @@ def main() -> None:
             print("Starting SuperLink...")
             superlink_proc = run_superlink(database_path, secret_path)
 
-            # Allow time for SuperLink to start
-            time.sleep(3)
+            # Wait until SuperLink accepts Control API requests
+            flwr_ls(time.monotonic() + PROCESS_START_TIMEOUT, max_retries=30)
 
             # Start the SuperExec
             print("Starting SuperExec...")

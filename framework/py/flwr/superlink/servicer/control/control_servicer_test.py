@@ -534,11 +534,11 @@ class TestControlServicer(unittest.TestCase):  # pylint: disable=R0904
         self.assertEqual(start_run.call_args.kwargs["source"], "unknown")
 
     def test_start_run_validates_and_binds_oauth_connectors(self) -> None:
-        """StartRun should bind connected OAuth connector IDs."""
+        """Bind stored connectors and validate references without OAuth config."""
         connector_id = self.state.create_connector(
             federation_id=CONNECTOR_FEDERATION_ID,
             connector_ref="slack",
-            credentials_json="{}",
+            credentials_json='{"access_token":"manual-token"}',
             config_json="{}",
             created_by=self.aid,
         )
@@ -559,6 +559,7 @@ class TestControlServicer(unittest.TestCase):  # pylint: disable=R0904
         request.fab.content = b"test FAB content with connector IDs"
 
         with (
+            patch.dict(connector_registry.OAUTH_FLOWS, {}, clear=True),
             patch(
                 "flwr.superlink.servicer.control.control_handlers.get_fab_config",
                 return_value={"tool": {"flwr": {"app": {}}}},
@@ -1009,8 +1010,10 @@ class TestControlServicer(unittest.TestCase):  # pylint: disable=R0904
             StartRunContext(federation_id=NOOP_FEDERATION_ID, runtime=expected_runtime),
         )
 
-    @parameterized.expand([(None,), (1,), (2,), (3,), (9,)])  # type: ignore
-    def test_list_runs(self, limit: int | None) -> None:
+    @parameterized.expand(  # type: ignore
+        [(None, 0), (1, 0), (2, 0), (2, 1), (2, 3), (3, 0), (9, 0)]
+    )
+    def test_list_runs(self, limit: int | None, skip: int) -> None:
         """Test List method of ControlServicer with --runs option."""
         # Prepare
         run_ids: list[int] = []
@@ -1019,14 +1022,19 @@ class TestControlServicer(unittest.TestCase):  # pylint: disable=R0904
             time.sleep(1e-6)  # Ensure different timestamps for sorting
 
         # Execute
-        response = self.servicer.ListRuns(ListRunsRequest(limit=limit), Mock())
+        response = self.servicer.ListRuns(
+            ListRunsRequest(limit=limit, skip=skip), Mock()
+        )
         retrieved_timestamp = datetime.fromisoformat(response.now).timestamp()
 
         # Assert
         if limit is None:
             limit = 999
         self.assertAlmostEqual(retrieved_timestamp, now().timestamp(), delta=1e-1)
-        self.assertEqual(set(response.run_dict.keys()), set(run_ids[-limit:]))
+        self.assertEqual(
+            set(response.run_dict.keys()),
+            set(run_ids[::-1][skip : skip + limit]),
+        )
         self.assertTrue(
             all(
                 run.account_name == self.account_info.account_name

@@ -22,12 +22,13 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Install the certificate bundle required to download the managed Python build.
 RUN apt-get update \
+    && apt-get -y upgrade \
     && apt-get -y --no-install-recommends install \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python from uv's managed, prebuilt CPython distributions.
-COPY --from=ghcr.io/astral-sh/uv:0.11.30@sha256:93b61e21202b1dab861092748e46bbd6e0e41dd84f59b9174efd2353186e1b47 /uv /uvx /bin/
+COPY --from=ghcr.io/astral-sh/uv:0.12.20@sha256:100047e74f30778ab704942321a09750d6158739573ff58bf3924085cc6cd2d8 /uv /uvx /bin/
 
 ARG PYTHON_VERSION=3.13
 ENV UV_PYTHON_INSTALL_DIR=/usr/local/bin/python \
@@ -40,7 +41,12 @@ ARG PIP_VERSION
 ARG SETUPTOOLS_VERSION
 # Use a virtual environment so packages have the same location regardless of
 # whether the subsequent image build runs as root or app.
-RUN python -m venv /python/venv \
+# Update the bundled installer too, since the managed Python tree is copied
+# into the runtime image alongside the virtual environment.
+RUN python -m pip install -U --no-cache-dir --break-system-packages \
+    pip==${PIP_VERSION} \
+    setuptools==${SETUPTOOLS_VERSION} \
+    && python -m venv /python/venv \
     && /python/venv/bin/python -m pip install -U --no-cache-dir \
     pip==${PIP_VERSION} \
     setuptools==${SETUPTOOLS_VERSION}
@@ -53,6 +59,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     PATH=/usr/local/bin/python/bin:$PATH
 
 RUN apt-get update \
+    && apt-get -y upgrade \
     && apt-get -y --no-install-recommends install \
     libsqlite3-0 \
     ca-certificates \

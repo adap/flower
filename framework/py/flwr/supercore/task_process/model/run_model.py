@@ -22,8 +22,9 @@ import signal
 import threading
 from collections.abc import Callable, Iterator
 from concurrent.futures import Future
-from contextlib import contextmanager
+from contextlib import ExitStack, contextmanager
 from logging import DEBUG, ERROR
+from time import monotonic
 from types import FrameType
 from typing import Any
 
@@ -53,8 +54,10 @@ from flwr.supercore.interceptors import (
 )
 from flwr.supercore.retry import RetryInvoker, make_simple_http_retry_invoker
 from flwr.supercore.runtime import RuntimeHttpClient
+from flwr.supercore.runtime.tracing import RuntimeTracingInterceptor
 from flwr.supercore.task_identity import TaskIdentity
 from flwr.supercore.telemetry import EventType, event
+from flwr.supercore.tracing import flush_traces, trace_span
 
 from .task import handle_task
 
@@ -69,11 +72,13 @@ class _ModelTaskLifecycle:  # pylint: disable=too-many-instance-attributes
         insecure: bool,
         certificates: bytes | None,
     ) -> None:
+        self._bootstrap_started = monotonic()
         self._runtime_api_address = runtime_api_address
         self._token = token
         self._insecure = insecure
         self._certificates = certificates
         self._client: RuntimeHttpClient | None = None
+        self._tracing = RuntimeTracingInterceptor()
         self._retry_invoker: RetryInvoker | None = None
         self._heartbeat_sender: HeartbeatSender | None = None
         self._sub_status = SubStatus.FAILED
@@ -82,6 +87,7 @@ class _ModelTaskLifecycle:  # pylint: disable=too-many-instance-attributes
         self._finalized = False
         self._task_finished = False
         self._leave_event_started = False
+        self._trace_attributes = {"flwr.component": "model"}
 
     def run(self) -> int:
         """Execute the task and return its Flower exit code."""
@@ -89,21 +95,42 @@ class _ModelTaskLifecycle:  # pylint: disable=too-many-instance-attributes
         try:
             if self._client is None:
                 raise RuntimeError("Model Runtime client initialization failed.")
-            self._heartbeat_sender = HeartbeatSender(
-                make_task_heartbeat_fn_http(self._client)
-            )
-            self._heartbeat_sender.start()
+            with trace_span(
+                "task.initialize", attributes=self._trace_attributes
+            ) as initialization:
+                # Runtime client setup and token acceptance precede this span.
+                initialization.set_attribute(
+                    "flwr.task.bootstrap_ms",
+                    (monotonic() - self._bootstrap_started) * 1000,
+                )
+                self._heartbeat_sender = HeartbeatSender(
+                    make_task_heartbeat_fn_http(self._client)
+                )
+                self._heartbeat_sender.start()
 
-            log(DEBUG, "[flwr-model] Pull task input")
-            task_input: PullTaskInputResponse = self._client.PullTaskInput(
-                PullTaskInputRequest()
-            )
-            TaskIdentity.task_id = task_input.task_id
-            TaskIdentity.run_id = task_input.run.run_id
-            TaskIdentity.node_id = task_input.context.node_id
+                log(DEBUG, "[flwr-model] Pull task input")
+                task_input: PullTaskInputResponse = self._client.PullTaskInput(
+                    PullTaskInputRequest()
+                )
+                TaskIdentity.task_id = task_input.task_id
+                TaskIdentity.run_id = task_input.run.run_id
+                TaskIdentity.node_id = task_input.context.node_id
+                self._trace_attributes.update(
+                    {
+                        "flwr.task_id": str(task_input.task_id),
+                        "flwr.run_id": str(task_input.run.run_id),
+                    }
+                )
+                initialization.set_attribute("flwr.run_id", str(task_input.run.run_id))
+                initialization.set_attribute("flwr.task_id", str(task_input.task_id))
 
             event(EventType.FLWR_MODEL_RUN_ENTER)
-            handle_task(client=self._client)
+            with trace_span(
+                "model.execute",
+                traceparent=self._tracing.take_task_traceparent(task_input.task_id),
+                attributes=self._trace_attributes,
+            ):
+                handle_task(client=self._client)
 
             with self._lock:
                 self._sub_status = SubStatus.COMPLETED
@@ -127,6 +154,7 @@ class _ModelTaskLifecycle:  # pylint: disable=too-many-instance-attributes
             token=self._token,
             insecure=self._insecure,
             certificates=self._certificates,
+            tracing=self._tracing,
         )
 
     def mark_interrupted(self) -> None:
@@ -139,28 +167,37 @@ class _ModelTaskLifecycle:  # pylint: disable=too-many-instance-attributes
 
     def finalize(self) -> None:
         """Push final status and release task state exactly once."""
-        with _ignore_graceful_signals(), self._lock:
+        with _ignore_graceful_signals(), self._lock, ExitStack() as tracing:
             if self._finalized:
                 return
             self._finalized = True
+            tracing.callback(flush_traces)
+            tracing.enter_context(
+                trace_span(
+                    "task.finalize",
+                    attributes=self._trace_attributes,
+                )
+            )
 
             log(DEBUG, "[flwr-model] Will push Model task output")
             if self._client is None or self._retry_invoker is None:
                 return
             self._retry_invoker.max_tries = 1
             try:
-                self._client.PushTaskOutput(
-                    PushTaskOutputRequest(
-                        sub_status=self._sub_status,
-                        details=self._details,
+                with trace_span("task.output_publish"):
+                    self._client.PushTaskOutput(
+                        PushTaskOutputRequest(
+                            sub_status=self._sub_status,
+                            details=self._details,
+                        )
                     )
-                )
             except Exception as err:  # pylint: disable=broad-exception-caught
                 log(ERROR, "Failed to push task output", exc_info=err)
 
             try:
                 if self._heartbeat_sender and self._heartbeat_sender.is_running:
-                    self._heartbeat_sender.stop()
+                    with trace_span("task.heartbeat_stop"):
+                        self._heartbeat_sender.stop()
             except Exception as err:  # pylint: disable=broad-exception-caught
                 log(ERROR, "Failed to stop Model task heartbeat", exc_info=err)
             try:
@@ -327,6 +364,7 @@ def _create_runtime_client(
     token: str,
     insecure: bool,
     certificates: bytes | None,
+    tracing: RuntimeTracingInterceptor,
 ) -> tuple[RuntimeHttpClient, RetryInvoker]:
     """Create a Runtime HTTP client authenticated as the model task."""
     retry_invoker = make_simple_http_retry_invoker()
@@ -335,6 +373,7 @@ def _create_runtime_client(
         insecure=insecure,
         root_certificates=certificates,
         interceptors=[
+            tracing,
             RuntimeVersionHttpInterceptor(component_name="flwr-model"),
             RuntimeTokenHttpInterceptor(token),
         ],

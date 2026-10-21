@@ -20,7 +20,8 @@ import asyncio
 import json
 import os
 import time
-from collections.abc import AsyncIterator
+from collections.abc import AsyncGenerator, Iterator
+from contextlib import aclosing, contextmanager
 from dataclasses import dataclass
 from logging import ERROR
 from typing import cast
@@ -45,6 +46,7 @@ from flwr.supercore.error import FlowerError
 from flwr.supercore.json_message.base import make_json_message
 from flwr.supercore.json_message.model_message import ModelRequest, ModelResponse
 from flwr.supercore.servicer.runtime import runtime_handlers
+from flwr.supercore.tracing import load_task_context, trace_span
 from flwr.supercore.typing import JSONObject
 from flwr.supercore.utils import strict_json_dumps
 
@@ -69,8 +71,9 @@ _TERMINAL_EVENTS = frozenset(
     {"error", "response.completed", "response.failed", "response.incomplete"}
 )
 _POLL_INTERVAL = 0.25
-_DEFAULT_MODEL_RESPONSE_TIMEOUT = 300.0
+_DEFAULT_MODEL_RESPONSE_TIMEOUT = 900.0
 _DEFAULT_MODEL_TASK_LAUNCH_TIMEOUT = 300.0
+_MODEL_RESPONSE_TIMEOUT_ENV = "FLWR_MODEL_RESPONSE_TIMEOUT"
 _MODEL_TASK_LAUNCH_TIMEOUT_ENV = "FLWR_MODEL_TASK_LAUNCH_TIMEOUT"
 
 
@@ -80,6 +83,14 @@ class _Exchange:
 
     agent_task_id: int
     model_task_id: int
+
+
+@dataclass
+class _StreamProgress:
+    """Retain relay progress for error framing and child-task cleanup."""
+
+    complete: bool = False
+    sequence_number: int = 0
 
 
 class _ResponsesError(Exception):
@@ -108,8 +119,15 @@ async def create_runtime_response(
                 media_type="text/event-stream",
                 headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
             )
-        exchange = await run_in_threadpool(_start_exchange, state, task, model_payload)
-        response = await _wait_for_response(request, state, exchange)
+        with _trace_model_exchange(task):
+            exchange = await run_in_threadpool(
+                _start_exchange,
+                state,
+                task,
+                model_payload,
+            )
+            with trace_span("model.response_wait"):
+                response = await _wait_for_response(request, state, exchange)
     except _ResponsesError as err:
         return _error_response(err)
     except Exception as err:  # pylint: disable=broad-exception-caught
@@ -118,6 +136,20 @@ async def create_runtime_response(
             _ResponsesError(500, "Internal server error.", "internal_error")
         )
     return JSONResponse(content=response)
+
+
+@contextmanager
+def _trace_model_exchange(task: Task) -> Iterator[None]:
+    """Measure the Runtime round trip, including asynchronous model waiting."""
+    with trace_span(
+        "model.round_trip",
+        attributes={
+            "flwr.component": "superlink",
+            "flwr.run_id": str(task.run_id),
+            "flwr.task_id": str(task.task_id),
+        },
+    ):
+        yield
 
 
 def _authenticate(request: Request, state: CoreState) -> Task:
@@ -185,9 +217,20 @@ def _start_exchange(
     """Create a child model task and send its request message."""
     model = cast(str, payload["model"])
     try:
-        response = runtime_handlers.create_task(
-            CreateTaskRequest(type=TaskType.MODEL, model_ref=model), state, task
-        )
+        with trace_span(
+            "model.create",
+            traceparent=load_task_context(state, task.task_id),
+            attributes={
+                "flwr.component": "superlink",
+                "flwr.run_id": str(task.run_id),
+                "flwr.parent_task_id": str(task.task_id),
+            },
+        ) as span:
+            response = runtime_handlers.create_task(
+                CreateTaskRequest(type=TaskType.MODEL, model_ref=model), state, task
+            )
+            if response.HasField("task_id"):
+                span.set_attribute("flwr.task_id", str(response.task_id))
     except FlowerError as err:
         raise _ResponsesError(
             500, "Model task could not be created.", "model_task_creation_failed"
@@ -234,7 +277,7 @@ async def _wait_for_response(
     """Wait for and return one correlated model response."""
     started_at = time.monotonic()
     launch_deadline = started_at + _model_task_launch_timeout()
-    response_deadline = started_at + _DEFAULT_MODEL_RESPONSE_TIMEOUT
+    response_deadline = started_at + _model_response_timeout()
     complete = False
     try:
         while True:
@@ -265,72 +308,91 @@ async def _wait_for_response(
 
 async def _stream_response(
     state: CoreState, task: Task, model_payload: JSONObject
-) -> AsyncIterator[str]:
+) -> AsyncGenerator[str, None]:
     """Create an exchange and relay its events as Server-Sent Events."""
-    cursor: int | None = None
-    complete = False
-    sequence_number = 0
-    exchange: _Exchange | None = None
-    try:
-        exchange = await run_in_threadpool(_start_exchange, state, task, model_payload)
-        started_at = time.monotonic()
-        launch_deadline = started_at + _model_task_launch_timeout()
-        response_deadline = started_at + _DEFAULT_MODEL_RESPONSE_TIMEOUT
-        while True:
-            # The model task stores all stream events before its final reply.
-            response = await run_in_threadpool(
-                _claim_response_or_raise_for_model_task_state,
+    with _trace_model_exchange(task):
+        progress = _StreamProgress()
+        exchange: _Exchange | None = None
+        try:
+            exchange = await run_in_threadpool(
+                _start_exchange,
                 state,
-                exchange,
-                launch_deadline,
-                response_deadline,
+                task,
+                model_payload,
             )
-            events = await run_in_threadpool(
-                state.get_task_events,
-                task_ids=[exchange.model_task_id],
-                after_task_event_id=cursor,
+            with trace_span("model.response_wait"):
+                async with aclosing(
+                    _relay_model_events(state, exchange, progress)
+                ) as relay:
+                    async for frame in relay:
+                        yield frame
+        except _ResponsesError as err:
+            yield _stream_error(err.message, err.code, progress.sequence_number)
+        except Exception as err:  # pylint: disable=broad-exception-caught
+            log(ERROR, "Runtime Responses stream failed unexpectedly", exc_info=err)
+            yield _stream_error(
+                "Internal server error.", "internal_error", progress.sequence_number
             )
-            for event in events:
-                cursor = event.id
-                if event.event in _TERMINAL_EVENTS:
-                    if response is None:
-                        await _wait_for_terminal_reply(
-                            state,
-                            exchange,
-                            launch_deadline,
-                            response_deadline,
-                        )
-                    complete = True
-                    yield _sse_frame(event)
-                    return
+        finally:
+            if exchange is not None and not progress.complete:
+                with CancelScope(shield=True):
+                    await run_in_threadpool(
+                        _stop_model_task,
+                        state,
+                        exchange,
+                        "Responses stream ended early.",
+                    )
+
+
+async def _relay_model_events(
+    state: CoreState, exchange: _Exchange, progress: _StreamProgress
+) -> AsyncGenerator[str, None]:
+    """Poll one model exchange and relay its ordered SSE frames."""
+    cursor: int | None = None
+    started_at = time.monotonic()
+    launch_deadline = started_at + _model_task_launch_timeout()
+    response_deadline = started_at + _model_response_timeout()
+    while True:
+        # The model task stores all stream events before its final reply.
+        response = await run_in_threadpool(
+            _claim_response_or_raise_for_model_task_state,
+            state,
+            exchange,
+            launch_deadline,
+            response_deadline,
+        )
+        events = await run_in_threadpool(
+            state.get_task_events,
+            task_ids=[exchange.model_task_id],
+            after_task_event_id=cursor,
+        )
+        for event in events:
+            cursor = event.id
+            if event.event in _TERMINAL_EVENTS:
+                if response is None:
+                    await _wait_for_terminal_reply(
+                        state, exchange, launch_deadline, response_deadline
+                    )
+                progress.complete = True
                 yield _sse_frame(event)
-                sequence_number += 1
-
-            if response is not None:
-                complete = True
-                yield _stream_error(
-                    (
-                        _response_error_message(response)
-                        if response.get("status") == "failed"
-                        else "Model stream ended before a terminal event."
-                    ),
-                    "model_stream_failed",
-                    sequence_number,
-                )
                 return
+            yield _sse_frame(event)
+            progress.sequence_number += 1
 
-            await asyncio.sleep(_POLL_INTERVAL)
-    except _ResponsesError as err:
-        yield _stream_error(err.message, err.code, sequence_number)
-    except Exception as err:  # pylint: disable=broad-exception-caught
-        log(ERROR, "Runtime Responses stream failed unexpectedly", exc_info=err)
-        yield _stream_error("Internal server error.", "internal_error", sequence_number)
-    finally:
-        if exchange is not None and not complete:
-            with CancelScope(shield=True):
-                await run_in_threadpool(
-                    _stop_model_task, state, exchange, "Responses stream ended early."
-                )
+        if response is not None:
+            progress.complete = True
+            yield _stream_error(
+                (
+                    _response_error_message(response)
+                    if response.get("status") == "failed"
+                    else "Model stream ended before a terminal event."
+                ),
+                "model_stream_failed",
+                progress.sequence_number,
+            )
+            return
+
+        await asyncio.sleep(_POLL_INTERVAL)
 
 
 async def _wait_for_terminal_reply(
@@ -424,6 +486,19 @@ def _model_task_launch_timeout() -> float:
         timeout = float(raw_timeout.strip())
     except ValueError:
         timeout = _DEFAULT_MODEL_TASK_LAUNCH_TIMEOUT
+    return max(1.0, timeout)
+
+
+def _model_response_timeout() -> float:
+    """Return the configured maximum time for receiving a model response."""
+    raw_timeout = os.getenv(
+        _MODEL_RESPONSE_TIMEOUT_ENV,
+        str(_DEFAULT_MODEL_RESPONSE_TIMEOUT),
+    )
+    try:
+        timeout = float(raw_timeout.strip())
+    except ValueError:
+        timeout = _DEFAULT_MODEL_RESPONSE_TIMEOUT
     return max(1.0, timeout)
 
 

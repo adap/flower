@@ -35,6 +35,7 @@ from uuid import uuid4
 from google.protobuf.message import DecodeError
 from parameterized import parameterized
 from sqlalchemy import event, insert, select, update
+from sqlalchemy.exc import OperationalError
 from sqlalchemy.sql.dml import Update
 
 from flwr.app import DEFAULT_TTL, Error, Message, RecordDict
@@ -55,6 +56,7 @@ from flwr.proto.federation_config_pb2 import SimulationConfig  # pylint: disable
 from flwr.proto.message_pb2 import Message as ProtoMessage
 from flwr.proto.message_pb2 import Metadata as ProtoMetadata
 from flwr.proto.recorddict_pb2 import RecordDict as ProtoRecordDict
+from flwr.proto.runseries_pb2 import CompactedContext  # pylint: disable=E0611
 from flwr.proto.task_pb2 import TaskEvent  # pylint: disable=E0611
 
 # pylint: enable=E0611
@@ -72,10 +74,14 @@ from flwr.supercore.corestate import CoreState
 from flwr.supercore.corestate.corestate_test import StateTest as CoreStateTest
 from flwr.supercore.corestate.utils_test import create_task_message
 from flwr.supercore.date import now
+from flwr.supercore.error import ApiErrorCode, FlowerError
 from flwr.supercore.fab import Fab
 from flwr.supercore.inflatable.inflatable_object import get_object_tree
 from flwr.supercore.object_store.object_store_factory import ObjectStoreFactory
 from flwr.supercore.primitives.asymmetric import generate_key_pairs, public_key_to_bytes
+from flwr.supercore.state.schema.corestate_models import (
+    CompactedContext as CompactedContextModel,
+)
 from flwr.supercore.state.schema.corestate_models import Connector as ConnectorModel
 from flwr.supercore.state.schema.corestate_models import Fab as FabModel
 from flwr.supercore.state.schema.linkstate_models import MessageIns as MessageInsModel
@@ -108,6 +114,149 @@ class StateTest(CoreStateTest):
         """Create a P-384 public key for node creation."""
         _, public_key = generate_key_pairs()
         return public_key_to_bytes(public_key)
+
+    def test_check_message_policy_empty_batch(self) -> None:
+        """Skip all lookups for an empty batch."""
+        # Prepare: Track run and federation lookups on a fresh state.
+        state = self.state_factory()
+        with (
+            patch.object(state, "get_run_info") as get_runs,
+            patch.object(state.federation_manager, "filter_nodes") as filter_nodes,
+        ):
+            # Execute & Assert: An empty batch produces no policy results.
+            # pylint: disable-next=protected-access
+            assert state._check_message_policy([]) == []
+        # Assert: No run or federation lookup was needed.
+        get_runs.assert_not_called()
+        filter_nodes.assert_not_called()
+
+    @parameterized.expand([(0, True), (1, True), (2, True), (3, False)])  # type: ignore
+    def test_check_message_policy_run_status(
+        self, transitions: int, expected: bool
+    ) -> None:
+        """Allow unfinished runs, including a pending SuperLink prompt."""
+        # Prepare: Create a SuperLink message for a run in the requested status.
+        state = self.state_factory()
+        run_id = create_dummy_run(state)
+        transition_run_status(state, run_id, transitions)
+        message = create_ins_message_obj(SUPERLINK_NODE_ID, SUPERLINK_NODE_ID, run_id)
+        with patch.object(
+            state.federation_manager,
+            "filter_nodes",
+            wraps=state.federation_manager.filter_nodes,
+        ) as filter_nodes:
+            # Execute & Assert: Accept the message only while the run is unfinished.
+            # pylint: disable-next=protected-access
+            assert state._check_message_policy((message,)) == [expected]
+        # Assert: Only unfinished runs require a federation membership lookup.
+        if expected:
+            filter_nodes.assert_called_once_with(
+                {SUPERLINK_NODE_ID}, NOOP_FEDERATION_ID
+            )
+        else:
+            filter_nodes.assert_not_called()
+
+    def test_check_message_policy_batches_runs_and_federations(self) -> None:
+        """Check both endpoints independently while sharing federation lookups."""
+        # Prepare: Mix runs, federations, and allowed and disallowed node IDs.
+        state = self.state_factory()
+        run_a = create_dummy_run(state)
+        run_b = create_dummy_run(state)
+        run_c = create_dummy_run(state, federation_id="other")
+        finished = create_dummy_run(state, federation_id="finished")
+        transition_run_status(state, finished, 3)
+        messages = [
+            create_ins_message_obj(10, 20, run_a),
+            create_ins_message_obj(30, 20, run_b),
+            create_ins_message_obj(SUPERLINK_NODE_ID, 10, run_b),
+            create_ins_message_obj(10, 30, run_a),
+            create_ins_message_obj(40, 40, run_c),
+            create_ins_message_obj(30, 30, run_a),
+            create_ins_message_obj(10, 20, finished),
+            create_ins_message_obj(10, 20, 0),
+        ]
+        members = {
+            NOOP_FEDERATION_ID: {SUPERLINK_NODE_ID, 10, 20},
+            "other": {40},
+        }
+        with (
+            patch.object(state, "get_run_info", wraps=state.get_run_info) as get_runs,
+            patch.object(
+                state.federation_manager,
+                "filter_nodes",
+                side_effect=lambda nodes, federation: nodes & members[federation],
+            ) as filter_nodes,
+        ):
+            # Execute & Assert: Each message receives its policy result in input order.
+            # pylint: disable-next=protected-access
+            assert state._check_message_policy(messages) == [
+                True,
+                False,
+                True,
+                False,
+                True,
+                False,
+                False,
+                False,
+            ]
+        # Assert: Share lookups across messages without storing any messages.
+        get_runs.assert_called_once_with(
+            run_ids=sorted({run_a, run_b, run_c, finished, 0})
+        )
+        assert filter_nodes.call_count == 2
+        filter_nodes.assert_any_call(
+            {SUPERLINK_NODE_ID, 10, 20, 30}, NOOP_FEDERATION_ID
+        )
+        filter_nodes.assert_any_call({40}, "other")
+        assert state.num_message_ins() == 0
+        assert state.num_message_res() == 0
+
+    def test_check_message_policy_missing_federation(self) -> None:
+        """Propagate the manager's error when a federation does not exist."""
+        # Prepare: Mix messages from missing and existing federations.
+        state = self.state_factory()
+        missing = create_dummy_run(state, federation_id="missing")
+        valid = create_dummy_run(state)
+        messages = [
+            create_ins_message_obj(SUPERLINK_NODE_ID, SUPERLINK_NODE_ID, missing),
+            create_ins_message_obj(SUPERLINK_NODE_ID, SUPERLINK_NODE_ID, valid),
+        ]
+
+        # Execute & Assert: A missing federation raises instead of rejecting a message.
+        with self.assertRaises(ValueError):
+            # pylint: disable-next=protected-access
+            state._check_message_policy(messages)
+
+    @parameterized.expand(  # type: ignore
+        [
+            ("get_run_info", OperationalError("select", {}, RuntimeError("offline"))),
+            ("filter_nodes", OperationalError("select", {}, RuntimeError("offline"))),
+            (
+                "filter_nodes",
+                FlowerError(
+                    ApiErrorCode.FEDERATION_NOT_FOUND_OR_NO_PERMISSION, "missing"
+                ),
+            ),
+            ("filter_nodes", FlowerError(ApiErrorCode.NO_PERMISSIONS, "denied")),
+            ("filter_nodes", ValueError("unexpected failure")),
+        ]
+    )
+    def test_check_message_policy_propagates_errors(
+        self, method: str, error: Exception
+    ) -> None:
+        """Propagate all lookup errors without converting them to policy rejection."""
+        # Prepare: Make the selected lookup raise the supplied error.
+        state = self.state_factory()
+        run_id = create_dummy_run(state)
+        message = create_ins_message_obj(SUPERLINK_NODE_ID, SUPERLINK_NODE_ID, run_id)
+        target = state if method == "get_run_info" else state.federation_manager
+        with patch.object(target, method, side_effect=error):
+            # Execute & Assert: Policy evaluation propagates the lookup error.
+            with self.assertRaises(type(error)) as caught:
+                # pylint: disable-next=protected-access
+                state._check_message_policy([message])
+        # Assert: The caller receives the original exception unchanged.
+        assert caught.exception is error
 
     def test_store_and_get_fab(self) -> None:
         """Test storing and retrieving a FAB."""
@@ -568,11 +717,43 @@ class StateTest(CoreStateTest):
         limited_runs = state.get_run_info(
             order_by="pending_at", ascending=True, limit=2
         )
+        second_page = state.get_run_info(
+            order_by="pending_at", ascending=False, limit=2, skip=1
+        )
 
         # Assert
         self.assertEqual([run.run_id for run in ascending_runs], run_ids)
         self.assertEqual([run.run_id for run in descending_runs], run_ids[::-1])
         self.assertEqual([run.run_id for run in limited_runs], run_ids[:2])
+        self.assertEqual([run.run_id for run in second_page], run_ids[1::-1])
+
+    def test_get_run_info_paging_with_equal_timestamps(self) -> None:
+        """Break equal timestamp ties consistently across storage backends."""
+        state = self.state_factory()
+        module = (
+            "flwr.server.superlink.linkstate.in_memory_linkstate"
+            if isinstance(state, InMemoryLinkState)
+            else "flwr.server.superlink.linkstate.sql_linkstate"
+        )
+        run_ids = [1, 1 << 63, (1 << 63) - 1]
+        generated_ids = [
+            value for pair in zip(run_ids, [11, 12, 13], strict=True) for value in pair
+        ]
+        fixed_time = datetime(2026, 1, 1, tzinfo=UTC)
+        with (
+            patch(f"{module}.generate_rand_int_from_bytes", side_effect=generated_ids),
+            patch(f"{module}.now", return_value=fixed_time),
+        ):
+            for _ in run_ids:
+                create_dummy_run(state)
+
+        first_page = state.get_run_info(order_by="pending_at", ascending=False, limit=2)
+        second_page = state.get_run_info(
+            order_by="pending_at", ascending=False, limit=2, skip=2
+        )
+
+        self.assertEqual([run.run_id for run in first_page], [run_ids[2], run_ids[0]])
+        self.assertEqual([run.run_id for run in second_page], [run_ids[1]])
 
     @parameterized.expand([(1,), (2,), (9999,)])  # type: ignore
     def test_get_run_info_limit_without_order_by(self, limit: int) -> None:
@@ -2546,6 +2727,39 @@ class InMemoryStateTest(StateTest):
         """Return InMemoryState."""
         return InMemoryLinkState(NoOpFederationManager(), ObjectStoreFactory().store())
 
+    def test_get_compacted_contexts(self) -> None:
+        """Read one series newest first with an exclusive cursor."""
+        state = self.state_factory()
+        state.compacted_context_store = {
+            context.id: context
+            for context in (
+                CompactedContext(id=1, series_id=42, through_event_id=10, text="First"),
+                CompactedContext(
+                    id=2, series_id=42, through_event_id=20, text="Second"
+                ),
+                CompactedContext(id=3, series_id=43, through_event_id=30, text="Other"),
+            )
+        }
+
+        self.assertEqual(
+            [context.text for context in state.get_compacted_contexts(42, limit=2)],
+            ["Second", "First"],
+        )
+        self.assertEqual(
+            [context.id for context in state.get_compacted_contexts(42)], [2]
+        )
+        self.assertEqual(
+            [
+                context.id
+                for context in state.get_compacted_contexts(42, before_context_id=2)
+            ],
+            [1],
+        )
+        self.assertEqual(
+            [context.text for context in state.get_compacted_contexts(43)],
+            ["Other"],
+        )
+
     def test_owner_aid_index(self) -> None:
         """Test that the owner_aid index works correctly."""
         # Prepare
@@ -2573,6 +2787,50 @@ class SqlInMemoryStateTest(StateTest, unittest.TestCase):
         )
         state.initialize()
         return state
+
+    def test_get_compacted_contexts(self) -> None:
+        """Read only one series in newest-first order with an exclusive cursor."""
+        state = self.state_factory()
+        with state.session() as session:
+            rows = [
+                CompactedContextModel(
+                    series_id=series_id,
+                    through_event_id=event_id,
+                    text=text,
+                    token_count=1,
+                    created_at=now(),
+                )
+                for series_id, event_id, text in (
+                    (42, 10, "First"),
+                    (42, 20, "Second"),
+                    (43, 30, "Other"),
+                )
+            ]
+            session.add_all(rows)
+            session.flush()
+            first_id, second_id = rows[0].id, rows[1].id
+
+        self.assertEqual(
+            [context.text for context in state.get_compacted_contexts(42, limit=2)],
+            ["Second", "First"],
+        )
+        self.assertEqual(
+            [context.id for context in state.get_compacted_contexts(42)],
+            [second_id],
+        )
+        self.assertEqual(
+            [
+                context.id
+                for context in state.get_compacted_contexts(
+                    42, before_context_id=second_id
+                )
+            ],
+            [first_id],
+        )
+        self.assertEqual(
+            [context.text for context in state.get_compacted_contexts(43)],
+            ["Other"],
+        )
 
     def test_get_fab_refreshes_cached_row_in_shared_session(self) -> None:
         """Test get_fab observes raw SQL updates in a shared session."""

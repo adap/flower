@@ -69,6 +69,7 @@ from flwr.supercore.state.schema.linkstate_models import MessageRes as MessageRe
 from flwr.supercore.state.schema.linkstate_models import Node as NodeModel
 from flwr.supercore.state.schema.linkstate_models import Run as RunModel
 from flwr.supercore.state.schema.linkstate_tables import create_linkstate_metadata
+from flwr.supercore.tracing import current_traceparent, store_task_context
 from flwr.supercore.utils import (
     int64_to_uint64,
     simulation_config_from_json,
@@ -1026,6 +1027,7 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
                         details="",
                     )
                 )
+                store_task_context(self, task_id, current_traceparent())
                 if primary_task_type == TaskType.AGENT_APP and user_prompt is not None:
                     message = create_user_prompt_message(run_id, user_prompt)
                     self.store_message_ins(message)
@@ -1061,6 +1063,7 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
         order_by: Literal["pending_at"] | None = None,
         ascending: bool = True,
         limit: int | None = None,
+        skip: int = 0,
     ) -> Sequence[Run]:
         """Retrieve information about runs based on the specified filters."""
         self._cleanup_expired_task_tokens()
@@ -1110,8 +1113,11 @@ class SqlLinkState(LinkState, SqlCoreState):  # pylint: disable=R0904
         if order_by is not None:
             order_column = TaskModel.pending_at
             stmt = stmt.order_by(
-                order_column.asc() if ascending else order_column.desc()
+                order_column.asc() if ascending else order_column.desc(),
+                RunModel.run_id.asc() if ascending else RunModel.run_id.desc(),
             )
+        if skip:
+            stmt = stmt.offset(skip)
         if limit is not None:
             stmt = stmt.limit(limit)
 

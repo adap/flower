@@ -12,204 +12,146 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Tests for the Slack connector."""
+"""Tests for Slack MCP discovery and execution."""
 
-from unittest.mock import Mock, patch
-from urllib.parse import parse_qs, urlparse
+import traceback
+from typing import cast
+from unittest.mock import Mock, call, create_autospec, patch
 
+import httpx
 import pytest
+from mcp import ClientSession
+from mcp.shared.exceptions import McpError
+from mcp.types import (
+    CallToolResult,
+    ErrorData,
+    ImageContent,
+    ListToolsResult,
+    TextContent,
+    Tool,
+)
 
 from flwr.supercore.typing import JSONObject
 
 from .. import registry
-from ..definition import ActionAccess
-from ..oauth import OAuthFlow
-from .actions import ACTIONS
-from .definition import PROVIDER, SLACK_CONNECTOR_REF, SLACK_USER_SCOPES
-from .executors import SlackApiError
-
-_HTTP_REQUEST = "flwr.supercore.task_process.connector.http.requests.request"
-_OAUTH_REQUEST = "flwr.supercore.task_process.connector.oauth.requests.post"
-_IDENTITY_REQUEST = "flwr.supercore.task_process.connector.oauth.requests.request"
+from . import mcp as slack_mcp
 
 
-def test_slack_actions_are_registered_and_executable() -> None:
-    """Slack read actions should be registered and executable."""
-    assert len(ACTIONS) == 4
-    assert [action.name for action in ACTIONS] == [
-        "search_messages",
-        "list_conversations",
-        "get_conversation_history",
-        "get_conversation_replies",
+def test_mcp_discovery_and_execution() -> None:
+    """Discover all Slack tools and execute former static names through MCP."""
+    session = create_autospec(ClientSession, instance=True)
+    session.list_tools.side_effect = [
+        ListToolsResult(
+            tools=[
+                Tool(name="slack_search_public", inputSchema={"type": "object"}),
+                Tool(name="slack_read_channel", inputSchema={"type": "object"}),
+            ],
+            nextCursor="next",
+        ),
+        ListToolsResult(tools=[]),
     ]
-    assert all(action.access is ActionAccess.READ for action in ACTIONS)
-    assert len(registry.get_connector_tools(SLACK_CONNECTOR_REF)) == len(ACTIONS)
-    response = Mock(status_code=200)
-    response.json.return_value = {"ok": True, "messages": {"matches": []}}
-    with patch(_HTTP_REQUEST, return_value=response) as request:
+    session.send_request.return_value = CallToolResult(
+        content=[TextContent(type="text", text="done")]
+    )
+    credentials: JSONObject = {"access_token": "xoxp-secret"}
+    assert not registry.get_connector_tools("slack")
+    assert registry.is_dynamic_connector_tool("slack_search_public")
+    with patch.object(slack_mcp, "_session") as open_session:
+        open_session.return_value.__aenter__.return_value = session
+        tools = registry.invoke_connector(
+            "slack__discover_tools", {}, Mock(), credentials, {}
+        )
+        assert isinstance(tools, list)
+        assert [cast(JSONObject, tool)["name"] for tool in tools] == [
+            "slack_search_public",
+            "slack_read_channel",
+        ]
         result = registry.invoke_connector(
-            "slack_search_messages",
-            {"query": "release", "cursor": "*", "page": 1},
-            Mock(),
-            {"access_token": "xoxp-secret"},
-            {},
-        )
-    assert result == response.json.return_value
-    assert request.call_args.args == ("GET", "https://slack.com/api/search.messages")
-    assert request.call_args.kwargs["params"] == {
-        "query": "release",
-        "cursor": "*",
-        "page": "1",
-    }
-
-
-def test_slack_api_errors_include_code_and_message() -> None:
-    """Slack's documented error fields should remain readable to callers."""
-    response = Mock(status_code=200)
-    response.json.return_value = {
-        "ok": False,
-        "error": "invalid_cursor",
-        "response_metadata": {"messages": ["Invalid cursor"]},
-    }
-    with (
-        patch(_HTTP_REQUEST, return_value=response),
-        pytest.raises(SlackApiError) as error,
-    ):
-        registry.invoke_connector(
-            "slack_search_messages",
+            "slack_search_public",
             {"query": "release"},
             Mock(),
-            {"access_token": "xoxp-secret"},
+            credentials,
             {},
         )
-    assert str(error.value) == (
-        "Slack API request failed: invalid_cursor: Invalid cursor."
-    )
+    assert session.list_tools.await_args_list == [
+        call(cursor=None),
+        call(cursor="next"),
+    ]
+    request = session.send_request.await_args.args[0].root
+    assert request.params.name == "slack_search_public"
+    assert request.params.arguments == {"query": "release"}
+    assert isinstance(result, dict)
+    assert result["content"] == [{"type": "text", "text": "done"}]
 
 
-def test_slack_http_rate_limit_preserves_status() -> None:
-    """Slack HTTP rate-limit responses should retain their code and status."""
-    response = Mock(status_code=429)
-    response.json.return_value = {"ok": False, "error": "ratelimited"}
-    with (
-        patch(_HTTP_REQUEST, return_value=response),
-        pytest.raises(SlackApiError) as error,
-    ):
-        registry.invoke_connector(
-            "slack_search_messages",
-            {"query": "release"},
-            Mock(),
-            {"access_token": "xoxp-secret"},
-            {},
-        )
-    assert str(error.value) == "Slack API request failed: ratelimited (429)."
-
-
-def test_slack_history_actions_forward_cursor() -> None:
-    """Slack history actions should expose cursor pagination."""
-    cases: tuple[tuple[str, JSONObject, dict[str, str]], ...] = (
+@pytest.mark.parametrize(
+    ("result", "message"),
+    [
         (
-            "slack_get_conversation_history",
-            {"channel_id": "C1", "cursor": "next", "limit": 15},
-            {"channel": "C1", "cursor": "next", "limit": "15"},
-        ),
-        (
-            "slack_get_conversation_replies",
-            {
-                "channel_id": "C1",
-                "thread_ts": "1.0",
-                "cursor": "next",
-                "limit": 15,
-            },
-            {"channel": "C1", "ts": "1.0", "cursor": "next", "limit": "15"},
-        ),
-    )
-    response = Mock(status_code=200)
-    response.json.return_value = {"ok": True, "response_metadata": {}}
-    for name, arguments, params in cases:
-        with patch(_HTTP_REQUEST, return_value=response) as request:
-            assert (
-                registry.invoke_connector(
-                    name, arguments, Mock(), {"access_token": "xoxp-secret"}, {}
-                )
-                == response.json.return_value
-            )
-        assert request.call_args.kwargs["params"] == params
-
-
-def test_slack_list_conversations_limit() -> None:
-    """Slack should apply its default when limit is omitted and accept up to 999."""
-    response = Mock(status_code=200)
-    response.json.return_value = {"ok": True, "channels": []}
-    cases: tuple[tuple[JSONObject, str | None], ...] = (
-        ({}, None),
-        ({"limit": 999}, "999"),
-    )
-    for arguments, expected_limit in cases:
-        with patch(_HTTP_REQUEST, return_value=response) as request:
-            registry.invoke_connector(
-                "slack_list_conversations",
-                arguments,
-                Mock(),
-                {"access_token": "xoxp-secret"},
-                {},
-            )
-        assert request.call_args.kwargs["params"].get("limit") == expected_limit
-
-
-def test_slack_oauth_flow() -> None:
-    """Slack OAuth should request read scopes and extract user credentials."""
-    redirect_uri = "https://example.com/callback"
-    flow = OAuthFlow(
-        PROVIDER, client_id="client", client_secret="secret", redirect_uri=redirect_uri
-    )
-    url = flow.build_authorization_url(
-        redirect_uri=redirect_uri, state="state", pkce_challenge="ignored"
-    )
-    query = parse_qs(urlparse(url).query)
-    assert query["response_type"] == ["code"]
-    assert query["user_scope"] == [",".join(SLACK_USER_SCOPES)]
-    response = Mock(status_code=200)
-    response.json.return_value = {
-        "ok": True,
-        "authed_user": {
-            "access_token": "token",
-            "scope": ", ".join(SLACK_USER_SCOPES),
-        },
-    }
-    with (
-        patch(_OAUTH_REQUEST, return_value=response) as post,
-        patch(
-            _IDENTITY_REQUEST,
-            return_value=Mock(
-                status_code=200,
-                **{
-                    "json.return_value": {"ok": True, "team": "Flower", "user": "alice"}
-                },
+            CallToolResult(
+                isError=True,
+                content=[
+                    TextContent(type="text", text="Denied xoxp-secret"),
+                    ImageContent(type="image", data="eA==", mimeType="image/png"),
+                    TextContent(type="text", text="Missing scope: chat:write"),
+                ],
             ),
-        ) as identity,
-    ):
-        credentials, config = flow.exchange_code(
-            code="code", redirect_uri=redirect_uri, pkce_verifier="ignored"
-        )
-    assert credentials == {"access_token": "token"}
-    assert config == {"display_name": "Slack · Flower / alice"}
-    assert post.call_args.kwargs["data"]["grant_type"] == "authorization_code"
-    assert identity.call_args.args == ("POST", "https://slack.com/api/auth.test")
+            "Denied [REDACTED] Missing scope: chat:write",
+        ),
+        (CallToolResult(isError=True, content=[]), ""),
+    ],
+)
+def test_mcp_tool_error_preserves_redacted_diagnostics(
+    result: CallToolResult, message: str
+) -> None:
+    """Preserve error text without exposing the bound token or non-text blocks."""
+    session = create_autospec(ClientSession, instance=True)
+    session.send_request.return_value = result
+    credentials: JSONObject = {"access_token": "xoxp-secret"}
+    with patch.object(slack_mcp, "_session") as open_session:
+        open_session.return_value.__aenter__.return_value = session
+        with pytest.raises(slack_mcp.SlackApiError) as error:
+            registry.invoke_connector(
+                "slack_search_public", {"query": "release"}, Mock(), credentials, {}
+            )
+    assert error.value.code == "mcp_tool_error"
+    assert error.value.message == message
+    assert "xoxp-secret" not in "".join(traceback.format_exception(error.value))
 
-    response.json.return_value["authed_user"]["scope"] = "search:read"
-    with patch(_OAUTH_REQUEST, return_value=response), pytest.raises(RuntimeError):
-        flow.exchange_code(
-            code="code", redirect_uri=redirect_uri, pkce_verifier="ignored"
-        )
 
-    response.json.return_value["authed_user"][
-        "scope"
-    ] = f"{','.join(SLACK_USER_SCOPES)},chat:write"
+@pytest.mark.parametrize("failure", ["http", "protocol", "connector"])
+def test_mcp_session_error_preserves_redacted_diagnostics(failure: str) -> None:
+    """Preserve nested session failures without exposing the bound token."""
+    message = "Denied xoxp-secret"
+    credentials: JSONObject = {"access_token": "xoxp-secret"}
+    session = create_autospec(ClientSession, instance=True)
+    session.__aenter__.return_value = session
+    cause: Exception
+    if failure == "http":
+        cause = httpx.HTTPStatusError(
+            message,
+            request=httpx.Request("POST", "https://mcp.slack.com/mcp"),
+            response=httpx.Response(401),
+        )
+    elif failure == "protocol":
+        cause = McpError(ErrorData(code=-32602, message=message))
+    else:
+        cause = slack_mcp.SlackApiError("invalid_tools", message=message)
+    session.list_tools.side_effect = ExceptionGroup(
+        "MCP failed", [ExceptionGroup("Transport failed", [cause])]
+    )
     with (
-        patch(_OAUTH_REQUEST, return_value=response),
-        patch(_IDENTITY_REQUEST, return_value=Mock(status_code=500)),
+        patch("mcp.ClientSession", return_value=session),
+        patch("mcp.client.streamable_http.streamable_http_client") as transport,
     ):
-        flow.exchange_code(
-            code="code", redirect_uri=redirect_uri, pkce_verifier="ignored"
-        )
+        transport.return_value.__aenter__.return_value = (Mock(), Mock(), Mock())
+        with pytest.raises(slack_mcp.SlackApiError) as error:
+            registry.invoke_connector(
+                "slack__discover_tools", {}, Mock(), credentials, {}
+            )
+    assert error.value.code == (
+        "invalid_tools" if failure == "connector" else "request_failed"
+    )
+    assert error.value.status_code == (401 if failure == "http" else None)
+    assert error.value.message == "Denied [REDACTED]"
+    assert "xoxp-secret" not in "".join(traceback.format_exception(error.value))

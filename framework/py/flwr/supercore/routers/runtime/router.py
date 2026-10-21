@@ -37,10 +37,10 @@ from flwr.proto.message_pb2 import (  # pylint: disable=E0611
 from flwr.proto.runtime_pb2 import (  # pylint: disable=E0611
     AcquireTaskRequest,
     AcquireTaskResponse,
-    ClaimTaskRequest,
-    ClaimTaskResponse,
     CreateTaskRequest,
     CreateTaskResponse,
+    GetCompactedContextsRequest,
+    GetCompactedContextsResponse,
     GetConnectorRequest,
     GetConnectorResponse,
     GetNodesRequest,
@@ -49,8 +49,6 @@ from flwr.proto.runtime_pb2 import (  # pylint: disable=E0611
     GetRunSeriesEventsResponse,
     PullAppMessagesRequest,
     PullAppMessagesResponse,
-    PullPendingTasksRequest,
-    PullPendingTasksResponse,
     PullTaskInputRequest,
     PullTaskInputResponse,
     PullTaskMessageRequest,
@@ -63,6 +61,8 @@ from flwr.proto.runtime_pb2 import (  # pylint: disable=E0611
     PushTaskMessageResponse,
     PushTaskOutputRequest,
     PushTaskOutputResponse,
+    PutCompactedContextRequest,
+    PutCompactedContextResponse,
     RecordTaskUsageRequest,
     RecordTaskUsageResponse,
     SendTaskHeartbeatRequest,
@@ -74,9 +74,13 @@ from flwr.supercore.dependencies.runtime import (
     SuperExecAuthDependency,
     TaskDependency,
 )
+from flwr.supercore.dependencies.version import VersionDependency
 from flwr.supercore.protobuf.routing import ProtobufRoute
 from flwr.supercore.protobuf.translation import PROTOBUF_REQUEST_DEPENDENCY
 from flwr.supercore.servicer.runtime import runtime_handlers as core_runtime_handlers
+from flwr.supercore.tracing import trace_span
+
+from .tracing import TaskCompletionTracingDependency
 
 router = APIRouter(
     prefix="/v1/runtime",
@@ -84,29 +88,27 @@ router = APIRouter(
     route_class=ProtobufRoute,
 )
 
-PullPendingTasksAuthDependency = Annotated[
-    None,
-    Depends(SuperExecAuthDependency("/flwr.proto.Runtime/PullPendingTasks")),
-]
+
+def create_runtime_router(component_name: str) -> APIRouter:
+    """Return the Runtime router with version checks for its host component."""
+    versioned_router = APIRouter(
+        dependencies=[
+            Depends(
+                VersionDependency(
+                    component_name=component_name,
+                    connection_name=f"Caller <-> {component_name} Runtime API",
+                )
+            )
+        ]
+    )
+    versioned_router.include_router(router)
+    return versioned_router
+
+
 AcquireTaskAuthDependency = Annotated[
     None,
     Depends(SuperExecAuthDependency("/flwr.proto.Runtime/AcquireTask")),
 ]
-ClaimTaskAuthDependency = Annotated[
-    None,
-    Depends(SuperExecAuthDependency("/flwr.proto.Runtime/ClaimTask")),
-]
-
-
-@router.post("/pull-pending-tasks")
-def pull_pending_tasks(
-    request: Annotated[PullPendingTasksRequest, PROTOBUF_REQUEST_DEPENDENCY],
-    state: RuntimeStateDependency,
-    handlers: RuntimeHandlersDependency,
-    _auth: PullPendingTasksAuthDependency,
-) -> PullPendingTasksResponse:
-    """Pull pending tasks."""
-    return handlers.pull_pending_tasks(request, state)
 
 
 @router.post("/acquire-task")
@@ -118,16 +120,6 @@ def acquire_task(
 ) -> AcquireTaskResponse:
     """Acquire the oldest eligible pending task."""
     return handlers.acquire_task(request, state)
-
-
-@router.post("/claim-task")
-def claim_task(
-    request: Annotated[ClaimTaskRequest, PROTOBUF_REQUEST_DEPENDENCY],
-    state: RuntimeStateDependency,
-    _auth: ClaimTaskAuthDependency,
-) -> ClaimTaskResponse:
-    """Claim a pending task."""
-    return core_runtime_handlers.claim_task(request, state)
 
 
 @router.post("/send-task-heartbeat")
@@ -148,7 +140,14 @@ def pull_task_input(
     task: TaskDependency,
 ) -> PullTaskInputResponse:
     """Pull app process inputs."""
-    return handlers.pull_task_input(request, state, task)
+    with trace_span(
+        "task.input",
+        attributes={
+            "flwr.run_id": str(task.run_id),
+            "flwr.task_id": str(task.task_id),
+        },
+    ):
+        return handlers.pull_task_input(request, state, task)
 
 
 @router.post("/push-task-output")
@@ -157,6 +156,7 @@ def push_task_output(
     state: RuntimeStateDependency,
     handlers: RuntimeHandlersDependency,
     task: TaskDependency,
+    _tracing: TaskCompletionTracingDependency,
 ) -> PushTaskOutputResponse:
     """Push app process outputs."""
     return handlers.push_task_output(request, state, task)
@@ -245,6 +245,28 @@ def get_run_series_events(
 ) -> GetRunSeriesEventsResponse:
     """Get events from the authenticated task's run series."""
     return handlers.get_run_series_events(request, state, task)
+
+
+@router.post("/get-compacted-contexts")
+def get_compacted_contexts(
+    request: Annotated[GetCompactedContextsRequest, PROTOBUF_REQUEST_DEPENDENCY],
+    state: RuntimeStateDependency,
+    handlers: RuntimeHandlersDependency,
+    task: TaskDependency,
+) -> GetCompactedContextsResponse:
+    """Get summaries from the authenticated task's run series."""
+    return handlers.get_compacted_contexts(request, state, task)
+
+
+@router.post("/put-compacted-context")
+def put_compacted_context(
+    request: Annotated[PutCompactedContextRequest, PROTOBUF_REQUEST_DEPENDENCY],
+    state: RuntimeStateDependency,
+    handlers: RuntimeHandlersDependency,
+    task: TaskDependency,
+) -> PutCompactedContextResponse:
+    """Store a summary in the authenticated task's run series."""
+    return handlers.put_compacted_context(request, state, task)
 
 
 @router.post("/pull-task-message")
