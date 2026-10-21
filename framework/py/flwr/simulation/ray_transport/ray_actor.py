@@ -137,17 +137,21 @@ def pool_size_from_resources(client_resources: dict[str, int | float]) -> int:
         if requested_gpus > 0 and not cluster_num_gpus:
             # No node in the cluster reported a GPU while each client asks for a
             # fraction of one. Only `num_gpus=0` is satisfiable here, so the generic
-            # "lower your resources" advice does not describe the fix. We cannot tell
-            # a CPU-only cluster (where zero is the correct setting) from a GPU the
-            # cluster failed to discover, so state the observation and let the user
-            # pick. A cluster that does have a GPU somewhere, just not enough of one,
-            # falls through to the generic warning instead.
+            # "lower your resources" advice does not describe the fix. Zero advertised
+            # GPUs does not by itself mean discovery failed, though: `ray.init()` can
+            # be configured (e.g. `--init-args-num-gpus 0`) to hide GPUs that are
+            # otherwise healthy, and that must not be reported as a discovery failure.
+            # A cluster that does have a GPU somewhere, just not enough of one, falls
+            # through to the generic warning instead.
             log(
                 WARNING,
-                "Ray reports no GPUs (GPUs=%s) but each client requests num_gpus=%s, "
-                "which no node can satisfy. Either this cluster has no GPU, in which "
-                "case set `num_gpus=0`, or Ray failed to discover one that is present. "
-                "Check what Ray detects with "
+                "Ray reports no GPU resources (GPUs=%s) but each client requests "
+                "num_gpus=%s, which no node can satisfy. This does not by itself mean "
+                "GPU discovery failed: the cluster may have no GPU, or Ray's GPU "
+                "resources may have been limited deliberately (for example "
+                "`--init-args-num-gpus 0`). Set `num_gpus=0` if no GPU is expected, "
+                "otherwise review that limit before suspecting discovery. Compare "
+                "what Ray actually detects with "
                 '`python -c "import ray; ray.init(); print(ray.cluster_resources())"`. '
                 "Note that an ML framework reporting a usable GPU (for instance "
                 "`torch.cuda.is_available()` returning True) does not imply Ray found "
@@ -158,8 +162,9 @@ def pool_size_from_resources(client_resources: dict[str, int | float]) -> int:
             if os.path.exists("/dev/kfd"):
                 log(
                     WARNING,
-                    "The ROCm kernel driver is loaded (/dev/kfd exists), so this is "
-                    "more likely a discovery failure than a CPU-only cluster. Ray "
+                    "The ROCm kernel driver is loaded (/dev/kfd exists), so an AMD "
+                    "GPU is likely present on this host. If Ray's GPU resources were "
+                    "not limited deliberately, check that Ray can enumerate it: Ray "
                     "finds AMD GPUs by opening `$ROCM_PATH/lib/librocm_smi64.so` "
                     "(ROCM_PATH defaults to /opt/rocm) under that *unversioned* name. "
                     "Ensure ROCM_PATH points at a ROCm root containing the "

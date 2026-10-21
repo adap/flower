@@ -42,8 +42,8 @@ class TestPoolSizeFromResources(TestCase):
                     pool_size_from_resources(client_resources)
 
         output = "\n".join(logs.output)
-        self.assertIn("set `num_gpus=0`", output)
-        self.assertIn("failed to discover", output)
+        self.assertIn("Set `num_gpus=0`", output)
+        self.assertIn("init-args-num-gpus", output)
         self.assertNotIn("Lowering these resources could help", output)
 
     def test_insufficient_cpus_keeps_generic_warning(self) -> None:

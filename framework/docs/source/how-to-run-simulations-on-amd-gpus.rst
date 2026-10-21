@@ -100,26 +100,39 @@ framework, and only then install Flower:
 
 .. important::
 
-    Installing ROCm wheels into your own environment is not always sufficient. ``flwr
-    run`` may build an isolated environment for the run, and a plain ``torch``
-    dependency resolves there to the default CUDA wheel -- bypassing the ROCm install
-    you just verified. Pin the index in your project's ``pyproject.toml`` so the run
-    environment resolves the same wheels:
+    Installing ROCm wheels into your own environment is not sufficient for the default
+    ``flwr run`` workflow. By default, the SuperLink that ``flwr run`` starts installs
+    each run's app dependencies into a fresh, isolated environment and activates it in
+    place of your base environment. An app that declares a plain ``torch`` dependency
+    can therefore resolve the default CUDA wheel from PyPI into that fresh environment
+    even though both GPU checks below pass in your base environment. Choose one:
 
-    .. code-block:: toml
+    - Pin the ROCm index in the app's own ``pyproject.toml``, so the install Flower
+      performs for you resolves the same wheels:
 
-        [[tool.uv.index]]
-        name = "rocm"
-        url = "https://download.pytorch.org/whl/rocm6.4"
-        explicit = true
+      .. code-block:: toml
 
-        [tool.uv.sources]
-        torch = { index = "rocm" }
-        torchvision = { index = "rocm" }
+          [[tool.uv.index]]
+          name = "rocm"
+          url = "https://download.pytorch.org/whl/rocm6.4"
+          explicit = true
 
-    Setting ``RAY_ENABLE_UV_RUN_RUNTIME_ENV=0`` is a quicker alternative: it keeps Ray
-    from building a separate environment, so the run uses the interpreter you launched
-    from. Pinning the index is the more durable fix, since it travels with the project.
+          [tool.uv.sources]
+          torch = { index = "rocm" }
+          torchvision = { index = "rocm" }
+
+    - Or preinstall every app dependency into your base environment and skip the per-run
+      install entirely, by disabling it before the SuperLink starts:
+
+      .. code-block:: shell
+
+          export FLWR_DISABLE_RUNTIME_DEPENDENCY_INSTALLATION=1
+
+      Set this *before* the first ``flwr run`` of the session -- a local SuperLink is
+      started lazily on first use and, like ``ROCM_PATH`` and ``HIP_VISIBLE_DEVICES``
+      below, keeps the environment it started with until it is stopped and restarted.
+      The equivalent flag on a SuperLink you start yourself is
+      ``--disable-runtime-dependency-installation``.
 
 ***********************************
  Point Ray at the ROCm SMI library
@@ -176,30 +189,72 @@ ROCR_VISIBLE_DEVICES``.
 The failure occurs at **import** time, not at ``ray.init()``. Because every Ray worker
 re-imports Ray on startup, this also surfaces indirectly as workers that never register.
 
-Move the device selection to the name Ray expects, rather than setting both:
+Satisfy Ray without disturbing ``ROCR_VISIBLE_DEVICES``, by deriving
+``HIP_VISIBLE_DEVICES`` from how many devices it already lists rather than copying its
+values:
 
 .. code-block:: shell
 
-    if [ -n "${ROCR_VISIBLE_DEVICES:-}" ] && [ -z "${HIP_VISIBLE_DEVICES:-}" ]; then
-        export HIP_VISIBLE_DEVICES="$ROCR_VISIBLE_DEVICES"
-        unset ROCR_VISIBLE_DEVICES
+    if [ -n "${ROCR_VISIBLE_DEVICES:-}" ]; then
+        _n=$(($(tr -cd ',' <<<"$ROCR_VISIBLE_DEVICES" | wc -c) + 1))
+        export HIP_VISIBLE_DEVICES="$(seq -s, 0 $((_n - 1)))"
+        unset _n
     fi
 
 .. important::
 
-    Unset ``ROCR_VISIBLE_DEVICES`` rather than leaving both set. The two masks
-    *compose*: ``HIP_VISIBLE_DEVICES`` indexes into the set that
-    ``ROCR_VISIBLE_DEVICES`` has already filtered down to. Copying a value such as ``2``
-    into both therefore asks HIP for index 2 of a one-device set and exposes no GPU at
-    all -- the copy is only safe once ROCr has stopped filtering.
+    Do not copy ``ROCR_VISIBLE_DEVICES``'s values into ``HIP_VISIBLE_DEVICES``, and do
+    not simply unset ``ROCR_VISIBLE_DEVICES`` -- on a shared host it may be how a
+    scheduler isolates your job's GPUs from everyone else's, so removing it can expose
+    devices that are not yours. The two masks instead *compose* in a specific order:
+    ROCr applies its filter first and renumbers whatever remains starting from ``0``,
+    and only then does ``HIP_VISIBLE_DEVICES`` index into that renumbered set -- not
+    into the original physical IDs. With ``ROCR_VISIBLE_DEVICES=1``, the sole visible
+    GPU becomes ordinal ``0``, so setting ``HIP_VISIBLE_DEVICES=1`` to match asks for a
+    device that no longer exists and Ray sees no GPU at all.
+
+    The snippet above sidesteps this: whatever ``ROCR_VISIBLE_DEVICES`` already
+    restricts you to, after filtering there are exactly that many devices, numbered
+    contiguously from ``0``. Selecting all of them (``0`` through ``n-1`` in
+    ``HIP_VISIBLE_DEVICES``) reproduces the original restriction exactly, while leaving
+    ``ROCR_VISIBLE_DEVICES`` itself untouched. This replaces any ``HIP_VISIBLE_DEVICES``
+    already set, since a value set in terms of physical IDs cannot be correct once
+    ``ROCR_VISIBLE_DEVICES`` is also present.
 
 .. important::
 
-    These exports apply to the shell you run them in. A managed SuperLink that is
-    already running keeps the environment it started with, and ``flwr run`` reuses that
-    process rather than starting a fresh one. After changing ``ROCM_PATH`` or
-    ``HIP_VISIBLE_DEVICES``, stop the running SuperLink so the next run picks up the new
-    values.
+    These exports apply only to the shell you run them in, and the local SuperLink that
+    ``flwr run`` manages copies its environment once, at startup. If a SuperLink from an
+    earlier, uncorrected session is still running, ``flwr run`` reuses it rather than
+    starting a fresh one -- which creates a trap: the two verification commands below
+    run in *your* corrected shell and pass, while every subsequent ``flwr run`` still
+    talks to a SuperLink holding the old, broken environment. A passing check is
+    therefore not proof that a run will succeed.
+
+    Stop the stale SuperLink before trusting those checks or applying simulation
+    configuration:
+
+    .. code-block:: shell
+
+        pkill -f flower-superlink
+
+    ``flwr run`` starts a new one automatically, which copies the corrected environment
+    of the shell that invokes it. There is no dedicated ``flwr`` command to stop just
+    the SuperLink process; ``flwr stop <run-id>`` stops a run, not the SuperLink itself.
+
+    If you manage a SuperExec separately from the one SuperLink auto-launches -- for
+    example, in a deployment that is not this local, single-command setup -- restarting
+    SuperLink alone does not refresh it. Restart that SuperExec process too.
+
+    The same singleton reuse means a ``HIP_VISIBLE_DEVICES`` export does not isolate one
+    run from another. ``flwr run`` is a client of the already-running SuperLink, not a
+    fresh launch of it: every run that reuses that SuperLink shares the one mask it
+    started with, so two simulations started from shells with different exports still
+    submit to the same process and can target the same physical GPU. A mask is a
+    property of the SuperLink, not of an individual run -- it only changes when the
+    SuperLink itself is stopped and restarted, same as above. Run simulations that need
+    different masks sequentially, stopping the SuperLink between them, rather than
+    concurrently.
 
 *************************************
  Verify that Ray detects the AMD GPU
