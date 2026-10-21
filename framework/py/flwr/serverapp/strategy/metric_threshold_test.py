@@ -59,3 +59,17 @@ def test_missing_round_does_not_reuse_previous_metrics() -> None:
 
     assert not stop_fn(1, Result())
     assert not stop_fn(2, result)
+
+
+def test_large_integer_metric_and_threshold() -> None:
+    """Compare finite integers that cannot be represented as floats."""
+    value = 10**309
+    stop_fn = MetricThreshold(
+        source="evaluate_metrics_clientapp",
+        metric="count",
+        threshold=value,
+        comparison=">=",
+    )
+    result = Result(evaluate_metrics_clientapp={1: MetricRecord({"count": value})})
+
+    assert stop_fn(1, result)

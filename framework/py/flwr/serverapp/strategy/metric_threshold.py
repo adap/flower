@@ -77,7 +77,7 @@ class MetricThreshold:
         if (
             isinstance(threshold, bool)
             or not isinstance(threshold, (int, float))
-            or not isfinite(threshold)
+            or (isinstance(threshold, float) and not isfinite(threshold))
         ):
             raise ValueError("threshold must be a finite scalar number.")
 
@@ -115,7 +115,9 @@ class MetricThreshold:
                 f"for round {server_round}."
             )
         value = metrics[self.metric]
-        if not isinstance(value, (int, float)) or not isfinite(value):
+        if not isinstance(value, (int, float)) or (
+            isinstance(value, float) and not isfinite(value)
+        ):
             raise ValueError(f"Metric {self.metric!r} must be a finite scalar number.")
         if self.comparison == ">=":
             return value >= self.threshold
