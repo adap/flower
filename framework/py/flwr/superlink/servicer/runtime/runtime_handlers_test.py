@@ -45,6 +45,7 @@ from flwr.proto.message_pb2 import (  # pylint: disable=E0611
     PushObjectRequest,
 )
 from flwr.proto.node_pb2 import Node, NodeInfo  # pylint: disable=E0611
+from flwr.proto.recorddict_pb2 import StringList  # pylint: disable=E0611
 from flwr.proto.runseries_pb2 import CompactedContext  # pylint: disable=E0611
 from flwr.proto.runtime_pb2 import (  # pylint: disable=E0611
     AcquireTaskRequest,
@@ -771,7 +772,9 @@ class TestSuperLinkRuntimeHandlers(unittest.TestCase):  # pylint: disable=R0902,
                 run_id, get_object_tree(reply_msg)
             )
 
-        request = PullAppMessagesRequest(message_ids=[str(msg_id)])
+        request = PullAppMessagesRequest(
+            reply_to_message_ids=StringList(vals=[str(msg_id)])
+        )
 
         # Execute
         response = runtime_handlers.pull_messages(request, self.state, self._auth_task)
@@ -810,7 +813,9 @@ class TestSuperLinkRuntimeHandlers(unittest.TestCase):  # pylint: disable=R0902,
         message_id = self.state.store_message_ins(message)
         assert message_id
 
-        request = PullAppMessagesRequest(message_ids=[message_id])
+        request = PullAppMessagesRequest(
+            reply_to_message_ids=StringList(vals=[message_id])
+        )
         with self.assertRaisesRegex(ValueError, "contains invalid IDs"):
             runtime_handlers.pull_messages(request, self.state, self._auth_task)
 
@@ -855,7 +860,9 @@ class TestSuperLinkRuntimeHandlers(unittest.TestCase):  # pylint: disable=R0902,
         self.state.store_message_res(message=reply_msg)
         # Register response in ObjectStore (so pulling message request can be completed)
         self.store.preregister(run_id, get_object_tree(reply_msg))
-        request = PullAppMessagesRequest(message_ids=[str(msg_id)])
+        request = PullAppMessagesRequest(
+            reply_to_message_ids=StringList(vals=[str(msg_id)])
+        )
 
         # Execute
         response = runtime_handlers.pull_messages(request, self.state, self._auth_task)
