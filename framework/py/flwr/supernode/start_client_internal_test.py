@@ -62,6 +62,9 @@ class TestStartClientInternal(unittest.TestCase):  # pylint: disable=R0902
     def setUp(self) -> None:
         """Set up the test case."""
         self.mock_state = Mock()
+        self.mock_state.store_messages.side_effect = lambda messages: [True] * len(
+            messages
+        )
         self.node_id = 111
         self.run_id = 110
         self.series_id = 112
@@ -145,7 +148,9 @@ class TestStartClientInternal(unittest.TestCase):  # pylint: disable=R0902
         self.mock_receive.assert_called_once()
         self.mock_confirm_message_received.assert_called_once()
         self.mock_state.get_run.assert_called_once()
-        self.mock_state.store_message.assert_called_once_with(message_without_content)
+        self.mock_state.store_messages.assert_called_once_with(
+            [message_without_content]
+        )
 
         # Assert: All objects should be pulled and stored
         for obj_id, obj_content in self.simple_store.items():
@@ -217,7 +222,7 @@ class TestStartClientInternal(unittest.TestCase):  # pylint: disable=R0902
             fab_hash=fab_hash,
         )
         self.mock_object_store.preregister.assert_not_called()
-        self.mock_state.store_message.assert_not_called()
+        self.mock_state.store_messages.assert_not_called()
         self.mock_confirm_message_received.assert_not_called()
 
     def test_pull_and_store_message_marks_task_failed_if_object_pull_fails(
@@ -250,7 +255,7 @@ class TestStartClientInternal(unittest.TestCase):  # pylint: disable=R0902
             run_id=self.run_id,
             fab_hash=fab_hash,
         )
-        self.mock_state.delete_messages.assert_called_once_with(
+        self.mock_state.cancel_messages.assert_called_once_with(
             message_ids=[message_id]
         )
         self.mock_object_store.delete.assert_called_once_with(message_id)
@@ -381,8 +386,9 @@ class TestStartClientInternal(unittest.TestCase):  # pylint: disable=R0902
         self.mock_state.store_run.assert_not_called()
         self.mock_confirm_message_received.assert_not_called()
 
-        self.mock_state.store_message.assert_called_once()
-        stored_message = self.mock_state.store_message.call_args.args[0]
+        self.mock_state.store_messages.assert_called_once()
+        original, stored_message = self.mock_state.store_messages.call_args.args[0]
+        assert original is self.mock_receive.return_value[0]
         assert stored_message.has_error()
         assert stored_message.error == FAB_VERIFICATION_ERROR
         assert (
@@ -435,8 +441,9 @@ class TestStartClientInternal(unittest.TestCase):  # pylint: disable=R0902
         self.mock_state.store_run.assert_not_called()
         self.mock_confirm_message_received.assert_not_called()
 
-        self.mock_state.store_message.assert_called_once()
-        stored_message = self.mock_state.store_message.call_args.args[0]
+        self.mock_state.store_messages.assert_called_once()
+        original, stored_message = self.mock_state.store_messages.call_args.args[0]
+        assert original is self.mock_receive.return_value[0]
         assert stored_message.has_error()
         assert stored_message.error == FAB_VERIFICATION_ERROR
 
@@ -556,7 +563,7 @@ def test_push_messages_pushes_each_requested_object_once() -> None:
     }
 
     state = Mock()
-    state.get_messages_legacy.return_value = [reply]
+    state.get_messages.return_value = [reply]
     state.get_message_processing_duration.return_value = 0.1
     object_store = Mock()
     object_store.get_object_tree.return_value = object_tree

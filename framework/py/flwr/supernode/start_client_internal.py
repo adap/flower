@@ -35,6 +35,7 @@ from flwr.common.config import get_fused_config_from_fab
 from flwr.common.constant import (
     ISOLATION_MODE_SUBPROCESS,
     RUNTIME_DEPENDENCY_INSTALL,
+    SUPERLINK_NODE_ID,
     ErrorCode,
     SubStatus,
 )
@@ -271,12 +272,15 @@ def start_client_internal(
             )
 
 
-def _insert_message(msg: Message, state: NodeState, store: ObjectStore) -> None:
-    """Insert a message into the NodeState and ObjectStore."""
+def _insert_message(
+    msg: Message, reply_to: Message, state: NodeState, store: ObjectStore
+) -> None:
+    """Insert a reply and retain its correlation target in the NodeState."""
     with no_object_id_recompute():
         # Store message in state
         msg.metadata.__dict__["_message_id"] = msg.object_id  # Set message_id
-        state.store_message(msg)
+        if not state.store_messages([reply_to, msg])[1]:
+            return
 
         # Preregister objects in ObjectStore
         store.preregister(msg.metadata.run_id, get_object_tree(msg))
@@ -349,7 +353,7 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments,R0
                         "not supported by the connected SuperLink.",
                     )
                     reply = Message(FAB_VERIFICATION_ERROR, reply_to=message)
-                    _insert_message(reply, state, object_store)
+                    _insert_message(reply, message, state, object_store)
                     return run_id
 
                 fab_verified = _verify_fab(fab, trusted_entities)
@@ -363,7 +367,7 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments,R0
                         "has been generated.",
                     )
                     reply = Message(FAB_VERIFICATION_ERROR, reply_to=message)
-                    _insert_message(reply, state, object_store)
+                    _insert_message(reply, message, state, object_store)
                     return run_id
 
             # Initialize or refresh the context
@@ -408,7 +412,7 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments,R0
         obj_ids_to_pull = object_store.preregister(run_id, object_tree)
 
         # Store the message in the state (note this message has no content)
-        state.store_message(message)
+        state.store_messages([message])
 
         try:
             # Pull and store objects of the message in the ObjectStore
@@ -429,7 +433,7 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments,R0
                 message.metadata.message_id,
                 err,
             )
-            state.delete_messages(message_ids=[message.metadata.message_id])
+            state.cancel_messages(message_ids=[message.metadata.message_id])
             object_store.delete(message.metadata.message_id)
             state.finish_task(
                 task_id,
@@ -463,13 +467,11 @@ def _push_messages(
     send: Callable[[Message, ObjectTree, float], tuple[set[str], str]],
     push_object: Callable[[int, str, str, bytes], None],
 ) -> None:
-    """Push reply messages to the SuperLink."""
-    # This is to ensure that only one message is processed at a time
-    # Wait until a reply message is available
-    while not (reply_messages := state.get_messages_legacy(is_reply=True)):
+    """Wait for one outbound message and push it to the SuperLink."""
+    while not (messages := state.get_messages(dst_node_id=SUPERLINK_NODE_ID, limit=1)):
         time.sleep(0.5)
 
-    for message in reply_messages:
+    for message in messages:
         # Log message sending
         log(INFO, "")
         if message.metadata.group_id:
@@ -510,10 +512,12 @@ def _push_messages(
 
         # Send the message
         try:
-            clientapp_runtime = state.get_message_processing_duration(
-                message_id=message.metadata.reply_to_message_id,
-            )
-            # Send the reply message with its ObjectTree and ClientApp runtime
+            clientapp_runtime = 0.0
+            if message.metadata.reply_to_message_id:
+                clientapp_runtime = state.get_message_processing_duration(
+                    message_id=message.metadata.reply_to_message_id
+                )
+            # Send the message with its ObjectTree and ClientApp runtime
             # Get the IDs of objects to send
             ids_obj_to_send, session_id = send(message, object_tree, clientapp_runtime)
 
@@ -533,7 +537,7 @@ def _push_messages(
         except RunNotRunningException:
             log(
                 INFO,
-                "Run ID %s is not in `RUNNING` status. Ignoring reply message %s.",
+                "Run ID %s is not in `RUNNING` status. Ignoring message %s.",
                 message.metadata.run_id,
                 message.metadata.message_id,
             )
@@ -546,7 +550,7 @@ def _push_messages(
             )
         finally:
             # Delete the message from the state
-            state.delete_messages(
+            state.cancel_messages(
                 message_ids=[
                     message.metadata.message_id,
                     message.metadata.reply_to_message_id,
