@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower Docs\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-20 00:09+0000\n"
+"POT-Creation-Date: 2026-10-21 00:09+0000\n"
 "PO-Revision-Date: 2026-05-23 06:55+0000\n"
 "Last-Translator: lco <Leandro.COLLIER@student.umons.ac.be>\n"
 "Language: fr\n"
@@ -48,8 +48,8 @@ msgstr ""
 msgid "Changelog"
 msgstr ""
 
-#: ../../source/changelog/v1.40.0.md:2
-msgid "v1.40.0 (2026-10-14)"
+#: ../../source/changelog/v1.41.0.md:2
+msgid "v1.41.0 (2026-10-20)"
 msgstr ""
 
 #: ../../source/changelog/v1.0.0.md:11 ../../source/changelog/v1.1.0.md:4
@@ -73,9 +73,9 @@ msgstr ""
 #: ../../source/changelog/v1.36.0.md:4 ../../source/changelog/v1.37.0.md:4
 #: ../../source/changelog/v1.38.0.md:4 ../../source/changelog/v1.39.0.md:4
 #: ../../source/changelog/v1.4.0.md:4 ../../source/changelog/v1.40.0.md:4
-#: ../../source/changelog/v1.5.0.md:4 ../../source/changelog/v1.6.0.md:4
-#: ../../source/changelog/v1.7.0.md:4 ../../source/changelog/v1.8.0.md:4
-#: ../../source/changelog/v1.9.0.md:4
+#: ../../source/changelog/v1.41.0.md:4 ../../source/changelog/v1.5.0.md:4
+#: ../../source/changelog/v1.6.0.md:4 ../../source/changelog/v1.7.0.md:4
+#: ../../source/changelog/v1.8.0.md:4 ../../source/changelog/v1.9.0.md:4
 msgid "Thanks to our contributors"
 msgstr "Merci à nos contributeurs"
 
@@ -99,9 +99,9 @@ msgstr "Merci à nos contributeurs"
 #: ../../source/changelog/v1.36.0.md:6 ../../source/changelog/v1.37.0.md:6
 #: ../../source/changelog/v1.38.0.md:6 ../../source/changelog/v1.39.0.md:6
 #: ../../source/changelog/v1.4.0.md:6 ../../source/changelog/v1.40.0.md:6
-#: ../../source/changelog/v1.5.0.md:6 ../../source/changelog/v1.6.0.md:6
-#: ../../source/changelog/v1.7.0.md:6 ../../source/changelog/v1.8.0.md:6
-#: ../../source/changelog/v1.9.0.md:6
+#: ../../source/changelog/v1.41.0.md:6 ../../source/changelog/v1.5.0.md:6
+#: ../../source/changelog/v1.6.0.md:6 ../../source/changelog/v1.7.0.md:6
+#: ../../source/changelog/v1.8.0.md:6 ../../source/changelog/v1.9.0.md:6
 msgid ""
 "We would like to give our special thanks to all the contributors who made"
 " the new version of Flower possible (in `git shortlog` order):"
@@ -110,12 +110,11 @@ msgstr ""
 "ont rendu possible la nouvelle version de Flower (dans l'ordre `git "
 "shortlog`) :"
 
-#: ../../source/changelog/v1.40.0.md:8
+#: ../../source/changelog/v1.41.0.md:8
 #, fuzzy
 msgid ""
-"`Charles Beauville`, `Chong Shen Ng`, `Daniel J. Beutel`, `Daniel Nata "
-"Nugraha`, `Dimitris Stripelis`, `Heng Pan`, `Istiaque Ahmed`, `Javier`, "
-"`Julian Rußmeyer`, `Ruth Galindo`, `Stephane Moroso`, `Taner Topal`"
+"`Charles Beauville`, `Chong Shen Ng`, `Daniel Nata Nugraha`, `Heng Pan`, "
+"`Javier`, `Taner Topal`"
 msgstr ""
 
 #: ../../source/changelog/v0.13.0.md:4 ../../source/changelog/v0.14.0.md:4
@@ -142,11 +141,122 @@ msgstr ""
 #: ../../source/changelog/v1.36.0.md:10 ../../source/changelog/v1.37.0.md:10
 #: ../../source/changelog/v1.38.0.md:10 ../../source/changelog/v1.39.0.md:10
 #: ../../source/changelog/v1.4.0.md:10 ../../source/changelog/v1.40.0.md:10
-#: ../../source/changelog/v1.5.0.md:10 ../../source/changelog/v1.6.0.md:10
-#: ../../source/changelog/v1.7.0.md:10 ../../source/changelog/v1.8.0.md:10
-#: ../../source/changelog/v1.9.0.md:10
+#: ../../source/changelog/v1.41.0.md:10 ../../source/changelog/v1.5.0.md:10
+#: ../../source/changelog/v1.6.0.md:10 ../../source/changelog/v1.7.0.md:10
+#: ../../source/changelog/v1.8.0.md:10 ../../source/changelog/v1.9.0.md:10
 msgid "What's new?"
 msgstr "Quoi de neuf ?"
+
+#: ../../source/changelog/v1.41.0.md:12
+#, fuzzy
+msgid ""
+"**Use GitHub, Notion, Slack, Attio, and Google connectors through MCP** "
+"([#8328](https://github.com/flwrlabs/flower/pull/8328), "
+"[#8339](https://github.com/flwrlabs/flower/pull/8339), "
+"[#8343](https://github.com/flwrlabs/flower/pull/8343), "
+"[#8362](https://github.com/flwrlabs/flower/pull/8362), "
+"[#8382](https://github.com/flwrlabs/flower/pull/8382))"
+msgstr ""
+
+#: ../../source/changelog/v1.41.0.md:14
+msgid ""
+"GitHub, Notion, Slack, and Attio connectors now integrate through MCP, "
+"with tools discovered dynamically from each connected account. New Google"
+" Drive, Gmail, and Google Calendar connectors use Google's remote MCP "
+"servers with OAuth/PKCE and token refresh."
+msgstr ""
+
+#: ../../source/changelog/v1.41.0.md:16
+#, fuzzy
+msgid ""
+"**Store and reuse compacted AgentApp contexts (experimental)** "
+"([#8350](https://github.com/flwrlabs/flower/pull/8350), "
+"[#8363](https://github.com/flwrlabs/flower/pull/8363), "
+"[#8364](https://github.com/flwrlabs/flower/pull/8364), "
+"[#8367](https://github.com/flwrlabs/flower/pull/8367), "
+"[#8370](https://github.com/flwrlabs/flower/pull/8370), "
+"[#8371](https://github.com/flwrlabs/flower/pull/8371), "
+"[#8376](https://github.com/flwrlabs/flower/pull/8376), "
+"[#8377](https://github.com/flwrlabs/flower/pull/8377), "
+"[#8380](https://github.com/flwrlabs/flower/pull/8380))"
+msgstr ""
+
+#: ../../source/changelog/v1.41.0.md:18
+msgid ""
+"AgentApps can now filter run-series events and read or store compacted "
+"contexts through `AgentSession.events`. Compacted contexts are persisted "
+"per run series and exposed through authenticated Runtime API endpoints "
+"with newest-first paginated reads."
+msgstr ""
+
+#: ../../source/changelog/v1.41.0.md:20
+#, fuzzy
+msgid ""
+"**Lay the groundwork for faster AgentApp responses** "
+"([#8375](https://github.com/flwrlabs/flower/pull/8375), "
+"[#8388](https://github.com/flwrlabs/flower/pull/8388))"
+msgstr ""
+
+#: ../../source/changelog/v1.41.0.md:22
+#, fuzzy
+msgid ""
+"**General improvements** "
+"([#8341](https://github.com/flwrlabs/flower/pull/8341), "
+"[#8345](https://github.com/flwrlabs/flower/pull/8345), "
+"[#8349](https://github.com/flwrlabs/flower/pull/8349), "
+"[#8356](https://github.com/flwrlabs/flower/pull/8356), "
+"[#8357](https://github.com/flwrlabs/flower/pull/8357), "
+"[#8358](https://github.com/flwrlabs/flower/pull/8358), "
+"[#8359](https://github.com/flwrlabs/flower/pull/8359), "
+"[#8360](https://github.com/flwrlabs/flower/pull/8360), "
+"[#8361](https://github.com/flwrlabs/flower/pull/8361), "
+"[#8365](https://github.com/flwrlabs/flower/pull/8365), "
+"[#8366](https://github.com/flwrlabs/flower/pull/8366), "
+"[#8372](https://github.com/flwrlabs/flower/pull/8372), "
+"[#8373](https://github.com/flwrlabs/flower/pull/8373), "
+"[#8374](https://github.com/flwrlabs/flower/pull/8374), "
+"[#8378](https://github.com/flwrlabs/flower/pull/8378), "
+"[#8384](https://github.com/flwrlabs/flower/pull/8384), "
+"[#8387](https://github.com/flwrlabs/flower/pull/8387), "
+"[#8389](https://github.com/flwrlabs/flower/pull/8389), "
+"[#8394](https://github.com/flwrlabs/flower/pull/8394))"
+msgstr ""
+
+#: ../../source/changelog/v1.10.0.md:68 ../../source/changelog/v1.11.0.md:65
+#: ../../source/changelog/v1.12.0.md:64 ../../source/changelog/v1.13.0.md:69
+#: ../../source/changelog/v1.13.1.md:32 ../../source/changelog/v1.14.0.md:63
+#: ../../source/changelog/v1.15.0.md:80 ../../source/changelog/v1.16.0.md:54
+#: ../../source/changelog/v1.17.0.md:85 ../../source/changelog/v1.18.0.md:50
+#: ../../source/changelog/v1.19.0.md:68 ../../source/changelog/v1.20.0.md:66
+#: ../../source/changelog/v1.21.0.md:56 ../../source/changelog/v1.22.0.md:40
+#: ../../source/changelog/v1.23.0.md:48 ../../source/changelog/v1.24.0.md:42
+#: ../../source/changelog/v1.25.0.md:36 ../../source/changelog/v1.26.0.md:44
+#: ../../source/changelog/v1.27.0.md:50 ../../source/changelog/v1.28.0.md:50
+#: ../../source/changelog/v1.29.0.md:46 ../../source/changelog/v1.30.0.md:34
+#: ../../source/changelog/v1.31.0.md:50 ../../source/changelog/v1.32.0.md:44
+#: ../../source/changelog/v1.33.0.md:50 ../../source/changelog/v1.34.0.md:54
+#: ../../source/changelog/v1.35.0.md:50 ../../source/changelog/v1.36.0.md:30
+#: ../../source/changelog/v1.37.0.md:40 ../../source/changelog/v1.38.0.md:36
+#: ../../source/changelog/v1.39.0.md:28 ../../source/changelog/v1.40.0.md:38
+#: ../../source/changelog/v1.41.0.md:24
+msgid ""
+"As always, many parts of the Flower framework and quality infrastructure "
+"were improved and updated."
+msgstr ""
+"Comme toujours, de nombreuses parties du cadre Flower et de "
+"l'infrastructure qualité ont été améliorées et mises à jour."
+
+#: ../../source/changelog/v1.40.0.md:2
+msgid "v1.40.0 (2026-10-14)"
+msgstr ""
+
+#: ../../source/changelog/v1.40.0.md:8
+#, fuzzy
+msgid ""
+"`Charles Beauville`, `Chong Shen Ng`, `Daniel J. Beutel`, `Daniel Nata "
+"Nugraha`, `Dimitris Stripelis`, `Heng Pan`, `Istiaque Ahmed`, `Javier`, "
+"`Julian Rußmeyer`, `Ruth Galindo`, `Stephane Moroso`, `Taner Topal`"
+msgstr ""
 
 #: ../../source/changelog/v1.40.0.md:12
 #, fuzzy
@@ -288,29 +398,6 @@ msgid ""
 "[#8347](https://github.com/flwrlabs/flower/pull/8347), "
 "[#8354](https://github.com/flwrlabs/flower/pull/8354))"
 msgstr ""
-
-#: ../../source/changelog/v1.10.0.md:68 ../../source/changelog/v1.11.0.md:65
-#: ../../source/changelog/v1.12.0.md:64 ../../source/changelog/v1.13.0.md:69
-#: ../../source/changelog/v1.13.1.md:32 ../../source/changelog/v1.14.0.md:63
-#: ../../source/changelog/v1.15.0.md:80 ../../source/changelog/v1.16.0.md:54
-#: ../../source/changelog/v1.17.0.md:85 ../../source/changelog/v1.18.0.md:50
-#: ../../source/changelog/v1.19.0.md:68 ../../source/changelog/v1.20.0.md:66
-#: ../../source/changelog/v1.21.0.md:56 ../../source/changelog/v1.22.0.md:40
-#: ../../source/changelog/v1.23.0.md:48 ../../source/changelog/v1.24.0.md:42
-#: ../../source/changelog/v1.25.0.md:36 ../../source/changelog/v1.26.0.md:44
-#: ../../source/changelog/v1.27.0.md:50 ../../source/changelog/v1.28.0.md:50
-#: ../../source/changelog/v1.29.0.md:46 ../../source/changelog/v1.30.0.md:34
-#: ../../source/changelog/v1.31.0.md:50 ../../source/changelog/v1.32.0.md:44
-#: ../../source/changelog/v1.33.0.md:50 ../../source/changelog/v1.34.0.md:54
-#: ../../source/changelog/v1.35.0.md:50 ../../source/changelog/v1.36.0.md:30
-#: ../../source/changelog/v1.37.0.md:40 ../../source/changelog/v1.38.0.md:36
-#: ../../source/changelog/v1.39.0.md:28 ../../source/changelog/v1.40.0.md:38
-msgid ""
-"As always, many parts of the Flower framework and quality infrastructure "
-"were improved and updated."
-msgstr ""
-"Comme toujours, de nombreuses parties du cadre Flower et de "
-"l'infrastructure qualité ont été améliorées et mises à jour."
 
 #: ../../source/changelog/v0.16.0.md:21 ../../source/changelog/v0.17.0.md:33
 #: ../../source/changelog/v0.18.0.md:62 ../../source/changelog/v0.19.0.md:58
