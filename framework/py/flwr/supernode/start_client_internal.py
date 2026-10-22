@@ -37,6 +37,7 @@ from flwr.common.constant import (
     RUNTIME_DEPENDENCY_INSTALL,
     SUPERLINK_NODE_ID,
     ErrorCode,
+    Status,
     SubStatus,
 )
 from flwr.proto.message_pb2 import ObjectTree  # pylint: disable=E0611
@@ -467,8 +468,15 @@ def _push_messages(
     send: Callable[[Message, ObjectTree, float], tuple[set[str], str]],
     push_object: Callable[[int, str, str, bytes], None],
 ) -> None:
-    """Wait for one outbound message and push it to the SuperLink."""
-    while not (messages := state.get_messages(dst_node_id=SUPERLINK_NODE_ID, limit=1)):
+    """Push one outbound message, waiting only while unfinished tasks remain."""
+    while True:
+        # Temporary before multi-tenancy support: only one task runs at a time.
+        active_tasks = state.get_tasks(
+            statuses=[Status.PENDING, Status.STARTING, Status.RUNNING], limit=1
+        )
+        messages = state.get_messages(dst_node_id=SUPERLINK_NODE_ID, limit=1)
+        if messages or not active_tasks:
+            break
         time.sleep(0.5)
 
     for message in messages:
