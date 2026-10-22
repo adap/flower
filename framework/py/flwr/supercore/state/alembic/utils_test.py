@@ -38,7 +38,6 @@ from sqlalchemy import (
     text,
 )
 from sqlalchemy.engine import URL, Connection, Engine
-from sqlalchemy.exc import IntegrityError
 
 from flwr.common.constant import SubStatus
 from flwr.supercore.constant import TaskType
@@ -414,7 +413,7 @@ class TestAlembicRun(unittest.TestCase):
 
             with engine.connect() as connection:
                 migrated = {
-                    row["message_id"]: row
+                    row["message_id"]: dict(row)
                     for row in connection.execute(message.select()).mappings()
                 }
                 self.assertEqual(connection.execute(original.select()).all(), old_rows)
@@ -441,14 +440,29 @@ class TestAlembicRun(unittest.TestCase):
             self.assertEqual(migrated["reply"]["reply_to_message_id"], "unpulled")
             self.assertFalse(migrated["reply"]["cleared"])
 
+            with engine.begin() as connection:
+                connection.execute(
+                    message.update()
+                    .where(message.c.message_id == "unpulled")
+                    .values(cleared=True)
+                )
+            migrated["unpulled"]["cleared"] = True
             self.downgrade_to_revision(engine, "d9bd9d502cf9")
             with engine.connect() as connection:
                 self.assertEqual(
                     len(connection.execute(message.select()).all()), len(rows) + 1
                 )
-            with self.assertRaises(IntegrityError):
-                self.upgrade_to_revision(engine, "4c9b3f185c5b")
+            self.upgrade_to_revision(engine, "4c9b3f185c5b")
+            with engine.connect() as connection:
+                self.assertEqual(
+                    {
+                        row["message_id"]: row
+                        for row in connection.execute(message.select()).mappings()
+                    },
+                    migrated,
+                )
 
+            self.downgrade_to_revision(engine, "d9bd9d502cf9")
             with engine.begin() as connection:
                 connection.execute(message.update().values(reply_to_message_id=None))
                 connection.execute(message.delete())

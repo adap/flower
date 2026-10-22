@@ -24,7 +24,8 @@ Migration rules:
   message root is absent from ObjectStore. A preregistered root with empty content
   still counts as present.
 - Leave acknowledged_at and cancelled_at NULL; their history is unknown.
-- Duplicate message IDs abort migration, even if their metadata matches.
+- Skip message IDs already present in message without changing their delivery state.
+  Run the migration without concurrent application writes to message.
 - Missing required fields or a missing correlation target abort migration.
 - Copy metadata only; do not modify legacy tables, ObjectStore, or push sessions.
 - Downgrade does not remove copied rows or revert their delivery state.
@@ -83,9 +84,11 @@ def upgrade() -> None:
             *(sa.column(name) for name in metadata_columns),
             sa.column("delivered_at"),
         )
+        not_migrated = ~sa.exists().where(message.c.message_id == legacy.c.message_id)
         orphan = connection.execute(
             sa.select(legacy.c.message_id, legacy.c.reply_to_message_id)
             .where(
+                not_migrated,
                 sa.func.nullif(legacy.c.reply_to_message_id, "").is_not(None),
                 ~sa.exists().where(
                     message.c.message_id == legacy.c.reply_to_message_id
@@ -104,7 +107,7 @@ def upgrade() -> None:
             else_=~sa.exists().where(objects.c.object_id == legacy.c.message_id),
         )
         with connection.execute(
-            sa.select(legacy, cleared.label("cleared")),
+            sa.select(legacy, cleared.label("cleared")).where(not_migrated),
             execution_options={"yield_per": 1000},
         ) as result:
             for batch in result.mappings().partitions(1000):
