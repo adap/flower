@@ -5,10 +5,10 @@ inputs:
     description: "Version range or exact version of Python to use, using SemVer's version range syntax."
     default: 3.11.14
   pip-version:
-    description: "Version of pip to be installed using pip"
+    description: "Version of pip to be installed using uv"
     default: 26.2.2
   setuptools-version:
-    description: "Version of setuptools to be installed using pip"
+    description: "Version of setuptools to be installed using uv"
     default: 83.0.0
   uv-version:
     description: "Version of uv to install"
@@ -43,9 +43,8 @@ runs:
         SETUPTOOLS_VERSION: ${{ inputs.setuptools-version }}
       run: |
         set -euo pipefail
-        python -m pip install -U --no-cache-dir 'pip @ https://files.pythonhosted.org/packages/3f/06/3e4420302363fbb71be3c7f35ce042f54bfca330e3e66b3a2e3c4cca579f/pip-26.2.2-py3-none-any.whl#sha256=fd7f4dfa8190e014013b9f08f3e973f4e4c26ffd179a204895533a7254813a70'
-        python -m pip install -U --no-cache-dir "pip==${PIP_VERSION}"
-        python -m pip install -U --no-cache-dir "setuptools==${SETUPTOOLS_VERSION}"
+        uv pip install --system --no-cache \
+          "pip==${PIP_VERSION}" "setuptools==${SETUPTOOLS_VERSION}"
       shell: bash
     - id: versions
       shell: bash
