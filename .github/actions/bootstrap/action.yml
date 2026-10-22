@@ -12,7 +12,7 @@ inputs:
     default: 83.0.0
   uv-version:
     description: "Version of uv to install"
-    default: "0.13.4"
+    default: "0.13.5"
 outputs:
   python-version:
     description: "Version range or exact version of Python"

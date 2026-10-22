@@ -33,7 +33,7 @@ RUN python -m pip install --upgrade --no-cache-dir \
 
 RUN python -m pip install \
     setuptools==83.0.0 \
-    uv==0.13.4 \
+    uv==0.13.5 \
     maturin==1.8.6
 # Install taplo from the main branch on GitHub so that maturin can build the wheel
 RUN python -m pip install \
