@@ -23,6 +23,7 @@ import flwr.proto.fab_pb2
 import flwr.proto.federation_config_pb2
 import flwr.proto.message_pb2
 import flwr.proto.node_pb2
+import flwr.proto.recorddict_pb2
 import flwr.proto.run_pb2
 import flwr.proto.runseries_pb2
 import flwr.proto.task_pb2
@@ -111,15 +112,19 @@ class PullAppMessagesRequest(google.protobuf.message.Message):
 
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
 
-    MESSAGE_IDS_FIELD_NUMBER: builtins.int
+    REPLY_TO_MESSAGE_IDS_FIELD_NUMBER: builtins.int
     @property
-    def message_ids(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.str]: ...
+    def reply_to_message_ids(self) -> flwr.proto.recorddict_pb2.StringList:
+        """Absent means no correlation filter; present with no IDs matches nothing."""
+
     def __init__(
         self,
         *,
-        message_ids: collections.abc.Iterable[builtins.str] | None = ...,
+        reply_to_message_ids: flwr.proto.recorddict_pb2.StringList | None = ...,
     ) -> None: ...
-    def ClearField(self, field_name: typing.Literal["message_ids", b"message_ids"]) -> None: ...
+    def HasField(self, field_name: typing.Literal["_reply_to_message_ids", b"_reply_to_message_ids", "reply_to_message_ids", b"reply_to_message_ids"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing.Literal["_reply_to_message_ids", b"_reply_to_message_ids", "reply_to_message_ids", b"reply_to_message_ids"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing.Literal["_reply_to_message_ids", b"_reply_to_message_ids"]) -> typing.Literal["reply_to_message_ids"] | None: ...
 
 global___PullAppMessagesRequest = PullAppMessagesRequest
 
