@@ -384,7 +384,9 @@ class TestStartClientInternal(unittest.TestCase):  # pylint: disable=R0902
         self.mock_get_fab.assert_called_once_with(fab.hash_str, self.run_id)
         self.mock_state.set_run_series_context.assert_not_called()
         self.mock_state.store_run.assert_not_called()
-        self.mock_confirm_message_received.assert_not_called()
+        self.mock_confirm_message_received.assert_called_once_with(
+            self.run_id, self.mock_receive.return_value[0].metadata.message_id
+        )
 
         self.mock_state.store_messages.assert_called_once()
         original, stored_message = self.mock_state.store_messages.call_args.args[0]
@@ -439,7 +441,9 @@ class TestStartClientInternal(unittest.TestCase):  # pylint: disable=R0902
         )
         self.mock_state.set_run_series_context.assert_not_called()
         self.mock_state.store_run.assert_not_called()
-        self.mock_confirm_message_received.assert_not_called()
+        self.mock_confirm_message_received.assert_called_once_with(
+            self.run_id, self.mock_receive.return_value[0].metadata.message_id
+        )
 
         self.mock_state.store_messages.assert_called_once()
         original, stored_message = self.mock_state.store_messages.call_args.args[0]

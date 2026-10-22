@@ -275,13 +275,13 @@ def start_client_internal(
 
 def _insert_message(
     msg: Message, reply_to: Message, state: NodeState, store: ObjectStore
-) -> None:
+) -> bool:
     """Insert a reply and retain its correlation target in the NodeState."""
     with no_object_id_recompute():
         # Store message in state
         msg.metadata.__dict__["_message_id"] = msg.object_id  # Set message_id
         if not state.store_messages([reply_to, msg])[1]:
-            return
+            return False
 
         # Preregister objects in ObjectStore
         store.preregister(msg.metadata.run_id, get_object_tree(msg))
@@ -290,6 +290,7 @@ def _insert_message(
         all_objects = get_all_nested_objects(msg)
         for obj_id, obj in all_objects.items():
             store.put(obj_id, obj.deflate())
+    return True
 
 
 def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments,R0911
@@ -354,7 +355,8 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments,R0
                         "not supported by the connected SuperLink.",
                     )
                     reply = Message(FAB_VERIFICATION_ERROR, reply_to=message)
-                    _insert_message(reply, message, state, object_store)
+                    if _insert_message(reply, message, state, object_store):
+                        confirm_message_received(run_id, message.metadata.message_id)
                     return run_id
 
                 fab_verified = _verify_fab(fab, trusted_entities)
@@ -368,7 +370,8 @@ def _pull_and_store_message(  # pylint: disable=too-many-positional-arguments,R0
                         "has been generated.",
                     )
                     reply = Message(FAB_VERIFICATION_ERROR, reply_to=message)
-                    _insert_message(reply, message, state, object_store)
+                    if _insert_message(reply, message, state, object_store):
+                        confirm_message_received(run_id, message.metadata.message_id)
                     return run_id
 
             # Initialize or refresh the context
