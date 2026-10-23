@@ -317,7 +317,7 @@ callback is also useful if you want to save the global model at the end of every
  Stop a strategy run early
 ***************************
 
-Pass a ``stop_fn`` callback to ``start`` to stop before reaching ``num_rounds``. The
+Pass a ``should_stop`` callback to ``start`` to stop before reaching ``num_rounds``. The
 callback receives the completed round number and accumulated
 :class:`~flwr.serverapp.strategy.Result`. For example, stop when aggregated federated
 evaluation accuracy reaches 90%:
@@ -339,7 +339,7 @@ evaluation accuracy reaches 90%:
         grid=grid,
         initial_arrays=arrays,
         num_rounds=100,
-        stop_fn=target_reached,
+        should_stop=target_reached,
     )
 
 The predicate runs once after each full round, including federated evaluation and any
@@ -349,7 +349,7 @@ When the predicate returns ``True``, no further round is dispatched. The returne
 ``Result`` contains the current global model and all metrics collected so far, so the
 ServerApp can continue with saving the model or other application logic.
 
-``num_rounds`` remains the maximum number of rounds. Without ``stop_fn``, all configured
-rounds run as before. Errors raised by the predicate propagate normally. Custom
-strategies that override ``start`` must forward ``stop_fn`` to the base implementation
-or invoke it in their own round loop.
+``num_rounds`` remains the maximum number of rounds. Without ``should_stop``, all
+configured rounds run as before. Errors raised by the predicate propagate normally.
+Custom strategies that override ``start`` must forward ``should_stop`` to the base
+implementation or invoke it in their own round loop.

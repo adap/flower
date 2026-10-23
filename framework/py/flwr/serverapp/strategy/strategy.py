@@ -141,7 +141,7 @@ class Strategy(ABC):
         train_config: ConfigRecord | None = None,
         evaluate_config: ConfigRecord | None = None,
         evaluate_fn: Callable[[int, ArrayRecord], MetricRecord | None] | None = None,
-        stop_fn: Callable[[int, Result], bool] | None = None,
+        should_stop: Callable[[int, Result], bool] | None = None,
     ) -> Result:
         """Execute the federated learning strategy.
 
@@ -170,7 +170,7 @@ class Strategy(ABC):
             server round number and array record, returns a MetricRecord or None. If
             provided, will be called before the first round and after each round.
             Defaults to None.
-        stop_fn : Callable[[int, Result], bool], optional
+        should_stop : Callable[[int, Result], bool], optional
             Optional predicate to determine whether to stop training early.
             Called at the end of each round with the round number and accumulated
             results. Return True to stop and return the model and metrics collected
@@ -278,7 +278,7 @@ class Strategy(ABC):
                 if res is not None:
                     result.evaluate_metrics_serverapp[current_round] = res
 
-            if stop_fn is not None and stop_fn(current_round, result):
+            if should_stop is not None and should_stop(current_round, result):
                 log(INFO, "Stopping early after round %s", current_round)
                 break
 
