@@ -211,7 +211,7 @@ def pull_messages(  # pylint: disable=R0914
     """Pull a set of Messages."""
     log(DEBUG, "Runtime.PullMessages")
     run_id = task.run_id
-    message_ids = set(request.message_ids)
+    message_ids = set(request.reply_to_message_ids.vals)
     messages: list[Message] = state.get_message_res(
         message_ids=message_ids, run_id=run_id
     )

@@ -54,7 +54,7 @@ class FederationManager(ABC):
 
     @abstractmethod
     def filter_nodes(self, node_ids: set[int], federation_id: str) -> set[int]:
-        """Given a list of node IDs, return sublist with nodes in federation."""
+        """Return the subset of node IDs in the federation, including SuperLink."""
 
     @abstractmethod
     def has_node(self, node_id: int, federation_id: str) -> bool:

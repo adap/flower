@@ -18,6 +18,7 @@
 import threading
 import time
 import unittest
+from collections.abc import Iterable
 from contextlib import AbstractContextManager
 from typing import Any
 from unittest.mock import Mock, patch
@@ -188,12 +189,54 @@ class TestHttpGrid(unittest.TestCase):
         self.assertEqual(len(args), 1)
         self.assertEqual(len(kwargs), 0)
         self.assertIsInstance(args[0], PullAppMessagesRequest)
-        self.assertEqual(args[0].message_ids, [ins1.object_id, ins2.object_id])
+        self.assertTrue(args[0].HasField("reply_to_message_ids"))
+        self.assertEqual(
+            args[0].reply_to_message_ids.vals, [ins1.object_id, ins2.object_id]
+        )
         self.assertEqual(msgs[0].metadata, ok_msg.metadata)
         self.assertEqual(msgs[0].content, ok_msg.content)
         self.assertEqual(msgs[1].metadata, err_msg.metadata)
         self.assertEqual(msgs[1].error, err_msg.error)
         self.assertEqual(self.mock_client.PullObject.call_count, len(obj_store))
+
+    @parameterized.expand(  # type: ignore
+        [
+            (None, None),
+            ([], []),
+            (["message-1"], ["message-1"]),
+            (iter(["message-1"]), ["message-1"]),
+        ]
+    )
+    def test_pull_messages_correlation_filter(
+        self,
+        reply_to_message_ids: Iterable[str] | None,
+        expected_ids: list[str] | None,
+    ) -> None:
+        """Preserve correlation filter presence across the wire."""
+        self.mock_client.PullMessages.return_value = Mock(
+            messages_list=[], message_object_trees=[]
+        )
+
+        self.assertEqual(list(self.grid.pull_messages(reply_to_message_ids)), [])
+
+        request = self.mock_client.PullMessages.call_args.args[0]
+        request = PullAppMessagesRequest.FromString(request.SerializeToString())
+        self.assertEqual(
+            request.HasField("reply_to_message_ids"), expected_ids is not None
+        )
+        if expected_ids is not None:
+            self.assertEqual(list(request.reply_to_message_ids.vals), expected_ids)
+
+    def test_pull_messages_without_arguments(self) -> None:
+        """Omit the correlation filter by default."""
+        self.mock_client.PullMessages.return_value = Mock(
+            messages_list=[], message_object_trees=[]
+        )
+
+        self.assertEqual(list(self.grid.pull_messages()), [])
+
+        request = self.mock_client.PullMessages.call_args.args[0]
+        self.assertFalse(request.HasField("reply_to_message_ids"))
 
     def test_send_and_receive_messages_complete(self) -> None:
         """Test send and receive all messages successfully."""

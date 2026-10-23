@@ -26,6 +26,7 @@ from dataclasses import dataclass
 from logging import DEBUG, ERROR
 from pathlib import Path
 from queue import Queue
+from time import monotonic
 from types import FrameType
 from typing import Any, cast
 
@@ -90,7 +91,7 @@ from flwr.supercore.superexec.dependency_installer import (
 from flwr.supercore.task_identity import TaskIdentity
 from flwr.supercore.telemetry import EventType, event
 from flwr.supercore.tls import validate_and_resolve_root_certificates
-from flwr.supercore.tracing import flush_traces, trace_span
+from flwr.supercore.tracing import PhaseTimings, flush_traces, trace_span
 from flwr.supercore.typing import JSONObject
 from flwr.supercore.utils import strict_json_dumps
 from flwr.superlink.grid import HttpGrid
@@ -190,7 +191,7 @@ def message_to_prompt(message: Message) -> str:
 
 def pull_prompt(grid: HttpGrid) -> tuple[str, Metadata]:
     """Pull and serialize the initial AgentApp instruction and retain its metadata."""
-    instructions = list(grid.pull_messages([]))
+    instructions = list(grid.pull_messages())
     if len(instructions) != 1:
         raise RuntimeError("Expected exactly one initial AgentApp instruction.")
     instruction = instructions[0]
@@ -211,6 +212,8 @@ class _AgentAppTaskLifecycle:  # pylint: disable=too-many-instance-attributes,pr
         runtime_dependency_install: bool,
         preloaded: PreloadedAgentApp | None,
     ) -> None:
+        self._bootstrap_started = monotonic()
+        self.timings = PhaseTimings()
         self._runtime_api_address = runtime_api_address
         self._log_queue = log_queue
         self._token = token
@@ -219,12 +222,13 @@ class _AgentAppTaskLifecycle:  # pylint: disable=too-many-instance-attributes,pr
         self._certificates_path = certificates_path
         self._runtime_dependency_install = runtime_dependency_install
         self._preloaded = preloaded
-        self._grid = HttpGrid(
-            runtime_api_address=self._runtime_api_address,
-            insecure=self._insecure,
-            root_certificates=self._certificates,
-            token=self._token,
-        )
+        with self.timings.measure("task.runtime_client"):
+            self._grid = HttpGrid(
+                runtime_api_address=self._runtime_api_address,
+                insecure=self._insecure,
+                root_certificates=self._certificates,
+                token=self._token,
+            )
         self._log_uploader: threading.Thread | None = None
         self._hash_run_id: str | None = None
         self._outcome = (SubStatus.FAILED, "Task failed with unknown error.")
@@ -247,6 +251,11 @@ class _AgentAppTaskLifecycle:  # pylint: disable=too-many-instance-attributes,pr
             with trace_span(
                 "task.initialize", attributes=self._trace_attributes
             ) as initialization:
+                # Keep pre-input setup correlated without extending the span.
+                initialization.set_attribute(
+                    "flwr.task.bootstrap_ms",
+                    (monotonic() - self._bootstrap_started) * 1000,
+                )
                 self._heartbeat_sender = HeartbeatSender(
                     make_task_heartbeat_fn_http(grid._runtime_client)
                 )
@@ -270,6 +279,7 @@ class _AgentAppTaskLifecycle:  # pylint: disable=too-many-instance-attributes,pr
                 initialization.set_attribute("flwr.run_id", str(run.run_id))
                 initialization.set_attribute("flwr.task_id", str(task_id))
 
+            self.timings.publish("task.bootstrap", self._trace_attributes)
             self._hash_run_id = get_sha256_hash(run.run_id)
 
             grid.set_run(run)
@@ -338,7 +348,6 @@ class _AgentAppTaskLifecycle:  # pylint: disable=too-many-instance-attributes,pr
                         agent_app = _load_agentapp_component(agent_app_attr, app_path)
             with trace_span(
                 "agentapp.execute",
-                traceparent=grid._tracing.take_task_traceparent(task_id),
                 attributes=self._trace_attributes,
             ):
                 agent_app(agent=agent, context=self._context)
@@ -571,7 +580,8 @@ def _run_agentapp_task(  # pylint: disable=too-many-arguments,too-many-positiona
             exit_handlers=[lifecycle.finalize],
         )
     if on_started is not None:
-        on_started()
+        with lifecycle.timings.measure("task.accept"):
+            on_started()
     if resident:
         mirror_output_to_queue(log_queue)
     return lifecycle, lifecycle.run()

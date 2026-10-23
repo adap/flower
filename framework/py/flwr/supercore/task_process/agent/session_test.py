@@ -27,14 +27,18 @@ from flwr.proto.control_pb2 import (  # pylint: disable=E0611
     StartAutomationResponse,
     StartRunRequest,
 )
+from flwr.proto.runseries_pb2 import CompactedContext  # pylint: disable=E0611
 from flwr.proto.runtime_pb2 import (  # pylint: disable=E0611
     CreateTaskRequest,
     CreateTaskResponse,
+    GetCompactedContextsRequest,
+    GetCompactedContextsResponse,
     GetRunSeriesEventsRequest,
     GetRunSeriesEventsResponse,
     PullTaskMessageRequest,
     PullTaskMessageResponse,
     PushTaskEventsRequest,
+    PutCompactedContextRequest,
 )
 from flwr.proto.task_pb2 import TaskEvent  # pylint: disable=E0611
 from flwr.supercore.constant import TaskType
@@ -193,6 +197,82 @@ def test_get_trace_without_filters_requests_all_events() -> None:
     events.close()
 
     stub.GetRunSeriesEvents.assert_called_once_with(GetRunSeriesEventsRequest())
+
+
+def test_get_compacted_contexts_returns_without_emitting() -> None:
+    """Return summaries without publishing a run event."""
+    stub = Mock()
+    stub.GetCompactedContexts.return_value = GetCompactedContextsResponse(
+        contexts=[
+            CompactedContext(
+                id=12,
+                series_id=42,
+                through_event_id=9,
+                text="Private summary",
+                created_at="2026-10-16T12:00:00+00:00",
+                token_count=123,
+            )
+        ]
+    )
+    events = RuntimeAgentEvents(stub)
+
+    with patch.object(events, "emit") as emit:
+        contexts = events.get_compacted_contexts(limit=2, before_context_id=20)
+    events.close()
+
+    stub.GetCompactedContexts.assert_called_once_with(
+        GetCompactedContextsRequest(limit=2, before_context_id=20)
+    )
+    assert contexts == [
+        {
+            "id": 12,
+            "series_id": 42,
+            "through_event_id": 9,
+            "text": "Private summary",
+            "created_at": "2026-10-16T12:00:00+00:00",
+            "token_count": 123,
+        }
+    ]
+    emit.assert_not_called()
+
+
+def test_put_compacted_context_forwards_without_emitting() -> None:
+    """Forward the summary without publishing a run event."""
+    stub = Mock()
+    events = RuntimeAgentEvents(stub)
+
+    with patch.object(events, "emit") as emit:
+        events.put_compacted_context(
+            through_event_id=9, text="Private summary", token_count=123
+        )
+    events.close()
+
+    stub.PutCompactedContext.assert_called_once_with(
+        PutCompactedContextRequest(
+            context=CompactedContext(
+                through_event_id=9, text="Private summary", token_count=123
+            )
+        )
+    )
+    emit.assert_not_called()
+
+
+def test_put_compacted_context_propagates_error_without_emitting() -> None:
+    """Preserve the request failure without publishing a run event."""
+    stub = Mock()
+    error = RuntimeError("Write failed")
+    stub.PutCompactedContext.side_effect = error
+    events = RuntimeAgentEvents(stub)
+
+    with patch.object(events, "emit") as emit:
+        with pytest.raises(RuntimeError) as caught:
+            events.put_compacted_context(
+                through_event_id=9, text="Private summary", token_count=123
+            )
+    events.close()
+
+    assert caught.value is error
+    emit.assert_not_called()
 
 
 def test_agent_events_and_connector_items_use_same_publisher() -> None:

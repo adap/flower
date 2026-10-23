@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower Docs\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-15 00:09+0000\n"
+"POT-Creation-Date: 2026-10-23 00:10+0000\n"
 "PO-Revision-Date: 2026-05-23 06:55+0000\n"
 "Last-Translator: lco <Leandro.COLLIER@student.umons.ac.be>\n"
 "Language: fr\n"
@@ -48,8 +48,8 @@ msgstr ""
 msgid "Changelog"
 msgstr ""
 
-#: ../../source/changelog/v1.40.0.md:2
-msgid "v1.40.0 (2026-10-14)"
+#: ../../source/changelog/v1.42.0.md:2
+msgid "v1.42.0 (2026-10-22)"
 msgstr ""
 
 #: ../../source/changelog/v1.0.0.md:11 ../../source/changelog/v1.1.0.md:4
@@ -73,6 +73,7 @@ msgstr ""
 #: ../../source/changelog/v1.36.0.md:4 ../../source/changelog/v1.37.0.md:4
 #: ../../source/changelog/v1.38.0.md:4 ../../source/changelog/v1.39.0.md:4
 #: ../../source/changelog/v1.4.0.md:4 ../../source/changelog/v1.40.0.md:4
+#: ../../source/changelog/v1.41.0.md:4 ../../source/changelog/v1.42.0.md:4
 #: ../../source/changelog/v1.5.0.md:4 ../../source/changelog/v1.6.0.md:4
 #: ../../source/changelog/v1.7.0.md:4 ../../source/changelog/v1.8.0.md:4
 #: ../../source/changelog/v1.9.0.md:4
@@ -99,6 +100,7 @@ msgstr "Merci à nos contributeurs"
 #: ../../source/changelog/v1.36.0.md:6 ../../source/changelog/v1.37.0.md:6
 #: ../../source/changelog/v1.38.0.md:6 ../../source/changelog/v1.39.0.md:6
 #: ../../source/changelog/v1.4.0.md:6 ../../source/changelog/v1.40.0.md:6
+#: ../../source/changelog/v1.41.0.md:6 ../../source/changelog/v1.42.0.md:6
 #: ../../source/changelog/v1.5.0.md:6 ../../source/changelog/v1.6.0.md:6
 #: ../../source/changelog/v1.7.0.md:6 ../../source/changelog/v1.8.0.md:6
 #: ../../source/changelog/v1.9.0.md:6
@@ -110,12 +112,9 @@ msgstr ""
 "ont rendu possible la nouvelle version de Flower (dans l'ordre `git "
 "shortlog`) :"
 
-#: ../../source/changelog/v1.40.0.md:8
+#: ../../source/changelog/v1.42.0.md:8
 #, fuzzy
-msgid ""
-"`Charles Beauville`, `Chong Shen Ng`, `Daniel J. Beutel`, `Daniel Nata "
-"Nugraha`, `Dimitris Stripelis`, `Heng Pan`, `Istiaque Ahmed`, `Javier`, "
-"`Julian Rußmeyer`, `Ruth Galindo`, `Stephane Moroso`, `Taner Topal`"
+msgid "`Charles Beauville`, `Chong Shen Ng`, `Heng Pan`, `Javier`, `Taner Topal`"
 msgstr ""
 
 #: ../../source/changelog/v0.13.0.md:4 ../../source/changelog/v0.14.0.md:4
@@ -142,11 +141,194 @@ msgstr ""
 #: ../../source/changelog/v1.36.0.md:10 ../../source/changelog/v1.37.0.md:10
 #: ../../source/changelog/v1.38.0.md:10 ../../source/changelog/v1.39.0.md:10
 #: ../../source/changelog/v1.4.0.md:10 ../../source/changelog/v1.40.0.md:10
+#: ../../source/changelog/v1.41.0.md:10 ../../source/changelog/v1.42.0.md:10
 #: ../../source/changelog/v1.5.0.md:10 ../../source/changelog/v1.6.0.md:10
 #: ../../source/changelog/v1.7.0.md:10 ../../source/changelog/v1.8.0.md:10
 #: ../../source/changelog/v1.9.0.md:10
 msgid "What's new?"
 msgstr "Quoi de neuf ?"
+
+#: ../../source/changelog/v1.42.0.md:12
+#, fuzzy
+msgid ""
+"**Reduce Agent response latency with faster warm-pool handoff** "
+"([#8280](https://github.com/flwrlabs/flower/pull/8280))"
+msgstr ""
+
+#: ../../source/changelog/v1.42.0.md:14
+msgid ""
+"Ready warm Pods are now handed off before Kubernetes replenishes the "
+"pool. Reconciliation creates replacements while tasks run, avoiding "
+"Kubernetes list and Pod-creation requests during successful warm token "
+"handoff."
+msgstr ""
+
+#: ../../source/changelog/v1.42.0.md:16
+#, fuzzy
+msgid ""
+"**Train the vertical FL example reliably** "
+"([#8396](https://github.com/flwrlabs/flower/pull/8396))"
+msgstr ""
+
+#: ../../source/changelog/v1.42.0.md:18
+msgid ""
+"The vertical FL example now aligns shuffled features and labels, reuses "
+"the model state that produced each embedding, requires complete feature "
+"and gradient exchanges, and reports training loss and accuracy from the "
+"same model state."
+msgstr ""
+
+#: ../../source/changelog/v1.42.0.md:20
+#, fuzzy
+msgid ""
+"**Improve Python TLS security following the eMudhra CA incident** "
+"([#8400](https://github.com/flwrlabs/flower/pull/8400))"
+msgstr ""
+
+#: ../../source/changelog/v1.42.0.md:22
+msgid ""
+"Following the eMudhra CA compromise, Flower now requires "
+"`certifi>=2026.10.19` and `uv>=0.13.5,<0.14.0` to mitigate risks from "
+"compromised CA certificates. CI, container, and baseline bootstraps also "
+"use updated, pinned build tools. Existing installations and images must "
+"be updated or rebuilt to receive these security improvements."
+msgstr ""
+
+#: ../../source/changelog/v1.42.0.md:24
+#, fuzzy
+msgid ""
+"**General improvements** "
+"([#8369](https://github.com/flwrlabs/flower/pull/8369), "
+"[#8391](https://github.com/flwrlabs/flower/pull/8391), "
+"[#8392](https://github.com/flwrlabs/flower/pull/8392), "
+"[#8393](https://github.com/flwrlabs/flower/pull/8393), "
+"[#8398](https://github.com/flwrlabs/flower/pull/8398), "
+"[#8399](https://github.com/flwrlabs/flower/pull/8399), "
+"[#8403](https://github.com/flwrlabs/flower/pull/8403), "
+"[#8405](https://github.com/flwrlabs/flower/pull/8405))"
+msgstr ""
+
+#: ../../source/changelog/v1.10.0.md:68 ../../source/changelog/v1.11.0.md:65
+#: ../../source/changelog/v1.12.0.md:64 ../../source/changelog/v1.13.0.md:69
+#: ../../source/changelog/v1.13.1.md:32 ../../source/changelog/v1.14.0.md:63
+#: ../../source/changelog/v1.15.0.md:80 ../../source/changelog/v1.16.0.md:54
+#: ../../source/changelog/v1.17.0.md:85 ../../source/changelog/v1.18.0.md:50
+#: ../../source/changelog/v1.19.0.md:68 ../../source/changelog/v1.20.0.md:66
+#: ../../source/changelog/v1.21.0.md:56 ../../source/changelog/v1.22.0.md:40
+#: ../../source/changelog/v1.23.0.md:48 ../../source/changelog/v1.24.0.md:42
+#: ../../source/changelog/v1.25.0.md:36 ../../source/changelog/v1.26.0.md:44
+#: ../../source/changelog/v1.27.0.md:50 ../../source/changelog/v1.28.0.md:50
+#: ../../source/changelog/v1.29.0.md:46 ../../source/changelog/v1.30.0.md:34
+#: ../../source/changelog/v1.31.0.md:50 ../../source/changelog/v1.32.0.md:44
+#: ../../source/changelog/v1.33.0.md:50 ../../source/changelog/v1.34.0.md:54
+#: ../../source/changelog/v1.35.0.md:50 ../../source/changelog/v1.36.0.md:30
+#: ../../source/changelog/v1.37.0.md:40 ../../source/changelog/v1.38.0.md:36
+#: ../../source/changelog/v1.39.0.md:28 ../../source/changelog/v1.40.0.md:38
+#: ../../source/changelog/v1.41.0.md:24 ../../source/changelog/v1.42.0.md:26
+msgid ""
+"As always, many parts of the Flower framework and quality infrastructure "
+"were improved and updated."
+msgstr ""
+"Comme toujours, de nombreuses parties du cadre Flower et de "
+"l'infrastructure qualité ont été améliorées et mises à jour."
+
+#: ../../source/changelog/v1.41.0.md:2
+msgid "v1.41.0 (2026-10-20)"
+msgstr ""
+
+#: ../../source/changelog/v1.41.0.md:8
+#, fuzzy
+msgid ""
+"`Charles Beauville`, `Chong Shen Ng`, `Daniel Nata Nugraha`, `Heng Pan`, "
+"`Javier`, `Taner Topal`"
+msgstr ""
+
+#: ../../source/changelog/v1.41.0.md:12
+#, fuzzy
+msgid ""
+"**Use GitHub, Notion, Slack, Attio, and Google connectors through MCP** "
+"([#8328](https://github.com/flwrlabs/flower/pull/8328), "
+"[#8339](https://github.com/flwrlabs/flower/pull/8339), "
+"[#8343](https://github.com/flwrlabs/flower/pull/8343), "
+"[#8362](https://github.com/flwrlabs/flower/pull/8362), "
+"[#8382](https://github.com/flwrlabs/flower/pull/8382))"
+msgstr ""
+
+#: ../../source/changelog/v1.41.0.md:14
+msgid ""
+"GitHub, Notion, Slack, and Attio connectors now integrate through MCP, "
+"with tools discovered dynamically from each connected account. New Google"
+" Drive, Gmail, and Google Calendar connectors use Google's remote MCP "
+"servers with OAuth/PKCE and token refresh."
+msgstr ""
+
+#: ../../source/changelog/v1.41.0.md:16
+#, fuzzy
+msgid ""
+"**Store and reuse compacted AgentApp contexts (experimental)** "
+"([#8350](https://github.com/flwrlabs/flower/pull/8350), "
+"[#8363](https://github.com/flwrlabs/flower/pull/8363), "
+"[#8364](https://github.com/flwrlabs/flower/pull/8364), "
+"[#8367](https://github.com/flwrlabs/flower/pull/8367), "
+"[#8370](https://github.com/flwrlabs/flower/pull/8370), "
+"[#8371](https://github.com/flwrlabs/flower/pull/8371), "
+"[#8376](https://github.com/flwrlabs/flower/pull/8376), "
+"[#8377](https://github.com/flwrlabs/flower/pull/8377), "
+"[#8380](https://github.com/flwrlabs/flower/pull/8380))"
+msgstr ""
+
+#: ../../source/changelog/v1.41.0.md:18
+msgid ""
+"AgentApps can now filter run-series events and read or store compacted "
+"contexts through `AgentSession.events`. Compacted contexts are persisted "
+"per run series and exposed through authenticated Runtime API endpoints "
+"with newest-first paginated reads."
+msgstr ""
+
+#: ../../source/changelog/v1.41.0.md:20
+#, fuzzy
+msgid ""
+"**Lay the groundwork for faster AgentApp responses** "
+"([#8375](https://github.com/flwrlabs/flower/pull/8375), "
+"[#8388](https://github.com/flwrlabs/flower/pull/8388))"
+msgstr ""
+
+#: ../../source/changelog/v1.41.0.md:22
+#, fuzzy
+msgid ""
+"**General improvements** "
+"([#8341](https://github.com/flwrlabs/flower/pull/8341), "
+"[#8345](https://github.com/flwrlabs/flower/pull/8345), "
+"[#8349](https://github.com/flwrlabs/flower/pull/8349), "
+"[#8356](https://github.com/flwrlabs/flower/pull/8356), "
+"[#8357](https://github.com/flwrlabs/flower/pull/8357), "
+"[#8358](https://github.com/flwrlabs/flower/pull/8358), "
+"[#8359](https://github.com/flwrlabs/flower/pull/8359), "
+"[#8360](https://github.com/flwrlabs/flower/pull/8360), "
+"[#8361](https://github.com/flwrlabs/flower/pull/8361), "
+"[#8365](https://github.com/flwrlabs/flower/pull/8365), "
+"[#8366](https://github.com/flwrlabs/flower/pull/8366), "
+"[#8372](https://github.com/flwrlabs/flower/pull/8372), "
+"[#8373](https://github.com/flwrlabs/flower/pull/8373), "
+"[#8374](https://github.com/flwrlabs/flower/pull/8374), "
+"[#8378](https://github.com/flwrlabs/flower/pull/8378), "
+"[#8384](https://github.com/flwrlabs/flower/pull/8384), "
+"[#8387](https://github.com/flwrlabs/flower/pull/8387), "
+"[#8389](https://github.com/flwrlabs/flower/pull/8389), "
+"[#8394](https://github.com/flwrlabs/flower/pull/8394))"
+msgstr ""
+
+#: ../../source/changelog/v1.40.0.md:2
+msgid "v1.40.0 (2026-10-14)"
+msgstr ""
+
+#: ../../source/changelog/v1.40.0.md:8
+#, fuzzy
+msgid ""
+"`Charles Beauville`, `Chong Shen Ng`, `Daniel J. Beutel`, `Daniel Nata "
+"Nugraha`, `Dimitris Stripelis`, `Heng Pan`, `Istiaque Ahmed`, `Javier`, "
+"`Julian Rußmeyer`, `Ruth Galindo`, `Stephane Moroso`, `Taner Topal`"
+msgstr ""
 
 #: ../../source/changelog/v1.40.0.md:12
 #, fuzzy
@@ -288,29 +470,6 @@ msgid ""
 "[#8347](https://github.com/flwrlabs/flower/pull/8347), "
 "[#8354](https://github.com/flwrlabs/flower/pull/8354))"
 msgstr ""
-
-#: ../../source/changelog/v1.10.0.md:68 ../../source/changelog/v1.11.0.md:65
-#: ../../source/changelog/v1.12.0.md:64 ../../source/changelog/v1.13.0.md:69
-#: ../../source/changelog/v1.13.1.md:32 ../../source/changelog/v1.14.0.md:63
-#: ../../source/changelog/v1.15.0.md:80 ../../source/changelog/v1.16.0.md:54
-#: ../../source/changelog/v1.17.0.md:85 ../../source/changelog/v1.18.0.md:50
-#: ../../source/changelog/v1.19.0.md:68 ../../source/changelog/v1.20.0.md:66
-#: ../../source/changelog/v1.21.0.md:56 ../../source/changelog/v1.22.0.md:40
-#: ../../source/changelog/v1.23.0.md:48 ../../source/changelog/v1.24.0.md:42
-#: ../../source/changelog/v1.25.0.md:36 ../../source/changelog/v1.26.0.md:44
-#: ../../source/changelog/v1.27.0.md:50 ../../source/changelog/v1.28.0.md:50
-#: ../../source/changelog/v1.29.0.md:46 ../../source/changelog/v1.30.0.md:34
-#: ../../source/changelog/v1.31.0.md:50 ../../source/changelog/v1.32.0.md:44
-#: ../../source/changelog/v1.33.0.md:50 ../../source/changelog/v1.34.0.md:54
-#: ../../source/changelog/v1.35.0.md:50 ../../source/changelog/v1.36.0.md:30
-#: ../../source/changelog/v1.37.0.md:40 ../../source/changelog/v1.38.0.md:36
-#: ../../source/changelog/v1.39.0.md:28 ../../source/changelog/v1.40.0.md:38
-msgid ""
-"As always, many parts of the Flower framework and quality infrastructure "
-"were improved and updated."
-msgstr ""
-"Comme toujours, de nombreuses parties du cadre Flower et de "
-"l'infrastructure qualité ont été améliorées et mises à jour."
 
 #: ../../source/changelog/v0.16.0.md:21 ../../source/changelog/v0.17.0.md:33
 #: ../../source/changelog/v0.18.0.md:62 ../../source/changelog/v0.19.0.md:58
@@ -26686,6 +26845,7 @@ msgstr ""
 #: ../../source/helm/how-to-deploy-superlink-using-helm.md:579
 #: ../../source/helm/how-to-deploy-supernode-using-helm.md:236
 #: ../../source/ref-api/flwr.agentapp.AgentConnectors.rst
+#: ../../source/ref-api/flwr.agentapp.AgentEvents.rst
 #: ../../source/ref-api/flwr.app.Array.rst
 #: ../../source/ref-api/flwr.app.ArrayRecord.rst
 #: ../../source/ref-api/flwr.app.ConfigRecord.rst
@@ -31908,12 +32068,8 @@ msgid "``flwr/supernode:XYZ``: Use the official SuperNode Docker image."
 msgstr "``flwr/supernode:XYZ``: Utilisez l'image officielle SuperNode Docker."
 
 #: ../../source/how-to-connect-supernodes-to-supergrid.rst:167
-msgid ""
-"``--superlink fleet-supergrid.flower.ai:443``: Connect the SuperNode to "
-"SuperGrid."
-msgstr ""
-"``--superlink fleet-supergrid.flower.ai:443``: Connectez le SuperNode à "
-"SuperGrid."
+msgid "``--superlink api.flower.ai:443``: Connect the SuperNode to SuperGrid."
+msgstr "``--superlink api.flower.ai:443``: Connectez le SuperNode à SuperGrid."
 
 #: ../../source/how-to-connect-supernodes-to-supergrid.rst:169
 msgid ""
@@ -32429,18 +32585,20 @@ msgstr ""
 
 #: ../../source/how-to-deploy-supernode-using-slurm.rst:24
 #, fuzzy
-msgid ":doc:`Flower installed <how-to-install-flower>` on the compute nodes"
-msgstr ""
-
-#: ../../source/how-to-deploy-supernode-using-slurm.rst:25
-msgid "A registered SuperNode private key that is readable from the compute node"
+msgid ""
+"The latest :doc:`Flower release installed <how-to-install-flower>` on the"
+" compute nodes"
 msgstr ""
 
 #: ../../source/how-to-deploy-supernode-using-slurm.rst:26
+msgid "A registered SuperNode private key that is readable from the compute node"
+msgstr ""
+
+#: ../../source/how-to-deploy-supernode-using-slurm.rst:27
 msgid "All ClientApp dependencies installed in the execution environment"
 msgstr ""
 
-#: ../../source/how-to-deploy-supernode-using-slurm.rst:28
+#: ../../source/how-to-deploy-supernode-using-slurm.rst:29
 msgid ""
 "In the examples, replace each value in angle brackets with the "
 "corresponding value for your cluster. The first two process-isolation "
@@ -32448,7 +32606,7 @@ msgid ""
 " The final example lets Slurm place each job."
 msgstr ""
 
-#: ../../source/how-to-deploy-supernode-using-slurm.rst:34
+#: ../../source/how-to-deploy-supernode-using-slurm.rst:35
 msgid ""
 "You can install ClientApp dependencies in advance or let Flower install "
 "them when an app starts. For the available options and their network "
@@ -32456,37 +32614,37 @@ msgid ""
 "to-install-app-dependencies-at-runtime>`."
 msgstr ""
 
-#: ../../source/how-to-deploy-supernode-using-slurm.rst:41
+#: ../../source/how-to-deploy-supernode-using-slurm.rst:42
 msgid "Use default subprocess isolation"
 msgstr ""
 
-#: ../../source/how-to-deploy-supernode-using-slurm.rst:43
+#: ../../source/how-to-deploy-supernode-using-slurm.rst:44
 msgid ""
 "By default, the SuperNode starts each ClientApp as a subprocess. This "
 "model needs only one Slurm job, and the command does not require an "
 "``--isolation`` option."
 msgstr ""
 
-#: ../../source/how-to-deploy-supernode-using-slurm.rst:46
+#: ../../source/how-to-deploy-supernode-using-slurm.rst:47
 msgid "Create ``supernode-subprocess.sbatch``:"
 msgstr ""
 
-#: ../../source/how-to-deploy-supernode-using-slurm.rst:68
+#: ../../source/how-to-deploy-supernode-using-slurm.rst:69
 #, fuzzy
 msgid "Submit the batch script to deploy the SuperNode:"
 msgstr ""
 
-#: ../../source/how-to-deploy-supernode-using-slurm.rst:74
+#: ../../source/how-to-deploy-supernode-using-slurm.rst:75
 msgid ""
 "Each ClientApp process that the SuperNode starts can use the CPU and "
 "memory assigned to this job."
 msgstr ""
 
-#: ../../source/how-to-deploy-supernode-using-slurm.rst:79
+#: ../../source/how-to-deploy-supernode-using-slurm.rst:80
 msgid "Use process isolation"
 msgstr ""
 
-#: ../../source/how-to-deploy-supernode-using-slurm.rst:81
+#: ../../source/how-to-deploy-supernode-using-slurm.rst:82
 msgid ""
 "With ``process`` isolation, Slurm manages the SuperNode and SuperExec as "
 "separate jobs. The SuperNode receives tasks from SuperGrid, while the "
@@ -32494,13 +32652,13 @@ msgid ""
 "processes."
 msgstr ""
 
-#: ../../source/how-to-deploy-supernode-using-slurm.rst:85
+#: ../../source/how-to-deploy-supernode-using-slurm.rst:86
 msgid ""
 "The Runtime API in this example listens on ``127.0.0.1``, so both jobs "
 "must use the same compute node."
 msgstr ""
 
-#: ../../source/how-to-deploy-supernode-using-slurm.rst:90
+#: ../../source/how-to-deploy-supernode-using-slurm.rst:91
 msgid ""
 "The process-isolation examples below are minimal configurations for a "
 "dedicated or otherwise trusted compute node. On a multi-tenant node, "
@@ -32511,25 +32669,25 @@ msgid ""
 "environments is outside the scope of this guide."
 msgstr ""
 
-#: ../../source/how-to-deploy-supernode-using-slurm.rst:97
+#: ../../source/how-to-deploy-supernode-using-slurm.rst:98
 msgid "Create ``supernode-process.sbatch``:"
 msgstr ""
 
-#: ../../source/how-to-deploy-supernode-using-slurm.rst:123
+#: ../../source/how-to-deploy-supernode-using-slurm.rst:124
 msgid "Create ``superexec-clientapp.sbatch``:"
 msgstr ""
 
-#: ../../source/how-to-deploy-supernode-using-slurm.rst:155
+#: ../../source/how-to-deploy-supernode-using-slurm.rst:156
 msgid "Submit the SuperNode job first, then submit the SuperExec job:"
 msgstr ""
 
-#: ../../source/how-to-deploy-supernode-using-slurm.rst:162
+#: ../../source/how-to-deploy-supernode-using-slurm.rst:163
 msgid ""
 "The SuperExec waits for ClientApp tasks from the SuperNode. The ClientApp"
 " processes inherit the CPU and memory allocation of the SuperExec job."
 msgstr ""
 
-#: ../../source/how-to-deploy-supernode-using-slurm.rst:167
+#: ../../source/how-to-deploy-supernode-using-slurm.rst:168
 msgid ""
 "``--insecure`` applies only to the local Runtime API connection between "
 "SuperExec and SuperNode. The connection from SuperNode to SuperGrid still"
@@ -32538,11 +32696,11 @@ msgid ""
 "enable-tls-connections>`."
 msgstr ""
 
-#: ../../source/how-to-deploy-supernode-using-slurm.rst:174
+#: ../../source/how-to-deploy-supernode-using-slurm.rst:175
 msgid "Use process isolation with a GPU ClientApp"
 msgstr ""
 
-#: ../../source/how-to-deploy-supernode-using-slurm.rst:176
+#: ../../source/how-to-deploy-supernode-using-slurm.rst:177
 msgid ""
 "To run a ClientApp on a GPU, use the ``supernode-process.sbatch`` script "
 "from the previous section without adding a GPU request. The SuperNode "
@@ -32550,7 +32708,7 @@ msgid ""
 "need access to the GPU."
 msgstr ""
 
-#: ../../source/how-to-deploy-supernode-using-slurm.rst:180
+#: ../../source/how-to-deploy-supernode-using-slurm.rst:181
 msgid ""
 "Request the GPU only in the SuperExec job. The ClientApp process then "
 "inherits the SuperExec environment, including ``CUDA_VISIBLE_DEVICES``. "
@@ -32559,17 +32717,17 @@ msgid ""
 "node."
 msgstr ""
 
-#: ../../source/how-to-deploy-supernode-using-slurm.rst:185
+#: ../../source/how-to-deploy-supernode-using-slurm.rst:186
 msgid "Create ``superexec-clientapp-gpu.sbatch``:"
 msgstr ""
 
-#: ../../source/how-to-deploy-supernode-using-slurm.rst:223
+#: ../../source/how-to-deploy-supernode-using-slurm.rst:224
 msgid ""
 "Submit the unchanged process-isolated SuperNode job first, then submit "
 "the GPU SuperExec job:"
 msgstr ""
 
-#: ../../source/how-to-deploy-supernode-using-slurm.rst:231
+#: ../../source/how-to-deploy-supernode-using-slurm.rst:232
 msgid ""
 "The ClientApp environment must include a GPU-enabled version of its "
 "machine learning framework and the required GPU libraries. For example, a"
@@ -32577,11 +32735,11 @@ msgid ""
 "``CUDA_VISIBLE_DEVICES``."
 msgstr ""
 
-#: ../../source/how-to-deploy-supernode-using-slurm.rst:237
+#: ../../source/how-to-deploy-supernode-using-slurm.rst:238
 msgid "Discover the SuperNode address from its job ID"
 msgstr ""
 
-#: ../../source/how-to-deploy-supernode-using-slurm.rst:239
+#: ../../source/how-to-deploy-supernode-using-slurm.rst:240
 msgid ""
 "The preceding process-isolation examples use ``--nodelist`` to place both"
 " jobs on the same node. You can remove this constraint when the compute "
@@ -32590,32 +32748,32 @@ msgid ""
 "starts, SuperExec uses that ID to discover the assigned node's address."
 msgstr ""
 
-#: ../../source/how-to-deploy-supernode-using-slurm.rst:245
+#: ../../source/how-to-deploy-supernode-using-slurm.rst:246
 msgid "Create ``supernode-process-dynamic.sbatch``:"
 msgstr ""
 
-#: ../../source/how-to-deploy-supernode-using-slurm.rst:270
+#: ../../source/how-to-deploy-supernode-using-slurm.rst:271
 msgid ""
 "The SuperNode listens on all network interfaces because Slurm can place "
 "SuperExec on a different node. Create ``superexec-clientapp-"
 "dynamic.sbatch`` without a ``--nodelist`` directive:"
 msgstr ""
 
-#: ../../source/how-to-deploy-supernode-using-slurm.rst:331
+#: ../../source/how-to-deploy-supernode-using-slurm.rst:332
 msgid ""
 "This example requests one GPU for SuperExec. Remove ``#SBATCH "
 "--gres=gpu:1`` when the ClientApp does not need a GPU."
 msgstr ""
 
-#: ../../source/how-to-deploy-supernode-using-slurm.rst:334
+#: ../../source/how-to-deploy-supernode-using-slurm.rst:335
 msgid "Create ``submit-process-pair.sh`` to submit both jobs:"
 msgstr ""
 
-#: ../../source/how-to-deploy-supernode-using-slurm.rst:354
+#: ../../source/how-to-deploy-supernode-using-slurm.rst:355
 msgid "Run the submission script:"
 msgstr ""
 
-#: ../../source/how-to-deploy-supernode-using-slurm.rst:360
+#: ../../source/how-to-deploy-supernode-using-slurm.rst:361
 msgid ""
 "The first ``sbatch`` command returns the SuperNode job ID. The second job"
 " uses an ``after:<job-id>`` dependency, so Slurm holds it until the "
@@ -32625,7 +32783,7 @@ msgid ""
 "becoming available."
 msgstr ""
 
-#: ../../source/how-to-deploy-supernode-using-slurm.rst:368
+#: ../../source/how-to-deploy-supernode-using-slurm.rst:369
 msgid ""
 "This minimal example exposes an unauthenticated and unencrypted Runtime "
 "API on the compute-node network. Use it only in a trusted, isolated test "
@@ -32634,7 +32792,7 @@ msgid ""
 "guide."
 msgstr ""
 
-#: ../../source/how-to-deploy-supernode-using-slurm.rst:373
+#: ../../source/how-to-deploy-supernode-using-slurm.rst:374
 msgid ""
 "For more information about the two isolation modes and the Runtime API, "
 "see :doc:`Flower Network Communication <ref-flower-network-"
@@ -42422,6 +42580,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.agentapp.AgentConnectors.rst
+#: ../../source/ref-api/flwr.agentapp.AgentEvents.rst
 #: ../../source/ref-api/flwr.app.Array.rst
 #: ../../source/ref-api/flwr.app.ArrayRecord.rst
 #: ../../source/ref-api/flwr.app.ConfigRecord.rst
@@ -42480,6 +42639,7 @@ msgid "Independent copies of the model-facing tool schemas."
 msgstr ""
 
 #: ../../source/ref-api/flwr.agentapp.AgentConnectors.rst
+#: ../../source/ref-api/flwr.agentapp.AgentEvents.rst
 #: ../../source/ref-api/flwr.app.Array.rst
 #: ../../source/ref-api/flwr.app.ArrayRecord.rst
 #: ../../source/ref-api/flwr.app.ConfigRecord.rst
@@ -42549,12 +42709,63 @@ msgstr ""
 
 #: flwr.agentapp.base.AgentEvents.emit:1:<autosummary>:1 of
 #, fuzzy
-msgid ":py:obj:`get_trace <flwr.agentapp.AgentEvents.get_trace>`\\ \\(\\)"
+msgid ""
+":py:obj:`get_compacted_contexts "
+"<flwr.agentapp.AgentEvents.get_compacted_contexts>`\\ \\(\\*\\[\\, "
+"limit\\, ...\\]\\)"
+msgstr ""
+
+#: flwr.agentapp.base.AgentEvents.emit:1:<autosummary>:1
+#: flwr.agentapp.base.AgentEvents.get_compacted_contexts:1 of
+msgid "Return the newest summaries."
+msgstr ""
+
+#: flwr.agentapp.base.AgentEvents.emit:1:<autosummary>:1 of
+#, fuzzy
+msgid ""
+":py:obj:`get_trace <flwr.agentapp.AgentEvents.get_trace>`\\ \\(\\*\\[\\, "
+"event\\_types\\, after\\_event\\_id\\, ...\\]\\)"
 msgstr ""
 
 #: flwr.agentapp.base.AgentEvents.emit:1:<autosummary>:1
 #: flwr.agentapp.base.AgentEvents.get_trace:1 of
-msgid "Get events from all runs in the current run series."
+msgid "Get matching events from all runs in the current run series."
+msgstr ""
+
+#: flwr.agentapp.base.AgentEvents.emit:1:<autosummary>:1 of
+msgid ""
+":py:obj:`put_compacted_context "
+"<flwr.agentapp.AgentEvents.put_compacted_context>`\\ \\(\\*\\, "
+"through\\_event\\_id\\, ...\\)"
+msgstr ""
+
+#: flwr.agentapp.base.AgentEvents.emit:1:<autosummary>:1
+#: flwr.agentapp.base.AgentEvents.put_compacted_context:1 of
+msgid "Store a summary."
+msgstr ""
+
+#: flwr.agentapp.base.AgentEvents.get_trace:3 of
+msgid ""
+"Filter by the given event types. If unset, include all event types. Use "
+"`RUN_SUMMARY_EVENT_TYPES` for common summary inputs."
+msgstr ""
+
+#: flwr.agentapp.base.AgentEvents.get_trace:6 of
+msgid "Return events with IDs greater than this value."
+msgstr ""
+
+#: flwr.agentapp.base.AgentEvents.get_trace:8 of
+msgid "Return events with IDs less than this value."
+msgstr ""
+
+#: flwr.agentapp.base.AgentEvents.get_trace:10 of
+msgid ""
+"Return the newest N matching events in ID order. If unset or zero, return"
+" all matching events."
+msgstr ""
+
+#: flwr.agentapp.base.AgentEvents.get_trace:14 of
+msgid "Matching event envelopes."
 msgstr ""
 
 #: ../../source/ref-api/flwr.agentapp.AgentGrid.rst:2
@@ -49331,17 +49542,15 @@ msgstr ""
 #, fuzzy
 msgid ""
 ":py:obj:`pull_messages <flwr.server.Driver.pull_messages>`\\ "
-"\\(message\\_ids\\)"
+"\\(\\[reply\\_to\\_message\\_ids\\, ...\\]\\)"
 msgstr ""
-":py:obj:`pull_messages <flwr.serverapp.Grid.pull_messages>`\\ "
-"\\(message\\_ids\\)"
 
 #: ../../source/ref-api/flwr.server.Driver.rst:44:<autosummary>:1
 #: ../../source/ref-api/flwr.server.Grid.rst:44:<autosummary>:1
 #: ../../source/ref-api/flwr.serverapp.Grid.rst:44:<autosummary>:1
 #: flwr.serverapp.grid.grid.Grid.pull_messages:1 of
-msgid "Pull messages based on message IDs."
-msgstr "Tirez des messages en fonction des IDs de message."
+msgid "Pull messages with an optional correlation filter."
+msgstr ""
 
 #: ../../source/ref-api/flwr.server.Driver.rst:44:<autosummary>:1
 #, fuzzy
@@ -49457,20 +49666,22 @@ msgstr ""
 "métadonnées spécifiés."
 
 #: flwr.serverapp.grid.grid.Grid.pull_messages:3 of
+msgid "Messages are addressed to this Grid's node and belong to its run."
+msgstr ""
+
+#: flwr.serverapp.grid.grid.Grid.pull_messages:5 of
 msgid ""
-"This method is used to collect messages from the SuperLink that "
-"correspond to a set of given message IDs."
+"Message IDs to filter ``reply_to_message_id`` by. If ``None``, no "
+"correlation filter is applied. An empty iterable matches no messages."
 msgstr ""
-"Cette méthode est utilisée pour collecter des messages à partir de "
-"SuperLink qui correspondent à un ensemble donné d'IDs de message."
 
-#: flwr.serverapp.grid.grid.Grid.pull_messages:6 of
-msgid "An iterable of message IDs for which reply messages are to be retrieved."
+#: flwr.serverapp.grid.grid.Grid.pull_messages:8 of
+msgid ""
+"Deprecated alias for ``reply_to_message_ids``. Only one of the two "
+"parameters may be non-``None``."
 msgstr ""
-"Une itérable d'IDs de message pour lesquels les réponses doivent être "
-"récupérées."
 
-#: flwr.serverapp.grid.grid.Grid.pull_messages:9 of
+#: flwr.serverapp.grid.grid.Grid.pull_messages:12 of
 msgid "**messages** -- An iterable of messages received."
 msgstr "**messages** -- Une itération de messages reçus."
 
@@ -49566,10 +49777,8 @@ msgstr ""
 #, fuzzy
 msgid ""
 ":py:obj:`pull_messages <flwr.server.Grid.pull_messages>`\\ "
-"\\(message\\_ids\\)"
+"\\(\\[reply\\_to\\_message\\_ids\\, ...\\]\\)"
 msgstr ""
-":py:obj:`pull_messages <flwr.serverapp.Grid.pull_messages>`\\ "
-"\\(message\\_ids\\)"
 
 #: ../../source/ref-api/flwr.server.Grid.rst:44:<autosummary>:1
 #, fuzzy
@@ -54116,12 +54325,11 @@ msgid ":py:obj:`get_nodes <flwr.serverapp.Grid.get_nodes>`\\ \\(\\)"
 msgstr ""
 
 #: ../../source/ref-api/flwr.serverapp.Grid.rst:44:<autosummary>:1
+#, fuzzy
 msgid ""
 ":py:obj:`pull_messages <flwr.serverapp.Grid.pull_messages>`\\ "
-"\\(message\\_ids\\)"
+"\\(\\[reply\\_to\\_message\\_ids\\, ...\\]\\)"
 msgstr ""
-":py:obj:`pull_messages <flwr.serverapp.Grid.pull_messages>`\\ "
-"\\(message\\_ids\\)"
 
 #: ../../source/ref-api/flwr.serverapp.Grid.rst:44:<autosummary>:1
 msgid ""
@@ -57737,7 +57945,7 @@ msgstr ""
 #: ../../source/ref-exit-codes/401.rst:13
 #: ../../source/ref-exit-codes/402.rst:14
 #: ../../source/ref-exit-codes/500.rst:17
-#: ../../source/ref-exit-codes/600.rst:14
+#: ../../source/ref-exit-codes/600.rst:15
 #: ../../source/ref-exit-codes/602.rst:17
 #: ../../source/ref-exit-codes/603.rst:14
 #: ../../source/ref-exit-codes/604.rst:13
@@ -58436,31 +58644,35 @@ msgid "[600] COMMON_ADDRESS_INVALID"
 msgstr ""
 
 #: ../../source/ref-exit-codes/600.rst:9
+#, fuzzy
 msgid ""
-"The provided address is invalid and cannot be parsed. It must be a valid "
-"URL, IPv4, or IPv6 address."
+"The provided address is invalid and cannot be parsed. It must be a domain"
+" name, IPv4, or IPv6 address with a port number, without a URL prefix "
+"such as ``http://`` or ``https://``."
 msgstr ""
-"L'adresse fournie est invalide et ne peut pas être interprétée. Elle doit"
-" être une adresse URL, IPv4 ou IPv6 valide."
 
-#: ../../source/ref-exit-codes/600.rst:16
+#: ../../source/ref-exit-codes/600.rst:17
 msgid "Verify that the address is correctly formatted as one of the following:"
 msgstr ""
 "Vérifiez que l'adresse est correctement formatée comme l'une des "
 "suivantes :"
 
-#: ../../source/ref-exit-codes/600.rst:17
-msgid "URL (e.g., ``https://127.0.0.1:8080`` or ``https://example.com:8080``)"
+#: ../../source/ref-exit-codes/600.rst:19
+msgid "Domain name (e.g., ``api.flower.ai:443`` or ``example.com:8080``)"
 msgstr ""
-"URL (par exemple, ``https://127.0.0.1:8080`` ou "
-"``https://example.com:8080``)"
 
-#: ../../source/ref-exit-codes/600.rst:18
+#: ../../source/ref-exit-codes/600.rst:20
 msgid "IPv4 (e.g., ``192.168.1.1:9091``)"
 msgstr ""
 
-#: ../../source/ref-exit-codes/600.rst:19
+#: ../../source/ref-exit-codes/600.rst:21
 msgid "IPv6 (e.g., ``[2001:0db8::1]:8000``)"
+msgstr ""
+
+#: ../../source/ref-exit-codes/600.rst:23
+msgid ""
+"For ``flower-supernode``, HTTPS is enabled by default. To use HTTP, pass "
+"``--insecure`` instead of adding a URL prefix to ``--superlink``."
 msgstr ""
 
 #: ../../source/ref-exit-codes/602.rst:3
@@ -67272,4 +67484,47 @@ msgstr ""
 #~ " to see the run details and "
 #~ "logs."
 #~ msgstr ""
+
+#~ msgid ":doc:`Flower installed <how-to-install-flower>` on the compute nodes"
+#~ msgstr ""
+
+#~ msgid ":py:obj:`get_trace <flwr.agentapp.AgentEvents.get_trace>`\\ \\(\\)"
+#~ msgstr ""
+
+#~ msgid "Get events from all runs in the current run series."
+#~ msgstr ""
+
+#~ msgid "URL (e.g., ``https://127.0.0.1:8080`` or ``https://example.com:8080``)"
+#~ msgstr ""
+#~ "URL (par exemple, ``https://127.0.0.1:8080`` "
+#~ "ou ``https://example.com:8080``)"
+
+#~ msgid ""
+#~ ":py:obj:`put_compacted_context "
+#~ "<flwr.agentapp.AgentEvents.put_compacted_context>`\\ \\(\\*\\,"
+#~ " through\\_event\\_id\\, text\\)"
+#~ msgstr ""
+
+#~ msgid "Pull messages based on message IDs."
+#~ msgstr "Tirez des messages en fonction des IDs de message."
+
+#~ msgid ""
+#~ "This method is used to collect "
+#~ "messages from the SuperLink that "
+#~ "correspond to a set of given "
+#~ "message IDs."
+#~ msgstr ""
+#~ "Cette méthode est utilisée pour "
+#~ "collecter des messages à partir de "
+#~ "SuperLink qui correspondent à un "
+#~ "ensemble donné d'IDs de message."
+
+#~ msgid ""
+#~ "An iterable of message IDs for "
+#~ "which reply messages are to be "
+#~ "retrieved."
+#~ msgstr ""
+#~ "Une itérable d'IDs de message pour "
+#~ "lesquels les réponses doivent être "
+#~ "récupérées."
 

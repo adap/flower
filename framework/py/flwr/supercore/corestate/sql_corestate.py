@@ -121,11 +121,6 @@ from flwr.supercore.state.schema.corestate_models import TaskLogsTable
 from flwr.supercore.state.schema.corestate_models import TaskMessage as TaskMessageModel
 from flwr.supercore.state.schema.corestate_models import TaskUsage as TaskUsageModel
 from flwr.supercore.state.schema.corestate_tables import create_corestate_metadata
-from flwr.supercore.tracing import (
-    current_traceparent,
-    load_task_context,
-    store_task_context,
-)
 from flwr.supercore.typing import ConnectorOAuthSessionRecord, ConnectorRecord
 from flwr.supercore.utils import int64_to_uint64, uint64_to_int64
 
@@ -1126,7 +1121,7 @@ class SqlCoreState(CoreState, SqlMixin):  # pylint: disable=R0904
         if limit <= 0:
             raise ValueError("limit must be positive")
         query = select(CompactedContextModel).where(
-            CompactedContextModel.series_id == uint64_to_int64(series_id)
+            CompactedContextModel.series_id == series_id
         )
         # Autoincremented context IDs cannot exceed the signed BIGINT range.
         if before_context_id is not None:
@@ -1138,15 +1133,20 @@ class SqlCoreState(CoreState, SqlMixin):  # pylint: disable=R0904
             ]
 
     def store_compacted_context(
-        self, series_id: int, through_event_id: int, text: str
+        self,
+        series_id: int,
+        through_event_id: int,
+        text: str,
+        token_count: int,
     ) -> None:
         """Store a new summary."""
         stmt = (
             self.dialect_insert(CompactedContextModel)
             .values(
-                series_id=uint64_to_int64(series_id),
-                through_event_id=uint64_to_int64(through_event_id),
+                series_id=series_id,
+                through_event_id=through_event_id,
                 text=text,
+                token_count=token_count,
                 created_at=now(),
             )
             .on_conflict_do_nothing(
@@ -1575,10 +1575,6 @@ class SqlCoreState(CoreState, SqlMixin):  # pylint: disable=R0904
             try:
                 if session.scalar(insert_stmt) is None:
                     return None
-                carrier = current_traceparent()
-                if not carrier and requesting_task_id is not None:
-                    carrier = load_task_context(self, requesting_task_id)
-                store_task_context(self, task_id, carrier)
                 return task_id
             except IntegrityError:
                 return None
@@ -2299,9 +2295,10 @@ def _compacted_context_from_model(model: CompactedContextModel) -> CompactedCont
     """Convert a compacted context model to its proto representation."""
     return CompactedContext(
         id=model.id,
-        series_id=int64_to_uint64(model.series_id),
-        through_event_id=int64_to_uint64(model.through_event_id),
+        series_id=model.series_id,
+        through_event_id=model.through_event_id,
         text=model.text,
+        token_count=model.token_count,
         created_at=timestamp_to_iso(model.created_at),
     )
 
