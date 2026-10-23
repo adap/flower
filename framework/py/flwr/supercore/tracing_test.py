@@ -117,3 +117,30 @@ def test_valid_traceparent(flags: str) -> None:
     """The complete version-00 trace-flags byte round trips unchanged."""
     carrier = _CARRIER[:-2] + flags
     assert tracing.validate_traceparent(carrier) == carrier
+
+
+@pytest.mark.parametrize("enabled", ["", "1"])
+def test_phase_timings_are_deferred_and_best_effort(
+    monkeypatch: pytest.MonkeyPatch, enabled: str
+) -> None:
+    """Keep original elapsed times and export once without failing work."""
+    monkeypatch.setenv("FLWR_TRACING_ENABLED", enabled)
+    monkeypatch.setattr(tracing, "time_ns", lambda: 1000)
+    monkeypatch.setattr(tracing, "monotonic_ns", Mock(side_effect=[10, 20, 40]))
+    backend = Mock()
+    backend.record_phase_spans.side_effect = RuntimeError("export failed")
+    discover = Mock(return_value=backend)
+    monkeypatch.setattr(tracing, "import_module", discover)
+    timings = tracing.PhaseTimings()
+    with pytest.raises(ValueError, match="application"):
+        with timings.measure("executor.claim"):
+            raise ValueError("application")
+    discover.assert_not_called()
+    timings.publish("executor.acquire", {"flwr.task_id": "7"})
+    timings.publish("executor.acquire", {"flwr.task_id": "7"})
+    if enabled:
+        backend.record_phase_spans.assert_called_once_with(
+            "executor.acquire", [("executor.claim", 1010, 1030)], {"flwr.task_id": "7"}
+        )
+    else:
+        discover.assert_not_called()
