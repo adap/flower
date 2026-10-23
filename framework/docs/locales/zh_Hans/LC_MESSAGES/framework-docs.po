@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-21 00:09+0000\n"
+"POT-Creation-Date: 2026-10-23 00:10+0000\n"
 "PO-Revision-Date: 2026-06-11 04:01+0000\n"
 "Last-Translator: reducedradius <feixiang512@outlook.com>\n"
 "Language: zh_Hans\n"
@@ -48,10 +48,10 @@ msgstr "以问题为导向的 \"如何做 \"指南逐步展示如何实现特定
 msgid "Changelog"
 msgstr "更新日志"
 
-#: ../../source/changelog/v1.41.0.md:2
+#: ../../source/changelog/v1.42.0.md:2
 #, fuzzy
-msgid "v1.41.0 (2026-10-20)"
-msgstr ""
+msgid "v1.42.0 (2026-10-22)"
+msgstr "v1.3.0 (2023-02-06)"
 
 #: ../../source/changelog/v1.0.0.md:11 ../../source/changelog/v1.1.0.md:4
 #: ../../source/changelog/v1.10.0.md:4 ../../source/changelog/v1.11.0.md:4
@@ -74,9 +74,10 @@ msgstr ""
 #: ../../source/changelog/v1.36.0.md:4 ../../source/changelog/v1.37.0.md:4
 #: ../../source/changelog/v1.38.0.md:4 ../../source/changelog/v1.39.0.md:4
 #: ../../source/changelog/v1.4.0.md:4 ../../source/changelog/v1.40.0.md:4
-#: ../../source/changelog/v1.41.0.md:4 ../../source/changelog/v1.5.0.md:4
-#: ../../source/changelog/v1.6.0.md:4 ../../source/changelog/v1.7.0.md:4
-#: ../../source/changelog/v1.8.0.md:4 ../../source/changelog/v1.9.0.md:4
+#: ../../source/changelog/v1.41.0.md:4 ../../source/changelog/v1.42.0.md:4
+#: ../../source/changelog/v1.5.0.md:4 ../../source/changelog/v1.6.0.md:4
+#: ../../source/changelog/v1.7.0.md:4 ../../source/changelog/v1.8.0.md:4
+#: ../../source/changelog/v1.9.0.md:4
 msgid "Thanks to our contributors"
 msgstr "感谢我们的贡献者"
 
@@ -100,20 +101,24 @@ msgstr "感谢我们的贡献者"
 #: ../../source/changelog/v1.36.0.md:6 ../../source/changelog/v1.37.0.md:6
 #: ../../source/changelog/v1.38.0.md:6 ../../source/changelog/v1.39.0.md:6
 #: ../../source/changelog/v1.4.0.md:6 ../../source/changelog/v1.40.0.md:6
-#: ../../source/changelog/v1.41.0.md:6 ../../source/changelog/v1.5.0.md:6
-#: ../../source/changelog/v1.6.0.md:6 ../../source/changelog/v1.7.0.md:6
-#: ../../source/changelog/v1.8.0.md:6 ../../source/changelog/v1.9.0.md:6
+#: ../../source/changelog/v1.41.0.md:6 ../../source/changelog/v1.42.0.md:6
+#: ../../source/changelog/v1.5.0.md:6 ../../source/changelog/v1.6.0.md:6
+#: ../../source/changelog/v1.7.0.md:6 ../../source/changelog/v1.8.0.md:6
+#: ../../source/changelog/v1.9.0.md:6
 msgid ""
 "We would like to give our special thanks to all the contributors who made"
 " the new version of Flower possible (in `git shortlog` order):"
 msgstr "在此，我们要特别感谢所有为 Flower 的新版本做出贡献的人员（按 `git shortlog` 顺序排列）："
 
-#: ../../source/changelog/v1.41.0.md:8
+#: ../../source/changelog/v1.42.0.md:8
 #, fuzzy
-msgid ""
-"`Charles Beauville`, `Chong Shen Ng`, `Daniel Nata Nugraha`, `Heng Pan`, "
-"`Javier`, `Taner Topal`"
+msgid "`Charles Beauville`, `Chong Shen Ng`, `Heng Pan`, `Javier`, `Taner Topal`"
 msgstr ""
+"`Adam Narozniak`, `Anass Anhari`, `Charles Beauville`, `Dana-Farber`, "
+"`Daniel J. Beutel`, `Daniel Nata Nugraha`, `Edoardo Gabrielli`, `Gustavo "
+"Bertoli`, `Heng Pan`, `Javier`, `Mahdi`, `Steven Hé (Sīchàng)`, `Taner "
+"Topal`, `achiverram28`, `danielnugraha`, `eunchung`, `ruthgal` <!---"
+"TOKEN_v1.5.0-->"
 
 #: ../../source/changelog/v0.13.0.md:4 ../../source/changelog/v0.14.0.md:4
 #: ../../source/changelog/v0.15.0.md:4 ../../source/changelog/v0.16.0.md:4
@@ -139,11 +144,114 @@ msgstr ""
 #: ../../source/changelog/v1.36.0.md:10 ../../source/changelog/v1.37.0.md:10
 #: ../../source/changelog/v1.38.0.md:10 ../../source/changelog/v1.39.0.md:10
 #: ../../source/changelog/v1.4.0.md:10 ../../source/changelog/v1.40.0.md:10
-#: ../../source/changelog/v1.41.0.md:10 ../../source/changelog/v1.5.0.md:10
-#: ../../source/changelog/v1.6.0.md:10 ../../source/changelog/v1.7.0.md:10
-#: ../../source/changelog/v1.8.0.md:10 ../../source/changelog/v1.9.0.md:10
+#: ../../source/changelog/v1.41.0.md:10 ../../source/changelog/v1.42.0.md:10
+#: ../../source/changelog/v1.5.0.md:10 ../../source/changelog/v1.6.0.md:10
+#: ../../source/changelog/v1.7.0.md:10 ../../source/changelog/v1.8.0.md:10
+#: ../../source/changelog/v1.9.0.md:10
 msgid "What's new?"
 msgstr "有什么新内容？"
+
+#: ../../source/changelog/v1.42.0.md:12
+#, fuzzy
+msgid ""
+"**Reduce Agent response latency with faster warm-pool handoff** "
+"([#8280](https://github.com/flwrlabs/flower/pull/8280))"
+msgstr ""
+"**介绍Flower Android SDK** "
+"([#2131](https://github.com/adap/flower/pull/2131))"
+
+#: ../../source/changelog/v1.42.0.md:14
+msgid ""
+"Ready warm Pods are now handed off before Kubernetes replenishes the "
+"pool. Reconciliation creates replacements while tasks run, avoiding "
+"Kubernetes list and Pod-creation requests during successful warm token "
+"handoff."
+msgstr ""
+
+#: ../../source/changelog/v1.42.0.md:16
+#, fuzzy
+msgid ""
+"**Train the vertical FL example reliably** "
+"([#8396](https://github.com/flwrlabs/flower/pull/8396))"
+msgstr "**新的 iOS CoreML 代码示例**（[#1289](https://github.com/adap/flower/pull/1289)）"
+
+#: ../../source/changelog/v1.42.0.md:18
+msgid ""
+"The vertical FL example now aligns shuffled features and labels, reuses "
+"the model state that produced each embedding, requires complete feature "
+"and gradient exchanges, and reports training loss and accuracy from the "
+"same model state."
+msgstr ""
+
+#: ../../source/changelog/v1.42.0.md:20
+#, fuzzy
+msgid ""
+"**Improve Python TLS security following the eMudhra CA incident** "
+"([#8400](https://github.com/flwrlabs/flower/pull/8400))"
+msgstr "**改进示例笔记** ([#2005](https://github.com/adap/flower/pull/2005))"
+
+#: ../../source/changelog/v1.42.0.md:22
+msgid ""
+"Following the eMudhra CA compromise, Flower now requires "
+"`certifi>=2026.10.19` and `uv>=0.13.5,<0.14.0` to mitigate risks from "
+"compromised CA certificates. CI, container, and baseline bootstraps also "
+"use updated, pinned build tools. Existing installations and images must "
+"be updated or rebuilt to receive these security improvements."
+msgstr ""
+
+#: ../../source/changelog/v1.42.0.md:24
+#, fuzzy
+msgid ""
+"**General improvements** "
+"([#8369](https://github.com/flwrlabs/flower/pull/8369), "
+"[#8391](https://github.com/flwrlabs/flower/pull/8391), "
+"[#8392](https://github.com/flwrlabs/flower/pull/8392), "
+"[#8393](https://github.com/flwrlabs/flower/pull/8393), "
+"[#8398](https://github.com/flwrlabs/flower/pull/8398), "
+"[#8399](https://github.com/flwrlabs/flower/pull/8399), "
+"[#8403](https://github.com/flwrlabs/flower/pull/8403), "
+"[#8405](https://github.com/flwrlabs/flower/pull/8405))"
+msgstr ""
+"**改进教程** ([#1468](https://github.com/adap/flower/pull/1468), "
+"[#1470](https://github.com/adap/flower/pull/1470), "
+"[#1472](https://github.com/adap/flower/pull/1472), "
+"[#1473](https://github.com/adap/flower/pull/1473), "
+"[#1474](https://github.com/adap/flower/pull/1474), "
+"[#1475](https://github.com/adap/flower/pull/1475)))"
+
+#: ../../source/changelog/v1.10.0.md:68 ../../source/changelog/v1.11.0.md:65
+#: ../../source/changelog/v1.12.0.md:64 ../../source/changelog/v1.13.0.md:69
+#: ../../source/changelog/v1.13.1.md:32 ../../source/changelog/v1.14.0.md:63
+#: ../../source/changelog/v1.15.0.md:80 ../../source/changelog/v1.16.0.md:54
+#: ../../source/changelog/v1.17.0.md:85 ../../source/changelog/v1.18.0.md:50
+#: ../../source/changelog/v1.19.0.md:68 ../../source/changelog/v1.20.0.md:66
+#: ../../source/changelog/v1.21.0.md:56 ../../source/changelog/v1.22.0.md:40
+#: ../../source/changelog/v1.23.0.md:48 ../../source/changelog/v1.24.0.md:42
+#: ../../source/changelog/v1.25.0.md:36 ../../source/changelog/v1.26.0.md:44
+#: ../../source/changelog/v1.27.0.md:50 ../../source/changelog/v1.28.0.md:50
+#: ../../source/changelog/v1.29.0.md:46 ../../source/changelog/v1.30.0.md:34
+#: ../../source/changelog/v1.31.0.md:50 ../../source/changelog/v1.32.0.md:44
+#: ../../source/changelog/v1.33.0.md:50 ../../source/changelog/v1.34.0.md:54
+#: ../../source/changelog/v1.35.0.md:50 ../../source/changelog/v1.36.0.md:30
+#: ../../source/changelog/v1.37.0.md:40 ../../source/changelog/v1.38.0.md:36
+#: ../../source/changelog/v1.39.0.md:28 ../../source/changelog/v1.40.0.md:38
+#: ../../source/changelog/v1.41.0.md:24 ../../source/changelog/v1.42.0.md:26
+msgid ""
+"As always, many parts of the Flower framework and quality infrastructure "
+"were improved and updated."
+msgstr ""
+
+#: ../../source/changelog/v1.41.0.md:2
+#, fuzzy
+msgid "v1.41.0 (2026-10-20)"
+msgstr ""
+
+#: ../../source/changelog/v1.41.0.md:8
+#, fuzzy
+msgid ""
+"`Charles Beauville`, `Chong Shen Ng`, `Daniel Nata Nugraha`, `Heng Pan`, "
+"`Javier`, `Taner Topal`"
+msgstr ""
 
 #: ../../source/changelog/v1.41.0.md:12
 #, fuzzy
@@ -218,28 +326,6 @@ msgid ""
 "[#8387](https://github.com/flwrlabs/flower/pull/8387), "
 "[#8389](https://github.com/flwrlabs/flower/pull/8389), "
 "[#8394](https://github.com/flwrlabs/flower/pull/8394))"
-msgstr ""
-
-#: ../../source/changelog/v1.10.0.md:68 ../../source/changelog/v1.11.0.md:65
-#: ../../source/changelog/v1.12.0.md:64 ../../source/changelog/v1.13.0.md:69
-#: ../../source/changelog/v1.13.1.md:32 ../../source/changelog/v1.14.0.md:63
-#: ../../source/changelog/v1.15.0.md:80 ../../source/changelog/v1.16.0.md:54
-#: ../../source/changelog/v1.17.0.md:85 ../../source/changelog/v1.18.0.md:50
-#: ../../source/changelog/v1.19.0.md:68 ../../source/changelog/v1.20.0.md:66
-#: ../../source/changelog/v1.21.0.md:56 ../../source/changelog/v1.22.0.md:40
-#: ../../source/changelog/v1.23.0.md:48 ../../source/changelog/v1.24.0.md:42
-#: ../../source/changelog/v1.25.0.md:36 ../../source/changelog/v1.26.0.md:44
-#: ../../source/changelog/v1.27.0.md:50 ../../source/changelog/v1.28.0.md:50
-#: ../../source/changelog/v1.29.0.md:46 ../../source/changelog/v1.30.0.md:34
-#: ../../source/changelog/v1.31.0.md:50 ../../source/changelog/v1.32.0.md:44
-#: ../../source/changelog/v1.33.0.md:50 ../../source/changelog/v1.34.0.md:54
-#: ../../source/changelog/v1.35.0.md:50 ../../source/changelog/v1.36.0.md:30
-#: ../../source/changelog/v1.37.0.md:40 ../../source/changelog/v1.38.0.md:36
-#: ../../source/changelog/v1.39.0.md:28 ../../source/changelog/v1.40.0.md:38
-#: ../../source/changelog/v1.41.0.md:24
-msgid ""
-"As always, many parts of the Flower framework and quality infrastructure "
-"were improved and updated."
 msgstr ""
 
 #: ../../source/changelog/v1.40.0.md:2
@@ -36298,7 +36384,7 @@ msgstr ""
 msgid ""
 ":py:obj:`put_compacted_context "
 "<flwr.agentapp.AgentEvents.put_compacted_context>`\\ \\(\\*\\, "
-"through\\_event\\_id\\, text\\)"
+"through\\_event\\_id\\, ...\\)"
 msgstr ""
 
 #: flwr.agentapp.base.AgentEvents.emit:1:<autosummary>:1
@@ -43011,7 +43097,7 @@ msgstr ""
 #, fuzzy
 msgid ""
 ":py:obj:`pull_messages <flwr.server.Driver.pull_messages>`\\ "
-"\\(message\\_ids\\)"
+"\\(\\[reply\\_to\\_message\\_ids\\, ...\\]\\)"
 msgstr ""
 ":py:obj:`pull_messages <flwr.server.Driver.pull_messages>`\\ "
 "\\(message\\_ids\\)"
@@ -43020,9 +43106,8 @@ msgstr ""
 #: ../../source/ref-api/flwr.server.Grid.rst:44:<autosummary>:1
 #: ../../source/ref-api/flwr.serverapp.Grid.rst:44:<autosummary>:1
 #: flwr.serverapp.grid.grid.Grid.pull_messages:1 of
-#, fuzzy
-msgid "Pull messages based on message IDs."
-msgstr "根据信息 ID 提取信息。"
+msgid "Pull messages with an optional correlation filter."
+msgstr ""
 
 #: ../../source/ref-api/flwr.server.Driver.rst:44:<autosummary>:1
 #, fuzzy
@@ -43133,18 +43218,22 @@ msgid ""
 msgstr "**message** -- 具有指定内容和元数据的新 \"信息 \"实例。"
 
 #: flwr.serverapp.grid.grid.Grid.pull_messages:3 of
-#, fuzzy
+msgid "Messages are addressed to this Grid's node and belong to its run."
+msgstr ""
+
+#: flwr.serverapp.grid.grid.Grid.pull_messages:5 of
 msgid ""
-"This method is used to collect messages from the SuperLink that "
-"correspond to a set of given message IDs."
-msgstr "该方法用于从超级链接中收集与一组给定消息 ID 相对应的消息。"
+"Message IDs to filter ``reply_to_message_id`` by. If ``None``, no "
+"correlation filter is applied. An empty iterable matches no messages."
+msgstr ""
 
-#: flwr.serverapp.grid.grid.Grid.pull_messages:6 of
-#, fuzzy
-msgid "An iterable of message IDs for which reply messages are to be retrieved."
-msgstr "要检索回复信息的信息 ID 的可迭代项。"
+#: flwr.serverapp.grid.grid.Grid.pull_messages:8 of
+msgid ""
+"Deprecated alias for ``reply_to_message_ids``. Only one of the two "
+"parameters may be non-``None``."
+msgstr ""
 
-#: flwr.serverapp.grid.grid.Grid.pull_messages:9 of
+#: flwr.serverapp.grid.grid.Grid.pull_messages:12 of
 #, fuzzy
 msgid "**messages** -- An iterable of messages received."
 msgstr "**messages** -- 收到的信息迭代。"
@@ -43233,7 +43322,7 @@ msgstr ""
 #, fuzzy
 msgid ""
 ":py:obj:`pull_messages <flwr.server.Grid.pull_messages>`\\ "
-"\\(message\\_ids\\)"
+"\\(\\[reply\\_to\\_message\\_ids\\, ...\\]\\)"
 msgstr ""
 ":py:obj:`pull_messages <flwr.server.Driver.pull_messages>`\\ "
 "\\(message\\_ids\\)"
@@ -47712,7 +47801,7 @@ msgstr ""
 #, fuzzy
 msgid ""
 ":py:obj:`pull_messages <flwr.serverapp.Grid.pull_messages>`\\ "
-"\\(message\\_ids\\)"
+"\\(\\[reply\\_to\\_message\\_ids\\, ...\\]\\)"
 msgstr ""
 ":py:obj:`pull_messages <flwr.server.Driver.pull_messages>`\\ "
 "\\(message\\_ids\\)"
@@ -89725,4 +89814,26 @@ msgstr ""
 
 #~ msgid "URL (e.g., ``https://127.0.0.1:8080`` or ``https://example.com:8080``)"
 #~ msgstr ""
+
+#~ msgid ""
+#~ ":py:obj:`put_compacted_context "
+#~ "<flwr.agentapp.AgentEvents.put_compacted_context>`\\ \\(\\*\\,"
+#~ " through\\_event\\_id\\, text\\)"
+#~ msgstr ""
+
+#~ msgid "Pull messages based on message IDs."
+#~ msgstr "根据信息 ID 提取信息。"
+
+#~ msgid ""
+#~ "This method is used to collect "
+#~ "messages from the SuperLink that "
+#~ "correspond to a set of given "
+#~ "message IDs."
+#~ msgstr "该方法用于从超级链接中收集与一组给定消息 ID 相对应的消息。"
+
+#~ msgid ""
+#~ "An iterable of message IDs for "
+#~ "which reply messages are to be "
+#~ "retrieved."
+#~ msgstr "要检索回复信息的信息 ID 的可迭代项。"
 
