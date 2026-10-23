@@ -171,12 +171,11 @@ class Strategy(ABC):
             provided, will be called before the first round and after each round.
             Defaults to None.
         stop_fn : Callable[[int, Result], bool], optional
-            Optional stopping predicate, called after each completed round with
-            the round number and accumulated results. Return True to stop early
-            and return the final model and metrics collected so far. Called after
-            training, federated evaluation, and optional centralized evaluation,
-            but not after the initial evaluation at round zero. Treat the results
-            as read-only. Defaults to None, which runs all rounds.
+            Optional predicate to determine whether to stop training early.
+            Called at the end of each round with the round number and accumulated
+            results. Return True to stop and return the model and metrics collected
+            so far. Not called for round zero. Results must not be modified.
+            Defaults to None (no early stopping).
 
         Returns
         -------
