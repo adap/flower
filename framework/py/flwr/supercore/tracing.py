@@ -62,6 +62,16 @@ def _backend() -> ModuleType | None:
     return _load_backend() if os.getenv("FLWR_TRACING_ENABLED") == "1" else None
 
 
+def initialize_tracing(component: str) -> None:
+    """Prepare optional tracing before worker readiness, without creating a span."""
+    backend = _backend()
+    if backend is not None:
+        try:
+            backend.initialize_tracing(component)
+        except Exception:  # pylint: disable=broad-exception-caught
+            pass
+
+
 class TraceSpan:
     """Isolate optional tracing failures from application work."""
 
