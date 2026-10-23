@@ -39438,7 +39438,7 @@ msgstr ""
 msgid ""
 ":py:obj:`pull_messages <flwr.server.Driver.pull_messages>`\\ "
 "\\(\\[reply\\_to\\_message\\_ids\\, ...\\]\\)"
-msgstr ":py:obj:`flwr.server <flwr.server>`\\"
+msgstr ""
 
 #: ../../source/ref-api/flwr.server.Driver.rst:44:<autosummary>:1
 #: ../../source/ref-api/flwr.server.Grid.rst:44:<autosummary>:1
@@ -39638,7 +39638,7 @@ msgstr ""
 msgid ""
 ":py:obj:`pull_messages <flwr.server.Grid.pull_messages>`\\ "
 "\\(\\[reply\\_to\\_message\\_ids\\, ...\\]\\)"
-msgstr ":py:obj:`flwr.server <flwr.server>`\\"
+msgstr ""
 
 #: ../../source/ref-api/flwr.server.Grid.rst:44:<autosummary>:1
 #, fuzzy
@@ -43682,7 +43682,7 @@ msgstr ""
 msgid ""
 ":py:obj:`pull_messages <flwr.serverapp.Grid.pull_messages>`\\ "
 "\\(\\[reply\\_to\\_message\\_ids\\, ...\\]\\)"
-msgstr ":py:obj:`flwr.server <flwr.server>`\\"
+msgstr ""
 
 #: ../../source/ref-api/flwr.serverapp.Grid.rst:44:<autosummary>:1
 #, fuzzy

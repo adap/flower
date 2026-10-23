@@ -116,8 +116,6 @@ msgstr ""
 #, fuzzy
 msgid "`Charles Beauville`, `Chong Shen Ng`, `Heng Pan`, `Javier`, `Taner Topal`"
 msgstr ""
-"`Charles Beauville`, `Chong Shen Ng`, `Daniel J. Beutel`, `Heng Pan`, "
-"`Javier`, `Taner Topal` <!---TOKEN_v1.26.1-->"
 
 #: ../../source/changelog/v0.13.0.md:4 ../../source/changelog/v0.14.0.md:4
 #: ../../source/changelog/v0.15.0.md:4 ../../source/changelog/v0.16.0.md:4
@@ -156,8 +154,6 @@ msgid ""
 "**Reduce Agent response latency with faster warm-pool handoff** "
 "([#8280](https://github.com/flwrlabs/flower/pull/8280))"
 msgstr ""
-"**Update the Android SDK** "
-"([#2187](https://github.com/flwrlabs/flower/pull/2187))"
 
 #: ../../source/changelog/v1.42.0.md:14
 msgid ""
@@ -173,8 +169,6 @@ msgid ""
 "**Train the vertical FL example reliably** "
 "([#8396](https://github.com/flwrlabs/flower/pull/8396))"
 msgstr ""
-"**Add Vertical FL example** "
-"([#2598](https://github.com/flwrlabs/flower/pull/2598))"
 
 #: ../../source/changelog/v1.42.0.md:18
 msgid ""
@@ -190,8 +184,6 @@ msgid ""
 "**Improve Python TLS security following the eMudhra CA incident** "
 "([#8400](https://github.com/flwrlabs/flower/pull/8400))"
 msgstr ""
-"**Improve performance** "
-"([#2293](https://github.com/flwrlabs/flower/pull/2293))"
 
 #: ../../source/changelog/v1.42.0.md:22
 msgid ""
@@ -215,14 +207,6 @@ msgid ""
 "[#8403](https://github.com/flwrlabs/flower/pull/8403), "
 "[#8405](https://github.com/flwrlabs/flower/pull/8405))"
 msgstr ""
-"**Fine-tune LLMs with LLM FlowerTune** "
-"([#3029](https://github.com/flwrlabs/flower/pull/3029), "
-"[#3089](https://github.com/flwrlabs/flower/pull/3089), "
-"[#3092](https://github.com/flwrlabs/flower/pull/3092), "
-"[#3100](https://github.com/flwrlabs/flower/pull/3100), "
-"[#3114](https://github.com/flwrlabs/flower/pull/3114), "
-"[#3162](https://github.com/flwrlabs/flower/pull/3162), "
-"[#3172](https://github.com/flwrlabs/flower/pull/3172))"
 
 #: ../../source/changelog/v1.10.0.md:68 ../../source/changelog/v1.11.0.md:65
 #: ../../source/changelog/v1.12.0.md:64 ../../source/changelog/v1.13.0.md:69
@@ -49560,8 +49544,6 @@ msgid ""
 ":py:obj:`pull_messages <flwr.server.Driver.pull_messages>`\\ "
 "\\(\\[reply\\_to\\_message\\_ids\\, ...\\]\\)"
 msgstr ""
-":py:obj:`pull_messages <flwr.serverapp.Grid.pull_messages>`\\ "
-"\\(message\\_ids\\)"
 
 #: ../../source/ref-api/flwr.server.Driver.rst:44:<autosummary>:1
 #: ../../source/ref-api/flwr.server.Grid.rst:44:<autosummary>:1
@@ -49797,8 +49779,6 @@ msgid ""
 ":py:obj:`pull_messages <flwr.server.Grid.pull_messages>`\\ "
 "\\(\\[reply\\_to\\_message\\_ids\\, ...\\]\\)"
 msgstr ""
-":py:obj:`pull_messages <flwr.serverapp.Grid.pull_messages>`\\ "
-"\\(message\\_ids\\)"
 
 #: ../../source/ref-api/flwr.server.Grid.rst:44:<autosummary>:1
 #, fuzzy
@@ -54350,8 +54330,6 @@ msgid ""
 ":py:obj:`pull_messages <flwr.serverapp.Grid.pull_messages>`\\ "
 "\\(\\[reply\\_to\\_message\\_ids\\, ...\\]\\)"
 msgstr ""
-":py:obj:`pull_messages <flwr.serverapp.Grid.pull_messages>`\\ "
-"\\(message\\_ids\\)"
 
 #: ../../source/ref-api/flwr.serverapp.Grid.rst:44:<autosummary>:1
 msgid ""

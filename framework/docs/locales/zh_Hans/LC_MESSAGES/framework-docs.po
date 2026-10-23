@@ -51,7 +51,7 @@ msgstr "更新日志"
 #: ../../source/changelog/v1.42.0.md:2
 #, fuzzy
 msgid "v1.42.0 (2026-10-22)"
-msgstr "v1.3.0 (2023-02-06)"
+msgstr ""
 
 #: ../../source/changelog/v1.0.0.md:11 ../../source/changelog/v1.1.0.md:4
 #: ../../source/changelog/v1.10.0.md:4 ../../source/changelog/v1.11.0.md:4
@@ -114,11 +114,6 @@ msgstr "在此，我们要特别感谢所有为 Flower 的新版本做出贡献�
 #, fuzzy
 msgid "`Charles Beauville`, `Chong Shen Ng`, `Heng Pan`, `Javier`, `Taner Topal`"
 msgstr ""
-"`Adam Narozniak`, `Anass Anhari`, `Charles Beauville`, `Dana-Farber`, "
-"`Daniel J. Beutel`, `Daniel Nata Nugraha`, `Edoardo Gabrielli`, `Gustavo "
-"Bertoli`, `Heng Pan`, `Javier`, `Mahdi`, `Steven Hé (Sīchàng)`, `Taner "
-"Topal`, `achiverram28`, `danielnugraha`, `eunchung`, `ruthgal` <!---"
-"TOKEN_v1.5.0-->"
 
 #: ../../source/changelog/v0.13.0.md:4 ../../source/changelog/v0.14.0.md:4
 #: ../../source/changelog/v0.15.0.md:4 ../../source/changelog/v0.16.0.md:4
@@ -157,8 +152,6 @@ msgid ""
 "**Reduce Agent response latency with faster warm-pool handoff** "
 "([#8280](https://github.com/flwrlabs/flower/pull/8280))"
 msgstr ""
-"**介绍Flower Android SDK** "
-"([#2131](https://github.com/adap/flower/pull/2131))"
 
 #: ../../source/changelog/v1.42.0.md:14
 msgid ""
@@ -173,7 +166,7 @@ msgstr ""
 msgid ""
 "**Train the vertical FL example reliably** "
 "([#8396](https://github.com/flwrlabs/flower/pull/8396))"
-msgstr "**新的 iOS CoreML 代码示例**（[#1289](https://github.com/adap/flower/pull/1289)）"
+msgstr ""
 
 #: ../../source/changelog/v1.42.0.md:18
 msgid ""
@@ -188,7 +181,7 @@ msgstr ""
 msgid ""
 "**Improve Python TLS security following the eMudhra CA incident** "
 "([#8400](https://github.com/flwrlabs/flower/pull/8400))"
-msgstr "**改进示例笔记** ([#2005](https://github.com/adap/flower/pull/2005))"
+msgstr ""
 
 #: ../../source/changelog/v1.42.0.md:22
 msgid ""
@@ -212,12 +205,6 @@ msgid ""
 "[#8403](https://github.com/flwrlabs/flower/pull/8403), "
 "[#8405](https://github.com/flwrlabs/flower/pull/8405))"
 msgstr ""
-"**改进教程** ([#1468](https://github.com/adap/flower/pull/1468), "
-"[#1470](https://github.com/adap/flower/pull/1470), "
-"[#1472](https://github.com/adap/flower/pull/1472), "
-"[#1473](https://github.com/adap/flower/pull/1473), "
-"[#1474](https://github.com/adap/flower/pull/1474), "
-"[#1475](https://github.com/adap/flower/pull/1475)))"
 
 #: ../../source/changelog/v1.10.0.md:68 ../../source/changelog/v1.11.0.md:65
 #: ../../source/changelog/v1.12.0.md:64 ../../source/changelog/v1.13.0.md:69
@@ -43099,8 +43086,6 @@ msgid ""
 ":py:obj:`pull_messages <flwr.server.Driver.pull_messages>`\\ "
 "\\(\\[reply\\_to\\_message\\_ids\\, ...\\]\\)"
 msgstr ""
-":py:obj:`pull_messages <flwr.server.Driver.pull_messages>`\\ "
-"\\(message\\_ids\\)"
 
 #: ../../source/ref-api/flwr.server.Driver.rst:44:<autosummary>:1
 #: ../../source/ref-api/flwr.server.Grid.rst:44:<autosummary>:1
@@ -43324,8 +43309,6 @@ msgid ""
 ":py:obj:`pull_messages <flwr.server.Grid.pull_messages>`\\ "
 "\\(\\[reply\\_to\\_message\\_ids\\, ...\\]\\)"
 msgstr ""
-":py:obj:`pull_messages <flwr.server.Driver.pull_messages>`\\ "
-"\\(message\\_ids\\)"
 
 #: ../../source/ref-api/flwr.server.Grid.rst:44:<autosummary>:1
 #, fuzzy
@@ -47803,8 +47786,6 @@ msgid ""
 ":py:obj:`pull_messages <flwr.serverapp.Grid.pull_messages>`\\ "
 "\\(\\[reply\\_to\\_message\\_ids\\, ...\\]\\)"
 msgstr ""
-":py:obj:`pull_messages <flwr.server.Driver.pull_messages>`\\ "
-"\\(message\\_ids\\)"
 
 #: ../../source/ref-api/flwr.serverapp.Grid.rst:44:<autosummary>:1
 #, fuzzy
