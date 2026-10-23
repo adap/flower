@@ -31,6 +31,7 @@ from flwr.proto.message_pb2 import (  # pylint: disable=E0611
     ConfirmMessageReceivedRequest,
 )
 from flwr.proto.node_pb2 import Node, NodeInfo  # pylint: disable=E0611
+from flwr.proto.recorddict_pb2 import StringList  # pylint: disable=E0611
 from flwr.proto.runtime_pb2 import (  # pylint: disable=E0611
     GetNodesRequest,
     GetNodesResponse,
@@ -301,18 +302,32 @@ class HttpGrid(Grid):  # pylint: disable=too-many-instance-attributes
 
         return message_ids
 
-    def pull_messages(self, message_ids: Iterable[str]) -> Iterable[Message]:
-        """Pull messages based on message IDs.
-
-        This method is used to collect messages from the SuperLink that correspond to a
-        set of given message IDs.
-        """
+    def pull_messages(
+        self,
+        reply_to_message_ids: Iterable[str] | None = None,
+        *,
+        message_ids: Iterable[str] | None = None,
+    ) -> Iterable[Message]:
+        """Pull messages with an optional correlation filter."""
+        if message_ids is not None:
+            if reply_to_message_ids is not None:
+                raise TypeError(
+                    "Specify only one of `reply_to_message_ids` and `message_ids`."
+                )
+            warn_deprecated_feature(
+                "`message_ids` is deprecated. Use `reply_to_message_ids` instead."
+            )
+            reply_to_message_ids = message_ids
         run_id = cast(Run, self._run).run_id
         try:
             # Pull Messages
             res: PullAppMessagesResponse = self._runtime_client.PullMessages(
                 PullAppMessagesRequest(
-                    message_ids=message_ids,
+                    reply_to_message_ids=(
+                        StringList(vals=reply_to_message_ids)
+                        if reply_to_message_ids is not None
+                        else None
+                    ),
                 )
             )
             # Pull Messages from store
