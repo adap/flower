@@ -60,8 +60,8 @@ Desktop apps may not inherit environment variables set in a terminal. Fully quit
 client, then launch it from the terminal where you set ``FLOWER_API_KEY``. Use the
 command in the desktop section of your client guide below.
 
-The launch command passes the key to the new app process. It does not update an app that
-is already running. Repeat the command each time you start the desktop client.
+The launch command passes the key to the new app process. Fully quit the client and
+repeat the command each time you start it.
 
 *********************************
  Continue with your client guide

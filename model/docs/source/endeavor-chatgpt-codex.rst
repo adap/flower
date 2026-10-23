@@ -33,9 +33,9 @@ in the model selector and defines its capabilities.
 .. note::
 
     The supplied catalog configures a 128,000-token context window and a 96,000-token
-    automatic compaction threshold for this client. These are client configuration
-    values, not a universal limit on Endeavor API requests. See :ref:`Context window and
-    limits <endeavor-context-limits>` for details.
+    automatic compaction threshold for this client. API request limits depend on the
+    deployment. See :ref:`Context window and limits <endeavor-context-limits>` for
+    details.
 
 In your terminal, copy the file to the Codex configuration directory:
 
