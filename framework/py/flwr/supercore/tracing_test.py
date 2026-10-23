@@ -43,6 +43,7 @@ def test_disabled_or_unavailable_backend_is_inert(
     monkeypatch.setenv("FLWR_TRACING_ENABLED", enabled)
     discover = Mock(side_effect=RuntimeError("private import detail"))
     monkeypatch.setattr(tracing, "import_module", discover)
+    tracing.initialize_tracing("model")
     with tracing.trace_span("test", traceparent=_CARRIER) as span:
         span.set_attribute("flwr.task_id", "1")
         span.add_event("provider.first_text")
@@ -52,7 +53,7 @@ def test_disabled_or_unavailable_backend_is_inert(
 
 
 @pytest.mark.parametrize(
-    "failure", ["enter", "exit", "attribute", "event", "carrier", "flush"]
+    "failure", ["enter", "exit", "attribute", "event", "carrier", "flush", "initialize"]
 )
 def test_backend_failures_preserve_application_exception(
     monkeypatch: pytest.MonkeyPatch, failure: str
@@ -72,9 +73,12 @@ def test_backend_failures_preserve_application_exception(
         "event": raw_span.add_event,
         "carrier": backend.current_traceparent,
         "flush": backend.flush_traces,
+        "initialize": backend.initialize_tracing,
     }[failure]
     method.side_effect = RuntimeError("backend-secret")
     monkeypatch.setattr(tracing, "_load_backend", lambda: backend)
+    tracing.initialize_tracing("model")
+    backend.initialize_tracing.assert_called_once_with("model")
     error = ValueError("application-secret")
     with pytest.raises(ValueError) as caught:
         with tracing.trace_span("test", traceparent="invalid") as span:
