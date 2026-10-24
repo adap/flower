@@ -25,6 +25,8 @@ from flwr.cli.constant import FEDERATION_CONFIG_HELP_MESSAGE
 from flwr.cli.flower_config import read_superlink_connection
 from flwr.common.constant import CliOutputFormat
 from flwr.proto.control_pb2 import (  # pylint: disable=E0611
+    ListRunsRequest,
+    ListRunsResponse,
     StopRunRequest,
     StopRunResponse,
 )
@@ -41,8 +43,8 @@ from .utils import (
 def stop(  # pylint: disable=R0914
     ctx: typer.Context,
     run_id: Annotated[  # pylint: disable=unused-argument
-        int,
-        typer.Argument(help="The Flower run ID to stop"),
+        str,
+        typer.Argument(help="The Flower run ID to stop. `all` will stop all runs, and `latest` will stop the most recently submitted run."),
     ],
     superlink: Annotated[
         str | None,
@@ -83,8 +85,29 @@ def stop(  # pylint: disable=R0914
         try:
             control_client = init_http_client_from_connection(superlink_connection)
 
-            typer.secho(f"✋ Stopping run ID {run_id}...", fg=typer.colors.GREEN)
-            _stop_run(stub=control_client, run_id=run_id, is_json=is_json)
+            run_ids_to_stop: list[int] = []
+            if run_id == "all":
+                with flwr_cli_exc_handler():
+                    res: ListRunsResponse = control_client.ListRuns(ListRunsRequest())
+                run_ids_to_stop = [
+                    proto.run_id
+                    for proto in res.run_dict.values()
+                    if proto.status.status != "finished"
+                ]
+            elif run_id == "latest":
+                with flwr_cli_exc_handler():
+                    res: ListRunsResponse = control_client.ListRuns(  # type: ignore[no-redef]
+                        ListRunsRequest(limit=1)
+                    )
+                run_ids_to_stop = [proto.run_id for proto in res.run_dict.values()]
+            else:
+                run_ids_to_stop = [int(run_id)]
+
+            for run_id_int in run_ids_to_stop:
+                typer.secho(
+                    f"✋ Stopping run ID {run_id_int}...", fg=typer.colors.GREEN
+                )
+                _stop_run(stub=control_client, run_id=run_id_int, is_json=is_json)
 
         finally:
             if control_client:
