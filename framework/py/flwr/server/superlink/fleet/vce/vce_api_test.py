@@ -25,6 +25,8 @@ from time import monotonic, sleep
 from unittest import TestCase
 from unittest.mock import Mock, patch
 
+import pytest
+
 from flwr.app import DEFAULT_TTL, ConfigRecord, Context, Message, Metadata, RecordDict
 from flwr.app.message import make_message
 from flwr.client import Client, NumPyClient
@@ -38,6 +40,8 @@ from flwr.server.superlink.fleet.vce.metrics import VceMetrics
 from flwr.server.superlink.fleet.vce.vce_api import (
     NodeToPartitionMapping,
     _register_nodes,
+    add_messages_to_queue,
+    put_message_into_state,
     start_vce,
     worker,
 )
@@ -49,6 +53,21 @@ from flwr.supercore.object_store import ObjectStoreFactory
 from flwr.supercore.run import Run, RunStatus
 from flwr.supercore.task_identity import TaskIdentity
 from flwr.superlink.federation import NoOpFederationManager
+
+
+@pytest.fixture(autouse=True)
+def reject_legacy_message_api(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Fail if simulation falls back to instruction/reply storage."""
+    for name in (
+        "store_message_ins",
+        "get_message_ins",
+        "store_message_res",
+        "get_message_res",
+        "delete_messages",
+    ):
+        monkeypatch.setattr(
+            InMemoryLinkState, name, Mock(side_effect=AssertionError(name))
+        )
 
 
 class DummyClient(NumPyClient):
@@ -204,8 +223,8 @@ def register_messages_into_state(
         message.metadata.__dict__["_message_id"] = message.object_id
 
         # Insert in state
-        message_id = state.store_message_ins(message)
-        if message_id:
+        message_id = message.metadata.message_id
+        if state.store_messages([message])[0]:
             # Add message_id to set
             message_ids.add(message_id)
             # Store expected output for check later on
@@ -276,6 +295,52 @@ def start_and_shutdown(
 
     if duration:
         termination_th.join()
+
+
+@pytest.mark.parametrize("queue_fails", [False, True])
+def test_add_messages_to_queue_acknowledges_after_enqueue(queue_fails: bool) -> None:
+    """Release the stored body only after the queue receives the full Message."""
+    state_factory, nodes_mapping, _ = init_state_factory_nodes_mapping(1, 1)
+    state = state_factory.state()
+    node_id = next(iter(nodes_mapping))
+    message = state.get_messages(dst_node_id=node_id)[0]
+    queue = Mock()
+    f_stop = threading.Event()
+
+    def enqueue(msg: Message) -> None:
+        assert msg is message
+        assert msg.has_content()
+        assert state.get_messages(dst_node_id=node_id) == [message]
+        if queue_fails:
+            raise RuntimeError("Cannot enqueue")
+        f_stop.set()
+
+    queue.put.side_effect = enqueue
+    if queue_fails:
+        with pytest.raises(RuntimeError, match="Cannot enqueue"):
+            add_messages_to_queue(state, queue, nodes_mapping, f_stop)
+    else:
+        add_messages_to_queue(state, queue, nodes_mapping, f_stop)
+    assert state.get_messages(dst_node_id=node_id) == ([message] if queue_fails else [])
+    assert message.has_content()
+
+
+def test_put_message_into_state_accepts_uncorrelated_message() -> None:
+    """Outgoing messages use destination delivery without requiring a reply."""
+    state_factory, _, _ = init_state_factory_nodes_mapping(1, 0)
+    state = state_factory.state()
+    message = _make_vce_test_message(node_id=SUPERLINK_NODE_ID)
+    queue = Mock()
+    f_stop = threading.Event()
+
+    def dequeue(timeout: float) -> Message:
+        assert timeout == 1.0
+        f_stop.set()
+        return message
+
+    queue.get.side_effect = dequeue
+    put_message_into_state(state, queue, f_stop)
+    assert state.get_messages(dst_node_id=SUPERLINK_NODE_ID) == [message]
 
 
 def test_worker_records_clientapp_runtime() -> None:
@@ -397,12 +462,16 @@ class TestFleetSimulationEngineRayBackend(TestCase):
         def collect_message_res() -> bool:
             """Collect new replies and report whether all replies have arrived.
 
-            LinkState marks replies as delivered when they are read, so retain each
-            batch across polls instead of expecting one poll to return every reply.
+            ACK each batch and retain it across polls.
             """
-            for message_res in state_factory.state().get_message_res(
-                set(message_ids), 1234
-            ):
+            state = state_factory.state()
+            messages = state.get_messages(
+                dst_node_id=SUPERLINK_NODE_ID,
+                run_id=1234,
+                reply_to_message_ids=message_ids,
+            )
+            state.acknowledge_messages([msg.metadata.message_id for msg in messages])
+            for message_res in messages:
                 message_res_by_id[message_res.metadata.reply_to_message_id] = (
                     message_res
                 )
