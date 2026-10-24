@@ -49446,7 +49446,7 @@ msgstr ""
 #: flwr.serverapp.strategy.strategy.Strategy.start:11 of
 #, fuzzy
 msgid "Maximum number of federated learning rounds to execute."
-msgstr "使用联邦学习策略"
+msgstr ""
 
 #: flwr.serverapp.strategy.strategy.Strategy.start:13 of
 msgid "Timeout in seconds for waiting for node responses."

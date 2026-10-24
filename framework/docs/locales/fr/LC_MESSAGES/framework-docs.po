@@ -25548,8 +25548,6 @@ msgid ""
 "Return the final ``Result``, which contains the final model and metrics "
 "history"
 msgstr ""
-"Retournez le modèle final, qui contient le modèle final et l'historique "
-"des métriques."
 
 #: ../../source/explanation-flower-strategy-abstraction.rst:155
 msgid "The following diagram illustrates the flow."
@@ -41383,12 +41381,6 @@ msgid ""
 "the global model at the end of every round (or every N rounds). Let's see"
 " what the signature of this callback is and how to use it:"
 msgstr ""
-"Enfin, l'argument final dans ``start`` est nommé ``evaluate_fn`` et "
-"permet de passer une fonction callback pour évaluer le modèle agrégé sur "
-"des données locales que le ``ServerApp`` pourrait avoir accès. Cette "
-"fonctionnalité est également utile si vous souhaitez sauvegarder le "
-"modèle global à la fin de chaque tour (ou tous les N tours). Voyons ce "
-"que est la signature de cette fonction callback et comment l'utiliser :"
 
 #: ../../source/how-to-use-strategies.rst:311
 msgid ""
@@ -56031,7 +56023,7 @@ msgstr ""
 #: flwr.serverapp.strategy.strategy.Strategy.start:11 of
 #, fuzzy
 msgid "Maximum number of federated learning rounds to execute."
-msgstr "Nombre de tours d'apprentissage fédéré à exécuter."
+msgstr ""
 
 #: flwr.serverapp.strategy.strategy.Strategy.start:13 of
 msgid "Timeout in seconds for waiting for node responses."
